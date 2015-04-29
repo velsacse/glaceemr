@@ -1,0 +1,86 @@
+package com.glenwood.glaceemr.server.application.specifications;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import org.springframework.data.jpa.domain.Specification;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
+
+public class PatientRegistrationSpecification {
+	
+	
+	
+	/**
+	 * @param lastName	: used to search the patients 
+	 * @return BooleanExpression is a  predicate  
+	 */
+	public static Specification<PatientRegistration> PatientByLastName(final String lastName)
+	{
+		return new Specification<PatientRegistration>() {
+			
+			@Override
+			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate PatientByLastName = cb.like(cb.upper(root.get(PatientRegistration_.ptLName)),lastName.toUpperCase()+"%");
+				return PatientByLastName;
+			}
+		};
+	}
+	
+	
+	/**
+	 * @param lastName	: used to search the patients 
+	 * @return BooleanExpression is a  predicate  
+	 */
+	public static Specification<PatientRegistration> PatientIsactive(final boolean isActive)
+	{
+		return new Specification<PatientRegistration>() {
+			
+			@Override
+			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate PatientIsActive = cb.equal(root.get(PatientRegistration_.ptIsActive),isActive);
+				return PatientIsActive;
+			}
+		};
+	}
+	
+	
+	/**
+	 * @param firstName	: used to search the patients 
+	 * @return BooleanExpression is a  predicate  
+	 */
+	public static Specification<PatientRegistration> PatientByFirstName(final String firstName)
+	{
+		return new Specification<PatientRegistration>() {
+			
+			@Override
+			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate PatientByFirstName = cb.like(cb.upper(root.get(PatientRegistration_.ptFName)),firstName.toUpperCase()+"%");
+				return PatientByFirstName;
+			}
+		};
+	}
+	
+	
+	/**
+	 * @param accountNumber	: used to search the patients 
+	 * @return BooleanExpression is a  predicate  
+	 */
+	public static Specification<PatientRegistration> PatientByAccountNumber(final String accountNumber)
+	{
+		return new Specification<PatientRegistration>() {
+			
+			@Override
+			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate PatientByAccountNumber = cb.like(cb.upper(root.get(PatientRegistration_.accno)),accountNumber.toUpperCase()+"%");
+				return PatientByAccountNumber;
+			}
+		};
+	}
+
+}

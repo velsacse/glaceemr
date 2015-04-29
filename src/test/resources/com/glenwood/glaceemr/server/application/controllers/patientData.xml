@@ -1,0 +1,28 @@
+<dataset>
+    <PatientTable patientId="1" PatientLName="Smith" PatientFName="Theodre" patientGender="0" patientDob="1956-12-01 00:00:00"  isActive="true" />
+    <PatientTable patientId="2" PatientLName="Smith" PatientFName="Joe" patientGender="0" patientDob="2006-09-03 00:00:00" isActive="true" />
+    <PatientTable patientId="3" PatientLName="Jennifer" PatientFName="Thompson" patientGender="1" patientDob="1980-07-01 00:00:00" isActive="true" />
+    <PatientTable patientId="7" PatientLName="Smith" PatientFName="Kishore" patientGender="0" patientDob="2015-03-26 00:00:00" isActive="true" />
+    <PatientTable patientId="4" PatientLName="Smith" PatientFName="test1" patientGender="1" patientDob="1980-04-12 00:00:00" isActive="true" />
+   
+    <EncounterTable encounterId="1001" PatientId="1" encounterReason="fever" encounterDate="2015-03-18 00:00:00"  isActive="true" />
+    <EncounterTable encounterId="1002" PatientId="2" encounterReason="cough" encounterDate="2015-03-18 00:00:00"  isActive="true" />
+    <EncounterTable encounterId="1003" PatientId="3" encounterReason="cold" encounterDate="2015-03-18 00:00:00"  isActive="true" />
+    <EncounterTable encounterId="1004" PatientId="1" encounterReason="cold" encounterDate="2015-03-21 00:00:00"  isActive="true" />
+    <EncounterTable encounterId="1005" PatientId="2" encounterReason="cold" encounterDate="2015-03-23 00:00:00"  isActive="true" />
+    
+    <AddressTable addressId="2001" address="FlatNO 2001" patientId="1" isactive="true" />
+	<AddressTable addressId="2002" address="FlatNO 2002" patientId="2" isactive="true" />
+	<AddressTable addressId="2003" address="FlatNO 2003" patientId="3" isactive="true" />
+
+	<InsuranceMasterTable InsuranceMasterId="3001" InuranceName="AnthemBlueCross" InsuranceAddress="PO BOX 111" PayorID="89765" isActive="true" />
+	<InsuranceMasterTable InsuranceMasterId="3002" InuranceName="UnitedHealthcare" InsuranceAddress="PO BOX 222" PayorID="89362" isActive="true" />
+	<InsuranceMasterTable InsuranceMasterId="3003" InuranceName="Connecticare" InsuranceAddress="PO BOX 333" PayorID="86432" isActive="true" />\
+	
+	 <PatientInsuranceTable InsuranceID="4001" InsuranceMasterId="3001" patientid="1" type="1" isValid="true" StartDate="2015-01-01 00:00:00" EndDate="2015-10-01 00:00:00" />
+	<PatientInsuranceTable InsuranceID="4002" InsuranceMasterId="3002" patientid="2" type="1" isValid="true" StartDate="2015-02-02 00:00:00" EndDate="2016-12-12 00:00:00" />
+	<PatientInsuranceTable InsuranceID="4003" InsuranceMasterId="3001" patientid="2" type="1" isValid="true" StartDate="2015-02-02 00:00:00" EndDate="2016-12-12 00:00:00" />
+	<PatientInsuranceTable InsuranceID="4004" InsuranceMasterId="3001" patientid="1" type="1" isValid="true" StartDate="2016-04-04 00:00:00" EndDate="2017-11-11 00:00:00" />    
+   
+	
+</dataset>

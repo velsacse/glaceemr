@@ -1,0 +1,99 @@
+<?xml  version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
+        http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+       http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<context:component-scan base-package="com.glenwood.glaceemr.server.application" />
+	<jpa:repositories base-package="com.glenwood.glaceemr.server.application.repositories" />
+
+	 <mvc:annotation-driven>
+        <mvc:message-converters>
+            <!-- Use the HibernateAware mapper instead of the default -->
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper">
+                    <bean class="com.glenwood.glaceemr.server.utils.HibernateAwareObjectMapper" />
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+	<!-- <bean id="jdbcEmployeeDAO" class="com.glenwood.glaceemr.server.application.model.dao.JDBCEmployeeDAOImpl"> 
+		</bean> -->
+
+
+	<bean id="jdbcProperty"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>/WEB-INF/application.properties</value>
+		</property>
+	</bean>
+
+	<bean id="abstractDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close" p:driverClassName="${jdbc.driverClassName}"
+		p:username="${jdbc.username}" p:password="${jdbc.password}" />
+
+	<bean id="concreteDataSourceOne" parent="abstractDataSource"
+		p:url="${jdbc.databaseurlOne}" />
+
+	<bean id="concreteDataSourceTwo" parent="abstractDataSource"
+		p:url="${jdbc.databaseurlTwo}" />
+		<bean id="concreteDataSourceThree" parent="abstractDataSource"
+		p:url="${jdbc.databaseurlThree}" />
+
+	<bean id="dataSource"
+		class="com.glenwood.glaceemr.server.datasource.TennantAwareDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="database2" value-ref="concreteDataSourceTwo" />
+				<entry key="database1" value-ref="concreteDataSourceOne" />
+				<entry key="database3" value-ref="concreteDataSourceThree" />
+			</map>
+
+		</property>
+		<property name="defaultTargetDataSource" ref="concreteDataSourceThree" />
+	</bean>
+
+<bean id="objectmapper" class="com.fasterxml.jackson.databind.ObjectMapper"></bean>
+
+	<bean id="EntityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+		p:persistenceUnitName="PersistenceUnit" p:dataSource-ref="dataSource">
+		 <!-- THIS IS WHERE THE MODELS ARE -->
+		<property name="packagesToScan" value="com.glenwood.glaceemr.server.application.models" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+				p:showSql="${hibernate.show_sql}" p:generateDdl="false"
+				p:databasePlatform="${hibernate.dialect}" />
+		</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="EntityManagerFactory" />
+	</bean>
+	<tx:annotation-driven />
+
+
+	<!-- Configuration Bean -->
+	
+	<mvc:default-servlet-handler />
+	
+	<!-- Swagger -->
+	<!-- <bean id="springSwaggerConfig" class="com.mangofactory.swagger.configuration.SpringSwaggerConfig">
+	</bean> -->
+	
+
+</beans>

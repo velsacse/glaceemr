@@ -1,0 +1,46 @@
+*.iml
+*.ipr
+*.idea
+*.iws
+*.classpath
+*.factorypath
+*.project
+*.settings
+target/
+.gwt/
+www-test/
+
+
+
+# Package Files #
+*.class
+*.jar
+*.war
+*.ear
+*.project
+*.classpath
+*.DS_Store
+*.svn
+*.jsdtscope
+*.gwt-log
+*.settings
+gwt-unitCache*
+*.cache.html
+*.symbolMap
+*.launch
+
+
+# Logs and databases #
+######################
+*.log
+
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
