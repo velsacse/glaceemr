@@ -1,33 +1,80 @@
+/**
+ * 
+ */
 package com.glenwood.glaceemr.server.application.controllers;
 
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.glenwood.glaceemr.server.application.services.users.UsersService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
 
+/**
+ * @author Anupama
+ *
+ */
+@RestController
+@RequestMapping(value="login")
 
-@Controller
-@RequestMapping("/login")
 public class LoginController {
 
-	HttpServletRequest httpRequest;
-	HttpSession session;
-	@RequestMapping(value = "/database/{name}", method = RequestMethod.GET)
-	public @ResponseBody String greeting( @PathVariable String name,HttpServletRequest request) {
+	@Autowired
+	UsersService usersService;
 
-		httpRequest = (HttpServletRequest)request;
-		session = httpRequest.getSession(false);
-		session.setAttribute("databasename", name);
-		return new String("Added to "+"session id ->"+session.getId()+" : "+session.getAttribute("databasename")+" in session");
+	@Autowired 
+	EMRResponseBean emrResponseBean;
+
+	Logger logger=LoggerFactory.getLogger(LoginController.class);
+	@RequestMapping(value = "accessDenied",method = RequestMethod.GET)
+	public EMRResponseBean accessDenied(HttpServletRequest request,HttpServletResponse response) 
+	{
+		emrResponseBean.setSuccess(true);
+		emrResponseBean.setData(null);
+		emrResponseBean.setIsAuthorizationPresent(true);
+		emrResponseBean.setCanUserAccess(false);
+		return emrResponseBean;
+	}
+
+	@RequestMapping(value = "loginFailed",method = RequestMethod.GET)
+	public EMRResponseBean loginFailed(HttpServletRequest request,HttpServletResponse response) 
+	{
+		System.out.println("authentication failed");
+		emrResponseBean.setLogin(false);
+		emrResponseBean.setSuccess(false);
+		emrResponseBean.setData(null);
+		emrResponseBean.setIsAuthorizationPresent(false);
+		emrResponseBean.setCanUserAccess(false);
+		return emrResponseBean;
+	}
+
+
+	@RequestMapping(value = "loginSuccess",method = RequestMethod.GET)
+	public EMRResponseBean loginSuccess(HttpServletRequest request,HttpServletResponse response) 
+	{
+		String message ="success";
+		emrResponseBean.setLogin(true);
+		emrResponseBean.setSuccess(true);
+		emrResponseBean.setData(message);
+		emrResponseBean.setIsAuthorizationPresent(true);
+		emrResponseBean.setCanUserAccess(true);
+		return emrResponseBean;
+	}
+
+	
+	
+	@RequestMapping(value = "loggedOut",method = RequestMethod.GET)
+	public String loggedOut(HttpServletRequest request,HttpServletResponse response) 
+	{
+		return "invalidatedSession~~true";
 	}
 	
 }

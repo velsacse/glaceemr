@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+      http://www.springframework.org/schema/security 
+      http://www.springframework.org/schema/security/spring-security-3.2.xsd
+      http://www.springframework.org/schema/beans 
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<http access-decision-manager-ref="accessDecisionManager"
+		use-expressions="true" entry-point-ref="customAuthenticationEntryPoint">
+		<access-denied-handler ref="accessDeniedHandler" />
+		<intercept-url pattern="/api/*.Action/**" access="isAuthenticated()" />
+		
+		<intercept-url pattern="/api/*.Action**" access="isAuthenticated()" />
+		
+		<form-login login-processing-url="/login_security_check"
+			authentication-success-handler-ref="mySuccessHandler"
+			authentication-failure-handler-ref="myFailureHandler" />
+		<logout logout-success-url="/api/login/loggedOut"
+			logout-url="/logout" delete-cookies="JSESSIONID" />
+		<http-basic />
+	</http>
+
+	<beans:bean id="customAuthenticationEntryPoint"
+		class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationEntryPoint">
+	</beans:bean>
+
+	<beans:bean id="accessDeniedHandler"
+		class="com.glenwood.glaceemr.server.application.Bean.CustomAccessDeniedHandler">
+		<beans:property name="errorPage" value="/api/login/accessDenied" />
+	</beans:bean>
+
+	<beans:bean id="accessDecisionManager"
+		class="org.springframework.security.access.vote.AffirmativeBased">
+		<beans:property name="decisionVoters">
+			<beans:list>
+				<beans:bean
+					class="org.springframework.security.web.access.expression.WebExpressionVoter" />
+				<beans:bean class="org.springframework.security.access.vote.RoleVoter">
+					<beans:property name="rolePrefix" value="" />
+				</beans:bean>
+				<beans:bean
+					class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+
+	<beans:bean id="mySuccessHandler"
+		class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationSuccessHandler" />
+
+	<beans:bean id="myFailureHandler"
+		class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationFailureHandler" />
+	<beans:bean id="customUserDetailsService"
+		class="com.glenwood.glaceemr.server.application.Bean.CustomUserDetailsService" />
+
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider user-service-ref="customUserDetailsService">
+		</authentication-provider>
+	</authentication-manager>
+
+</beans:beans>

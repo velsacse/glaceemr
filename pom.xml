@@ -27,6 +27,8 @@
 		<jetty-plugin.version>8.1.0.v20120127</jetty-plugin.version>
 		<!-- Rest assured -->
 		 <rest-assured.version>2.4.0</rest-assured.version>
+		 <!-- spring secutiry -->
+		  <spring.security.version>3.2.4.RELEASE</spring.security.version>
 		<target.jdk>1.7</target.jdk>
 		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -319,6 +321,30 @@
 			<artifactId>guava</artifactId>
 			<version>18.0</version>
 		</dependency>
+		
+		
+		<!-- Spring security -->
+		 <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-config</artifactId>
+      <version>${spring.security.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core</artifactId>
+      <version>${spring.security.version}</version>
+      <scope>compile</scope>
+    </dependency>
+ 
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
+      <version>${spring.security.version}</version>
+      <scope>compile</scope>
+    </dependency>
+		
+		
 	</dependencies>
 	<build>
 	

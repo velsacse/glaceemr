@@ -9,21 +9,40 @@
     <filter-name>DataBaseAccessFilter</filter-name>
     <filter-class>com.glenwood.glaceemr.server.filters.DataBaseAccessFilter</filter-class>
   </filter>
+  <filter>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy
+		</filter-class>
+	</filter>
   <filter-mapping>
     <filter-name>CORSFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
   <filter-mapping>
     <filter-name>DataBaseAccessFilter</filter-name>
-    <url-pattern>/api/*</url-pattern>
+    <url-pattern>/*</url-pattern>
   </filter-mapping>
+  <filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/applicationContext.xml</param-value>
+    <param-value>/WEB-INF/applicationContext.xml , /WEB-INF/security.xml</param-value>
   </context-param>
+   <listener>
+            <listener-class>
+                    org.springframework.web.context.request.RequestContextListener 
+            </listener-class>
+    </listener>
+<listener>
+    <listener-class>
+      org.springframework.security.web.session.HttpSessionEventPublisher
+    </listener-class>
+</listener> 
   <servlet>
     <servlet-name>rest</servlet-name>
     <servlet-class>org.springframework.data.rest.webmvc.RepositoryRestDispatcherServlet</servlet-class>

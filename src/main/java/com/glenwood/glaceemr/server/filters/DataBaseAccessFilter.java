@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.stereotype.Component;
 
 import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
+import com.glenwood.glaceemr.server.utils.HUtil;
 /**
  * Servlet Filter implementation class DataBaseAccessFilter
  */
@@ -53,6 +54,12 @@ public class DataBaseAccessFilter implements Filter {
 			System.out.println("in tennetaware"+session.getAttribute("databasename").toString());
 			TennantContextHolder.setTennantId(session.getAttribute("databasename").toString());
 		}*/
+		String tennantId = HUtil.Nz(request.getParameter("dbname"),"-1");
+		System.out.println("dbname in database access filter-->"+tennantId);
+
+		if(tennantId != "-1"){
+			TennantContextHolder.setTennantId(tennantId);
+		}
 		chain.doFilter(request, response);
 	}
 

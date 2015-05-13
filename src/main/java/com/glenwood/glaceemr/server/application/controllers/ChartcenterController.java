@@ -11,7 +11,7 @@ import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.services.chartcenter.ChartcenterService;
 
 @RestController
-@RequestMapping(value="PatientSearch")
+@RequestMapping(value="PatientSearch.Action")
 public class ChartcenterController {
 
 	@Autowired(required=true)

@@ -55,7 +55,7 @@ public class PatientControllerTest {
 	public void findByLastNameTest() throws Exception {
 
         given().
-        param("lastName", "Smith").when().get("/ByLastName").then().
+        param("lastName", "Smith").when().get("/PatientController.Action/ByLastName").then().
                 statusCode(HttpServletResponse.SC_OK).
                 contentType("application/json").
                 body(equalTo("[{\"patientId\":1,\"patientLName\":\"Smith\",\"patientFName\":\"Theodre\",\"patientGender\":0,\"patientDob\":\"1956-12-01\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null},{\"patientId\":2,\"patientLName\":\"Smith\",\"patientFName\":\"Joe\",\"patientGender\":0,\"patientDob\":\"2006-09-03\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null},{\"patientId\":4,\"patientLName\":\"Smith\",\"patientFName\":\"test1\",\"patientGender\":1,\"patientDob\":\"1980-04-12\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null},{\"patientId\":7,\"patientLName\":\"Smith\",\"patientFName\":\"Kishore\",\"patientGender\":0,\"patientDob\":\"2015-03-26\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null}]"))
@@ -66,7 +66,7 @@ public class PatientControllerTest {
 	
 	@Test 
 	public void getPatientsBylastNameAndDobTest() throws Exception {
-		given(). param("lastName", "Smith").param("dob", "1980-04-12").when().get("/ByLastNameAndDob").then().
+		given(). param("lastName", "Smith").param("dob", "1980-04-12").when().get("/PatientController.Action/ByLastNameAndDob").then().
         statusCode(HttpServletResponse.SC_OK).
         contentType("application/json").body(equalTo("[{\"patientId\":4,\"patientLName\":\"Smith\",\"patientFName\":\"test1\",\"patientGender\":1,\"patientDob\":\"1980-04-12\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null}]"));
 	}
@@ -74,7 +74,7 @@ public class PatientControllerTest {
 	@Test			
 	public void updateByPatientTest() throws Exception {
 		given(). param("patient","{\"patientId\":4,\"patientLName\":\"Smith\",\"patientFName\":\"updated\",\"patientGender\":1,\"patientDob\":\"1980-04-12\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null}").when()
-		.post("/updateByPatient").then().
+		.post("/PatientController.Action/updateByPatient").then().
         statusCode(HttpServletResponse.SC_OK);
 	}
 }

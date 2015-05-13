@@ -1,6 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -8,16 +7,12 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.Address;
 import com.glenwood.glaceemr.server.application.models.Encounter;
@@ -28,6 +23,7 @@ import com.glenwood.glaceemr.server.application.services.patient.PatientService;
 
 @RestController
 @Transactional
+@RequestMapping(value = "/PatientController.Action")
 public class PatientController {
 
 
