@@ -7,9 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.services.chartcenter.ChartcenterService;
+import com.wordnik.swagger.annotations.Api;
 
+@Api(value = "PatientLookup", description = "gets list of active patients", consumes="application/json")
 @RestController
 @RequestMapping(value="PatientSearch.Action")
 public class ChartcenterController {

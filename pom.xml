@@ -55,22 +55,11 @@
 		</dependency>
 
 		<!-- Swagger integration -->
-		<!-- <dependency>
-			<groupId>com.mangofactory</groupId>
-			<artifactId>swagger-springmvc</artifactId>
-			<version>0.8.8</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mangofactory</groupId>
-			<artifactId>swagger-springmvc</artifactId>
-			<version>0.5.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.mangofactory</groupId>
-			<artifactId>swagger-springmvc</artifactId>
-			<version>0.9.5</version>
-		</dependency> -->
+		 <dependency>
+             <groupId>com.mangofactory</groupId>
+             <artifactId>swagger-springmvc</artifactId>
+             <version>0.9.5</version>
+         </dependency>
 
 		<!-- Spring 4 dependencies -->
 
@@ -445,11 +434,12 @@
 
 
 		<!-- Swaggger Based Repository -->
-		<repository>
-			<id>jcenter-release</id>
-			<name>jcenter</name>
-			<url>http://oss.jfrog.org/artifactory/oss-release-local/</url>
-		</repository>
+         <repository>
+             <id>jcenter-release</id>
+             <name>jcenter</name>
+             <url>http://oss.jfrog.org/artifactory/oss-release-local/</url>
+         </repository>
+
 
 	</repositories>
 </project>

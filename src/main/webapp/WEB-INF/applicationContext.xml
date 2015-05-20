@@ -102,8 +102,8 @@
 	<mvc:default-servlet-handler />
 	
 	<!-- Swagger -->
-	<!-- <bean id="springSwaggerConfig" class="com.mangofactory.swagger.configuration.SpringSwaggerConfig">
-	</bean> -->
+	<context:property-placeholder location="classpath:/swagger.properties"/>
+     <bean id="springSwaggerConfig" class="com.mangofactory.swagger.configuration.SpringSwaggerConfig" />
 	
 
 </beans>
