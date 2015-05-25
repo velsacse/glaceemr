@@ -56,7 +56,13 @@
             </bean>
         </property>
     </bean>
+<bean id="sessionMap"
+		class="com.glenwood.glaceemr.server.utils.SessionMap"
+		scope="session">
 
+		<!-- this next element effects the proxying of the surrounding bean -->
+		<aop:scoped-proxy />
+	</bean>
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
         <property name="entityManagerFactory" ref="entityManagerFactory"/>
     </bean>

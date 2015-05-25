@@ -18,6 +18,7 @@ public class SessionMap implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	int userID;
+	String dbName;
 
 	public int getUserID() {
 		return userID;
@@ -26,5 +27,14 @@ public class SessionMap implements Serializable{
 	public void setUserID(int userID) {
 		this.userID = userID;
 	}
+
+	public String getDbName() {
+		return dbName;
+	}
+
+	public void setDbName(String dbName) {
+		this.dbName = dbName;
+	}
+	
 	
 }

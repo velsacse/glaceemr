@@ -3,10 +3,10 @@
  */
 package com.glenwood.glaceemr.server.utils;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -28,14 +28,18 @@ import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
 @Component
 public class EMRRequestInterceptor implements HandlerInterceptor{
 
-	@Resource
+	@Autowired
 	EMRResponseBean emrResponseBean;
+	
+	@Autowired
+	SessionMap sessionMap;
 
 	@Override
 	public boolean preHandle(HttpServletRequest request,
 			HttpServletResponse response, Object handler) throws Exception {
 		
-		String tennantId = HUtil.Nz(request.getParameter("dbname"),"-1");
+
+		String tennantId = sessionMap.getDbName();
 		System.out.println("dbname -->"+tennantId);
 		String[] splitURl = request.getRequestURI().split(request.getServletPath());
 		String formattedURl= splitURl[1].substring(1, splitURl[1].length());
