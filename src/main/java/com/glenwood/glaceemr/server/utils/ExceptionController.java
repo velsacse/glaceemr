@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.utils;
 
 import javax.annotation.Resource;
 
+import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -38,10 +39,11 @@ public class ExceptionController {
       * you can change data by adding any custom message in case of exceptions and
       * modify your client side code as required
       */
-
+     protected final Logger logger = Logger.getLogger(ExceptionController.class);
      @ExceptionHandler(Exception.class)
      public @ResponseBody EMRResponseBean handleCustomException(Exception ex) {
-         ex.printStackTrace();
+    	 logger.error("", ex);
+    	 ex.printStackTrace();
          emrResponseBean.setSuccess(false);
          emrResponseBean.setData(null);
          return emrResponseBean;

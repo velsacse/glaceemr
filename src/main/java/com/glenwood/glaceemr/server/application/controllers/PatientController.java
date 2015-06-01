@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ public class PatientController {
 	
 	@Autowired
 	ObjectMapper objectmapper;
+	private Logger logger = Logger.getLogger(PatientController.class);
 	
 	/**
 	 * @param lastName 		: required patients lastName 
@@ -42,6 +44,9 @@ public class PatientController {
     @ResponseBody
 	public Iterable<Patient> getPatientsByLastname(@RequestParam(value="lastName", required=false, defaultValue="") String lastName) throws Exception{
 		
+		
+		logger.debug("in patient controller log ");
+		logger.error("in patient controller log ");
 		Iterable<Patient> patients=patientInfoService.findPatientByLastName(lastName);
 		
 		
