@@ -3,6 +3,9 @@ package com.glenwood.glaceemr.server.utils;
 import javax.annotation.Resource;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
+import org.apache.log4j.NDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -20,16 +23,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 * Add handler for your Exceptions(Custom / Default) with a custom message
 */
 
-/**
-* @author Anupama
-*
-*/
 @ControllerAdvice
 public class ExceptionController {
 
      @Resource
      EMRResponseBean emrResponseBean;
-
+     
+     @Autowired
+     SessionMap sessionMap;
      /**
       *
       * @return emrResponseBean object with custom values set
@@ -40,9 +41,31 @@ public class ExceptionController {
       * modify your client side code as required
       */
      protected final Logger logger = Logger.getLogger(ExceptionController.class);
-     @ExceptionHandler(Exception.class)
-     public @ResponseBody EMRResponseBean handleCustomException(Exception ex) {
+  
+     
+     @ExceptionHandler(CustomException.class)
+     public @ResponseBody EMRResponseBean handleCustom(CustomException ex) {
+    	 NDC.push("UserId :" +sessionMap.getUserID()+"@Sperator@");
+    	 MDC.put("UserId", sessionMap.getUserID()+"");
     	 logger.error("", ex);
+    	 NDC.clear();
+    	 MDC.remove("UserId");
+    	 MDC.remove("Request Method");
+    	 MDC.remove("Request URL");
+    	 ex.printStackTrace();
+         emrResponseBean.setSuccess(false);
+         emrResponseBean.setData(null);
+         return emrResponseBean;
+     }
+      @ExceptionHandler(Exception.class)
+     public @ResponseBody EMRResponseBean handleCustomException(Exception ex) {
+    	 NDC.push("UserId :" +sessionMap.getUserID()+"@Sperator@");
+    	 MDC.put("UserId", sessionMap.getUserID()+"");
+    	 logger.error("", ex);
+    	 MDC.remove("UserId");
+    	 MDC.remove("Request Method");
+    	 MDC.remove("Request URL");
+    	 NDC.clear();
     	 ex.printStackTrace();
          emrResponseBean.setSuccess(false);
          emrResponseBean.setData(null);

@@ -69,5 +69,8 @@
 
     <tx:annotation-driven/>
 	<mvc:default-servlet-handler />
-
+<mvc:interceptors>
+		<bean
+			class="com.glenwood.glaceemr.server.utils.EMRRequestInterceptor" />
+	</mvc:interceptors>
 </beans>

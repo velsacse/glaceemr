@@ -16,6 +16,27 @@
        </layout>
     </appender>
     
+<!--    <appender name="ErrorEmailAppender" class="org.apache.log4j.net.SMTPAppender"> -->
+<appender name="EMAIL"  class="com.glenwood.glaceemr.server.utils.AlternateSMTPAppender">
+    <param name="SMTPHost" value="mail.glenwoodsystems.com" />
+  <!--  <param name="SMTPPort" value="465" /> -->
+    <param name="ssl" value="true" />
+    <param name="Authentication" value="true" />
+    <param name="SMTPUsername" value="donotreply@glenwoodsystems.com" />
+    <param name="SMTPPassword" value="D0N0tR!p1y" />
+    <param name="From" value="donotreply@glenwoodsystems.com" />
+    <param name="To" value="harikishore@glenwoodsystems.com,vasanth@glenwoodsystems.com,glanesh@glenwoodsystems.com" />
+    <param name="Subject" value="[%p][%X{UserId}][%d{MM-dd-yyyy HH:mm:ss}]" />
+      <param name="BufferSize" value="512" />
+
+    <layout class="com.glenwood.glaceemr.server.utils.AlternateHTMLLayout">
+    <param name="Title" value="true"/>
+        </layout>
+    <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="LevelMin" value="ERROR"/>
+            <param name="LevelMax" value="FATAL"/>
+        </filter>
+</appender>
  <logger name="org.springframework">
     <level value="off"/>
 </logger>
@@ -35,6 +56,8 @@
         <appender-ref ref="Appender1" />
         <level value="ERROR" />
         <appender-ref ref="Appender2" />
+        <level value="ERROR" />
+         <appender-ref ref="EMAIL" />
     </root>
      
 </log4j:configuration>
