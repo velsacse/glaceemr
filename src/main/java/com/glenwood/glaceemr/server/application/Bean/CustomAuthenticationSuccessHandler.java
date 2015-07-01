@@ -37,7 +37,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 			Assert.notNull(dbName, "dbName is empty");
 			Assert.notNull(apache_url, "apache_url is empty");
 			sessionMap.setDbName(dbName);
-			response.sendRedirect(apache_url+"/glaceemr.html?contextPath="+tomcat_context);
+			response.sendRedirect(apache_url);
 			
 		}catch(Exception ex){
 			try {
