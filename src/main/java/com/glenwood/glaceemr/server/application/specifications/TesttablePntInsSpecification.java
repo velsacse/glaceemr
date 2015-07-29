@@ -10,10 +10,11 @@ import javax.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import com.glenwood.glaceemr.server.application.models.TesttablePtn;
+
 import com.glenwood.glaceemr.server.application.models.TesttablePntIns;
-import com.glenwood.glaceemr.server.application.models.PatientInsurance_;
-import com.glenwood.glaceemr.server.application.models.Patient_;
+import com.glenwood.glaceemr.server.application.models.TesttablePntIns_;
+import com.glenwood.glaceemr.server.application.models.TesttablePtn;
+import com.glenwood.glaceemr.server.application.models.TesttablePtn_;
 
 
 
@@ -29,11 +30,11 @@ public class TesttablePntInsSpecification {
 				@Override
 				public Predicate toPredicate(Root<TesttablePntIns> root,
 						CriteriaQuery<?> query, CriteriaBuilder cb) {
-					Join<TesttablePntIns,TesttablePtn> patientinsurance=root.join(PatientInsurance_.patientTable,JoinType.INNER);
-					root.fetch(PatientInsurance_.patientTable);
-					root.fetch(PatientInsurance_.insuranceMasterTable);
+					Join<TesttablePntIns,TesttablePtn> patientinsurance=root.join(TesttablePntIns_.patientTable,JoinType.INNER);
+					root.fetch(TesttablePntIns_.patientTable);
+					root.fetch(TesttablePntIns_.insuranceMasterTable);
 					query.multiselect(root);
-					Predicate ispatientId=cb.equal(patientinsurance.get(Patient_.patientId),patientId);
+					Predicate ispatientId=cb.equal(patientinsurance.get(TesttablePtn_.patientId),patientId);
 					query.where(ispatientId);
 					return null;
 					

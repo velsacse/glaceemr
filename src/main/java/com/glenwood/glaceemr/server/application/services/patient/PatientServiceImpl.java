@@ -25,19 +25,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.models.TesttableAdrs;
-import com.glenwood.glaceemr.server.application.models.Testtableenctr;
-import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.TesttablePtn;
-import com.glenwood.glaceemr.server.application.models.Patient_;
+import com.glenwood.glaceemr.server.application.models.TesttablePtn_;
+import com.glenwood.glaceemr.server.application.models.Testtableenctr;
+import com.glenwood.glaceemr.server.application.models.Testtableenctr_;
 import com.glenwood.glaceemr.server.application.repositories.TesttableAdrsRepository;
-import com.glenwood.glaceemr.server.application.repositories.TesttableenctrRepository;
 import com.glenwood.glaceemr.server.application.repositories.TesttableInsMasterRepository;
 import com.glenwood.glaceemr.server.application.repositories.TesttablePntInsRepository;
 import com.glenwood.glaceemr.server.application.repositories.TesttablePtnRepository;
+import com.glenwood.glaceemr.server.application.repositories.TesttableenctrRepository;
 import com.glenwood.glaceemr.server.application.specifications.TesttableAdrsSpecfication;
-import com.glenwood.glaceemr.server.application.specifications.TesttableenctrSpecification;
 import com.glenwood.glaceemr.server.application.specifications.TesttablePntInsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.TesttablePtnSpecification;
+import com.glenwood.glaceemr.server.application.specifications.TesttableenctrSpecification;
 import com.google.common.collect.ImmutableSet;
 
 @Service
@@ -153,14 +153,14 @@ public class PatientServiceImpl implements PatientService{
 		CriteriaQuery<Object> cq = builder.createQuery();
 
 		Root<Testtableenctr> root = cq.from(Testtableenctr.class);
-		Join<Testtableenctr,TesttablePtn> patient=root.join(Encounter_.patientTable,JoinType.INNER);
-		Predicate Bypatientid=builder.equal(patient.get(Patient_.patientId), PatientId);
-		cq.multiselect(builder.max(root.get(Encounter_.encounterId))).where(Bypatientid);
+		Join<Testtableenctr,TesttablePtn> patient=root.join(Testtableenctr_.patientTable,JoinType.INNER);
+		Predicate Bypatientid=builder.equal(patient.get(TesttablePtn_.patientId), PatientId);
+		cq.multiselect(builder.max(root.get(Testtableenctr_.encounterId))).where(Bypatientid);
 		
 		Integer id=(Integer) em.createQuery(cq).getSingleResult();
-		Predicate Bymaxencoutnerid=builder.equal(root.get(Encounter_.encounterId), id);
+		Predicate Bymaxencoutnerid=builder.equal(root.get(Testtableenctr_.encounterId), id);
 		
-		cq.multiselect(root.get(Encounter_.encounterId),root.get(Encounter_.encounterDate),patient.get(Patient_.patientLName),patient.get(Patient_.patientId)).where(Bymaxencoutnerid).distinct(true);  //using metamodel
+		cq.multiselect(root.get(Testtableenctr_.encounterId),root.get(Testtableenctr_.encounterDate),patient.get(TesttablePtn_.patientLName),patient.get(TesttablePtn_.patientId)).where(Bymaxencoutnerid).distinct(true);  //using metamodel
 		
 		List<String> listofproperties=new ArrayList<String>();
 		listofproperties.add("encounterId");
@@ -219,13 +219,13 @@ public class PatientServiceImpl implements PatientService{
 
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<Testtableenctr> root = cq.from(Testtableenctr.class);
-		Join<Testtableenctr,TesttablePtn> patient=root.join(Encounter_.patientTable,JoinType.INNER);
+		Join<Testtableenctr,TesttablePtn> patient=root.join(Testtableenctr_.patientTable,JoinType.INNER);
 		List<Iterable<Object>> newlist= new ArrayList<Iterable<Object>>();
 		for(int i=0;i<PatientId.size();i++){
-			Predicate Bypatientid=builder.equal(patient.get(Patient_.patientId), PatientId.get(i));
-			cq.multiselect(builder.max(root.get(Encounter_.encounterId))).where(Bypatientid);
+			Predicate Bypatientid=builder.equal(patient.get(TesttablePtn_.patientId), PatientId.get(i));
+			cq.multiselect(builder.max(root.get(Testtableenctr_.encounterId))).where(Bypatientid);
 			Integer id=(Integer) em.createQuery(cq).getSingleResult();
-			Predicate Bymaxencoutnerid=builder.equal(root.get(Encounter_.encounterId), id);
+			Predicate Bymaxencoutnerid=builder.equal(root.get(Testtableenctr_.encounterId), id);
 			cq.multiselect(root).where(Bymaxencoutnerid).distinct(true);  //using metamodel
 			Iterable<Object> test=em.createQuery(cq).getResultList();
 			newlist.add(test);

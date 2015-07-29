@@ -8,16 +8,17 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import com.glenwood.glaceemr.server.application.models.Testtableenctr;
-import com.glenwood.glaceemr.server.application.models.Insurance_;
-import com.glenwood.glaceemr.server.application.models.PatientInsurance_;
-import com.glenwood.glaceemr.server.application.models.Patient_;
+
 import com.glenwood.glaceemr.server.application.models.TesttableIns;
-import com.glenwood.glaceemr.server.application.models.TesttablePtn;
+import com.glenwood.glaceemr.server.application.models.TesttableIns_;
 import com.glenwood.glaceemr.server.application.models.TesttablePntIns;
+import com.glenwood.glaceemr.server.application.models.TesttablePntIns_;
+import com.glenwood.glaceemr.server.application.models.TesttablePtn;
+import com.glenwood.glaceemr.server.application.models.TesttablePtn_;
 
 
 @Component
@@ -35,7 +36,7 @@ public class TesttablePtnSpecification {
 			@Override
 			public Predicate toPredicate(Root<TesttablePtn> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate PatientByLastName = cb.like(cb.upper(root.get(Patient_.patientLName)), lastName.toUpperCase());
+				Predicate PatientByLastName = cb.like(cb.upper(root.get(TesttablePtn_.patientLName)), lastName.toUpperCase());
 				return PatientByLastName;
 			}
 		};
@@ -54,7 +55,7 @@ public class TesttablePtnSpecification {
 			@Override
 			public Predicate toPredicate(Root<TesttablePtn> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate PatientByFirstName = cb.like(cb.upper(root.get(Patient_.patientFName)), firstName.toUpperCase());
+				Predicate PatientByFirstName = cb.like(cb.upper(root.get(TesttablePtn_.patientFName)), firstName.toUpperCase());
 				return PatientByFirstName;
 			}
 		};
@@ -76,7 +77,7 @@ public class TesttablePtnSpecification {
 			public Predicate toPredicate(Root<TesttablePtn> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				Timestamp toTimeStamp = Timestamp.valueOf(dob+" 00:00:00");
-				Predicate PatientByDob=cb.equal(root.get(Patient_.patientDob),toTimeStamp);
+				Predicate PatientByDob=cb.equal(root.get(TesttablePtn_.patientDob),toTimeStamp);
 				return PatientByDob;
 			}
 		};
@@ -91,7 +92,7 @@ public class TesttablePtnSpecification {
 			public Predicate toPredicate(Root<TesttablePtn> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				
-				Predicate PatientById=cb.equal(root.get(Patient_.patientId),PatietnId);
+				Predicate PatientById=cb.equal(root.get(TesttablePtn_.patientId),PatietnId);
 				return PatientById;
 			}
 		};
@@ -113,13 +114,13 @@ public class TesttablePtnSpecification {
 			public Predicate toPredicate(Root<TesttablePtn> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 //				Join<Patient,Encounter> encounter=root.join(Patient_.encounterTable);
-				Join<TesttablePtn,TesttablePntIns> patientinsurance= root.join(Patient_.patientInsuranceTable);
-				Join<TesttablePntIns,TesttableIns> insurance= patientinsurance.join(PatientInsurance_.insuranceMasterTable);
+				Join<TesttablePtn,TesttablePntIns> patientinsurance= root.join(TesttablePtn_.patientInsuranceTable);
+				Join<TesttablePntIns,TesttableIns> insurance= patientinsurance.join(TesttablePntIns_.insuranceMasterTable);
 				if (Long.class != query.getResultType()) {
 //				root.fetch(Patient_.patientInsuranceTable).fetch(PatientInsurance_.insuranceMasterTable);
 //				root.fetch(Patient_.encounterTable);
 				}
-				Predicate PatientByInsuranceName=cb.like(cb.upper(insurance.get(Insurance_.inuranceName)),insuranceName.toUpperCase());
+				Predicate PatientByInsuranceName=cb.like(cb.upper(insurance.get(TesttableIns_.inuranceName)),insuranceName.toUpperCase());
 				return PatientByInsuranceName;
 			}
 		};

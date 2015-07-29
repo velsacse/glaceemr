@@ -8,7 +8,7 @@ import javax.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.TesttableAdrs;
-import com.glenwood.glaceemr.server.application.models.Address_;
+import com.glenwood.glaceemr.server.application.models.TesttableAdrs_;;
 
 
 
@@ -27,7 +27,7 @@ public class TesttableAdrsSpecfication {
 			@Override
 			public Predicate toPredicate(Root<TesttableAdrs> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate byAddress = cb.like(cb.upper(root.get(Address_.address)), address.toUpperCase());
+				Predicate byAddress = cb.like(cb.upper(root.get(TesttableAdrs_.address)), address.toUpperCase());
 				return byAddress;
 			}
 		};
