@@ -17,7 +17,7 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "EncounterTable")
-public class Encounter {
+public class Testtableenctr {
 	
 	
 	@Id
@@ -43,7 +43,7 @@ public class Encounter {
 	@ManyToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name="patientId", referencedColumnName="patientId", insertable=false, updatable=false)
 	@JsonBackReference
-	Patient patientTable;
+	TesttablePtn patientTable;
 	
 	public Integer getEncounterId() {
 		return encounterId;
@@ -95,12 +95,12 @@ public class Encounter {
 	}
 
 
-	public Patient getPatientTable() {
+	public TesttablePtn getPatientTable() {
 		return patientTable;
 	}
 
 
-	public void setPatientTable(Patient patientTable) {
+	public void setPatientTable(TesttablePtn patientTable) {
 		this.patientTable = patientTable;
 	}
 

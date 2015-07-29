@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "InsuranceMasterTable")
-public class Insurance  {
+public class TesttableIns  {
 
 	
 	  @Id
@@ -41,7 +41,7 @@ public class Insurance  {
 	   */
 	  	@OneToOne
 		@JsonBackReference
-	    PatientInsurance patientInsurance;
+	    TesttablePntIns patientInsurance;
 	  
 		public Integer getInsuranceMasterId() {
 			return insuranceMasterId;

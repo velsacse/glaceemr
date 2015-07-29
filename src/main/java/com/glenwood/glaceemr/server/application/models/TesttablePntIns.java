@@ -18,7 +18,7 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "PatientInsuranceTable")
-public class PatientInsurance {
+public class TesttablePntIns {
  
 	
 	@Id
@@ -48,12 +48,12 @@ public class PatientInsurance {
 	@ManyToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name="patientId", referencedColumnName="patientId", insertable=false, updatable=false)
 	@JsonBackReference
-	Patient patientTable;
+	TesttablePtn patientTable;
 	
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="insuranceMasterId", referencedColumnName="insuranceMasterId", insertable=false, updatable=false)
 	@JsonManagedReference
-    Insurance insuranceMasterTable;
+    TesttableIns insuranceMasterTable;
 
 	public Integer getInsuranceId() {
 		return insuranceId;
@@ -111,19 +111,19 @@ public class PatientInsurance {
 		this.endDate = endDate;
 	}
 
-	public Patient getPatientTable() {
+	public TesttablePtn getPatientTable() {
 		return patientTable;
 	}
 
-	public void setPatientTable(Patient patientTable) {
+	public void setPatientTable(TesttablePtn patientTable) {
 		this.patientTable = patientTable;
 	}
 
-	public Insurance getInsuranceMasterTable() {
+	public TesttableIns getInsuranceMasterTable() {
 		return insuranceMasterTable;
 	}
 
-	public void setInsuranceMasterTable(Insurance insuranceMasterTable) {
+	public void setInsuranceMasterTable(TesttableIns insuranceMasterTable) {
 		this.insuranceMasterTable = insuranceMasterTable;
 	}
 	

@@ -10,7 +10,7 @@ import org.springframework.util.Assert;
 import com.glenwood.glaceemr.server.application.services.users.UsersService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-
+import org.springframework.web.context.request.RequestContextHolder;
 
 
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler{
@@ -29,15 +29,23 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 			HttpServletResponse response, Authentication authentication){
 		try{
 			emrResponseBean.setLogin(true);
-			System.out.println(authentication.getName().toString());
 			sessionMap.setUserID(usersService.findByUserName(authentication.getName().toString()));
+			String userName = request.getParameter("j_username");
+			String password = request.getParameter("txtpword");
+			String accountId = request.getParameter("dbname");
 			String dbName = request.getParameter("dbname");
 			String apache_url = request.getParameter("apache_url");
 			String tomcat_context = request.getParameter("tomcat_context");
 			Assert.notNull(dbName, "dbName is empty");
 			Assert.notNull(apache_url, "apache_url is empty");
 			sessionMap.setDbName(dbName);
+			boolean isFromGWT = Boolean.parseBoolean(request.getParameter("isFromGwt"));
+			String sprToken = RequestContextHolder.currentRequestAttributes().getSessionId();
+			if(isFromGWT)
 			response.sendRedirect(apache_url);
+			else{
+				response.sendRedirect(apache_url+"/jsp/QuickLoginAction"+"?txtUserName="+userName+"&txtPWord="+password+"&accountID="+accountId+"&isFromSpring=true"+"&sprToken="+sprToken);	
+			}
 			
 		}catch(Exception ex){
 			try {

@@ -24,20 +24,20 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.glenwood.glaceemr.server.application.models.Address;
-import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.TesttableAdrs;
+import com.glenwood.glaceemr.server.application.models.Testtableenctr;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.Patient;
+import com.glenwood.glaceemr.server.application.models.TesttablePtn;
 import com.glenwood.glaceemr.server.application.models.Patient_;
-import com.glenwood.glaceemr.server.application.repositories.AddressRepository;
-import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
-import com.glenwood.glaceemr.server.application.repositories.InsuranceMasterRepository;
-import com.glenwood.glaceemr.server.application.repositories.PatientInsuranceRepository;
-import com.glenwood.glaceemr.server.application.repositories.PatientRepository;
-import com.glenwood.glaceemr.server.application.specifications.AddressSpecfication;
-import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
-import com.glenwood.glaceemr.server.application.specifications.PatientInsuranceSpecification;
-import com.glenwood.glaceemr.server.application.specifications.PatientSpecification;
+import com.glenwood.glaceemr.server.application.repositories.TesttableAdrsRepository;
+import com.glenwood.glaceemr.server.application.repositories.TesttableenctrRepository;
+import com.glenwood.glaceemr.server.application.repositories.TesttableInsMasterRepository;
+import com.glenwood.glaceemr.server.application.repositories.TesttablePntInsRepository;
+import com.glenwood.glaceemr.server.application.repositories.TesttablePtnRepository;
+import com.glenwood.glaceemr.server.application.specifications.TesttableAdrsSpecfication;
+import com.glenwood.glaceemr.server.application.specifications.TesttableenctrSpecification;
+import com.glenwood.glaceemr.server.application.specifications.TesttablePntInsSpecification;
+import com.glenwood.glaceemr.server.application.specifications.TesttablePtnSpecification;
 import com.google.common.collect.ImmutableSet;
 
 @Service
@@ -45,22 +45,22 @@ import com.google.common.collect.ImmutableSet;
 public class PatientServiceImpl implements PatientService{
 
 	@Autowired
-	PatientRepository patientTableRepository; 
+	TesttablePtnRepository patientTableRepository; 
 
 	@Autowired
-	AddressRepository addressTableRepository;
+	TesttableAdrsRepository addressTableRepository;
 
 	@Autowired
-	EncounterRepository encounterTableRepository; 
+	TesttableenctrRepository encounterTableRepository; 
 
 	@Autowired
 	EntityManagerFactory emf ;
 
 	@Autowired
-	InsuranceMasterRepository insuranceMasterRepository;
+	TesttableInsMasterRepository insuranceMasterRepository;
 
 	@Autowired
-	PatientInsuranceRepository patientInsuranceRepository; 
+	TesttablePntInsRepository patientInsuranceRepository; 
 
 	@PersistenceContext
 	EntityManager em;
@@ -71,9 +71,9 @@ public class PatientServiceImpl implements PatientService{
 	 * This method returns list of Patients  satisfied by the condition (lastName should match)
 	 */
 	@Override
-	public Iterable<Patient> findPatientByLastName(String lastName) {
+	public Iterable<TesttablePtn> findPatientByLastName(String lastName) {
 
-		Iterable<Patient> patients= patientTableRepository.findAll(PatientSpecification.PatientByLastName(lastName));
+		Iterable<TesttablePtn> patients= patientTableRepository.findAll(TesttablePtnSpecification.PatientByLastName(lastName));
 		
 		return patients;
 	}
@@ -84,9 +84,9 @@ public class PatientServiceImpl implements PatientService{
 	 * This method returns list of Patients  satisfied by the condition (lastName should match)
 	 */
 	@Override
-	public Iterable<Patient> findPatientByPatientId(Integer patientId) {
+	public Iterable<TesttablePtn> findPatientByPatientId(Integer patientId) {
 
-		Iterable<Patient> patients= patientTableRepository.findAll(PatientSpecification.PatientByPatientId(patientId));
+		Iterable<TesttablePtn> patients= patientTableRepository.findAll(TesttablePtnSpecification.PatientByPatientId(patientId));
 		return patients;
 	}
 
@@ -98,16 +98,16 @@ public class PatientServiceImpl implements PatientService{
 	 * This method returns list of Patients  satisfied by the condition (lastName and date of birth should match)
 	 */
 	@Override
-	public Iterable<Patient> findPatientByLastNameAndDob(String lastName, String dob) {
-		return  patientTableRepository.findAll(Specifications.where(PatientSpecification.PatientByLastName(lastName)).and(PatientSpecification.PatientByDob(dob)));
+	public Iterable<TesttablePtn> findPatientByLastNameAndDob(String lastName, String dob) {
+		return  patientTableRepository.findAll(Specifications.where(TesttablePtnSpecification.PatientByLastName(lastName)).and(TesttablePtnSpecification.PatientByDob(dob)));
 	}
 
 
 
 	@Override
-	public Iterable<Patient> findPatientByinsuranceName(String insuranceName) {
+	public Iterable<TesttablePtn> findPatientByinsuranceName(String insuranceName) {
 
-		Iterable<Patient> patients= patientTableRepository.findAll(PatientSpecification.PatientByInusranceName(insuranceName),new PageRequest(0, 2,Direction.DESC,"patientFName")).getContent();
+		Iterable<TesttablePtn> patients= patientTableRepository.findAll(TesttablePtnSpecification.PatientByInusranceName(insuranceName),new PageRequest(0, 2,Direction.DESC,"patientFName")).getContent();
 		return patients;
 	}
 
@@ -117,26 +117,26 @@ public class PatientServiceImpl implements PatientService{
 	 * This method returns list of  Patients  satisfied by the condition (lastName and insuranceName should match)
 	 */
 	@Override
-	public Iterable<Patient> findPatintByLastNameHavingInsuranceByName(String lastName, String insuranceName) {
-		Iterable<Patient> patients=patientTableRepository.findAll(Specifications.where(PatientSpecification.PatientByLastName(lastName)).and(PatientSpecification.PatientByInusranceName(insuranceName)));
+	public Iterable<TesttablePtn> findPatintByLastNameHavingInsuranceByName(String lastName, String insuranceName) {
+		Iterable<TesttablePtn> patients=patientTableRepository.findAll(Specifications.where(TesttablePtnSpecification.PatientByLastName(lastName)).and(TesttablePtnSpecification.PatientByInusranceName(insuranceName)));
 		return  patients;
 	}
 
 
 
-	public Iterable<Encounter> findEncounterByPatientId(Integer PatientId) {
+	public Iterable<Testtableenctr> findEncounterByPatientId(Integer PatientId) {
 
-		return encounterTableRepository.findAll(EncounterSpecification.EncounterByPatientId(PatientId));
+		return encounterTableRepository.findAll(TesttableenctrSpecification.EncounterByPatientId(PatientId));
 
 	}
 
 
-	public Iterable<Patient> findInsuranceByPatientId(Integer PatientId) {
+	public Iterable<TesttablePtn> findInsuranceByPatientId(Integer PatientId) {
 		
-		Iterable<Patient> patients=patientTableRepository.findAll(PatientSpecification.PatientByPatientId(PatientId));
+		Iterable<TesttablePtn> patients=patientTableRepository.findAll(TesttablePtnSpecification.PatientByPatientId(PatientId));
 		
-		for (Patient patient : patients) {
-			patient.setPatientInsuranceTable(ImmutableSet.copyOf(patientInsuranceRepository.findAll(PatientInsuranceSpecification.InsuranceByPatientId(PatientId))));
+		for (TesttablePtn patient : patients) {
+			patient.setPatientInsuranceTable(ImmutableSet.copyOf(patientInsuranceRepository.findAll(TesttablePntInsSpecification.InsuranceByPatientId(PatientId))));
 		}
 		
 		
@@ -152,8 +152,8 @@ public class PatientServiceImpl implements PatientService{
 
 		CriteriaQuery<Object> cq = builder.createQuery();
 
-		Root<Encounter> root = cq.from(Encounter.class);
-		Join<Encounter,Patient> patient=root.join(Encounter_.patientTable,JoinType.INNER);
+		Root<Testtableenctr> root = cq.from(Testtableenctr.class);
+		Join<Testtableenctr,TesttablePtn> patient=root.join(Encounter_.patientTable,JoinType.INNER);
 		Predicate Bypatientid=builder.equal(patient.get(Patient_.patientId), PatientId);
 		cq.multiselect(builder.max(root.get(Encounter_.encounterId))).where(Bypatientid);
 		
@@ -206,9 +206,9 @@ public class PatientServiceImpl implements PatientService{
 
 	}
 
-	public Iterable<Encounter> findEncountersbyPatientID(List<Integer> patientId) {
+	public Iterable<Testtableenctr> findEncountersbyPatientID(List<Integer> patientId) {
 		
-		return encounterTableRepository.findAll(EncounterSpecification.EncounterByPatientIds(patientId));
+		return encounterTableRepository.findAll(TesttableenctrSpecification.EncounterByPatientIds(patientId));
 	
 	}
 
@@ -218,8 +218,8 @@ public class PatientServiceImpl implements PatientService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 
 		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<Encounter> root = cq.from(Encounter.class);
-		Join<Encounter,Patient> patient=root.join(Encounter_.patientTable,JoinType.INNER);
+		Root<Testtableenctr> root = cq.from(Testtableenctr.class);
+		Join<Testtableenctr,TesttablePtn> patient=root.join(Encounter_.patientTable,JoinType.INNER);
 		List<Iterable<Object>> newlist= new ArrayList<Iterable<Object>>();
 		for(int i=0;i<PatientId.size();i++){
 			Predicate Bypatientid=builder.equal(patient.get(Patient_.patientId), PatientId.get(i));
@@ -242,7 +242,7 @@ public class PatientServiceImpl implements PatientService{
 
 	public void insertorupdaterecord()
 	{
-		Patient testinsert=new Patient();
+		TesttablePtn testinsert=new TesttablePtn();
 		testinsert.setIsActive(false);
 //		Timestamp patientDob = Timestamp.valueOf("12-12-1999 00:00:00");
 		testinsert.setPatientDob("12-12-1999");
@@ -254,7 +254,7 @@ public class PatientServiceImpl implements PatientService{
 	}
 	
 	@Override
-	public Patient updateByPatient(Patient patient) {
+	public TesttablePtn updateByPatient(TesttablePtn patient) {
 		
 		return patientTableRepository.saveAndFlush(patient);
 	}
@@ -262,7 +262,7 @@ public class PatientServiceImpl implements PatientService{
 	
 	public void deleteById(Integer patientId)
 	{
-		patientTableRepository.delete(patientTableRepository.findOne(PatientSpecification.PatientByPatientId(patientId)));
+		patientTableRepository.delete(patientTableRepository.findOne(TesttablePtnSpecification.PatientByPatientId(patientId)));
 		
 		
 	}
@@ -270,7 +270,7 @@ public class PatientServiceImpl implements PatientService{
 
 	@Override
 	public void deleteByLastname(String lastName) {
-		patientTableRepository.delete(patientTableRepository.findAll(PatientSpecification.PatientByLastName(lastName)));
+		patientTableRepository.delete(patientTableRepository.findAll(TesttablePtnSpecification.PatientByLastName(lastName)));
 		
 	}
 
@@ -285,10 +285,10 @@ public class PatientServiceImpl implements PatientService{
 
 
 	@Override
-	public Iterable<Address> updateByAddress(String address) {
+	public Iterable<TesttableAdrs> updateByAddress(String address) {
 		
-		Iterable<Address> addresses=addressTableRepository.findAll(AddressSpecfication.byAddress(address));
-		for (Address address2 : addresses) {
+		Iterable<TesttableAdrs> addresses=addressTableRepository.findAll(TesttableAdrsSpecfication.byAddress(address));
+		for (TesttableAdrs address2 : addresses) {
 			address2.setAddress(address2.getAddress()+" USA");
 			address2=addressTableRepository.saveAndFlush(address2);	
 		}
@@ -297,21 +297,21 @@ public class PatientServiceImpl implements PatientService{
 
 
 	@Override
-	public Patient insertByPatient(Patient patient) {
+	public TesttablePtn insertByPatient(TesttablePtn patient) {
 		return patientTableRepository.save(patient);
 	}
 	
 	
 
 	@Override
-	public Patient updateByAddressId(Integer addressId) {
+	public TesttablePtn updateByAddressId(Integer addressId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
 	@Override
-	public void deleteByPatient(Patient patient) {
+	public void deleteByPatient(TesttablePtn patient) {
 		patientTableRepository.delete(patient);
 		
 	}

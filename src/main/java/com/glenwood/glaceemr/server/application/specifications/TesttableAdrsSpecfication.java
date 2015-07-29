@@ -7,25 +7,25 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.glenwood.glaceemr.server.application.models.Address;
+import com.glenwood.glaceemr.server.application.models.TesttableAdrs;
 import com.glenwood.glaceemr.server.application.models.Address_;
 
 
 
 
 
-public class AddressSpecfication {
+public class TesttableAdrsSpecfication {
 	
 	/**
 	 * @param lastName	: used to search the patients 
 	 * @return BooleanExpression is a  predicate  
 	 */
-	public static Specification<Address> byAddress(final String address)
+	public static Specification<TesttableAdrs> byAddress(final String address)
 	{
-		return new Specification<Address>() {
+		return new Specification<TesttableAdrs>() {
 			
 			@Override
-			public Predicate toPredicate(Root<Address> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<TesttableAdrs> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				Predicate byAddress = cb.like(cb.upper(root.get(Address_.address)), address.toUpperCase());
 				return byAddress;

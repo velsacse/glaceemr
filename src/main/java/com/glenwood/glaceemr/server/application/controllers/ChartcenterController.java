@@ -40,7 +40,7 @@ public class ChartcenterController {
 			@RequestParam(value="toSearchData",required = false)String toSearchData,
 			@RequestParam(value="searchType",required = false)String searchTypeParam) throws Exception{
 		logger.debug("This is an info log entry");
-        logger.error("This is an error log entry");
+        
 		Page<PatientRegistration>   patients = patientSearchService.getPatientSearchResult(toSearchData,searchTypeParam);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return patients;

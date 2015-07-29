@@ -10,8 +10,8 @@ import javax.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import com.glenwood.glaceemr.server.application.models.Patient;
-import com.glenwood.glaceemr.server.application.models.PatientInsurance;
+import com.glenwood.glaceemr.server.application.models.TesttablePtn;
+import com.glenwood.glaceemr.server.application.models.TesttablePntIns;
 import com.glenwood.glaceemr.server.application.models.PatientInsurance_;
 import com.glenwood.glaceemr.server.application.models.Patient_;
 
@@ -20,16 +20,16 @@ import com.glenwood.glaceemr.server.application.models.Patient_;
 
 @Component
 @Transactional
-public class PatientInsuranceSpecification {
+public class TesttablePntInsSpecification {
 	
-	 public static Specification<PatientInsurance> InsuranceByPatientId(final Integer patientId)
+	 public static Specification<TesttablePntIns> InsuranceByPatientId(final Integer patientId)
 		{
-			return new Specification<PatientInsurance>() {
+			return new Specification<TesttablePntIns>() {
 				
 				@Override
-				public Predicate toPredicate(Root<PatientInsurance> root,
+				public Predicate toPredicate(Root<TesttablePntIns> root,
 						CriteriaQuery<?> query, CriteriaBuilder cb) {
-					Join<PatientInsurance,Patient> patientinsurance=root.join(PatientInsurance_.patientTable,JoinType.INNER);
+					Join<TesttablePntIns,TesttablePtn> patientinsurance=root.join(PatientInsurance_.patientTable,JoinType.INNER);
 					root.fetch(PatientInsurance_.patientTable);
 					root.fetch(PatientInsurance_.insuranceMasterTable);
 					query.multiselect(root);

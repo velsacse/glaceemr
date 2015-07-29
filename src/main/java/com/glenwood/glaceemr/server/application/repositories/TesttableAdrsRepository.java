@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import com.glenwood.glaceemr.server.application.models.Address;
+import com.glenwood.glaceemr.server.application.models.TesttableAdrs;
 @Repository
-public interface AddressRepository extends JpaRepository<Address, Integer>,JpaSpecificationExecutor<Address>{
+public interface TesttableAdrsRepository extends JpaRepository<TesttableAdrs, Integer>,JpaSpecificationExecutor<TesttableAdrs>{
 
 }

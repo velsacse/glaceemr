@@ -17,7 +17,7 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "PatientTable")
-public class Patient  {
+public class TesttablePtn  {
 
 	@Id
 	@Column(name="patientId")
@@ -42,21 +42,21 @@ public class Patient  {
 	 
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="patientTable")
 	@JsonManagedReference
-	Set<Encounter> encounterTable;
+	Set<Testtableenctr> encounterTable;
 
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="patientTable")
 	@JsonManagedReference
-	Set<PatientInsurance> patientInsuranceTable;
+	Set<TesttablePntIns> patientInsuranceTable;
 
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="patientTable")
 	@JsonManagedReference
-	Set<Address> pAddressTable;
+	Set<TesttableAdrs> pAddressTable;
 
-	public Set<Address> getpAddressTable() {
+	public Set<TesttableAdrs> getpAddressTable() {
 		return pAddressTable;
 	}
 
-	public void setpAddressTable(Set<Address> pAddressTable) {
+	public void setpAddressTable(Set<TesttableAdrs> pAddressTable) {
 		this.pAddressTable = pAddressTable;
 	}
 
@@ -113,20 +113,20 @@ public class Patient  {
 		this.isActive = isActive;
 	}
 
-	public Set<Encounter> getEncounterTable() {
+	public Set<Testtableenctr> getEncounterTable() {
 		return encounterTable;
 	}
 
-	public void setEncounterTable(Set<Encounter> encounterTable) {
+	public void setEncounterTable(Set<Testtableenctr> encounterTable) {
 		this.encounterTable = encounterTable;
 	}
 
-	public Set<PatientInsurance> getPatientInsuranceTable() {
+	public Set<TesttablePntIns> getPatientInsuranceTable() {
 		return patientInsuranceTable;
 	}
 
 	public void setPatientInsuranceTable(
-			Set<PatientInsurance> patientInsuranceTable) {
+			Set<TesttablePntIns> patientInsuranceTable) {
 		this.patientInsuranceTable = patientInsuranceTable;
 	}
 

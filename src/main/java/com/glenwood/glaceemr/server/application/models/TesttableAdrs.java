@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "AddressTable")
-public class Address {
+public class TesttableAdrs {
 	
 	@Id
 	@Column(name="addressId")
@@ -33,14 +33,14 @@ public class Address {
 	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.LAZY)
 	@JoinColumn(name="patientId", referencedColumnName="patientId", insertable=false, updatable=false)
 	@JsonBackReference
-	Patient patientTable;
+	TesttablePtn patientTable;
 	
 
-	public Patient getPatientTable() {
+	public TesttablePtn getPatientTable() {
 		return patientTable;
 	}
 
-	public void setPatientTable(Patient patientTable) {
+	public void setPatientTable(TesttablePtn patientTable) {
 		this.patientTable = patientTable;
 	}
 

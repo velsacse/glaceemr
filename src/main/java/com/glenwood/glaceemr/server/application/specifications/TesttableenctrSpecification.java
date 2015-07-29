@@ -9,13 +9,13 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
-import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.Testtableenctr;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.Patient;
+import com.glenwood.glaceemr.server.application.models.TesttablePtn;
 import com.glenwood.glaceemr.server.application.models.Patient_;
 
 
-public class EncounterSpecification {
+public class TesttableenctrSpecification {
 	
 	/**
 	 * @param isActive	: used to search the Encounter Entity by given isActive state
@@ -23,11 +23,11 @@ public class EncounterSpecification {
 	 * 
 	 * This predicate filter data with isActive state on Encounter Entity 
 	 */
-		public static Specification<Encounter> IsactiveEncounter() {
-			return new Specification<Encounter>() {
+		public static Specification<Testtableenctr> IsactiveEncounter() {
+			return new Specification<Testtableenctr>() {
 				
 				@Override
-				public Predicate toPredicate(Root<Encounter> root, CriteriaQuery<?> query,
+				public Predicate toPredicate(Root<Testtableenctr> root, CriteriaQuery<?> query,
 						CriteriaBuilder cb) {
 					Predicate IsactiveEncounter=cb.isTrue(root.get(Encounter_.isActive));
 					return IsactiveEncounter;
@@ -41,14 +41,14 @@ public class EncounterSpecification {
 	 * This predicate filter data by encounterDate field on Encounter Entity 
 	 */
 	
-	public static Specification<Encounter> EncounterByPatientId(final Integer patientId)
+	public static Specification<Testtableenctr> EncounterByPatientId(final Integer patientId)
 	{
-		return new Specification<Encounter>() {
+		return new Specification<Testtableenctr>() {
 			
 			@Override
-			public Predicate toPredicate(Root<Encounter> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<Testtableenctr> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Join<Encounter, Patient> patient=root.join(Encounter_.patientTable);
+				Join<Testtableenctr, TesttablePtn> patient=root.join(Encounter_.patientTable);
 				root.fetch(Encounter_.patientTable);
 				Predicate EncounterByPatientid=cb.equal(patient.get(Patient_.patientId), patientId);
 				return EncounterByPatientid;
@@ -57,14 +57,14 @@ public class EncounterSpecification {
 	}
 	
 	
-	public static Specification<Encounter> EncounterByPatientIds(final List<Integer> myList)
+	public static Specification<Testtableenctr> EncounterByPatientIds(final List<Integer> myList)
 	{
-		return new Specification<Encounter>() {
+		return new Specification<Testtableenctr>() {
 			
 			@Override
-			public Predicate toPredicate(Root<Encounter> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<Testtableenctr> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Join<Encounter, Patient> patient=root.join(Encounter_.patientTable);
+				Join<Testtableenctr, TesttablePtn> patient=root.join(Encounter_.patientTable);
 				root.fetch(Encounter_.patientTable);
 				Expression<Integer> integ=patient.get(Patient_.patientId);
 				Predicate EncounterByPatientid=integ.in(myList);

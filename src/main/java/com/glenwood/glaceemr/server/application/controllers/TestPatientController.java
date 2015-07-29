@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.models.Address;
-import com.glenwood.glaceemr.server.application.models.Encounter;
-import com.glenwood.glaceemr.server.application.models.Patient;
+import com.glenwood.glaceemr.server.application.models.TesttableAdrs;
+import com.glenwood.glaceemr.server.application.models.Testtableenctr;
+import com.glenwood.glaceemr.server.application.models.TesttablePtn;
 import com.glenwood.glaceemr.server.application.services.patient.PatientService;
 
 
@@ -25,7 +25,7 @@ import com.glenwood.glaceemr.server.application.services.patient.PatientService;
 @RestController
 @Transactional
 @RequestMapping(value = "/PatientController.Action")
-public class PatientController {
+public class TestPatientController {
 
 
 	@Autowired
@@ -33,7 +33,7 @@ public class PatientController {
 	
 	@Autowired
 	ObjectMapper objectmapper;
-	private Logger logger = Logger.getLogger(PatientController.class);
+	private Logger logger = Logger.getLogger(TestPatientController.class);
 	
 	/**
 	 * @param lastName 		: required patients lastName 
@@ -42,12 +42,11 @@ public class PatientController {
 	 */
 	@RequestMapping(value = "/ByLastName", method = RequestMethod.GET)
     @ResponseBody
-	public Iterable<Patient> getPatientsByLastname(@RequestParam(value="lastName", required=false, defaultValue="") String lastName) throws Exception{
+	public Iterable<TesttablePtn> getPatientsByLastname(@RequestParam(value="lastName", required=false, defaultValue="") String lastName) throws Exception{
 		
 		
 		logger.debug("in patient controller log ");
-		logger.error("in patient controller log ");
-		Iterable<Patient> patients=patientInfoService.findPatientByLastName(lastName);
+		Iterable<TesttablePtn> patients=patientInfoService.findPatientByLastName(lastName);
 		
 		
 		return patients;
@@ -61,7 +60,7 @@ public class PatientController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/ByLastNameAndDob",method = RequestMethod.GET)
-	public Iterable<Patient> getPatientsBylastNameAndDob(@RequestParam(value="lastName", required=false, defaultValue="") String lastName,@RequestParam(value="dob", required=false, defaultValue="") String dob) throws Exception{
+	public Iterable<TesttablePtn> getPatientsBylastNameAndDob(@RequestParam(value="lastName", required=false, defaultValue="") String lastName,@RequestParam(value="dob", required=false, defaultValue="") String dob) throws Exception{
 		return patientInfoService.findPatientByLastNameAndDob(lastName, dob);
 	}
 	
@@ -72,7 +71,7 @@ public class PatientController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/ByInsuranceName",method = RequestMethod.GET)
-	public Iterable<Patient> getPatientsByInsuranceName(@RequestParam(value="insuranceName", required=false, defaultValue="") String insuranceName) throws Exception{
+	public Iterable<TesttablePtn> getPatientsByInsuranceName(@RequestParam(value="insuranceName", required=false, defaultValue="") String insuranceName) throws Exception{
 		return patientInfoService.findPatientByinsuranceName(insuranceName);
 	}
 
@@ -83,20 +82,20 @@ public class PatientController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/ByLastNameHavingInsuranceByName",method = RequestMethod.GET)
-	public Iterable<Patient> getPatientsByLastNameHavingInsuranceByName(@RequestParam(value="lastName", required=false, defaultValue="") String lastName,@RequestParam(value="insuranceName", required=false, defaultValue="") String insuranceName) throws Exception{
-		Iterable<Patient> patients=patientInfoService.findPatintByLastNameHavingInsuranceByName(lastName, insuranceName);
+	public Iterable<TesttablePtn> getPatientsByLastNameHavingInsuranceByName(@RequestParam(value="lastName", required=false, defaultValue="") String lastName,@RequestParam(value="insuranceName", required=false, defaultValue="") String insuranceName) throws Exception{
+		Iterable<TesttablePtn> patients=patientInfoService.findPatintByLastNameHavingInsuranceByName(lastName, insuranceName);
 		return patients;
 	}
 
 	@RequestMapping(value = "/AllEncountersByPatientId",method = RequestMethod.GET)
-	public Iterable<Encounter> getAllEncountersbyPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
-		Iterable<Encounter> encounter=patientInfoService.findEncounterByPatientId(patientId);
+	public Iterable<Testtableenctr> getAllEncountersbyPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
+		Iterable<Testtableenctr> encounter=patientInfoService.findEncounterByPatientId(patientId);
 		return encounter;
 	}
 	
 	@RequestMapping(value = "/AllInsuranceByPatientId",method = RequestMethod.GET)
-	public Iterable<Patient> getAllInsurancebyPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
-		Iterable<Patient> insurance=patientInfoService.findInsuranceByPatientId(patientId);
+	public Iterable<TesttablePtn> getAllInsurancebyPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
+		Iterable<TesttablePtn> insurance=patientInfoService.findInsuranceByPatientId(patientId);
 		return insurance;
 	}
 	
@@ -110,12 +109,12 @@ public class PatientController {
 	
 
 	@RequestMapping(value = "/EncountersbyPatientIDs",method = RequestMethod.GET)
-	public Iterable<Encounter>  getEncountersbyPatientID(@RequestParam(value="patientId", required=false, defaultValue="") String patientId) throws Exception{
+	public Iterable<Testtableenctr>  getEncountersbyPatientID(@RequestParam(value="patientId", required=false, defaultValue="") String patientId) throws Exception{
 		JSONArray array=new JSONArray(patientId);
 		List<Integer> patientIdList = new ArrayList<Integer>();
 		for(int i=0;i<array.length();i++)
 			patientIdList.add((Integer)array.get(i));
-		Iterable<Encounter> encounter=patientInfoService.findEncountersbyPatientID(patientIdList);
+		Iterable<Testtableenctr> encounter=patientInfoService.findEncountersbyPatientID(patientIdList);
 		return encounter;
 	}
 	
@@ -132,18 +131,18 @@ public class PatientController {
 	
 	 
 		@RequestMapping(value = "/ByPatientId",method = RequestMethod.GET)
-		public Iterable<Patient> getPatientsByPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
+		public Iterable<TesttablePtn> getPatientsByPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
 			return patientInfoService.findPatientByPatientId(patientId);
 		}
 		
 		 
 		 @RequestMapping(value="/updateByPatient" ,method = RequestMethod.POST)
 		 @ResponseBody
-		    public Patient updateByPatient(@RequestParam(value="patient")String patient) {
-			 Patient updatepatient;
+		    public TesttablePtn updateByPatient(@RequestParam(value="patient")String patient) {
+			 TesttablePtn updatepatient;
 			 System.out.println("In update By patientId>>"+patient);
 			try {
-				updatepatient = objectmapper.readValue(patient, Patient.class);
+				updatepatient = objectmapper.readValue(patient, TesttablePtn.class);
 
 			 return patientInfoService.updateByPatient(updatepatient);
 			 
@@ -157,7 +156,7 @@ public class PatientController {
 
 		 @RequestMapping(value="/updateByAddress" ,method = RequestMethod.GET)
 		 @ResponseBody
-		    public Iterable<Address> updateByaddress(@RequestParam(value="address", required=false, defaultValue="") String address) throws Exception{
+		    public Iterable<TesttableAdrs> updateByaddress(@RequestParam(value="address", required=false, defaultValue="") String address) throws Exception{
 			
 			 System.out.println("In update By address>>"+address);
 
@@ -207,10 +206,10 @@ public class PatientController {
 			 @RequestMapping(value="/deleteByPatient" ,method = RequestMethod.POST)
 			 @ResponseBody
 			    public String deleteByPatient(@RequestParam(value="patient")String patient) {
-				 Patient updatepatient;
+				 TesttablePtn updatepatient;
 				 System.out.println("In delete By patient>>"+patient);
 				try {
-					updatepatient = objectmapper.readValue(patient, Patient.class);
+					updatepatient = objectmapper.readValue(patient, TesttablePtn.class);
 
 				 patientInfoService.deleteByPatient(updatepatient);
 				 
@@ -228,11 +227,11 @@ public class PatientController {
 			 
 			 @RequestMapping(value="/insertByPatient" ,method = RequestMethod.POST)
 			 @ResponseBody
-			    public Patient insertByPatient(@RequestParam(value="patient")String patient) {
-				 Patient updatepatient;
+			    public TesttablePtn insertByPatient(@RequestParam(value="patient")String patient) {
+				 TesttablePtn updatepatient;
 				 System.out.println("In insert By patient>>"+patient);
 				try {
-					updatepatient = objectmapper.readValue(patient, Patient.class);
+					updatepatient = objectmapper.readValue(patient, TesttablePtn.class);
 
 				 return patientInfoService.insertByPatient(updatepatient);
 				 
