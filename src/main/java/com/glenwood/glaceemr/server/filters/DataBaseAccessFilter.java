@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
 import com.glenwood.glaceemr.server.utils.HUtil;
+import com.glenwood.glaceemr.server.utils.MyRequestWrapper;
 /**
  * Servlet Filter implementation class DataBaseAccessFilter
  */
@@ -69,22 +70,13 @@ public class DataBaseAccessFilter implements Filter {
 		Enumeration<String> headerNames = httpRequest.getHeaderNames();
 		Enumeration<String> parametersNames =httpRequest.getParameterNames();
 		StringBuffer jb = new StringBuffer();
-		try{
-			ServletInputStream reader = request.getInputStream();
+		
+			MyRequestWrapper myRequestWrapper = new MyRequestWrapper((HttpServletRequest) request);
+			String body = myRequestWrapper.getBody();
 			
-			int line;
-			while ((line = reader.read()) != -1)
-			{
-				String tets= String.valueOf(Character.toChars(line));
-				jb.append(tets);
-			}
-		}catch(Exception r)
-		{
-
-		}
-		if(jb.length()>0){
+		if(body.length()>0){
 			NDC.push("@RequestParamterSperator@");
-			NDC.push(jb.toString()+"&");
+			NDC.push(body+"&");
 			NDC.push("@RequestParamterSperator@");
 		}else
 		{
