@@ -19,7 +19,7 @@ public class JsonTimestampSerializer extends JsonSerializer<Timestamp>{
 public void serialize(Timestamp timestamp, JsonGenerator generator,
 		SerializerProvider provider) throws IOException, JsonProcessingException {
 	String date[] = timestamp.toString().split("\\.");
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	java.util.Date dateval=null;
 	
 	try {
@@ -28,8 +28,8 @@ public void serialize(Timestamp timestamp, JsonGenerator generator,
 		e.printStackTrace();
 	}
 	
-	SimpleDateFormat form = new SimpleDateFormat("hh:mm:ss a zzz EEEE', 'MMMM dd', 'yyyy");
-	generator.writeString(sdf.format(dateval));
+	SimpleDateFormat form = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+	generator.writeString(form.format(dateval));
 	/*String date[] = timestamp.toString().split("\\.");
 	gen.writeString(date[0].toString());*/
 }
