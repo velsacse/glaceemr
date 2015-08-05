@@ -724,22 +724,6 @@ public class Prescription {
 		this.docPrescBaseDoseUnits = docPrescBaseDoseUnits;
 	}
 
-	public String getDocPrescPackage() {
-		return docPrescPackage;
-	}
-
-	public void setDocPrescPackage(String docPrescPackage) {
-		this.docPrescPackage = docPrescPackage;
-	}
-
-	public Integer getDocPrescTransmissionId() {
-		return docPrescTransmissionId;
-	}
-
-	public void setDocPrescTransmissionId(Integer docPrescTransmissionId) {
-		this.docPrescTransmissionId = docPrescTransmissionId;
-	}
-
 	/*@Column(name="doc_presc_stop_date")
 	private Date docPrescStopDate;
 */
@@ -936,12 +920,6 @@ public class Prescription {
 	@Column(name="doc_presc_base_dose_units")
 	private String docPrescBaseDoseUnits;
 
-	@Column(name="doc_presc_package")
-	private String docPrescPackage;
-
-	@Column(name="doc_presc_transmission_id")
-	private Integer docPrescTransmissionId;
-	
 	@Column(name="doc_presc_print_time")
 	private String docPrescPrintTime;
 

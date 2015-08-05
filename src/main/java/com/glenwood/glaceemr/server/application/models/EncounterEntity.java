@@ -161,29 +161,15 @@ public class EncounterEntity {
 	@Column(name="medication_attestation_status")
 	private String medicationAttestationStatus;
 
-	@Column(name="encounter_isfinished")
-	private Boolean encounterIsfinished;
-
 	@Column(name="encounter_isportal")
 	private Integer encounterIsportal;
 	
-	@Column(name="encounter_isportal1")
-	private Integer encounterIsportal1;
-
 	public Long getEncounter_service_doctor() {
 		return encounter_service_doctor;
 	}
 
 	public void setEncounter_service_doctor(Long encounter_service_doctor) {
 		this.encounter_service_doctor = encounter_service_doctor;
-	}
-
-	public Integer getEncounterIsportal1() {
-		return encounterIsportal1;
-	}
-
-	public void setEncounterIsportal1(Integer encounterIsportal1) {
-		this.encounterIsportal1 = encounterIsportal1;
 	}
 
 	public EmpProfile getEmpProfileEmpId() {
@@ -599,14 +585,6 @@ public class EncounterEntity {
 
 	public void setMedicationAttestationStatus(String medicationAttestationStatus) {
 		this.medicationAttestationStatus = medicationAttestationStatus;
-	}
-
-	public Boolean getEncounterIsfinished() {
-		return encounterIsfinished;
-	}
-
-	public void setEncounterIsfinished(Boolean encounterIsfinished) {
-		this.encounterIsfinished = encounterIsfinished;
 	}
 
 	public Integer getEncounterIsportal() {
