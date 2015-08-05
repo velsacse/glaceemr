@@ -112,7 +112,7 @@ public class PrescriptionController {
 	 * @param dataToSave
 	 * @throws Exception
 	 */
-	@RequestMapping(value ="/getMedAdminLogHistory", method = RequestMethod.GET) 
+	@RequestMapping(value ="/getMedAdminLog", method = RequestMethod.GET) 
 	@ResponseBody
 	
 	public List getMedAdministrationLogHistory(@RequestParam(value="planId",required=false,defaultValue="-1")Integer planId)throws Exception{
@@ -126,7 +126,7 @@ public class PrescriptionController {
 	 * @param dataToSave
 	 * @throws Exception
 	 */
-	@RequestMapping(value ="/getMedAdminLog", method = RequestMethod.GET) 
+	@RequestMapping(value ="/getMedAdminLog1", method = RequestMethod.GET) 
 	@ResponseBody
 	
 	public List getMedAdminLog(@RequestParam(value="logId",required=false,defaultValue="-1")Integer logId)throws Exception{
