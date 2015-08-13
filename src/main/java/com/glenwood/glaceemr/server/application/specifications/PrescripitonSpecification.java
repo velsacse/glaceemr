@@ -17,8 +17,8 @@ import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.CurrentMedication;
 import com.glenwood.glaceemr.server.application.models.CurrentMedication_;
-import com.glenwood.glaceemr.server.application.models.EncounterEntity;
-import com.glenwood.glaceemr.server.application.models.EncounterEntity_;
+import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.MedStatus;
 import com.glenwood.glaceemr.server.application.models.MedStatus_;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
@@ -52,8 +52,8 @@ public class PrescripitonSpecification {
 			
 				
 				Join<CurrentMedication,MedStatus> currjoin=root.join(CurrentMedication_.medstatus,JoinType.INNER);
-				Join<CurrentMedication,EncounterEntity> currjoin1=root.join(CurrentMedication_.encounter,JoinType.INNER);
-				Join<EncounterEntity, Chart> cc=currjoin1.join(EncounterEntity_.chart, JoinType.INNER);
+				Join<CurrentMedication,Encounter> currjoin1=root.join(CurrentMedication_.encounter,JoinType.INNER);
+				Join<Encounter, Chart> cc=currjoin1.join(Encounter_.chart, JoinType.INNER);
 				Join<Chart, PatientRegistration> patientjoin=cc.join(Chart_.patientRegistrationTable,JoinType.INNER);
 				
 							
@@ -97,10 +97,10 @@ public class PrescripitonSpecification {
 						CriteriaBuilder cb) {
 				
 					
-					Join<Prescription,EncounterEntity> currjoin1=root.join(Prescription_.encounter,JoinType.INNER);
+					Join<Prescription,Encounter> currjoin1=root.join(Prescription_.encounter,JoinType.INNER);
 //					Join<Prescription,MedsAdminPlan> medPlanJoin = root.join(Prescription_.medsAdminPlan,JoinType.INNER);
 					Join<Prescription,MedStatus> currjoin=root.join(Prescription_.medstatus,JoinType.INNER);
-					Join<EncounterEntity, Chart> cc=currjoin1.join(EncounterEntity_.chart, JoinType.INNER);
+					Join<Encounter, Chart> cc=currjoin1.join(Encounter_.chart, JoinType.INNER);
 //					Join<Chart, PatientRegistration> patientjoin=cc.join(Chart_.patientRegistrationTable,JoinType.INNER);
 					
 					String likePattern = getLikePattern("active");
@@ -110,7 +110,7 @@ public class PrescripitonSpecification {
 					Predicate medstatus=cb.like(cb.lower(currjoin.get(MedStatus_.medStatusGroup)),likePattern);
 					Predicate orderDate = null;
 					if(startDate!=null&&endDate!=null) {
-						orderDate = cb.lessThanOrEqualTo(root.get(Prescription_.docPrescOrderedDate), endDate);
+						orderDate = cb.lessThanOrEqualTo((root.get(Prescription_.docPrescOrderedDate)).as(Date.class), endDate);
 //						orderDate = cb.between(root.get(Prescription_.docPrescOrderedDate), startDate, endDate);
 					}
 					root.fetch(Prescription_.medstatus,JoinType.INNER);

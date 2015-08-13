@@ -42,22 +42,22 @@ public class Prescription {
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="doc_presc_provider_id",referencedColumnName="emp_profile_empid",insertable=false, updatable=false)
 	@JsonManagedReference
-	EmpProfile empprofile;
+	EmployeeProfile empprofile;
 	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="doc_presc_encounter_id",referencedColumnName="encounter_id",insertable=false,updatable=false)
 	@JsonManagedReference
-	EncounterEntity encounter;
+	Encounter encounter;
 	
 	@OneToMany(mappedBy="prescription", fetch=FetchType.LAZY)
 	@JsonManagedReference
 	List<MedsAdminPlan> medsAdminPlan;
 	
-	public EncounterEntity getEncounter() {
+	public Encounter getEncounter() {
 		return encounter;
 	}
 
-	public void setEncounter(EncounterEntity encounter) {
+	public void setEncounter(Encounter encounter) {
 		this.encounter = encounter;
 	}
 
@@ -171,11 +171,11 @@ public class Prescription {
 	NdcPkgProduct ndcPkgProduct;*/
 	
 	
-	public EmpProfile getEmpprofile() {
+	public EmployeeProfile getEmpprofile() {
 		return empprofile;
 	}
 
-	public void setEmpprofile(EmpProfile empprofile) {
+	public void setEmpprofile(EmployeeProfile empprofile) {
 		this.empprofile = empprofile;
 	}
 

@@ -58,4 +58,11 @@ public interface PrescriptionService {
 	 */
 	void deleteMedicationAdminLog(int planId,int logId);
 
+	/**
+	 * To edit the medications plan (Currently this is for medication log used by Behavioural health practices)
+	 * @param dataToSave
+	 * @throws JSONException
+	 */
+	void editMedicationAdminPlan(String dataToSave) throws JSONException;
+	
 }

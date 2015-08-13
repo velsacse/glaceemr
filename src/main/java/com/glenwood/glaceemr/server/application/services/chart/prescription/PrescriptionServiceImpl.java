@@ -60,6 +60,7 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	       JSONObject medPlanData = new JSONObject(dataToSave);
 	       int patientId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medPlanData.get("patientId").toString())).or("-1"));
 	       int prescId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medPlanData.get("prescId").toString())).or("-1"));
+	       int userId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medPlanData.get("loginId").toString())).or("-1"));
 	       String planTime =  Optional.fromNullable(Strings.emptyToNull(medPlanData.get("planTimeList").toString())).or("-1");
 	       String planTimeList[] = null;
 			try {
@@ -76,6 +77,10 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 			    newPlan.setMedsAdminPlanPatientId(patientId);
 			    newPlan.setMedsAdminPlanTime(planTimeTemp);
 			    newPlan.setMedsAdminPlanSavedTime(medAdminLogRepository.findCurrentTimeStamp());
+			    newPlan.setMedsAdminPlanOrderedBy(userId);
+			    newPlan.setMedsAdminPlanModifiedOn(medAdminLogRepository.findCurrentTimeStamp());
+			    newPlan.setMedsAdminPlanModifiedBy(userId);
+			    newPlan.setMedsAdminPlanIsActive(true);
 			    medAdminPlanRepository.saveAndFlush(newPlan);
 			}
 	}
@@ -176,6 +181,53 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		mapobject.put("currentmed", currentmedlist);
 		mapobject.put("prescmed", prescmedlist);
 		return mapobject;
+	}
+
+	/**
+	 * To edit the medication plan (Currently this is for medication log used by Behavioural health practices)
+	 */
+	@Override
+	public void editMedicationAdminPlan(String dataToSave) throws JSONException {
+	       JSONObject medPlanData = new JSONObject(dataToSave);
+	       int patientId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medPlanData.get("patientId").toString())).or("-1"));
+	       int prescId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medPlanData.get("prescId").toString())).or("-1"));
+	       int planId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medPlanData.get("planId").toString())).or("-1"));
+	       boolean isPlanDeleted = Boolean.parseBoolean(Optional.fromNullable(Strings.emptyToNull(medPlanData.get("isPlanDeleted").toString())).or("false"));
+	       int userId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medPlanData.get("loginId").toString())).or("-1"));
+	       String planTime =  Optional.fromNullable(Strings.emptyToNull(medPlanData.get("planTimeList").toString())).or("");
+	       String planTimeList[] = null;
+	       if(isPlanDeleted) {
+	    	   MedsAdminPlan newPlan = medAdminPlanRepository.findOne(planId);
+	    	   newPlan.setMedsAdminPlanModifiedOn(medAdminLogRepository.findCurrentTimeStamp());
+	    	   newPlan.setMedsAdminPlanModifiedBy(userId);
+	    	   newPlan.setMedsAdminPlanIsActive(false);
+	    	   newPlan.setMedsAdminPlanDeletedBy(userId);
+	    	   newPlan.setMedsAdminPlanDeletedOn(medAdminLogRepository.findCurrentTimeStamp());
+	    	   medAdminPlanRepository.saveAndFlush(newPlan);
+		   }
+			try {
+				if(planTime!=null&&planTime!="") {
+					planTimeList = planTime.split(",");
+				}
+			} catch (Exception e) {
+				System.out.println("Exception in plan time set up \n"+e);
+			}
+			if(planTimeList.length>0) {
+				for(int i=0;i<planTimeList.length;i++) {
+					String planTimeTemp = planTimeList[i].replace("[", "").replace("]", "").trim();
+				if (!planTimeTemp.equalsIgnoreCase("")) {
+					MedsAdminPlan newPlan = new MedsAdminPlan();
+					newPlan.setMedsAdminPlanMedicationId(prescId);
+					newPlan.setMedsAdminPlanPatientId(patientId);
+					newPlan.setMedsAdminPlanTime(planTimeTemp);
+					newPlan.setMedsAdminPlanIsActive(true);
+					newPlan.setMedsAdminPlanSavedTime(medAdminLogRepository.findCurrentTimeStamp());
+					newPlan.setMedsAdminPlanModifiedOn(medAdminLogRepository.findCurrentTimeStamp());
+					newPlan.setMedsAdminPlanModifiedBy(userId);
+					medAdminPlanRepository.saveAndFlush(newPlan);
+				}
+			}
+		}
 	}
 
 }

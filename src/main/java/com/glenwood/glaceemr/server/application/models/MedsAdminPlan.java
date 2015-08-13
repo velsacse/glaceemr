@@ -18,6 +18,8 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "meds_admin_plan")
@@ -41,7 +43,27 @@ public class MedsAdminPlan {
 	@Column(name="meds_admin_plan_saved_time")
 	private Timestamp medsAdminPlanSavedTime;
 	
-@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@Column(name="meds_admin_plan_ordered_by")
+	private Integer medsAdminPlanOrderedBy;
+
+	@Column(name="meds_admin_plan_is_active")
+	private Boolean medsAdminPlanIsActive;
+
+	@Column(name="meds_admin_plan_modified_by")
+	private Integer medsAdminPlanModifiedBy;
+
+	@Column(name="meds_admin_plan_deleted_by")
+	private Integer medsAdminPlanDeletedBy;
+
+	@JsonSerialize(using = JsonTimestampSerializer.class)
+	@Column(name="meds_admin_plan_modified_on")
+	private Timestamp medsAdminPlanModifiedOn;
+
+	@JsonSerialize(using = JsonTimestampSerializer.class)
+	@Column(name="meds_admin_plan_deleted_on")
+	private Timestamp medsAdminPlanDeletedOn;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="meds_admin_plan_medication_id",referencedColumnName="doc_presc_id",insertable=false, updatable=false)
 	@JsonBackReference
 	Prescription prescription;
@@ -120,4 +142,52 @@ public class MedsAdminPlan {
 		this.medsAdminPlanSavedTime = medsAdminPlanSavedTime;
 	}
 
+	public Integer getMedsAdminPlanOrderedBy() {
+		return medsAdminPlanOrderedBy;
+	}
+
+	public void setMedsAdminPlanOrderedBy(Integer medsAdminPlanOrderedBy) {
+		this.medsAdminPlanOrderedBy = medsAdminPlanOrderedBy;
+	}
+
+	public Boolean getMedsAdminPlanIsActive() {
+		return medsAdminPlanIsActive;
+	}
+
+	public void setMedsAdminPlanIsActive(Boolean medsAdminPlanIsActive) {
+		this.medsAdminPlanIsActive = medsAdminPlanIsActive;
+	}
+
+	public Integer getMedsAdminPlanModifiedBy() {
+		return medsAdminPlanModifiedBy;
+	}
+
+	public void setMedsAdminPlanModifiedBy(Integer medsAdminPlanModifiedBy) {
+		this.medsAdminPlanModifiedBy = medsAdminPlanModifiedBy;
+	}
+
+	public Integer getMedsAdminPlanDeletedBy() {
+		return medsAdminPlanDeletedBy;
+	}
+
+	public void setMedsAdminPlanDeletedBy(Integer medsAdminPlanDeletedBy) {
+		this.medsAdminPlanDeletedBy = medsAdminPlanDeletedBy;
+	}
+
+	public Timestamp getMedsAdminPlanModifiedOn() {
+		return medsAdminPlanModifiedOn;
+	}
+
+	public void setMedsAdminPlanModifiedOn(Timestamp medsAdminPlanModifiedOn) {
+		this.medsAdminPlanModifiedOn = medsAdminPlanModifiedOn;
+	}
+
+	public Timestamp getMedsAdminPlanDeletedOn() {
+		return medsAdminPlanDeletedOn;
+	}
+
+	public void setMedsAdminPlanDeletedOn(Timestamp medsAdminPlanDeletedOn) {
+		this.medsAdminPlanDeletedOn = medsAdminPlanDeletedOn;
+	}
+	
 }

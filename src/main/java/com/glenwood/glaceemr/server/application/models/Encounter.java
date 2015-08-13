@@ -16,7 +16,7 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "encounter")
-public class EncounterEntity {
+public class Encounter {
 
 	@Id
 	@Column(name="encounter_id")
@@ -172,23 +172,23 @@ public class EncounterEntity {
 		this.encounter_service_doctor = encounter_service_doctor;
 	}
 
-	public EmpProfile getEmpProfileEmpId() {
+	public EmployeeProfile getEmpProfileEmpId() {
 		return empProfileEmpId;
 	}
 
-	public void setEmpProfileEmpId(EmpProfile empProfileEmpId) {
+	public void setEmpProfileEmpId(EmployeeProfile empProfileEmpId) {
 		this.empProfileEmpId = empProfileEmpId;
 	}
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="encounter_service_doctor",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
-	EmpProfile empProfileEmpId;
+	EmployeeProfile empProfileEmpId;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="encounter_created_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
-	EmpProfile encounterCreatedByEmpProf;
+	EmployeeProfile encounterCreatedByEmpProf;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -595,11 +595,11 @@ public class EncounterEntity {
 		this.encounterIsportal = encounterIsportal;
 	}
 
-	public EmpProfile getEncounterCreatedByEmpProf() {
+	public EmployeeProfile getEncounterCreatedByEmpProf() {
 		return encounterCreatedByEmpProf;
 	}
 
-	public void setEncounterCreatedByEmpProf(EmpProfile encounterCreatedByEmpProf) {
+	public void setEncounterCreatedByEmpProf(EmployeeProfile encounterCreatedByEmpProf) {
 		this.encounterCreatedByEmpProf = encounterCreatedByEmpProf;
 	}
 }

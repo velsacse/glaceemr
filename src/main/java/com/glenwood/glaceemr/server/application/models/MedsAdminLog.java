@@ -34,7 +34,7 @@ public class MedsAdminLog {
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="meds_admin_log_administered_by",referencedColumnName="emp_profile_empid",insertable=false, updatable=false)
 	@JsonManagedReference
-	EmpProfile empprofile;
+	EmployeeProfile empprofile;
 	
 	@ManyToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name="meds_admin_log_plan_id",referencedColumnName="meds_admin_plan_id",insertable=false, updatable=false)
@@ -174,11 +174,11 @@ public class MedsAdminLog {
 		this.medsAdminLogDeletedOn = medsAdminLogDeletedOn;
 	}
 
-	public EmpProfile getEmpprofile() {
+	public EmployeeProfile getEmpprofile() {
 		return empprofile;
 	}
 
-	public void setEmpprofile(EmpProfile empprofile) {
+	public void setEmpprofile(EmployeeProfile empprofile) {
 		this.empprofile = empprofile;
 	}
 

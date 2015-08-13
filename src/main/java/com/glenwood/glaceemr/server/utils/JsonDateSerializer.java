@@ -31,7 +31,7 @@ public class JsonDateSerializer extends JsonSerializer<Date>{
 			e.printStackTrace();
 		}
 		
-		SimpleDateFormat form = new SimpleDateFormat("MM-dd-yyyy");
+		SimpleDateFormat form = new SimpleDateFormat("MM/dd/yyyy");
 		generator.writeString(form.format(dateval));
 		/*String date[] = timestamp.toString().split("\\.");
 		gen.writeString(date[0].toString());*/

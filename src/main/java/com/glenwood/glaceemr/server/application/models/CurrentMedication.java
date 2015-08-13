@@ -33,7 +33,7 @@ public class CurrentMedication {
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="current_medication_encounter_id",referencedColumnName="encounter_id",insertable=false,updatable=false)
 	@JsonManagedReference
-	EncounterEntity encounter;
+	Encounter encounter;
 
 	@OneToMany(mappedBy="currentMedication", fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -47,11 +47,11 @@ public class CurrentMedication {
 		this.medsAdminPlan = medsAdminPlan;
 	}
 
-	public EncounterEntity getEncounter() {
+	public Encounter getEncounter() {
 		return encounter;
 	}
 
-	public void setEncounter(EncounterEntity encounter) {
+	public void setEncounter(Encounter encounter) {
 		this.encounter = encounter;
 	}
 

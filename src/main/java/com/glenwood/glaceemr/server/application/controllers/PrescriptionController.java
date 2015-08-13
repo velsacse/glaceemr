@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 
@@ -55,9 +56,11 @@ public class PrescriptionController {
 	@RequestMapping(value ="/Bypatientid", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public Map<String, Object> getactivemedwithclass(@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid)throws Exception{
+	public EMRResponseBean getactivemedwithclass(@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid)throws Exception{
 		Map<String, Object> drugs=prescriptionService.getactivemedwithclass(patientid);
-		return drugs;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(drugs);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -112,7 +115,7 @@ public class PrescriptionController {
 	 * @param dataToSave
 	 * @throws Exception
 	 */
-	@RequestMapping(value ="/getMedAdminLog", method = RequestMethod.GET) 
+	@RequestMapping(value ="/getMedAdminLogHistory", method = RequestMethod.GET) 
 	@ResponseBody
 	
 	public List getMedAdministrationLogHistory(@RequestParam(value="planId",required=false,defaultValue="-1")Integer planId)throws Exception{
@@ -126,7 +129,7 @@ public class PrescriptionController {
 	 * @param dataToSave
 	 * @throws Exception
 	 */
-	@RequestMapping(value ="/getMedAdminLog1", method = RequestMethod.GET) 
+	@RequestMapping(value ="/getMedAdminLog", method = RequestMethod.GET) 
 	@ResponseBody
 	
 	public List getMedAdminLog(@RequestParam(value="logId",required=false,defaultValue="-1")Integer logId)throws Exception{
@@ -149,5 +152,17 @@ public class PrescriptionController {
 		prescriptionService.deleteMedicationAdminLog(deletedBy,logId);
 		logger.debug("In deleteMedAdminLog - "+logId+"got deleted");
 	}
-	
+
+	/**
+	 * To edit the medication's administration plan 
+	 * @param dataToSave
+	 * @throws Exception
+	 */
+	@RequestMapping(value ="/editDeleteMedAdminPlan", method = RequestMethod.GET) 
+	@ResponseBody
+	public void editmedAdministrationPlan(@RequestParam(value="dataToSave",required=false,defaultValue="-1")String dataToSave)throws Exception{
+		logger.debug("In editDeleteMedAdminPlan - plan is going to be edited");
+		prescriptionService.editMedicationAdminPlan(dataToSave);
+		logger.debug("In editDeleteMedAdminPlan - saved");
+	}
 }

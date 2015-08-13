@@ -18,7 +18,7 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @Entity
 @Table(name = "emp_profile")
-public class EmpProfile {
+public class EmployeeProfile {
 
 	@Id
 	@Column(name="emp_profile_empid")
@@ -148,7 +148,7 @@ public class EmpProfile {
 	
 	@OneToMany(mappedBy="encounter_service_doctor")
 	@JsonManagedReference
-	List<EncounterEntity> encounterServiceDr;
+	List<Encounter> encounterServiceDr;
 	
 	public Integer getEmpProfileEmpid() {
 		return empProfileEmpid;
@@ -472,11 +472,11 @@ public class EmpProfile {
 		this.empProfileModifiedBy = empProfileModifiedBy;
 	}
 	
-	public List<EncounterEntity> getEncounterServiceDr() {
+	public List<Encounter> getEncounterServiceDr() {
 		return encounterServiceDr;
 	}
 
-	public void setEncounterServiceDr(List<EncounterEntity> encounterServiceDr) {
+	public void setEncounterServiceDr(List<Encounter> encounterServiceDr) {
 		this.encounterServiceDr = encounterServiceDr;
 	}
 	public String getEmpProfileCtpNumber() {
