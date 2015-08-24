@@ -35,7 +35,7 @@ import static org.hamcrest.Matchers.*;
 	TransactionalTestExecutionListener.class,
 	DbUnitTestExecutionListener.class })
 //@DbUnitConfiguration(dataSetLoader = ColumnSensingReplacementDataSetLoader.class)
-@DatabaseSetup("patientData.xml")
+@DatabaseSetup("testCaseData.xml")
 @WebAppConfiguration
 public class PatientControllerTest {
 
