@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.Users;
 import com.glenwood.glaceemr.server.application.repositories.UsersRepository;
+import com.glenwood.glaceemr.server.application.services.users.UsersService;
+import com.glenwood.glaceemr.server.filters.DataBaseAccessFilter;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService{
@@ -26,25 +28,33 @@ public class CustomUserDetailsService implements UserDetailsService{
 	@Autowired
 	UsersRepository usersRepository;
 	
+	@Autowired
+	UsersService usersService;
+	
+	public static String password="";
 	@Override
 	public UserDetails loadUserByUsername(String userName)
 			throws UsernameNotFoundException {
-		Users user = usersRepository.findByUserNameIgnoreCase(userName);
+//		System.out.println("\n>>>>>>>database retrived password>>>>"+DataBaseAccessFilter.password+"\n");
+		System.out.println("\n\nbefore query>>>\n"+DataBaseAccessFilter.password);
+		String testpassword=DataBaseAccessFilter.password;
+		Users user =usersService.getUserObject(userName,testpassword);
+		
 		boolean enabled = true;
 		boolean accountNonExpired = true;
 		boolean credentialsNonExpired = true;
 		boolean accountNonLocked = true;
-		System.out.println("username -->"+userName);
-		System.out.println("user from dbname-->"+user.toString());
-		User loggedInUser = new User(user.getTxtUsername(), user.getPassword(),
+		System.out.println(">>>>>>>>>>after login query");
+		User loggedInUser = new User(user.getUserName(), user.getPassword(),
 				enabled, accountNonExpired,
 				credentialsNonExpired, accountNonLocked, getAuthorities('A'));
-		System.out.println("here in custom details service \n\n\n\n"+ loggedInUser.toString());
-		logger.debug("here in custom details service \n\n\n\n", loggedInUser);
+		
+		logger.debug("here in custom details service ", loggedInUser);
 		return loggedInUser;
 	}
 
-
+	
+	
 	/**
 	 * Retrieves a collection of {@link GrantedAuthority} based on a numerical role
 	 * @param role the numerical role

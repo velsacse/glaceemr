@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.glenwood.glaceemr</groupId>
-	<artifactId>glaceemr</artifactId>
+	<artifactId>glaceemr_backend</artifactId>
 	<packaging>war</packaging>
 	<version>5.0-SNAPSHOT</version>
 	<name>GlaceEMR Backend</name>
@@ -121,6 +121,12 @@
 			<artifactId>spring-security-config</artifactId>
 			<version>3.2.3.RELEASE</version>
 		</dependency>
+		<!-- apache commons org -->
+		<dependency>
+	<groupId>org.apache.commons</groupId>
+	<artifactId>commons-io</artifactId>
+	<version>1.3.2</version>
+</dependency>
 		
 		
 	<!-- Testing -->
@@ -346,18 +352,35 @@
   <artifactId>log4j</artifactId>
   <version>1.2.17</version>
 </dependency>
-		
+		<!-- ecache realted jars -->
+		<dependency>
+		<groupId>net.sf.ehcache</groupId>
+		<artifactId>ehcache</artifactId>
+		<version>2.9.0</version>
+	</dependency>
+	<!-- Support for Ehcache and others -->
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-context-support</artifactId>
+		<version>4.1.4.RELEASE</version>
+	</dependency>
 				<!-- smtp realted jar for sending log -->
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
 			<version>1.4.7</version>
 		</dependency>
+		<!-- apache commons -->
+		<dependency>
+	<groupId>commons-codec</groupId>
+	<artifactId>commons-codec</artifactId>
+	<version>1.2</version>
+</dependency>
 	</dependencies>
 	<build>
 	
 		<!-- Generate compiled stuff in the folder used for developing mode -->
-		<finalName>glaceemr</finalName>
+		<finalName>glaceemr_backend</finalName>
 		<outputDirectory>${webappDirectory}/WEB-INF/classes</outputDirectory>
 
 		<resources>

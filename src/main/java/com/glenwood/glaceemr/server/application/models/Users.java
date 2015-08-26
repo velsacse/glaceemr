@@ -1,9 +1,13 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.util.Collection;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -86,6 +90,12 @@ public class Users {
 		return "Users [userId=" + userId + ", userName=" + userName
 				+ ", password=" + password + ", txtUsername=" + txtUsername
 				+ ", isActive=" + isActive + "]";
+	}
+
+
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		// TODO Auto-generated method stub
+		return null;
 	}
  
 	

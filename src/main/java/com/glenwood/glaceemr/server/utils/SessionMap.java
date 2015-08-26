@@ -5,12 +5,9 @@ package com.glenwood.glaceemr.server.utils;
 
 import java.io.Serializable;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.context.annotation.ScopedProxyMode;
 
 @Component
-@Scope(value ="session",proxyMode=ScopedProxyMode.INTERFACES)
 public class SessionMap implements Serializable{
 
 	/**

@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.services.users;
 
 import javax.annotation.Resource;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.Users;
@@ -39,7 +40,14 @@ public class UsersServiceImpl implements UsersService {
 	
 	  @Override
 	   public Users getUserDetails(String username) {
-	       Users user = usersRepository.findByTxtUsername(username);
+	       Users user = usersRepository.findByUserNameIgnoreCase(username);
 	       return user;
 	   }
+	  
+	  @Cacheable(value="UserNameCache") 
+		public Users getUserObject(String userName,String password)
+		{
+			Users user=usersRepository.findByUserNameIgnoreCase(userName);
+			return user;
+		}
 }

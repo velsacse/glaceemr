@@ -8,5 +8,7 @@ public interface UsersService {
 	public int findByUserName(String searchValue);
 	
 	 public Users getUserDetails(String username) ;
+	 
+	 public Users getUserObject(String userName,String password);
 	
 }
