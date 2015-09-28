@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,17 +14,30 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
+import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionBean;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
-
+ 
 /**
  * Controller for Prescriptions in GlaceEMR, 
  * contains the methods to get the patient medications and performing different operations on those. 
  * 
  * @author software
+ *
+ */
+/**
+ * @author selvakumar
+ *
+ */
+/**
+ * @author selvakumar
+ *
+ */
+/**
+ * @author selvakumar
  *
  */
 @Api(value = "Prescriptions", description = "contains the methods to get the patient medications and performing different operations on those", consumes="application/json")
@@ -165,4 +177,23 @@ public class PrescriptionController {
 		prescriptionService.editMedicationAdminPlan(dataToSave);
 		logger.debug("In editDeleteMedAdminPlan - saved");
 	}
+	
+	
+	/*
+	 *To get the medical supplies details for the selected patient
+	 *@param patientid
+	 *@throws Exception
+	 */
+	@RequestMapping(value ="/patientid", method = RequestMethod.GET) 
+	@ResponseBody
+	
+	public PrescriptionBean getactivemedicalsupplies(@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid)throws Exception{
+		logger.debug("In medical supplies");
+		PrescriptionBean drugs=prescriptionService.getactivemedicalsupplies(patientid);
+		logger.debug("Got the medical supplies data");
+		return drugs;
+	}
+	
+	
+	
 }

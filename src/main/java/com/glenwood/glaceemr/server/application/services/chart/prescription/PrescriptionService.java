@@ -3,8 +3,13 @@ package com.glenwood.glaceemr.server.application.services.chart.prescription;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONException;
+import org.json.JSONException; 
 
+ 
+/**
+ * @author selvakumar
+ *
+ */
 public interface PrescriptionService {
 
 	/**
@@ -64,5 +69,16 @@ public interface PrescriptionService {
 	 * @throws JSONException
 	 */
 	void editMedicationAdminPlan(String dataToSave) throws JSONException;
+	
+	
+	
+	/*To get the medical supplies data
+	 * @param patientid
+	 * throws Exception
+	 * 
+	 */
+	PrescriptionBean getactivemedicalsupplies(Integer patientid);
+
+
 	
 }

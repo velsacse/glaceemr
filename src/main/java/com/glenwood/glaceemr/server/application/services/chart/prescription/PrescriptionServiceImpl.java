@@ -3,7 +3,7 @@ package com.glenwood.glaceemr.server.application.services.chart.prescription;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Map; 
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,7 +23,7 @@ import com.glenwood.glaceemr.server.application.specifications.PrescripitonSpeci
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 
-
+  
 @Service
 @Transactional
 public class PrescriptionServiceImpl implements PrescriptionService{
@@ -32,6 +32,9 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	
 	@Autowired
 	CurrentMedicationRepository currentMedicationRepository;
+	
+	
+	
 	
 	@Autowired
 	MedAdministrationPlanRepository medAdminPlanRepository;
@@ -229,6 +232,23 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 			}
 		}
 	}
-
+	
+	/**
+	 * To get the medical supplies for the particular patient
+	 * @param patientid
+	 * throws {@link Exception}
+	 */
+	@Override
+	public PrescriptionBean getactivemedicalsupplies(Integer patientid) {
+		List<CurrentMedication> currentmedlist=currentMedicationRepository.findAll(PrescripitonSpecification.getactivemedicalsupplieswithclass(patientid,null,null));
+		List<Prescription> prescmedlist=prescriptionRepository.findAll(PrescripitonSpecification.getactivemedicalsupplieswithclasspresc(patientid,null,null));
+		PrescriptionBean beanobj=new PrescriptionBean(prescmedlist, currentmedlist);
+		/*	Map<String, Object> mapobject=new HashMap<String,Object>();
+		mapobject.put("currentmed", currentmedlist);
+		mapobject.put("prescmed", prescmedlist);*/
+		return beanobj;
+	}
+	
+	
 }
 
