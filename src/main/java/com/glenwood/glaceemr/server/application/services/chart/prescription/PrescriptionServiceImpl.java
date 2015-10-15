@@ -1,9 +1,16 @@
 package com.glenwood.glaceemr.server.application.services.chart.prescription;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map; 
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,10 +19,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.models.CurrentMedication;
+import com.glenwood.glaceemr.server.application.models.DrugSchedule;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlan;
 import com.glenwood.glaceemr.server.application.models.Prescription;
+import com.glenwood.glaceemr.server.application.models.Prescription_;
 import com.glenwood.glaceemr.server.application.repositories.CurrentMedicationRepository;
+import com.glenwood.glaceemr.server.application.repositories.DrugScheduleRepository;
 import com.glenwood.glaceemr.server.application.repositories.MedAdministrationLogRepository;
 import com.glenwood.glaceemr.server.application.repositories.MedAdministrationPlanRepository;
 import com.glenwood.glaceemr.server.application.repositories.PrescriptionRepository;
@@ -33,7 +43,8 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	@Autowired
 	CurrentMedicationRepository currentMedicationRepository;
 	
-	
+	@Autowired
+	DrugScheduleRepository drugScheduleRepository;
 	
 	
 	@Autowired
@@ -42,6 +53,8 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	@Autowired
 	MedAdministrationLogRepository medAdminLogRepository;
 	
+	@PersistenceContext
+	EntityManager em;
 	/**
 	 * To get the prescribed medications by the doctor
 	 */
@@ -249,6 +262,69 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		return beanobj;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService#getfrequencylist(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public List<DrugSchedule> getfrequencylist(String brandname,String mode) {
+		// TODO Auto-generated method stub
+		List<DrugSchedule> schedulelist=drugScheduleRepository.findAll(PrescripitonSpecification.getfrequencylist(brandname,mode));
+		return schedulelist;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService#getfrequencylistall(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public List<DrugSchedule> getfrequencylistall(String brandname,String mode) {
+		// TODO Auto-generated method stub
+		List<DrugSchedule> schedulelist=drugScheduleRepository.findAll(PrescripitonSpecification.getfrequencylist(brandname,mode));
+		return schedulelist;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService#gettake(java.lang.String)
+	 */
+	@Override
+	public List<IntakeBean> gettake(String brandname) {
+		// TODO Auto-generated method stub
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Prescription> root = cq.from(Prescription.class);
+		cq.multiselect(builder.construct(IntakeBean.class, root.get(Prescription_.docPrescIntake),
+				root.get(Prescription_.docPrescIntake)));
+		cq.where(builder.like((builder.lower(root.get(Prescription_.rxname))),getLikePattern(brandname)));
+		cq.orderBy(builder.asc(root.get(Prescription_.docPrescIntake)));
+		cq.distinct(true);
+		List<Object> dd=em.createQuery(cq).getResultList();
+		List<IntakeBean> bean1 = new ArrayList<IntakeBean>();
+		for(int i=0;i<dd.size();i++){
+		IntakeBean takebean=(IntakeBean)dd.get(i);
+		String name=takebean.getName();
+		String value=takebean.getValue();
+		takebean.setName(name);
+		takebean.setValue(value);
+		bean1.add(takebean);
+		}
+		
+		return bean1;
+	}
+	
+	
+	/**
+	 * Retunrs the formatted the pattern
+	 * @param searchTerm
+	 * @return
+	 */
+	private static String getLikePattern(final String searchTerm) {
+		StringBuilder pattern = new StringBuilder();
+		pattern.append(searchTerm.toLowerCase());
+		pattern.append("%");
+		return pattern.toString();
+	}
 	
 }
 

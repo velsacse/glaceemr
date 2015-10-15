@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.json.JSONException; 
 
+import com.glenwood.glaceemr.server.application.models.DrugSchedule;
+
  
 /**
  * @author selvakumar
@@ -79,6 +81,16 @@ public interface PrescriptionService {
 	 */
 	PrescriptionBean getactivemedicalsupplies(Integer patientid);
 
-
-	
+	/*To get the frequency list based on medication
+	 * 
+	 */
+	List<DrugSchedule> getfrequencylist(String brandname, String mode);
+	/*To get the all frequency list based on medication
+	 * 
+	 */
+	List<DrugSchedule> getfrequencylistall(String brandname, String mode);
+	/*To get the take list based on medication
+	 * 
+	 */
+	List<IntakeBean> gettake(String brandname);
 }

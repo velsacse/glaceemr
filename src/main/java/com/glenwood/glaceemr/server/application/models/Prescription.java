@@ -44,6 +44,12 @@ public class Prescription {
 	@JsonManagedReference
 	EmployeeProfile empprofile;
 	
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="doc_presc_schedule1",referencedColumnName="drug_schedule_name",insertable=false, updatable=false)
+	@JsonManagedReference
+	DrugSchedule drugSchedule;
+	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="doc_presc_encounter_id",referencedColumnName="encounter_id",insertable=false,updatable=false)
 	@JsonManagedReference

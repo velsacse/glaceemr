@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.glenwood.glaceemr.server.application.models.DrugSchedule;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
+import com.glenwood.glaceemr.server.application.services.chart.prescription.IntakeBean;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionBean;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
@@ -194,6 +196,46 @@ public class PrescriptionController {
 		return drugs;
 	}
 	
+	/*To get the take and frequency list based on selected medications
+	 * 
+	 */
+		@RequestMapping(value="/getTakeAndFrequencyList", method = RequestMethod.GET)
+		@ResponseBody
+		public List<DrugSchedule> getTakeAndFrequencyList(@RequestParam(value="brandname",required=false,defaultValue="-1")String brandname,@RequestParam(value="mode",required=false,defaultValue="-1")String mode)throws Exception{
+
+			logger.debug("In getting frequency list");
+			List<DrugSchedule> schedulename=prescriptionService.getfrequencylist(brandname.replaceAll("'","''"),mode);
+
+			return schedulename;
+
+		}
+
+		
+		/*To get the all the frequency list based on selected medications
+		 * 
+		 */
+		@RequestMapping(value="/getFrequencyListall", method = RequestMethod.GET)
+		@ResponseBody
+		public List<DrugSchedule> getFrequencyListall(@RequestParam(value="brandname",required=false,defaultValue="-1")String brandname,@RequestParam(value="mode",required=false,defaultValue="-1")String mode)throws Exception{
+			logger.debug("In getting all  frequency list");
+			List<DrugSchedule> schedulename=prescriptionService.getfrequencylistall(brandname.replaceAll("'","''"),mode);
+
+			return schedulename;
+
+		}
+
+		/*To get the take list based on selected medications
+		 * 
+		 */
+		@RequestMapping(value="/gettake", method = RequestMethod.GET)
+		@ResponseBody
+		public List<IntakeBean> gettake(@RequestParam(value="brandname",required=false,defaultValue="-1")String brandname)throws Exception{
+			logger.debug("In getting t list");
+			List<IntakeBean> takevalues=prescriptionService.gettake(brandname.replaceAll("'","''"));
+
+			return takevalues;
+
+		}
 	
 	
 }

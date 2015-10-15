@@ -1,8 +1,6 @@
 package com.glenwood.glaceemr.server.application.specifications;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -19,6 +17,8 @@ import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.CurrentMedication;
 import com.glenwood.glaceemr.server.application.models.CurrentMedication_;
+import com.glenwood.glaceemr.server.application.models.DrugSchedule;
+import com.glenwood.glaceemr.server.application.models.DrugSchedule_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.MedStatus;
@@ -280,6 +280,37 @@ public class PrescripitonSpecification {
 			}
 		};
 	}
+	
+	/*
+	 * To get the frequecny list based on selected medication
+	 */
+	public static Specification<DrugSchedule> getfrequencylist(final String brandname, final String mode) {
+		return new Specification<DrugSchedule>() {
+
+			@Override
+			public Predicate toPredicate(Root<DrugSchedule> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				
+				Join<DrugSchedule, Prescription> join1=root.join(DrugSchedule_.presc,JoinType.INNER);
+				Predicate Predicate2;		
+				query.distinct(true);
+				Predicate predicate1=cb.equal(root.get(DrugSchedule_.drugScheduleType),0);
+				query.orderBy(cb.asc(root.get(DrugSchedule_.drugScheduleName)));
+				if(mode.equalsIgnoreCase("getallfrequencylist")){
+					query.where(predicate1);
+					
+				}else{
+					 Predicate2=cb.like((cb.lower(join1.get(Prescription_.rxname))), getLikePattern(brandname));
+					 query.where(predicate1,Predicate2);
+				}
+					 
+				return query.getRestriction();
+				
+			}
+		};
+		
+	}
+	
 
 }
 
