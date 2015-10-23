@@ -27,8 +27,8 @@ public class MedsAdminLog {
 
 	@Id
 	@Column(name="meds_admin_log_id")
-	@GeneratedValue(strategy=GenerationType.SEQUENCE,generator="meds_admin_plan_id")
-	@SequenceGenerator(name="meds_admin_plan_id",sequenceName="meds_admin_plan_id",allocationSize=1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE,generator="meds_admin_log_id")
+	@SequenceGenerator(name="meds_admin_log_id",sequenceName="meds_admin_log_id",allocationSize=1)
 	private Integer medsAdminLogId;
 	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
@@ -40,6 +40,11 @@ public class MedsAdminLog {
 	@JoinColumn(name="meds_admin_log_plan_id",referencedColumnName="meds_admin_plan_id",insertable=false, updatable=false)
 	@JsonBackReference
 	MedsAdminPlan medsAdminPlan;
+	
+	@ManyToOne(cascade=CascadeType.ALL) 
+	@JoinColumn(name="meds_admin_log_admin_category",referencedColumnName="meds_admin_category_id",insertable=false, updatable=false)
+	@JsonManagedReference
+	MedsAdminCategory medsAdminCategory;
 	
 	@Column(name="meds_admin_log_route_id")
 	private Integer medsAdminLogRouteId;
@@ -76,7 +81,13 @@ public class MedsAdminLog {
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="meds_admin_log_deleted_on")
 	private Timestamp medsAdminLogDeletedOn;
-
+	
+	@Column(name="meds_admin_log_admin_category")
+	private Integer medsAdminLogAdminCategory;
+	
+	@Column(name="meds_admin_log_admin_notes")
+	private String medsAdminLogAdminNotes;
+	
 	public Integer getMedsAdminLogId() {
 		return medsAdminLogId;
 	}
@@ -174,6 +185,14 @@ public class MedsAdminLog {
 		this.medsAdminLogDeletedOn = medsAdminLogDeletedOn;
 	}
 
+	public Integer getMedsAdminLogAdminCategory() {
+		return medsAdminLogAdminCategory;
+	}
+
+	public void setMedsAdminLogAdminCategory(Integer medsAdminLogAdminCategory) {
+		this.medsAdminLogAdminCategory = medsAdminLogAdminCategory;
+	}
+
 	public EmployeeProfile getEmpprofile() {
 		return empprofile;
 	}
@@ -190,6 +209,20 @@ public class MedsAdminLog {
 		this.medsAdminPlan = medsAdminPlan;
 	}
 
-	
+	public MedsAdminCategory getMedsAdminCategory() {
+		return medsAdminCategory;
+	}
+
+	public void setMedsAdminCategory(MedsAdminCategory medsAdminCategory) {
+		this.medsAdminCategory = medsAdminCategory;
+	}
+
+	public String getMedsAdminLogAdminNotes() {
+		return medsAdminLogAdminNotes;
+	}
+
+	public void setMedsAdminLogAdminNotes(String medsAdminLogAdminNotes) {
+		this.medsAdminLogAdminNotes = medsAdminLogAdminNotes;
+	}
 	
 }

@@ -17,29 +17,18 @@ import com.glenwood.glaceemr.server.application.models.DrugSchedule;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.IntakeBean;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionBean;
+import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
- 
+
 /**
  * Controller for Prescriptions in GlaceEMR, 
  * contains the methods to get the patient medications and performing different operations on those. 
  * 
  * @author software
- *
- */
-/**
- * @author selvakumar
- *
- */
-/**
- * @author selvakumar
- *
- */
-/**
- * @author selvakumar
  *
  */
 @Api(value = "Prescriptions", description = "contains the methods to get the patient medications and performing different operations on those", consumes="application/json")
@@ -237,5 +226,30 @@ public class PrescriptionController {
 
 		}
 	
+	/**
+	 * To modify the medication administered log notes 
+	 * @param dataToSave
+	 * @throws Exception
+	 */
+	@RequestMapping(value ="/updateMedAdminLogNotes", method = RequestMethod.GET) 
+	@ResponseBody
+	public void updateMedAdministrationLogNotes(@RequestParam(value="modifiedBy",required=false,defaultValue="-1")Integer modifiedBy,
+			@RequestParam(value="logId",required=false,defaultValue="-1")Integer logId,
+			@RequestParam(value="notes",required=false,defaultValue="")String notes)throws Exception{
+		logger.debug("In updateMedAdministrationLogNotes - "+logId+"is going to be modified");
+		prescriptionService.updateMedicationAdminLogNotes(modifiedBy,logId,notes);
+		logger.debug("In updateMedAdministrationLogNotes - "+logId+"got modified");
+	}
 	
+	/**
+	 * To get the medication administration plan shortcuts 
+	 * * @throws Exception
+	 */
+	@RequestMapping(value ="/getMedAdminPlanShortcuts", method = RequestMethod.GET) 
+	@ResponseBody
+	public List getMedAdminPlanShortcuts()throws Exception{
+		logger.debug("In getMedAdminPlanShortcuts");
+		List<MedsAdminPlanShortcut> shortcutsList = prescriptionService.getMedAdminPlanShortcuts();
+		return shortcutsList;
+	}
 }

@@ -93,4 +93,16 @@ public interface PrescriptionService {
 	 * 
 	 */
 	List<IntakeBean> gettake(String brandname);
+	
+	/**
+	 * To modify the administered medication log notes (Currently this is for medication log used by Behavioural health practices).
+	 * @param planId
+	 * @param logId
+	 */
+	void updateMedicationAdminLogNotes(int modifiedBy,int logId,String notes);
+	
+	/**
+	 * To get the medication administration plan shortcuts
+	 */
+	List getMedAdminPlanShortcuts();
 }

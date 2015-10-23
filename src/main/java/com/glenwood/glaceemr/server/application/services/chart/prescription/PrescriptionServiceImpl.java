@@ -22,12 +22,14 @@ import com.glenwood.glaceemr.server.application.models.CurrentMedication;
 import com.glenwood.glaceemr.server.application.models.DrugSchedule;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlan;
+import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
 import com.glenwood.glaceemr.server.application.models.Prescription;
 import com.glenwood.glaceemr.server.application.models.Prescription_;
 import com.glenwood.glaceemr.server.application.repositories.CurrentMedicationRepository;
 import com.glenwood.glaceemr.server.application.repositories.DrugScheduleRepository;
 import com.glenwood.glaceemr.server.application.repositories.MedAdministrationLogRepository;
 import com.glenwood.glaceemr.server.application.repositories.MedAdministrationPlanRepository;
+import com.glenwood.glaceemr.server.application.repositories.MedAdministrationPlanShortcutRepository;
 import com.glenwood.glaceemr.server.application.repositories.PrescriptionRepository;
 import com.glenwood.glaceemr.server.application.specifications.PrescripitonSpecification;
 import com.google.common.base.Optional;
@@ -52,6 +54,9 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	
 	@Autowired
 	MedAdministrationLogRepository medAdminLogRepository;
+	
+	@Autowired
+	MedAdministrationPlanShortcutRepository medAdministrationPlanShortcutRepository;
 	
 	@PersistenceContext
 	EntityManager em;
@@ -115,6 +120,8 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	    boolean isDuplicate = Boolean.parseBoolean(Optional.fromNullable(Strings.emptyToNull(medAdminLogData.get("isDuplicate").toString())).or("false"));
 	    if(isDuplicate) 
 	    	logId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medAdminLogData.get("logId").toString())).or("-1"));
+	    int medAdminCategory = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medAdminLogData.get("selectedAdminCategory").toString())).or("-1"));
+	    String adminNotes = Optional.fromNullable(Strings.emptyToNull(medAdminLogData.get("adminNotes").toString())).or("");
 		MedsAdminLog newAdminLog = new MedsAdminLog();
 		newAdminLog.setMedsAdminLogPatientId(patientId);
 		if(logId!= -1)
@@ -128,6 +135,8 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		newAdminLog.setMedsAdminLogModifiedBy(administeredBy);
 		newAdminLog.setMedsAdminLogModifiedDate(medAdminLogRepository.findCurrentTimeStamp());
 		newAdminLog.setMedsAdminLogIsDeleted(false);
+		newAdminLog.setMedsAdminLogAdminCategory(medAdminCategory);
+		newAdminLog.setMedsAdminLogAdminNotes(adminNotes);
 		MedsAdminLog savedLog = medAdminLogRepository.saveAndFlush(newAdminLog);
 		if(logId==-1) {
 			int logRouteId = savedLog.getMedsAdminLogId();
@@ -324,6 +333,27 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		pattern.append(searchTerm.toLowerCase());
 		pattern.append("%");
 		return pattern.toString();
+	}
+	
+	/**
+	 * To modify the administered medication log notes
+	 */
+	@Override
+	public void updateMedicationAdminLogNotes(int modifiedBy, int logId,String notes) {
+		MedsAdminLog adminLog = medAdminLogRepository.findOne(logId);
+		adminLog.setMedsAdminLogModifiedDate(medAdminLogRepository.findCurrentTimeStamp());
+		adminLog.setMedsAdminLogModifiedBy(modifiedBy);
+		adminLog.setMedsAdminLogAdminNotes(notes);
+		medAdminLogRepository.saveAndFlush(adminLog);
+	}
+
+	/**
+	 * To get the medication administration plan shortcuts
+	 */
+	@Override
+	public List<MedsAdminPlanShortcut> getMedAdminPlanShortcuts() {
+		List<MedsAdminPlanShortcut> shortcutsList = medAdministrationPlanShortcutRepository.findAll();
+		return shortcutsList;
 	}
 	
 }
