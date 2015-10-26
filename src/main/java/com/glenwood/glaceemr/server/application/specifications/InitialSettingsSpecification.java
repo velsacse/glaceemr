@@ -1,0 +1,49 @@
+package com.glenwood.glaceemr.server.application.specifications;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import com.glenwood.glaceemr.server.application.models.InitialSettings;
+import com.glenwood.glaceemr.server.application.models.InitialSettings_;
+
+public class InitialSettingsSpecification {
+	/**
+	 * Specification to get the list based on id
+	 * @param id
+	 * @return Specification<InitialSettings>
+	 */
+	public static Specification<InitialSettings> optionId(final Integer id)
+	{
+		return new Specification<InitialSettings>() {
+
+			@Override
+			public Predicate toPredicate(Root<InitialSettings> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate optionId = cb.equal(root.get(InitialSettings_.initialSettingsOptionId),id);
+				return optionId;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to get the list based on option name
+	 * @param optionName
+	 * @return Specification<InitialSettings>
+	 */
+	public static Specification<InitialSettings> optionName(final String optionName)
+	{
+		return new Specification<InitialSettings>() {
+
+			@Override
+			public Predicate toPredicate(Root<InitialSettings> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate predicate = cb.like(root.get(InitialSettings_.initialSettingsOptionName),"%"+optionName+"%");
+				return predicate;
+			}
+		};
+	}
+}

@@ -55,6 +55,25 @@ public class EmployeeSpecification {
 
 		};
 	}
+	
+	/**
+	 * This specification used to return employee details based on user id
+	 * @param userId
+	 * @return
+	 */
+	public static Specification<EmployeeProfile> getUserDetailsByUserId(final int userId){
+		return new Specification<EmployeeProfile>() {
+
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate predicate=query.where(cb.equal(root.get(EmployeeProfile_.empProfileEmpid), userId)).getRestriction();	
+				return predicate;
+			}
+
+		};
+	}
+
 
 
 }

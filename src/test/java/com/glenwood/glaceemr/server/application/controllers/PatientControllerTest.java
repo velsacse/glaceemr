@@ -58,7 +58,7 @@ public class PatientControllerTest {
         param("lastName", "Smith").when().get("/PatientController.Action/ByLastName").then().
                 statusCode(HttpServletResponse.SC_OK).
                 contentType("application/json").
-                body(equalTo("[{\"patientId\":1,\"patientLName\":\"Smith\",\"patientFName\":\"Theodre\",\"patientGender\":0,\"patientDob\":\"12/01/1956 12:00 AM\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null},{\"patientId\":2,\"patientLName\":\"Smith\",\"patientFName\":\"Joe\",\"patientGender\":0,\"patientDob\":\"09/03/2006 12:00 AM\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null},{\"patientId\":4,\"patientLName\":\"Smith\",\"patientFName\":\"test1\",\"patientGender\":1,\"patientDob\":\"04/12/1980 12:00 AM\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null},{\"patientId\":7,\"patientLName\":\"Smith\",\"patientFName\":\"Kishore\",\"patientGender\":0,\"patientDob\":\"03/26/2015 12:00 AM\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null}]"))
+                body(equalTo("[{\"patientId\":1,\"patientLName\":\"Smith\",\"patientFName\":\"Theodre\",\"patientGender\":0,\"patientDob\":\"12/01/1956 00:00:00 EST\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null},{\"patientId\":2,\"patientLName\":\"Smith\",\"patientFName\":\"Joe\",\"patientGender\":0,\"patientDob\":\"09/03/2006 00:00:00 EDT\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null},{\"patientId\":4,\"patientLName\":\"Smith\",\"patientFName\":\"test1\",\"patientGender\":1,\"patientDob\":\"04/12/1980 00:00:00 EST\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null},{\"patientId\":7,\"patientLName\":\"Smith\",\"patientFName\":\"Kishore\",\"patientGender\":0,\"patientDob\":\"03/26/2015 00:00:00 EDT\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null}]"))
                .body ("size()", equalTo (4))
                 .body ("[1].patientId",equalTo (2)).
                 body("patientId", hasSize(4));
@@ -68,7 +68,7 @@ public class PatientControllerTest {
 	public void getPatientsBylastNameAndDobTest() throws Exception {
 		given(). param("lastName", "Smith").param("dob", "1980-04-12").when().get("/PatientController.Action/ByLastNameAndDob").then().
         statusCode(HttpServletResponse.SC_OK).
-        contentType("application/json").body(equalTo("[{\"patientId\":4,\"patientLName\":\"Smith\",\"patientFName\":\"test1\",\"patientGender\":1,\"patientDob\":\"04/12/1980 12:00 AM\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null}]"));
+        contentType("application/json").body(equalTo("[{\"patientId\":4,\"patientLName\":\"Smith\",\"patientFName\":\"test1\",\"patientGender\":1,\"patientDob\":\"04/12/1980 00:00:00 EST\",\"isActive\":true,\"encounterTable\":null,\"patientInsuranceTable\":null,\"pAddressTable\":null}]"));
 	}
 	
 	@Test			
