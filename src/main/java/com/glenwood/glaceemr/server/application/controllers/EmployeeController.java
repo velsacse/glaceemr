@@ -18,7 +18,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponses;
 import com.wordnik.swagger.annotations.ApiResponse;
 
-@Api(value = "/Employee.Action", description = "To deal with employee details.", consumes="application/json")
+@Api(value = "/Employee", description = "To deal with employee details.", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="Employee.Action")

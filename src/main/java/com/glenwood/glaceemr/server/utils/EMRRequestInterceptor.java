@@ -44,8 +44,9 @@ public class EMRRequestInterceptor implements HandlerInterceptor{
 	
 		System.out.println(">>>>In EMR Requestor>>>>>"+TennantContextHolder.getTennantId());
 		
-		String[] splitURl = request.getRequestURI().split(request.getServletPath());
+		String[] splitURl = request.getRequestURI().split(request.getServletPath()+"/");
 		String formattedURl= splitURl[1].substring(1, splitURl[1].length());
+		formattedURl="/"+formattedURl; 
 		if(formattedURl.contains("/")){
 			String actionName = formattedURl.substring(0, formattedURl.indexOf("/")).toLowerCase();
 			setLoginParameterInResponse(actionName);

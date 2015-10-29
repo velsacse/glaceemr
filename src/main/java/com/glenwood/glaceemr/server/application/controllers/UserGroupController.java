@@ -23,7 +23,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * Controller for UserGroup module. It has one main entities, <b> UserGroup </b>.
  * @author Jeyanthkumar S
  */
-@Api(value = "/UserGroup.Action", description = "To get list of UserGroup and also to create,update and delete the UserGroup", consumes="application/json")
+@Api(value = "/UserGroup", description = "To get list of UserGroup and also to create,update and delete the UserGroup", consumes="application/json")
 @RestController
 @Transactional 
 @RequestMapping(value="UserGroup.Action")
