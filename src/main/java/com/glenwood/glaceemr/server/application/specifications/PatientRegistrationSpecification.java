@@ -82,5 +82,23 @@ public class PatientRegistrationSpecification {
 			}
 		};
 	}
+	
+	/**
+	 * Get patients by patient id
+	 * @param patient id
+	 * @return String is a predicate  
+	 */
+	public static Specification<PatientRegistration> PatientId(final String patientId)
+	{
+		return new Specification<PatientRegistration>() {
+			
+			@Override
+			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate PatientId = cb.equal(root.get(PatientRegistration_.patRegId), patientId);
+				return PatientId;
+			}
+		};
+	}
 
 }

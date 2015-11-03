@@ -31,5 +31,23 @@ public class UserGroupSpecification {
 		};
 
 	}
+	
+	/**
+	 * 
+	 * @param userId 
+	 * @return  condition to fetch the user group details based on the user id
+	 */
+	public static Specification<UserGroup> groupDetailsByUserId(final Integer userId){
+		return new Specification<UserGroup>() {
+
+			@Override
+			public Predicate toPredicate(Root<UserGroup> root,
+					CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				Predicate predicate=cq.where(cb.equal(root.get(UserGroup_.userId),userId)).getRestriction();
+				return predicate;
+			}
+		};
+
+	}
 
 }

@@ -25,8 +25,9 @@ public class PatientRegistration {
 	
 	@Column(name="patient_registration_first_name")
 	public String ptFName;
-	
 
+	@Column(name="patient_registration_mid_initial")
+	private String patientRegistrationMidInitial;
 	
 	@Column(name="patient_registration_active")
 	public boolean ptIsActive;
@@ -34,13 +35,14 @@ public class PatientRegistration {
 	@Column(name="patient_registration_accountno")
 	public String accno;
 	
-	
-	
 	@Column(name="patient_registration_dob")
 	public Date dob;
 
 	@Column(name="patient_registration_accttype")
 	private Integer ptRegAccType;
+
+	@Column(name="patient_registration_phone_no")
+	private String patientRegistrationPhoneNo;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonBackReference
@@ -69,6 +71,14 @@ public class PatientRegistration {
 
 	public void setPtFName(String ptFName) {
 		this.ptFName = ptFName;
+	}
+
+	public String getPatientRegistrationMidInitial() {
+		return patientRegistrationMidInitial;
+	}
+
+	public void setPatientRegistrationMidInitial(String patientRegistrationMidInitial) {
+		this.patientRegistrationMidInitial = patientRegistrationMidInitial;
 	}
 
 	public boolean isPtIsActive() {
@@ -109,6 +119,14 @@ public class PatientRegistration {
 
 	public void setPtAccType(AccountType ptAccType) {
 		this.ptAccType = ptAccType;
+	}
+
+	public String getPatientRegistrationPhoneNo() {
+		return patientRegistrationPhoneNo;
+	}
+
+	public void setPatientRegistrationPhoneNo(String patientRegistrationPhoneNo) {
+		this.patientRegistrationPhoneNo = patientRegistrationPhoneNo;
 	}
 	
 	
