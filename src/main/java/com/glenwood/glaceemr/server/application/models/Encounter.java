@@ -5,9 +5,12 @@ import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -19,6 +22,8 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class Encounter {
 
 	@Id
+	@SequenceGenerator(name = "sequence", sequenceName = "encounter_id_seq")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
 	@Column(name="encounter_id")
 	private Integer encounterId;
 
@@ -204,6 +209,11 @@ public class Encounter {
 	@JsonManagedReference
 	@JoinColumn(name="encounter_visittype",referencedColumnName="categoryid",insertable=false,updatable=false)
     PatientEncounterType patientEncounterType;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="encounter_chartid",referencedColumnName="chart_id",insertable=false,updatable=false)
+    Chart encounterChartTable;
 	
 
 	public Chart getChart() {
