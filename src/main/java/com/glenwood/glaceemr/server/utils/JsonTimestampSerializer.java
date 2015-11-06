@@ -33,7 +33,7 @@ public void serialize(Timestamp timestamp, JsonGenerator generator,
 	/*String date[] = timestamp.toString().split("\\.");
 	gen.writeString(date[0].toString());*/
 	
-	SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss z");
+	SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy HH:mm a z");
 	generator.writeString(formatter.format(timestamp));
 }
  
