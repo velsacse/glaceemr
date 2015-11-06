@@ -50,6 +50,7 @@ import com.glenwood.glaceemr.server.application.repositories.AlertInboxRepositor
 import com.glenwood.glaceemr.server.application.repositories.EmployeeProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.specifications.AlertArchiveSpecification;
+import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
 import com.glenwood.glaceemr.server.application.specifications.AlertInboxSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.google.common.base.Optional;
@@ -552,7 +553,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 				joinAcAe.get(AlertEvent_.alertEventId).alias("eventId"),
 				rootAlCate.get(AlertCategory_.alertCategoryId),
 				joinAeChart.get(Chart_.chart_id),
-				joinChartPatReg.get(PatientRegistration_.accno).alias("accNo"),
+				joinChartPatReg.get(PatientRegistration_.patientRegistrationAccountno).alias("accNo"),
 				joinAcAe.get(AlertEvent_.alertEventPatientName).alias("patientname"),
 				builder.coalesce(joinAcAeR.get(Room_.roomName),"-"),
 				rootAlCate.get(AlertCategory_.alertCategoryName),
@@ -644,7 +645,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 				joinAcAe.get(AlertEvent_.alertEventId).alias("eventId"),
 				rootAlCate.get(AlertCategory_.alertCategoryId),
 				joinAeChart.get(Chart_.chart_id),
-				joinChartPatReg.get(PatientRegistration_.accno).alias("accNo"),
+				joinChartPatReg.get(PatientRegistration_.patientRegistrationAccountno).alias("accNo"),
 				joinAcAe.get(AlertEvent_.alertEventPatientName).alias("patientname"),
 				builder.coalesce(joinAcAeR.get(Room_.roomName),"-"),
 				rootAlCate.get(AlertCategory_.alertCategoryName),
@@ -998,8 +999,8 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		PatientRegistration patient=patientRegistrationRepository.findOne(PatientRegistrationSpecification.PatientId(patientId+""));
 		
 
-		lastName=Optional.fromNullable(patient.getPtLName()).or(" ");
-		firstName=Optional.fromNullable(patient.getPtFName()).or(" ");
+		lastName=Optional.fromNullable(patient.getPatientRegistrationLastName()).or(" ");
+		firstName=Optional.fromNullable(patient.getPatientRegistrationFirstName()).or(" ");
 		midInitial=Optional.fromNullable(patient.getPatientRegistrationMidInitial()).or(" ");
 		
 		List<AlertEvent> alertEventList=null;
@@ -1096,5 +1097,23 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		}
 		
 		return alertEventList;
+	}
+	
+	@Override
+	public AlertEvent getAlertId(Integer patientId, Integer encounterId, Integer refId) {
+		AlertEvent alertEvent = alertInboxRepository.findOne(AlertInboxSpecification.getAlertData(patientId, encounterId, refId));
+		return alertEvent;
+	}
+
+	@Override
+	public Integer getCategoryId(Integer section, Integer actionMap) {
+		AlertCategory alertCategory = alertCategoryRepository.findOne(AlertCategorySpecification.checkSectionAndActionmap(section,actionMap));
+		return alertCategory.getAlertCategoryId();
+	}
+
+	@Override
+	public Integer getAlertCategoryId(Integer actionMap, Integer catType) {
+		AlertCategory alertCategory = alertCategoryRepository.findOne(AlertCategorySpecification.checkTypeAndActionmap(actionMap, catType));
+		return alertCategory.getAlertCategoryId();
 	}
 }

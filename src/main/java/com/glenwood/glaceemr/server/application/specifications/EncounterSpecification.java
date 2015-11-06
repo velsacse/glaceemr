@@ -5,9 +5,12 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.EncounterPlan;
+import com.glenwood.glaceemr.server.application.models.EncounterPlan_;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
 
 
@@ -98,6 +101,22 @@ public class EncounterSpecification {
 					CriteriaBuilder cb) {
 				Predicate pred = root.get(Encounter_.encounterId).in((Object[])encounterIds);
 				return pred;
+			}
+		};
+	}
+	
+	/**
+	 * 
+	 * get Encounter Plan by encounter Id 
+	 * 
+	 * @param encounterId
+	 * @return
+	 */
+	public static Specification<EncounterPlan> getEncounterPlanByEncId(final Integer encounterId) {
+		return new Specification<EncounterPlan>() {
+			@Override
+			public Predicate toPredicate(Root<EncounterPlan> root, CriteriaQuery<?> query,CriteriaBuilder cb) {
+				return cb.equal(root.get(EncounterPlan_.encounterid),encounterId);
 			}
 		};
 	}

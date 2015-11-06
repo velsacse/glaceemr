@@ -133,4 +133,19 @@ public class AlertInboxSpecification {
 			}
 		};
 	}
+	
+	public static Specification<AlertEvent> getAlertData(final Integer patientId, final Integer encounterId, final Integer refId) {
+		return new Specification<AlertEvent>() {
+
+			@Override
+			public Predicate toPredicate(Root<AlertEvent> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate checkPatientId = cb.equal(root.get(AlertEvent_.alertEventPatientId), patientId);
+				Predicate checkEncounterId = cb.equal(root.get(AlertEvent_.alertEventEncounterId), encounterId);
+				Predicate checkRefId = cb.equal(root.get(AlertEvent_.alertEventRefId), refId);
+				Predicate checkStatus = cb.equal(root.get(AlertEvent_.alertEventStatus), 1);
+				return cb.and(checkPatientId, checkEncounterId, checkRefId, checkStatus);
+			}
+		};
+	}
 }

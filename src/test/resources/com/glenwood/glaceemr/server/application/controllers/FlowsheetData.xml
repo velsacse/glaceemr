@@ -1,0 +1,13 @@
+<dataset>
+    <flowsheet_type flowsheet_type_id="1" flowsheet_type_name="Preventative Management" flowsheet_type_isactive="true"/>
+	<flowsheet_type flowsheet_type_id="2" flowsheet_type_name="Disease Management" flowsheet_type_isactive="true"/>   
+	<flowsheet_type flowsheet_type_id="100" flowsheet_type_name="Prenatal Flow Sheet" flowsheet_type_isactive="true"/>
+	<flowsheet_type flowsheet_type_id="5" flowsheet_type_name="Lab Flow Sheet" flowsheet_type_isactive="true"/>	
+	
+	<flowsheet flowsheet_id="56" flowsheet_name="Annual Wellness Visit" flowsheet_type="1" flowsheet_isactive="true"/>
+	<flowsheet flowsheet_id="57" flowsheet_name="Coumadin/PT/INR" flowsheet_type="1" flowsheet_isactive="true"/>
+	<flowsheet flowsheet_id="58" flowsheet_name="Hypertension" flowsheet_type="2" flowsheet_isactive="true"/>
+	<flowsheet flowsheet_id="62" flowsheet_name="Asthma Management" flowsheet_type="2" flowsheet_isactive="false"/>
+	<flowsheet flowsheet_id="2" flowsheet_name="Diabetes Mellitus" flowsheet_type="2" flowsheet_isactive="true"/>
+	<flowsheet flowsheet_id="1" flowsheet_name="Preventative Management" flowsheet_type="1" flowsheet_isactive="false"/>
+</dataset>

@@ -7,6 +7,8 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.glenwood.glaceemr.server.application.models.H068;
+import com.glenwood.glaceemr.server.application.models.H068_;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InitialSettings_;
 
@@ -25,6 +27,24 @@ public class InitialSettingsSpecification {
 					CriteriaBuilder cb) {
 				Predicate optionId = cb.equal(root.get(InitialSettings_.initialSettingsOptionId),id);
 				return optionId;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to get the list of status
+	 * @param id
+	 * @return Specification<H068>
+	 */
+	public static Specification<H068> getIdType(final Integer type)
+	{
+		return new Specification<H068>() {
+
+			@Override
+			public Predicate toPredicate(Root<H068> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate typeId = cb.equal(root.get(H068_.h068005),type);
+				return typeId;
 			}
 		};
 	}

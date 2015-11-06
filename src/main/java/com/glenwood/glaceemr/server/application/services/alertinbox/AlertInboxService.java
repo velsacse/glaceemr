@@ -130,4 +130,10 @@ public interface AlertInboxService {
 	 * @return					List of alerts.
 	 */
 	List<AlertEvent> alertByEncounter(List<Integer> encounterIdList);
+	
+	AlertEvent getAlertId(Integer patientId, Integer labEncounterId, Integer refId);
+	
+	Integer getCategoryId(Integer section, Integer actionMap);
+
+	Integer getAlertCategoryId(Integer actionMap, Integer catType);
 }

@@ -59,6 +59,11 @@ public class Prescription {
 	@JsonManagedReference
 	List<MedsAdminPlan> medsAdminPlan;
 	
+	 @ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+     @JoinColumn(name="doc_presc_ndc_code",referencedColumnName="pkg_product_id",insertable=false, updatable=false)
+     @JsonManagedReference
+     NdcPkgProduct ndcPkgProduct;
+	
 	public Encounter getEncounter() {
 		return encounter;
 	}

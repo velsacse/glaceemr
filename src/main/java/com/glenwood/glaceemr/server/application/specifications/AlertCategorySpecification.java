@@ -48,4 +48,49 @@ public class AlertCategorySpecification {
 		};
 		
 	}
+	
+	/**
+	 * Method to check category type and section
+	 * @param catType
+	 * @return
+	 */
+	public static Specification<AlertCategory> getAlertCatByType(final int catType) {
+		return new Specification<AlertCategory>() {
+
+			@Override
+			public Predicate toPredicate(Root<AlertCategory> root,
+					CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				Predicate checkType = cb.equal(root.get(AlertCategory_.alertCategoryType),catType);
+				Predicate checkSection = cb.equal(root.get(AlertCategory_.alertCategorySection),4);
+				return cb.and(checkType, checkSection);
+			}
+		};
+	}
+
+	public static Specification<AlertCategory> checkSectionAndActionmap(final Integer section, final Integer actionMap) {
+		return new Specification<AlertCategory>() {
+
+			@Override
+			public Predicate toPredicate(Root<AlertCategory> root,
+					CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				Predicate checkSection = cb.equal(root.get(AlertCategory_.alertCategorySection),section);
+				Predicate checkActionMap = cb.equal(root.get(AlertCategory_.alertCategoryActionMap),actionMap);
+				return cb.and(checkActionMap, checkSection);
+			}
+		};
+	}
+
+	public static Specification<AlertCategory> checkTypeAndActionmap(final Integer actionMap, final Integer catType) {
+		return new Specification<AlertCategory>() {
+
+			@Override
+			public Predicate toPredicate(Root<AlertCategory> root,
+					CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				Predicate checkSection = cb.equal(root.get(AlertCategory_.alertCategorySection),4);
+				Predicate checkCatType = cb.equal(root.get(AlertCategory_.alertCategoryType),catType);
+				Predicate checkActionMap = cb.equal(root.get(AlertCategory_.alertCategoryActionMap),actionMap);
+				return cb.and(checkActionMap, checkSection, checkCatType);
+			}
+		};
+	}
 }

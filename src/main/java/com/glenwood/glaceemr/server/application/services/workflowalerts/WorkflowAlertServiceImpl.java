@@ -250,9 +250,9 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 				,builder.coalesce(roomIdJoin.get(Room_.roomName),"-1")
 				,builder.coalesce(statusNameJoin.get(AlertCategory_.alertCategoryName),"-")
 				,builder.coalesce(statusNameJoin.get(AlertCategory_.alertCategoryUrl),"-")
-				,builder.concat(builder.coalesce(patientIdJoin.get(PatientRegistration_.ptLName),builder.literal(" ")),
+				,builder.concat(builder.coalesce(patientIdJoin.get(PatientRegistration_.patientRegistrationLastName),builder.literal(" ")),
 						builder.concat(builder.literal(", "), 
-								builder.concat(builder.coalesce(patientIdJoin.get(PatientRegistration_.ptFName),builder.literal(" ")), 
+								builder.concat(builder.coalesce(patientIdJoin.get(PatientRegistration_.patientRegistrationFirstName),builder.literal(" ")), 
 										builder.concat(builder.literal(" "), builder.coalesce(patientIdJoin.get(PatientRegistration_.patientRegistrationMidInitial),builder.literal(" "))))))			//Lastname, Firstname MidInitial
 				))
 				.where(builder.equal(root.get(Workflow_.workflowIsactive), true), builder.and(restrictions));
@@ -333,9 +333,9 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 				,builder.coalesce(roomIdJoin.get(Room_.roomName),"-1")
 				,builder.coalesce(statusNameJoin.get(AlertCategory_.alertCategoryName),"-")
 				,builder.coalesce(statusNameJoin.get(AlertCategory_.alertCategoryUrl),"-")
-				,builder.concat(builder.coalesce(patientIdJoin.get(PatientRegistration_.ptLName),builder.literal(" ")),
+				,builder.concat(builder.coalesce(patientIdJoin.get(PatientRegistration_.patientRegistrationLastName),builder.literal(" ")),
 						builder.concat(builder.literal(", "), 
-								builder.concat(builder.coalesce(patientIdJoin.get(PatientRegistration_.ptFName),builder.literal(" ")), 
+								builder.concat(builder.coalesce(patientIdJoin.get(PatientRegistration_.patientRegistrationFirstName),builder.literal(" ")), 
 										builder.concat(builder.literal(" "), builder.coalesce(patientIdJoin.get(PatientRegistration_.patientRegistrationMidInitial),builder.literal(" "))))))			//Lastname, Firstname MidInitial
 				))
 				.where(builder.equal(root.get(Workflow_.workflowIsactive), true), builder.and(restrictions))

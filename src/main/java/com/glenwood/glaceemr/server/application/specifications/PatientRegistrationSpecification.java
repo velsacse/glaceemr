@@ -23,7 +23,7 @@ public class PatientRegistrationSpecification {
 			@Override
 			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate PatientByLastName = cb.like(cb.upper(root.get(PatientRegistration_.ptLName)),lastName.toUpperCase()+"%");
+				Predicate PatientByLastName = cb.like(cb.upper(root.get(PatientRegistration_.patientRegistrationLastName)),lastName.toUpperCase()+"%");
 				return PatientByLastName;
 			}
 		};
@@ -41,7 +41,7 @@ public class PatientRegistrationSpecification {
 			@Override
 			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate PatientIsActive = cb.equal(root.get(PatientRegistration_.ptIsActive),isActive);
+				Predicate PatientIsActive = cb.equal(root.get(PatientRegistration_.patientRegistrationActive),isActive);
 				return PatientIsActive;
 			}
 		};
@@ -59,7 +59,7 @@ public class PatientRegistrationSpecification {
 			@Override
 			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate PatientByFirstName = cb.like(cb.upper(root.get(PatientRegistration_.ptFName)),firstName.toUpperCase()+"%");
+				Predicate PatientByFirstName = cb.like(cb.upper(root.get(PatientRegistration_.patientRegistrationFirstName)),firstName.toUpperCase()+"%");
 				return PatientByFirstName;
 			}
 		};
@@ -77,7 +77,7 @@ public class PatientRegistrationSpecification {
 			@Override
 			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate PatientByAccountNumber = cb.like(cb.upper(root.get(PatientRegistration_.accno)),accountNumber.toUpperCase()+"%");
+				Predicate PatientByAccountNumber = cb.like(cb.upper(root.get(PatientRegistration_.patientRegistrationAccountno)),accountNumber.toUpperCase()+"%");
 				return PatientByAccountNumber;
 			}
 		};
@@ -95,7 +95,7 @@ public class PatientRegistrationSpecification {
 			@Override
 			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate PatientId = cb.equal(root.get(PatientRegistration_.patRegId), patientId);
+				Predicate PatientId = cb.equal(root.get(PatientRegistration_.patientRegistrationId), patientId);
 				return PatientId;
 			}
 		};

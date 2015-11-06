@@ -1,7 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
-
 import java.sql.Date;
 
 import javax.persistence.Column;
@@ -12,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -92,6 +92,10 @@ public class ProblemList {
 	@JoinColumn(name="problem_list_coding_systemid",referencedColumnName="coding_system_oid",insertable=false,updatable=false)
 	CodingSystems codingSystems;
 	
+	@ManyToOne
+	@JoinColumn(name="problem_list_dx_code", referencedColumnName="flowsheet_dx_code", insertable=false, updatable=false)
+	@JsonBackReference
+	FlowsheetDx flowsheetDxTable;
 	
 	public Integer getProblemListId() {
 		return problemListId;

@@ -3,13 +3,19 @@ package com.glenwood.glaceemr.server.application.specifications;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 
 
 public class EncounterEntitySpecification {
@@ -99,6 +105,41 @@ public class EncounterEntitySpecification {
 					CriteriaBuilder cb) {
 				Predicate pred = root.get(Encounter_.encounterId).in((Object[])encounterIds);
 				return pred;
+			}
+		};
+	}
+	
+	/**
+	 * Get Encounter Details based on Encounter Id
+	 * 
+	 * @param encounterId
+	 * 
+	 */
+	public static Specification<Encounter> getEncounterByEncId(final Integer encounterId) {
+		return new Specification<Encounter>() {
+			@Override
+			public Predicate toPredicate(Root<Encounter> root, CriteriaQuery<?> query,CriteriaBuilder cb) {
+				return cb.equal(root.get(Encounter_.encounterId),encounterId);
+			}
+		};
+	}
+	
+	
+	/**
+	 * Get Encounter Details based on patient Id
+	 * 
+	 * @param encounterId
+	 * 
+	 */
+	public static Specification<Encounter> getEncounterByPatId(final Integer patientId,final Integer encounterId) {
+		return new Specification<Encounter>() {
+			@Override
+			public Predicate toPredicate(Root<Encounter> root, CriteriaQuery<?> query,CriteriaBuilder cb) {
+				Join<Encounter, Chart> paramJoin=root.join(Encounter_.chart,JoinType.INNER);
+				Join<Chart, PatientRegistration> regJoin=paramJoin.join(Chart_.patientRegistrationTable);
+				regJoin.on(cb.equal(regJoin.get(PatientRegistration_.patientRegistrationId),patientId));
+				query.orderBy(cb.desc(root.get(Encounter_.encounterId)));
+				return cb.notEqual(root.get(Encounter_.encounterId), encounterId);
 			}
 		};
 	}

@@ -4,10 +4,12 @@ import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
+import com.glenwood.glaceemr.server.application.models.CoreClassGendrug;
+import com.glenwood.glaceemr.server.application.models.CoreClassGendrug_;
+import com.glenwood.glaceemr.server.application.models.CoreClassHierarchy;
+import com.glenwood.glaceemr.server.application.models.CoreClassHierarchy_;
+import com.glenwood.glaceemr.server.application.models.CoreGenproduct;
+import com.glenwood.glaceemr.server.application.models.CoreGenproduct_;
 import com.glenwood.glaceemr.server.application.models.CurrentMedication;
 import com.glenwood.glaceemr.server.application.models.CurrentMedication_;
 import com.glenwood.glaceemr.server.application.models.DrugSchedule;
@@ -27,6 +35,8 @@ import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog_;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlan;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlan_;
+import com.glenwood.glaceemr.server.application.models.NdcPkgProduct;
+import com.glenwood.glaceemr.server.application.models.NdcPkgProduct_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.Prescription;
 import com.glenwood.glaceemr.server.application.models.Prescription_;
@@ -310,8 +320,81 @@ public class PrescripitonSpecification {
 		};
 		
 	}
-	
+	public static Specification<Prescription> getactivemedwithclassIdpresc( final Integer patientid,final String classId,final Integer encounterId,final Encounter encounterEntity) {
+		return new Specification<Prescription>() {
+			@Override
+			public Predicate toPredicate(Root<Prescription> root, CriteriaQuery<?> cq,
+					CriteriaBuilder cb) {
+				Join<Prescription,Encounter> currjoin1=root.join(Prescription_.encounter,JoinType.INNER);
+				Join<Prescription,MedStatus> currjoin=root.join(Prescription_.medstatus,JoinType.INNER);
+				currjoin1.join(Encounter_.chart, JoinType.INNER);
+				Join<Prescription, NdcPkgProduct> pkgjoin=root.join(Prescription_.ndcPkgProduct,JoinType.INNER);
+				Join<NdcPkgProduct, CoreGenproduct> corejoin=pkgjoin.join(NdcPkgProduct_.coregenproduct,JoinType.INNER);
+				Join<CoreGenproduct, CoreClassGendrug> classjoin=corejoin.join(CoreGenproduct_.coreclassgendrug,JoinType.INNER);
+				Join<CoreClassGendrug, CoreClassHierarchy> hierarchyjon=classjoin.join(CoreClassGendrug_.coreClassHierarchyTable,JoinType.INNER);
+				String likePattern = getLikePattern("active");
+				Predicate patientId=cb.equal(root.get(Prescription_.docPrescPatientId), patientid);
+				Predicate isactive=cb.equal(root.get(Prescription_.docPrescIsActive),true);
+				Predicate ismedsup=cb.equal(root.get(Prescription_.docPrescIsMedSup),false);
+				Predicate medstatus=cb.like(cb.lower(currjoin.get(MedStatus_.medStatusGroup)),likePattern);
+				Predicate classIdPres=cb.equal(hierarchyjon.get(CoreClassHierarchy_.parentClassId), classId);
+				root.fetch(Prescription_.medstatus,JoinType.INNER);
+				root.fetch(Prescription_.encounter,JoinType.INNER);
+				if((encounterId!=-1)&&(encounterEntity.getEncounterStatus()==3)){
+					Predicate encounterDatePred=cb.lessThanOrEqualTo(root.get(Prescription_.docPrescOrderedDate), encounterEntity.getEncounterDate());
+					cq.where(cb.and(patientId, isactive,medstatus,ismedsup,classIdPres,encounterDatePred));
+				}else{
+					cq.where(cb.and(patientId, isactive,medstatus,ismedsup,classIdPres));
+				}
+				return cq.getRestriction();
+			}
+		};
+	}
+	/**
+	 * Specification to get the list of distinct drug classes
+	 * @param isActive
+	 * @return Specification<CoreClassHierarchy>
+	 */
+	public static Specification<CoreClassHierarchy> drugClasses()
+	{
+		return new Specification<CoreClassHierarchy>() {
 
+			@Override
+			public Predicate toPredicate(Root<CoreClassHierarchy> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Subquery<String> subquery = query.subquery(String.class);
+				Root<CoreClassHierarchy> subqueryFrom = subquery.from(CoreClassHierarchy.class);
+				Expression<String> subQExp=subqueryFrom.get(CoreClassHierarchy_.parentClassId);
+				subquery.select(subQExp);
+				Join<CoreClassHierarchy,CoreClassGendrug> classJoin=root.join("coreClassGendrugTable",JoinType.LEFT);
+				classJoin.join("coreGendrugTable",JoinType.LEFT);
+				query.distinct(true);
+				query.orderBy(cb.asc(root.get(CoreClassHierarchy_.displayName)));
+				Predicate drugClasses = cb.in(root.get(CoreClassHierarchy_.classId)).value(subquery);
+				return drugClasses;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to get the med status
+	 * @param isActive
+	 * @return Specification<MedStatus>
+	 */
+	public static Specification<MedStatus> medStatus(final Integer medStatusId)
+	{
+		return new Specification<MedStatus>() {
+
+			@Override
+			public Predicate toPredicate(Root<MedStatus> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate isActive=cb.equal(root.get(MedStatus_.medStatusIsActive), true); 
+				Predicate medStatusPred = cb.equal(root.get(MedStatus_.medStatusId),medStatusId);
+				Predicate medStatus=cb.and(isActive,medStatusPred);
+				return medStatus;
+			}
+		};
+	}
 }
 
 
