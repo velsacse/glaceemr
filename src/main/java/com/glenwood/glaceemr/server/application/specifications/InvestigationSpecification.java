@@ -171,7 +171,8 @@ public class InvestigationSpecification {
 			@Override
 			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				query.orderBy(cb.desc(cb.coalesce(root.get(LabEntries_.labEntriesPerfOn),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))));
+				query.orderBy(cb.desc(cb.coalesce(root.get(LabEntries_.labEntriesPerfOn),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))),
+						cb.desc(root.get(LabEntries_.labEntriesTestdetailId)));
 				Predicate testIdPred=root.get(LabEntries_.labEntriesTestId).in((Object[])testId);
 				Predicate testStatusGreaterPred=cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus),statusGreaterThan);
 				Predicate testStatusNotEqualPred=cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),statusNotEqual);
@@ -204,7 +205,8 @@ public class InvestigationSpecification {
 			@Override
 			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				query.orderBy(cb.desc(cb.coalesce(root.get(LabEntries_.labEntriesPerfOn),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))));
+				query.orderBy(cb.desc(cb.coalesce(root.get(LabEntries_.labEntriesPerfOn),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))),
+						cb.desc(root.get(LabEntries_.labEntriesTestdetailId)));
 				Predicate testIdPred=root.get(LabEntries_.labEntriesTestId).in((Object[])testId);
 				Predicate testStatusGreaterPred=cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus),statusGreaterThan);
 				Predicate testStatusNotEqualPred=cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),statusNotEqual);

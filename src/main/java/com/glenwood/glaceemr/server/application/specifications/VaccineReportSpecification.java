@@ -36,7 +36,8 @@ public class VaccineReportSpecification {
 			public Predicate toPredicate(Root<VaccineReport> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				Join<VaccineReport,LabDescription> join=root.join("labDescriptionTable",JoinType.LEFT);
-				query.orderBy(cb.desc(cb.coalesce(root.get(VaccineReport_.vaccineReportGivenDate),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))));
+				query.orderBy(cb.desc(cb.coalesce(root.get(VaccineReport_.vaccineReportGivenDate),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))),
+						cb.desc(root.get(VaccineReport_.vaccineReportVaccineId)));
 				Predicate vaccIdPred=root.get(VaccineReport_.vaccineReportVaccineId).in((Object[])testId);
 				Predicate chartIdPred=cb.equal(root.get(VaccineReport_.vaccineReportChartId),chartId);
 				Predicate groupIdsPred =null;
