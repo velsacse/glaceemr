@@ -63,7 +63,8 @@ public class ReferralServiceImpl implements ReferralService{
 		Integer encounterId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(encounterID.toString())).or("-1"));
 		Integer chartId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(chartID.toString())).or("-1"));
 		
-		List<Referral> result = null;
+		List<Referral> result = null;		
+		dx = dx.trim();
 		
 		if(!dx.trim().isEmpty()){
 			
