@@ -192,11 +192,6 @@ public class Encounter {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="encounter_id",referencedColumnName="h611002",insertable=false,updatable=false)
-	H611 h611;
-	
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JsonManagedReference
 	@JoinColumn(name="encounter_created_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
 	EmployeeProfile encounterCreatedByEmpProf;
 	

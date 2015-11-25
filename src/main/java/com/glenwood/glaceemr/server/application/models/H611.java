@@ -90,9 +90,10 @@ public class H611 implements Serializable{
 	@JoinColumn(name="h611_coding_systemid", referencedColumnName="coding_system_oid" , insertable=false, updatable=false)
 	private CodingSystems codingsystemsTable;
 	
-	@OneToMany(mappedBy="h611")
+	@ManyToOne
 	@JsonManagedReference
-	List<Encounter> encounter;
+	@JoinColumn(name="h611002", referencedColumnName="encounter_id" , insertable=false, updatable=false)
+	Encounter encounter;
 	
 	public String getPlanNotes() {
 		return planNotes;
