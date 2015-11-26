@@ -10,6 +10,8 @@
 
 	<!-- Rest authentication entry point configuration -->
 	<http use-expressions="true"  create-session="stateless" entry-point-ref="customAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
+		<intercept-url pattern="/api/api-docs**" access="permitAll" />
+	<intercept-url pattern="/api/api-docs/**" access="permitAll" />
 		<intercept-url pattern="/api/**" access="isAuthenticated()" />
 			<sec:form-login authentication-success-handler-ref="mySuccessHandler" />
 			<sec:access-denied-handler ref="accessDeniedHandler" />
