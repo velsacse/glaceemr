@@ -156,15 +156,16 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 
 		joinAcAI.on(restrictions);
 		joinAcAp.on(predicatePrivilegeId);
-		cq.select(builder.construct(AlertCountBean.class, builder.count(joinAcAp),
+		cq.select(builder.construct(AlertCountBean.class, builder.count(joinAcAI.get(AlertEvent_.alertEventId)),
 				rootAlertCategory.get(AlertCategory_.alertCategoryId),
 				rootAlertCategory.get(AlertCategory_.alertCategoryName),
 				rootAlertCategory.get(AlertCategory_.alertCategoryDisplayOrder)));
 		cq.groupBy(rootAlertCategory.get(AlertCategory_.alertCategoryId),
 				rootAlertCategory.get(AlertCategory_.alertCategoryName),
-				joinAcAI.get(AlertEvent_.alertEventRead),
-				rootAlertCategory.get(AlertCategory_.alertCategoryDisplayOrder),
-				rootAlertCategory.get(AlertCategory_.alertCategoryGroup));
+//				joinAcAI.get(AlertEvent_.alertEventRead),
+				rootAlertCategory.get(AlertCategory_.alertCategoryDisplayOrder)
+//				,rootAlertCategory.get(AlertCategory_.alertCategoryGroup)
+				);
 		cq.orderBy(builder.asc(rootAlertCategory.get(AlertCategory_.alertCategoryId)));
 
 		List<Object> getAlertCounts=em.createQuery(cq).getResultList();
@@ -213,6 +214,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 				String categoryName=categoryNameList.get(i);
 				String categoryOrder=categoryOrderList.get(i);
 
+//				System.out.println("Category Id>>"+categoryId+"\tCategory Name>>"+categoryName+"\tCount>>"+totalCount);
 				categoryNameList.set(i, "-1");
 
 				for(int j=0;j<categoryNameList.size();j++){
