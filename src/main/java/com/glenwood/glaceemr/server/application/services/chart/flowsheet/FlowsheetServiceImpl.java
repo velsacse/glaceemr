@@ -2699,8 +2699,12 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					drugBean = new FS_DrugBean();
 					performedDate="Never Prescribed";
 					drugBean.setStatusOn(performedDate);
-					String className = Optional.fromNullable(flowsheetDrug.getFlowsheetDrugClassName()).or("");
-					drugBean.setGenericDrugName(className);
+					if( flowsheetDrug != null ) {
+						String className = Optional.fromNullable(flowsheetDrug.getFlowsheetDrugClassName()).or("");
+						drugBean.setGenericDrugName(className);
+					} else {
+						drugBean.setGenericDrugName("");
+					}
 					drugBean.setGenericDrugId(hsh_notes.getFlowsheetDrugClassId());
 					drugBean.setStatus("");
 					drugBean.setDrugName("");
