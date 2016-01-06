@@ -3,8 +3,6 @@ package com.glenwood.glaceemr.server.utils;
 import javax.annotation.Resource;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.MDC;
-import org.apache.log4j.NDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -45,13 +43,7 @@ public class ExceptionController {
      
      @ExceptionHandler(CustomException.class)
      public @ResponseBody EMRResponseBean handleCustom(CustomException ex) {
-    	 NDC.push("UserId :" +sessionMap.getUserID()+"@Sperator@");
-    	 MDC.put("UserId", sessionMap.getUserID()+"");
     	 logger.error("", ex);
-    	 NDC.clear();
-    	 MDC.remove("UserId");
-    	 MDC.remove("Request Method");
-    	 MDC.remove("Request URL");
     	 ex.printStackTrace();
          emrResponseBean.setSuccess(false);
          emrResponseBean.setData(null);
@@ -59,13 +51,7 @@ public class ExceptionController {
      }
       @ExceptionHandler(Exception.class)
      public @ResponseBody EMRResponseBean handleCustomException(Exception ex) {
-    	 NDC.push("UserId :" +sessionMap.getUserID()+"@Sperator@");
-    	 MDC.put("UserId", sessionMap.getUserID()+"");
     	 logger.error("", ex);
-    	 MDC.remove("UserId");
-    	 MDC.remove("Request Method");
-    	 MDC.remove("Request URL");
-    	 NDC.clear();
     	 ex.printStackTrace();
          emrResponseBean.setSuccess(false);
          emrResponseBean.setData(null);

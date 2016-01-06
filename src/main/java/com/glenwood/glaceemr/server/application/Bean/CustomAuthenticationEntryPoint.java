@@ -17,7 +17,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint{
 	public void commence(HttpServletRequest request,
 			HttpServletResponse response, AuthenticationException authException)
 			throws IOException, ServletException {
-		System.out.println("in custom authentication entry point --->");
+//		System.out.println("in custom authentication entry point --->");
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/api/login/loginFailed");
         dispatcher.forward(request, response);
 		

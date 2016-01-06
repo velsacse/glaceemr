@@ -32,8 +32,8 @@ public Authentication authenticate(Authentication authentication) throws Authent
     String username = String.valueOf(auth.getPrincipal());
     String password = String.valueOf(auth.getCredentials());
 
-    System.out.println(">>>username"+username);
-    System.out.println(">>>password"+password);
+//    System.out.println(">>>username"+username);
+//    System.out.println(">>>password"+password);
   
     GrantedAuthority[] authorities = new GrantedAuthorityImpl[1];
     authorities[0] = new GrantedAuthorityImpl("ROLE_USER");

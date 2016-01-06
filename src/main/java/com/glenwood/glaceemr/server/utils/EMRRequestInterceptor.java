@@ -42,7 +42,7 @@ public class EMRRequestInterceptor implements HandlerInterceptor{
 //		String tennantId = sessionMap.getDbName();
 //		System.out.println("dbname -->"+tennantId);
 	
-		System.out.println(">>>>In EMR Requestor>>>>>"+TennantContextHolder.getTennantId());
+		System.out.println(">>>>In EMR Requestor>>>>>"+request.getRequestURI());
 		
 		String[] splitURl = request.getRequestURI().split(request.getServletPath()+"/");
 		String formattedURl= splitURl[1].substring(1, splitURl[1].length());

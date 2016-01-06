@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.util.Enumeration;
 
 import javax.servlet.Filter;
@@ -17,8 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.MDC;
-import org.apache.log4j.NDC;
 import org.springframework.stereotype.Component;
 
 import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
@@ -71,12 +68,6 @@ public class DataBaseAccessFilter implements Filter {
 		
 		
 		
-		NDC.push("Request Method : "+httpRequest.getMethod());
-		MDC.put("Request Method", httpRequest.getMethod());
-		MDC.put("Request URL", httpRequest.getRequestURL());
-		MDC.put("ClientIp", httpRequest.getRemoteAddr());
-		MDC.put("ServerIp", InetAddress.getLocalHost());
-		NDC.push("Request URL : "+httpRequest.getRequestURL());
 		Enumeration<String> headerNames = httpRequest.getHeaderNames();
 		Enumeration<String> parametersNames =httpRequest.getParameterNames();
 		StringBuffer jb = new StringBuffer();
@@ -124,27 +115,17 @@ public class DataBaseAccessFilter implements Filter {
 			
 		if(body.length()>0){
 			
-			NDC.push("@RequestParamterSperator@");
-			NDC.push(body+"&");
-			NDC.push("@RequestParamterSperator@");
 		}else
 		{
 			
-			NDC.push("@RequestParamterSperator@");
 			while(parametersNames.hasMoreElements())
 			{
 				String parameter = parametersNames.nextElement();
-				NDC.push(parameter+"="+httpRequest.getParameter(parameter)+"&");
 			}
-			NDC.push("@RequestParamterSperator@");
 		}
-		NDC.push("@RequestHeaderSperator@");
 		while(headerNames.hasMoreElements()){
 			String header = headerNames.nextElement();
-			NDC.push(header+"@HeaderSperator@");
-			NDC.push(httpRequest.getHeader(header)+"@HeaderValueSperator@");
 			if(header.trim().equalsIgnoreCase("authorization")){
-			System.out.println(">>>"+header+"value>>>>>>>>"+httpRequest.getHeader(header));
 			String basecut[]=httpRequest.getHeader(header).split("Basic");
 			byte[] valueDecoded= Base64.decodeBase64(basecut[1].getBytes() );
 			password=new String(valueDecoded).split(":")[1];
@@ -159,7 +140,6 @@ public class DataBaseAccessFilter implements Filter {
 
 				}
 		}
-		NDC.push("@RequestHeaderSperator@");
 	
 	
 		chain.doFilter(multiReadRequest, response);
