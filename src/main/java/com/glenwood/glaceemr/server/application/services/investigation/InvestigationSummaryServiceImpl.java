@@ -323,9 +323,11 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				for(int m=0;m<temptestidarray.length;m++)
 				{
 					LabEntries labEntriesList=labEntriesRepository.findOne(InvestigationSpecification.testdetailIds(Integer.parseInt(Optional.fromNullable(temptestidarray[m]).or("-1").toString())));
-					int teststatus=Optional.fromNullable(labEntriesList.getLabEntriesTestStatus()).or(-1);
-					if(teststatus<=3)
-						isreviewed=false;
+					if(labEntriesList!=null){
+						int teststatus=Optional.fromNullable(labEntriesList.getLabEntriesTestStatus()).or(-1);
+						if(teststatus<=3)
+							isreviewed=false;
+					}
 				}
 				if(isreviewed)
 				{
@@ -590,16 +592,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		LabEntries labEntriesSave=new LabEntries();
 		Specimen specimenSave=new Specimen();
 		if(dataStr[dataValueMap("int_lab_testdetailid")].equals("-1")){
-			CriteriaBuilder builder = em.getCriteriaBuilder();
-			CriteriaQuery<Integer> cq = builder.createQuery(Integer.class);
-			Root<LabEntries> root=cq.from(LabEntries.class);
-			@SuppressWarnings("rawtypes")
-			Selection[] multi= new Selection[] { 
-				builder.max(root.get(LabEntries_.labEntriesTestdetailId))
-			};
-			cq.multiselect(multi);
-			Integer labEntriesMax= em.createQuery(cq).getSingleResult();
-			labEntriesSave.setLabEntriesTestdetailId(labEntriesMax+1);
+			labEntriesSave.setLabEntriesTestdetailId(-1);
 		}else{
 			labEntriesSave=labEntriesRepository.findOne(InvestigationSpecification.testdetailIds(Integer.parseInt(dataStr[dataValueMap("int_lab_testdetailid")])));
 			testEncounterId = Optional.fromNullable(labEntriesSave.getLabEntriesEncounterId()).or(-1);

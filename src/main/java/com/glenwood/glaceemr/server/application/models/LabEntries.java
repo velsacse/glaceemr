@@ -23,7 +23,7 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class LabEntries {
 
 	@Id
-	@Column(name="lab_entries_testdetail_id", columnDefinition="Integer default -1", nullable=false)
+	@Column(name="lab_entries_testdetail_id", nullable=false)
 	private Integer labEntriesTestdetailId;
 
 	@Column(name="lab_entries_encounter_id")

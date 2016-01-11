@@ -23,6 +23,7 @@ import com.glenwood.glaceemr.server.application.services.chart.flowsheet.HmrRule
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 
 @Api(value = "FlowsheetConfiguration", description = "Contains the methods to get and save the details of flowsheet for configuration page.", consumes="application/json")
 @RestController
@@ -53,9 +54,10 @@ public class FlowsheetManagementController {
 	 */
 	@ApiOperation(value = "Get the flowsheet basic details for configuration", notes = "Get the flowsheet basic details for configuration")
 	@RequestMapping(value = "/FlowsheetManagement",method = RequestMethod.GET)
-	public FS_Management getFlowsheetsManagementDetails(@RequestParam(value="loadFromFlowsheet", required=false, defaultValue="-1") Integer loadFromFlowsheet,
-			@RequestParam(value="flowsheetId", required=false, defaultValue="-1") Integer flowsheetId,
-			@RequestParam(value="flowsheetTypeId", required=false, defaultValue="-1") Integer flowsheetTypeId) throws Exception{
+	public FS_Management getFlowsheetsManagementDetails(
+			@ApiParam(name="loadFromFlowsheet",value="whether the configuration page is loading from flowsheet home page or not") @RequestParam(value="loadFromFlowsheet", required=false, defaultValue="-1") Integer loadFromFlowsheet,
+			@ApiParam(name="flowsheetId",value="flowsheet id") @RequestParam(value="flowsheetId", required=false, defaultValue="-1") Integer flowsheetId,
+			@ApiParam(name="flowsheetTypeId",value="flowsheet type id") @RequestParam(value="flowsheetTypeId", required=false, defaultValue="-1") Integer flowsheetTypeId) throws Exception{
 		logger.debug("Begin of request to get the flowsheets basic details for configuration.");
 		FS_Management flowsheetsManagementDetails = flowsheetService.getFlowsheetsManagementDetails(loadFromFlowsheet,flowsheetId,flowsheetTypeId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully loaded data flowsheet basic details for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully loaded data flowsheet basic details for configuration");
@@ -73,7 +75,8 @@ public class FlowsheetManagementController {
 	 */
 	@ApiOperation(value = "Get the configured details of flowsheet", notes = "Get the configured details of flowsheet")
 	@RequestMapping(value = "/FlowsheetConfiguredDetails",method = RequestMethod.GET)
-	public FS_ConfiguredDetails getFlowsheetsConfiguredDetails(@RequestParam(value="flowsheetId", required=true, defaultValue="-1") Integer flowsheetId) throws Exception{
+	public FS_ConfiguredDetails getFlowsheetsConfiguredDetails(
+			@ApiParam(name="flowsheetId",value="flowsheet id") @RequestParam(value="flowsheetId", required=true, defaultValue="-1") Integer flowsheetId) throws Exception{
 		logger.debug("Begin of request to get the configured details of flowsheet.");
 		FS_ConfiguredDetails flowsheetsManagementDetails = flowsheetService.getFlowsheetsConfiguredDetails(flowsheetId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully loaded configured details of flowsheet for flowsheet id="+flowsheetId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully loaded configured details of flowsheet for flowsheet id="+flowsheetId);
@@ -89,7 +92,8 @@ public class FlowsheetManagementController {
 	 */
 	@ApiOperation(value = "Get the group details of lab and params", notes = "Get the group details of lab and params")
 	@RequestMapping(value = "/FlowsheetStandardGroupDetails",method = RequestMethod.GET)
-	public FS_ConfiguredDetails getFlowsheetsStandardGroupDetails(@RequestParam(value="isStandardLab", required=true, defaultValue="-1") Integer isStandardLab) throws Exception{
+	public FS_ConfiguredDetails getFlowsheetsStandardGroupDetails(
+			@ApiParam(name="isStandardLab",value="whether its a standard lab or standard param") @RequestParam(value="isStandardLab", required=true, defaultValue="-1") Integer isStandardLab) throws Exception{
 		logger.debug("Begin of request to get group details of lab and params.");
 		FS_ConfiguredDetails flowsheetsManagementDetails = flowsheetService.getFlowsheetsStandardGroupDetails(isStandardLab);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully loaded standard group details of flowsheet",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully loaded standard group details of flowsheet");
@@ -137,8 +141,9 @@ public class FlowsheetManagementController {
 	 */
 	@ApiOperation(value = "Get the HMR details", notes = "Get the HMR details")
 	@RequestMapping(value = "/HMRRuleDetails",method = RequestMethod.GET)
-	public HmrRuleBean getHMRDetail(@RequestParam(value="groupIds", required=true, defaultValue="-1") String groupId,
-			@RequestParam(value="flowsheetElementType", required=true, defaultValue="-1") Integer flowsheetElementType) throws Exception{
+	public HmrRuleBean getHMRDetail(
+			@ApiParam(name="groupIds",value="group ids") @RequestParam(value="groupIds", required=true, defaultValue="-1") String groupId,
+			@ApiParam(name="flowsheetElementType",value="flowsheet element type") @RequestParam(value="flowsheetElementType", required=true, defaultValue="-1") Integer flowsheetElementType) throws Exception{
 		logger.debug("Begin of request to get the HMR details.");
 		HmrRuleBean flowsheetData = flowsheetService.getFlowSheetRuleQuery(groupId,flowsheetElementType);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.HMR,AuditLogConstants.HMR,1,AuditLogConstants.SUCCESS,"Successfully loaded data for request to get the HMR details having groupIds="+groupId+" and flowsheet element type="+flowsheetElementType,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.HMR,request,"Successfully loaded data for request to get the HMR details having groupIds="+groupId+" and flowsheet element type="+flowsheetElementType);
