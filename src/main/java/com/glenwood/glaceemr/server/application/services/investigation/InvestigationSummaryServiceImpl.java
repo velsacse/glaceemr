@@ -1443,7 +1443,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 	public void saveVaccineDosage(String dosage,String testid, int performedby, int labencId, String givenDate,int testdetailid){
 		LabEntries labEntriesList=labEntriesRepository.findOne(InvestigationSpecification.testdetailIds(testdetailid));
-		int status= Optional.fromNullable(labEntriesList.getLabEntriesTestStatus()).or(1);
+		int status=1;
+		if(labEntriesList!=null)
+			status= Optional.fromNullable(labEntriesList.getLabEntriesTestStatus()).or(1);
 		List<VaccineReport> vaccineReportList=vaccineReportRepository.findAll(Specifications.where(VaccineReportSpecification.getEncounterId(labencId)).and(VaccineReportSpecification.getVaccineId(Integer.parseInt(testid))));
 		int dosagelevel = -1;
 		if(vaccineReportList.size()>0)
