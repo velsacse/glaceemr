@@ -592,7 +592,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		LabEntries labEntriesSave=new LabEntries();
 		Specimen specimenSave=new Specimen();
 		if(dataStr[dataValueMap("int_lab_testdetailid")].equals("-1")){
-			labEntriesSave.setLabEntriesTestdetailId(-1);
+			//labEntriesSave.setLabEntriesTestdetailId(-1);
 		}else{
 			labEntriesSave=labEntriesRepository.findOne(InvestigationSpecification.testdetailIds(Integer.parseInt(dataStr[dataValueMap("int_lab_testdetailid")])));
 			testEncounterId = Optional.fromNullable(labEntriesSave.getLabEntriesEncounterId()).or(-1);
@@ -1040,8 +1040,21 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			labEntriesSave.setLabEntriesSepcimenId(Integer.parseInt(specimenId+""));
 		}
 		if(dataStr[dataValueMap("int_lab_testdetailid")].equals("-1")){
-			LabEntries saveidLab=labEntriesRepository.saveAndFlush(labEntriesSave);
-			saveid=saveidLab.getLabEntriesTestdetailId()+"";
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<LabEntries> root = cq.from(LabEntries.class);
+			cq.multiselect(builder.coalesce(builder.max(root.get(LabEntries_.labEntriesTestdetailId)),-1));
+			int testDetTemp=Integer.parseInt(MoreObjects.firstNonNull(Integer.parseInt(em.createQuery(cq).getSingleResult().toString()),-1).toString());
+			labEntriesRepository.saveAndFlush(labEntriesSave);
+			CriteriaBuilder builder1 = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq1 = builder1.createQuery();
+			Root<LabEntries> root1 = cq1.from(LabEntries.class);
+			cq1.multiselect(builder1.coalesce(builder1.max(root1.get(LabEntries_.labEntriesTestdetailId)),-1));
+			int testDetAfterSave=Integer.parseInt(MoreObjects.firstNonNull(em.createQuery(cq1).getSingleResult().toString(),-1).toString());
+			if(testDetAfterSave==(testDetTemp+1))
+				saveid=testDetAfterSave+"";
+			else
+				saveid="-1";
 		}else{
 			LabEntries saveidLab=labEntriesRepository.saveAndFlush(labEntriesSave);
 			saveid=saveidLab.getLabEntriesTestdetailId()+"";
@@ -1117,11 +1130,11 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 								deleteLabAlert(alertEvent);
 								break;
 							case 3:Message = Message + " has been done,result need to be reviewed"; 
-								putLabAlert(labEncounterId, refId, lab_status, speGrpId, isExternal, Message, alertEvent);
-								break;
+							putLabAlert(labEncounterId, refId, lab_status, speGrpId, isExternal, Message, alertEvent);
+							break;
 							case 4:Message = Message + " result has been reviewed,Patient has to be informed."; 
-								putLabAlert(labEncounterId, refId, lab_status, speGrpId, isExternal, Message, alertEvent);
-								break;
+							putLabAlert(labEncounterId, refId, lab_status, speGrpId, isExternal, Message, alertEvent);
+							break;
 							case 5:
 								deleteLabAlert(alertEvent);
 								break;
@@ -1153,10 +1166,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 								deleteLabAlert(alertEvent);
 								break;
 							case 3:Message = Message + " has been done,result need to be reviewed"; 
-								putLabAlert(labEncounterId, refId, lab_status, -1, isExternal, Message, alertEvent);
+							putLabAlert(labEncounterId, refId, lab_status, -1, isExternal, Message, alertEvent);
 							break;
 							case 4:Message = Message + " result has been reviewed,Patient has to be informed."; 
-								putLabAlert(labEncounterId, refId, lab_status, -1, isExternal, Message, alertEvent);
+							putLabAlert(labEncounterId, refId, lab_status, -1, isExternal, Message, alertEvent);
 							break;
 							case 5:
 								deleteLabAlert(alertEvent);
@@ -1268,12 +1281,12 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		int forwardTo = 0;
 		int CategoryId = -2;
 		switch( status ) {
-			case 1: forwardTo = -2;
-			break;
-			case 3: forwardTo = -1;
-			break;
-			case 4: forwardTo = -2;
-			break;
+		case 1: forwardTo = -2;
+		break;
+		case 3: forwardTo = -1;
+		break;
+		case 4: forwardTo = -2;
+		break;
 		}
 		int section = -1;
 		if ( isExternal == 1 ) {
@@ -1457,7 +1470,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				for(int j=0;j<vaccineReportListUpdate.size();j++){
 					vaccineReportListUpdate.get(j).setVaccineReportDosageLevel(Integer.parseInt(dosage));
 					if(!givenDate.equals(""))
-						vaccineReportListUpdate.get(j).setVaccineReportGivenDate(Timestamp.valueOf(givenDate));
+						vaccineReportListUpdate.get(j).setVaccineReportGivenDate(Timestamp.valueOf(givenDate+" 00:00:00"));
 					Date dateMod=new Date();
 					Timestamp timeStampModified=new Timestamp(dateMod.getTime());
 					vaccineReportListUpdate.get(j).setVaccineReportLastModified(timeStampModified);
@@ -1505,7 +1518,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 					vaccineReportTemp.setVaccineReportChartId(chartId);
 					vaccineReportTemp.setVaccineReportEncounterId(labencId);
 					vaccineReportTemp.setVaccineReportVaccineId(Integer.parseInt(testid));
-					vaccineReportTemp.setVaccineReportGivenDate(Timestamp.valueOf(givenDate));
+					vaccineReportTemp.setVaccineReportGivenDate(Timestamp.valueOf(givenDate+" 00:00:00"));
 					vaccineReportTemp.setVaccineReportDosageLevel(Integer.parseInt(dosage));
 					vaccineReportTemp.setVaccineReportComments("");
 					vaccineReportTemp.setVaccineReportIsemr(1);
@@ -1520,18 +1533,18 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				CriteriaBuilder builder = em.getCriteriaBuilder();
 				CriteriaQuery<Object> cq = builder.createQuery();
 				Root<VaccineReport> root = cq.from(VaccineReport.class);
-				cq.multiselect(builder.coalesce(builder.max(root.get(VaccineReport_.vaccineReportDosageLevel)),0).alias("dosage"));
+				cq.multiselect(builder.coalesce(builder.max(root.get(VaccineReport_.vaccineReportDosageLevel)),0));
 				Predicate[] rest=new Predicate[]{
 						builder.equal(root.get(VaccineReport_.vaccineReportChartId),chartId)
 						,builder.equal(root.get(VaccineReport_.vaccineReportVaccineId),Integer.parseInt(testid))
 				};
 				cq.where(rest);
-				dosage =  Optional.fromNullable(MoreObjects.firstNonNull(em.createQuery(cq).getParameter("dosage"),0).toString()).or("-1");
+				dosage =  Optional.fromNullable(MoreObjects.firstNonNull(em.createQuery(cq).getSingleResult(),0).toString()).or("-1");
 				int currdos =Integer.parseInt(dosage)+1;
 				if(givenDate.equals("")){
 					VaccineReport vaccineReportTemp=new VaccineReport();
 					CriteriaBuilder builder1 = em.getCriteriaBuilder();
-					CriteriaQuery<VaccineReport> cq1 = builder1.createQuery(VaccineReport.class);
+					CriteriaQuery<Object> cq1 = builder1.createQuery();
 					Root<VaccineReport> root1 = cq1.from(VaccineReport.class);
 					cq1.multiselect(builder1.coalesce(builder1.max(root1.get(VaccineReport_.vaccineReportId)),0));
 					vaccineReportTemp.setVaccineReportId(Integer.parseInt(MoreObjects.firstNonNull(em.createQuery(cq1).getSingleResult(),0).toString())+1);
@@ -1554,14 +1567,14 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 					VaccineReport vaccineReportTemp=new VaccineReport();
 					CriteriaBuilder builder1 = em.getCriteriaBuilder();
-					CriteriaQuery<VaccineReport> cq1 = builder1.createQuery(VaccineReport.class);
+					CriteriaQuery<Object> cq1 = builder1.createQuery();
 					Root<VaccineReport> root1 = cq1.from(VaccineReport.class);
 					cq1.multiselect(builder1.coalesce(builder1.max(root1.get(VaccineReport_.vaccineReportId)),0));
 					vaccineReportTemp.setVaccineReportId(Integer.parseInt(MoreObjects.firstNonNull(em.createQuery(cq1).getSingleResult(),0).toString())+1);
 					vaccineReportTemp.setVaccineReportChartId(chartId);
 					vaccineReportTemp.setVaccineReportEncounterId(labencId);
 					vaccineReportTemp.setVaccineReportVaccineId(Integer.parseInt(testid));
-					vaccineReportTemp.setVaccineReportGivenDate(Timestamp.valueOf(givenDate));
+					vaccineReportTemp.setVaccineReportGivenDate(Timestamp.valueOf(givenDate+" 00:00:00"));
 					vaccineReportTemp.setVaccineReportDosageLevel(Integer.parseInt(dosage));
 					vaccineReportTemp.setVaccineReportComments("");
 					vaccineReportTemp.setVaccineReportIsemr(1);
@@ -1778,7 +1791,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		int paramId = -1;
 		if( (!paramCode.equals("")) && (!paramCode.equalsIgnoreCase("null")) && (!paramCode.equalsIgnoreCase("undefined")) && (!paramCodeSys.equals("")) ){
 			List<LabParameterCode> labParameterCodeList=labParameterCodeRepository.findAll(Specifications.where(InvestigationSpecification.getCode(paramCode)).and(InvestigationSpecification.getCodeSystem(paramCodeSys)));
-			paramId = Optional.fromNullable(labParameterCodeList.get(0).getLabParameterCodeParamid()).or(-1);
+			if( labParameterCodeList.size() > 0 ) {
+				paramId = Optional.fromNullable(labParameterCodeList.get(0).getLabParameterCodeParamid()).or(-1);
+			}
 		}
 		List<LabParameters> labParametersList=labParametersRepository.findAll(InvestigationSpecification.getParamDetails(paramId));
 		int count=Optional.fromNullable(labParametersList.size()).or(0);

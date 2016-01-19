@@ -6,11 +6,14 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -23,6 +26,8 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class LabEntries {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="lab_entries_seq")
+	@SequenceGenerator(name ="lab_entries_seq", sequenceName="lab_entries_seq", allocationSize=1)
 	@Column(name="lab_entries_testdetail_id", nullable=false)
 	private Integer labEntriesTestdetailId;
 
