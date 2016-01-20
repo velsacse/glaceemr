@@ -151,9 +151,6 @@ public class LabDescription implements Serializable {
 	@Column(name="lab_description_def_mod42", length=10)
 	private String labDescriptionDefMod42;
 
-	@Column(name="lab_description_abnormal")
-	private Boolean labDescriptionAbnormal;
-
 	@Column(name="lab_description_testcategory_type")
 	private Integer labDescriptionTestcategoryType;
 
@@ -629,14 +626,6 @@ public class LabDescription implements Serializable {
 
 	public void setLabDescriptionDefMod42(String labDescriptionDefMod42) {
 		this.labDescriptionDefMod42 = labDescriptionDefMod42;
-	}
-
-	public Boolean getLabDescriptionAbnormal() {
-		return labDescriptionAbnormal;
-	}
-
-	public void setLabDescriptionAbnormal(Boolean labDescriptionAbnormal) {
-		this.labDescriptionAbnormal = labDescriptionAbnormal;
 	}
 
 	public Integer getLabDescriptionTestcategoryType() {
