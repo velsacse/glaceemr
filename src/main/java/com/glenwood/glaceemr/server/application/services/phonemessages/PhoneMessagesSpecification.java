@@ -39,8 +39,8 @@ public class PhoneMessagesSpecification {
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
 				Join<Encounter,Chart> patientIdJoin=root.join(Encounter_.chart,JoinType.INNER);
-				Join<Encounter,EmployeeProfile> serviceDrJoin=root.join(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
-
+				Join<Encounter,EmployeeProfile> createdByJoin=root.join(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
+				Join<Encounter,EmployeeProfile> serviceDrJoin=root.join(Encounter_.empProfileEmpId,JoinType.INNER);
 				Predicate[] predicateApUserId;
 				
 					try{
@@ -86,9 +86,11 @@ public class PhoneMessagesSpecification {
 
 					root.join("chart",JoinType.INNER);
 					root.join("encounterCreatedByEmpProf",JoinType.INNER);
+					root.join("empProfileEmpId",JoinType.INNER);
 
 					root.fetch(Encounter_.chart,JoinType.INNER);
 					root.fetch(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
+					root.fetch(Encounter_.empProfileEmpId,JoinType.INNER);
 				
 				return predicate;
 			}
@@ -110,16 +112,20 @@ public class PhoneMessagesSpecification {
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
 				Join<Encounter,Chart> patientIdJoin=root.join(Encounter_.chart,JoinType.INNER);
-				Join<Encounter,EmployeeProfile> serviceDrJoin=root.join(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
+				Join<Encounter,EmployeeProfile> createdByDrJoin=root.join(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
+				Join<Encounter,EmployeeProfile> serviceDrJoin=root.join(Encounter_.empProfileEmpId,JoinType.INNER);
+				
 
 
 					Predicate predicate=cb.equal(root.get(Encounter_.encounterId), encounterId);
 
 					root.join("chart",JoinType.INNER);
 					root.join("encounterCreatedByEmpProf",JoinType.INNER);
+					root.join("empProfileEmpId",JoinType.INNER);			
 
 					root.fetch(Encounter_.chart,JoinType.INNER);
 					root.fetch(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
+					root.fetch(Encounter_.empProfileEmpId,JoinType.INNER);
 				
 				return predicate;
 			}
