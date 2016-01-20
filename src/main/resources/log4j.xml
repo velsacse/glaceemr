@@ -3,13 +3,9 @@
  
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
  
-    <appender name="Appender1" class="org.apache.log4j.ConsoleAppender">
-       <layout class="org.apache.log4j.PatternLayout">
-          <param name="ConversionPattern" value="%-7p %d [%t] %c %x - %m%n"/>
-       </layout>
-    </appender>
-    <appender name="Appender2" class="org.apache.log4j.FileAppender">
-       <param name="File" value="${catalina.home}/logs/myapp.log" />
+    <appender name="Appender2" class="org.apache.log4j.DailyRollingFileAppender">
+       <param name="File" value="/var/glace/logs/springlog" />
+       <param name="DatePattern" value="'.'yyyy-MM-dd" />
        <layout class="org.apache.log4j.PatternLayout">
           <param name="ConversionPattern" value="%-7p %d [%t] %c %x - %m%n"/>
        </layout>
@@ -30,8 +26,6 @@
  
     <root>
         <priority value="ERROR"/>
-        <level value="ERROR" />
-        <appender-ref ref="Appender1" />
         <level value="ERROR" />
         <appender-ref ref="Appender2" />
     </root>
