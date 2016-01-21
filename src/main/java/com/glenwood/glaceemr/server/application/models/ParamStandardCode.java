@@ -2,9 +2,10 @@ package com.glenwood.glaceemr.server.application.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -34,7 +35,7 @@ public class ParamStandardCode {
 	@Column(name="param_standard_code_group_codesystem", length=100)
 	private String paramStandardCodeGroupCodesystem;
 
-	@OneToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="param_standard_code_group_gwid",referencedColumnName="lab_parameters_id",insertable=false,updatable=false)
 	@JsonManagedReference
 	LabParameters labParametersTable;
