@@ -5,6 +5,7 @@
  
     <appender name="Appender2" class="org.apache.log4j.DailyRollingFileAppender">
        <param name="File" value="/var/glace/logs/springlog" />
+        <param name="Threshold" value="ERROR" />
        <param name="DatePattern" value="'.'yyyy-MM-dd" />
        <layout class="org.apache.log4j.PatternLayout">
           <param name="ConversionPattern" value="%-7p %d [%t] %c %x - %m%n"/>
@@ -25,8 +26,7 @@
 </logger>
  
     <root>
-        <priority value="ERROR"/>
-        <level value="ERROR" />
+       <level value="DEBUG" />
         <appender-ref ref="Appender2" />
     </root>
      
