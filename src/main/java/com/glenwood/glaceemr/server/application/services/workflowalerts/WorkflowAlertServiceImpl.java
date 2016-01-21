@@ -1089,12 +1089,15 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 	@Override
 	public Workflow closeAlert(int patientId) {
 		Workflow alert=workFlowAlertRepository.findOne(WorkflowAlertSpecification.getAlertByPatientId(patientId));
-		if(!alert.toString().equalsIgnoreCase(null))
+		if(alert!=null)
 		{
 			alert.setWorkflowIsactive(false);
 			workFlowAlertRepository.save(alert);
+			return alert;
+		}else{
+			return null;
 		}
-		return alert;
+		
 	}
 
 	/**
