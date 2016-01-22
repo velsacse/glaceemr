@@ -40,7 +40,7 @@ public class PhoneMessagesSpecification {
 
 				Join<Encounter,Chart> patientIdJoin=root.join(Encounter_.chart,JoinType.INNER);
 				Join<Encounter,EmployeeProfile> createdByJoin=root.join(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
-				Join<Encounter,EmployeeProfile> serviceDrJoin=root.join(Encounter_.empProfileEmpId,JoinType.INNER);
+				Join<Encounter,EmployeeProfile> serviceDrJoin=root.join(Encounter_.empProfileEmpId,JoinType.LEFT);
 				Predicate[] predicateApUserId;
 				
 					try{
@@ -86,11 +86,11 @@ public class PhoneMessagesSpecification {
 
 					root.join("chart",JoinType.INNER);
 					root.join("encounterCreatedByEmpProf",JoinType.INNER);
-					root.join("empProfileEmpId",JoinType.INNER);
+					root.join("empProfileEmpId",JoinType.LEFT);
 
 					root.fetch(Encounter_.chart,JoinType.INNER);
 					root.fetch(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
-					root.fetch(Encounter_.empProfileEmpId,JoinType.INNER);
+					root.fetch(Encounter_.empProfileEmpId,JoinType.LEFT);
 				
 				return predicate;
 			}
@@ -113,7 +113,7 @@ public class PhoneMessagesSpecification {
 
 				Join<Encounter,Chart> patientIdJoin=root.join(Encounter_.chart,JoinType.INNER);
 				Join<Encounter,EmployeeProfile> createdByDrJoin=root.join(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
-				Join<Encounter,EmployeeProfile> serviceDrJoin=root.join(Encounter_.empProfileEmpId,JoinType.INNER);
+				Join<Encounter,EmployeeProfile> serviceDrJoin=root.join(Encounter_.empProfileEmpId,JoinType.LEFT);
 				
 
 
@@ -121,11 +121,11 @@ public class PhoneMessagesSpecification {
 
 					root.join("chart",JoinType.INNER);
 					root.join("encounterCreatedByEmpProf",JoinType.INNER);
-					root.join("empProfileEmpId",JoinType.INNER);			
+					root.join("empProfileEmpId",JoinType.LEFT);			
 
 					root.fetch(Encounter_.chart,JoinType.INNER);
 					root.fetch(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
-					root.fetch(Encounter_.empProfileEmpId,JoinType.INNER);
+					root.fetch(Encounter_.empProfileEmpId,JoinType.LEFT);
 				
 				return predicate;
 			}
