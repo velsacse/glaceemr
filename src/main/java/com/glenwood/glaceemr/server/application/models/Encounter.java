@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -210,7 +212,17 @@ public class Encounter {
 	@JoinColumn(name="encounter_chartid",referencedColumnName="chart_id",insertable=false,updatable=false)
     Chart encounterChartTable;
 	
+	@OneToMany(mappedBy="encounterTable")
+	private List<LeafPatient> leafPatient;
+		
+	public List<LeafPatient> getLeafPatient() {
+		return leafPatient;
+	}
 
+	public void setLeafPatient(List<LeafPatient> leafPatient) {
+		this.leafPatient = leafPatient;
+	}
+	
 	public Chart getChart() {
 		return chart;
 	}

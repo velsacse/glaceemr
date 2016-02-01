@@ -23,7 +23,7 @@ public class ChartSpecification {
 			@Override
 			public Predicate toPredicate(Root<Chart> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate flowsheetLabsMapId = cb.equal(root.get(Chart_.chart_patientid),patientId);
+				Predicate flowsheetLabsMapId = cb.equal(root.get(Chart_.chartPatientid),patientId);
 				return flowsheetLabsMapId;
 			}
 		};
@@ -43,7 +43,7 @@ public class ChartSpecification {
 			@Override
 			public Predicate toPredicate(Root<Chart> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate chartIdPredicate=cb.equal(root.get(Chart_.chart_patientid),patientId);
+				Predicate chartIdPredicate=cb.equal(root.get(Chart_.chartPatientid),patientId);
 				return chartIdPredicate;
 			}
 		};
@@ -61,7 +61,7 @@ public class ChartSpecification {
 			@Override
 			public Predicate toPredicate(Root<Chart> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate pred = cb.equal(root.get(Chart_.chart_id),chartId);
+				Predicate pred = cb.equal(root.get(Chart_.chartId),chartId);
 				return pred;
 			}
 		};

@@ -3,16 +3,20 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;	
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -566,6 +570,18 @@ public class PatientRegistration {
 
 	@Column(name="patient_registration_studycode")
 	private Integer patientRegistrationStudycode;
+	
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="patientRegistrationTable")
+	@JsonManagedReference
+	List<Chart> alertTable;
+	
+	public List<Chart> getAlertTable() {
+		return alertTable;
+	}
+
+	public void setAlertTable(List<Chart> alertTable) {
+		this.alertTable = alertTable;
+	}
 	
 	public Integer getPatientRegistrationId() {
 		return patientRegistrationId;

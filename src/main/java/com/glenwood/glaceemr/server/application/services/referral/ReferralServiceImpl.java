@@ -242,8 +242,8 @@ public class ReferralServiceImpl implements ReferralService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<Chart> root = cq.from(Chart.class);
-		cq.select(root.get(Chart_.chart_patientid));
-		cq.where(builder.equal(root.get(Chart_.chart_id), chartId));
+		cq.select(root.get(Chart_.chartPatientid));
+		cq.where(builder.equal(root.get(Chart_.chartId), chartId));
 		List <Object> resultList = em.createQuery(cq).getResultList();
 		String patientId="-1";
 		if(resultList.size()>0)

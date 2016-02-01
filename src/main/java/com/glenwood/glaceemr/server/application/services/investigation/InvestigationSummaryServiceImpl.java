@@ -1,16 +1,26 @@
 package com.glenwood.glaceemr.server.application.services.investigation;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Vector;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -18,83 +28,135 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.AssociatedOrderPblm;
+import com.glenwood.glaceemr.server.application.models.BodySite;
 import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.Chart_;
+import com.glenwood.glaceemr.server.application.models.Cpt;
+import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
+import com.glenwood.glaceemr.server.application.models.FileDetails;
+import com.glenwood.glaceemr.server.application.models.FileDetails_;
+import com.glenwood.glaceemr.server.application.models.FileName;
+import com.glenwood.glaceemr.server.application.models.FileName_;
+import com.glenwood.glaceemr.server.application.models.H068;
+import com.glenwood.glaceemr.server.application.models.H213;
+import com.glenwood.glaceemr.server.application.models.H213_;
 import com.glenwood.glaceemr.server.application.models.Hl7ResultInbox;
+import com.glenwood.glaceemr.server.application.models.Hl7ResultInbox_;
 import com.glenwood.glaceemr.server.application.models.Hl7Unmappedresults;
+import com.glenwood.glaceemr.server.application.models.Hl7Unmappedresults_;
+import com.glenwood.glaceemr.server.application.models.ImmunisationSite;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.LabAlertforwardstatus;
+import com.glenwood.glaceemr.server.application.models.LabAlertforwardstatus_;
+import com.glenwood.glaceemr.server.application.models.LabDescpParameters;
 import com.glenwood.glaceemr.server.application.models.LabDescription;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
+import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
+import com.glenwood.glaceemr.server.application.models.LabGroups;
 import com.glenwood.glaceemr.server.application.models.LabIncludePrevious;
 import com.glenwood.glaceemr.server.application.models.LabParameterCode;
 import com.glenwood.glaceemr.server.application.models.LabParameters;
+import com.glenwood.glaceemr.server.application.models.LabcompanyDetails;
+import com.glenwood.glaceemr.server.application.models.LabcompanyDetails_;
 import com.glenwood.glaceemr.server.application.models.LoginUsers;
+import com.glenwood.glaceemr.server.application.models.OrdersetCategorylist;
+import com.glenwood.glaceemr.server.application.models.OrdersetList;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
+import com.glenwood.glaceemr.server.application.models.PatientEncounterType;
 import com.glenwood.glaceemr.server.application.models.PatientImmunityVaccineMapping;
 import com.glenwood.glaceemr.server.application.models.PatientImmunityVaccineMapping_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PatientVisEntries;
 import com.glenwood.glaceemr.server.application.models.PatientVisEntries_;
 import com.glenwood.glaceemr.server.application.models.Specimen;
+import com.glenwood.glaceemr.server.application.models.VaccinationConsentForm;
 import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails;
+import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails_;
 import com.glenwood.glaceemr.server.application.models.VaccineReport;
 import com.glenwood.glaceemr.server.application.models.VaccineReport_;
+import com.glenwood.glaceemr.server.application.models.Vis;
+import com.glenwood.glaceemr.server.application.models.VisFileMapping;
 import com.glenwood.glaceemr.server.application.repositories.AlertCategoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.AssociatedOrderPblmRepository;
+import com.glenwood.glaceemr.server.application.repositories.BodySiteRepository;
 import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
 import com.glenwood.glaceemr.server.application.repositories.CptRepository;
+import com.glenwood.glaceemr.server.application.repositories.CvxVaccineGroupRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
+import com.glenwood.glaceemr.server.application.repositories.FileDetailsRepository;
+import com.glenwood.glaceemr.server.application.repositories.FileNameRepository;
+import com.glenwood.glaceemr.server.application.repositories.H068Repository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7ResultInboxRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7UnmappedResultsRepository;
 import com.glenwood.glaceemr.server.application.repositories.IcdmRepository;
+import com.glenwood.glaceemr.server.application.repositories.ImmunisationSiteRepository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabAlertforwardstatusRepository;
+import com.glenwood.glaceemr.server.application.repositories.LabCompanyDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabDescriptionRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabEntriesParameterRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabEntriesRepository;
+import com.glenwood.glaceemr.server.application.repositories.LabGroupRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabIncludePreviousRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabParameterCodeRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabParametersRepository;
 import com.glenwood.glaceemr.server.application.repositories.LoginUsersRepository;
+import com.glenwood.glaceemr.server.application.repositories.OrderSetCategoryListRepository;
+import com.glenwood.glaceemr.server.application.repositories.OrderSetListRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientEncounterTypeRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientImmunityVaccineMappingRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientVisEntriesRepository;
 import com.glenwood.glaceemr.server.application.repositories.SpecimenRepository;
+import com.glenwood.glaceemr.server.application.repositories.VaccinationConsentFormRepository;
 import com.glenwood.glaceemr.server.application.repositories.VaccineOrderDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.VaccineReportRepository;
+import com.glenwood.glaceemr.server.application.repositories.VisRepository;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.ClinicalElementsService;
 import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
 import com.glenwood.glaceemr.server.application.specifications.ChartSpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
 import com.glenwood.glaceemr.server.application.specifications.InitialSettingsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.InvestigationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.LoginSpecfication;
+import com.glenwood.glaceemr.server.application.specifications.PatientClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.VaccineReportSpecification;
 import com.glenwood.glaceemr.server.utils.HUtil;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * @author yasodha
@@ -102,8 +164,12 @@ import com.google.common.base.Optional;
  * InvestigationSummaryServiceImpl gives the data required for 
  * investigation summary
  */
+@Api(value = "InvestigationService", description = "Contains the methods to get and save the order details.", consumes="application/json")
 @Service
 public class InvestigationSummaryServiceImpl implements	InvestigationSummaryService {
+
+	@Autowired
+	VaccinationConsentFormRepository vaccinationConsentFormRepository;
 
 	@Autowired
 	LabDescriptionRepository labDescriptionRepository;
@@ -113,6 +179,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 	@Autowired
 	LabParameterCodeRepository labParameterCodeRepository;
+
+	@Autowired
+	LabCompanyDetailsRepository labCompanyRepository;
 
 	@Autowired
 	EncounterEntityRepository encounterEntityRepository;
@@ -125,6 +194,36 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 	@Autowired
 	EmpProfileRepository empProfileRepository;
+
+	@Autowired
+	CvxVaccineGroupRepository cvxRepository;
+
+	@Autowired
+	FileDetailsRepository fileDetailsRepository;
+
+	@Autowired
+	PatientVisEntriesRepository patientVISRepository;
+
+	@Autowired
+	VisRepository visRepository;
+
+	@Autowired
+	H068Repository h068Repository;
+
+	@Autowired
+	BodySiteRepository bodySiteRepository;
+
+	@Autowired
+	LabGroupRepository labGroupsRepository;
+
+	@Autowired
+	VaccineOrderDetailsRepository vaccineRepository;
+
+	@Autowired
+	ImmunisationSiteRepository siteRepository;
+
+	@Autowired
+	VaccinationConsentFormRepository consentRepository;
 
 	@Autowired
 	PatientRegistrationRepository patientRegistrationRepository;
@@ -154,11 +253,23 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	LabEntriesParameterRepository labEntriesParameterRepository;
 
 	@Autowired
+	PatientClinicalElementsRepository patientClinicalElementsRepository;
+
+	@Autowired
 	LabIncludePreviousRepository labIncludePreviousRepository;
 
 	@Autowired
+	FileNameRepository fileNameRepository;
+
+	@Autowired
 	PatientVisEntriesRepository patientVisEntriesRepository;
-	
+
+	@Autowired
+	OrderSetListRepository orderSetRepository;
+
+	@Autowired
+	OrderSetCategoryListRepository orderSetCatRepository;
+
 	@Autowired
 	PatientImmunityVaccineMappingRepository patientImmunityVaccineMappingRepository;
 
@@ -182,7 +293,13 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 	@Autowired
 	AlertInboxService alertInboxService;
-	
+
+	@Autowired
+	PatientEncounterTypeRepository petRepository;
+
+	@Autowired
+	ClinicalElementsService clinicalElementsService;
+
 	@PersistenceContext
 	EntityManager em;
 
@@ -214,6 +331,959 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	String ishighpriority = "false";
 	String testId = new String();
 	Integer empId = -1;
+	ArrayList<String> dateArr=new ArrayList<String>();
+
+
+	/**
+	 * Method to save investigation data received from HL7 results (Parsing and attaching unknown patient results)
+	 * @param attachData
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("rawtypes")
+	@Override
+	public String saveInvestigation(SaveAttachResultData attachData) throws Exception {
+		setResourceBundle();
+		String testDetailId = attachData.getTestDetailId(); 
+		Integer patientId = -1;
+		boolean isUpdate = false;
+		this.chartId = attachData.getChartId();
+		patientId = getPatientId();
+		if ( !testDetailId.equals("-1") ) {
+			isUpdate = true;
+			List<LabEntries> labEntries = labEntriesRepository.findAll(InvestigationSpecification.testdetailIds(Integer.parseInt(testDetailId)));
+			for( LabEntries labs : labEntries ) {
+				labs.setLabEntriesTestType(1);
+				labs.setLabEntriesPerfBy(attachData.getPerformedBy());
+				if(attachData.getPerformedDate().equals(""))
+					attachData.setPerformedDate(attachData.getOrderedDate());
+				if( !attachData.getPerformedDate().equals("") )
+					labs.setLabEntriesPerfOn(Timestamp.valueOf(attachData.getPerformedDate()));
+				labs.setLabEntriesTestStatus(attachData.getStatus());
+				if( isUpdate ) {
+					if( labs.getLabEntriesResultNotes().trim().equals("") )
+						labs.setLabEntriesResultNotes(attachData.getResultNotes());
+				} else {
+					labs.setLabEntriesResultNotes(attachData.getResultNotes());
+				}
+				labs.setLabEntriesClinicalInfo(attachData.getClinicalInfo());
+				if( attachData.getIsFasting().equalsIgnoreCase("Y") ) {
+					labs.setLabEntriesIsFasting(true);
+				}
+				if( !attachData.getSpecimenSource().equals("") ) {
+					long specimenId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + getSpecimenData(attachData))).or("-1"));
+					if( specimenId == -1 ) {
+						Specimen insertSpecimen = new Specimen();
+						insertSpecimen.setSpecimenSource(attachData.getSpecimenSource());
+						if( !attachData.getSpecimenCondition().equals("") )
+							insertSpecimen.setSpecimenCondition(attachData.getSpecimenCondition());
+						if( !attachData.getSpecimencollecteddate().equals("") )
+							insertSpecimen.setSpecimenDate(Timestamp.valueOf(attachData.getSpecimencollecteddate()));
+						if( !attachData.getCollectionVolume().equals("") )
+							insertSpecimen.setSpecimenCollVol(attachData.getCollectionVolume());
+						specimenRepository.save(insertSpecimen);
+						specimenId = getSpecimenData(attachData);
+					}
+					labs.setLabEntriesSepcimenId(Integer.parseInt("" + specimenId));
+				}
+				labEntriesRepository.saveAndFlush(labs);
+				if( testDetailId.equals("-1") ) {
+					testDetailId = getLabTestDetailId();
+				}
+			}
+			Vector paramEntryIdVect = SaveParameters(this.chartId, Integer.parseInt(testDetailId), attachData.getResultParamStr(),attachData.getLabLocCodeDetails(), attachData.getRootPath(), attachData.getResultFileName());
+			addLabAlert(patientId,encounterId, Integer.parseInt(testDetailId), attachData.getStatus(), 1, attachData.getOrderedBy());
+			for( int j = 0;j < paramEntryIdVect.size() ;j++ ) {
+				int fileScanId = Integer.parseInt(HUtil.Nz(getFileScanId(Integer.parseInt("" + paramEntryIdVect.get(j))), "-1"));
+				if( fileScanId != -1 ) {
+					List<FileDetails> fileList = fileDetailsRepository.findAll(InvestigationSpecification.checkFileScanId(fileScanId));
+					for( FileDetails fileData : fileList ) {
+						fileData.setFiledetailsEntityid(Integer.parseInt("" + paramEntryIdVect.get(j)));
+						fileDetailsRepository.saveAndFlush(fileData);
+					}
+				}
+			}
+		}
+		return testDetailId;
+	}
+
+	@Override
+	public String getFileScanId(int parameterId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabEntriesParameter> root = cq.from(LabEntriesParameter.class);
+		cq.select(root.get(LabEntriesParameter_.labEntriesParameterFilenameScanid));
+		cq.where(builder.equal(root.get(LabEntriesParameter_.labEntriesParameterId), parameterId));
+		return "" + em.createQuery(cq).getFirstResult();
+	}
+
+	/**
+	 * Method to save parameters from lab results
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public Vector SaveParameters (int chartId, int testDetailId, String paramString,Hashtable labLocDetails,String rootPath,String resultFileName) throws Exception {
+		String[] paramSet = paramString.split("@#@");
+		String[] param;
+		int paramId = -1;
+		int paramLen = 0;
+		int sortOrder = 1;
+		Vector paramIdVector = new Vector();
+		for(int i=0; i<paramSet.length; i++) {
+			param = paramSet[i].split("\\|~\\|");
+			paramLen = param.length;
+			if(paramLen > paramValueMap("PARAM_ID")) {
+				paramId = Integer.parseInt(HUtil.Nz(param[paramValueMap("PARAM_ID")],"-1").trim());
+			}
+			if(paramId == -1) {
+				String paramName	= "";
+				String paramUnits	= "";
+				String NormalRange	= "";
+				String paramCode	= "";
+				String paramCodeSys	= "";
+				if(paramLen > paramValueMap("PARAM_NAME"))
+					paramName = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_NAME")],"")).trim();
+				if(paramLen > paramValueMap("PARAM_UNITS"))
+					paramUnits = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_UNITS")],"")).trim();
+				if(paramLen > paramValueMap("PARAM_NORMALRANGE"))
+					NormalRange = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_NORMALRANGE")],"")).trim();
+				if(paramLen > paramValueMap("PARAM_CODE"))
+					paramCode = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_CODE")],"")).trim();
+				if(paramLen > paramValueMap("PARAM_CODESYSTEM"))
+					paramCodeSys = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_CODESYSTEM")],"")).trim();
+				paramId = insertParamDesc(paramName, paramUnits, NormalRange, paramCode, paramCodeSys);
+			}
+			if(paramId != -1) {
+				int labEntryParamId = -1;
+				String paramValue = "";
+				String paramDate  = "";
+				String paramStatus = "";
+				String paramNotes = "";
+				String paramResultStatus = "";
+				String normalRange = "";
+				String labLocCode = "-1";
+				String paramValuetype = "";
+				String paramEncryptionType = "";
+				String encryptedFileContent = "";
+				if(paramLen > paramValueMap("PARAM_LABENTRYID"))
+					labEntryParamId = Integer.parseInt(HUtil.Nz(param[paramValueMap("PARAM_LABENTRYID")],"-1").trim());
+				if(paramLen > paramValueMap("PARAM_VALUE"))
+					paramValue = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_VALUE")],"")).trim();
+				if(paramLen > paramValueMap("PARAM_DATE"))
+					paramDate = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_DATE")],"")).trim();
+				if(paramLen > paramValueMap("PARAM_STATUS"))
+					paramStatus = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_STATUS")],"")).trim();
+				if(paramLen > paramValueMap("PARAM_NOTES"))
+					paramNotes = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_NOTES")],""));
+				if(paramLen > paramValueMap("PARAM_RESULTSTATUS"))
+					paramResultStatus = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_RESULTSTATUS")],"")).trim();
+				if(labEntryParamId==-1)
+					DeleteParameters(testDetailId,paramId);
+				if(paramLen > paramValueMap("PARAM_NORMALRANGE"))
+					normalRange = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_NORMALRANGE")],"")).trim();
+				if(paramLen > paramValueMap("PARAM_LAB_LOC_CODE"))
+					labLocCode = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_LAB_LOC_CODE")],"")).trim();
+				if(paramLen > paramValueMap("PARAM_VALUE_TYPE"))
+					paramValuetype = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_VALUE_TYPE")],"")).trim();
+				if(paramLen > paramValueMap("PARAM_ENCRYPTION_TYPE"))
+					paramEncryptionType = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("PARAM_ENCRYPTION_TYPE")],"")).trim();
+				if(paramLen > paramValueMap("ENCRYPTED_FILE_CONTENT"))
+					encryptedFileContent = HUtil.ValidateSingleQuote(HUtil.Nz(param[paramValueMap("ENCRYPTED_FILE_CONTENT")],"")).trim();
+				int fileNameId=-1,fileScanId=-1,isPdf=0;
+				if(paramValuetype.equalsIgnoreCase("ED") && paramEncryptionType.equalsIgnoreCase("Base64")) {
+					int encounterID = Integer.parseInt(HUtil.Nz(getEncounterId(testDetailId), "-1"));
+					this.chartId = chartId;
+					int patientID = Integer.parseInt(HUtil.Nz(getPatientId(), "-1"));
+					Hashtable fileDetailsHash = putPDFAttacmentEntry(encounterID,patientID,chartId,testDetailId,resultFileName,rootPath,encryptedFileContent);
+					if(fileDetailsHash.containsKey("fileNameId")){
+						fileNameId = (int) fileDetailsHash.get("fileNameId");
+					}
+					if(fileDetailsHash.containsKey("fileScanId")){
+						fileScanId = (int) fileDetailsHash.get("fileScanId");
+					}
+					isPdf=1;
+				}
+				int labLocDetId=-1;
+				Hashtable labLocDetail = new Hashtable();
+				if(labLocDetails.containsKey(labLocCode)){
+					labLocDetail = (Hashtable)labLocDetails.get(labLocCode);
+				}
+				labLocDetId = insertLabAddressDetails(labLocDetail);
+				int paramEntryId = insertParamValue(chartId, labEntryParamId, testDetailId, paramId, paramValue, paramDate, paramStatus, paramNotes, paramResultStatus, sortOrder , normalRange,labLocDetId,fileNameId,fileScanId,isPdf);
+				paramIdVector.add(paramEntryId);
+				sortOrder++;
+			}
+		}
+		return paramIdVector;
+	}
+
+	/**
+	 * Method to handle multiple ZEF segments for each OBX
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Hashtable putPDFAttacmentEntry(int encounterId,int patientID,int chartId,int testDetailId,String resultFileName,String rootPath,String encryptedData)throws Exception{
+		resultFileName = resultFileName.substring(0,resultFileName.lastIndexOf("_"));
+		Hashtable fileDetailsHash = new Hashtable();
+		try {			
+			int categoryId = Integer.parseInt(HUtil.Nz(getScanGroupId(testDetailId),"1"));
+			FileDetails fileDetails = new FileDetails();
+			fileDetails.setFiledetailsFlag(2);
+			fileDetails.setFiledetailsDescription("PDF Report");
+			Date date = new Date();
+			Timestamp currentTime = new Timestamp(date.getTime());
+			fileDetails.setFiledetailsCreationdate(currentTime);
+			fileDetails.setFiledetailsCreatedby(-100);
+			fileDetails.setFiledetailsLastmodifiedon(currentTime);
+			fileDetails.setFiledetailsLastmodifiedby(-100);
+			fileDetails.setFiledetailsEncounterid(encounterId);
+			fileDetails.setFiledetailsPatientid(patientID);
+			fileDetails.setFiledetailsChartid(chartId);
+			fileDetails.setFiledetailsEntityid(-1);
+			fileDetails.setFiledetailsCategoryid(categoryId);
+			fileDetailsRepository.save(fileDetails);
+			this.chartId = chartId;
+			this.patientId = patientID;
+			this.encounterId = encounterId;
+			int filedetailsId = Integer.parseInt(getFileDetailId(categoryId, currentTime));
+			decodeToPDF(encryptedData, rootPath + "/Attachments/" + patientID + "/", resultFileName + "_" + filedetailsId);
+			FileName fileName = new FileName();
+			fileName.setFilenameScanid(filedetailsId);
+			fileName.setFilenameName(resultFileName+"_" + filedetailsId + ".pdf");
+			fileName.setFilenameFileextension(".pdf");
+			fileName.setFilenameIsactive(true);
+			fileNameRepository.save(fileName);
+			int fileNameId = Integer.parseInt(getFileNameId(filedetailsId, resultFileName+"_" + filedetailsId + ".pdf"));
+			fileDetailsHash.put("fileNameId",fileNameId);
+			fileDetailsHash.put("fileScanId",filedetailsId);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return fileDetailsHash;
+	}
+
+	private String getFileNameId(Integer filedetailsId, String fileName) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<FileName> root = cq.from(FileName.class);
+		cq.select(root.get(FileName_.filenameId));
+		cq.where(builder.and(builder.equal(root.get(FileName_.filenameScanid), filedetailsId),
+				builder.equal(root.get(FileName_.filenameName), fileName),
+				builder.equal(root.get(FileName_.filenameIsactive), true),
+				builder.equal(root.get(FileName_.filenameFileextension), ".pdf")));
+		return "" + em.createQuery(cq).getFirstResult();
+	}
+
+	/**
+	 * Method to get file detail id
+	 * @param categoryId
+	 * @return
+	 */
+	private String getFileDetailId(Integer categoryId, Timestamp currentTime) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<FileDetails> root = cq.from(FileDetails.class);
+		cq.select(root.get(FileDetails_.filedetailsId));
+		cq.where(builder.and(builder.equal(root.get(FileDetails_.filedetailsCategoryid), categoryId),
+				builder.equal(root.get(FileDetails_.filedetailsChartid), chartId),
+				builder.equal(root.get(FileDetails_.filedetailsPatientid), patientId),
+				builder.equal(root.get(FileDetails_.filedetailsEncounterid), encounterId),
+				builder.equal(root.get(FileDetails_.filedetailsFlag), 2),
+				builder.equal(root.get(FileDetails_.filedetailsDescription), "PDF Report"),
+				builder.equal(root.get(FileDetails_.filedetailsCreationdate), currentTime),
+				builder.equal(root.get(FileDetails_.filedetailsLastmodifiedon), currentTime)));
+		return "" + em.createQuery(cq).getFirstResult();
+	}
+
+	/**
+	 * Method to decode to pdf
+	 * @param encypedData
+	 * @param destPath
+	 * @param resFilename
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public String decodeToPDF(String encypedData,String destPath,String resFilename)throws Exception {
+		FileOutputStream fout = null;
+		BufferedOutputStream buffout = null;
+		String pdfFileName=resFilename+".pdf";
+		try {
+			Base64 decoder = new Base64();
+			byte[] decodedBytes = decoder.decode(encypedData.toString());
+			File destDir = new File (destPath);
+			if(!destDir.exists()){
+				destDir.mkdir();
+			}
+			fout = new FileOutputStream(new File(destPath+"/"+pdfFileName));
+			buffout = new BufferedOutputStream(fout);
+			buffout.write(decodedBytes);
+			buffout.flush();
+		} catch(Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			try {
+				if(buffout != null)
+					buffout.close();
+			} catch(Exception ie){}
+			try {
+				if(fout != null)
+					fout.close();
+			} catch(Exception ie){}
+		}
+		return pdfFileName;
+	}
+	/**
+	 * Method to get scan group id
+	 * @param testDetailId
+	 * @return
+	 */
+	private String getScanGroupId(int testDetailId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabEntries> root = cq.from(LabEntries.class);
+		cq.select(root.get(LabEntries_.labEntriesScangroupId));
+		cq.where(builder.equal(root.get(LabEntries_.labEntriesTestdetailId), testDetailId));
+		return "" + em.createQuery(cq).getFirstResult();
+	}
+
+	/**
+	 * Method to get encounter id
+	 * @param testDetailId
+	 * @return
+	 */
+	private String getEncounterId(Integer testDetailId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabEntries> root = cq.from(LabEntries.class);
+		cq.select(root.get(LabEntries_.labEntriesEncounterId));
+		cq.where(builder.equal(root.get(LabEntries_.labEntriesTestdetailId), testDetailId));
+		return "" + em.createQuery(cq).getFirstResult();
+	}
+
+	/**
+	 * Method to handle multiple zps segments for external results
+	 */
+	@SuppressWarnings("rawtypes")
+	public Integer insertLabAddressDetails(Hashtable locationDetail) {
+		int labCompAddrId = -1;
+		try {
+			labCompAddrId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + getLabCompanyAddrId(locationDetail))).or("-1"));
+			if( labCompAddrId == -1 ) {
+				LabcompanyDetails labCompanyDetails = new LabcompanyDetails();
+				labCompanyDetails.setLabcompanyDetailsLabname(HUtil.Nz(locationDetail.get("labLocName"),"").toString().trim());
+				labCompanyDetails.setLabcompanyDetailsLabaddress(HUtil.Nz(locationDetail.get("labLocAddr"),"").toString().trim());
+				labCompanyDetails.setLabcompanyDetailsLabcity(HUtil.Nz(locationDetail.get("labLocCity"),"").toString().trim());
+				labCompanyDetails.setLabcompanyDetailsLabstate(HUtil.Nz(locationDetail.get("labLocState"),"").toString().trim());
+				labCompanyDetails.setLabcompanyDetailsLabzip(HUtil.Nz(locationDetail.get("labLocZip"),"").toString().trim());
+				labCompanyDetails.setLabcompanyDetailsDirectorName(HUtil.Nz(locationDetail.get("labDirector"),"").toString().trim());
+				labCompanyDetails.setLabcompanyDetailsClianumber(HUtil.Nz(locationDetail.get("cliaNumber"),"").toString().trim());
+				labCompanyDetails.setLabcompanyDetailsDirectorPhonenumber(HUtil.Nz(locationDetail.get("labDirectorPhoneNumber"),"").toString().trim());
+				labCompanyDetails.setLabcompanyDetailsLabloccode(HUtil.Nz(locationDetail.get("labLocCode"),"").toString().trim());
+				labCompanyRepository.save(labCompanyDetails);
+				labCompAddrId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + getLabCompanyAddrId(locationDetail))).or("-1"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return labCompAddrId;
+	}
+
+	/**
+	 * Method to get lab company details id
+	 * @param locationDetail
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	private String getLabCompanyAddrId(Hashtable locationDetail) {
+		System.out.println("locationDetail:::::::::" + locationDetail);
+		String addrId = "-1";
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		System.out.println("locationDetail getlablocname:::::::::" + locationDetail.get("labLocName").toString().trim());
+		Root<LabcompanyDetails> root = cq.from(LabcompanyDetails.class);
+		cq.select(root.get(LabcompanyDetails_.labcompanyDetailsId));
+		cq.where(builder.and(builder.equal(root.get(LabcompanyDetails_.labcompanyDetailsLabname), Optional.fromNullable(Strings.emptyToNull("" + locationDetail.get("labLocName").toString().trim())).or(""))),
+				builder.equal(root.get(LabcompanyDetails_.labcompanyDetailsLabaddress), Optional.fromNullable(Strings.emptyToNull("" + locationDetail.get("labLocAddr").toString().trim())).or("")),
+				builder.equal(root.get(LabcompanyDetails_.labcompanyDetailsLabcity), Optional.fromNullable(Strings.emptyToNull("" + locationDetail.get("labLocCity").toString().trim())).or("")),
+				builder.equal(root.get(LabcompanyDetails_.labcompanyDetailsLabstate), Optional.fromNullable(Strings.emptyToNull("" + locationDetail.get("labLocState").toString().trim())).or("")),
+				builder.equal(root.get(LabcompanyDetails_.labcompanyDetailsLabzip), Optional.fromNullable(Strings.emptyToNull("" + locationDetail.get("labLocZip").toString().trim())).or("")),
+				builder.equal(root.get(LabcompanyDetails_.labcompanyDetailsDirectorName), Optional.fromNullable(Strings.emptyToNull("" + locationDetail.get("labDirector").toString().trim())).or("")),
+				builder.equal(root.get(LabcompanyDetails_.labcompanyDetailsClianumber), Optional.fromNullable(Strings.emptyToNull("" + locationDetail.get("cliaNumber").toString().trim())).or("")),
+				builder.equal(root.get(LabcompanyDetails_.labcompanyDetailsDirectorPhonenumber), Optional.fromNullable(Strings.emptyToNull("" + locationDetail.get("labDirectorPhoneNumber").toString().trim())).or("")),
+				builder.equal(root.get(LabcompanyDetails_.labcompanyDetailsLabloccode), Optional.fromNullable(Strings.emptyToNull("" + locationDetail.get("labLocCode").toString().trim())).or("")));
+		addrId = "" + em.createQuery(cq).getFirstResult(); 
+		return addrId;
+	}
+
+	/**
+	 * Insert parameters from lab entries
+	 * @return
+	 * @throws Exception
+	 */
+	private int insertParamValue(int chartId, int labEntryParamId,
+			int testDetailId, int paramId, String paramValue, String performedDate,
+			String paramStatus, String paramNotes, String paramResultStatus,
+			int sortOrder, String normalRange, int labLocDetId, int fileNameId,
+			int fileScanId, int isPdf) throws Exception {
+		if(labEntryParamId == -1) {
+			List<LabEntriesParameter> labEntriesParameterList=labEntriesParameterRepository.findAll(Specifications.where(InvestigationSpecification.getParamEntriesIsActive(true)).and(InvestigationSpecification.getParamEntriesTestDetailIdNot(-1)).and(InvestigationSpecification.getParamEntriesTestDetailId(testDetailId)).and(InvestigationSpecification.getParamEntriesMapId(paramId)));
+			if(labEntriesParameterList.size()>0)
+				labEntryParamId = Optional.fromNullable(labEntriesParameterList.get(0).getLabEntriesParameterId()).or(-1);
+		}
+		if(labEntryParamId != -1) {
+			List<LabEntriesParameter> labEntriesParameterList=labEntriesParameterRepository.findAll(InvestigationSpecification.getParamEntriesId(labEntryParamId));
+			for(int h=0;h<labEntriesParameterList.size();h++){
+				labEntriesParameterList.get(h).setLabEntriesParameterValue(paramValue);
+				labEntriesParameterList.get(h).setLabEntriesParameterStatus(paramStatus);
+				labEntriesParameterList.get(h).setLabEntriesParameterNotes(paramNotes);
+				labEntriesParameterList.get(h).setLabEntriesParameterChartid(chartId);
+				if(!performedDate.equals(""))
+					labEntriesParameterList.get(h).setLabEntriesParameterDate(Timestamp.valueOf(performedDate));
+				labEntriesParameterList.get(h).setLabEntriesParameterResultstatus(paramResultStatus);
+				labEntriesParameterList.get(h).setLabEntriesParameterSortorder(sortOrder);
+				if(!normalRange.equals(""))
+					labEntriesParameterList.get(h).setLabEntriesParameterNormalrange(normalRange);
+				labEntriesParameterList.get(h).setLabEntriesParameterLabcompDetailid(labLocDetId);
+				labEntriesParameterList.get(h).setLabEntriesParameterIspdf(isPdf);
+				labEntriesParameterList.get(h).setLabEntriesParameterFilenameId(fileNameId);
+				labEntriesParameterList.get(h).setLabEntriesParameterFilenameScanid(fileScanId);
+				labEntriesParameterRepository.saveAndFlush(labEntriesParameterList.get(h));
+			}
+			return labEntryParamId;
+		} else {
+			LabEntriesParameter labEntriesParameterTemp = new LabEntriesParameter();
+			labEntriesParameterTemp.setLabEntriesParameterTestdetailid(testDetailId);
+			labEntriesParameterTemp.setLabEntriesParameterMapid(paramId);
+			labEntriesParameterTemp.setLabEntriesParameterValue(paramValue);
+			labEntriesParameterTemp.setLabEntriesParameterStatus(paramStatus);
+			labEntriesParameterTemp.setLabEntriesParameterNotes(paramNotes);
+			labEntriesParameterTemp.setLabEntriesParameterChartid(chartId);
+			if(!performedDate.equals("")) {
+				DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+				DateFormat parser = new SimpleDateFormat("MM/dd/yyyy"); 
+				Date date = null;
+				try {
+					date = (Date) parser.parse(performedDate);
+
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				performedDate = formatter.format(date);
+				labEntriesParameterTemp.setLabEntriesParameterDate(Timestamp.valueOf(performedDate));
+			}
+			labEntriesParameterTemp.setLabEntriesParameterResultstatus(paramResultStatus);
+			labEntriesParameterTemp.setLabEntriesParameterSortorder(sortOrder);
+			if(!normalRange.equals(""))
+				labEntriesParameterTemp.setLabEntriesParameterNormalrange(normalRange);
+			labEntriesParameterTemp.setLabEntriesParameterLabcompDetailid(labLocDetId);
+			labEntriesParameterTemp.setLabEntriesParameterIspdf(isPdf);
+			labEntriesParameterTemp.setLabEntriesParameterFilenameId(fileNameId);
+			labEntriesParameterTemp.setLabEntriesParameterFilenameScanid(fileScanId);
+			labEntriesParameterRepository.saveAndFlush(labEntriesParameterTemp);
+			List<LabEntriesParameter> labEntriesParameterList=labEntriesParameterRepository.findAll(Specifications.where(InvestigationSpecification.getParamEntriesIsActive(true)).and(InvestigationSpecification.getParamEntriesTestDetailIdNot(-1)).and(InvestigationSpecification.getParamEntriesTestDetailId(testDetailId)).and(InvestigationSpecification.getParamEntriesMapId(paramId)));
+			if(labEntriesParameterList.size()>0)
+				labEntryParamId = Optional.fromNullable(labEntriesParameterList.get(0).getLabEntriesParameterId()).or(-1);
+			return labEntryParamId;
+		}		
+	}
+
+	/**
+	 * Method to add new lab alert in inbox page
+	 * @param patientId
+	 * @param encounterId
+	 * @param testDetailId
+	 * @param status
+	 * @param isExternal
+	 * @param userId
+	 * @throws Exception
+	 */
+	@Override
+	public void addLabAlert(int patientId,int encounterId, int testDetailId, int status ,int isExternal, int userId) throws Exception {	
+		String Message = Optional.fromNullable(Strings.emptyToNull("" + getTestName(testDetailId))).or("");				
+		AlertEvent alertEvent = alertInboxService.getAlertId(patientId, encounterId, testDetailId);
+		try {
+			switch( status ) {
+			case 1: String isDefault    = Optional.fromNullable(Strings.emptyToNull("" + getAlertForwardStatus(status))).or("t");
+			String scheduledDate = Optional.fromNullable(Strings.emptyToNull("" + getLabScheduledDate(testDetailId))).or("-1");
+			if( isDefault.equalsIgnoreCase("t") ) {
+				Message = Message + " has to be done."; 
+				if( !scheduledDate.equals("") )
+					Message = Message + ".\nScheduled Date: "+scheduledDate;
+				putLabAlert(encounterId, testDetailId, status, -1, isExternal, Message, alertEvent);
+			}
+			break;
+			case 2: deleteLabAlert(alertEvent);
+			break;
+			case 3: Message = Message + " has been done,result need to be reviewed"; 
+			putLabAlert(encounterId, testDetailId, status, -1, isExternal, Message, alertEvent);
+			break;
+			case 4: Message = Message + " result has been reviewed,Patient has to be informed."; 
+			putLabAlert(encounterId, testDetailId, status, -1, isExternal, Message, alertEvent);
+			break;
+			case 5: deleteLabAlert(alertEvent);
+			break;
+			case 6: deleteLabAlert(alertEvent);
+			break;
+			case 7: deleteLabAlert(alertEvent);
+			break;
+			}
+		} catch( Exception e ) {
+			e.printStackTrace();
+			throw e;
+		}		
+	}
+
+	/**
+	 * Method to get lab entries scheduled date
+	 * @param testDetailId
+	 * @return
+	 */
+	private String getLabScheduledDate(Integer testDetailId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabEntries> root = cq.from(LabEntries.class);
+		cq.select(root.get(LabEntries_.labEntriesScheduleddate));
+		cq.where(builder.equal(root.get(LabEntries_.labEntriesTestdetailId), testDetailId));
+		return "" + em.createQuery(cq).getFirstResult();
+	}
+
+	/**
+	 * Method to get lab alert forward status
+	 * @param status
+	 * @return
+	 */
+	private String getAlertForwardStatus(Integer status) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabAlertforwardstatus> root = cq.from(LabAlertforwardstatus.class);
+		cq.select(root.get(LabAlertforwardstatus_.labAlertforwardstatusTodefault));
+		cq.where(builder.equal(root.get(LabAlertforwardstatus_.labAlertforwardstatusLabstatus), status));
+		return "" + em.createQuery(cq).getFirstResult();
+	}
+
+	/**
+	 * Method to get test name
+	 * @param testDetailId
+	 * @return
+	 */
+	private String getTestName(Integer testDetailId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabEntries> root = cq.from(LabEntries.class);
+		cq.select(root.get(LabEntries_.labEntriesTestDesc));
+		cq.where(builder.equal(root.get(LabEntries_.labEntriesTestdetailId), testDetailId));
+		return "" + em.createQuery(cq).getFirstResult();
+	}
+
+	/**
+	 * Method to get lab test detail Id after inserting in to lab entries from hl7
+	 * @return
+	 */
+	private String getLabTestDetailId() {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<H213> root = cq.from(H213.class);
+		cq.select(root.get(H213_.h213003));
+		cq.where(builder.equal(root.get(H213_.h213002),"lab_entries"));
+		return "" + em.createQuery(cq).getFirstResult();
+	}
+
+	/**
+	 * Method to get specimen id
+	 * @param attachData
+	 * @return
+	 */
+	private Integer getSpecimenData(SaveAttachResultData attachData) {
+		Specimen specimen = specimenRepository.findOne(Specifications.where(InvestigationSpecification.specimenSource(attachData.getSpecimenSource()))
+				.and(InvestigationSpecification.specimenColVol(attachData.getCollectionVolume()))
+				.and(InvestigationSpecification.specimenColVolUnit(""))
+				.and(InvestigationSpecification.specimenCondition(attachData.getSpecimenCondition())));
+		return specimen.getSpecimenId();
+	}
+
+	/**
+	 * Method to get Patient id based on chart
+	 * @return
+	 */
+	private Integer getPatientId() {
+		Integer patientId = -1;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Chart> root = cq.from(Chart.class);
+		cq.select(root.get(Chart_.chartPatientid));
+		cq.where(builder.equal(root.get(Chart_.chartId), this.chartId));
+		patientId = (Integer)em.createQuery(cq).getSingleResult();
+		return patientId;
+	}
+
+	/**
+	 * Method to get order set data
+	 * @throws Exception
+	 */
+	public List<OrderSetData> findOrderSetData() throws Exception {
+		List<OrderSetData> orderSet = new ArrayList<OrderSetData>();
+		List<OrdersetList> orderSetList = orderSetRepository.findAll(InvestigationSpecification.getOrderSet());
+		for (int i = 0; i < orderSetList.size(); i++) {
+			OrdersetList orderSetData = orderSetList.get(i);
+			OrderSetData orderData = new OrderSetData();
+			List<OrdersetCategorylist> categoryList = orderSetCatRepository.findAll(InvestigationSpecification.checkOrderSetId(orderSetData.getSetId()));
+			if( categoryList.size() > 0 ) {
+				OrdersetCategorylist categoryData = categoryList.get(0);
+				String[] associatedList = categoryData.getAssociatedList().trim().split(",");
+				ArrayList<Integer> list = new ArrayList<Integer>();
+				for (int j = 0; j < associatedList.length; j++) {
+					list.add(Integer.parseInt(associatedList[j]));
+				}
+				List<LabDescription> labData = labDescriptionRepository.findAll(Specifications.where(InvestigationSpecification.checkOrderSetId(list)).and(InvestigationSpecification.labIsActive()));
+				orderData.setOrderSetId("" + orderSetData.getSetId());
+				orderData.setOrderSetName(orderSetData.getSetName());
+				orderData.setLabDetailsList(labData);
+				orderSet.add(orderData);
+			}
+		}
+		return orderSet;
+	}
+
+	/**
+	 * Method to save newly added lab
+	 */
+	@Override
+	public String saveNewLab(LabDescription testDetails, Integer encounterId, Integer testId, Integer chartId, Integer patientId) throws Exception {
+		String saveData = formSaveObject(testDetails, encounterId, testId, chartId);
+		this.chartId = chartId;
+		savelab("1", encounterId, patientId, chartId, this.empId, saveData, "-1", "-1", "false", "" + testId);
+		return "success";
+	}
+
+	/**
+	 * Method to form save object for saving new lab
+	 * @param testDetails
+	 */
+	private String formSaveObject(LabDescription testDetails, Integer encounterId, Integer testId, Integer chartId) {
+		String saveObject = "";
+		saveObject = saveObject + "lab_isnew_col_0~@@~" + "0" + "#@@#";
+		saveObject = saveObject + "lab_ismodified_col_0~@@~" + "1" + "#@@#";
+		saveObject = saveObject + "lab_isbilled_col_0~@@~" + "1" + "#@@#";
+		saveObject = saveObject + "lab_testdetailid_col_0~@@~" + "-1" + "#@@#";
+		saveObject = saveObject + "lab_encounterid_col_0~@@~"+ encounterId +"#@@#";
+		saveObject = saveObject + "lab_chartid_col_0~@@~" + chartId + "#@@#";
+		saveObject = saveObject + "lab_testid_col_0~@@~" + testId +"#@@#";
+		saveObject = saveObject + "lab_groupid_col_0~@@~" + testDetails.getLabDescriptionGroupid() +"#@@#";
+		saveObject = saveObject + "lab_dx1id_col_0~@@~" + "-1" +"#@@#";
+		saveObject = saveObject + "lab_dx2id_col_0~@@~" + "-1" +"#@@#";
+		saveObject = saveObject + "lab_dx1code_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefDx1())).or("") +"#@@#";
+		saveObject = saveObject + "lab_dx2code_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefDx2())).or("") +"#@@#";
+		saveObject = saveObject + "lab_dx3code_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx4code_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx5code_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx6code_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx7code_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx8code_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx1code_codesystem_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefDx1codeCodesystem())).or("") +"#@@#";
+		saveObject = saveObject + "lab_dx2code_codesystem_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx3code_codesystem_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx4code_codesystem_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx5code_codesystem_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx6code_codesystem_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx7code_codesystem_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_dx8code_codesystem_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_teststatus_col_0~@@~" + "1" +"#@@#";
+		String[] cptDetails = getCPTDataAndQuantity(testDetails);
+		String cptQuantity = "";
+		String cptData = "";
+		if( cptDetails.length > 0)  {
+			cptData = cptDetails[0];
+		}
+		if( cptDetails.length > 1) {
+			cptQuantity = cptDetails[1];
+		}
+		saveObject = saveObject + "lab_qnty_col_0~@@~" + cptQuantity +"#@@#";
+		saveObject = saveObject + "lab_cpt_col_0~@@~" + cptData +"#@@#";
+		saveObject = saveObject + "lab_labname_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionTestDesc())).or("") +"#@@#";
+		saveObject = saveObject + "lab_printxslurl_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionPrintxslurl())).or("") +"#@@#";
+		String visitType = getVisitType(encounterId);
+		if( visitType.equalsIgnoreCase("f") ) {
+			visitType = "1";
+		} else {
+			visitType = "3";
+		}
+		saveObject = saveObject + "lab_ischdp_col_0~@@~" + visitType +"#@@#";
+		saveObject = saveObject + "lab_instruction_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionInstruction())).or(" ") +"#@@#";
+		saveObject = saveObject + "lab_isbillable_col_0~@@~" + testDetails.getLabDescriptionBillable() +"#@@#";
+		saveObject = saveObject + "lab_confirmresult_col_0~@@~" + "0" +"#@@#";
+		saveObject = saveObject + "lab_drug_col_0~@@~" + testDetails.getLabDescriptionDrugs() +"#@@#";
+		saveObject = saveObject + "lab_orderby_col_0~@@~" + this.empId +"#@@#";
+		Date date = new Date();
+		saveObject = saveObject + "lab_enteredon_col_0~@@~" + new Timestamp(date.getTime()) +"#@@#";
+		saveObject = saveObject + "lab_enteredby_col_0~@@~" + this.empId +"#@@#";
+		saveObject = saveObject + "lab_bodysitecode_col_0~@@~" + " " +"#@@#";
+		saveObject = saveObject + "lab_bodysitedesc_col_0~@@~" + " " +"#@@#";
+		saveObject = saveObject + "lab_performon_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_performby_col_0~@@~" + "-1" +"#@@#";
+		saveObject = saveObject + "lab_reviewon_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_reviewby_col_0~@@~" + "-1" +"#@@#";
+		saveObject = saveObject + "lab_informon_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_informby_col_0~@@~" + "-1" +"#@@#";
+		saveObject = saveObject + "lab_patientvisinfoentries_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_persumeimmunityifo_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_loinc_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionLoinc())).or(" ") +"#@@#";
+		saveObject = saveObject + "lab_status_col_0~@@~" + "0" +"#@@#";
+		String orderedDate = getOrderedDate(encounterId);
+		saveObject = saveObject + "lab_orderon_col_0~@@~" + orderedDate +"#@@#";
+		saveObject = saveObject + "lab_shortnotes_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_intext_col_0~@@~" + testDetails.getLabDescriptionDefaultType() +"#@@#";
+		saveObject = saveObject + "lab_scheduled_date_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_sourceofspecimen_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_collectionvolume_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_specimendate_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_collectionunits_col_0~@@~" + "" +"#@@#";
+		saveObject = saveObject + "lab_short_order_notes_col_0~@@~" + "Order Notes" +"#@@#";
+		saveObject = saveObject + "lab_isfasting_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionIsfasting())).or("f") +"#@@#";
+		List<LabDescription> ResultdataAry = getNewLabParameters(testId);
+		String appendResult = "";
+		if( ResultdataAry.size() > 0 ) {
+			for(int rstCount = 0 ; rstCount < ResultdataAry.size();rstCount++ ) {
+				LabDescription Resultdata = ResultdataAry.get(rstCount);
+				List<LabDescpParameters> descparams = Resultdata.getLabDescParams();
+				if( descparams.size() > 0 ) {
+					LabParameters labParams = descparams.get(0).getLabParametersTable();
+					Resultdata = ResultdataAry.get(rstCount);
+					appendResult += "-1" + " |~|";
+					appendResult += labParams.getLabParametersId() + " |~|";
+					appendResult += labParams.getLabParametersDisplayname() + " |~|";
+					appendResult += " " + " |~|";
+					appendResult += "" + " |~|";  //Date 
+					appendResult += "N" + " |~|";  //Normal Range
+					appendResult += "" + " |~|"; //Notes;
+					appendResult += "" + " @#@"; //Status
+				}
+			}
+		}
+		saveObject = saveObject + "lab_resultdata_col_0~@@~" + appendResult +"#@@#";
+		saveObject = saveObject + "lab_lotno_col_0~@@~" + "-1" +"#@@#";
+		saveObject = saveObject + "lab_oldlotno_col_0~@@~" + "-1" +"#@@#";
+		saveObject = saveObject + "lab_ndc_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionNdc())).or("") +"#@@#";
+		saveObject = saveObject + "lab_cvx_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionCvx())).or("-1") +"#@@#";
+		saveObject = saveObject + "lab_refusalreason_col_0~@@~" + "0" +"#@@#";
+		saveObject = saveObject + "lab_administration_notes_col_0~@@~" + "0" +"#@@#";
+		return saveObject;
+	}
+
+	private String[] getCPTDataAndQuantity(LabDescription testDetails) {
+		String cptData = "";
+		String cptQuantity = "";
+		String cptCode = "";
+		String mod = "";
+		String mod2 = "";
+		JSONObject mod12Json = new JSONObject();
+		JSONObject modJson = new JSONObject();
+		JSONObject cptJson = new JSONObject();
+		try {
+			mod12Json.put("mod12", testDetails.getLabDescriptionDefMod12());
+			mod12Json.put("mod22", testDetails.getLabDescriptionDefMod22());
+			mod12Json.put("mod32", testDetails.getLabDescriptionDefMod32());
+			mod12Json.put("mod42", testDetails.getLabDescriptionDefMod42());
+			modJson.put("mod1", testDetails.getLabDescriptionDefMod1());
+			modJson.put("mod2", testDetails.getLabDescriptionDefMod2());
+			modJson.put("mod3", testDetails.getLabDescriptionDefMod3());
+			modJson.put("mod4", testDetails.getLabDescriptionDefMod4());
+			if ( !Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt1())).or("").equals("") ) {
+				if( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt1().split("~")[0])).or("")).size() < 1 )
+					cptJson.put("cpt1" , "");
+			}
+			if ( !Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt2())).or("").equals("") ) {
+				if ( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt2().split("~")[0])).or("")).size() < 1 )
+					cptJson.put("cpt2" , "");
+			}
+			if ( !Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt3())).or("").equals("") ) {
+				if ( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt3().split("~")[0])).or("")).size() < 1 )
+					cptJson.put("cpt3" , "");
+			}
+			if ( !Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt4())).or("").equals("") ) {
+				if ( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt3().split("~")[0])).or("")).size() < 1 )
+					cptJson.put("cpt4" , "");
+			}
+			for (int i = 1; i <= 4 ; i++) {
+				cptCode = Optional.fromNullable(Strings.emptyToNull((cptJson.getString("cpt" + i)).trim())).or("");
+				mod = Optional.fromNullable(Strings.emptyToNull((modJson.getString("mod" + i)).trim())).or("");
+				mod2 = Optional.fromNullable(Strings.emptyToNull((mod12Json.getString("mod" + i + "2")).trim())).or("");
+				if( (!cptCode.equals("")) && ( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + cptJson.getString("cpt" + i).split("~")[0])).or("")).size() > 0 )){
+					if( (!mod.equals("")) && (!mod2.equals("")) )
+						cptData += cptCode.split("~")[0] + "-" + mod + "-" + mod2 + ",";
+					else if( (!mod.equals("")) && (mod2.equals("")) )
+						cptData += cptCode.split("~")[0] + "-" + mod + ",";
+					else if((!mod2.equals("")) && (mod.equals("")))
+						cptData += cptCode.split("~")[0] + "-" + mod2 + ",";
+					else
+						cptData += cptCode.split("~")[0] + ",";
+					if ( cptCode.split("~").length > 1 ) {
+						cptQuantity += cptCode + "^";
+					} else {
+						cptQuantity += cptCode + "~1^";
+					}
+				}			
+			}
+			if( cptData.length() > 0 ) {
+				cptData = cptData.substring(0,cptData.length()-1);
+			}
+		} catch(Exception e) {
+
+		}
+		String[] cptDetails = new String[2];
+		cptDetails[0] = cptData;
+		cptDetails[1] = cptQuantity;
+		return cptDetails;
+	}
+
+	private List<LabDescription> getNewLabParameters(Integer testid) {
+		List<LabDescription> labDesc = labDescriptionRepository.findAll(Specifications.where(InvestigationSpecification.getNewLabParams(testid)));
+		return labDesc;
+	}
+
+	private String getOrderedDate(Integer encounterId) {
+		Date date = new Date();
+		Timestamp timeStamp = new Timestamp(date.getTime());
+		String orderedOn = timeStamp.toString();
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Encounter> root = cq.from(Encounter.class);
+		cq.select(root.get(Encounter_.encounterDate));
+		cq.where(builder.equal(root.get(Encounter_.encounterId),encounterId));
+		Timestamp encounterDate = (Timestamp) em.createQuery(cq).getSingleResult();
+		if( encounterDate == timeStamp ) {
+			return orderedOn;
+		} else {
+			return encounterDate.toString();
+		}
+	}
+
+	private String getVisitType(Integer encounterId) {
+		String isCHDPVisit = "f";
+		if ( encounterId != -1 ) {
+			List<Encounter> encounterTypeList = encounterEntityRepository.findAll(Specifications.where(InvestigationSpecification.checkEncounterId(encounterId)));
+			Encounter encounterData = encounterTypeList.get(0);
+			PatientEncounterType petType = encounterData.getPatientEncounterType();
+			if( petType.getGroupid() == 2 || petType.getGroupid() == 4 ) {
+				isCHDPVisit = "f";
+			} else {
+				isCHDPVisit = "t";
+			}
+		}
+		return isCHDPVisit;
+	}
+
+	private Vector<CPTDTO> getCPTs(String cptCode) {
+		Vector<CPTDTO> cptVector = new Vector<CPTDTO>();
+		CPTDTO cpt = null;
+		List<Cpt> cptList = cptRepository.findAll(Specifications.where(InvestigationSpecification.checkCPTId(cptCode)));
+		if( cptList.size() > 0) {
+			Cpt cptData = cptList.get(0);
+			cpt = CPTDTO.getInstance(Long.parseLong(Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptId())).or("-1")),
+					Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptCptcode())).or(""),
+					Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptDescription())).or(""),
+					Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptShortCutDesc())).or(""),
+					Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptCpttype())).or("0")),
+					Float.parseFloat(Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptCost())).or("0")),
+					Float.parseFloat(Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptMcallowed())).or("0")),
+					Float.parseFloat(Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptRvu())).or("0")),
+					Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptGroupid())).or("0")),
+					Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptOrderby())).or("0")),
+					Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptHitcount())).or("0")),
+					Optional.fromNullable(Strings.emptyToNull("" + cptData.getCptShortCutDesc())).or("false").equals("t")?true:false);
+			cptVector.add(cpt);
+		}		
+		return cptVector;
+	}
+
+	/**
+	 * Method to get test details of a newly ordered lab
+	 * @param testId
+	 * @return
+	 */
+	@Override
+	public LabDescription getNewTestDetails(Integer testId) {
+		List<LabDescription> labDataList = labDescriptionRepository.findAll(Specifications.where(InvestigationSpecification.checkTestId(testId)));
+		LabDescription labData = labDataList.get(0);
+		return labData;
+	}	
+
+	/**
+	 * Method to get list of labs to be reviewed
+	 * @param chartId
+	 * @return
+	 */
+	public List<LabEntries> findResultsLabs(Integer chartId) {
+		logger.debug("in finding results to be reviewed");
+		chartId =  Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + chartId)).or("-1"));
+		List<LabEntries> labs = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.labResults(chartId)));
+		return labs;
+	}
+
+	/**
+	 * Method to get pending orders list
+	 * @param encounterId
+	 * @param chartId
+	 * @return
+	 */	
+	@Override
+	public List<LabEntries> findPendingOrders(Integer encounterId, Integer chartId) {
+		logger.debug("in pending orders");
+		this.encounterId = encounterId;
+		encounterId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + encounterId)).or("-1"));
+		chartId =  Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + chartId)).or("-1"));
+		List<LabEntries> labs = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.pendingLabs(encounterId,chartId)));
+		return labs;
+	}
+
+	/**
+	 * Method to update status for a lab
+	 * @param testDetailIds
+	 * @param encounterId
+	 * @param testStatus
+	 */
+	@Override
+	public void performOrDeleteLab(String testDetailId, String encounterId, String testStatus) {
+		if( testDetailId.contains(",") ) {
+			String[] testId = testDetailId.split(",");
+			String[] encId = encounterId.split(",");
+			for (int i = 0; i < testId.length; i++) {
+				if( !testId[i].equals("") ) {
+					updateTestData(testId[i], encId[i], testStatus);
+				}
+			}
+		} else {
+			if( !testDetailId.equals("") ) {
+				updateTestData(testDetailId , encounterId, testStatus);
+			}
+		}		
+	}
+
+	/**
+	 * Method to update test data
+	 * @param testDetailId
+	 * @param encounterId
+	 * @param testStatus
+	 */
+	private void updateTestData(String testDetailId, String encounterId, String testStatus) {
+		List<LabEntries> labs = labEntriesRepository.findAll(InvestigationSpecification.findTest(encounterId,testDetailId));
+		if( labs.size() > 0 ) {
+			for (LabEntries lab : labs) {
+				if ( testStatus.equalsIgnoreCase("6") ) {
+					EmployeeProfile empProfile = labs.get(0).getEmpProfile();
+					Integer loginId = getLoginUserId(empProfile.getEmpProfileEmpid());
+					Date date = new Date();
+					Timestamp perfOn = new Timestamp(date.getTime());
+					lab.setLabEntriesPerfOn(perfOn);
+					lab.setLabEntriesPerfBy(loginId);					
+					lab.setLabEntriesRevOn(perfOn);
+					lab.setLabEntriesRevBy(loginId);
+				}
+				lab.setLabEntriesTestStatus(Integer.parseInt(testStatus));
+				labEntriesRepository.saveAndFlush(lab);
+			}
+		}
+	}	
 
 	private Integer getLoginUserId(Integer empid) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -224,7 +1294,235 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		Integer loginId = (Integer) em.createQuery(cq).getSingleResult();
 		return loginId;
 	}
-	
+
+	/**
+	 * Method to find VIS details based on testId and testDetailId
+	 */
+	public List<VisData> findVISData(Integer testId, Integer testDetailId) {
+		logger.debug("in getting VIS details");
+		String langCode = getLanguageCode(this.chartId);
+		if( !langCode.equalsIgnoreCase("17")) {
+			langCode = "6";
+		}
+		List<LabDescription> labDetails = labDescriptionRepository.findAll(InvestigationSpecification.labByTestId(testId));
+		List<CvxVaccineGroupMapping> cvxVaccine = null;
+		for (int i = 0; i < labDetails.size(); i++) {
+			cvxVaccine = cvxRepository.findAll(InvestigationSpecification.cvxByLabs(labDetails.get(i).getLabDescriptionCvx()));
+		}	
+		List<VisInfo> visInfoList = new ArrayList<VisInfo>();
+		for (int i = 0; i < cvxVaccine.size(); i++) {
+			CvxVaccineGroupMapping vaccineCVX = cvxVaccine.get(i);
+			List<Vis> visList = visRepository.findAll(InvestigationSpecification.checkVISLangCode(vaccineCVX.getCvxVaccineGroupMappingVaccineGroupCode(), langCode));
+			Date date = new Date();			
+			for (int j = 0; j < visList.size(); j++) {
+				Vis vis = visList.get(j);
+				VisFileMapping visFileMapping = vis.getVisFileMapping();
+				for (int k = 0; k < cvxVaccine.size(); k++) {
+					CvxVaccineGroupMapping cvx = cvxVaccine.get(k);
+					if (cvx.getCvxVaccineGroupMappingVaccineGroupCode().equals(vis.getVisVaccineGroupCode())) {
+						VisInfo visInfo = new VisInfo();
+						visInfo.setCvxVaccineGroupMappingCvxCode(cvx.getCvxVaccineGroupMappingCvxCode());
+						visInfo.setCvxVaccineGroupMappingUncertainFormulationCvx(cvx.getCvxVaccineGroupMappingUncertainFormulationCvx());
+						visInfo.setCvxVaccineGroupMappingVaccineGroupCode(cvx.getCvxVaccineGroupMappingVaccineGroupCode());
+						visInfo.setVisEntriesId(-1);
+						visInfo.setVisId(vis.getVisId());
+						visInfo.setVisName(vis.getVisName());
+						visInfo.setVisPresentDate(new Timestamp(date.getTime()));
+						visInfo.setVisPublicationDate(vis.getVisPublicationDate());
+						visInfo.setVisFileMappingFileName(visFileMapping.getVisFileMappingFileName());
+						visInfoList.add(visInfo);
+						break;
+					} 
+				}
+			}		
+		}
+
+		List<PatientVisEntries> patientVisList = patientVISRepository.findAll(InvestigationSpecification.visByTestDetailId(testDetailId));
+		List<VisEntries> visEntriesList = new ArrayList<VisEntries>();
+
+		for (int i = 0; i < patientVisList.size(); i++) {
+			VisEntries visEntries = new VisEntries();
+			PatientVisEntries patientVis = patientVisList.get(i);
+			visEntries.setPatientVisEntriesCvx(patientVis.getPatientVisEntriesCvx());
+			visEntries.setPatientVisEntriesId(patientVis.getPatientVisEntriesId());
+			visEntries.setPatientVisEntriesPresentationDate(patientVis.getPatientVisEntriesPresentationDate());
+			visEntries.setPatientVisEntriesVisId(patientVis.getPatientVisEntriesVisId());
+			visEntriesList.add(visEntries);
+		}
+
+		List<VisData> visDataList = new ArrayList<VisData>();
+		for (int i = 0; i < visInfoList.size(); i++) {
+			VisInfo cvx = visInfoList.get(i);
+			if( visEntriesList.size() > 0 ) {
+				for (int j = 0; j < visEntriesList.size(); j++) {
+					VisEntries visEntries = visEntriesList.get(j);
+					if( visEntries.getPatientVisEntriesCvx().equalsIgnoreCase(cvx.getCvxVaccineGroupMappingUncertainFormulationCvx())
+							&& visEntries.getPatientVisEntriesId().equals(cvx.getVisId())) {
+						VisData visData = new VisData();
+						visData.setCvxMapCode(cvx.getCvxVaccineGroupMappingUncertainFormulationCvx());
+						visData.setVisName(cvx.getVisName());
+						visData.setGroupName(cvx.getCvxVaccineGroupMappingVaccineGroupCode());
+						visData.setGroupCode(cvx.getCvxVaccineGroupMappingCvxCode());
+						visData.setVisPubDate(cvx.getVisPublicationDate());
+						visData.setVisFileName(cvx.getVisFileMappingFileName());
+						if( cvx.getVisEntriesId() != null ) {
+							visData.setVisEntriesId(cvx.getVisEntriesId());
+						} else {
+							visData.setVisEntriesId(-1);
+						}
+						if( cvx.getVisPresentDate() != null ) {
+							visData.setVisPrsntDate(cvx.getVisPresentDate());
+						} else {
+							visData.setVisPrsntDate(visEntries.getPatientVisEntriesPresentationDate());
+						}
+						if( cvx.getVisId() != null ) {
+							visData.setVisPatientEntiresId(cvx.getVisId());
+						} else {
+							visData.setVisPatientEntiresId(visEntries.getPatientVisEntriesId());
+						}
+						visDataList.add(visData);
+					}
+				}
+			} else {
+				VisData visData = new VisData();
+				visData.setCvxMapCode(cvx.getCvxVaccineGroupMappingUncertainFormulationCvx());
+				visData.setVisName(cvx.getVisName());
+				visData.setGroupName(cvx.getCvxVaccineGroupMappingVaccineGroupCode());
+				visData.setGroupCode(cvx.getCvxVaccineGroupMappingCvxCode());
+				visData.setVisPubDate(cvx.getVisPublicationDate());
+				visData.setVisFileName(cvx.getVisFileMappingFileName());
+				visData.setVisEntriesId(cvx.getVisEntriesId());
+				visData.setVisPrsntDate(cvx.getVisPresentDate());
+				visData.setVisPatientEntiresId(cvx.getVisId());
+				visDataList.add(visData);
+			}
+		}
+
+		return visDataList;
+	}
+
+	/**
+	 * Method to get language code of patient based on
+	 * @param chartId2
+	 * @return
+	 */
+	private String getLanguageCode(int chartId2) {
+		String langCode;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
+		Join<PatientRegistration, Chart> joinChart = root.join(PatientRegistration_.alertTable,JoinType.INNER);
+		cq.select(root.get(PatientRegistration_.patientRegistrationPreferredLan));
+		cq.where(builder.equal(joinChart.get(Chart_.chartPatientid), chartId2));
+		langCode = "" + em.createQuery(cq).getFirstResult();
+		return langCode;
+	}
+
+	/**
+	 * Method to get lot number details
+	 * @param vaccineId
+	 * @param onLoad
+	 */
+	@Override
+	public List<VaccineOrderDetails> findLotDetails(Integer vaccineId, String onLoad) {
+		String isCHDP = "";
+		List<VaccineOrderDetails> lotDeatils;
+		if( onLoad == "-2" ) {
+			isCHDP = getCHDPFromLab(vaccineId, this.encounterId);
+			lotDeatils = vaccineRepository.findAll(Specifications.where(InvestigationSpecification.getLotNoDetails()).and(InvestigationSpecification.checkExpiryDate()).and(InvestigationSpecification.checkIsActive()).and(InvestigationSpecification.checkVaccineId(vaccineId)).and(InvestigationSpecification.chdpCriteria(isCHDP)));
+		} else {
+			isCHDP = getCHDPFromVaccines(vaccineId);
+			lotDeatils = vaccineRepository.findAll(Specifications.where(InvestigationSpecification.getLotNoDetails()).and(InvestigationSpecification.checkExpiryDate()).and(InvestigationSpecification.checkIsActive()).and(InvestigationSpecification.checkVaccineId(vaccineId)).and(InvestigationSpecification.chdpCriteria(isCHDP)));
+		}
+		logger.debug("in getting lot number details");
+		return lotDeatils;
+	}
+
+	/**
+	 * Method to save vaccine consent
+	 * @param consentData
+	 */
+	@Override
+	public List<VaccinationConsentForm> saveVaccineConsent(ConsentDetails consentData) {
+		logger.debug("in saveVaccineConsent");
+		String[] testDetailsArray= consentData.getVaccineDetailId().toString().split(",");
+		String filepath = saveDecodeImage(consentData.getImageContent(), consentData.getSharedFolderPath(), consentData.getEncounterId());
+		Date date = new Date();
+		for (int i = 0; i < testDetailsArray.length; i++) {			
+			VaccinationConsentForm consentForm = new VaccinationConsentForm();
+			consentForm.setVaccinationConsentFormImagePath(filepath);
+			consentForm.setVaccinationConsentFormImgcontent(consentData.getImageContent());
+			consentForm.setVaccinationConsentFormIsgiven(consentData.isConsentGiven());
+			consentForm.setVaccinationConsentFormSignedUser("$$" + consentData.getSignedUser() + "$$");
+			consentForm.setVaccinationConsentFormTestdetailId(Integer.parseInt(testDetailsArray[i]));
+			consentForm.setVaccinationConsentFormSignedDate(new Timestamp(date.getTime()));
+			consentForm.setVaccinationConsentFormCreatedBy(sessionMap.getUserID());
+			consentForm.setVaccinationConsentFormCreatedDate(new Timestamp(date.getTime()));
+			consentForm.setVaccinationConsentFormUserId(sessionMap.getUserID());
+			vaccinationConsentFormRepository.saveAndFlush(consentForm);
+		}
+		List<VaccinationConsentForm> consentList = vaccinationConsentFormRepository.findAll(InvestigationSpecification.consentByChartId(consentData.getChartId()));
+		return consentList;
+	}
+
+	/**
+	 * Method to save the decoded image in shared folder
+	 * @param imgBase64Data
+	 * @param encounterId
+	 * @return
+	 */
+	public static String saveDecodeImage(String imgBase64Data, String path, int encounterId) {
+		try {/*
+			String sharedFolderPath = path;
+			File dirStructure = new File(sharedFolderPath+"/vaccineconsentform");
+			java.util.Date date = new java.util.Date();
+			SimpleDateFormat ft = new SimpleDateFormat ("yyMMddhhmm");
+			if ( !dirStructure.exists() ) {
+				dirStructure.setReadable(true,false);
+				dirStructure.setWritable(true,false);
+				dirStructure.setExecutable(true,false);
+				dirStructure.mkdir();
+			}
+			Base64 decoder = new Base64();
+			imgBase64Data =  imgBase64Data.replaceAll("@","/");
+			String str = "";
+			for(int i=0;i<imgBase64Data.length();i++) {
+				if(imgBase64Data.charAt(i)==' ') {
+					str = str + "+";
+				} else {
+					str = str + imgBase64Data.charAt(i);
+				}
+			}
+			byte[] imgBytes = decoder.decode(str);
+			FileOutputStream osf;
+			osf = new FileOutputStream(new File(sharedFolderPath+"/vaccineconsentform/"+encounterId+"_"+ft.format(date)+"_consentform.png"));
+			osf.write(imgBytes);
+			osf.flush();
+			osf.close();
+			return sharedFolderPath+"/vaccineconsentform/"+encounterId+"_"+ft.format(date)+"_consentform.png";
+		*/
+			return "";
+			} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		return "";
+	}
+
+	/**
+	 * Method to get the lab details based on
+	 * @param encounterId
+	 * @return
+	 * @throws Exception 
+	 */
+	@Override
+	public List<LabEntries> findTodaysOrders(Integer encounterId) throws Exception {
+		logger.debug("in findTodaysOrders");
+		this.encounterId = encounterId;
+		encounterId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + encounterId)).or("-1"));
+		List<LabEntries> labs = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.labByEncounterId(encounterId)).and(InvestigationSpecification.LabsByTestStatus()));
+		return labs;
+	}
+
 	private Integer getEmpId(int encounterId2) {
 		Integer employeeId;
 		CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -236,7 +1534,278 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		employeeId =  (Integer) em.createQuery(cq).getSingleResult();
 		return employeeId;
 	}
-	
+
+	/**
+	 * Method to get the lab details based on
+	 * @param testDetailId
+	 * @param testId
+	 * @return Orders
+	 * @throws Exception 
+	 */
+	@Override
+	public Orders findCompleteTestDetails(Integer testDetailId, Integer testId, String groupId)
+			throws Exception {
+		Orders orderDetails = new Orders();
+		logger.debug("in getting testDetails");
+		List<LabEntries> labs = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.testDetailsByTestId(testDetailId)).and(InvestigationSpecification.checkTestStatus()));
+		List<LabData> labDataList = new ArrayList<LabData>();
+		for (int i = 0; i < labs.size(); i++) {
+			LabEntries labEntry = labs.get(i);
+			LabData labData = new LabData();
+			labData.setChartId("" + labEntry.getLabEntriesChartid());
+			EmployeeProfile empData = labEntry.getEmpProfile();
+			labData.setEmpFullName(empData.getEmpProfileFullname());
+			labData.setEmpId("" + empData.getEmpProfileEmpid());
+			labData.setEncounterId("" + labEntry.getLabEntriesEncounterId());
+			this.chartId = labEntry.getLabEntriesChartid();
+			labData.setPatientId("" + getPatientId());
+			if( labEntry.getLabEntriesSepcimenId() != -1 ) {
+				Specimen specimen = labEntry.getSpecimen();
+				labData.setSpecCollVol(specimen.getSpecimenCollVol());
+				labData.setSpecCollVolUnit(specimen.getSpecimenCollVolUnit());
+				labData.setSpecimenSource(specimen.getSpecimenSource());
+			} else {
+				labData.setSpecCollVol("");
+				labData.setSpecCollVolUnit("");
+				labData.setSpecimenSource("");
+			}
+			labData.setTestAdminNotes("" + labEntry.getLabEntriesAdministrationNotes());
+			labData.setTestBaseDose(labEntry.getLabEntriesBasedose());
+			labData.setTestBodySiteCode(labEntry.getLabEntriesBodysiteCode());
+			labData.setTestBodySiteDesc(labEntry.getLabEntriesBodysiteDesc());
+			labData.setTestConfirmStatus("" + labEntry.getLabEntriesConfirmTestStatus());
+			labData.setTestDetailId("" + labEntry.getLabEntriesTestdetailId());
+			labData.setTestDosage(labEntry.getLabEntriesDosage());
+			labData.setTestGroupId("" + labEntry.getLabEntriesGroupid());
+			labData.setTestId("" + labEntry.getLabEntriesTestId());
+			if( labEntry.getLabEntriesIsBillable() != null )
+				labData.setTestIsBillable(labEntry.getLabEntriesIsBillable());
+			else
+				labData.setTestIsBillable(true);
+			labData.setTestIsChdp("" + labEntry.getLabEntriesIschdplab());
+			labData.setTestIsFasting(labEntry.getLabEntriesIsFasting());
+			labData.setTestLoinc(labEntry.getLabEntriesLoinc());
+			labData.setTestName(labEntry.getLabEntriesTestDesc());
+			labData.setTestOrdBy("" + labEntry.getLabEntriesOrdBy());
+			DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+			labData.setTestOrdOn(formatter.format(labEntry.getLabEntriesOrdOn()));
+			labData.setTestPerfBy("" + labEntry.getLabEntriesPerfBy());
+			if( labEntry.getLabEntriesPerfOn() != null ) 
+				labData.setTestPerfOn(formatter.format(labEntry.getLabEntriesPerfOn()));
+			else {
+				labData.setTestPerfOn("");
+			}
+			labData.setTestRefusalId("" + labEntry.getLabEntriesRefusalreason());
+			labData.setTestRevBy("" + labEntry.getLabEntriesRevBy());
+			if( labEntry.getLabEntriesRevOn() != null )
+				labData.setTestRevOn(formatter.format(labEntry.getLabEntriesRevOn()));
+			else 
+				labData.setTestRevOn("");
+			labData.setTestRoute(labEntry.getLabEntriesLabRoute());
+			labData.setTestShortOrderNotes(labEntry.getLabEntriesShortorderNotes());
+			labData.setTestSite(labEntry.getLabEntriesLabSite());
+			labData.setTestSpecimenId("" + labEntry.getLabEntriesSepcimenId());
+			labData.setTeststatus("" + labEntry.getLabEntriesTestStatus());
+			labData.setTestStrength(labEntry.getLabEntriesStrength());
+			labData.setTestStrengthUnit(labEntry.getLabEntriesStrengthUnit());
+			labData.setTestModifiedBy("" + labEntry.getLabEntriesModifiedby());
+			labData.setTestShortNotes(labEntry.getLabEntriesShortNotes());
+			labData.setTestCpt(labEntry.getLabEntriesCpt());
+			labData.setTestCptUnits(labEntry.getLabEntriesCptUnits());
+			labData.setTestResultNotes(labEntry.getLabEntriesResultNotes());
+			labData.setDx1Code(labEntry.getLabEntriesDx1code());
+			labData.setDx1CodeSystem(labEntry.getLabEntriesDx1codeCodesystem());
+			labData.setDx2Code(labEntry.getLabEntriesDx2code());
+			labData.setDx2CodeSystem(labEntry.getLabEntriesDx2codeCodesystem());
+			labData.setDx3Code(labEntry.getLabEntriesDx3code());
+			labData.setDx3CodeSystem(labEntry.getLabEntriesDx3codeCodesystem());
+			labData.setDx4Code(labEntry.getLabEntriesDx4code());
+			labData.setDx4CodeSystem(labEntry.getLabEntriesDx4codeCodesystem());
+			labData.setDx1CodeDesc(labEntry.getLabEntriesDx1codeCodedesc());
+			labData.setDx2CodeDesc(labEntry.getLabEntriesDx2codeCodedesc());
+			labData.setDx3CodeDesc(labEntry.getLabEntriesDx3codeCodedesc());
+			labData.setDx4CodeDesc(labEntry.getLabEntriesDx4codeCodedesc());
+			labData.setTestLotNo("" + labEntry.getLabEntriesLotNo());
+			labDataList.add(labData);
+		}		
+		orderDetails.setLabEntries(labDataList);
+
+		logger.debug("in getting status list");
+		List<H068> statusList = h068Repository.findAll(InvestigationSpecification.getStatusList());
+		orderDetails.setStatusList(statusList);
+
+		logger.debug("in getting refusal reason list");
+		List<H068> refusalReason = h068Repository.findAll(InvestigationSpecification.getRefusalReasonList());
+		orderDetails.setRefusalReasonList(refusalReason);
+
+		logger.debug("in getting source list");
+		List<H068> sourceList = h068Repository.findAll(InvestigationSpecification.getSourceList());
+		orderDetails.setSourceList(sourceList);
+
+		logger.debug("in getting immunisation site info");
+		List<ImmunisationSite> siteInfo = siteRepository.findAll(InvestigationSpecification.getSiteDetails());
+		orderDetails.setSiteInfo(siteInfo);
+
+		List<VaccinationConsentForm> consentDetails = consentRepository.findAll(InvestigationSpecification.checkForConsent(testDetailId));
+		if ( consentDetails.size() > 0 ) {
+			orderDetails.setIsConsentObtained(true);
+		} else {
+			orderDetails.setIsConsentObtained(false);
+		}
+
+		if( !orderDetails.getIsConsentObtained() ) {
+			List<LabEntries> vaccineInfo = findVaccineInfo(labs.get(0).getLabEntriesEncounterId());
+			orderDetails.setVaccineConsentInfo(vaccineInfo);
+		}
+
+		if( groupId.equalsIgnoreCase("36")) {
+			List<VisData> visData = findVISData(testId, testDetailId);
+			orderDetails.setVisData(visData);
+		}
+
+		if( groupId.equalsIgnoreCase("36") || groupId.equalsIgnoreCase("5")) {
+			this.encounterId = labs.get(0).getLabEntriesEncounterId();
+			List<VaccineOrderDetails> vaccineOrderDetails = findLotDetails(testId, "-2");
+			orderDetails.setLotDetails(vaccineOrderDetails);
+		}
+
+		LabEntries currentLab = labs.get(0);
+		Chart chart = currentLab.getChart();
+		if( currentLab.getLabEntriesCpt().equalsIgnoreCase("92551")) { /** Audiometry Screening*/
+			List<PatientClinicalElements> leftValueList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), chart.getChartPatientid(), "0000200200100145000"));
+			if( leftValueList.size() > 0 ) {
+				orderDetails.setLeftEarValue(leftValueList.get(0).getPatientClinicalElementsValue());
+				orderDetails.setAudiometryLeftList(clinicalElementsService.getClinicalElementOptions("0000200200100145000")); /** audio status left*/
+			}
+			List<PatientClinicalElements> rightValueList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), chart.getChartPatientid(), "0000200200100146000"));
+			if( rightValueList.size() > 0 ) {
+				orderDetails.setRightEarValue(rightValueList.get(0).getPatientClinicalElementsValue());
+				orderDetails.setAudiometryRightList(clinicalElementsService.getClinicalElementOptions("0000200200100146000")); /** audio status right*/
+			}
+		} else if( currentLab.getLabEntriesCpt().equalsIgnoreCase("99173")) { /** Vision Screening*/
+			List<PatientClinicalElements> leftEyeList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), chart.getChartPatientid(), "0000200200100147000"));
+			if( leftEyeList.size() > 0 ) {
+				orderDetails.setLeftEyeValue(leftEyeList.get(0).getPatientClinicalElementsValue());
+				orderDetails.setVisionLeftList(clinicalElementsService.getClinicalElementOptions("0000200200100147000")); /** vital vision left*/
+			}
+			List<PatientClinicalElements> rightEyeList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), chart.getChartPatientid(), "0000200200100148000"));
+			if( rightEyeList.size() > 0 ) {
+				orderDetails.setRightEyeValue(rightEyeList.get(0).getPatientClinicalElementsValue());
+				orderDetails.setVisionRightList(clinicalElementsService.getClinicalElementOptions("0000200200100148000")); /** vital vision right*/
+			}
+			List<PatientClinicalElements> glassList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), chart.getChartPatientid(), "0000200200100179000"));
+			if( glassList.size() > 0 ) {
+				orderDetails.setGlassValue(glassList.get(0).getPatientClinicalElementsValue());
+				orderDetails.setGlassValueList(clinicalElementsService.getClinicalElementOptions("0000200200100179000")); /** vital glass value*/
+			}
+		}
+		List<PatientClinicalElements> weightList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), -1, "0000200200100024000"));
+		if( weightList.size() > 0 ) {
+			orderDetails.setPatientWeight(weightList.get(0).getPatientClinicalElementsValue());
+		}
+
+		this.chartId = currentLab.getLabEntriesChartid();
+
+		List<LabEntriesParameter> labParameters = labEntriesParameterRepository.findAll(InvestigationSpecification.checkParameterAndTestDetailId(testDetailId));
+		orderDetails.setLabParameters(labParameters);
+
+		List<FileName> docDetails = fileNameRepository.findAll(InvestigationSpecification.checkFileEntityAndScanType(testDetailId,2));
+		orderDetails.setDocDetails(docDetails);
+
+		List<FileName> imageDetails = fileNameRepository.findAll(InvestigationSpecification.checkFileEntityAndScanType(testDetailId,1));
+		orderDetails.setImageDetails(imageDetails);
+
+		return orderDetails;
+	}
+
+	/**
+	 * Method to get CHDP criteria state
+	 * @param labId
+	 * @param labEncounterId
+	 * @return
+	 */
+	private String getCHDPFromLab(Integer labId, int labEncounterId) {
+		String isCHDP;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabEntries> root = cq.from(LabEntries.class);
+		cq.select(root.get(LabEntries_.labEntriesIschdplab));
+		cq.where(builder.and(builder.equal(root.get(LabEntries_.labEntriesTestId), labId), builder.equal(root.get(LabEntries_.labEntriesEncounterId), encounterId)));
+		cq.orderBy(builder.desc((root.get(LabEntries_.labEntriesIschdplab))));
+		isCHDP = "" + em.createQuery(cq).getSingleResult();
+		return isCHDP;
+	}
+
+	/**
+	 * Method to get CHDP criteria state from vaccineOrderDetails
+	 * @param labId
+	 * @return
+	 */
+	private String getCHDPFromVaccines(Integer labId) {
+		String isCHDP;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<VaccineOrderDetails> root = cq.from(VaccineOrderDetails.class);
+		cq.select(root.get(VaccineOrderDetails_.vaccineOrderDetailsIschdp));
+		cq.where(builder.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsVaccineId), labId));
+		cq.orderBy(builder.desc((root.get(VaccineOrderDetails_.vaccineOrderDetailsIschdp))));
+		isCHDP = "" + em.createQuery(cq).getFirstResult();
+		return isCHDP;
+	}
+
+	/**
+	 * Method to get the body site data
+	 * @param searchStr
+	 * @param limit
+	 * @param offset
+	 * @return
+	 */
+	@Override
+	public Page<BodySite> findBodySiteData(String searchStr, Integer limit, Integer offset) throws Exception {
+		logger.debug("in getting body site data");
+		Page<BodySite> siteDetails = bodySiteRepository.findAll(Specifications.where(InvestigationSpecification.searchBasedOnCode(searchStr + "%")),new PageRequest(offset, limit));
+		if ( siteDetails.getContent().size() < 1 ) {
+			siteDetails = bodySiteRepository.findAll(Specifications.where(InvestigationSpecification.searchBasedOnDesc(searchStr + "%")),new PageRequest(offset, limit));
+		}
+		return siteDetails;
+	}
+
+	/**
+	 * Method to find frequent orders list
+	 */
+	@Override
+	public List<FrequentOrders> findFrequentOrders(Integer encounterId) throws Exception {
+		logger.debug("in getting frequent orders list");
+		List<FrequentOrders> freqList = new ArrayList<FrequentOrders>();
+		List<LabGroups> labGroups = labGroupsRepository.findAll();
+		for (int i = 0; i < labGroups.size(); i++) {
+			FrequentOrders freqOrders = new FrequentOrders();
+			LabGroups groups = labGroups.get(i);
+			this.empId = getEmpId(encounterId);
+			Integer loginId = getLoginUserId(this.empId);
+			List<LabDescription> frequentOrder = labDescriptionRepository.findAll(Specifications.where(InvestigationSpecification.getFrequentLabs(groups.getLabGroupsId(),loginId)));
+			if( frequentOrder.size() > 0 ) {
+				freqOrders.setLabs(frequentOrder);
+				freqOrders.setGroupId(groups.getLabGroupsId());
+				freqOrders.setGroupName(groups.getLabGroupsDesc());
+				freqList.add(freqOrders);
+			}
+		}
+		return freqList;
+	}
+
+	/**
+	 * Method to get vaccine details which has to take consent
+	 * @return the entity PatientRegistration
+	 * @throws Exception
+	 */
+	public List<LabEntries> findVaccineInfo(Integer encounterId) throws Exception {
+		logger.debug("in getting vaccine details");
+		encounterId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + encounterId)).or("-1"));
+		List<LabEntries> vaccines = labEntriesRepository.findAll(InvestigationSpecification.vaccineByEncounter(encounterId));
+		return vaccines;
+	}
+
 	@Override
 	public void  savelab(String requesttosave,Integer encounterIdParam,Integer patientIdParam,Integer chartIdParam,
 			Integer userIdParam,String fullDataParam,String isforwardParam,String forwardto,
@@ -1074,7 +2643,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		List<Chart> chart=chartRepository.findAll(ChartSpecification.findByChartId(chartId));
 		int tmpPatientId = -1;
 		if( chart.size() > 0 ) {
-			tmpPatientId = chart.get(0).getChart_patientid();
+			tmpPatientId = chart.get(0).getChartPatientid();
 		}
 		SavePatientImmunityinformation(labEncounterId,tmpPatientId,chartId,persumeimmunityinfo);
 		SaveParameters(chartId, Integer.parseInt(saveid), paramString);
@@ -1277,6 +2846,16 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 	}
 
+	/**
+	 * Method to put lab alert in inbox page
+	 * @param labEncounterId
+	 * @param refId
+	 * @param status
+	 * @param labType
+	 * @param isExternal
+	 * @param message
+	 * @param alertEvent
+	 */
 	private void putLabAlert(int labEncounterId, int refId, int status, int labType, int isExternal, String message, AlertEvent alertEvent) {
 		int forwardTo = 0;
 		int CategoryId = -2;
@@ -1861,6 +3440,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		}
 	}
 
+	@Override
 	public void DeleteParameters (int testDetailId) throws Exception {
 		if(testDetailId != -1) {
 			List<LabEntriesParameter> labEntriesParameterList=labEntriesParameterRepository.findAll(Specifications.where(InvestigationSpecification.getParamEntriesTestDetailId(testDetailId)));
@@ -1936,4 +3516,340 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		associatedOrderPblm.setAssociatedOrderPblmFlag(true);
 		associatedOrderPblmRepository.saveAndFlush(associatedOrderPblm);
 	}
+
+	@Override
+	public LS_Bean findPatientLabDataByChart(Integer chartId) throws Exception {
+		return getCompleteLabData(chartId);
+	}
+	
+	@Override
+	public LS_Bean findPatientLabDataByCategory(Integer chartId,Integer category) throws Exception {
+		return getLabDataCategory(chartId, category);
+	}
+	
+	@Override
+	public LS_Bean findPatientLabDataByTest(Integer chartId,Integer testId) throws Exception {
+		return getLabDataTestId(chartId, testId);
+	}
+
+	public LS_Bean getCompleteLabData(Integer chartId){
+		LS_Bean lsBean = new LS_Bean();
+		List<LabEntries> labEntriesList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartId(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)));
+		ArrayList<Integer> testIds = new ArrayList<Integer>();
+		for(int i=0;i < labEntriesList.size();i++) {
+			if( !testIds.contains(labEntriesList.get(i).getLabEntriesTestId()) ) {
+				testIds.add(labEntriesList.get(i).getLabEntriesTestId());
+			}
+			HashMap<String, String> temp = new HashMap<String, String>();
+			LabDescription labDescription = labDescriptionRepository.findOne(InvestigationSpecification.labByTestId(labEntriesList.get(i).getLabEntriesTestId()));
+			if(labDescription!=null)
+				temp.put("testCategory", Optional.fromNullable(labDescription.getLabDescriptionTestcategoryType()).or(4)+"");
+			else
+				temp.put("testCategory","4");
+			if(labDescription!=null){
+				if(Optional.fromNullable(labDescription.getLabDescriptionTestcategoryType()).or(4)==3)
+					continue;
+			}			
+		}
+		if(labEntriesList.size() > 0) {
+			dateArr=new ArrayList<String>();
+			lsBean.setParamData(labAndParamData(chartId, testIds));
+			lsBean.setExternalLabsResult(externalData(chartId));
+			dateArr = sorttoascending(dateArr);
+			lsBean.setParamDate(dateArr);
+		}else{
+			GroupName groupName = new GroupName();
+			groupName.setLaboratories(new ArrayList<LS_Lab>());
+			groupName.setRadiology(new ArrayList<LS_Lab>());
+			groupName.setMiscellaneous(new ArrayList<LS_Lab>());
+			groupName.setProcedures(new ArrayList<LS_Lab>());
+			lsBean.setParamData(groupName);
+			lsBean.setExternalLabsResult(new ArrayList<LS_External>());
+			lsBean.setParamDate(new ArrayList<String>());
+		}
+		lsBean.setChartId(chartId);
+		lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
+		return lsBean;
+	}
+
+	public LS_Bean getLabDataTestId(Integer chartId,Integer testId){
+		LS_Bean lsBean=new LS_Bean();
+		dateArr=new ArrayList<String>();
+		lsBean.setParamData(labAndParamData(chartId,new ArrayList<Integer>(Arrays.asList(testId))));
+		dateArr = sorttoascending(dateArr);
+		lsBean.setParamDate(dateArr);
+		lsBean.setChartId(chartId);
+		lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
+		return lsBean;
+	}
+
+	public LS_Bean getLabDataCategory(Integer chartId,Integer category){
+		LS_Bean lsBean=new LS_Bean();
+		List<LabDescription> labDescription=labDescriptionRepository.findAll(InvestigationSpecification.labByCategoryId(category));
+		ArrayList<Integer> testIdsDescription=new ArrayList<Integer>();
+		for(int i=0;i<labDescription.size();i++){
+			testIdsDescription.add(labDescription.get(i).getLabDescriptionTestid());
+		}
+		List<LabEntries> labEntriesList=labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartId(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.testIds(testIdsDescription)));
+		ArrayList<Integer> testIdsEntries=new ArrayList<Integer>();
+		for(int i=0;i<labEntriesList.size();i++){
+			testIdsEntries.add(labEntriesList.get(i).getLabEntriesTestId());
+		}
+		if(testIdsEntries.size()>0){
+			dateArr = new ArrayList<String>();
+			lsBean.setParamData(labAndParamData(chartId, testIdsEntries));
+			dateArr = sorttoascending(dateArr);
+			lsBean.setParamDate(dateArr);
+		} else {
+			GroupName groupName = new GroupName();
+			groupName.setLaboratories(new ArrayList<LS_Lab>());
+			groupName.setRadiology(new ArrayList<LS_Lab>());
+			groupName.setMiscellaneous(new ArrayList<LS_Lab>());
+			groupName.setProcedures(new ArrayList<LS_Lab>());
+			lsBean.setParamData(groupName);
+			lsBean.setParamDate(new ArrayList<String>());
+		}
+		lsBean.setChartId(chartId);
+		lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
+		return lsBean;
+	}
+	
+	public GroupName labAndParamData(Integer chartId,ArrayList<Integer> testIds){
+		GroupName labs = new GroupName();
+		List<LS_Lab> radiology = new ArrayList<LS_Lab>();
+		List<LS_Lab> laboratories = new ArrayList<LS_Lab>();
+		List<LS_Lab> procedures = new ArrayList<LS_Lab>();
+		List<LS_Lab> miscellaneous = new ArrayList<LS_Lab>();		
+		for (int i = 0; i < testIds.size(); i++) {
+			LS_Lab labData = new LS_Lab();
+			Integer testId = -1;
+			String testCategory = "4", labName = "";
+			List<LabEntries> paramData = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartId(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.getTestLog(testIds.get(i))));
+			List<ParamData> labParamDetails = new ArrayList<ParamData>();						
+			for (int j = 0; j < paramData.size(); j++) {				
+				LabEntries paramDetails = paramData.get(j);
+				ParamData labParam = new ParamData();
+				testId = paramDetails.getLabEntriesTestId();
+				LabDescription labDescription = labDescriptionRepository.findOne(InvestigationSpecification.labByTestId(paramDetails.getLabEntriesTestId()));
+				if(labDescription != null) {
+					testCategory = Optional.fromNullable(labDescription.getLabDescriptionTestcategoryType()).or(4) + "";
+				} else {
+					testCategory = "4";
+				}
+				labName = paramDetails.getLabEntriesTestDesc();
+				labParam.setConfirmTestStatus(paramDetails.getLabEntriesConfirmTestStatus());
+				labParam.setDrugxml(paramDetails.getLabEntriesDrugxml());
+				labParam.setLabStatus(paramDetails.getLabEntriesTestStatus());
+				DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
+				labParam.setOrderedDate(formatter.format(paramDetails.getLabEntriesOrdOn()));
+				labParam.setPerformedDate(formatter.format(paramDetails.getLabEntriesPerfOn()));
+				labParam.setEncounterId(paramDetails.getLabEntriesEncounterId());
+				labParam.setTestDetailId(paramDetails.getLabEntriesTestdetailId());
+				labParam.setResultNotes(paramDetails.getLabEntriesResultNotes());
+				int testdetilid = Integer.parseInt(HUtil.Nz(labParam.getTestDetailId(),"-1001"));
+				List<Object> paramList = getParamMapIds(testdetilid);
+				if( paramList.size() > 0 ) {
+					List<LS_Parameter> rstList = new ArrayList<LS_Parameter>();
+					for(int k = 0 ; k < paramList.size() ; k++) {
+						LS_Parameter lsParameter = paramDataComplete((Integer)paramList.get(k), chartId);
+						if( lsParameter != null ) {
+							rstList.add(lsParameter);
+						}
+					}
+					if( testCategory.equalsIgnoreCase("2")) {
+						labParam.setParameters(rstList);
+					} else {
+						labParam.setParameters(new ArrayList<LS_Parameter>());
+					}
+					if(rstList.size() > 0) {
+						for(int l = 0 ; l < rstList.size() ;l++ ) {
+							List<ParamValues> paramValues = rstList.get(l).getParamValuesList();
+							if( paramValues != null ) {
+								for (int m = 0; m < paramValues.size(); m++) {
+									if( paramValues.get(m) != null ) {
+										if(paramValues.get(m).getParamDate() != null ) {
+											if(!dateArr.contains(paramValues.get(m).getParamDate().toString()))
+												dateArr.add(paramValues.get(m).getParamDate().toString());
+										}	
+									}
+								}
+							}
+						}
+					}
+				} else {
+					labParam.setParameters(new ArrayList<LS_Parameter>());
+				}
+				labParamDetails.add(labParam);
+			}
+			labData.setLabName(labName);
+			labData.setTestId(testId);
+			labData.setTestCategory(testCategory);
+			labData.setLabParamDetails(labParamDetails);
+			switch( labData.getTestCategory() ) {
+			case "1": radiology.add(labData);
+			break;
+			case "2": laboratories.add(labData);
+			break;
+			case "4": miscellaneous.add(labData);
+			break;
+			case "5": procedures.add(labData);
+			break;
+			}
+		}
+		labs.setRadiology(radiology);
+		labs.setLaboratories(laboratories);
+		labs.setMiscellaneous(miscellaneous);
+		labs.setProcedures(procedures);
+		return labs;
+	}
+	
+	private List<Object> getParamMapIds(int testdetilid) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabEntriesParameter> root = cq.from(LabEntriesParameter.class);
+		cq.select(root.get(LabEntriesParameter_.labEntriesParameterMapid));
+		cq.where(builder.equal(root.get(LabEntriesParameter_.labEntriesParameterTestdetailid), testdetilid));
+		cq.distinct(true);
+		return em.createQuery(cq).getResultList();
+	}
+
+	@SuppressWarnings("unused")
+	public List<LS_External> externalData(Integer chartId){
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<LS_External> cq = builder.createQuery(LS_External.class);
+		Root<LabEntries> root = cq.from(LabEntries.class);
+		Join<LabEntries,Hl7Unmappedresults> params=root.join("labData",JoinType.INNER);
+		Join<Join<LabEntries,Hl7Unmappedresults>,PatientRegistration> params1=params.join("hl7UnmappedresultsPatTable",JoinType.INNER);
+		Join<Join<LabEntries,Hl7Unmappedresults>,Hl7ResultInbox> params2=params.join("hl7ResultInbox",JoinType.INNER);
+		Join<LabEntries,Chart> params3 = root.join("chart",JoinType.INNER);
+		@SuppressWarnings("rawtypes")
+		Selection[] selections=new Selection[]{
+			root.get(LabEntries_.labEntriesTestdetailId),
+			root.get(LabEntries_.labEntriesTestDesc),
+			root.get(LabEntries_.labEntriesTestId),
+			params.get(Hl7Unmappedresults_.hl7UnmappedresultsFilewiseId),
+			params2.get(Hl7ResultInbox_.hl7ResultInboxReviewed),
+		};
+		cq.select(builder.construct(LS_External.class,selections));
+		Predicate[] restrictions = new Predicate[] {
+				builder.equal(root.get(LabEntries_.labEntriesChartid),chartId),
+				builder.equal(params.get(Hl7Unmappedresults_.hl7UnmappedresultsIsactive),true),
+				builder.equal(params2.get(Hl7ResultInbox_.hl7ResultInboxIsactive),true),
+		};
+		cq.where(restrictions);
+		List<LS_External> rstList=new ArrayList<LS_External>();
+		try{
+			rstList=em.createQuery(cq).getResultList();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return rstList;
+	}
+	
+	public LS_Parameter paramDataComplete(Integer paramMapId, Integer chartId) {
+		LS_Parameter parameterData = new LS_Parameter();
+		Integer paramId = -1;
+		String displayName = "";
+		List<LabEntriesParameter> labDetailsList = labEntriesParameterRepository.findAll(InvestigationSpecification.getParamLog(paramMapId, chartId));
+		List<ParamValues> paramValuesList = new ArrayList<ParamValues>();
+		for (int k = 0; k < labDetailsList.size(); k++) {
+			ParamValues paramValues = new ParamValues();
+			LabEntriesParameter labEntriesParameter = labDetailsList.get(k);
+			LabParameters labParameters = labEntriesParameter.getLabParametersTable();
+			if( labParameters != null ) {
+				paramValues.setUnits(labParameters.getLabParametersUnits());
+				paramValues.setNormalRange(labParameters.getLabParametersNormalrange());
+				paramValues.setParamType(labParameters.getLabParametersType());
+				paramValues.setParamName(labParameters.getLabParametersName());
+				paramId = labParameters.getLabParametersId();
+				displayName = labParameters.getLabParametersDisplayname();
+				paramValues.setFlowsheetUrl(labParameters.getLabParametersFlowsheeturl());
+				paramValues.setIsflowsheetNeeded(labParameters.getLabParametersIsflowsheetneeded());					
+			}
+			DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+			if( labEntriesParameter.getLabEntriesParameterDate() != null ) {
+				paramValues.setParamDate(formatter.format(labEntriesParameter.getLabEntriesParameterDate()));
+			} else {
+				paramValues.setParamDate(formatter.format(getLabPerformedDate(labEntriesParameter.getLabEntriesParameterTestdetailid())));
+			}
+			paramValues.setLabEntryParamId(labEntriesParameter.getLabEntriesParameterId());
+			paramValues.setLabEntryParamValue(labEntriesParameter.getLabEntriesParameterValue());
+			paramValues.setLabEntryParamNotes(labEntriesParameter.getLabEntriesParameterNotes());
+			paramValues.setLabEntryParamStatus(labEntriesParameter.getLabEntriesParameterStatus());
+			paramValues.setLabEntryLabComp(labEntriesParameter.getLabEntriesParameterLabcompDetailid());				
+			paramValuesList.add(paramValues);
+		}
+		if( paramValuesList.size() > 0 && paramId != -1) {
+			parameterData.setDisplayName(displayName);
+			parameterData.setParamId(paramId);
+			parameterData.setParamValuesList(paramValuesList);
+		}
+		if( parameterData.getParamId() != null || parameterData.getDisplayName() != null && parameterData.getParamValuesList() != null )	{
+			return parameterData;
+		} else {
+			return null;
+		}
+	}
+
+	private Timestamp getLabPerformedDate(Integer testdetailid) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabEntries> root = cq.from(LabEntries.class);
+		cq.select(root.get(LabEntries_.labEntriesPerfOn));
+		cq.where(builder.and(builder.equal(root.get(LabEntries_.labEntriesTestdetailId), testdetailid)),
+				builder.greaterThan(root.get(LabEntries_.labEntriesTestStatus), 2),
+				builder.lessThan(root.get(LabEntries_.labEntriesTestStatus), 7));
+		return (Timestamp) em.createQuery(cq).getSingleResult(); 
+	}
+
+	public ArrayList<LabEntries> orderByName(ArrayList<LabEntries> labData){
+		if (labData.size() > 0) {
+			Collections.sort(labData, new Comparator<LabEntries>() {
+				@Override
+				public int compare(final LabEntries object1, final LabEntries object2) {
+					return object1.getLabEntriesTestDesc().toString().compareToIgnoreCase(object2.getLabEntriesTestDesc().toString());
+				}
+			} );
+		}
+		return labData;
+	}
+
+	public List<LS_Parameter> orderByDisplayName(List<LS_Parameter> labData){
+		if (labData.size() > 0) {
+			Collections.sort(labData, new Comparator<LS_Parameter>() {
+				@Override
+				public int compare(final LS_Parameter object1, final LS_Parameter object2) {
+					return object1.getDisplayName().toString().compareToIgnoreCase(object2.getDisplayName().toString());
+				}
+			} );
+		}
+		return labData;
+	}
+
+	public ArrayList<String> sorttoascending(ArrayList<String> vitalparamdate){
+		ArrayList<String> returnvitalparamdate = new ArrayList<String>(); 
+		ArrayList<LogsheetDateBean> logsheetDateBean = new ArrayList<LogsheetDateBean>();
+		for(String vitaldate : vitalparamdate){
+			String vitaldatepairs[] = vitaldate.replace("-", "/").split("/");
+			logsheetDateBean.add(new LogsheetDateBean(Integer.parseInt(vitaldatepairs[2]),Integer.parseInt(vitaldatepairs[0]),Integer.parseInt(vitaldatepairs[1])));
+		}
+		DateComparator comparator = new DateComparator(); 
+		Collections.sort(logsheetDateBean,comparator);
+
+		for(LogsheetDateBean logsheetDateBeaninst : logsheetDateBean){
+			String temp="";
+			if(logsheetDateBeaninst.getMonth()<10)
+				temp= "0"+logsheetDateBeaninst.getMonth()+"/";
+			else
+				temp= logsheetDateBeaninst.getMonth()+"/";
+			if(logsheetDateBeaninst.getDay()<10)
+				temp= temp + "0" +logsheetDateBeaninst.getDay()+"/";
+			else
+				temp= temp + logsheetDateBeaninst.getDay()+"/";
+			temp= temp + logsheetDateBeaninst.getYear();
+			returnvitalparamdate.add(temp);
+		}
+		return returnvitalparamdate;
+	}
+
 }

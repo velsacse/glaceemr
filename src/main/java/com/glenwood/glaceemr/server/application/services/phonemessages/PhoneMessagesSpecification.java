@@ -56,7 +56,7 @@ public class PhoneMessagesSpecification {
 								cb.equal(root.get(Encounter_.encounterType), "2"),
 								cb.greaterThanOrEqualTo(root.get(Encounter_.encounterCreatedDate),dateStarting),
 								cb.lessThanOrEqualTo(root.get(Encounter_.encounterCreatedDate),dateEnding),
-								cb.equal(patientIdJoin.get(Chart_.chart_patientid), patientId)
+								cb.equal(patientIdJoin.get(Chart_.chartPatientid), patientId)
 						};
 					}
 					else
@@ -64,7 +64,7 @@ public class PhoneMessagesSpecification {
 							predicateApUserId= new Predicate[] {
 									cb.equal(root.get(Encounter_.encounterType), "2"),
 									cb.greaterThanOrEqualTo(root.get(Encounter_.encounterCreatedDate),dateStarting),
-									cb.equal(patientIdJoin.get(Chart_.chart_patientid), patientId)
+									cb.equal(patientIdJoin.get(Chart_.chartPatientid), patientId)
 							};
 						}
 					else
@@ -72,13 +72,13 @@ public class PhoneMessagesSpecification {
 								predicateApUserId= new Predicate[] {
 										cb.equal(root.get(Encounter_.encounterType), "2"),
 										cb.lessThanOrEqualTo(root.get(Encounter_.encounterCreatedDate),dateEnding),
-										cb.equal(patientIdJoin.get(Chart_.chart_patientid), patientId)
+										cb.equal(patientIdJoin.get(Chart_.chartPatientid), patientId)
 								};
 							}
 					else{
 						predicateApUserId= new Predicate[] {
 								cb.equal(root.get(Encounter_.encounterType), "2"),
-								cb.equal(patientIdJoin.get(Chart_.chart_patientid), patientId)
+								cb.equal(patientIdJoin.get(Chart_.chartPatientid), patientId)
 						};
 					}
 

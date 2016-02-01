@@ -1,10 +1,13 @@
 package com.glenwood.glaceemr.server.application.specifications;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -12,21 +15,42 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.glenwood.glaceemr.server.application.models.BodySite;
+import com.glenwood.glaceemr.server.application.models.BodySite_;
+import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.Chart_;
+import com.glenwood.glaceemr.server.application.models.Cpt;
+import com.glenwood.glaceemr.server.application.models.Cpt_;
+import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping;
+import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.Encounter_;
+import com.glenwood.glaceemr.server.application.models.FileDetails;
+import com.glenwood.glaceemr.server.application.models.FileDetails_;
+import com.glenwood.glaceemr.server.application.models.FileName;
+import com.glenwood.glaceemr.server.application.models.FileName_;
+import com.glenwood.glaceemr.server.application.models.H068;
+import com.glenwood.glaceemr.server.application.models.H068_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping;
+import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping_;
 import com.glenwood.glaceemr.server.application.models.Hl7ResultInbox;
 import com.glenwood.glaceemr.server.application.models.Hl7ResultInbox_;
+import com.glenwood.glaceemr.server.application.models.ImmunisationSite;
+import com.glenwood.glaceemr.server.application.models.ImmunisationSite_;
 import com.glenwood.glaceemr.server.application.models.LabAlertforwardstatus;
 import com.glenwood.glaceemr.server.application.models.LabAlertforwardstatus_;
 import com.glenwood.glaceemr.server.application.models.LabDescpParameters;
+import com.glenwood.glaceemr.server.application.models.LabDescpParameters_;
 import com.glenwood.glaceemr.server.application.models.LabDescription;
 import com.glenwood.glaceemr.server.application.models.LabDescription_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
+import com.glenwood.glaceemr.server.application.models.LabFreqorder;
+import com.glenwood.glaceemr.server.application.models.LabFreqorder_;
 import com.glenwood.glaceemr.server.application.models.LabGroups;
 import com.glenwood.glaceemr.server.application.models.LabGroups_;
 import com.glenwood.glaceemr.server.application.models.LabIncludePrevious;
@@ -35,10 +59,30 @@ import com.glenwood.glaceemr.server.application.models.LabParameterCode;
 import com.glenwood.glaceemr.server.application.models.LabParameterCode_;
 import com.glenwood.glaceemr.server.application.models.LabParameters;
 import com.glenwood.glaceemr.server.application.models.LabParameters_;
+import com.glenwood.glaceemr.server.application.models.LeafPatient;
+import com.glenwood.glaceemr.server.application.models.LeafPatient_;
+import com.glenwood.glaceemr.server.application.models.OrdersetCategorylist;
+import com.glenwood.glaceemr.server.application.models.OrdersetCategorylist_;
+import com.glenwood.glaceemr.server.application.models.OrdersetList;
+import com.glenwood.glaceemr.server.application.models.OrdersetList_;
+import com.glenwood.glaceemr.server.application.models.PatientDocCategory;
+import com.glenwood.glaceemr.server.application.models.PatientDocCategory_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
+import com.glenwood.glaceemr.server.application.models.PatientVisEntries;
+import com.glenwood.glaceemr.server.application.models.PatientVisEntries_;
 import com.glenwood.glaceemr.server.application.models.Specimen;
 import com.glenwood.glaceemr.server.application.models.Specimen_;
+import com.glenwood.glaceemr.server.application.models.VaccinationConsentForm;
+import com.glenwood.glaceemr.server.application.models.VaccinationConsentForm_;
+import com.glenwood.glaceemr.server.application.models.VaccineOrder;
+import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails;
+import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails_;
+import com.glenwood.glaceemr.server.application.models.VaccineOrder_;
+import com.glenwood.glaceemr.server.application.models.Vis;
+import com.glenwood.glaceemr.server.application.models.VisFileMapping;
+import com.glenwood.glaceemr.server.application.models.VisFileMapping_;
+import com.glenwood.glaceemr.server.application.models.Vis_;
 
 /**
  * @author yasodha
@@ -47,7 +91,300 @@ import com.glenwood.glaceemr.server.application.models.Specimen_;
  * required to get the lab data for investigation module.
  */
 public class InvestigationSpecification {
+	
+	/**
+	 * Specification to check order set id
+	 * @return
+	 */
+	public static Specification<LabDescription> checkOrderSetId(final ArrayList<Integer> list) {
+		return new Specification<LabDescription>() {
 
+			@Override
+			public Predicate toPredicate(Root<LabDescription> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate checkId = root.get(LabDescription_.labDescriptionTestid).in(list);
+				return checkId;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to check lab is active or not
+	 * @return
+	 */
+	public static Specification<LabDescription> labIsActive() {
+		return new Specification<LabDescription>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabDescription> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				root.join(LabDescription_.labGroups, JoinType.INNER);
+				Predicate checkId = cb.equal(root.get(LabDescription_.labDescriptionIsactive), true);
+				return checkId;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to get associated list
+	 * @param setId
+	 * @return
+	 */
+	public static Specification<OrdersetCategorylist> checkOrderSetId(final Integer setId) {
+		return new Specification<OrdersetCategorylist>() {
+
+			@Override
+			public Predicate toPredicate(Root<OrdersetCategorylist> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate checkId = cb.equal(root.get(OrdersetCategorylist_.setid), setId);
+				Predicate checkCategory = cb.equal(root.get(OrdersetCategorylist_.categoryId), 101);
+				return cb.and(checkCategory, checkId);
+			}
+		};
+	}
+	
+	/**
+	 * Specification to get order set list which is active
+	 * @param testId
+	 * @return
+	 */
+	public static  Specification<OrdersetList> getOrderSet() {
+		return new Specification<OrdersetList>() {
+
+			@Override
+			public Predicate toPredicate(Root<OrdersetList> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate checkIsActive = cb.equal(root.get(OrdersetList_.isactive), true);
+				Predicate checkType = cb.equal(root.get(OrdersetList_.setType), 1);
+				return cb.and(checkIsActive, checkType);
+			}
+		};
+	}
+	
+	/**
+	 * Specification to get new lab parameters
+	 * @param testId
+	 * @return
+	 */
+	public static Specification<LabDescription> getNewLabParams(final Integer testId) {
+		return new Specification<LabDescription>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabDescription> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Join<LabDescription, LabDescpParameters> descJoin = root.join(LabDescription_.labDescParams, JoinType.INNER);
+				Join<LabDescpParameters, LabParameters> paramsJoin = descJoin.join(LabDescpParameters_.labParametersTable, JoinType.INNER);;
+				Predicate checkIsActive = cb.equal(paramsJoin.get(LabParameters_.labParametersIsactive), true);
+				Predicate descIsActive = cb.equal(descJoin.get(LabDescpParameters_.labDescpParameterIsactive), true);
+				Predicate checkId = cb.equal(root.get(LabDescription_.labDescriptionTestid), testId);
+				query.orderBy(cb.asc(descJoin.get(LabDescpParameters_.labDescpParameterSortorder)));
+				return cb.and(checkIsActive, descIsActive, checkId);
+			}
+		};
+	}
+	
+	/**
+	 * Specification to check encounterId
+	 * @param testId
+	 * @return
+	 */
+	public static Specification<Encounter> checkEncounterId(final Integer encounterId) {
+		return new Specification<Encounter>() {
+
+			@Override
+			public Predicate toPredicate(Root<Encounter> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				root.join(Encounter_.patientEncounterType,JoinType.INNER);
+				Predicate checkId = cb.equal(root.get(Encounter_.encounterId), encounterId);
+				return checkId;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to check cpt code
+	 * @param testId
+	 * @return
+	 */
+	public static Specification<Cpt> checkCPTId(final String cptCode) {
+		return new Specification<Cpt>() {
+
+			@Override
+			public Predicate toPredicate(Root<Cpt> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate checkId = cb.like(cb.lower(root.get(Cpt_.cptCptcode)), cptCode.toLowerCase());
+				return checkId;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to check test id of new lab
+	 * @param testId
+	 * @return
+	 */
+	public static Specification<LabDescription> checkTestId(final Integer testId) {
+		return new Specification<LabDescription>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabDescription> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate checkId = root.get(LabDescription_.labDescriptionTestid).in(testId);
+				return checkId;
+			}
+		};
+	}	
+	
+	/**
+	 * Specification to get test details based on type
+	 * @param test category type
+	 * @return
+	 */
+	public static Specification<LabDescription> labByCategoryId(final Integer categoryId) {
+		return new Specification<LabDescription>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabDescription> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate labByCategoryId = cb.equal(cb.coalesce(root.get(LabDescription_.labDescriptionTestcategoryType),4), categoryId);
+				return labByCategoryId;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to get results to be reviewed list
+	 * @param encounterId
+	 * @param chartId
+	 * @return
+	 */
+	public static Specification<LabEntries> labResults(final Integer chartId) {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				root.join(LabEntries_.empProfile,JoinType.LEFT);
+				Join<LabEntries, Encounter> encounterJoin = root.join(LabEntries_.encounter,JoinType.LEFT);
+				root.join(LabEntries_.labGroups,JoinType.INNER);
+				root.fetch(LabEntries_.empProfile);
+				root.fetch(LabEntries_.encounter);
+				root.fetch(LabEntries_.labGroups);
+				Predicate checkstatus = root.get(LabEntries_.labEntriesTestStatus).in(3);
+				Predicate checkGroupId = cb.not(root.get(LabEntries_.labEntriesGroupid).in(36,5));
+				Predicate checkChartId = cb.equal(encounterJoin.get(Encounter_.encounterChartid), chartId);				
+				query.orderBy(cb.asc(root.get(LabEntries_.labEntriesGroupid)),cb.desc(root.get(LabEntries_.labEntriesOrdOn)));
+				return cb.and(checkstatus, checkGroupId, checkChartId);
+			}
+		};
+	}
+
+	/**
+	 * Specification to get pending labs
+	 * @param encounterId
+	 * @param chartId
+	 * @return
+	 */
+	public static Specification<LabEntries> pendingLabs(final Integer encounterId,final Integer chartId) {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				root.join(LabEntries_.empProfile,JoinType.LEFT);
+				Join<LabEntries, Encounter> encounterJoin = root.join(LabEntries_.encounter,JoinType.INNER);
+				encounterJoin.on(cb.notEqual(root.get(LabEntries_.labEntriesEncounterId), encounterId));
+				root.join(LabEntries_.labGroups,JoinType.INNER);
+				root.fetch(LabEntries_.empProfile);
+				root.fetch(LabEntries_.encounter);
+				root.fetch(LabEntries_.labGroups);
+				Predicate checkstatus = cb.equal(root.get(LabEntries_.labEntriesTestStatus), 1);
+				Predicate checkChartId = cb.equal(encounterJoin.get(Encounter_.encounterChartid), chartId);				
+				query.orderBy(cb.asc(root.get(LabEntries_.labEntriesGroupid)),cb.desc(root.get(LabEntries_.labEntriesOrdOn)));
+				return cb.and(checkstatus, checkChartId);
+			}
+		};
+	}	
+	
+	/**
+	 * Specification to check filescan type and test detail id
+	 * @return
+	 */
+	public static Specification<FileName> checkFileEntityAndScanType(final Integer testDetailId, final Integer[] ScanType) {
+		return new Specification<FileName>() {
+
+			@Override
+			public Predicate toPredicate(Root<FileName> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Join<FileName, FileDetails> nameJoin = root.join(FileName_.fileNameDetails,JoinType.INNER);
+				nameJoin.on(cb.equal(root.get(FileName_.filenameIsactive), true));
+				Join<FileDetails, PatientDocCategory> detailsJoin = nameJoin.join(FileDetails_.patientDocCategory,JoinType.INNER);
+				detailsJoin.on(cb.equal(detailsJoin.get(PatientDocCategory_.patientDocCategoryIsactive), true));
+				root.join(FileName_.empProfile,JoinType.LEFT);
+				Predicate checkEntity = cb.equal(nameJoin.get(FileDetails_.filedetailsEntityid), testDetailId);
+				Predicate checkScanType = nameJoin.get(FileDetails_.filedetailsScantype).in((Object[])ScanType);
+				Predicate finalCheck = cb.and(checkEntity,checkScanType);
+				query.orderBy(cb.asc(detailsJoin.get(PatientDocCategory_.patientDocCategoryOrder)),
+						cb.asc(detailsJoin.get(PatientDocCategory_.patientDocCategoryName)),
+						cb.asc(detailsJoin.get(PatientDocCategory_.patientDocCategoryId)),
+						cb.desc(nameJoin.get(FileDetails_.filedetailsId)),
+						cb.desc(nameJoin.get(FileDetails_.filedetailsCreationdate)),
+						cb.asc(root.get(FileName_.filenameOrderby)),
+						cb.asc(root.get(FileName_.filenameCreatedon)),
+						cb.asc(root.get(FileName_.filenameId)));
+				return finalCheck;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to check filescan type 
+	 * @return
+	 */
+	public static Specification<FileDetails> checkFileDetailScanType(final Integer scanType) {
+		return new Specification<FileDetails>() {
+
+			@Override
+			public Predicate toPredicate(Root<FileDetails> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate checkFileDetailScanType = cb.equal(root.get(FileDetails_.filedetailsScantype),scanType);
+				return checkFileDetailScanType;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to check entity id
+	 * @return
+	 */
+	public static Specification<FileDetails> checkFileDetailEntityId(final Integer entityId) {
+		return new Specification<FileDetails>() {
+
+			@Override
+			public Predicate toPredicate(Root<FileDetails> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate checkFileDetailEntityId = cb.equal(root.get(FileDetails_.filedetailsEntityid),entityId);
+				return checkFileDetailEntityId;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to check patient id
+	 * @return
+	 */
+	public static Specification<FileDetails> checkFileDetailPatientId(final Integer patientId) {
+		return new Specification<FileDetails>() {
+
+			@Override
+			public Predicate toPredicate(Root<FileDetails> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate checkFileDetailPatientId = cb.equal(root.get(FileDetails_.filedetailsPatientid),patientId);
+				return checkFileDetailPatientId;
+			}
+		};
+	}
+	
 	/**
 	 * Specification to get test details
 	 * @param testId
@@ -65,6 +402,496 @@ public class InvestigationSpecification {
 		};
 	}
 	
+	/**
+	 * Specification to get the list of labs having testId
+	 * @param testId
+	 * @return Specification<LabEntries>
+	 */
+	public static Specification<LabEntries> testIds(final ArrayList<Integer> testIds)
+	{
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate testIdsPred = root.get(LabEntries_.labEntriesTestId).in(testIds);
+				return testIdsPred;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to check filescan type and test detail id
+	 * @return
+	 */
+	public static Specification<FileName> checkFileEntityAndScanType(final Integer testDetailId, final int ScanType) {
+		return new Specification<FileName>() {
+
+			@Override
+			public Predicate toPredicate(Root<FileName> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Join<FileName, FileDetails> nameJoin = root.join(FileName_.fileNameDetails,JoinType.INNER);
+				nameJoin.on(cb.equal(root.get(FileName_.filenameIsactive), true));
+				Join<FileDetails, PatientDocCategory> detailsJoin = nameJoin.join(FileDetails_.patientDocCategory,JoinType.INNER);
+				detailsJoin.on(cb.equal(detailsJoin.get(PatientDocCategory_.patientDocCategoryIsactive), true));
+				root.join(FileName_.empProfile,JoinType.LEFT);
+				Predicate checkEntity = cb.equal(nameJoin.get(FileDetails_.filedetailsEntityid), testDetailId);
+				Predicate checkScanType = nameJoin.get(FileDetails_.filedetailsScantype).in(ScanType);
+				Predicate finalCheck = cb.and(checkEntity,checkScanType);
+				return finalCheck;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to check parameter is active and compare testdetailId
+	 * @return
+	 */
+	public static Specification<LabEntriesParameter> checkParameterAndTestDetailId(final Integer testDetailId) {
+		return new Specification<LabEntriesParameter>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntriesParameter> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Join<LabEntriesParameter, LabEntries> paramJoin = root.join(LabEntriesParameter_.labEntriesTable,JoinType.INNER);
+				Predicate checkId = cb.equal(paramJoin.get(LabEntries_.labEntriesTestdetailId),testDetailId);
+				Predicate checkParam = cb.equal(root.get(LabEntriesParameter_.labEntriesParameterIsactive), true);
+				if ( Long.class != query.getResultType() ) {
+					root.fetch(LabEntriesParameter_.labParametersTable);					
+				}
+				Predicate finalCheck = cb.and(checkId,checkParam);
+				return finalCheck;
+			}
+		};
+	}	
+
+	/**
+	 * Specification to check vaccines consent
+	 * @return
+	 */
+	public static Specification<VaccinationConsentForm> consentByChartId(final Integer chartId) {
+		return new Specification<VaccinationConsentForm>() {
+
+			@Override
+			public Predicate toPredicate(Root<VaccinationConsentForm> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Join<VaccinationConsentForm, LabEntries> consentChart = root.join(VaccinationConsentForm_.labEntries,JoinType.INNER);
+				Predicate consent = cb.equal(consentChart.get(LabEntries_.chart).get(Chart_.chartId),chartId);
+				return consent;
+			}	
+		};
+	}
+
+	/**
+	 * Specification to check vaccines expiry date
+	 * @return
+	 */
+	public static Specification<VaccineOrderDetails> checkExpiryDate() {
+		return new Specification<VaccineOrderDetails>() {
+
+			@Override
+			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				if (Long.class != query.getResultType()) {
+
+				}
+				Predicate expiryDate = cb.greaterThan(root.get(VaccineOrderDetails_.vaccineOrderDetailsExpiry), new Date());
+				return expiryDate;
+			}	
+		};
+	}
+
+	/**
+	 * Specification to check whether a vaccine is active or not
+	 * @return
+	 */
+	public static Specification<VaccineOrderDetails> checkIsActive() {
+		return new Specification<VaccineOrderDetails>() {
+
+			@Override
+			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				if (Long.class != query.getResultType()) {
+
+				}
+				Predicate isActive = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsIsactive), true);
+				return isActive;
+			}	
+		};
+	}
+
+	/**
+	 * Method to check CHDP state for a vaccine
+	 * @param isCHDP
+	 * @return
+	 */
+	public static Specification<VaccineOrderDetails> chdpCriteria(final String isCHDP) {
+		return new Specification<VaccineOrderDetails>() {
+
+			@Override
+			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate chdp = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsIschdp), isCHDP);
+				return chdp;
+			}	
+		};
+	}
+
+	/**
+	 * Specification to compare vaccine test id with
+	 * @param testId
+	 * @return
+	 */
+	public static Specification<VaccineOrderDetails> checkVaccineId(final Integer testId) {
+		return new Specification<VaccineOrderDetails>() {
+
+			@Override
+			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				if (Long.class != query.getResultType()) {
+
+				}
+				Predicate vaccineId = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsVaccineId), testId);
+				return vaccineId;
+			}	
+		};
+	}
+
+	/**
+	 * Method to get frequently ordered labs based on 
+	 * @param groupId
+	 * @param loginId
+	 * @return
+	 */
+	public static Specification<LabDescription> getFrequentLabs(final Integer groupId, final Integer loginId) {
+		return new Specification<LabDescription>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabDescription> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {	
+				Predicate checkGroupId = cb.equal(root.get(LabDescription_.labDescriptionGroupid), groupId);
+				Predicate checkisActive = cb.equal(root.get(LabDescription_.labDescriptionIsactive), true);
+				Join<LabDescription, LabFreqorder> join = root.join(LabDescription_.labFreqOrder, JoinType.INNER);
+				Predicate userIdPredicate = join.get(LabFreqorder_.labFreqorderUserid).in(-1, loginId);
+				Join<LabDescription, Hl7ExternalTestmapping> rootjoin = root.join(LabDescription_.hl7ExternalTestmappingTable, JoinType.LEFT);
+				rootjoin.join(Hl7ExternalTestmapping_.hl7ExternalTestTable, JoinType.LEFT);
+				query.distinct(true);
+				query.orderBy(cb.asc(root.get(LabDescription_.labDescriptionTestDesc)));
+				return cb.and(checkGroupId,checkisActive,userIdPredicate);
+			}	
+		};
+	}
+
+	/**
+	 * Specification to get the site information
+	 * @return Predicate
+	 */
+	public static Specification<ImmunisationSite> getSiteDetails() {
+		return new Specification<ImmunisationSite>() {
+
+			@Override
+			public Predicate toPredicate(Root<ImmunisationSite> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate isActive = cb.equal(root.get(ImmunisationSite_.immunisationSiteIsactive),true);
+				query.orderBy(cb.asc(root.get(ImmunisationSite_.immunisationSiteSortorder)));
+				return isActive;
+			}	
+		};
+	}
+
+	/**
+	 * Specification to check whether a vaccine got consent or not based on its
+	 * @param testDetailId
+	 * @return consent Predicate
+	 */
+	public static Specification<VaccinationConsentForm> checkForConsent(final Integer testDetailId) {
+		return new Specification<VaccinationConsentForm>() {
+
+			@Override
+			public Predicate toPredicate(Root<VaccinationConsentForm> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate consent = cb.equal(root.get(VaccinationConsentForm_.vaccinationConsentFormTestdetailId),testDetailId);
+				return consent;
+			}	
+		};
+	}
+
+	/**
+	 * Specification to get list of vaccines based on
+	 * @param encounterId which are ordered but consent is not availed
+	 * @return vaccineRule
+	 */
+	public static Specification<LabEntries> vaccineByEncounter(final Integer encounterId) {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Join<LabEntries, LabDescription> descriptionJoin = root.join(LabEntries_.labDescriptionTable,JoinType.INNER);
+				Join<LabEntries, Encounter> encounterFetch = root.join(LabEntries_.encounter,JoinType.INNER);
+				Join<Encounter, Chart> chartFetch = encounterFetch.join(Encounter_.chart,JoinType.INNER);
+				Join<LabEntries, VaccinationConsentForm> consentJoin = root.join(LabEntries_.vaccinationConsentForm,JoinType.LEFT);
+				chartFetch.join(Chart_.patientRegistrationTable,JoinType.INNER);
+				Predicate checkGroup = cb.equal(descriptionJoin.get(LabDescription_.labDescriptionGroupid), 36);
+				Predicate checkStatus = root.get(LabEntries_.labEntriesTestStatus).in(1,6);
+				Predicate checkEncounterId = cb.equal(root.get(LabEntries_.labEntriesEncounterId), encounterId);
+				Predicate checkConsent = cb.isNull(consentJoin.get(VaccinationConsentForm_.vaccinationConsentFormTestdetailId));
+				Predicate vaccinesRule = cb.and(checkGroup,checkStatus,checkEncounterId,checkConsent);
+				return vaccinesRule;
+			}	
+		};
+	}
+	/**
+	 * Method to get the rule for checking test status
+	 * @return predicate value LabsByTestStatus
+	 */
+	public static Specification<LabEntries> testDetailsByTestId(final Integer testDetailId) {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Join<LabEntries, Encounter> encounterJoin = root.join(LabEntries_.encounter,JoinType.LEFT);
+				Join<Encounter, LeafPatient> leafJoin = encounterJoin.join(Encounter_.leafPatient, JoinType.LEFT) ;
+				leafJoin.on(cb.equal(leafJoin.get(LeafPatient_.leafPatientId),-1));
+				root.join(LabEntries_.labDescriptionTable,JoinType.LEFT);
+				root.join(LabEntries_.specimen,JoinType.LEFT);
+				root.join(LabEntries_.empProfile,JoinType.LEFT);
+				if ( Long.class != query.getResultType() ) {
+					root.fetch(LabEntries_.labDescriptionTable,JoinType.LEFT);
+					root.fetch(LabEntries_.specimen,JoinType.LEFT);
+					root.fetch(LabEntries_.empProfile,JoinType.LEFT);
+				}				
+				Predicate testDetails = cb.equal(root.get(LabEntries_.labEntriesTestdetailId), testDetailId);
+				return testDetails;
+			}
+		};
+	}
+
+	/**
+	 * Method to get the rule for checking test status
+	 * @return predicate value LabsByTestStatus
+	 */
+	public static Specification<LabEntries> checkTestStatus() {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate labsByTestStatus = cb.not((root.get(LabEntries_.labEntriesTestStatus).in(2,7)));
+				Predicate checkStatus = cb.lessThan(root.get(LabEntries_.labEntriesTestStatus), 9);
+				Predicate status = cb.and(checkStatus, labsByTestStatus);
+				return status;
+			}
+		};
+	}
+
+	public static Specification<PatientVisEntries> visByTestDetailId(final Integer testDetailId) {
+		return new Specification<PatientVisEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<PatientVisEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate checkId = cb.equal(root.get(PatientVisEntries_.patientVisEntriesAdministrationId), testDetailId);
+				Predicate isActive = cb.equal(root.get(PatientVisEntries_.patientVisEntriesIsActive), true);
+				return cb.and(checkId, isActive);
+			}
+		};
+	}	
+	
+	/**
+	 * Method to get VIS by testId
+	 * @return predicate value vis
+	 */
+	public static Specification<CvxVaccineGroupMapping> cvxByLabs(final String cvx) {
+		return new Specification<CvxVaccineGroupMapping>() {
+
+			@Override
+			public Predicate toPredicate(Root<CvxVaccineGroupMapping> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate vis = cb.equal(root.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingCvxCode), cvx);
+				return vis;
+			}
+		};
+	}
+
+	/**
+	 * Method to check vis file mapping language code
+	 * @return predicate value lanCode
+	 */
+	public static Specification<Vis> checkVISLangCode(final String groupCode,final String langCode) {
+		return new Specification<Vis>() {
+
+			@Override
+			public Predicate toPredicate(Root<Vis> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Join<Vis, VisFileMapping> subJoin = root.join(Vis_.visFileMapping, JoinType.INNER);
+				Predicate langPredicate = cb.equal(subJoin.get(VisFileMapping_.visFileMappingLanguageCode), langCode);
+				Predicate groupCodePredicate = cb.equal(root.get(Vis_.visVaccineGroupCode), groupCode);
+				Predicate resultPredicate = cb.and(langPredicate, groupCodePredicate);
+				return resultPredicate;
+			}
+		};
+	}
+
+	/**
+	 * Method to get the status list based on column h068005
+	 * @return predicate value statusValue
+	 */
+	public static Specification<H068> getStatusList() {
+		return new Specification<H068>() {
+
+			@Override
+			public Predicate toPredicate(Root<H068> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate statusValue = cb.equal(root.get(H068_.h068005), 413);
+				query.orderBy(cb.asc(root.get(H068_.h068002)));
+				return statusValue;
+			}
+		};
+	}
+
+	/**
+	 * Method to get the refusal reason list based on column h068005
+	 * @return predicate value refusalReasonValue
+	 */
+	public static Specification<H068> getRefusalReasonList() {
+		return new Specification<H068>() {
+
+			@Override
+			public Predicate toPredicate(Root<H068> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate refusalReasonValue = cb.equal(root.get(H068_.h068005), 997);
+				query.orderBy(cb.asc(root.get(H068_.h068002)));
+				return refusalReasonValue;
+			}
+		};
+	}
+
+	/**
+	 * Method to get the source list based on column h068005
+	 * @return predicate value sourceValue
+	 */
+	public static Specification<H068> getSourceList() {
+		return new Specification<H068>() {
+
+			@Override
+			public Predicate toPredicate(Root<H068> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate sourceValue = cb.equal(root.get(H068_.h068005), 998);
+				query.orderBy(cb.asc(root.get(H068_.h068002)));
+				return sourceValue;
+			}
+		};
+	}
+
+	/**
+	 * Predicate to get data based on 
+	 * @param searchStr
+	 * @return
+	 */
+	public static Specification<BodySite> searchBasedOnCode(final String searchStr) {
+		return new Specification<BodySite>() {
+
+			@Override
+			public Predicate toPredicate(Root<BodySite> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				if (Long.class != query.getResultType()) {
+
+				}
+				Predicate basedOnCode = cb.like(cb.lower(root.get(BodySite_.bodySiteCode)), searchStr.toLowerCase());
+				return basedOnCode;
+			}
+		};
+	}
+
+	/**
+	 * Predicate to get data based on 
+	 * @param searchStr
+	 * @return
+	 */
+	public static Specification<BodySite> searchBasedOnDesc(final String searchStr) {
+		return new Specification<BodySite>() {
+
+			@Override
+			public Predicate toPredicate(Root<BodySite> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				if (Long.class != query.getResultType()) {
+
+				}
+				Predicate basedOnDesc = cb.like(cb.lower(root.get(BodySite_.bodySiteDescription)), searchStr.toLowerCase());
+				return basedOnDesc;
+			}	
+		};
+	}
+
+	/**
+	 * Predicate to get lot number details 
+	 * @param vaccineId
+	 * @return
+	 */
+	public static Specification<VaccineOrderDetails> getLotNoDetails() {
+		return new Specification<VaccineOrderDetails>() {
+
+			@Override
+			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Join<VaccineOrderDetails, VaccineOrder> rootJoin = root.join(VaccineOrderDetails_.vaccineOrder,JoinType.INNER);
+				Expression<Integer> quantity = cb.diff(cb.sum(root.get(VaccineOrderDetails_.vaccineOrderDetailsQty), root.get(VaccineOrderDetails_.vaccineOrderDetailsQtyReconcile)), root.get(VaccineOrderDetails_.vaccineOrderDetailsQtyUsed));
+				rootJoin.on(cb.greaterThan(quantity, 0));
+				rootJoin.join(VaccineOrder_.vaccineManDetails, JoinType.LEFT);
+				if (Long.class != query.getResultType()) {
+
+				}
+				Predicate quantityPredicate = cb.greaterThan(quantity, 0);
+				return quantityPredicate;
+			}	
+		};
+	}
+
+	/**
+	 * Method to get the rule for checking 
+	 * @param encounterId
+	 * with the id in entity and
+	 * @return predicate value LabByEncounterId
+	 */
+	public static Specification<LabEntries> labByEncounterId(final Integer encounterId)	{
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				root.join(LabEntries_.empProfile,JoinType.LEFT);
+				root.join(LabEntries_.encounter,JoinType.LEFT);
+				root.join(LabEntries_.labGroups,JoinType.INNER);
+				root.fetch(LabEntries_.empProfile);
+				root.fetch(LabEntries_.encounter);
+				root.fetch(LabEntries_.labGroups);
+				Predicate LabByEncounterId = cb.equal(root.get(LabEntries_.labEntriesEncounterId), encounterId);
+				query.orderBy(cb.asc(root.get(LabEntries_.labEntriesGroupid)),cb.desc(root.get(LabEntries_.labEntriesOrdOn)));
+				return LabByEncounterId;
+			}
+		};
+	}
+
+	/**
+	 * Method to get the rule for checking 
+	 * @param testStatus
+	 * not in given list
+	 * @return predicate value LabsByTestStatus
+	 */
+	public static Specification<LabEntries> LabsByTestStatus()	{
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate LabsByTestStatus = cb.not((root.get(LabEntries_.labEntriesTestStatus).in(2,7)));
+				return LabsByTestStatus;
+			}
+		};
+	}
+
 	/**
 	 * Specification to get the list of labs having testId
 	 * @param testId
@@ -97,7 +924,26 @@ public class InvestigationSpecification {
 			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				Predicate chartIdPred = cb.equal(root.get(LabEntries_.labEntriesChartid),chartId);
+				query.distinct(true);
 				return chartIdPred;
+			}
+		};
+	}
+
+	/**
+	 * Specification to get the list of labs having encounter Id
+	 * @param chart Id
+	 * @return Specification<LabEntries>
+	 */
+	public static Specification<LabEntries> labEntryencounterId(final Integer encounterId)
+	{
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate encounterIdPred = cb.equal(root.get(LabEntries_.labEntriesEncounterId),encounterId);
+				return encounterIdPred;
 			}
 		};
 	}
@@ -120,6 +966,24 @@ public class InvestigationSpecification {
 		};
 	}
 
+	/**
+	 * Specification to get the list of labs having status less than
+	 * @param status
+	 * @return Specification<LabEntries>
+	 */
+	public static Specification<LabEntries> statusLessThan(final Integer status)
+	{
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate statusLessThan = cb.lessThan(root.get(LabEntries_.labEntriesTestStatus),status);
+				return statusLessThan;
+			}
+		};
+	}
+	
 	/**
 	 * Specification to get the list of labs having status not equal to
 	 * @param status
@@ -171,8 +1035,7 @@ public class InvestigationSpecification {
 			@Override
 			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				query.orderBy(cb.desc(cb.coalesce(root.get(LabEntries_.labEntriesPerfOn),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))),
-						cb.desc(root.get(LabEntries_.labEntriesTestdetailId)));
+				query.orderBy(cb.desc(cb.coalesce(root.get(LabEntries_.labEntriesPerfOn),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))));
 				Predicate testIdPred=root.get(LabEntries_.labEntriesTestId).in((Object[])testId);
 				Predicate testStatusGreaterPred=cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus),statusGreaterThan);
 				Predicate testStatusNotEqualPred=cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),statusNotEqual);
@@ -189,7 +1052,7 @@ public class InvestigationSpecification {
 			}
 		};
 	}
-	
+
 	/**
 	 * Specification to get the list of orders having testId
 	 * @param testId
@@ -205,8 +1068,7 @@ public class InvestigationSpecification {
 			@Override
 			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				query.orderBy(cb.desc(cb.coalesce(root.get(LabEntries_.labEntriesPerfOn),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))),
-						cb.desc(root.get(LabEntries_.labEntriesTestdetailId)));
+				query.orderBy(cb.desc(cb.coalesce(root.get(LabEntries_.labEntriesPerfOn),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))));
 				Predicate testIdPred=root.get(LabEntries_.labEntriesTestId).in((Object[])testId);
 				Predicate testStatusGreaterPred=cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus),statusGreaterThan);
 				Predicate testStatusNotEqualPred=cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),statusNotEqual);
@@ -223,7 +1085,7 @@ public class InvestigationSpecification {
 			}
 		};
 	}
-	
+
 	/**
 	 * Specification to get the list of orders having testId
 	 * @param testId
@@ -291,6 +1153,24 @@ public class InvestigationSpecification {
 					CriteriaBuilder cb) {
 				Predicate testdetailIds = cb.equal(root.get(LabEntries_.labEntriesTestdetailId),testdetailId);
 				return testdetailIds;
+			}
+		};
+	}
+
+	/**
+	 * Specification to get the list of labs not having group id
+	 * @param groupId
+	 * @return Specification<LabEntries>
+	 */
+	public static Specification<LabEntries> groupIdNotLabEntries(final Integer groupId)
+	{
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate groupIdPred = cb.notEqual(cb.coalesce(root.get(LabEntries_.labEntriesGroupid),-1),groupId);
+				return groupIdPred;
 			}
 		};
 	}
@@ -418,7 +1298,7 @@ public class InvestigationSpecification {
 			}
 		};
 	}
-	
+
 	/**
 	 * Specification to get the list of parameter entries having paramId and chart id
 	 * @param paramId
@@ -451,14 +1331,14 @@ public class InvestigationSpecification {
 	 * @param testdetailid
 	 * @return Specification<LabEntriesParameter>
 	 */
-	public static Specification<LabEntriesParameter> getParamEntriesTestDetailId(final Integer testdetailid)
-	{
+	public static Specification<LabEntriesParameter> getParamEntriesTestDetailId(final Integer testdetailid) {
 		return new Specification<LabEntriesParameter>() {
 
 			@Override
 			public Predicate toPredicate(Root<LabEntriesParameter> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				Predicate getParams = cb.equal(root.get(LabEntriesParameter_.labEntriesParameterTestdetailid),testdetailid);
+				query.distinct(true);
 				return getParams;
 			}
 		};
@@ -469,8 +1349,7 @@ public class InvestigationSpecification {
 	 * @param testdetailid
 	 * @return Specification<LabEntriesParameter>
 	 */
-	public static Specification<LabEntriesParameter> getParamEntriesTestDetailIdNot(final Integer testdetailid)
-	{
+	public static Specification<LabEntriesParameter> getParamEntriesTestDetailIdNot(final Integer testdetailid) {
 		return new Specification<LabEntriesParameter>() {
 
 			@Override
@@ -831,8 +1710,7 @@ public class InvestigationSpecification {
 	 * @param source
 	 * @return Specification<Specimen>
 	 */
-	public static Specification<Specimen> specimenColVol(final String colVol)
-	{
+	public static Specification<Specimen> specimenColVol(final String colVol) {
 		return new Specification<Specimen>() {
 
 			@Override
@@ -849,8 +1727,7 @@ public class InvestigationSpecification {
 	 * @param source
 	 * @return Specification<Specimen>
 	 */
-	public static Specification<Specimen> specimenColVolUnit(final String unit)
-	{
+	public static Specification<Specimen> specimenColVolUnit(final String unit)	{
 		return new Specification<Specimen>() {
 
 			@Override
@@ -898,6 +1775,12 @@ public class InvestigationSpecification {
 		};
 	}
 
+	/**
+	 * Specification to find test
+	 * @param encounterId
+	 * @param testDetailId
+	 * @return
+	 */
 	public static Specification<LabEntries> findTest(final String encounterId, final String testDetailId) {
 		return new Specification<LabEntries>() {
 
@@ -911,6 +1794,11 @@ public class InvestigationSpecification {
 		};
 	}
 
+	/**
+	 * Specification to check patient id and get encounter id
+	 * @param patientId
+	 * @return
+	 */
 	public static Specification<PatientRegistration> checkPatientId(final Integer patientId) {
 		return new Specification<PatientRegistration>() {
 
@@ -919,6 +1807,72 @@ public class InvestigationSpecification {
 					CriteriaBuilder cb) {
 				Predicate checkEncounterId = cb.equal(root.get(PatientRegistration_.patientRegistrationId), patientId);
 				return checkEncounterId;
+			}
+		};
+	}
+
+	/**
+	 * Specification to check specimen condition
+	 * @param condition
+	 * @return
+	 */
+	public static Specification<Specimen> specimenCondition(final String condition) {
+		return new Specification<Specimen>() {
+
+			@Override
+			public Predicate toPredicate(Root<Specimen> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate specimenSource = cb.equal(root.get(Specimen_.specimenCondition), condition);
+				return specimenSource;
+			}
+		};
+	}
+
+	/**
+	 * Specification to verify file Scan Id
+	 * @param fileScanId
+	 * @return
+	 */
+	public static Specification<FileDetails> checkFileScanId(final Integer fileScanId) {
+		return new Specification<FileDetails>() {
+
+			@Override
+			public Predicate toPredicate(Root<FileDetails> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate specimenSource = cb.equal(root.get(FileDetails_.filedetailsId), fileScanId);
+				return specimenSource;
+			}
+		};
+	}
+	
+	public static Specification<LabEntries> getTestLog(final Integer testId) {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate test = root.get(LabEntries_.labEntriesTestId).in(testId);
+				return test;
+			}
+		};
+	}
+
+	public static Specification<LabEntriesParameter> getParamLog(final Integer paramId, final Integer chartId) {
+		return new Specification<LabEntriesParameter>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntriesParameter> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				@SuppressWarnings("unused")
+				Join<LabEntriesParameter,LabParameters> params1 = root.join("labParametersTable",JoinType.INNER);
+				Join<LabEntriesParameter, LabEntries> labJoin = root.join(LabEntriesParameter_.labEntriesTable, JoinType.INNER);
+				Predicate param = root.get(LabEntriesParameter_.labEntriesParameterMapid).in(paramId);
+				Predicate chart = cb.equal(root.get(LabEntriesParameter_.labEntriesParameterChartid),chartId);
+				Predicate active = cb.equal(root.get(LabEntriesParameter_.labEntriesParameterIsactive), true);
+				Predicate status = cb.and(cb.greaterThan(labJoin.get(LabEntries_.labEntriesTestStatus), 2),
+						cb.lessThan(labJoin.get(LabEntries_.labEntriesTestStatus), 7));
+				query.distinct(true);
+				return cb.and(param,chart,active, status);
 			}
 		};
 	}

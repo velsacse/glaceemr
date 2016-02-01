@@ -11,6 +11,7 @@ public class SaveLabDetails {
 	String groupId;
 	Integer testDetailId;
 	String requestToSave;
+	String testStatusSave;
 	
 	public Integer getEncounterId() {
 		return encounterId;
@@ -65,5 +66,11 @@ public class SaveLabDetails {
 	}
 	public void setRequestToSave(String requestToSave) {
 		this.requestToSave = requestToSave;
-	}	
+	}
+	public void setTestStatus(String testStatusSave) {
+		this.testStatusSave = testStatusSave;
+	}
+	public String getTestStatusSave() {
+		return testStatusSave;
+	}
 }

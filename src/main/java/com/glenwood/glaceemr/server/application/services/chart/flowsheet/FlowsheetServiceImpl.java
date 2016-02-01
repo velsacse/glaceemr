@@ -670,7 +670,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		//getting the chart id
 		Integer chartId=-1;
 		List<Chart> charts=chartRepository.findAll(Specifications.where(ChartSpecification.patientId(patientId)));
-		chartId=charts.get(0).getChart_id();
+		chartId=charts.get(0).getChartId();
 
 		Encounter encounterEntity=null;
 		//getting the encounter details
@@ -1122,7 +1122,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		//getting the chart id
 		Integer chartId=-1;
 		List<Chart> charts=chartRepository.findAll(Specifications.where(ChartSpecification.patientId(patientId)));
-		chartId=charts.get(0).getChart_id();
+		chartId=charts.get(0).getChartId();
 
 		Encounter encounterEntity=null;
 		//getting the encounter details
@@ -2834,7 +2834,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	@Override
 	public List<FS_ClinicalElementOptionBean> getClinicalElements(Integer chartId,Integer encounterId,String gwIds, Integer isVital){
 		Chart charts=chartRepository.findOne(Specifications.where(ChartSpecification.findByChartId(chartId)));
-		Integer patientId=charts.getChart_patientid();
+		Integer patientId=charts.getChartPatientid();
 		List<FS_ClinicalElementOptionBean> cinicalElementOptionBeans=new ArrayList<FS_ClinicalElementOptionBean>();
 		String[] elementIdArr=gwIds.split("~");
 		for(int i=0;i<elementIdArr.length;i++){
@@ -3036,7 +3036,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		//getting the chart id
 		Integer chartId=-1;
 		List<Chart> charts=chartRepository.findAll(Specifications.where(ChartSpecification.patientId(patientId)));
-		chartId=charts.get(0).getChart_id();
+		chartId=charts.get(0).getChartId();
 
 		//getting the patient gender
 		PatientRegistration patients=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
@@ -3161,7 +3161,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		//getting the chart id
 		Integer chartId=-1;
 		List<Chart> charts=chartRepository.findAll(Specifications.where(ChartSpecification.patientId(patientId)));
-		chartId=charts.get(0).getChart_id();
+		chartId=charts.get(0).getChartId();
 
 		//getting the patient gender
 		PatientRegistration patients=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
