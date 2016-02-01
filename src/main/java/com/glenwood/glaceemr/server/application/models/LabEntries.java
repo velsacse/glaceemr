@@ -372,7 +372,7 @@ public class LabEntries {
 	@JoinColumn(name="lab_entries_test_id", referencedColumnName="lab_description_testid" , insertable=false, updatable=false)
 	private LabDescription labDescriptionTable;
 		
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="lab_entries_encounter_id", referencedColumnName="encounter_id" , insertable=false, updatable=false)
 	private Encounter encounter;

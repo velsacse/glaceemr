@@ -4158,4 +4158,71 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			return confData1;
 		}
 	}
+	
+	public FlowsheetBean getFlowsheetDataSOAP(Integer flowsheetTypeParam,Integer flowsheetId, Integer patientId,Integer encounterId) throws Exception{
+		logger.debug("Request to get the flowsheet details for labs and params section for a particular flowsheet for a patient.:: inside service Impl");
+		FlowsheetBean fBean=new FlowsheetBean();
+		if(encounterId!=-1)
+			fBean.setChartBased(false);
+		else
+			fBean.setChartBased(true);
+		if(flowsheetId!=-1){
+			fBean.setFlowsheetId(flowsheetId);
+			Flowsheet flowsheet=flowsheetRepository.findOne(Specifications.where(FlowsheetSpecification.flowsheetId(flowsheetId)).and(FlowsheetSpecification.flowsheetIsactive(true)));
+			int flowsheetType=Optional.fromNullable(flowsheet.getFlowsheetType()).or(-1);
+			fBean.setFlowsheetType(flowsheetType);
+			fBean.setFlowsheetName(Optional.fromNullable(Strings.emptyToNull(flowsheet.getFlowsheetName())).or("").toString());
+			List<FlowsheetDx> flowhseetDx=new ArrayList<FlowsheetDx>();
+			flowhseetDx=flowsheetDxRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetDxMapid(flowsheetId)));
+			String[] flowsheetIds=new String[flowhseetDx.size()];
+			for(int i=0;i<flowhseetDx.size();i++){
+				flowsheetIds[i]=flowhseetDx.get(i).getFlowsheetDxCode();
+			}
+			if(flowsheetIds.length==0){
+				flowsheetIds=new String[1];
+				flowsheetIds[0]="-2";
+			}
+			String startDate = "";
+			if((flowsheetType==1)|| (flowsheetType==5)){
+				//Preventive Management
+				PatientRegistration patientReg=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+				startDate = MoreObjects.firstNonNull(patientReg.getPatientRegistrationDob(), "").toString();
+			} else if(flowsheetType==2){
+				//Disease Management
+				CriteriaBuilder builder = em.getCriteriaBuilder();
+				CriteriaQuery<Object> cq = builder.createQuery();
+				Root<ProblemList> root = cq.from(ProblemList.class);
+				Join<ProblemList,FlowsheetDx> problems=root.join("flowsheetDxTable",JoinType.INNER);
+				Join<Join<ProblemList,FlowsheetDx>,Flowsheet> problems1=problems.join("flowsheetTable",JoinType.INNER);
+				Predicate[] restrictions = new Predicate[] {
+						builder.equal(problems1.get("flowsheetType"),2),
+						builder.equal(problems1.get("flowsheetIsactive"),true)
+				};
+				problems1.on(restrictions);
+				problems1.join("flowsheetTypeTable",JoinType.INNER);
+				Predicate[] restrictions1 = new Predicate[] {
+						builder.equal(problems1.get("flowsheetId"),flowsheetId),
+						builder.equal(root.get(ProblemList_.problemListPatientId),patientId)
+				};
+				cq.select(builder.selectCase().when(builder.isNull(root.get(ProblemList_.problemListOnsetDate)), builder.function("to_char", String.class, root.get(ProblemList_.problemListCreatedon),builder.literal("yyyy-MM-dd"))).otherwise(builder.function("to_char", String.class, root.get(ProblemList_.problemListOnsetDate), builder.literal("yyyy-MM-dd"))));
+				cq.where(restrictions1);
+				List<Object> rstList=em.createQuery(cq).getResultList();
+				if(rstList.size()>0)
+					startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
+			}else if(flowsheetType==3){
+				//Meaningful Use Measures
+				CriteriaBuilder builder = em.getCriteriaBuilder();
+				CriteriaQuery<Object> cq = builder.createQuery();
+				cq.select(builder.currentDate()).from(FlowsheetType.class);
+				Object rstList=em.createQuery(cq).getSingleResult();
+				if(rstList!=null)
+					startDate = Optional.fromNullable(rstList).or("").toString();
+			}
+			fBean.setLabData(formLabData(flowsheetId, startDate, patientId,encounterId));
+			fBean.setParamData(formLabParameters(flowsheetId, startDate, patientId,encounterId));
+			fBean.setParamDateArr(paramPerformedDate);
+		}
+		logger.debug("Request to get the flowsheet details for labs and params section for a particular flowsheet for a patient.:: outside service Impl");
+		return fBean;
+	}
 }
