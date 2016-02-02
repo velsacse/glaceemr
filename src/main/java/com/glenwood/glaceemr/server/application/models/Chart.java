@@ -93,9 +93,6 @@ public class Chart {
 	@Column(name="chart_telemedurl")
 	private String chartTelemedurl;
 
-	@Column(name="chart_isfinished")
-	private Boolean chartIsfinished;
-
 	@Column(name="chart_remainder_by")
 	private Integer chartRemainderBy;
 
@@ -290,14 +287,6 @@ public class Chart {
 
 	public void setChartTelemedurl(String chartTelemedurl) {
 		this.chartTelemedurl = chartTelemedurl;
-	}
-
-	public Boolean getChartIsfinished() {
-		return chartIsfinished;
-	}
-
-	public void setChartIsfinished(Boolean chartIsfinished) {
-		this.chartIsfinished = chartIsfinished;
 	}
 
 	public Integer getChartRemainderBy() {
