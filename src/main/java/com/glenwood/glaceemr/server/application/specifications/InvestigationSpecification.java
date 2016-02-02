@@ -916,8 +916,24 @@ public class InvestigationSpecification {
 	 * @param chart Id
 	 * @return Specification<LabEntries>
 	 */
-	public static Specification<LabEntries> chartId(final Integer chartId)
-	{
+	public static Specification<LabEntries> chartId(final Integer chartId) {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate chartIdPred = cb.equal(root.get(LabEntries_.labEntriesChartid),chartId);
+				return chartIdPred;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to get the list of labs having chart Id
+	 * @param chart Id
+	 * @return Specification<LabEntries>
+	 */
+	public static Specification<LabEntries> chartIdLog(final Integer chartId) {
 		return new Specification<LabEntries>() {
 
 			@Override

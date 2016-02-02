@@ -3534,7 +3534,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 	public LS_Bean getCompleteLabData(Integer chartId){
 		LS_Bean lsBean = new LS_Bean();
-		List<LabEntries> labEntriesList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartId(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)));
+		List<LabEntries> labEntriesList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)));
 		ArrayList<Integer> testIds = new ArrayList<Integer>();
 		for(int i=0;i < labEntriesList.size();i++) {
 			if( !testIds.contains(labEntriesList.get(i).getLabEntriesTestId()) ) {
@@ -3590,7 +3590,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		for(int i=0;i<labDescription.size();i++){
 			testIdsDescription.add(labDescription.get(i).getLabDescriptionTestid());
 		}
-		List<LabEntries> labEntriesList=labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartId(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.testIds(testIdsDescription)));
+		List<LabEntries> labEntriesList=labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.testIds(testIdsDescription)));
 		ArrayList<Integer> testIdsEntries=new ArrayList<Integer>();
 		for(int i=0;i<labEntriesList.size();i++){
 			testIdsEntries.add(labEntriesList.get(i).getLabEntriesTestId());
@@ -3624,7 +3624,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			LS_Lab labData = new LS_Lab();
 			Integer testId = -1;
 			String testCategory = "4", labName = "";
-			List<LabEntries> paramData = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartId(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.getTestLog(testIds.get(i))));
+			List<LabEntries> paramData = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.getTestLog(testIds.get(i))));
 			List<ParamData> labParamDetails = new ArrayList<ParamData>();						
 			for (int j = 0; j < paramData.size(); j++) {				
 				LabEntries paramDetails = paramData.get(j);
