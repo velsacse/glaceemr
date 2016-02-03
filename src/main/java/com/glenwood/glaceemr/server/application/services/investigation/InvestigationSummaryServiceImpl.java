@@ -3770,7 +3770,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			if( labEntriesParameter.getLabEntriesParameterDate() != null ) {
 				paramValues.setParamDate(formatter.format(labEntriesParameter.getLabEntriesParameterDate()));
 			} else {
-				paramValues.setParamDate(formatter.format(getLabPerformedDate(labEntriesParameter.getLabEntriesParameterTestdetailid())));
+				Timestamp date = getLabPerformedDate(labEntriesParameter.getLabEntriesParameterTestdetailid());
+				if(date==null)
+					date = getLabOrderedDate(labEntriesParameter.getLabEntriesParameterTestdetailid());
+				paramValues.setParamDate(formatter.format(date));
 			}
 			paramValues.setLabEntryParamId(labEntriesParameter.getLabEntriesParameterId());
 			paramValues.setLabEntryParamValue(labEntriesParameter.getLabEntriesParameterValue());
@@ -3789,6 +3792,17 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		} else {
 			return null;
 		}
+	}
+
+	private Timestamp getLabOrderedDate(Integer testdetailid) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabEntries> root = cq.from(LabEntries.class);
+		cq.select(root.get(LabEntries_.labEntriesOrdOn));
+		cq.where(builder.and(builder.equal(root.get(LabEntries_.labEntriesTestdetailId), testdetailid)),
+				builder.greaterThan(root.get(LabEntries_.labEntriesTestStatus), 2),
+				builder.lessThan(root.get(LabEntries_.labEntriesTestStatus), 7));
+		return (Timestamp) em.createQuery(cq).getSingleResult();
 	}
 
 	private Timestamp getLabPerformedDate(Integer testdetailid) {
