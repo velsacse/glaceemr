@@ -1892,4 +1892,17 @@ public class InvestigationSpecification {
 			}
 		};
 	}
+
+	public static Specification<PatientRegistration> getPatientData(final Integer labEntriesChartid) {
+		return new Specification<PatientRegistration>() {
+
+			@Override
+			public Predicate toPredicate(Root<PatientRegistration> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Join<PatientRegistration,Chart> chartJoin = root.join(PatientRegistration_.alertTable,JoinType.INNER);
+				Predicate chart = cb.equal(chartJoin.get(Chart_.chartId),labEntriesChartid);
+				return chart;
+			}
+		};
+	}
 }

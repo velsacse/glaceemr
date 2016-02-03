@@ -27,6 +27,7 @@ public class LabData {
 	String testAdminNotes;
 	String testSite;
 	String testIsChdp;
+	String testPrelimStatus;
 	String testConfirmStatus;
 	String testOrdBy;
 	String testPerfBy;
@@ -206,6 +207,12 @@ public class LabData {
 	}
 	public void setTestIsChdp(String testIsChdp) {
 		this.testIsChdp = testIsChdp;
+	}	
+	public String getTestPrelimStatus() {
+		return testPrelimStatus;
+	}
+	public void setTestPrelimStatus(String testPrelimStatus) {
+		this.testPrelimStatus = testPrelimStatus;
 	}
 	public String getTestConfirmStatus() {
 		return testConfirmStatus;

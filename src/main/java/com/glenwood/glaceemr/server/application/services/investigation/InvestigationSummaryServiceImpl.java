@@ -1559,7 +1559,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			labData.setEncounterId("" + labEntry.getLabEntriesEncounterId());
 			this.chartId = labEntry.getLabEntriesChartid();
 			labData.setPatientId("" + getPatientId());
-			if( labEntry.getLabEntriesSepcimenId() != -1 ) {
+			if( labEntry.getLabEntriesSepcimenId() != null && labEntry.getLabEntriesSepcimenId() != -1 ) {
 				Specimen specimen = labEntry.getSpecimen();
 				labData.setSpecCollVol(specimen.getSpecimenCollVol());
 				labData.setSpecCollVolUnit(specimen.getSpecimenCollVolUnit());
@@ -1573,6 +1573,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			labData.setTestBaseDose(labEntry.getLabEntriesBasedose());
 			labData.setTestBodySiteCode(labEntry.getLabEntriesBodysiteCode());
 			labData.setTestBodySiteDesc(labEntry.getLabEntriesBodysiteDesc());
+			labData.setTestPrelimStatus("" + labEntry.getLabEntriesPrelimTestStatus());
 			labData.setTestConfirmStatus("" + labEntry.getLabEntriesConfirmTestStatus());
 			labData.setTestDetailId("" + labEntry.getLabEntriesTestdetailId());
 			labData.setTestDosage(labEntry.getLabEntriesDosage());
@@ -1654,8 +1655,26 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		}
 
 		if( !orderDetails.getIsConsentObtained() ) {
-			List<LabEntries> vaccineInfo = findVaccineInfo(labs.get(0).getLabEntriesEncounterId());
-			orderDetails.setVaccineConsentInfo(vaccineInfo);
+			List<LabEntries> vaccineInfoList = findVaccineInfo(labs.get(0).getLabEntriesEncounterId());
+			List<Vaccines> vaccineDataList = new ArrayList<Vaccines>();
+			for (int i = 0; i < vaccineInfoList.size(); i++) {
+				LabEntries vaccineInfo = vaccineInfoList.get(i);
+				Vaccines vaccineData = new Vaccines();
+				PatientRegistration patData = patientRegistrationRepository.findOne(InvestigationSpecification.getPatientData(vaccineInfo.getLabEntriesChartid()));
+				vaccineData.setAccountNo(patData.getPatientRegistrationAccountno());
+				vaccineData.setChartId("" + vaccineInfo.getLabEntriesChartid());
+				DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+				vaccineData.setDob(formatter.format(patData.getPatientRegistrationDob()));
+				vaccineData.setFirstName(patData.getPatientRegistrationFirstName());
+				vaccineData.setLastName(patData.getPatientRegistrationLastName());
+				vaccineData.setMidInitial(patData.getPatientRegistrationMidInitial());
+				vaccineData.setPatientId("" + patData.getPatientRegistrationId());
+				vaccineData.setPhoneNo(patData.getPatientRegistrationPhoneNo());
+				vaccineData.setTestDetailId("" + vaccineInfo.getLabEntriesTestdetailId());
+				vaccineData.setTestName(vaccineInfo.getLabEntriesTestDesc());
+				vaccineDataList.add(vaccineData);
+			}
+			orderDetails.setVaccineConsentInfo(vaccineDataList);
 		}
 
 		if( groupId.equalsIgnoreCase("36")) {

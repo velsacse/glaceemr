@@ -6,7 +6,6 @@ import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
 import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.H068;
 import com.glenwood.glaceemr.server.application.models.ImmunisationSite;
-import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails;
 
@@ -17,7 +16,7 @@ import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails;
 public class Orders {
 
 	List<LabData> labEntries;
-	List<LabEntries> vaccineConsentInfo;
+	List<Vaccines> vaccineConsentInfo;
 	List<H068> statusList;
 	List<H068> refusalReasonList;
 	List<H068> sourceList;
@@ -156,10 +155,10 @@ public class Orders {
 	public void setSiteInfo(List<ImmunisationSite> siteInfo) {
 		this.siteInfo = siteInfo;
 	}
-	public List<LabEntries> getVaccineConsentInfo() {
+	public List<Vaccines> getVaccineConsentInfo() {
 		return vaccineConsentInfo;
 	}
-	public void setVaccineConsentInfo(List<LabEntries> vaccineConsentInfo) {
+	public void setVaccineConsentInfo(List<Vaccines> vaccineConsentInfo) {
 		this.vaccineConsentInfo = vaccineConsentInfo;
 	}
 	public List<VisData> getVisData() {
