@@ -316,6 +316,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	ResourceBundle resBun = null;
 	String savedIds ="";
 	int encounterId ;
+	int testDetailLotId;
 	String edate="";
 	int patientId ;
 	int userId;
@@ -1428,7 +1429,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		String isCHDP = "";
 		List<VaccineOrderDetails> lotDeatils;
 		if( onLoad == "-2" ) {
-			isCHDP = getCHDPFromLab(vaccineId, this.encounterId);
+			isCHDP = getCHDPFromLab(vaccineId, this.encounterId, this.testDetailLotId);
 			lotDeatils = vaccineRepository.findAll(Specifications.where(InvestigationSpecification.getLotNoDetails()).and(InvestigationSpecification.checkExpiryDate()).and(InvestigationSpecification.checkIsActive()).and(InvestigationSpecification.checkVaccineId(vaccineId)).and(InvestigationSpecification.chdpCriteria(isCHDP)));
 		} else {
 			isCHDP = getCHDPFromVaccines(vaccineId);
@@ -1545,6 +1546,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	@Override
 	public Orders findCompleteTestDetails(Integer testDetailId, Integer testId, String groupId)
 			throws Exception {
+		this.testDetailLotId = testDetailId;
 		Orders orderDetails = new Orders();
 		logger.debug("in getting testDetails");
 		List<LabEntries> labs = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.testDetailsByTestId(testDetailId)).and(InvestigationSpecification.checkTestStatus()));
@@ -1684,6 +1686,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 		if( groupId.equalsIgnoreCase("36") || groupId.equalsIgnoreCase("5")) {
 			this.encounterId = labs.get(0).getLabEntriesEncounterId();
+			this.testDetailLotId = labs.get(0).getLabEntriesTestdetailId();
 			List<VaccineOrderDetails> vaccineOrderDetails = findLotDetails(testId, "-2");
 			orderDetails.setLotDetails(vaccineOrderDetails);
 		}
@@ -1743,15 +1746,17 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	 * @param labEncounterId
 	 * @return
 	 */
-	private String getCHDPFromLab(Integer labId, int labEncounterId) {
+	private String getCHDPFromLab(Integer labId, int labEncounterId, int testDetailId) {
 		String isCHDP;
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<LabEntries> root = cq.from(LabEntries.class);
 		cq.select(root.get(LabEntries_.labEntriesIschdplab));
-		cq.where(builder.and(builder.equal(root.get(LabEntries_.labEntriesTestId), labId), builder.equal(root.get(LabEntries_.labEntriesEncounterId), encounterId)));
+		cq.where(builder.and(builder.equal(root.get(LabEntries_.labEntriesTestId), labId), 
+				builder.equal(root.get(LabEntries_.labEntriesTestdetailId), testDetailId),
+				builder.equal(root.get(LabEntries_.labEntriesEncounterId), encounterId)));
 		cq.orderBy(builder.desc((root.get(LabEntries_.labEntriesIschdplab))));
-		isCHDP = "" + em.createQuery(cq).getSingleResult();
+		isCHDP = "" + em.createQuery(cq).getFirstResult();
 		return isCHDP;
 	}
 
@@ -3573,7 +3578,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		if(labEntriesList.size() > 0) {
 			dateArr=new ArrayList<String>();
 			lsBean.setParamData(labAndParamData(chartId, testIds));
-			lsBean.setExternalLabsResult(externalData(chartId));
+			lsBean.setExternalLabsResult(new ArrayList<LS_External>());
+//			lsBean.setExternalLabsResult(externalData(chartId));
 			dateArr = sorttoascending(dateArr);
 			lsBean.setParamDate(dateArr);
 		}else{
@@ -3661,7 +3667,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				labParam.setLabStatus(paramDetails.getLabEntriesTestStatus());
 				DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
 				labParam.setOrderedDate(formatter.format(paramDetails.getLabEntriesOrdOn()));
-				labParam.setPerformedDate(formatter.format(paramDetails.getLabEntriesPerfOn()));
+				if( paramDetails.getLabEntriesPerfOn() != null )
+					labParam.setPerformedDate(formatter.format(paramDetails.getLabEntriesPerfOn()));
+				else
+					labParam.setPerformedDate("");
 				labParam.setEncounterId(paramDetails.getLabEntriesEncounterId());
 				labParam.setTestDetailId(paramDetails.getLabEntriesTestdetailId());
 				labParam.setResultNotes(paramDetails.getLabEntriesResultNotes());
@@ -3884,5 +3893,4 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		}
 		return returnvitalparamdate;
 	}
-
 }
