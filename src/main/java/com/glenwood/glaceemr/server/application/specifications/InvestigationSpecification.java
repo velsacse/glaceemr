@@ -492,9 +492,6 @@ public class InvestigationSpecification {
 			@Override
 			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				if (Long.class != query.getResultType()) {
-
-				}
 				Predicate expiryDate = cb.greaterThan(root.get(VaccineOrderDetails_.vaccineOrderDetailsExpiry), new Date());
 				return expiryDate;
 			}	
@@ -511,9 +508,6 @@ public class InvestigationSpecification {
 			@Override
 			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				if (Long.class != query.getResultType()) {
-
-				}
 				Predicate isActive = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsIsactive), true);
 				return isActive;
 			}	
@@ -532,6 +526,7 @@ public class InvestigationSpecification {
 			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				Predicate chdp = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsIschdp), isCHDP);
+				System.out.println("" + query.toString());
 				return chdp;
 			}	
 		};
@@ -548,9 +543,6 @@ public class InvestigationSpecification {
 			@Override
 			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				if (Long.class != query.getResultType()) {
-
-				}
 				Predicate vaccineId = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsVaccineId), testId);
 				return vaccineId;
 			}	
@@ -830,21 +822,24 @@ public class InvestigationSpecification {
 	 * @param vaccineId
 	 * @return
 	 */
-	public static Specification<VaccineOrderDetails> getLotNoDetails() {
+	public static Specification<VaccineOrderDetails> getLotNoDetails(final Integer isCHDP,final Integer testId) {
 		return new Specification<VaccineOrderDetails>() {
 
 			@Override
 			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				Join<VaccineOrderDetails, VaccineOrder> rootJoin = root.join(VaccineOrderDetails_.vaccineOrder,JoinType.INNER);
-				Expression<Integer> quantity = cb.diff(cb.sum(root.get(VaccineOrderDetails_.vaccineOrderDetailsQty), root.get(VaccineOrderDetails_.vaccineOrderDetailsQtyReconcile)), root.get(VaccineOrderDetails_.vaccineOrderDetailsQtyUsed));
+				Expression<Integer> quantity = cb.diff(cb.sum(root.get(VaccineOrderDetails_.vaccineOrderDetailsQty), 
+						root.get(VaccineOrderDetails_.vaccineOrderDetailsQtyReconcile)), 
+						root.get(VaccineOrderDetails_.vaccineOrderDetailsQtyUsed));
 				rootJoin.on(cb.greaterThan(quantity, 0));
 				rootJoin.join(VaccineOrder_.vaccineManDetails, JoinType.LEFT);
-				if (Long.class != query.getResultType()) {
-
-				}
 				Predicate quantityPredicate = cb.greaterThan(quantity, 0);
-				return quantityPredicate;
+				Predicate expiryDate = cb.greaterThan(root.get(VaccineOrderDetails_.vaccineOrderDetailsExpiry), new Date());
+				Predicate isActive = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsIsactive), true);
+				Predicate chdp = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsIschdp), isCHDP);
+				Predicate vaccineId = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsVaccineId), testId);
+				return cb.and(quantityPredicate, expiryDate, isActive, chdp, vaccineId);
 			}	
 		};
 	}

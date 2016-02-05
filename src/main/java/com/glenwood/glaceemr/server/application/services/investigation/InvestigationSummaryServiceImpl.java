@@ -1427,16 +1427,16 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	@Override
 	public List<VaccineOrderDetails> findLotDetails(Integer vaccineId, String onLoad) {
 		String isCHDP = "";
-		List<VaccineOrderDetails> lotDeatils;
+		List<VaccineOrderDetails> lotDetails;
 		if( onLoad == "-2" ) {
 			isCHDP = getCHDPFromLab(vaccineId, this.encounterId, this.testDetailLotId);
-			lotDeatils = vaccineRepository.findAll(Specifications.where(InvestigationSpecification.getLotNoDetails()).and(InvestigationSpecification.checkExpiryDate()).and(InvestigationSpecification.checkIsActive()).and(InvestigationSpecification.checkVaccineId(vaccineId)).and(InvestigationSpecification.chdpCriteria(isCHDP)));
+			lotDetails = vaccineRepository.findAll(InvestigationSpecification.getLotNoDetails(Integer.parseInt(isCHDP), vaccineId));
 		} else {
 			isCHDP = getCHDPFromVaccines(vaccineId);
-			lotDeatils = vaccineRepository.findAll(Specifications.where(InvestigationSpecification.getLotNoDetails()).and(InvestigationSpecification.checkExpiryDate()).and(InvestigationSpecification.checkIsActive()).and(InvestigationSpecification.checkVaccineId(vaccineId)).and(InvestigationSpecification.chdpCriteria(isCHDP)));
+			lotDetails = vaccineRepository.findAll(InvestigationSpecification.getLotNoDetails(Integer.parseInt(isCHDP), vaccineId));
 		}
 		logger.debug("in getting lot number details");
-		return lotDeatils;
+		return lotDetails;
 	}
 
 	/**
@@ -1756,7 +1756,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				builder.equal(root.get(LabEntries_.labEntriesTestdetailId), testDetailId),
 				builder.equal(root.get(LabEntries_.labEntriesEncounterId), encounterId)));
 		cq.orderBy(builder.desc((root.get(LabEntries_.labEntriesIschdplab))));
-		isCHDP = "" + em.createQuery(cq).getFirstResult();
+		isCHDP = "" + em.createQuery(cq).getSingleResult();
 		return isCHDP;
 	}
 
