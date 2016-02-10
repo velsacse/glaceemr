@@ -1000,7 +1000,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			cptQuantity = cptDetails[1];
 		}
 		saveObject = saveObject + "lab_qnty_col_0~@@~" + cptQuantity +"#@@#";
-		saveObject = saveObject + "lab_cpt_col_0~@@~" + cptData +"#@@#";
+		saveObject = saveObject + "lab_cpt_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt1())).or("") +"#@@#";
 		saveObject = saveObject + "lab_labname_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionTestDesc())).or("") +"#@@#";
 		saveObject = saveObject + "lab_printxslurl_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionPrintxslurl())).or("") +"#@@#";
 		String visitType = getVisitType(encounterId);
@@ -1090,20 +1090,20 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			modJson.put("mod3", testDetails.getLabDescriptionDefMod3());
 			modJson.put("mod4", testDetails.getLabDescriptionDefMod4());
 			if ( !Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt1())).or("").equals("") ) {
-				if( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt1().split("~")[0])).or("")).size() < 1 )
-					cptJson.put("cpt1" , "");
+//				if( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt1().split("~")[0])).or("")).size() < 1 )
+					cptJson.put("cpt1" , testDetails.getLabDescriptionDefCpt1().split("~")[0]);
 			}
 			if ( !Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt2())).or("").equals("") ) {
-				if ( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt2().split("~")[0])).or("")).size() < 1 )
-					cptJson.put("cpt2" , "");
+//				if ( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt2().split("~")[0])).or("")).size() < 1 )
+					cptJson.put("cpt2" , testDetails.getLabDescriptionDefCpt2().split("~")[0]);
 			}
 			if ( !Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt3())).or("").equals("") ) {
-				if ( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt3().split("~")[0])).or("")).size() < 1 )
-					cptJson.put("cpt3" , "");
+//				if ( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt3().split("~")[0])).or("")).size() < 1 )
+					cptJson.put("cpt3" , testDetails.getLabDescriptionDefCpt3().split("~")[0]);
 			}
 			if ( !Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt4())).or("").equals("") ) {
-				if ( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt3().split("~")[0])).or("")).size() < 1 )
-					cptJson.put("cpt4" , "");
+//				if ( getCPTs(Optional.fromNullable(Strings.emptyToNull("" + testDetails.getLabDescriptionDefCpt4().split("~")[0])).or("")).size() < 1 )
+					cptJson.put("cpt4" , testDetails.getLabDescriptionDefCpt4().split("~")[0]);
 			}
 			for (int i = 1; i <= 4 ; i++) {
 				cptCode = Optional.fromNullable(Strings.emptyToNull((cptJson.getString("cpt" + i)).trim())).or("");
@@ -1556,8 +1556,19 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			LabData labData = new LabData();
 			labData.setChartId("" + labEntry.getLabEntriesChartid());
 			EmployeeProfile empData = labEntry.getEmpProfile();
+			Encounter encounter = labEntry.getEncounter();
 			labData.setEmpFullName(empData.getEmpProfileFullname());
-			labData.setEmpId("" + empData.getEmpProfileEmpid());
+			if( empData.getEmpProfileGroupid() == -10 ) {
+				if( encounter.getEncounterId() == -1 ) {
+					Chart chart = encounter.getChart();
+					PatientRegistration patReg = chart.getPatientRegistrationTable();
+					labData.setEmpId("" + patReg.getPatientRegistrationPrincipalDoctor());
+				} else {
+					labData.setEmpId("" + encounter.getEncounterServiceDoctor());
+				}
+			} else {
+				labData.setEmpId("" + empData.getEmpProfileEmpid());
+			}
 			labData.setEncounterId("" + labEntry.getLabEntriesEncounterId());
 			this.chartId = labEntry.getLabEntriesChartid();
 			labData.setPatientId("" + getPatientId());
@@ -3651,6 +3662,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			String testCategory = "4", labName = "";
 			List<LabEntries> paramData = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.getTestLog(testIds.get(i))));
 			List<ParamData> labParamDetails = new ArrayList<ParamData>();						
+			int scanCount = 0; int fileCount = 0;
 			for (int j = 0; j < paramData.size(); j++) {				
 				LabEntries paramDetails = paramData.get(j);
 				ParamData labParam = new ParamData();
@@ -3704,11 +3716,25 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 							}
 						}
 					}
-				} else {
+				}else {
 					labParam.setParameters(new ArrayList<LS_Parameter>());
 				}
 				labParamDetails.add(labParam);
+				Chart chartIdEntity=chartRepository.findOne(ChartSpecification.findByChartId(chartId));
+				int patientId=Optional.fromNullable(chartIdEntity.getChartPatientid()).or(-1);
+				if(patientId==-1){
+					List<FileDetails> fileDetailCount=fileDetailsRepository.findAll(Specifications.where(InvestigationSpecification.checkFileDetailScanType(1)).and(InvestigationSpecification.checkFileDetailEntityId(testdetilid)));
+					scanCount+=fileDetailCount.size();
+				}else{
+					List<FileDetails> fileDetailCount=fileDetailsRepository.findAll(Specifications.where(InvestigationSpecification.checkFileDetailScanType(1)).and(InvestigationSpecification.checkFileDetailEntityId(testdetilid)).and(InvestigationSpecification.checkFileDetailPatientId(patientId)));
+					scanCount+=fileDetailCount.size();
+				}
+				Integer[] scanCat=new Integer[]{1,2};
+				List<FileName> docDetails = fileNameRepository.findAll(InvestigationSpecification.checkFileEntityAndScanType(testdetilid,scanCat));
+				fileCount += docDetails.size();
 			}
+			labData.setFileCount(fileCount);
+			labData.setScanCount(scanCount);
 			labData.setLabName(labName);
 			labData.setTestId(testId);
 			labData.setTestCategory(testCategory);
