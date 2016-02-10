@@ -173,4 +173,25 @@ public class FlowsheetController {
 		logger.debug("End of request to get the list of overdue alerts.");
 		return flowsheetData;
 	}
+	
+	/**
+	 * Request to get the flowsheet details for labs and params section(as on 2016/01/21) for a particular flowsheet for a patient.
+	 * @param flowsheetId
+	 * @param patientId
+	 * @param encounterId
+	 * @return
+	 * @throws Exception
+	 */
+	@ApiOperation(value = "Get the flowsheet details for labs and params section for a particular flowsheet for a patient.", notes = "Get the flowsheet details for labs and params section for a particular flowsheet for a patient")
+	@RequestMapping(value = "/FlowsheetDataSOAP",method = RequestMethod.GET)
+	public FlowsheetBean getFlowsheetsDetailsSOAP(
+			@ApiParam(name="flowsheetId",value="flowsheet id") @RequestParam(value="flowsheetId", required=true, defaultValue="-1") Integer flowsheetId,
+			@ApiParam(name="patientId",value="patient id") @RequestParam(value="patientId", required=true, defaultValue="-1") Integer patientId,
+			@ApiParam(name="encounterId",value="encounter id") @RequestParam(value="encounterId", required=true, defaultValue="-1") Integer encounterId) throws Exception{
+		logger.debug("Begin of request to get the flowsheet details for labs and params section for a particular flowsheet for a patient");
+		FlowsheetBean flowsheetData = flowsheetService.getFlowsheetDataSOAP(-1,flowsheetId,patientId,encounterId);
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully loaded data for flowsheet="+flowsheetId+" for the patient having PatientId="+patientId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully loaded data for flowsheet="+flowsheetId+" for the patient having PatientId="+patientId);
+		logger.debug("End of request to get the complete flowsheet details based on flowsheet id and patient Id.");
+		return flowsheetData;
+	}
 }

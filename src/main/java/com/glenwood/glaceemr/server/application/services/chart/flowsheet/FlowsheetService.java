@@ -18,4 +18,5 @@ public interface FlowsheetService {
 	public List<FlowsheetBean> getFlowsheetDataList(Integer flowsheetType,String dxCode,Integer patientId,Integer encounterId) throws Exception;
 	public List<FlowsheetBean> getFlowsheetDataListOverdue(Integer patientId,Integer encounterId) throws Exception;
 	public List<OverdueAlert> overdueLabs(Integer patientId, Integer chartId, Integer encounterId) throws Exception;
+	public FlowsheetBean getFlowsheetDataSOAP(Integer flowsheetType,Integer flowsheetId, Integer patientId, Integer encounterId) throws Exception;
 }
