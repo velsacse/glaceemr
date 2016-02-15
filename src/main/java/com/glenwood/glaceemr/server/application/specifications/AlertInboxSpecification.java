@@ -148,4 +148,21 @@ public class AlertInboxSpecification {
 			}
 		};
 	}
+	
+	public static Specification<AlertEvent> byEncIdAndCatId(final Integer encounterId, final Integer categoryId) {
+		return new Specification<AlertEvent>() {
+
+			@Override
+			public Predicate toPredicate(Root<AlertEvent> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate checkCatId=cb.equal(root.get(AlertEvent_.alertEventCategoryId), categoryId);
+				Predicate checkEncId=cb.equal(root.get(AlertEvent_.alertEventEncounterId),encounterId );
+				Predicate checkStatus = cb.equal(root.get(AlertEvent_.alertEventStatus), 1);
+				Predicate mainPredicate=cb.and(checkStatus,checkEncId,checkCatId);
+				return mainPredicate;
+			}
+
+
+		};
+	}
 }

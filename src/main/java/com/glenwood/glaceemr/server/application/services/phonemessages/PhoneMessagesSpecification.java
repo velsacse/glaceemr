@@ -81,7 +81,7 @@ public class PhoneMessagesSpecification {
 								cb.equal(patientIdJoin.get(Chart_.chartPatientid), patientId)
 						};
 					}
-
+					
 					Predicate predicate=cb.and(predicateApUserId);
 
 					root.join("chart",JoinType.INNER);
@@ -91,7 +91,8 @@ public class PhoneMessagesSpecification {
 					root.fetch(Encounter_.chart,JoinType.INNER);
 					root.fetch(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
 					root.fetch(Encounter_.empProfileEmpId,JoinType.LEFT);
-				
+					
+					cq.orderBy(cb.desc(root.get(Encounter_.encounterCreatedDate)));
 				return predicate;
 			}
 		};

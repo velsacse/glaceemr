@@ -136,4 +136,6 @@ public interface AlertInboxService {
 	Integer getCategoryId(Integer section, Integer actionMap);
 
 	Integer getAlertCategoryId(Integer actionMap, Integer catType);
+	
+	List<AlertEvent> getAlertsByEncIdAndCatId(Integer encounterId,Integer categoryId);
 }

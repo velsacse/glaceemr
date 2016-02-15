@@ -970,7 +970,6 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 	@Override
 	public List<AlertEvent> deleteAlert(List<Integer> alertIdList, Integer userId) {
 		List<AlertEvent> alertEventList=alertInboxRepository.findAll(AlertInboxSpecification.byAlertId(alertIdList));
-		AlertEvent aeUpdate = null;
 		for (AlertEvent alertEvent : alertEventList) {
 			//Take individual bean to update the value
 			AlertEvent ae=alertEvent;
@@ -980,9 +979,40 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			Date date= new Date();
 			ae.setAlertEventModifiedby(userId);
 			ae.setAlertEventModifiedDate(new Timestamp(date.getTime()));
-			aeUpdate=ae;
-			//Update the bean(row).
-			alertInboxRepository.saveAndFlush(aeUpdate);
+			ae.setAlertEventClosedDate(new Timestamp(date.getTime()));
+			alertInboxRepository.saveAndFlush(ae);
+
+			AlertArchive aa=new AlertArchive();//insert row in alert_archive from alert_event
+			aa.setAlertEventCategoryId(ae.getAlertEventCategoryId());
+			aa.setAlertEventChartId(ae.getAlertEventChartId());
+			aa.setAlertEventClosedDate(ae.getAlertEventClosedDate());
+			aa.setAlertEventCreatedDate(ae.getAlertEventCreatedDate());
+			aa.setAlertEventEncounterId(ae.getAlertEventEncounterId());
+			aa.setAlertEventFrom(ae.getAlertEventFrom());
+			aa.setAlertEventFrompage(ae.getAlertEventFrompage());
+			aa.setAlertEventHighlight(ae.getAlertEventHighlight());
+			aa.setAlertEventId(ae.getAlertEventId());
+			aa.setAlertEventIsgroupalert(ae.getAlertEventIsgroupalert());
+			aa.setAlertEventMessage(ae.getAlertEventMessage());
+			aa.setAlertEventModifiedby(ae.getAlertEventModifiedby());
+			if(ae.getAlertEventModifiedDate()!=null)
+				aa.setAlertEventModifiedDate(ae.getAlertEventModifiedDate());
+			aa.setAlertEventParentalertid(ae.getAlertEventParentalertid());
+			aa.setAlertEventPatientId(ae.getAlertEventPatientId());
+			aa.setAlertEventPatientName(ae.getAlertEventPatientName());
+			aa.setAlertEventRead(ae.getAlertEventRead());
+			aa.setAlertEventReadby(ae.getAlertEventReadby());
+			if(ae.getAlertEventReadDate()!=null)
+				aa.setAlertEventReadDate(ae.getAlertEventReadDate());
+			aa.setAlertEventRefId(ae.getAlertEventRefId());
+			aa.setAlertEventRoomId(ae.getAlertEventRoomId());
+			aa.setAlertEventStatus(ae.getAlertEventStatus());
+			aa.setAlertEventStatus1(ae.getAlertEventStatus1());
+			aa.setAlertEventTo(ae.getAlertEventTo());
+			aa.setAlertEventUnknown(ae.getAlertEventUnknown());
+			alertArchiveRepository.saveAndFlush(aa);
+
+			alertInboxRepository.delete(ae); //delete a row from alert_event table
 		}
 
 		return alertEventList;
@@ -1034,24 +1064,55 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 
 	@Override
 	public List<AlertEvent> deleteAlertByEncounter(List<Integer> encounterIdList, Integer userId) {
-		
+
 		List<AlertEvent> alertEventList=alertInboxRepository.findAll(AlertInboxSpecification.byEncounterId(encounterIdList));
-		
-		AlertEvent aeUpdate = null;
+
 		for (AlertEvent alertEvent : alertEventList) {
 			//Take individual bean to update the value
-			AlertEvent ae=alertEvent;
+			AlertEvent ae=alertEvent;	
 			//Change the status of alert
 			ae.setAlertEventStatus(2);		//2 for closing alert
 			//Set modified date
 			Date date= new Date();
 			ae.setAlertEventModifiedby(userId);
+			ae.setAlertEventClosedDate(new Timestamp(date.getTime()));
 			ae.setAlertEventModifiedDate(new Timestamp(date.getTime()));
-			aeUpdate=ae;
-			//Update the bean(row).
-			alertInboxRepository.saveAndFlush(aeUpdate);
+			alertInboxRepository.saveAndFlush(ae);
+
+			AlertArchive aa=new AlertArchive();//insert row in alert_archive from alert_event
+			aa.setAlertEventCategoryId(ae.getAlertEventCategoryId());
+			aa.setAlertEventChartId(ae.getAlertEventChartId());
+			aa.setAlertEventClosedDate(ae.getAlertEventClosedDate());
+			aa.setAlertEventCreatedDate(ae.getAlertEventCreatedDate());
+			aa.setAlertEventEncounterId(ae.getAlertEventEncounterId());
+			aa.setAlertEventFrom(ae.getAlertEventFrom());
+			aa.setAlertEventFrompage(ae.getAlertEventFrompage());
+			aa.setAlertEventHighlight(ae.getAlertEventHighlight());
+			aa.setAlertEventId(ae.getAlertEventId());
+			aa.setAlertEventIsgroupalert(ae.getAlertEventIsgroupalert());
+			aa.setAlertEventMessage(ae.getAlertEventMessage());
+			aa.setAlertEventModifiedby(ae.getAlertEventModifiedby());
+			if(ae.getAlertEventModifiedDate()!=null)
+				aa.setAlertEventModifiedDate(ae.getAlertEventModifiedDate());
+			aa.setAlertEventParentalertid(ae.getAlertEventParentalertid());
+			aa.setAlertEventPatientId(ae.getAlertEventPatientId());
+			aa.setAlertEventPatientName(ae.getAlertEventPatientName());	
+			aa.setAlertEventRead(ae.getAlertEventRead());
+			aa.setAlertEventReadby(ae.getAlertEventReadby());
+			if(ae.getAlertEventReadDate()!=null)
+				aa.setAlertEventReadDate(ae.getAlertEventReadDate());
+			aa.setAlertEventRefId(ae.getAlertEventRefId());
+			aa.setAlertEventRoomId(ae.getAlertEventRoomId());
+			aa.setAlertEventStatus(ae.getAlertEventStatus());
+			aa.setAlertEventStatus1(ae.getAlertEventStatus1());
+			aa.setAlertEventTo(ae.getAlertEventTo());
+			aa.setAlertEventUnknown(ae.getAlertEventUnknown());
+			alertArchiveRepository.saveAndFlush(aa);
+
+			alertInboxRepository.delete(ae); //delete a row from alert_event table
+
 		}
-		
+
 		return alertEventList;
 	}
 
@@ -1117,5 +1178,13 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 	public Integer getAlertCategoryId(Integer actionMap, Integer catType) {
 		AlertCategory alertCategory = alertCategoryRepository.findOne(AlertCategorySpecification.checkTypeAndActionmap(actionMap, catType));
 		return alertCategory.getAlertCategoryId();
+	}
+
+	@Override
+	public List<AlertEvent> getAlertsByEncIdAndCatId(Integer encounterId,
+			Integer categoryId) {
+		
+		List<AlertEvent> alerts=alertInboxRepository.findAll(AlertInboxSpecification.byEncIdAndCatId(encounterId,categoryId));
+		return alerts;
 	}
 }
