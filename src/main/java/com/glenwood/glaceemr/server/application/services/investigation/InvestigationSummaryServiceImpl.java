@@ -1618,7 +1618,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			else 
 				labData.setTestRevOn("");
 			labData.setTestRoute(labEntry.getLabEntriesLabRoute());
-			labData.setTestShortOrderNotes(labEntry.getLabEntriesShortorderNotes());
+			if( labEntry.getLabEntriesShortorderNotes() != null )
+				labData.setTestShortOrderNotes(labEntry.getLabEntriesShortorderNotes());
+			else
+				labData.setTestShortOrderNotes("");
 			labData.setTestSite(labEntry.getLabEntriesLabSite());
 			labData.setTestSpecimenId("" + labEntry.getLabEntriesSepcimenId());
 			labData.setTeststatus("" + labEntry.getLabEntriesTestStatus());
@@ -2400,12 +2403,16 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				else
 					labEntriesSave.setLabEntriesAdministrationNotes(0);
 			}
+		} else {
+			labEntriesSave.setLabEntriesAdministrationNotes(0);
 		}
 		if(dataStr[dataValueMap("int_lab_refusalreason")] != null)
 		{
 			if (! dataStr[dataValueMap("int_lab_refusalreason")].equals(""))
 				labEntriesSave.setLabEntriesRefusalreason(Integer.parseInt(Optional.fromNullable(dataStr[dataValueMap("int_lab_refusalreason")]).or("-1").toString()));
-		}		
+		} else {
+			labEntriesSave.setLabEntriesRefusalreason(0);
+		}
 		if((dataStr[dataValueMap("int_lab_enteredby")] != null)){
 			if(!dataStr[dataValueMap("int_lab_enteredby")].equals(""))
 				labEntriesSave.setLabEntriesEnteredBy(Integer.parseInt(Optional.fromNullable(dataStr[dataValueMap("int_lab_enteredby")]).or("-1").toString()));
@@ -2523,10 +2530,14 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				if(groupid.equals(vacgroupid)){
 					if ((dataStr[dataValueMap("int_lab_oldunitno")]!=null) && (!dataStr[dataValueMap("int_lab_oldunitno")].equals(""))){
 						labEntriesSave.setLabEntriesZunits(1);
+					} else {
+						labEntriesSave.setLabEntriesZunits(0);
 					}
 				}else{
 					if ((dataStr[dataValueMap("int_lab_oldunitno")]!=null) && (!dataStr[dataValueMap("int_lab_oldunitno")].equals(""))){
 						labEntriesSave.setLabEntriesZunits(Integer.parseInt(Optional.fromNullable(dataStr[dataValueMap("int_lab_unitno")]).or("-1").toString()));
+					} else {
+						labEntriesSave.setLabEntriesZunits(0);
 					}
 				}
 			}
@@ -2572,12 +2583,16 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		}
 		if ((dataStr[dataValueMap("int_lab_isfasting")]!=null) && (!dataStr[dataValueMap("int_lab_isfasting")].equals("")))
 			labEntriesSave.setLabEntriesIsFasting(Boolean.parseBoolean(dataStr[dataValueMap("int_lab_isfasting")]));
+		else
+			labEntriesSave.setLabEntriesIsFasting(false);
 		if(dataStr[dataValueMap("int_lab_qnty")] != null){ 
 			if (!dataStr[dataValueMap("int_lab_qnty")].equals(""))
 				labEntriesSave.setLabEntriesCptUnits(dataStr[dataValueMap("int_lab_qnty")]);
 		}
 		if(dataStr[dataValueMap("int_lab_ischdp")] != null)
 			labEntriesSave.setLabEntriesIschdplab(Integer.parseInt(dataStr[dataValueMap("int_lab_ischdp")]));
+		else
+			labEntriesSave.setLabEntriesIschdplab(1);
 		if(dataStr[dataValueMap("int_lab_instruction")] != null)
 			labEntriesSave.setLabEntriesInstruction(dataStr[dataValueMap("int_lab_instruction")]);
 		if(dataStr[dataValueMap("int_lab_strength")] != null){
@@ -2644,7 +2659,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				specimenId = specimenRepository.saveAndFlush(specimenSave).getSpecimenId();
 			}
 			labEntriesSave.setLabEntriesSepcimenId(Integer.parseInt(specimenId+""));
+		} else {
+			labEntriesSave.setLabEntriesSepcimenId(-1);
 		}
+		labEntriesSave.setLabEntriesImmunizationstatus(0);
 		if(dataStr[dataValueMap("int_lab_testdetailid")].equals("-1")){
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Object> cq = builder.createQuery();
