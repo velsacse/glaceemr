@@ -50,7 +50,7 @@ public class DataBaseAccessFilter implements Filter {
 	 */
 
 	public static String password="";
-	
+
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
 
@@ -64,39 +64,39 @@ public class DataBaseAccessFilter implements Filter {
 			TennantContextHolder.setTennantId(session.getAttribute("databasename").toString());
 		}*/
 		httpRequest = (HttpServletRequest)request;
-		
-		
-		
-		
+
+
+
+
 		Enumeration<String> headerNames = httpRequest.getHeaderNames();
 		Enumeration<String> parametersNames =httpRequest.getParameterNames();
 		StringBuffer jb = new StringBuffer();
-		
+
 		MultiReadHttpServletRequest multiReadRequest = new MultiReadHttpServletRequest((HttpServletRequest) request);
 
-			/*String body = myRequestWrapper.getBody();*/
-			
-			
-			String body="";
-			
-			///////////////////////
-			  StringBuilder stringBuilder = new StringBuilder();
-			   BufferedReader bufferedReader = null;
-			   try {
-			     InputStream inputStream = multiReadRequest.getInputStream();
-			     if (inputStream != null) {
-			       bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-			       char[] charBuffer = new char[128];
-			       int bytesRead = -1;
-			       while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
-			         stringBuilder.append(charBuffer, 0, bytesRead);
-			       }
-			     } else {
-			       stringBuilder.append("");
-			     }
-			   } catch (IOException ex) {
-			       throw ex;
-			   } finally {/*
+		/*String body = myRequestWrapper.getBody();*/
+
+
+		String body="";
+
+		///////////////////////
+		StringBuilder stringBuilder = new StringBuilder();
+		BufferedReader bufferedReader = null;
+		try {
+			InputStream inputStream = multiReadRequest.getInputStream();
+			if (inputStream != null) {
+				bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+				char[] charBuffer = new char[128];
+				int bytesRead = -1;
+				while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+					stringBuilder.append(charBuffer, 0, bytesRead);
+				}
+			} else {
+				stringBuilder.append("");
+			}
+		} catch (IOException ex) {
+			throw ex;
+		} finally {/*
 			     if (bufferedReader != null) {
 			       try {
 			         bufferedReader.close();
@@ -104,45 +104,65 @@ public class DataBaseAccessFilter implements Filter {
 			         throw ex;
 			       }
 			     }
-			   */}
-			   
-			   body = stringBuilder.toString();
-			
-			
-			///////////////////////
-			
-			
-			
+		 */}
+
+		body = stringBuilder.toString();
+
+
+		///////////////////////
+
+
+
 		if(body.length()>0){
-			
+
 		}else
 		{
-			
+
 			while(parametersNames.hasMoreElements())
 			{
 				String parameter = parametersNames.nextElement();
 			}
 		}
+
+		String tennantId = HUtil.Nz(request.getParameter("dbname"),"-1");
+		if(tennantId != "-1"){
+			TennantContextHolder.setTennantId(tennantId);
+		}
+
 		while(headerNames.hasMoreElements()){
 			String header = headerNames.nextElement();
 			if(header.trim().equalsIgnoreCase("authorization")){
-			String basecut[]=httpRequest.getHeader(header).split("Basic");
-			byte[] valueDecoded= Base64.decodeBase64(basecut[1].getBytes() );
-			password=new String(valueDecoded).split(":")[1];
+				String basecut[]=httpRequest.getHeader(header).split("Basic");
+				byte[] valueDecoded= Base64.decodeBase64(basecut[1].getBytes() );
+				password=new String(valueDecoded).split(":")[1];
 
 			}
-			
+
 			if(header.trim().equalsIgnoreCase("Database")){
-				String tennantId = HUtil.Nz(httpRequest.getHeader(header).toString(),"-1");
+				tennantId = HUtil.Nz(httpRequest.getHeader(header).toString(),"-1");
 				if(tennantId != "-1"){
 					TennantContextHolder.setTennantId(tennantId);
 				}
 
-				}
+			}
 		}
-	
-	
-		chain.doFilter(multiReadRequest, response);
+		//		HttpServletRequest httpReq = (HttpServletRequest) request;
+
+		//		System.out.println("request URI--->"+httpReq.getRequestURI());
+		//		System.out.println("request url--->"+httpReq.getRequestURL());
+		String params[] = multiReadRequest.getRequestURI().split("api/");
+		String[] dbParams = params[0].split("/glaceemr_backend/");
+		if(dbParams.length>1){
+			String db[] = dbParams[1].split("/");
+			if(db.length>1){
+				System.out.println("***request is from GWT***"+db[0]);
+				TennantContextHolder.setTennantId(db[0].toLowerCase());
+				request.getServletContext().getRequestDispatcher("/api/"+params[1]).forward(multiReadRequest, response);
+			}
+		}else{
+			System.out.println("***request is from legacy***"+TennantContextHolder.getTennantId());
+			chain.doFilter(multiReadRequest, response);
+		}
 	}
 
 	/**
