@@ -126,7 +126,7 @@ public class DataBaseAccessFilter implements Filter {
 
 		String tennantId = HUtil.Nz(request.getParameter("dbname"),"-1");
 		if(tennantId != "-1"){
-			TennantContextHolder.setTennantId(tennantId);
+			TennantContextHolder.setTennantId(tennantId.trim().toLowerCase());
 		}
 
 		while(headerNames.hasMoreElements()){
@@ -141,7 +141,7 @@ public class DataBaseAccessFilter implements Filter {
 			if(header.trim().equalsIgnoreCase("Database")){
 				tennantId = HUtil.Nz(httpRequest.getHeader(header).toString(),"-1");
 				if(tennantId != "-1"){
-					TennantContextHolder.setTennantId(tennantId);
+					TennantContextHolder.setTennantId(tennantId.trim().toLowerCase());
 				}
 
 			}
@@ -156,7 +156,7 @@ public class DataBaseAccessFilter implements Filter {
 			String db[] = dbParams[1].split("/");
 			if(db.length>1){
 				System.out.println("***request is from GWT***"+db[0]);
-				TennantContextHolder.setTennantId(db[0].toLowerCase());
+				TennantContextHolder.setTennantId(db[0].trim().toLowerCase());
 				request.getServletContext().getRequestDispatcher("/api/"+params[1]).forward(multiReadRequest, response);
 			}
 		}else{
