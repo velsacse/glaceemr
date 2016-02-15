@@ -173,7 +173,7 @@ public class InvestigationSpecification {
 			public Predicate toPredicate(Root<LabDescription> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				Join<LabDescription, LabDescpParameters> descJoin = root.join(LabDescription_.labDescParams, JoinType.INNER);
-				Join<LabDescpParameters, LabParameters> paramsJoin = descJoin.join(LabDescpParameters_.labParametersTable, JoinType.INNER);;
+				Join<LabDescpParameters, LabParameters> paramsJoin = descJoin.join(LabDescpParameters_.labParametersTable, JoinType.INNER);
 				Predicate checkIsActive = cb.equal(paramsJoin.get(LabParameters_.labParametersIsactive), true);
 				Predicate descIsActive = cb.equal(descJoin.get(LabDescpParameters_.labDescpParameterIsactive), true);
 				Predicate checkId = cb.equal(root.get(LabDescription_.labDescriptionTestid), testId);
@@ -456,9 +456,6 @@ public class InvestigationSpecification {
 				Join<LabEntriesParameter, LabEntries> paramJoin = root.join(LabEntriesParameter_.labEntriesTable,JoinType.INNER);
 				Predicate checkId = cb.equal(paramJoin.get(LabEntries_.labEntriesTestdetailId),testDetailId);
 				Predicate checkParam = cb.equal(root.get(LabEntriesParameter_.labEntriesParameterIsactive), true);
-				if ( Long.class != query.getResultType() ) {
-					root.fetch(LabEntriesParameter_.labParametersTable);					
-				}
 				Predicate finalCheck = cb.and(checkId,checkParam);
 				return finalCheck;
 			}

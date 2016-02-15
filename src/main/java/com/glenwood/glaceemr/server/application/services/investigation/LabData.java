@@ -18,6 +18,7 @@ public class LabData {
 	String testStrengthUnit;
 	String testBaseDose;
 	String testDosage;
+	String testDoseLevel;
 	String testRoute;
 	String testBodySiteCode;
 	String testBodySiteDesc;
@@ -153,6 +154,12 @@ public class LabData {
 	}
 	public void setTestDosage(String testDosage) {
 		this.testDosage = testDosage;
+	}	
+	public String getTestDoseLevel() {
+		return testDoseLevel;
+	}
+	public void setTestDoseLevel(String testDoseLevel) {
+		this.testDoseLevel = testDoseLevel;
 	}
 	public String getTestRoute() {
 		return testRoute;

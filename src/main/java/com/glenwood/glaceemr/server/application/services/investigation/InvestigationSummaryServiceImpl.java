@@ -697,11 +697,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	 */
 	@SuppressWarnings("rawtypes")
 	private String getLabCompanyAddrId(Hashtable locationDetail) {
-		System.out.println("locationDetail:::::::::" + locationDetail);
 		String addrId = "-1";
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
-		System.out.println("locationDetail getlablocname:::::::::" + locationDetail.get("labLocName").toString().trim());
 		Root<LabcompanyDetails> root = cq.from(LabcompanyDetails.class);
 		cq.select(root.get(LabcompanyDetails_.labcompanyDetailsId));
 		cq.where(builder.and(builder.equal(root.get(LabcompanyDetails_.labcompanyDetailsLabname), Optional.fromNullable(Strings.emptyToNull("" + locationDetail.get("labLocName").toString().trim())).or(""))),
@@ -992,6 +990,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		saveObject = saveObject + "lab_teststatus_col_0~@@~" + "1" +"#@@#";
 		String[] cptDetails = getCPTDataAndQuantity(testDetails);
 		String cptQuantity = "";
+		@SuppressWarnings("unused")
 		String cptData = "";
 		if( cptDetails.length > 0)  {
 			cptData = cptDetails[0];
@@ -1048,16 +1047,18 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				LabDescription Resultdata = ResultdataAry.get(rstCount);
 				List<LabDescpParameters> descparams = Resultdata.getLabDescParams();
 				if( descparams.size() > 0 ) {
-					LabParameters labParams = descparams.get(0).getLabParametersTable();
-					Resultdata = ResultdataAry.get(rstCount);
-					appendResult += "-1" + " |~|";
-					appendResult += labParams.getLabParametersId() + " |~|";
-					appendResult += labParams.getLabParametersDisplayname() + " |~|";
-					appendResult += " " + " |~|";
-					appendResult += "" + " |~|";  //Date 
-					appendResult += "N" + " |~|";  //Normal Range
-					appendResult += "" + " |~|"; //Notes;
-					appendResult += "" + " @#@"; //Status
+					for (int i = 0; i < descparams.size(); i++) {
+						LabParameters labParams = descparams.get(i).getLabParametersTable();
+						Resultdata = ResultdataAry.get(rstCount);
+						appendResult += "-1" + " |~|";
+						appendResult += labParams.getLabParametersId() + " |~|";
+						appendResult += labParams.getLabParametersDisplayname() + " |~|";
+						appendResult += " " + " |~|";
+						appendResult += "" + " |~|";  //Date 
+						appendResult += "N" + " |~|";  //Normal Range
+						appendResult += "" + " |~|"; //Notes;
+						appendResult += "" + " @#@"; //Status	
+					}
 				}
 			}
 		}
@@ -1590,6 +1591,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			labData.setTestConfirmStatus("" + labEntry.getLabEntriesConfirmTestStatus());
 			labData.setTestDetailId("" + labEntry.getLabEntriesTestdetailId());
 			labData.setTestDosage(labEntry.getLabEntriesDosage());
+			labData.setTestDoseLevel("" + labEntry.getLabEntriesDosageLevel());
 			labData.setTestGroupId("" + labEntry.getLabEntriesGroupid());
 			labData.setTestId("" + labEntry.getLabEntriesTestId());
 			if( labEntry.getLabEntriesIsBillable() != null )
@@ -3380,8 +3382,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 					labEntriesParameterList.get(h).setLabEntriesParameterNormalrange(normalRange);
 				labEntriesParameterRepository.saveAndFlush(labEntriesParameterList.get(h));
 			}
-		}else {
-			LabEntriesParameter labEntriesParameterTemp=new LabEntriesParameter();
+		} else {
+			LabEntriesParameter labEntriesParameterTemp = new LabEntriesParameter();
 			labEntriesParameterTemp.setLabEntriesParameterTestdetailid(testDetailId);
 			labEntriesParameterTemp.setLabEntriesParameterMapid(paramId);
 			labEntriesParameterTemp.setLabEntriesParameterValue(paramValue);
@@ -3392,8 +3394,13 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				labEntriesParameterTemp.setLabEntriesParameterDate(Timestamp.valueOf(performedDate));
 			labEntriesParameterTemp.setLabEntriesParameterResultstatus(paramResultStatus);
 			labEntriesParameterTemp.setLabEntriesParameterSortorder(sortOrder);
+			labEntriesParameterTemp.setLabEntriesParameterIsactive(true);
 			if(!normalRange.equals(""))
 				labEntriesParameterTemp.setLabEntriesParameterNormalrange(normalRange);
+			labEntriesParameterTemp.setLabEntriesParameterLabcompDetailid(-2);
+			labEntriesParameterTemp.setLabEntriesParameterIspdf(0);
+			labEntriesParameterTemp.setLabEntriesParameterFilenameId(-2);
+			labEntriesParameterTemp.setLabEntriesParameterFilenameScanid(-2);
 			labEntriesParameterRepository.saveAndFlush(labEntriesParameterTemp);
 		}
 	}

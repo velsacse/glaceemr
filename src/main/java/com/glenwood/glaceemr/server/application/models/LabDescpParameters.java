@@ -36,12 +36,12 @@ public class LabDescpParameters {
 	@Column(name="lab_descp_parameter_isactive", columnDefinition="Boolean default true")
 	private Boolean labDescpParameterIsactive;
 
-	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.LAZY)
+	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.EAGER)
 	@JoinColumn(name="lab_descp_parameter_testid", referencedColumnName="lab_description_testid", insertable=false, updatable=false)
 	@JsonBackReference
 	LabDescription labDescriptionTable;
 	
-	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.LAZY)
+	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.EAGER)
 	@JoinColumn(name="lab_descp_parameter_mapid", referencedColumnName="lab_parameters_id", insertable=false, updatable=false)
 	@JsonBackReference
 	LabParameters labParametersTable;
