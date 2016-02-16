@@ -3458,6 +3458,15 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				if(groupId!=-1){
 					labGroupList.get(i).setLabStandardCodeTable(labStandardCodeRepository.findAll(FlowsheetSpecification.labStandardCodeGroupId(groupId)));
 				}
+				if(labGroupList.get(i).getLabStandardCodeTable().size()>0){
+					for(int j=0;j<labGroupList.get(i).getLabStandardCodeTable().size();j++){
+						LabStandardCode temp=labGroupList.get(i).getLabStandardCodeTable().get(j);
+						if(temp.getLabStandardCodeGroupCodesystem().contentEquals(FlowsheetServiceImpl.GlenwoodSystemsOID)&&
+								temp.getLabStandardCodeGroupGwid()!=null){
+								temp.setLabDescriptionTable(labDescriptionRepository.findOne(InvestigationSpecification.labByTestId(temp.getLabStandardCodeGroupGwid())));
+						}
+					}
+				}
 			}
 			labGroupList=orderByLabGroupName(labGroupList);
 			flowsheetConfiguredDetails.setLabStandardGroup(labGroupList);
@@ -3467,6 +3476,15 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				Integer groupId=Optional.fromNullable(paramGroupList.get(i).getParamStandardGroupId()).or(-1);
 				if(groupId!=-1){
 					paramGroupList.get(i).setParamStandardCodeTable(paramStandardCodeRepository.findAll(FlowsheetSpecification.paramStandardCodeGroupId(groupId)));
+				}
+				if(paramGroupList.get(i).getParamStandardCodeTable().size()>0){
+					for(int j=0;j<paramGroupList.get(i).getParamStandardCodeTable().size();j++){
+						ParamStandardCode temp=paramGroupList.get(i).getParamStandardCodeTable().get(j);
+						if(temp.getParamStandardCodeGroupCodesystem().contentEquals(FlowsheetServiceImpl.GlenwoodSystemsOID)&&
+								temp.getParamStandardCodeGroupGwid()!=null){
+								temp.setLabParametersTable(labParametersRepository.findOne(InvestigationSpecification.getParamDetails(temp.getParamStandardCodeGroupGwid())));
+						}
+					}
 				}
 			}
 			paramGroupList=orderByParamGroupName(paramGroupList);
