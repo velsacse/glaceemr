@@ -154,7 +154,7 @@ public class DataBaseAccessFilter implements Filter {
 		String[] dbParams = params[0].split("/glaceemr_backend/");
 		if(dbParams.length>1){
 			String db[] = dbParams[1].split("/");
-			if(db.length>1){
+			if(db[0]!= null){
 				System.out.println("***request is from GWT***"+db[0]);
 				TennantContextHolder.setTennantId(db[0].trim().toLowerCase());
 				request.getServletContext().getRequestDispatcher("/api/"+params[1]).forward(multiReadRequest, response);
