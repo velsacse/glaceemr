@@ -1551,10 +1551,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		Orders orderDetails = new Orders();
 		logger.debug("in getting testDetails");
 		List<LabEntries> labs = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.testDetailsByTestId(testDetailId)).and(InvestigationSpecification.checkTestStatus()));
-		List<LabData> labDataList = new ArrayList<LabData>();
+		LabData labData = new LabData();
 		for (int i = 0; i < labs.size(); i++) {
 			LabEntries labEntry = labs.get(i);
-			LabData labData = new LabData();
 			labData.setChartId("" + labEntry.getLabEntriesChartid());
 			EmployeeProfile empData = labEntry.getEmpProfile();
 			Encounter encounter = labEntry.getEncounter();
@@ -1645,9 +1644,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			labData.setDx3CodeDesc(labEntry.getLabEntriesDx3codeCodedesc());
 			labData.setDx4CodeDesc(labEntry.getLabEntriesDx4codeCodedesc());
 			labData.setTestLotNo("" + labEntry.getLabEntriesLotNo());
-			labDataList.add(labData);
 		}		
-		orderDetails.setLabEntries(labDataList);
+		orderDetails.setLabEntries(labData);
 
 		logger.debug("in getting status list");
 		List<H068> statusList = h068Repository.findAll(InvestigationSpecification.getStatusList());
@@ -1706,43 +1704,40 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			List<VaccineOrderDetails> vaccineOrderDetails = findLotDetails(testId, "-2");
 			orderDetails.setLotDetails(vaccineOrderDetails);
 		}
-
-		LabEntries currentLab = labs.get(0);
-		Chart chart = currentLab.getChart();
-		if( currentLab.getLabEntriesCpt().equalsIgnoreCase("92551")) { /** Audiometry Screening*/
-			List<PatientClinicalElements> leftValueList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), chart.getChartPatientid(), "0000200200100145000"));
+		if( labData.getTestCpt().equalsIgnoreCase("92551")) { /** Audiometry Screening*/
+			List<PatientClinicalElements> leftValueList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100145000"));
 			if( leftValueList.size() > 0 ) {
 				orderDetails.setLeftEarValue(leftValueList.get(0).getPatientClinicalElementsValue());
 				orderDetails.setAudiometryLeftList(clinicalElementsService.getClinicalElementOptions("0000200200100145000")); /** audio status left*/
 			}
-			List<PatientClinicalElements> rightValueList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), chart.getChartPatientid(), "0000200200100146000"));
+			List<PatientClinicalElements> rightValueList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100146000"));
 			if( rightValueList.size() > 0 ) {
 				orderDetails.setRightEarValue(rightValueList.get(0).getPatientClinicalElementsValue());
 				orderDetails.setAudiometryRightList(clinicalElementsService.getClinicalElementOptions("0000200200100146000")); /** audio status right*/
 			}
-		} else if( currentLab.getLabEntriesCpt().equalsIgnoreCase("99173")) { /** Vision Screening*/
-			List<PatientClinicalElements> leftEyeList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), chart.getChartPatientid(), "0000200200100147000"));
+		} else if( labData.getTestCpt().equalsIgnoreCase("99173")) { /** Vision Screening*/
+			List<PatientClinicalElements> leftEyeList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100147000"));
 			if( leftEyeList.size() > 0 ) {
 				orderDetails.setLeftEyeValue(leftEyeList.get(0).getPatientClinicalElementsValue());
 				orderDetails.setVisionLeftList(clinicalElementsService.getClinicalElementOptions("0000200200100147000")); /** vital vision left*/
 			}
-			List<PatientClinicalElements> rightEyeList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), chart.getChartPatientid(), "0000200200100148000"));
+			List<PatientClinicalElements> rightEyeList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100148000"));
 			if( rightEyeList.size() > 0 ) {
 				orderDetails.setRightEyeValue(rightEyeList.get(0).getPatientClinicalElementsValue());
 				orderDetails.setVisionRightList(clinicalElementsService.getClinicalElementOptions("0000200200100148000")); /** vital vision right*/
 			}
-			List<PatientClinicalElements> glassList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), chart.getChartPatientid(), "0000200200100179000"));
+			List<PatientClinicalElements> glassList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100179000"));
 			if( glassList.size() > 0 ) {
 				orderDetails.setGlassValue(glassList.get(0).getPatientClinicalElementsValue());
 				orderDetails.setGlassValueList(clinicalElementsService.getClinicalElementOptions("0000200200100179000")); /** vital glass value*/
 			}
 		}
-		List<PatientClinicalElements> weightList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(currentLab.getLabEntriesEncounterId(), -1, "0000200200100024000"));
+		List<PatientClinicalElements> weightList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), -1, "0000200200100024000"));
 		if( weightList.size() > 0 ) {
 			orderDetails.setPatientWeight(weightList.get(0).getPatientClinicalElementsValue());
 		}
 
-		this.chartId = currentLab.getLabEntriesChartid();
+		this.chartId = Integer.parseInt(labData.getChartId());
 
 		List<LabEntriesParameter> labParameters = labEntriesParameterRepository.findAll(InvestigationSpecification.checkParameterAndTestDetailId(testDetailId));
 		orderDetails.setLabParameters(labParameters);

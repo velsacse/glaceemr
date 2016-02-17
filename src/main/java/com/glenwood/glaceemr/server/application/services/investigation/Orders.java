@@ -15,7 +15,7 @@ import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails;
  */
 public class Orders {
 
-	List<LabData> labEntries;
+	LabData labEntries;
 	List<Vaccines> vaccineConsentInfo;
 	List<H068> statusList;
 	List<H068> refusalReasonList;
@@ -125,10 +125,10 @@ public class Orders {
 	public void setIsConsentObtained(Boolean isConsentObtained) {
 		this.isConsentObtained = isConsentObtained;
 	}
-	public List<LabData> getLabEntries() {
+	public LabData getLabEntries() {
 		return labEntries;
 	}
-	public void setLabEntries(List<LabData> labEntries) {
+	public void setLabEntries(LabData labEntries) {
 		this.labEntries = labEntries;
 	}
 	public List<H068> getStatusList() {
