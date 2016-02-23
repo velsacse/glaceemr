@@ -95,12 +95,11 @@ public class PatientClinicalElementsSpecification {
 					encounterPred=cb.lessThanOrEqualTo(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
 				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
 				Predicate elementPred=root.get(PatientClinicalElements_.patientClinicalElementsGwid).in(gwids);
-				Predicate isHistoryPred=cb.equal(paramJoin.get(ClinicalElements_.clinicalElementsIshistory),false);
 				Predicate finalPred=null;
 				if(encounterId!=-1)
-					finalPred= cb.and(encounterPred,patientPred,elementPred,isHistoryPred);
+					finalPred= cb.and(encounterPred,patientPred,elementPred);
 				else
-					finalPred= cb.and(patientPred,elementPred,isHistoryPred);
+					finalPred= cb.and(patientPred,elementPred);
 				return finalPred;
 
 			}
