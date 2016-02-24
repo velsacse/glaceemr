@@ -332,8 +332,6 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	String ishighpriority = "false";
 	String testId = new String();
 	Integer empId = -1;
-	ArrayList<String> dateArr=new ArrayList<String>();
-
 
 	/**
 	 * Method to save investigation data received from HL7 results (Parsing and attaching unknown patient results)
@@ -3574,7 +3572,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 	@Override
 	public LS_Bean findPatientLabDataByChart(Integer chartId) throws Exception {
-		return getCompleteLabData(chartId);
+		return getCompleteLabData(chartId, null, null);
 	}
 	
 	@Override
@@ -3587,9 +3585,14 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		return getLabDataTestId(chartId, testId);
 	}
 
-	public LS_Bean getCompleteLabData(Integer chartId){
+	public LS_Bean getCompleteLabData(Integer chartId, Timestamp fromDate, Timestamp toDate) {
 		LS_Bean lsBean = new LS_Bean();
-		List<LabEntries> labEntriesList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)));
+		List<LabEntries> labEntriesList = null;
+		if( fromDate != null ) {
+			labEntriesList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.checkDate(fromDate,toDate)));
+		} else {
+			labEntriesList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)));
+		}
 		ArrayList<Integer> testIds = new ArrayList<Integer>();
 		for(int i=0;i < labEntriesList.size();i++) {
 			if( !testIds.contains(labEntriesList.get(i).getLabEntriesTestId()) ) {
@@ -3607,13 +3610,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			}			
 		}
 		if(labEntriesList.size() > 0) {
-			dateArr=new ArrayList<String>();
 			lsBean.setParamData(labAndParamData(chartId, testIds));
 			lsBean.setExternalLabsResult(new ArrayList<LS_External>());
 //			lsBean.setExternalLabsResult(externalData(chartId));
-			dateArr = sorttoascending(dateArr);
-			lsBean.setParamDate(dateArr);
-		}else{
+		} else {
 			GroupName groupName = new GroupName();
 			groupName.setLaboratories(new ArrayList<LS_Lab>());
 			groupName.setRadiology(new ArrayList<LS_Lab>());
@@ -3621,7 +3621,6 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			groupName.setProcedures(new ArrayList<LS_Lab>());
 			lsBean.setParamData(groupName);
 			lsBean.setExternalLabsResult(new ArrayList<LS_External>());
-			lsBean.setParamDate(new ArrayList<String>());
 		}
 		lsBean.setChartId(chartId);
 		lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
@@ -3630,10 +3629,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 	public LS_Bean getLabDataTestId(Integer chartId,Integer testId){
 		LS_Bean lsBean=new LS_Bean();
-		dateArr=new ArrayList<String>();
 		lsBean.setParamData(labAndParamData(chartId,new ArrayList<Integer>(Arrays.asList(testId))));
-		dateArr = sorttoascending(dateArr);
-		lsBean.setParamDate(dateArr);
 		lsBean.setChartId(chartId);
 		lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
 		return lsBean;
@@ -3651,11 +3647,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		for(int i=0;i<labEntriesList.size();i++){
 			testIdsEntries.add(labEntriesList.get(i).getLabEntriesTestId());
 		}
-		if(testIdsEntries.size()>0){
-			dateArr = new ArrayList<String>();
+		if(testIdsEntries.size() > 0 ) {
 			lsBean.setParamData(labAndParamData(chartId, testIdsEntries));
-			dateArr = sorttoascending(dateArr);
-			lsBean.setParamDate(dateArr);
 		} else {
 			GroupName groupName = new GroupName();
 			groupName.setLaboratories(new ArrayList<LS_Lab>());
@@ -3663,7 +3656,6 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			groupName.setMiscellaneous(new ArrayList<LS_Lab>());
 			groupName.setProcedures(new ArrayList<LS_Lab>());
 			lsBean.setParamData(groupName);
-			lsBean.setParamDate(new ArrayList<String>());
 		}
 		lsBean.setChartId(chartId);
 		lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
@@ -3717,27 +3709,12 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 						}
 					}
 					if( testCategory.equalsIgnoreCase("2")) {
-						labParam.setParameters(rstList);
+						labData.setParameters(rstList);
 					} else {
-						labParam.setParameters(new ArrayList<LS_Parameter>());
+						labData.setParameters(new ArrayList<LS_Parameter>());
 					}
-					if(rstList.size() > 0) {
-						for(int l = 0 ; l < rstList.size() ;l++ ) {
-							List<ParamValues> paramValues = rstList.get(l).getParamValuesList();
-							if( paramValues != null ) {
-								for (int m = 0; m < paramValues.size(); m++) {
-									if( paramValues.get(m) != null ) {
-										if(paramValues.get(m).getParamDate() != null ) {
-											if(!dateArr.contains(paramValues.get(m).getParamDate().toString()))
-												dateArr.add(paramValues.get(m).getParamDate().toString());
-										}	
-									}
-								}
-							}
-						}
-					}
-				}else {
-					labParam.setParameters(new ArrayList<LS_Parameter>());
+				} else {
+					labData.setParameters(new ArrayList<LS_Parameter>());
 				}
 				labParamDetails.add(labParam);
 				Chart chartIdEntity=chartRepository.findOne(ChartSpecification.findByChartId(chartId));
@@ -3838,9 +3815,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				paramId = labParameters.getLabParametersId();
 				displayName = labParameters.getLabParametersDisplayname();
 				paramValues.setFlowsheetUrl(labParameters.getLabParametersFlowsheeturl());
-				paramValues.setIsflowsheetNeeded(labParameters.getLabParametersIsflowsheetneeded());					
+				paramValues.setIsflowsheetNeeded(labParameters.getLabParametersIsflowsheetneeded());
 			}
-			DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+			DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
 			if( labEntriesParameter.getLabEntriesParameterDate() != null ) {
 				paramValues.setParamDate(formatter.format(labEntriesParameter.getLabEntriesParameterDate()));
 			} else {
@@ -3853,7 +3830,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			paramValues.setLabEntryParamValue(labEntriesParameter.getLabEntriesParameterValue());
 			paramValues.setLabEntryParamNotes(labEntriesParameter.getLabEntriesParameterNotes());
 			paramValues.setLabEntryParamStatus(labEntriesParameter.getLabEntriesParameterStatus());
-			paramValues.setLabEntryLabComp(labEntriesParameter.getLabEntriesParameterLabcompDetailid());				
+			paramValues.setLabEntryLabComp(labEntriesParameter.getLabEntriesParameterLabcompDetailid());
+			paramValues.setResultStatus(labEntriesParameter.getLabEntriesParameterStatus());
 			paramValuesList.add(paramValues);
 		}
 		if( paramValuesList.size() > 0 && paramId != -1) {
@@ -3938,5 +3916,26 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			returnvitalparamdate.add(temp);
 		}
 		return returnvitalparamdate;
+	}
+
+	@Override
+	public LS_Bean getResultsByDate(Integer chartId, String fromDate, String toDate) throws Exception {
+		DateFormat parser = new SimpleDateFormat("MM/dd/yyyy");
+		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		if( fromDate != null && !fromDate.equals("")) {
+			Date date1 = (Date) parser.parse(fromDate);
+			fromDate = formatter.format(date1);
+			fromDate = fromDate + ".000000000";
+		}
+		if( toDate != null && ! toDate.equals("")) {
+			Date date2 = (Date) parser.parse(toDate);
+			toDate = formatter.format(date2);
+		}
+		if( toDate != null && !toDate.equals("")) {
+			return getCompleteLabData(chartId, Timestamp.valueOf(fromDate), Timestamp.valueOf(toDate));
+		} else {
+			Date date = new Date();
+			return getCompleteLabData(chartId, Timestamp.valueOf(fromDate), new Timestamp(date.getTime()));
+		}
 	}
 }

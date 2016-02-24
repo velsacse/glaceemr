@@ -134,4 +134,12 @@ public class VaccineReport {
 	public void setVaccineReportLastModified(Timestamp vaccineReportLastModified) {
 		this.vaccineReportLastModified = vaccineReportLastModified;
 	}
+
+	public LabDescription getLabDescriptionTable() {
+		return labDescriptionTable;
+	}
+
+	public void setLabDescriptionTable(LabDescription labDescriptionTable) {
+		this.labDescriptionTable = labDescriptionTable;
+	}
 }

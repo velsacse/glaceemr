@@ -260,6 +260,16 @@ public class InvestigationSummaryController {
 		return labInfo;
 	}
 	
+	@ApiOperation(value = "Get the complete parameter details for a patient in between the selected dates", notes = "Get the complete parameter details for a patient in between the selected dates")
+	@RequestMapping(value = "/ParamDataByDate",method = RequestMethod.GET)
+	public LS_Bean getLabDetailsByDate(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
+			@RequestParam(value="fromDate", required=false, defaultValue="") String fromDate,
+			@RequestParam(value="toDate", required=false, defaultValue="") String toDate) throws Exception {
+		logger.debug("Get the complete details for a patient");
+		LS_Bean labInfo = investigationService.getResultsByDate(chartId, fromDate, toDate);
+		return labInfo;
+	}
+	
 	@ApiOperation(value = "Get the complete details based on category", notes = "Get the complete details based on category")
 	@RequestMapping(value = "/OrdersHistoryByCategory",method = RequestMethod.GET)
 	public LS_Bean getLabDetailsByCategory(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,

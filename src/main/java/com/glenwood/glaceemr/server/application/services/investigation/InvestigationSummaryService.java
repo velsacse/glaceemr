@@ -125,6 +125,7 @@ public interface InvestigationSummaryService {
 			Integer userIdParam,String fullDataParam,String isforwardParam,String forwardto,
 			String ishighpriorityParam,String testidParam) throws Exception;
 	LS_Bean findPatientLabDataByChart(Integer chartId) throws Exception;
+	LS_Bean getResultsByDate(Integer chartId, String fromDate, String toDate) throws Exception;
 	LS_Bean findPatientLabDataByCategory(Integer chartId,Integer category) throws Exception;
 	LS_Bean findPatientLabDataByTest(Integer chartId,Integer testId) throws Exception;
 	

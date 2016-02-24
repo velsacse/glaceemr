@@ -1897,4 +1897,16 @@ public class InvestigationSpecification {
 			}
 		};
 	}
+
+	public static Specification<LabEntries> checkDate(final Timestamp fromDate, final Timestamp toDate) {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root,	CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate checkDate = cb.and(cb.greaterThan(root.get(LabEntries_.labEntriesPerfOn), fromDate),
+						cb.lessThan(root.get(LabEntries_.labEntriesPerfOn), toDate));
+				return checkDate;
+			}
+		};
+	}
 }

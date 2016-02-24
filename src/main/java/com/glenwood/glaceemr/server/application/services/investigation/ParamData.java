@@ -1,6 +1,5 @@
 package com.glenwood.glaceemr.server.application.services.investigation;
 
-import java.util.List;
 
 public class ParamData {
 	Integer confirmTestStatus;
@@ -11,7 +10,6 @@ public class ParamData {
 	Integer testDetailId;
 	Integer encounterId;
 	String drugxml;
-	List<LS_Parameter> parameters;
 	public Integer getConfirmTestStatus() {
 		return confirmTestStatus;
 	}
@@ -58,11 +56,5 @@ public class ParamData {
 	}
 	public void setDrugxml(String drugxml) {
 		this.drugxml = drugxml;
-	}
-	public List<LS_Parameter> getParameters() {
-		return parameters;
-	}
-	public void setParameters(List<LS_Parameter> parameters) {
-		this.parameters = parameters;
-	}
+	}	
 }

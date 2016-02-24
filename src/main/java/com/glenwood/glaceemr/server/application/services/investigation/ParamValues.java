@@ -14,6 +14,7 @@ public class ParamValues {
 	Boolean isflowsheetNeeded;
 	String flowsheetUrl;
 	String paramDate;
+	String resultStatus;
 	public String getUnits() {
 		return units;
 	}
@@ -85,5 +86,11 @@ public class ParamValues {
 	}
 	public void setParamDate(String paramDate) {
 		this.paramDate = paramDate;
+	}
+	public String getResultStatus() {
+		return resultStatus;
+	}
+	public void setResultStatus(String resultStatus) {
+		this.resultStatus = resultStatus;
 	}
 }

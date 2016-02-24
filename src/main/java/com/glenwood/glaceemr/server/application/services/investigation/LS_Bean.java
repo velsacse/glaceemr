@@ -1,12 +1,10 @@
 package com.glenwood.glaceemr.server.application.services.investigation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LS_Bean {
 	GroupName paramData;
 	List<LS_External> externalLabsResult;
-	ArrayList<String> paramDate;
 	Integer chartId;
 	Integer patientId;
 	public GroupName getParamData() {
@@ -32,11 +30,5 @@ public class LS_Bean {
 	}
 	public void setPatientId(Integer patientId) {
 		this.patientId = patientId;
-	}
-	public ArrayList<String> getParamDate() {
-		return paramDate;
-	}
-	public void setParamDate(ArrayList<String> paramDate) {
-		this.paramDate = paramDate;
 	}
 }

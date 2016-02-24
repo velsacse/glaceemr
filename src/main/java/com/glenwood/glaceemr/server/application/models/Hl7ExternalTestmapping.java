@@ -1,7 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +8,6 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -76,5 +74,20 @@ public class Hl7ExternalTestmapping implements Serializable{
 	public void setHl7ExternalTestmappingLabcompanyid(
 			Integer hl7ExternalTestmappingLabcompanyid) {
 		this.hl7ExternalTestmappingLabcompanyid = hl7ExternalTestmappingLabcompanyid;
+	}
+	public Hl7ExternalTest getHl7ExternalTestTable() {
+		return hl7ExternalTestTable;
+	}
+
+	public void setHl7ExternalTestTable(Hl7ExternalTest hl7ExternalTestTable) {
+		this.hl7ExternalTestTable = hl7ExternalTestTable;
+	}
+
+	public LabDescription getLabDescription() {
+		return labDescription;
+	}
+
+	public void setLabDescription(LabDescription labDescription) {
+		this.labDescription = labDescription;
 	}
 }
