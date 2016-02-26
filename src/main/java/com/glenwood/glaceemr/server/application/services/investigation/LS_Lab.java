@@ -10,6 +10,7 @@ public class LS_Lab {
 	List<ParamData> labParamDetails;
 	Integer scanCount;
 	Integer fileCount;
+	List<LS_Parameter> parameters;
 	
 	public String getTestCategory() {
 		return testCategory;
@@ -46,5 +47,11 @@ public class LS_Lab {
 	}
 	public void setFileCount(Integer fileCount) {
 		this.fileCount = fileCount;
+	}
+	public List<LS_Parameter> getParameters() {
+		return parameters;
+	}
+	public void setParameters(List<LS_Parameter> parameters) {
+		this.parameters = parameters;
 	}
 }
