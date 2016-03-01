@@ -24,6 +24,7 @@ import java.util.Vector;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -1291,7 +1292,12 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
 		cq.select(root.get(EmployeeProfile_.empProfileLoginid));
 		cq.where(builder.equal(root.get(EmployeeProfile_.empProfileEmpid),empid));
-		Integer loginId = (Integer) em.createQuery(cq).getSingleResult();
+		Integer loginId =-1;
+		try{
+			loginId=(Integer) em.createQuery(cq).getSingleResult();
+		}catch(NoResultException e){
+			loginId=-1;
+		}
 		return loginId;
 	}
 
@@ -1531,7 +1537,11 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		Join<EmployeeProfile, Encounter> join = root.join(EmployeeProfile_.encounterServiceDr);
 		cq.select(root.get(EmployeeProfile_.empProfileEmpid));
 		cq.where(builder.equal(join.get(Encounter_.encounterId), encounterId2));
-		employeeId =  (Integer) em.createQuery(cq).getSingleResult();
+		try{
+			employeeId =  Integer.parseInt(MoreObjects.firstNonNull(em.createQuery(cq).getSingleResult(),-1).toString());
+		}catch(NoResultException e){
+			employeeId=-1;
+		}
 		return employeeId;
 	}
 
