@@ -3,6 +3,8 @@ package com.glenwood.glaceemr.server.application.services.investigation;
 
 public class ParamData {
 	Integer confirmTestStatus;
+	Integer prelimStatus;
+	Integer resultStatus;
 	Integer labStatus;
 	String orderedDate;
 	String performedDate;
@@ -15,6 +17,18 @@ public class ParamData {
 	}
 	public void setConfirmTestStatus(Integer confirmTestStatus) {
 		this.confirmTestStatus = confirmTestStatus;
+	}
+	public Integer getPrelimStatus() {
+		return prelimStatus;
+	}
+	public void setPrelimStatus(Integer prelimStatus) {
+		this.prelimStatus = prelimStatus;
+	}
+	public Integer getResultStatus() {
+		return resultStatus;
+	}
+	public void setResultStatus(Integer resultStatus) {
+		this.resultStatus = resultStatus;
 	}
 	public Integer getLabStatus() {
 		return labStatus;

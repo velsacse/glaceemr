@@ -998,7 +998,17 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			cptQuantity = cptDetails[1];
 		}
 		saveObject = saveObject + "lab_qnty_col_0~@@~" + cptQuantity +"#@@#";
-		saveObject = saveObject + "lab_cpt_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt1())).or("") +"#@@#";
+		String defaultCptData = Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt1())).or("");
+		if( !defaultCptData.equals("") && !Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt2())).or("").equalsIgnoreCase("") ) {
+			defaultCptData += "," + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt2())).or("");
+		}
+		if( !defaultCptData.equals("") && !Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt3())).or("").equalsIgnoreCase("") ) {
+			defaultCptData += "," + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt3())).or("");
+		}
+		if( !defaultCptData.equals("") && !Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt4())).or("").equalsIgnoreCase("") ) {
+			defaultCptData += "," + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt4())).or("");
+		}
+		saveObject = saveObject + "lab_cpt_col_0~@@~" + defaultCptData +"#@@#";
 		saveObject = saveObject + "lab_labname_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionTestDesc())).or("") +"#@@#";
 		saveObject = saveObject + "lab_printxslurl_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionPrintxslurl())).or("") +"#@@#";
 		String visitType = getVisitType(encounterId);
@@ -1293,10 +1303,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		cq.select(root.get(EmployeeProfile_.empProfileLoginid));
 		cq.where(builder.equal(root.get(EmployeeProfile_.empProfileEmpid),empid));
 		Integer loginId =-1;
-		try{
+		try {
 			loginId=(Integer) em.createQuery(cq).getSingleResult();
-		}catch(NoResultException e){
-			loginId=-1;
+		} catch(NoResultException e) {
+			loginId = -1;
 		}
 		return loginId;
 	}
@@ -1478,7 +1488,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	 * @return
 	 */
 	public static String saveDecodeImage(String imgBase64Data, String path, int encounterId) {
-		try {/*
+		try {
 			String sharedFolderPath = path;
 			File dirStructure = new File(sharedFolderPath+"/vaccineconsentform");
 			java.util.Date date = new java.util.Date();
@@ -1506,9 +1516,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			osf.flush();
 			osf.close();
 			return sharedFolderPath+"/vaccineconsentform/"+encounterId+"_"+ft.format(date)+"_consentform.png";
-		*/
-			return "";
-			} catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		} 
 		return "";
@@ -1537,9 +1545,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		Join<EmployeeProfile, Encounter> join = root.join(EmployeeProfile_.encounterServiceDr);
 		cq.select(root.get(EmployeeProfile_.empProfileEmpid));
 		cq.where(builder.equal(join.get(Encounter_.encounterId), encounterId2));
-		try{
-			employeeId =  Integer.parseInt(MoreObjects.firstNonNull(em.createQuery(cq).getSingleResult(),-1).toString());
-		}catch(NoResultException e){
+		try {
+			employeeId = Integer.parseInt(MoreObjects.firstNonNull(em.createQuery(cq).getSingleResult(),-1).toString());
+		} catch(NoResultException e) {
 			employeeId=-1;
 		}
 		return employeeId;
@@ -1595,6 +1603,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			labData.setTestBodySiteCode(labEntry.getLabEntriesBodysiteCode());
 			labData.setTestBodySiteDesc(labEntry.getLabEntriesBodysiteDesc());
 			labData.setTestPrelimStatus("" + labEntry.getLabEntriesPrelimTestStatus());
+			labData.setTestResultStatus("" + labEntry.getLabEntriesStatus());
 			labData.setTestConfirmStatus("" + labEntry.getLabEntriesConfirmTestStatus());
 			labData.setTestDetailId("" + labEntry.getLabEntriesTestdetailId());
 			labData.setTestDosage(labEntry.getLabEntriesDosage());
@@ -3697,6 +3706,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				}
 				labName = paramDetails.getLabEntriesTestDesc();
 				labParam.setConfirmTestStatus(paramDetails.getLabEntriesConfirmTestStatus());
+				labParam.setPrelimStatus(paramDetails.getLabEntriesPrelimTestStatus());
+				labParam.setResultStatus(paramDetails.getLabEntriesStatus());
 				labParam.setDrugxml(paramDetails.getLabEntriesDrugxml());
 				labParam.setLabStatus(paramDetails.getLabEntriesTestStatus());
 				DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
