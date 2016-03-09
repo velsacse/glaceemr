@@ -999,14 +999,26 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		}
 		saveObject = saveObject + "lab_qnty_col_0~@@~" + cptQuantity +"#@@#";
 		String defaultCptData = Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt1())).or("");
-		if( !defaultCptData.equals("") && !Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt2())).or("").equalsIgnoreCase("") ) {
-			defaultCptData += "," + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt2())).or("");
+		if(!Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt2())).or("").equalsIgnoreCase("") ) {
+			if( !defaultCptData.equals("") ) {
+				defaultCptData += "," + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt2())).or("");
+			} else {
+				defaultCptData += Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt2())).or("");
+			}
 		}
-		if( !defaultCptData.equals("") && !Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt3())).or("").equalsIgnoreCase("") ) {
-			defaultCptData += "," + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt3())).or("");
+		if(!Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt3())).or("").equalsIgnoreCase("") ) {
+			if( !defaultCptData.equals("") ) {
+				defaultCptData += "," + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt3())).or("");
+			} else {
+				defaultCptData += Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt3())).or("");
+			}
 		}
-		if( !defaultCptData.equals("") && !Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt4())).or("").equalsIgnoreCase("") ) {
-			defaultCptData += "," + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt4())).or("");
+		if(!Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt4())).or("").equalsIgnoreCase("") ) {
+			if( !defaultCptData.equals("") ) {
+				defaultCptData += "," + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt4())).or("");
+			} else {
+				defaultCptData += Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionDefCpt4())).or("");
+			}
 		}
 		saveObject = saveObject + "lab_cpt_col_0~@@~" + defaultCptData +"#@@#";
 		saveObject = saveObject + "lab_labname_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionTestDesc())).or("") +"#@@#";
@@ -3958,5 +3970,63 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			Date date = new Date();
 			return getCompleteLabData(chartId, Timestamp.valueOf(fromDate), new Timestamp(date.getTime()));
 		}
+	}
+
+	/**
+	 * Method to find summary of all orders
+	 */
+	@Override
+	public OrderLogGroups findOrdersSummary(Integer chartId) {
+		OrderLogGroups logGroups = new OrderLogGroups();
+		List<OrderLog> radiology = new ArrayList<OrderLog>();
+		List<OrderLog> laboratories = new ArrayList<OrderLog>();
+		List<OrderLog> procedures = new ArrayList<OrderLog>();
+		List<OrderLog> miscellaneous = new ArrayList<OrderLog>();
+		String testCategory = "4";
+		Integer testId = -1;
+		List<LabEntries> labsList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.checkDeleted()));
+		logGroups.setCount(labsList.size());
+		for (int i = 0; i < labsList.size(); i++) {
+			OrderLog orderLog = new OrderLog();
+			LabEntries labs = labsList.get(i);
+			testId = labs.getLabEntriesTestId();
+			LabDescription labDescription = labDescriptionRepository.findOne(InvestigationSpecification.labByTestId(labs.getLabEntriesTestId()));
+			if(labDescription != null) {
+				testCategory = Optional.fromNullable(labDescription.getLabDescriptionTestcategoryType()).or(4) + "";
+			} else {
+				testCategory = "4";
+			}
+			orderLog.setConfirmStatus("" + labs.getLabEntriesConfirmTestStatus());
+			orderLog.setEncounterId("" + labs.getLabEntriesEncounterId());
+			orderLog.setLabName(labs.getLabEntriesTestDesc());
+			DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+			orderLog.setOrderedDate(formatter.format(labs.getLabEntriesOrdOn()));
+			if( labs.getLabEntriesPerfOn() != null ) {
+				orderLog.setPerformedDate(formatter.format(labs.getLabEntriesPerfOn()));
+			} else {
+				orderLog.setPerformedDate("-");
+			}
+			orderLog.setPrelimStatus("" + labs.getLabEntriesPrelimTestStatus());
+			orderLog.setResultStatus("" + labs.getLabEntriesStatus());
+			orderLog.setTestCategory(testCategory);
+			orderLog.setTestDetailId("" + labs.getLabEntriesTestdetailId());
+			orderLog.setTestId("" + testId);
+			orderLog.setTestStatus("" + labs.getLabEntriesTestStatus());
+			switch( orderLog.getTestCategory() ) {
+			case "1": radiology.add(orderLog);
+			break;
+			case "2": laboratories.add(orderLog);
+			break;
+			case "4": miscellaneous.add(orderLog);
+			break;
+			case "5": procedures.add(orderLog);
+			break;
+			}
+		}
+		logGroups.setLaboratories(laboratories);
+		logGroups.setMiscellaneous(miscellaneous);
+		logGroups.setProcedures(procedures);
+		logGroups.setRadiology(radiology);
+		return logGroups;
 	}
 }

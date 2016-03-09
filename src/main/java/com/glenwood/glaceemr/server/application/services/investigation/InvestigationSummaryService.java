@@ -159,4 +159,9 @@ public interface InvestigationSummaryService {
 	String getFileScanId(int parameterId);
 
 	public String decodeToPDF(String encryptedData, String destPath, String resultFileName) throws Exception;
+
+	/**
+	 * Method to find summary of all orders
+	 */
+	public OrderLogGroups findOrdersSummary(Integer chartId);
 }

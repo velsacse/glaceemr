@@ -1909,4 +1909,16 @@ public class InvestigationSpecification {
 			}
 		};
 	}
+
+	public static Specification<LabEntries> checkDeleted() {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root,	CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate status = cb.and(cb.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
+						cb.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7));
+				return status;
+			}
+		};
+	}
 }

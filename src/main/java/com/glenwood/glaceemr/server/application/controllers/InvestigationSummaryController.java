@@ -27,6 +27,7 @@ import com.glenwood.glaceemr.server.application.services.investigation.ConsentDe
 import com.glenwood.glaceemr.server.application.services.investigation.FrequentOrders;
 import com.glenwood.glaceemr.server.application.services.investigation.InvestigationSummaryService;
 import com.glenwood.glaceemr.server.application.services.investigation.LS_Bean;
+import com.glenwood.glaceemr.server.application.services.investigation.OrderLogGroups;
 import com.glenwood.glaceemr.server.application.services.investigation.OrderSetData;
 import com.glenwood.glaceemr.server.application.services.investigation.Orders;
 import com.glenwood.glaceemr.server.application.services.investigation.SaveLabDetails;
@@ -257,6 +258,13 @@ public class InvestigationSummaryController {
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Investigations,AuditLogConstants.Investigations,
 				1,AuditLogConstants.SUCCESS,"Successfully loaded data for patient having chart id="+chartId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Investigations,request,
 				"Successfully loaded data for patient having chart id="+chartId);
+		return labInfo;
+	}
+	
+	@ApiOperation(value = "Get the complete details for a patient", notes = "Get the complete details for a patient")
+	@RequestMapping(value = "/OrdersLogByChart",method = RequestMethod.GET)
+	public OrderLogGroups getOrderLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
+		OrderLogGroups labInfo = investigationService.findOrdersSummary(chartId);
 		return labInfo;
 	}
 	
