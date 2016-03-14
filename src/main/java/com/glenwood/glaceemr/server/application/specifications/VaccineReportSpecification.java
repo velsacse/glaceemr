@@ -169,7 +169,7 @@ public class VaccineReportSpecification {
 	 * @param lotNo
 	 * @return Specification<VaccineOrderDetails>
 	 */
-	public static Specification<VaccineOrderDetails> getQtyGreaterThan(final Integer qty)
+	public static Specification<VaccineOrderDetails> getQtyGreaterThan(final Double qty)
 	{
 		return new Specification<VaccineOrderDetails>() {
 

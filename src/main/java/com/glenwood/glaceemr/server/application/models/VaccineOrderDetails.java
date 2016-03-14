@@ -36,13 +36,13 @@ public class VaccineOrderDetails {
 	private Timestamp vaccineOrderDetailsExpiry;
 
 	@Column(name="vaccine_order_details_qty")
-	private Integer vaccineOrderDetailsQty;
+	private Double vaccineOrderDetailsQty;
 
 	@Column(name="vaccine_order_details_qty_used")
-	private Integer vaccineOrderDetailsQtyUsed;
+	private Double vaccineOrderDetailsQtyUsed;
 
 	@Column(name="vaccine_order_details_qty_reconcile")
-	private Integer vaccineOrderDetailsQtyReconcile;
+	private Double vaccineOrderDetailsQtyReconcile;
 
 	@Column(name="vaccine_order_details_type")
 	private Integer vaccineOrderDetailsType;
@@ -109,28 +109,28 @@ public class VaccineOrderDetails {
 		this.vaccineOrderDetailsExpiry = vaccineOrderDetailsExpiry;
 	}
 
-	public Integer getVaccineOrderDetailsQty() {
+	public Double getVaccineOrderDetailsQty() {
 		return vaccineOrderDetailsQty;
 	}
 
-	public void setVaccineOrderDetailsQty(Integer vaccineOrderDetailsQty) {
+	public void setVaccineOrderDetailsQty(Double vaccineOrderDetailsQty) {
 		this.vaccineOrderDetailsQty = vaccineOrderDetailsQty;
 	}
 
-	public Integer getVaccineOrderDetailsQtyUsed() {
+	public Double getVaccineOrderDetailsQtyUsed() {
 		return vaccineOrderDetailsQtyUsed;
 	}
 
-	public void setVaccineOrderDetailsQtyUsed(Integer vaccineOrderDetailsQtyUsed) {
+	public void setVaccineOrderDetailsQtyUsed(Double vaccineOrderDetailsQtyUsed) {
 		this.vaccineOrderDetailsQtyUsed = vaccineOrderDetailsQtyUsed;
 	}
 
-	public Integer getVaccineOrderDetailsQtyReconcile() {
+	public Double getVaccineOrderDetailsQtyReconcile() {
 		return vaccineOrderDetailsQtyReconcile;
 	}
 
 	public void setVaccineOrderDetailsQtyReconcile(
-			Integer vaccineOrderDetailsQtyReconcile) {
+			Double vaccineOrderDetailsQtyReconcile) {
 		this.vaccineOrderDetailsQtyReconcile = vaccineOrderDetailsQtyReconcile;
 	}
 

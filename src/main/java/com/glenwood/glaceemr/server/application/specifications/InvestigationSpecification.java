@@ -826,12 +826,12 @@ public class InvestigationSpecification {
 			public Predicate toPredicate(Root<VaccineOrderDetails> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				Join<VaccineOrderDetails, VaccineOrder> rootJoin = root.join(VaccineOrderDetails_.vaccineOrder,JoinType.INNER);
-				Expression<Integer> quantity = cb.diff(cb.sum(root.get(VaccineOrderDetails_.vaccineOrderDetailsQty), 
+				Expression<Double> quantity = cb.diff(cb.sum(root.get(VaccineOrderDetails_.vaccineOrderDetailsQty), 
 						root.get(VaccineOrderDetails_.vaccineOrderDetailsQtyReconcile)), 
 						root.get(VaccineOrderDetails_.vaccineOrderDetailsQtyUsed));
-				rootJoin.on(cb.greaterThan(quantity, 0));
+				rootJoin.on(cb.greaterThan(quantity, 0.0));
 				rootJoin.join(VaccineOrder_.vaccineManDetails, JoinType.LEFT);
-				Predicate quantityPredicate = cb.greaterThan(quantity, 0);
+				Predicate quantityPredicate = cb.greaterThan(quantity, 0.0);
 				Predicate expiryDate = cb.greaterThan(root.get(VaccineOrderDetails_.vaccineOrderDetailsExpiry), new Date());
 				Predicate isActive = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsIsactive), true);
 				Predicate chdp = cb.equal(root.get(VaccineOrderDetails_.vaccineOrderDetailsIschdp), isCHDP);

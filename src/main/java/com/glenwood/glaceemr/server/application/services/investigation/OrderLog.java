@@ -12,6 +12,7 @@ public class OrderLog {
 	String confirmStatus;
 	String testStatus;
 	String testCategory;
+	String testGroupId;
 	public String getLabName() {
 		return labName;
 	}
@@ -77,5 +78,11 @@ public class OrderLog {
 	}
 	public void setTestCategory(String testCategory) {
 		this.testCategory = testCategory;
+	}
+	public String getTestGroupId() {
+		return testGroupId;
+	}
+	public void setTestGroupId(String testGroupId) {
+		this.testGroupId = testGroupId;
 	}
 }

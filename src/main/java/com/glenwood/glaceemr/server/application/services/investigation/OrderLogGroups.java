@@ -8,6 +8,7 @@ public class OrderLogGroups {
 	List<OrderLog> radiology;
 	List<OrderLog> miscellaneous;
 	List<OrderLog> procedures;
+	List<OrderLog> vaccinations;
 	public int getCount() {
 		return count;
 	}
@@ -37,5 +38,11 @@ public class OrderLogGroups {
 	}
 	public void setProcedures(List<OrderLog> procedures) {
 		this.procedures = procedures;
+	}
+	public List<OrderLog> getVaccinations() {
+		return vaccinations;
+	}
+	public void setVaccinations(List<OrderLog> vaccinations) {
+		this.vaccinations = vaccinations;
 	}
 }

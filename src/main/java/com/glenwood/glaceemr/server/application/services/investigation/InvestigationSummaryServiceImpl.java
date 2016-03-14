@@ -1627,7 +1627,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			else
 				labData.setTestIsBillable(true);
 			labData.setTestIsChdp("" + labEntry.getLabEntriesIschdplab());
-			labData.setTestIsFasting(labEntry.getLabEntriesIsFasting());
+			if( labEntry.getLabEntriesIsFasting() != null )
+				labData.setTestIsFasting(labEntry.getLabEntriesIsFasting());
+			else
+				labData.setTestIsFasting(false);
 			labData.setTestLoinc(labEntry.getLabEntriesLoinc());
 			labData.setTestName(labEntry.getLabEntriesTestDesc());
 			labData.setTestOrdBy("" + labEntry.getLabEntriesOrdBy());
@@ -1761,7 +1764,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				orderDetails.setGlassValueList(clinicalElementsService.getClinicalElementOptions("0000200200100179000")); /** vital glass value*/
 			}
 		}
-		List<PatientClinicalElements> weightList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), -1, "0000200200100024000"));
+		List<PatientClinicalElements> weightList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100024000"));
 		if( weightList.size() > 0 ) {
 			orderDetails.setPatientWeight(weightList.get(0).getPatientClinicalElementsValue());
 		}
@@ -2525,13 +2528,13 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 					if(lab_status < 7){
 						if(!dataStr[dataValueMap("int_lab_lotno")].equals(dataStr[dataValueMap("int_lab_oldlotno")])){				//Lot number is changed
 							if(groupid.equals(vacgroupid)){
-								if(!dataStr[dataValueMap("int_lab_lotno")].equals("-1"))
-									increaseVaccineCount(dataStr[dataValueMap("int_lab_lotno")]);
+					    		if(!dataStr[dataValueMap("int_lab_lotno")].equals("-1") && !dataStr[dataValueMap("int_lab_dosage")].equals("-1") )
+					    			increaseVaccineCount(dataStr[dataValueMap("int_lab_lotno")],dataStr[dataValueMap("int_lab_dosage")]);
 								if(dataStr[dataValueMap("int_lab_oldlotno")] != null && !dataStr[dataValueMap("int_lab_oldlotno")].equals("-1") )
 									decreaseVaccineCount(dataStr[dataValueMap("int_lab_oldlotno")]);
 							}else{
-								if(!dataStr[dataValueMap("int_lab_lotno")].equals("-1"))
-									increaseVaccineCount(dataStr[dataValueMap("int_lab_lotno")],curunit);
+					    		if(!dataStr[dataValueMap("int_lab_lotno")].equals("-1") && !dataStr[dataValueMap("int_lab_dosage")].equals("-1"))
+					    			increaseVaccineCount(dataStr[dataValueMap("int_lab_lotno")],dataStr[dataValueMap("int_lab_dosage")]);
 								if( dataStr[dataValueMap("int_lab_oldlotno")] != null && !dataStr[dataValueMap("int_lab_oldlotno")].equals("-1") )
 									decreaseVaccineCount(dataStr[dataValueMap("int_lab_oldlotno")],prevunit);
 							}
@@ -2541,7 +2544,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 						}
 					}else if(tmp_lab_or_vac_status < 7 && dataStr[dataValueMap("int_lab_oldlotno")] != null && !dataStr[dataValueMap("int_lab_oldlotno")].equals("-1") ){					//Delete already performed labs
 						if(groupid.equals(vacgroupid))
-							decreaseVaccineCount(dataStr[dataValueMap("int_lab_oldlotno")]);
+						decreaseVaccineCount(dataStr[dataValueMap("int_lab_oldlotno")]);
 					}
 				}else if(lab_status < 7 && !dataStr[dataValueMap("int_lab_lotno")].equals("-1")){													//Labs that are not already performed
 					if(groupid.equals(vacgroupid)){
@@ -3296,24 +3299,26 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	public void decreaseVaccineCount(String lotno,String  dose)
 	{
 		String[] m1= dose.split("~");
-		int incr;
+		double incr;
 		try{
-			incr = Integer.parseInt(m1[0]);
+			incr = Double.parseDouble(m1[0]);
 		}catch(Exception e){
-			incr = 0;
+			incr = 0.0;
 		}
 		decreaseVaccineCount(lotno,incr);
 	}
 
-	public void decreaseVaccineCount(String lotno,int incr)
+	public void decreaseVaccineCount(String lotno,double incr)
 	{
+	
 		Integer lotNoInt=-1;
 		if(!lotno.trim().contentEquals(""))
 			lotNoInt=Integer.parseInt(lotno);
-		List<VaccineOrderDetails> vaccineReportList=vaccineOrderDetailsRepository.findAll(Specifications.where(VaccineReportSpecification.getLotNo(lotNoInt)).and(VaccineReportSpecification.getQtyGreaterThan(0)));
+		List<VaccineOrderDetails> vaccineReportList=vaccineOrderDetailsRepository.findAll(Specifications.where(VaccineReportSpecification.getLotNo(lotNoInt)).and(VaccineReportSpecification.getQtyGreaterThan(0.0)));
 		for(int j=0;j<vaccineReportList.size();j++){
 			VaccineOrderDetails vaccineOrderTemp=vaccineReportList.get(j);
 			vaccineOrderTemp.setVaccineOrderDetailsQtyUsed(vaccineReportList.get(j).getVaccineOrderDetailsQtyUsed()-incr);
+			System.out.println("values in incr"+incr);
 			vaccineOrderDetailsRepository.saveAndFlush(vaccineOrderTemp);
 		}
 	}
@@ -3323,7 +3328,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		Integer lotNoInt=-1;
 		if(!lotno.trim().contentEquals(""))
 			lotNoInt=Integer.parseInt(lotno);
-		List<VaccineOrderDetails> vaccineReportList=vaccineOrderDetailsRepository.findAll(Specifications.where(VaccineReportSpecification.getLotNo(lotNoInt)).and(VaccineReportSpecification.getQtyGreaterThan(0)));
+		List<VaccineOrderDetails> vaccineReportList=vaccineOrderDetailsRepository.findAll(Specifications.where(VaccineReportSpecification.getLotNo(lotNoInt)).and(VaccineReportSpecification.getQtyGreaterThan(0.0)));
 		for(VaccineOrderDetails vaccineOrder:vaccineReportList){
 			VaccineOrderDetails vaccineOrderTemp=vaccineOrder;
 			vaccineOrderTemp.setVaccineOrderDetailsQtyUsed(vaccineOrder.getVaccineOrderDetailsQtyUsed()-1);
@@ -3980,6 +3985,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		OrderLogGroups logGroups = new OrderLogGroups();
 		List<OrderLog> radiology = new ArrayList<OrderLog>();
 		List<OrderLog> laboratories = new ArrayList<OrderLog>();
+		List<OrderLog> vaccines = new ArrayList<OrderLog>();
 		List<OrderLog> procedures = new ArrayList<OrderLog>();
 		List<OrderLog> miscellaneous = new ArrayList<OrderLog>();
 		String testCategory = "4";
@@ -3999,6 +4005,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			orderLog.setConfirmStatus("" + labs.getLabEntriesConfirmTestStatus());
 			orderLog.setEncounterId("" + labs.getLabEntriesEncounterId());
 			orderLog.setLabName(labs.getLabEntriesTestDesc());
+			orderLog.setTestGroupId("" + labs.getLabEntriesGroupid());
 			DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 			orderLog.setOrderedDate(formatter.format(labs.getLabEntriesOrdOn()));
 			if( labs.getLabEntriesPerfOn() != null ) {
@@ -4017,6 +4024,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			break;
 			case "2": laboratories.add(orderLog);
 			break;
+			case "3": vaccines.add(orderLog);
+			break;
 			case "4": miscellaneous.add(orderLog);
 			break;
 			case "5": procedures.add(orderLog);
@@ -4025,6 +4034,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		}
 		logGroups.setLaboratories(laboratories);
 		logGroups.setMiscellaneous(miscellaneous);
+		logGroups.setVaccinations(vaccines);
 		logGroups.setProcedures(procedures);
 		logGroups.setRadiology(radiology);
 		return logGroups;

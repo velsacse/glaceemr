@@ -99,6 +99,9 @@ public class Chart {
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="chart_remainder_date")
 	private Timestamp chartRemainderDate;
+	
+	@Column(name="chart_immnotes")
+	private String chartImmnotes;
 
 	@OneToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -303,6 +306,13 @@ public class Chart {
 
 	public void setChartRemainderDate(Timestamp chartRemainderDate) {
 		this.chartRemainderDate = chartRemainderDate;
+	}
+	public String getChartImmnotes() {
+		return chartImmnotes;
+	}
+
+	public void setChartImmnotes(String chartImmnotes) {
+		this.chartImmnotes = chartImmnotes;
 	}
 
 	public PatientRegistration getPatientRegistrationTable() {
