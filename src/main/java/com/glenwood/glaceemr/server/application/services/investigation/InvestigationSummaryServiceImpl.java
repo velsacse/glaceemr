@@ -3318,7 +3318,6 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		for(int j=0;j<vaccineReportList.size();j++){
 			VaccineOrderDetails vaccineOrderTemp=vaccineReportList.get(j);
 			vaccineOrderTemp.setVaccineOrderDetailsQtyUsed(vaccineReportList.get(j).getVaccineOrderDetailsQtyUsed()-incr);
-			System.out.println("values in incr"+incr);
 			vaccineOrderDetailsRepository.saveAndFlush(vaccineOrderTemp);
 		}
 	}

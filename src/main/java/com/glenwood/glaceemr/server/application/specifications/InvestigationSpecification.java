@@ -1917,6 +1917,7 @@ public class InvestigationSpecification {
 			public Predicate toPredicate(Root<LabEntries> root,	CriteriaQuery<?> query, CriteriaBuilder cb) {
 				Predicate status = cb.and(cb.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
 						cb.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7));
+				query.orderBy(cb.desc(root.get(LabEntries_.labEntriesOrdOn)), cb.desc(root.get(LabEntries_.labEntriesPerfOn)));
 				return status;
 			}
 		};
