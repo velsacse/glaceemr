@@ -85,6 +85,11 @@ public class Workflow {
 	@JsonManagedReference
 	@JoinColumn(name="workflow_statusid",referencedColumnName="alert_category_id",insertable=false,updatable=false)
 	AlertCategory alertCategoryName;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="workflow_encounterid",referencedColumnName="encounter_id",insertable=false,updatable=false)
+	Encounter encounter;
 
 	public Integer getWorkflowId() {
 		return workflowId;

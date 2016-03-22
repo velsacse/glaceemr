@@ -275,6 +275,7 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 	@Override
 	public List workflowAlertList(int userId)  throws ParseException {
 
+		checkIsActiveEncounter();
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		EmployeeProfile userInfo=empProfileRepository.findOne(EmployeeSpecification.getUserDetailsByUserId(userId));
@@ -499,11 +500,23 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 		}
 		return workflowBeans;
 	}
-
+	//To set workflow isactive as false if encounter is not opened
+	private void checkIsActiveEncounter(){
+		List<Workflow> activeEncounter=workFlowAlertRepository.findAll(WorkflowAlertSpecification.getClosedEncounterWFAlerts());
+		
+		for(int i=0;i<activeEncounter.size();i++){
+			Workflow alert=activeEncounter.get(i);
+			alert.setWorkflowIsactive(false);
+			workFlowAlertRepository.saveAndFlush(alert);
+		}
+	}
+	
 	private String getTotalTime(Integer patientId, Date currentTime) {
 		String timeBuffer="";
 		Timestamp minimum=null;
-		List<Workflow> alertList=workFlowAlertRepository.findAll(WorkflowAlertSpecification.getAllAlertByPatientId(patientId));
+		Workflow activeAlert=workFlowAlertRepository.findOne(WorkflowAlertSpecification.getAlertByPatientId(patientId));
+		int activeEncId=activeAlert.getWorkflowEncounterid();
+		List<Workflow> alertList=workFlowAlertRepository.findAll(WorkflowAlertSpecification.getAllAlertByPatientId(patientId,activeEncId));
 		for(int i=0;i<alertList.size();i++){
 			Workflow wf=alertList.get(i);
 			if(minimum==null)

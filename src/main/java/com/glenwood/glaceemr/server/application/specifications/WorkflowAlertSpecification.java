@@ -2,14 +2,17 @@ package com.glenwood.glaceemr.server.application.specifications;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 
+import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.Room;
 import com.glenwood.glaceemr.server.application.models.Room_;
 import com.glenwood.glaceemr.server.application.models.Workflow;
@@ -45,14 +48,15 @@ public class WorkflowAlertSpecification {
 	 * @param patientId
 	 * @return condition for getting alert by patientid
 	 */
-	public static Specification<Workflow> getAllAlertByPatientId(final int patientId)
+	public static Specification<Workflow> getAllAlertByPatientId(final int patientId,final int encounterId)
 	{
 		return new Specification<Workflow>() {
 
 			@Override
 			public Predicate toPredicate(Root<Workflow> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate patientIdPrdcte=query.where(cb.equal(root.get(Workflow_.workflowPatientid), patientId)).getRestriction();
+				Predicate patientIdPrdcte=query.where(cb.and(cb.equal(root.get(Workflow_.workflowEncounterid), encounterId),
+						cb.equal(root.get(Workflow_.workflowPatientid), patientId))).getRestriction();
 				Predicate predicate=cb.and(patientIdPrdcte);
 				return predicate;
 			}
@@ -125,6 +129,27 @@ public class WorkflowAlertSpecification {
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				Predicate isActive=query.where(cb.equal(root.get(Workflow_.workflowIsactive), true)).getRestriction();
 				Predicate predicate=cb.and(isActive,query.where(cb.equal(root.get(Workflow_.workflowEncounterid), encounterId)).getRestriction());
+				return predicate;
+			}
+		};
+	}
+	
+	/**
+	 * 
+	 * @param patientId
+	 * @return condition for getting workflow alert based on encounter checked out
+	 */
+	public static Specification<Workflow> getClosedEncounterWFAlerts()
+	{
+		return new Specification<Workflow>() {
+
+			@Override
+			public Predicate toPredicate(Root<Workflow> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				
+				Join<Workflow,Encounter> serviceDrJoin=root.join(Workflow_.encounter,JoinType.INNER);
+				Predicate predicate=query.where(cb.and(cb.equal(root.get(Workflow_.workflowIsactive), true),
+						cb.notEqual(serviceDrJoin.get(Encounter_.encounterStatus),1))).getRestriction();
 				return predicate;
 			}
 		};
