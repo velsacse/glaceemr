@@ -36,6 +36,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * @author yasodha
@@ -265,6 +268,28 @@ public class InvestigationSummaryController {
 	@RequestMapping(value = "/OrdersLogByChart",method = RequestMethod.GET)
 	public OrderLogGroups getOrderLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
 		OrderLogGroups labInfo = investigationService.findOrdersSummary(chartId);
+		return labInfo;
+	}
+	
+	@ApiOperation(value = "Get the complete reviewed lab list for a patient", notes = "Get the complete reviewed lab list for a patient")
+	@ApiResponses(value={@ApiResponse(code = 200, message = "Successful retrieval of reviewed orders for a patient"),
+            @ApiResponse(code = 404, message = "Labs with given chart id does not exist"),
+            @ApiResponse(code = 500, message = "Internal server error")})
+	@ApiParam(name="chartId", value="id for each patient chart")
+	@RequestMapping(value = "/ReviewedLogByChart",method = RequestMethod.GET)
+	public OrderLogGroups getReviewedLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
+		OrderLogGroups labInfo = investigationService.findReviewedSummary(chartId);
+		return labInfo;
+	}
+	
+	@ApiOperation(value = "Get the complete pending orders for a patient", notes = "Get the complete pending orders for a patient")
+	@ApiResponses(value={@ApiResponse(code = 200, message = "Successful retrieval of pending orders for a patient"),
+            @ApiResponse(code = 404, message = "Labs with given chart id does not exist"),
+            @ApiResponse(code = 500, message = "Internal server error")})
+	@ApiParam(name="chartId", value="id for each patient chart")
+	@RequestMapping(value = "/PendingLogByChart",method = RequestMethod.GET)
+	public OrderLogGroups getPendingLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
+		OrderLogGroups labInfo = investigationService.findPendingSummary(chartId);
 		return labInfo;
 	}
 	

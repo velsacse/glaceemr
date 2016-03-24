@@ -1922,4 +1922,28 @@ public class InvestigationSpecification {
 			}
 		};
 	}
+
+	public static Specification<LabEntries> checkOrderedStatus() {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root,	CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate status = cb.equal(root.get(LabEntries_.labEntriesTestStatus), 1);
+				return status;
+			}
+		};
+	}
+	
+	public static Specification<LabEntries> checkReviewedStatus() {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root,	CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate status = cb.and(cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus), 3),
+						cb.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
+						cb.notEqual(root.get(LabEntries_.labEntriesTestStatus), 8));
+				return status;
+			}
+		};
+	}
 }

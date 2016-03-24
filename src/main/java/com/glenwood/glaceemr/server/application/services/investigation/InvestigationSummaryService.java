@@ -164,4 +164,8 @@ public interface InvestigationSummaryService {
 	 * Method to find summary of all orders
 	 */
 	public OrderLogGroups findOrdersSummary(Integer chartId);
+
+	public OrderLogGroups findReviewedSummary(Integer chartId);
+
+	public OrderLogGroups findPendingSummary(Integer chartId);
 }

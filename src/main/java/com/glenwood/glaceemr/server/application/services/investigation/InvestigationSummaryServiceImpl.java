@@ -3981,6 +3981,29 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	 */
 	@Override
 	public OrderLogGroups findOrdersSummary(Integer chartId) {
+		List<LabEntries> labsList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.checkDeleted()));
+		return setOrdersData(labsList);
+	}
+	
+	/**
+	 * Method to find summary of all orders
+	 */
+	@Override
+	public OrderLogGroups findPendingSummary(Integer chartId) {
+		List<LabEntries> labsList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.checkDeleted()).and(InvestigationSpecification.checkOrderedStatus()));
+		return setOrdersData(labsList);
+	}
+	
+	/**
+	 * Method to find summary of all orders
+	 */
+	@Override
+	public OrderLogGroups findReviewedSummary(Integer chartId) {		
+		List<LabEntries> labsList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.checkDeleted()).and(InvestigationSpecification.checkReviewedStatus()));			
+		return setOrdersData(labsList);
+	}
+
+	private OrderLogGroups setOrdersData(List<LabEntries> labsList) {
 		OrderLogGroups logGroups = new OrderLogGroups();
 		List<OrderLog> radiology = new ArrayList<OrderLog>();
 		List<OrderLog> laboratories = new ArrayList<OrderLog>();
@@ -3989,7 +4012,6 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		List<OrderLog> miscellaneous = new ArrayList<OrderLog>();
 		String testCategory = "4";
 		Integer testId = -1;
-		List<LabEntries> labsList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.checkDeleted()));
 		logGroups.setCount(labsList.size());
 		for (int i = 0; i < labsList.size(); i++) {
 			OrderLog orderLog = new OrderLog();
