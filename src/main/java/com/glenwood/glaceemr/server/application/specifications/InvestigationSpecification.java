@@ -1939,9 +1939,7 @@ public class InvestigationSpecification {
 
 			@Override
 			public Predicate toPredicate(Root<LabEntries> root,	CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate status = cb.and(cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus), 3),
-						cb.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
-						cb.notEqual(root.get(LabEntries_.labEntriesTestStatus), 8));
+				Predicate status = cb.equal(root.get(LabEntries_.labEntriesTestStatus), 3);
 				return status;
 			}
 		};
