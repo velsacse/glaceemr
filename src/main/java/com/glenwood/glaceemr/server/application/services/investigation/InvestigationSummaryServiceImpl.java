@@ -3957,7 +3957,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 	@Override
 	public LS_Bean getResultsByDate(Integer chartId, String fromDate, String toDate) throws Exception {
-		DateFormat parser = new SimpleDateFormat("MM/dd/yyyy");
+		DateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
 		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		if( fromDate != null && !fromDate.equals("")) {
 			Date date1 = (Date) parser.parse(fromDate);
