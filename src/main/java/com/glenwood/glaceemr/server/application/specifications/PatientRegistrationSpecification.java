@@ -100,5 +100,25 @@ public class PatientRegistrationSpecification {
 			}
 		};
 	}
+	
+	/**
+	 * @param patientId	: used to get patient details of a patient of that particular id
+	 * @return BooleanExpression is a  predicate  
+	 */	
+   public static Specification<PatientRegistration> getPatientPersonalDetails(final int patientId)
+   {
+	   return new Specification<PatientRegistration>() {
+
+		   @Override
+		   public Predicate toPredicate(Root<PatientRegistration> root,
+				   CriteriaQuery<?> cq, CriteriaBuilder cb) {
+
+			   Predicate personalDetailsPredicate=cb.equal(root.get(PatientRegistration_.patientRegistrationId),patientId);
+			   cq.where(cb.and(personalDetailsPredicate));
+			   return cq.getRestriction();
+		   }
+
+	   };
+   }
 
 }

@@ -611,5 +611,31 @@ public class PatientClinicalElementsSpecification {
 			}
 		};
 	}
+	
+	/**
+	 * Get PatientClinicalData for patientId for given GWIDS with encounter data's order by encounter date
+	 * @param patientId
+	 * @param encounterId
+	 * @param gwids
+	 * 
+	 */
+	public static Specification<PatientClinicalElements> getPatClinicalDataByGWDID(final Integer patientId,final List<String> gwids){
+
+		return new Specification<PatientClinicalElements>(){
+
+			@Override
+			public Predicate toPredicate(Root<PatientClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				
+				root.fetch(PatientClinicalElements_.encounter,JoinType.INNER);
+				Join<PatientClinicalElements,Encounter> paramJoin=root.join(PatientClinicalElements_.encounter,JoinType.INNER);
+				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
+				Predicate elementPred=root.get(PatientClinicalElements_.patientClinicalElementsGwid).in(gwids);
+				query.orderBy(cb.desc(paramJoin.get(Encounter_.encounterDate)));
+				return cb.and(patientPred,elementPred);
+
+			}
+
+		};
+	}
 
 }
