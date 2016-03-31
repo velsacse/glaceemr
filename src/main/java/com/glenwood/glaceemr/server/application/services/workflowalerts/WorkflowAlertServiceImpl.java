@@ -5,8 +5,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -509,6 +511,28 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 			alert.setWorkflowIsactive(false);
 			workFlowAlertRepository.saveAndFlush(alert);
 		}
+		
+		//To used to inactive more than one alerts for a patient
+		
+		Map<Integer,Integer> alertsMap=new HashMap<Integer,Integer>();
+		List<Integer> patientIds=new ArrayList<Integer>();
+		List<Workflow> activeAlerts=workFlowAlertRepository.findAll(WorkflowAlertSpecification.getActiveAlerts());
+		
+		for(int i=0;i<activeAlerts.size();i++){
+			Workflow alert=activeAlerts.get(i);
+			int patientId=alert.getWorkflowPatientid();
+			int workflowId=alert.getWorkflowId();
+			
+			if(!patientIds.contains(patientId)){
+				patientIds.add(patientId);
+			}else{
+				int alertId=alertsMap.get(patientId);
+				Workflow activeAlert=workFlowAlertRepository.findOne(WorkflowAlertSpecification.getAlertByAlertId(alertId));
+				activeAlert.setWorkflowIsactive(false);
+				workFlowAlertRepository.saveAndFlush(activeAlert);
+			}
+			alertsMap.put(patientId, workflowId);
+		}
 	}
 	
 	private String getTotalTime(Integer patientId, Date currentTime) {
@@ -807,12 +831,43 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 		}
 		if((encounterIdFlag==1)||(patientIdFlag==1))
 		{
-			Workflow activeAlert=workFlowAlertRepository.findOne(WorkflowAlertSpecification.getAlertByPatientId(patientId));//it will get active alerts for given patient id
-			if(activeAlert==null){ //if encounter is already checkout
+			List<Workflow> activeAlertList=workFlowAlertRepository.findAll(WorkflowAlertSpecification.getAlertByPatientId(patientId));//it will get active alerts for given patient id
+			int count=activeAlertList.size();
+			if(count<1){ //if encounter is already checkout
 				
 				alert=createAlert(patientId, encounterId, chartId, roomId, fromId, toId, msg, status, isHighPriority);
-			}else{
+			}else if(count==1){
 				
+				Workflow activeAlert=activeAlertList.get(0);
+				int lastAlertStatus=activeAlert.getWorkflowStatus();
+				if(lastAlertStatus==status)//if status is not changed
+				{
+					activeAlert.setWorkflowToid(toId);
+					activeAlert.setWorkflowFromid(fromId);
+					activeAlert.setWorkflowRoomid(roomId);
+					activeAlert.setWorkflowIshighpriority(isHighPriority);
+					activeAlert.setWorkflowMessage(msg);
+					workFlowAlertRepository.saveAndFlush(activeAlert);
+					alert=activeAlert;
+
+				}
+				else
+				{
+					activeAlert.setWorkflowIsactive(false);
+					activeAlert.setWorkflowEndtime(new Timestamp(new Date().getTime()));
+					workFlowAlertRepository.saveAndFlush(activeAlert);
+					alert=createAlert(patientId, encounterId, chartId, roomId, fromId, toId, msg, status, isHighPriority);
+				}
+			}else if(count>1){
+				
+				for(int i=0;i<count-1;i++){//Inactive wrong workflow active alerts
+					Workflow activeAlert=activeAlertList.get(i);
+					activeAlert.setWorkflowIsactive(false);
+					activeAlert.setWorkflowEndtime(new Timestamp(new Date().getTime()));
+					workFlowAlertRepository.saveAndFlush(activeAlert);
+				}
+				
+				Workflow activeAlert=activeAlertList.get(count-1);
 				int lastAlertStatus=activeAlert.getWorkflowStatus();
 				if(lastAlertStatus==status)//if status is not changed
 				{
