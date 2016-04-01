@@ -14,6 +14,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -79,6 +82,7 @@ public class LabEntriesParameter {
 	@JsonManagedReference
 	private LabEntries labEntriesTable;
 	
+	@NotFound(action=NotFoundAction.IGNORE) 
 	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.EAGER)
 	@JoinColumn(name="lab_entries_parameter_mapid", referencedColumnName="lab_parameters_id", insertable=false, updatable=false)
 	@JsonManagedReference
