@@ -168,7 +168,7 @@ public class InsCompAddr {
 	@Column(name="ins_comp_addr_isindividual")
 	private Boolean insCompAddrIsindividual;
 
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="ins_comp_addr_inscompany_id", referencedColumnName="ins_company_id" , insertable=false, updatable=false)
 	private InsCompany insCompany;

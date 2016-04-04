@@ -3,11 +3,13 @@ package com.glenwood.glaceemr.server.application.models;
 import java.sql.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -168,12 +170,25 @@ public class PatientInsDetail {
 		this.patientInsDetailProgramEnddate = patientInsDetailProgramEnddate;
 	}
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="patient_ins_detail_insaddressid", referencedColumnName="ins_comp_addr_id" , insertable=false, updatable=false)
 	private InsCompAddr insCompAddr;
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonBackReference
+	@JoinColumn(name="patient_ins_detail_patientid", referencedColumnName="patient_registration_id" , insertable=false, updatable=false)
+	private PatientRegistration patientRegistrationTable;
 	
+	public PatientRegistration getPatientRegistrationTable() {
+		return patientRegistrationTable;
+	}
+
+	public void setPatientRegistrationTable(
+			PatientRegistration patientRegistrationTable) {
+		this.patientRegistrationTable = patientRegistrationTable;
+	}
+
 	public InsCompAddr getInsCompAddr() {
 		return insCompAddr;
 	}
@@ -568,6 +583,5 @@ public class PatientInsDetail {
 			Date patientInsDetailProgramStartdate) {
 		this.patientInsDetailProgramStartdate = patientInsDetailProgramStartdate;
 	}
-	
 	
 }

@@ -13,7 +13,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -571,18 +575,33 @@ public class PatientRegistration {
 	@Column(name="patient_registration_studycode")
 	private Integer patientRegistrationStudycode;
 	
-	@OneToMany(cascade=CascadeType.ALL,mappedBy="patientRegistrationTable")
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	List<Chart> alertTable;
+	@JoinColumn(name="patient_registration_refering_physician",referencedColumnName="H076001",insertable=false,updatable=false)
+	@NotFound(action=NotFoundAction.IGNORE)	// To ignore entries -1, -2 in patient_registration table which doesn't exist in H076001
+	private H076 referringPhyTable;
+
+	@OneToMany(mappedBy="patientRegistrationTable")
+	@JsonManagedReference
+	private List<PatientInsDetail> patientInsuranceTable;
 	
-	public List<Chart> getAlertTable() {
-		return alertTable;
+	public H076 getReferringPhyTable() {
+		return referringPhyTable;
 	}
 
-	public void setAlertTable(List<Chart> alertTable) {
-		this.alertTable = alertTable;
-	}
+	public void setReferringPhyTable(H076 referringPhyTable) {
+		this.referringPhyTable = referringPhyTable;
+	}			
 	
+	public List<PatientInsDetail> getPatientInsuranceTable() {
+		return patientInsuranceTable;
+	}
+
+	public void setPatientInsuranceTable(
+			List<PatientInsDetail> patientInsuranceTable) {
+		this.patientInsuranceTable = patientInsuranceTable;
+	}
+
 	public Integer getPatientRegistrationId() {
 		return patientRegistrationId;
 	}
@@ -2112,6 +2131,49 @@ public class PatientRegistration {
 		this.patientRegistrationPhoneNo = patientRegistrationPhoneNo;
 	}
 	
+	public Timestamp getPatientRegistrationDobtime() {
+		return patientRegistrationDobtime;
+	}
+
+	public void setPatientRegistrationDobtime(Timestamp patientRegistrationDobtime) {
+		this.patientRegistrationDobtime = patientRegistrationDobtime;
+	}
+
+	public Chart getChartTable() {
+		return chartTable;
+	}
+
+	public void setChartTable(Chart chartTable) {
+		this.chartTable = chartTable;
+	}
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonBackReference
+	@JoinColumn(name="patient_registration_principal_doctor", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
+	private EmployeeProfile empProfile;
+
+	public EmployeeProfile getEmpProfile() {
+		return empProfile;
+	}
+
+	public void setEmpProfile(EmployeeProfile empProfile) {
+		this.empProfile = empProfile;
+	}
 	
-			
+	@OneToOne
+	@JsonManagedReference
+	@JoinColumn(name="patient_registration_id", referencedColumnName="chart_patientid" , insertable=false, updatable=false)
+	private Chart chartTable;
+	
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="patientRegistrationTable")
+	@JsonManagedReference
+	List<Chart> alertTable;
+	
+	public List<Chart> getAlertTable() {
+		return alertTable;
+	}
+
+	public void setAlertTable(List<Chart> alertTable) {
+		this.alertTable = alertTable;
+	}
 }

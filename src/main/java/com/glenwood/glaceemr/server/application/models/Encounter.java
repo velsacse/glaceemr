@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -207,10 +208,10 @@ public class Encounter {
 	@JoinColumn(name="encounter_visittype",referencedColumnName="categoryid",insertable=false,updatable=false)
     PatientEncounterType patientEncounterType;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	/*@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="encounter_chartid",referencedColumnName="chart_id",insertable=false,updatable=false)
-    Chart encounterChartTable;
+    Chart encounterChartTable;*/
 	
 	@OneToMany(mappedBy="encounterTable")
 	private List<LeafPatient> leafPatient;
@@ -623,5 +624,18 @@ public class Encounter {
 
 	public void setEncounterCreatedByEmpProf(EmployeeProfile encounterCreatedByEmpProf) {
 		this.encounterCreatedByEmpProf = encounterCreatedByEmpProf;
+	}
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonBackReference
+	@JoinColumn(name="encounter_chartid",referencedColumnName="chart_id",insertable=false,updatable=false)
+    Chart chartTable;
+
+	public Chart getChartTable() {
+		return chartTable;
+	}
+
+	public void setChartTable(Chart chartTable) {
+		this.chartTable = chartTable;
 	}
 }

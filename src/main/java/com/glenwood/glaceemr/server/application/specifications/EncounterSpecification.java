@@ -3,6 +3,7 @@ package com.glenwood.glaceemr.server.application.specifications;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -120,4 +121,25 @@ public class EncounterSpecification {
 			}
 		};
 	}
+	
+	 /**
+     * search using encounter id
+     * @param encounterId
+     * @return
+     */
+    public static Specification<Encounter> EncounterById(final Integer encounterId, boolean join)
+    {
+        return new Specification<Encounter>() {
+           
+            @Override
+            public Predicate toPredicate(Root<Encounter> root, CriteriaQuery<?> query,
+                    CriteriaBuilder cb) {
+                Predicate pred = cb.equal(root.get(Encounter_.encounterId), encounterId);
+                root.fetch(Encounter_.empProfileEmpId,JoinType.LEFT);
+               
+                return pred;
+            }
+        };
+    }
+
 }
