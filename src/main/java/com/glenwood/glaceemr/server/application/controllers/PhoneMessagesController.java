@@ -58,7 +58,7 @@ public class PhoneMessagesController {
 	 * @return
 	 */
 	@ApiOperation(value = "Create phone message encounter", notes = "To create phone message encounter.")
-	@RequestMapping(value = "/create", method = RequestMethod.GET)
+	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	@ResponseBody
 	public Encounter create(
 			@RequestParam(value="patientid", required=false, defaultValue="") String patientId,
@@ -99,7 +99,7 @@ public class PhoneMessagesController {
 	 * @return
 	 */
 	@ApiOperation(value = "Update encounter details", notes = "To update the particular encounter details")
-	@RequestMapping(value = "/update", method = RequestMethod.GET)
+	@RequestMapping(value = "/update", method = RequestMethod.POST)
 	@ResponseBody
 	public Encounter update(
 			@RequestParam(value="encounterid", required=false, defaultValue="1") String encounterId,
@@ -123,7 +123,7 @@ public class PhoneMessagesController {
 	 * @return
 	 */
 	@ApiOperation(value = "Send reply to a phone message", notes = "To send reply to a phone message encounter.")
-	@RequestMapping(value = "/sendreply", method = RequestMethod.GET)
+	@RequestMapping(value = "/sendreply", method = RequestMethod.POST)
 	@ResponseBody
 	public Encounter sendReply(
 			@RequestParam(value="encounterid", required=false, defaultValue="1") String encounterId,

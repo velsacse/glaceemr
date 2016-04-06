@@ -66,7 +66,7 @@ public class InternalMessagesController {
 	 * @return
 	 */
 	@ApiOperation(value = "update particular encounter details", notes = "To update the particular encounter details based on the encounter id")	
-	@RequestMapping(value = "/update", method = RequestMethod.GET)
+	@RequestMapping(value = "/update", method = RequestMethod.POST)
 	@ResponseBody
 	public Encounter update(
 			@RequestParam(value="encounterid", required=true, defaultValue="1") String encounterId,
@@ -90,7 +90,7 @@ public class InternalMessagesController {
 	 * @return
 	 */
 	@ApiOperation(value = "create new encounter details", notes = "To create new encounter details")	
-	@RequestMapping(value = "/compose", method = RequestMethod.GET)
+	@RequestMapping(value = "/compose", method = RequestMethod.POST)
 	@ResponseBody
 	public Encounter compose(
 			@RequestParam(value="patientid", required=true, defaultValue="1") String patientId,
