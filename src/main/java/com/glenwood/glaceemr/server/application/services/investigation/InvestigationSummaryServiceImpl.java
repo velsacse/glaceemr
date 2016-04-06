@@ -1583,20 +1583,33 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		for (int i = 0; i < labs.size(); i++) {
 			LabEntries labEntry = labs.get(i);
 			labData.setChartId("" + labEntry.getLabEntriesChartid());
-			EmployeeProfile empData = labEntry.getEmpProfile();
 			Encounter encounter = labEntry.getEncounter();
-			labData.setEmpFullName(empData.getEmpProfileFullname());
-			if( empData.getEmpProfileGroupid() == -10 ) {
+			if( labEntry.getEmpProfile() != null ) {
+				EmployeeProfile empData = labEntry.getEmpProfile();
+				labData.setEmpFullName(empData.getEmpProfileFullname());
+				if( empData.getEmpProfileGroupid() == -10 ) {
+					if( encounter.getEncounterId() == -1 ) {
+						Chart chart = encounter.getChart();
+						PatientRegistration patReg = chart.getPatientRegistrationTable();
+						labData.setEmpId("" + patReg.getPatientRegistrationPrincipalDoctor());
+					} else {
+						labData.setEmpId("" + encounter.getEncounterServiceDoctor());
+					}
+				} else {
+					labData.setEmpId("" + empData.getEmpProfileEmpid());
+				}
+			} else {
 				if( encounter.getEncounterId() == -1 ) {
 					Chart chart = encounter.getChart();
 					PatientRegistration patReg = chart.getPatientRegistrationTable();
 					labData.setEmpId("" + patReg.getPatientRegistrationPrincipalDoctor());
+					labData.setEmpFullName(getEmployeeName(labData.getEmpId()));
 				} else {
 					labData.setEmpId("" + encounter.getEncounterServiceDoctor());
+					labData.setEmpFullName(getEmployeeName(labData.getEmpId()));
 				}
-			} else {
-				labData.setEmpId("" + empData.getEmpProfileEmpid());
 			}
+			
 			labData.setEncounterId("" + labEntry.getLabEntriesEncounterId());
 			this.chartId = labEntry.getLabEntriesChartid();
 			labData.setPatientId("" + getPatientId());
@@ -1736,39 +1749,40 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			List<VaccineOrderDetails> vaccineOrderDetails = findLotDetails(testId, "-2");
 			orderDetails.setLotDetails(vaccineOrderDetails);
 		}
-		if( labData.getTestCpt().equalsIgnoreCase("92551")) { /** Audiometry Screening*/
-			List<PatientClinicalElements> leftValueList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100145000"));
-			if( leftValueList.size() > 0 ) {
-				orderDetails.setLeftEarValue(leftValueList.get(0).getPatientClinicalElementsValue());
-				orderDetails.setAudiometryLeftList(clinicalElementsService.getClinicalElementOptions("0000200200100145000")); /** audio status left*/
+		if( labData.getTestCpt() != null ) {
+			if( labData.getTestCpt().equalsIgnoreCase("92551")) { /** Audiometry Screening*/
+				List<PatientClinicalElements> leftValueList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100145000"));
+				if( leftValueList.size() > 0 ) {
+					orderDetails.setLeftEarValue(leftValueList.get(0).getPatientClinicalElementsValue());
+					orderDetails.setAudiometryLeftList(clinicalElementsService.getClinicalElementOptions("0000200200100145000")); /** audio status left*/
+				}
+				List<PatientClinicalElements> rightValueList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100146000"));
+				if( rightValueList.size() > 0 ) {
+					orderDetails.setRightEarValue(rightValueList.get(0).getPatientClinicalElementsValue());
+					orderDetails.setAudiometryRightList(clinicalElementsService.getClinicalElementOptions("0000200200100146000")); /** audio status right*/
+				}
+			} else if( labData.getTestCpt().equalsIgnoreCase("99173")) { /** Vision Screening*/
+				List<PatientClinicalElements> leftEyeList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100147000"));
+				if( leftEyeList.size() > 0 ) {
+					orderDetails.setLeftEyeValue(leftEyeList.get(0).getPatientClinicalElementsValue());
+					orderDetails.setVisionLeftList(clinicalElementsService.getClinicalElementOptions("0000200200100147000")); /** vital vision left*/
+				}
+				List<PatientClinicalElements> rightEyeList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100148000"));
+				if( rightEyeList.size() > 0 ) {
+					orderDetails.setRightEyeValue(rightEyeList.get(0).getPatientClinicalElementsValue());
+					orderDetails.setVisionRightList(clinicalElementsService.getClinicalElementOptions("0000200200100148000")); /** vital vision right*/
+				}
+				List<PatientClinicalElements> glassList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100179000"));
+				if( glassList.size() > 0 ) {
+					orderDetails.setGlassValue(glassList.get(0).getPatientClinicalElementsValue());
+					orderDetails.setGlassValueList(clinicalElementsService.getClinicalElementOptions("0000200200100179000")); /** vital glass value*/
+				}
 			}
-			List<PatientClinicalElements> rightValueList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100146000"));
-			if( rightValueList.size() > 0 ) {
-				orderDetails.setRightEarValue(rightValueList.get(0).getPatientClinicalElementsValue());
-				orderDetails.setAudiometryRightList(clinicalElementsService.getClinicalElementOptions("0000200200100146000")); /** audio status right*/
-			}
-		} else if( labData.getTestCpt().equalsIgnoreCase("99173")) { /** Vision Screening*/
-			List<PatientClinicalElements> leftEyeList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100147000"));
-			if( leftEyeList.size() > 0 ) {
-				orderDetails.setLeftEyeValue(leftEyeList.get(0).getPatientClinicalElementsValue());
-				orderDetails.setVisionLeftList(clinicalElementsService.getClinicalElementOptions("0000200200100147000")); /** vital vision left*/
-			}
-			List<PatientClinicalElements> rightEyeList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100148000"));
-			if( rightEyeList.size() > 0 ) {
-				orderDetails.setRightEyeValue(rightEyeList.get(0).getPatientClinicalElementsValue());
-				orderDetails.setVisionRightList(clinicalElementsService.getClinicalElementOptions("0000200200100148000")); /** vital vision right*/
-			}
-			List<PatientClinicalElements> glassList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100179000"));
-			if( glassList.size() > 0 ) {
-				orderDetails.setGlassValue(glassList.get(0).getPatientClinicalElementsValue());
-				orderDetails.setGlassValueList(clinicalElementsService.getClinicalElementOptions("0000200200100179000")); /** vital glass value*/
+			List<PatientClinicalElements> weightList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100024000"));
+			if( weightList.size() > 0 ) {
+				orderDetails.setPatientWeight(weightList.get(0).getPatientClinicalElementsValue());
 			}
 		}
-		List<PatientClinicalElements> weightList = patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(Integer.parseInt(labData.getEncounterId()), Integer.parseInt(labData.getPatientId()), "0000200200100024000"));
-		if( weightList.size() > 0 ) {
-			orderDetails.setPatientWeight(weightList.get(0).getPatientClinicalElementsValue());
-		}
-
 		this.chartId = Integer.parseInt(labData.getChartId());
 
 		List<LabEntriesParameter> labParameters = labEntriesParameterRepository.findAll(InvestigationSpecification.checkParameterAndTestDetailId(testDetailId));
@@ -1781,6 +1795,15 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		orderDetails.setImageDetails(imageDetails);
 
 		return orderDetails;
+	}
+
+	private String getEmployeeName(String employeeId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
+		cq.select(root.get(EmployeeProfile_.empProfileFullname));
+		cq.where(builder.equal(root.get(EmployeeProfile_.empProfileEmpid), employeeId));		
+		return "" + em.createQuery(cq).getSingleResult();
 	}
 
 	/**
