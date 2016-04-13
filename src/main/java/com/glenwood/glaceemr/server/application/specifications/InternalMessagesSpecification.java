@@ -49,6 +49,7 @@ public class InternalMessagesSpecification {
 
 				root.fetch(Encounter_.chart,JoinType.INNER);
 				root.fetch(Encounter_.encounterCreatedByEmpProf,JoinType.INNER);
+				root.fetch(Encounter_.empProfileEmpId,JoinType.LEFT);
 
 				return predicate;
 			}
