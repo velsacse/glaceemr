@@ -257,8 +257,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	public static int LOAD_CLINICAL_ELEMENTS_DATA = 2;
 	ArrayList<String> paramPerformedDate = new ArrayList<String> ();
 	ArrayList<String> clinicalVitalParamDate = new ArrayList<String> ();
-	JSONObject groupIdTestIdMap=new JSONObject();
-	JSONObject groupIdParamIdMap=new JSONObject();
 
 	/**
 	 * Specification to get the list of flowsheets with details based on flowsheet type
@@ -587,11 +585,10 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	 * @return String[][]. In the array first column is code and second is codesystem 
 	 * @throws Exception 
 	 */
-	public String[][] getFlowsheetLabCode(List<Integer> groupIds) throws Exception{
+	public String[][] getFlowsheetLabCode(List<Integer> groupIds,JSONObject groupIdTestIdMap) throws Exception{
 		List<LabStandardCode> labCodes=new ArrayList<LabStandardCode>();
 		labCodes=labStandardCodeRepository.findAll(FlowsheetSpecification.labStandardCodeGroupIds(groupIds));
 		String[][] standardCode=new String[labCodes.size()][2];
-		groupIdTestIdMap=new JSONObject();
 		for(int i=0;i<labCodes.size();i++){
 			if(labCodes.get(i).getLabStandardCodeGroupCodesystem().contentEquals(FlowsheetServiceImpl.GlenwoodSystemsOID)){
 				standardCode[i][0]=Integer.toString(labCodes.get(i).getLabStandardCodeGroupGwid());
@@ -622,11 +619,10 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	 * @return String[][]. In the array first column is code and second is codesystem 
 	 * @throws Exception 
 	 */
-	public String[][] getFlowsheetParamCode(List<Integer> groupIds) throws Exception{
+	public String[][] getFlowsheetParamCode(List<Integer> groupIds,JSONObject groupIdParamIdMap) throws Exception{
 		List<ParamStandardCode> labCodes=new ArrayList<ParamStandardCode>();
 		labCodes=paramStandardCodeRepository.findAll(FlowsheetSpecification.paramStandardCodeGroupIds(groupIds));
 		String[][] standardCode=new String[labCodes.size()][2];
-		groupIdParamIdMap=new JSONObject();
 		for(int i=0;i<labCodes.size();i++){
 			if(labCodes.get(i).getParamStandardCodeGroupCodesystem().contentEquals(FlowsheetServiceImpl.GlenwoodSystemsOID)){
 				standardCode[i][0]=Integer.toString(labCodes.get(i).getParamStandardCodeGroupGwid());
@@ -655,10 +651,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	public ArrayList<FS_LabBean> formLabData(int flowsheetId,String startDate, Integer patientId,Integer encounterId) throws Exception{
 		// getting list of codes and there code system
 		List<Integer> groupIds=getFlowsheetLabGroupId(flowsheetId,patientId);
-		String[][] codes= getFlowsheetLabCode(groupIds);
+		JSONObject groupIdTestIdMap=new JSONObject();
+		String[][] codes= getFlowsheetLabCode(groupIds,groupIdTestIdMap);
 
 		//getting the list of testIds for the above codes
-		List<LabDescription> labsList=getLabTestIds(codes);
+		List<LabDescription> labsList=getLabTestIds(codes,groupIdTestIdMap);
 		Integer[] testIds=new Integer[labsList.size()];
 		for(int k=0;k<labsList.size();k++){
 			testIds[k]=Optional.fromNullable(labsList.get(k).getLabDescriptionTestid()).or(-1);
@@ -870,7 +867,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			prevLabName = hsh_lab.getLabStandardGroupName(); 
 		} 
 		arr_lab=orderByName(arr_lab);
-		arr_lab = checkFlowSheetRulesForLabData(patientId,chartId, groupIds, arr_lab, startDate);
+		arr_lab = checkFlowSheetRulesForLabData(patientId,chartId, groupIds, arr_lab, startDate,groupIdTestIdMap);
 		return arr_lab;
 	}
 
@@ -984,7 +981,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return confData;
 	}
 
-	public ArrayList<FS_LabBean> checkFlowSheetRulesForLabData(int patientId,int chartId, List<Integer> groupIds,ArrayList<FS_LabBean> flowSheetData, String startDate) throws Exception{
+	public ArrayList<FS_LabBean> checkFlowSheetRulesForLabData(int patientId,int chartId, List<Integer> groupIds,ArrayList<FS_LabBean> flowSheetData, String startDate,JSONObject groupIdTestIdMap) throws Exception{
 		String currentDate = getCurrentDate();
 		List<String> newGroupIds=Lists.transform(groupIds, Functions.toStringFunction());
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,newGroupIds, startDate,3);
@@ -1104,13 +1101,13 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 	public ArrayList<FS_LabParameterBean> formLabParameters (int flowsheetId, String startDate,Integer patientId,Integer encounterId) throws Exception {
 		paramPerformedDate = new ArrayList<String> ();
-
 		// getting list of codes and there code system
 		List<Integer> groupIds=getFlowsheetParamGroupId(flowsheetId,patientId);
-		String[][] codes= getFlowsheetParamCode(groupIds);
+		JSONObject groupIdParamIdMap=new JSONObject();
+		String[][] codes= getFlowsheetParamCode(groupIds,groupIdParamIdMap);
 
 		//getting the list of paramIds for the above codes
-		List<LabParameters> paramsList=getParamIds(codes);
+		List<LabParameters> paramsList=getParamIds(codes,groupIdParamIdMap);
 		Integer[] paramIds=new Integer[paramsList.size()];
 		for(int k=0;k<paramsList.size();k++){
 			paramIds[k]=Optional.fromNullable(paramsList.get(k).getLabParametersId()).or(-1);
@@ -1235,12 +1232,12 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		}
 		paramPerformedDate= sorttoascending(paramPerformedDate,"Never Performed");
 		Collections.reverse(paramPerformedDate);
-		paramPerformedDate = limitthecount(paramPerformedDate,10);
-		arr_param = checkFlowSheetRulesLabParametersData(patientId,chartId, groupIds, arr_param, startDate);
+		paramPerformedDate = limitthecount(paramPerformedDate,11);
+		arr_param = checkFlowSheetRulesLabParametersData(patientId,chartId, groupIds, arr_param, startDate,groupIdParamIdMap);
 		return arr_param;
 	}
 
-	public ArrayList<FS_LabParameterBean> checkFlowSheetRulesLabParametersData(int patientId, int chartId, List<Integer> groupIds,ArrayList<FS_LabParameterBean> flowSheetData, String startDate) throws Exception{
+	public ArrayList<FS_LabParameterBean> checkFlowSheetRulesLabParametersData(int patientId, int chartId, List<Integer> groupIds,ArrayList<FS_LabParameterBean> flowSheetData, String startDate,JSONObject groupIdParamIdMap) throws Exception{
 		String currentDate = getCurrentDate();
 		List<String> newGroupIds=Lists.transform(groupIds, Functions.toStringFunction());
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,newGroupIds, startDate,2);
@@ -1876,7 +1873,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}
 
 	@SuppressWarnings("rawtypes")
-	public List<LabDescription> getLabTestIds(String[][] codes)
+	public List<LabDescription> getLabTestIds(String[][] codes,JSONObject groupIdTestIdMap)
 			throws Exception {
 		List<Integer> glenwoodCodes=new ArrayList<Integer>();
 		List<String> loincCodes=new ArrayList<String>();
@@ -1968,7 +1965,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}	
 
 	@SuppressWarnings("rawtypes")
-	public List<LabParameters> getParamIds(String[][] codes)
+	public List<LabParameters> getParamIds(String[][] codes,JSONObject groupIdParamIdMap)
 			throws Exception {
 		List<Integer> glenwoodCodes=new ArrayList<Integer>();
 		List<String> loincCodes=new ArrayList<String>();
@@ -2043,6 +2040,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 				ClinicalElements clinicalElements=clinicalElementsRepository.findOne(Specifications.where(ClinicalElementsSpecification.getClinicalElement(hsh_notes.getFlowsheetClinicalParamMapElementgwid())));
 				String[] gwIdOverride=new String[1];
+				if(clinicalElements==null)
+					continue;
 				String gwId = clinicalElements.getClinicalElementsGwid()+"";
 				gwIdOverride[0]=gwId;
 
@@ -2209,7 +2208,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		arr_clinical=conversion(arr_clinical);
 		clinicalVitalParamDate= sorttoascending(clinicalVitalParamDate,"Never Documented");
 		Collections.reverse(clinicalVitalParamDate);
-		clinicalVitalParamDate=limitthecount(clinicalVitalParamDate,10);
+		clinicalVitalParamDate=limitthecount(clinicalVitalParamDate,11);
 		arr_clinical = checkFlowSheetRulesClinicalElementsData(patientId,flowsheetId,gwidsComplete, arr_clinical, startDate);
 		return arr_clinical;
 	}
@@ -2386,6 +2385,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				}
 				ClinicalElements clinicalElements=clinicalElementsRepository.findOne(Specifications.where(ClinicalElementsSpecification.getClinicalElement(hsh_notes.getFlowsheetClinicalParamMapElementgwid())));
 				String[] gwIdOverride=new String[1];
+				if(clinicalElements==null)
+					continue;
 				String gwId = clinicalElements.getClinicalElementsGwid()+"";
 				gwIdOverride[0]=gwId;
 
@@ -3021,10 +3022,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	public ArrayList<FS_LabBean> formDataRecommendedLabsParams(int flowsheetId,String startDate, Integer patientId) throws Exception {
 		// getting list of codes and there code system
 		List<Integer> groupIds=getFlowsheetParamGroupId(flowsheetId,patientId);
-		String[][] codes= getFlowsheetParamCode(groupIds);
+		JSONObject groupIdParamIdMap=new JSONObject();
+		String[][] codes= getFlowsheetParamCode(groupIds,groupIdParamIdMap);
 
 		//getting the list of paramIds for the above codes
-		List<LabParameters> paramsList=getParamIds(codes);
+		List<LabParameters> paramsList=getParamIds(codes,groupIdParamIdMap);
 		Integer[] paramIds=new Integer[paramsList.size()];
 		for(int k=0;k<paramsList.size();k++){
 			paramIds[k]=Optional.fromNullable(paramsList.get(k).getLabParametersId()).or(-1);
@@ -3146,10 +3148,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	public ArrayList<FS_LabBean> formDataRecommendedLabs(int flowsheetId,String startDate, Integer patientId) throws Exception{
 		// getting list of codes and there code system
 		List<Integer> groupIds=getFlowsheetLabGroupId(flowsheetId,patientId);
-		String[][] codes= getFlowsheetLabCode(groupIds);
+		JSONObject groupIdTestIdMap=new JSONObject();
+		String[][] codes= getFlowsheetLabCode(groupIds,groupIdTestIdMap);
 
 		//getting the list of testIds for the above codes
-		List<LabDescription> labsList=getLabTestIds(codes);
+		List<LabDescription> labsList=getLabTestIds(codes,groupIdTestIdMap);
 		Integer[] testIds=new Integer[labsList.size()];
 		for(int k=0;k<labsList.size();k++){
 			testIds[k]=Optional.fromNullable(labsList.get(k).getLabDescriptionTestid()).or(-1);
@@ -4239,6 +4242,9 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			fBean.setLabData(formLabData(flowsheetId, startDate, patientId,encounterId));
 			fBean.setParamData(formLabParameters(flowsheetId, startDate, patientId,encounterId));
 			fBean.setParamDateArr(paramPerformedDate);
+			fBean.setClinicalVitalsData(formClinicalElementsData(flowsheetId, startDate, patientId,encounterId));
+			fBean.setVitalDateArr(clinicalVitalParamDate);
+			fBean.setClinicalPlanData(formClinicalData(flowsheetId, startDate, patientId,encounterId));
 		}
 		logger.debug("Request to get the flowsheet details for labs and params section for a particular flowsheet for a patient.:: outside service Impl");
 		return fBean;
