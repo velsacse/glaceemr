@@ -867,7 +867,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			prevLabName = hsh_lab.getLabStandardGroupName(); 
 		} 
 		arr_lab=orderByName(arr_lab);
-		arr_lab = checkFlowSheetRulesForLabData(patientId,chartId, groupIds, arr_lab, startDate,groupIdTestIdMap);
+		if(groupIds.size()>0)
+			arr_lab = checkFlowSheetRulesForLabData(patientId,chartId, groupIds, arr_lab, startDate,groupIdTestIdMap);
 		return arr_lab;
 	}
 
@@ -1233,7 +1234,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		paramPerformedDate= sorttoascending(paramPerformedDate,"Never Performed");
 		Collections.reverse(paramPerformedDate);
 		paramPerformedDate = limitthecount(paramPerformedDate,11);
-		arr_param = checkFlowSheetRulesLabParametersData(patientId,chartId, groupIds, arr_param, startDate,groupIdParamIdMap);
+		if(groupIds.size()>0)
+			arr_param = checkFlowSheetRulesLabParametersData(patientId,chartId, groupIds, arr_param, startDate,groupIdParamIdMap);
 		return arr_param;
 	}
 
@@ -2209,7 +2211,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		clinicalVitalParamDate= sorttoascending(clinicalVitalParamDate,"Never Documented");
 		Collections.reverse(clinicalVitalParamDate);
 		clinicalVitalParamDate=limitthecount(clinicalVitalParamDate,11);
-		arr_clinical = checkFlowSheetRulesClinicalElementsData(patientId,flowsheetId,gwidsComplete, arr_clinical, startDate);
+		if(gwidsComplete.size()>0)
+			arr_clinical = checkFlowSheetRulesClinicalElementsData(patientId,flowsheetId,gwidsComplete, arr_clinical, startDate);
 		return arr_clinical;
 	}
 	private ArrayList<FS_ClinicalElementBean> conversion(ArrayList<FS_ClinicalElementBean> arr_clinical){
@@ -2508,7 +2511,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			}
 		}
 		arr_clinical=conversion(arr_clinical);
-		arr_clinical = checkFlowSheetRulesForClinicalData(patientId, flowsheetId,gwidsComplete, arr_clinical, startDate);
+		if(gwidsComplete.size()>0)
+			arr_clinical = checkFlowSheetRulesForClinicalData(patientId, flowsheetId,gwidsComplete, arr_clinical, startDate);
 		return arr_clinical;
 	}
 	public ArrayList<FS_ClinicalElementBean> checkFlowSheetRulesForClinicalData(Integer patientId, Integer flowSheetId,List<String> gwidsComplete,ArrayList<FS_ClinicalElementBean> flowSheetData, String startDate) throws Exception{
@@ -2714,7 +2718,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				classId = hsh_notes.getFlowsheetDrugClassId();
 			}
 		}
-		arr_drugs = checkFlowSheetRulesForDrugData(patientId,flowsheetId,classIdsComplete, arr_drugs, startDate);
+		if(classIdsComplete.size()>0)
+			arr_drugs = checkFlowSheetRulesForDrugData(patientId,flowsheetId,classIdsComplete, arr_drugs, startDate);
 		return arr_drugs;
 	}
 
@@ -3141,7 +3146,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			prevParamName = hsh_param.getParamStandardGroupName(); 
 		}
 		arr_param=orderByName(arr_param);
-		arr_param = checkFlowSheetRulesRecommendedLabs(patientId,chartId, groupIds, arr_param, startDate);
+		if(groupIds.size()>0)
+			arr_param = checkFlowSheetRulesRecommendedLabs(patientId,chartId, groupIds, arr_param, startDate);
 		return arr_param;
 	}
 
@@ -3343,7 +3349,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			prevLabName = hsh_lab.getLabStandardGroupName(); 
 		} 
 		arr_lab=orderByName(arr_lab);
-		arr_lab = checkFlowSheetRulesRecommendedLabs(patientId,chartId, groupIds, arr_lab, startDate);
+		if(groupIds.size()>0)
+			arr_lab = checkFlowSheetRulesRecommendedLabs(patientId,chartId, groupIds, arr_lab, startDate);
 		return arr_lab;
 	}
 
