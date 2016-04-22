@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -48,6 +49,19 @@ public class PosTable {
 	@JsonManagedReference
 	@JoinColumn(name="pos_table_pos_code", referencedColumnName="pos_type_type_id", insertable=false, updatable=false)
 	private PosType posType;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="pos_table_place_id", referencedColumnName="place_of_service_placeid", insertable=false, updatable=false)
+	private PlaceOfService placeOfService;
+	
+	public PlaceOfService getPlaceOfService() {
+		return placeOfService;
+	}
+
+	public void setPlaceOfService(PlaceOfService placeOfService) {
+		this.placeOfService = placeOfService;
+	}
 
 	public PosType getPosType() {
 		return posType;
