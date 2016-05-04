@@ -6,13 +6,6 @@ public class LS_External {
 	Integer testId;
 	Integer hl7fileid;
 	Integer isreviewed;
-	public LS_External(Integer testDetailId,String labName,Integer testId,Integer hl7fileid,Integer isreviewed){
-		this.testDetailId=testDetailId;
-		this.labName=labName;
-		this.testId=testId;
-		this.hl7fileid=hl7fileid;
-		this.isreviewed=isreviewed;
-	}
 	public Integer getTestDetailId() {
 		return testDetailId;
 	}

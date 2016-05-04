@@ -1,7 +1,10 @@
 package com.glenwood.glaceemr.server.application.services.investigation;
 
+import java.util.List;
+
 
 public class ParamData {
+	Integer fileCount;
 	Integer confirmTestStatus;
 	Integer prelimStatus;
 	Integer resultStatus;
@@ -12,6 +15,13 @@ public class ParamData {
 	Integer testDetailId;
 	Integer encounterId;
 	String drugxml;
+	List<String> fileNameList;
+	public Integer getFileCount() {
+		return fileCount;
+	}
+	public void setFileCount(Integer fileCount) {
+		this.fileCount = fileCount;
+	}
 	public Integer getConfirmTestStatus() {
 		return confirmTestStatus;
 	}
@@ -70,5 +80,11 @@ public class ParamData {
 	}
 	public void setDrugxml(String drugxml) {
 		this.drugxml = drugxml;
-	}	
+	}
+	public List<String> getFileNameList() {
+		return fileNameList;
+	}
+	public void setFileNameList(List<String> fileNameList) {
+		this.fileNameList = fileNameList;
+	}
 }

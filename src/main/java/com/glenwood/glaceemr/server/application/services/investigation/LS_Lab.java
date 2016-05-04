@@ -8,8 +8,6 @@ public class LS_Lab {
 	String labName;
 	Integer testId;
 	List<ParamData> labParamDetails;
-	Integer scanCount;
-	Integer fileCount;
 	List<LS_Parameter> parameters;
 	
 	public String getTestCategory() {
@@ -36,22 +34,10 @@ public class LS_Lab {
 	public void setLabParamDetails(List<ParamData> labParamDetails) {
 		this.labParamDetails = labParamDetails;
 	}
-	public Integer getScanCount() {
-		return scanCount;
-	}
-	public void setScanCount(Integer scanCount) {
-		this.scanCount = scanCount;
-	}
-	public Integer getFileCount() {
-		return fileCount;
-	}
-	public void setFileCount(Integer fileCount) {
-		this.fileCount = fileCount;
-	}
 	public List<LS_Parameter> getParameters() {
 		return parameters;
 	}
 	public void setParameters(List<LS_Parameter> parameters) {
 		this.parameters = parameters;
-	}
+	}	
 }

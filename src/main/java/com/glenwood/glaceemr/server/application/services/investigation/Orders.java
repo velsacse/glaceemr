@@ -3,7 +3,6 @@ package com.glenwood.glaceemr.server.application.services.investigation;
 import java.util.List;
 
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
-import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.H068;
 import com.glenwood.glaceemr.server.application.models.ImmunisationSite;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
@@ -22,8 +21,8 @@ public class Orders {
 	List<H068> sourceList;
 	List<ImmunisationSite> siteInfo;
 	List<LabEntriesParameter> labParameters;
-	List<FileName> docDetails;
-	List<FileName> imageDetails;
+	List<String> docDetails;
+	List<String> imageDetails;
 	List<ClinicalElementsOptions> audiometryLeftList;
 	List<ClinicalElementsOptions> audiometryRightList;
 	List<ClinicalElementsOptions> visionLeftList;
@@ -101,16 +100,16 @@ public class Orders {
 	public void setVisionRightList(List<ClinicalElementsOptions> visionRightList) {
 		this.visionRightList = visionRightList;
 	}
-	public List<FileName> getImageDetails() {
+	public List<String> getImageDetails() {
 		return imageDetails;
 	}
-	public void setImageDetails(List<FileName> imageDetails) {
+	public void setImageDetails(List<String> imageDetails) {
 		this.imageDetails = imageDetails;
 	}
-	public List<FileName> getDocDetails() {
+	public List<String> getDocDetails() {
 		return docDetails;
 	}
-	public void setDocDetails(List<FileName> docDetails) {
+	public void setDocDetails(List<String> docDetails) {
 		this.docDetails = docDetails;
 	}
 	public List<LabEntriesParameter> getLabParameters() {

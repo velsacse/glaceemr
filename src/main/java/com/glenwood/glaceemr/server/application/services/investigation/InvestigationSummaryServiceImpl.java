@@ -1788,12 +1788,25 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		List<LabEntriesParameter> labParameters = labEntriesParameterRepository.findAll(InvestigationSpecification.checkParameterAndTestDetailId(testDetailId));
 		orderDetails.setLabParameters(labParameters);
 
-		List<FileName> docDetails = fileNameRepository.findAll(InvestigationSpecification.checkFileEntityAndScanType(testDetailId,2));
+		this.patientId = getPatientId();
+		List<Object> docId = getFileScanIds(testDetailId, this.patientId, 2);
+		ArrayList<String> docDetails = new ArrayList<String>();
+		for (int l = 0; l < docId.size(); l++) {
+			List<Object> docIdList = getFileName((Integer)docId.get(l)); 
+			for (int k = 0; k < docIdList.size(); k++) {
+				docDetails.add("" + docIdList.get(k));
+			}
+		}				
+		ArrayList<String> imageDetails = new ArrayList<String>();
+		List<Object> scanId = getFileScanIds(testDetailId, this.patientId, 1);
+		for (int l = 0; l < scanId.size(); l++) {
+			List<Object> scanIdList = getFileName((Integer)scanId.get(l)); 
+			for (int k = 0; k < scanIdList.size(); k++) {
+				imageDetails.add("" + scanIdList.get(k));
+			}
+		}
 		orderDetails.setDocDetails(docDetails);
-
-		List<FileName> imageDetails = fileNameRepository.findAll(InvestigationSpecification.checkFileEntityAndScanType(testDetailId,1));
 		orderDetails.setImageDetails(imageDetails);
-
 		return orderDetails;
 	}
 
@@ -3731,8 +3744,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			Integer testId = -1;
 			String testCategory = "4", labName = "";
 			List<LabEntries> paramData = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.getTestLog(testIds.get(i))));
-			List<ParamData> labParamDetails = new ArrayList<ParamData>();						
-			int scanCount = 0; int fileCount = 0;
+			List<ParamData> labParamDetails = new ArrayList<ParamData>();
 			for (int j = 0; j < paramData.size(); j++) {				
 				LabEntries paramDetails = paramData.get(j);
 				ParamData labParam = new ParamData();
@@ -3758,8 +3770,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				labParam.setEncounterId(paramDetails.getLabEntriesEncounterId());
 				labParam.setTestDetailId(paramDetails.getLabEntriesTestdetailId());
 				labParam.setResultNotes(paramDetails.getLabEntriesResultNotes());
-				int testdetilid = Integer.parseInt(HUtil.Nz(labParam.getTestDetailId(),"-1001"));
-				List<Object> paramList = getParamMapIds(testdetilid);
+				int testdetailId = Integer.parseInt(HUtil.Nz(labParam.getTestDetailId(),"-1001"));
+				List<Object> paramList = getParamMapIds(testdetailId);
 				if( paramList.size() > 0 ) {
 					List<LS_Parameter> rstList = new ArrayList<LS_Parameter>();
 					for(int k = 0 ; k < paramList.size() ; k++) {
@@ -3776,22 +3788,27 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				} else {
 					labData.setParameters(new ArrayList<LS_Parameter>());
 				}
-				labParamDetails.add(labParam);
-				Chart chartIdEntity=chartRepository.findOne(ChartSpecification.findByChartId(chartId));
-				int patientId=Optional.fromNullable(chartIdEntity.getChartPatientid()).or(-1);
-				if(patientId==-1){
-					List<FileDetails> fileDetailCount=fileDetailsRepository.findAll(Specifications.where(InvestigationSpecification.checkFileDetailScanType(1)).and(InvestigationSpecification.checkFileDetailEntityId(testdetilid)));
-					scanCount+=fileDetailCount.size();
-				}else{
-					List<FileDetails> fileDetailCount=fileDetailsRepository.findAll(Specifications.where(InvestigationSpecification.checkFileDetailScanType(1)).and(InvestigationSpecification.checkFileDetailEntityId(testdetilid)).and(InvestigationSpecification.checkFileDetailPatientId(patientId)));
-					scanCount+=fileDetailCount.size();
+				this.chartId = chartId;
+				this.patientId = getPatientId();
+				List<Object> docId = getFileScanIds(testdetailId, this.patientId, 2);
+				ArrayList<String> fileNameList = new ArrayList<String>();
+				for (int l = 0; l < docId.size(); l++) {
+					List<Object> docIdList = getFileName((Integer)docId.get(l)); 
+					for (int k = 0; k < docIdList.size(); k++) {
+						fileNameList.add("" + docIdList.get(k));
+					}
+				}				
+				List<Object> scanId = getFileScanIds(testdetailId, this.patientId, 1);
+				for (int l = 0; l < scanId.size(); l++) {
+					List<Object> scanIdList = getFileName((Integer)scanId.get(l)); 
+					for (int k = 0; k < scanIdList.size(); k++) {
+						fileNameList.add("" + scanIdList.get(k));
+					}
 				}
-				Integer[] scanCat=new Integer[]{1,2};
-				List<FileName> docDetails = fileNameRepository.findAll(InvestigationSpecification.checkFileEntityAndScanType(testdetilid,scanCat));
-				fileCount += docDetails.size();
+				labParam.setFileNameList(fileNameList);
+				labParam.setFileCount(fileNameList.size());
+				labParamDetails.add(labParam);
 			}
-			labData.setFileCount(fileCount);
-			labData.setScanCount(scanCount);
 			labData.setLabName(labName);
 			labData.setTestId(testId);
 			labData.setTestCategory(testCategory);
@@ -3814,6 +3831,26 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		return labs;
 	}
 	
+	private List<Object> getFileName(Integer scanId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<FileName> root = cq.from(FileName.class);
+		cq.select(root.get(FileName_.filenameName));
+		cq.where(builder.and(builder.equal(root.get(FileName_.filenameScanid), scanId)));
+		return em.createQuery(cq).getResultList();
+	}
+
+	private List<Object> getFileScanIds(int testdetailId, int patientId2, int scanType) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<FileDetails> root = cq.from(FileDetails.class);
+		cq.select(root.get(FileDetails_.filedetailsId));
+		cq.where(builder.and(builder.equal(root.get(FileDetails_.filedetailsEntityid), testdetailId)),
+				builder.equal(root.get(FileDetails_.filedetailsScantype), scanType),
+				builder.equal(root.get(FileDetails_.filedetailsPatientid), patientId2));
+		return em.createQuery(cq).getResultList();
+	}
+
 	private List<Object> getParamMapIds(int testdetilid) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();

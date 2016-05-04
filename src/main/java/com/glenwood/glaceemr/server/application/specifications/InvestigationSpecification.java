@@ -27,8 +27,6 @@ import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileDetails_;
-import com.glenwood.glaceemr.server.application.models.FileName;
-import com.glenwood.glaceemr.server.application.models.FileName_;
 import com.glenwood.glaceemr.server.application.models.H068;
 import com.glenwood.glaceemr.server.application.models.H068_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest;
@@ -65,8 +63,6 @@ import com.glenwood.glaceemr.server.application.models.OrdersetCategorylist;
 import com.glenwood.glaceemr.server.application.models.OrdersetCategorylist_;
 import com.glenwood.glaceemr.server.application.models.OrdersetList;
 import com.glenwood.glaceemr.server.application.models.OrdersetList_;
-import com.glenwood.glaceemr.server.application.models.PatientDocCategory;
-import com.glenwood.glaceemr.server.application.models.PatientDocCategory_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PatientVisEntries;
@@ -304,85 +300,6 @@ public class InvestigationSpecification {
 				return cb.and(checkstatus, checkChartId);
 			}
 		};
-	}	
-	
-	/**
-	 * Specification to check filescan type and test detail id
-	 * @return
-	 */
-	public static Specification<FileName> checkFileEntityAndScanType(final Integer testDetailId, final Integer[] ScanType) {
-		return new Specification<FileName>() {
-
-			@Override
-			public Predicate toPredicate(Root<FileName> root, CriteriaQuery<?> query,
-					CriteriaBuilder cb) {
-				Join<FileName, FileDetails> nameJoin = root.join(FileName_.fileNameDetails,JoinType.INNER);
-				nameJoin.on(cb.equal(root.get(FileName_.filenameIsactive), true));
-				Join<FileDetails, PatientDocCategory> detailsJoin = nameJoin.join(FileDetails_.patientDocCategory,JoinType.INNER);
-				detailsJoin.on(cb.equal(detailsJoin.get(PatientDocCategory_.patientDocCategoryIsactive), true));
-				root.join(FileName_.empProfile,JoinType.LEFT);
-				Predicate checkEntity = cb.equal(nameJoin.get(FileDetails_.filedetailsEntityid), testDetailId);
-				Predicate checkScanType = nameJoin.get(FileDetails_.filedetailsScantype).in((Object[])ScanType);
-				Predicate finalCheck = cb.and(checkEntity,checkScanType);
-				query.orderBy(cb.asc(detailsJoin.get(PatientDocCategory_.patientDocCategoryOrder)),
-						cb.asc(detailsJoin.get(PatientDocCategory_.patientDocCategoryName)),
-						cb.asc(detailsJoin.get(PatientDocCategory_.patientDocCategoryId)),
-						cb.desc(nameJoin.get(FileDetails_.filedetailsId)),
-						cb.desc(nameJoin.get(FileDetails_.filedetailsCreationdate)),
-						cb.asc(root.get(FileName_.filenameOrderby)),
-						cb.asc(root.get(FileName_.filenameCreatedon)),
-						cb.asc(root.get(FileName_.filenameId)));
-				return finalCheck;
-			}
-		};
-	}
-	
-	/**
-	 * Specification to check filescan type 
-	 * @return
-	 */
-	public static Specification<FileDetails> checkFileDetailScanType(final Integer scanType) {
-		return new Specification<FileDetails>() {
-
-			@Override
-			public Predicate toPredicate(Root<FileDetails> root, CriteriaQuery<?> query,
-					CriteriaBuilder cb) {
-				Predicate checkFileDetailScanType = cb.equal(root.get(FileDetails_.filedetailsScantype),scanType);
-				return checkFileDetailScanType;
-			}
-		};
-	}
-	
-	/**
-	 * Specification to check entity id
-	 * @return
-	 */
-	public static Specification<FileDetails> checkFileDetailEntityId(final Integer entityId) {
-		return new Specification<FileDetails>() {
-
-			@Override
-			public Predicate toPredicate(Root<FileDetails> root, CriteriaQuery<?> query,
-					CriteriaBuilder cb) {
-				Predicate checkFileDetailEntityId = cb.equal(root.get(FileDetails_.filedetailsEntityid),entityId);
-				return checkFileDetailEntityId;
-			}
-		};
-	}
-	
-	/**
-	 * Specification to check patient id
-	 * @return
-	 */
-	public static Specification<FileDetails> checkFileDetailPatientId(final Integer patientId) {
-		return new Specification<FileDetails>() {
-
-			@Override
-			public Predicate toPredicate(Root<FileDetails> root, CriteriaQuery<?> query,
-					CriteriaBuilder cb) {
-				Predicate checkFileDetailPatientId = cb.equal(root.get(FileDetails_.filedetailsPatientid),patientId);
-				return checkFileDetailPatientId;
-			}
-		};
 	}
 	
 	/**
@@ -416,29 +333,6 @@ public class InvestigationSpecification {
 					CriteriaBuilder cb) {
 				Predicate testIdsPred = root.get(LabEntries_.labEntriesTestId).in(testIds);
 				return testIdsPred;
-			}
-		};
-	}
-	
-	/**
-	 * Specification to check filescan type and test detail id
-	 * @return
-	 */
-	public static Specification<FileName> checkFileEntityAndScanType(final Integer testDetailId, final int ScanType) {
-		return new Specification<FileName>() {
-
-			@Override
-			public Predicate toPredicate(Root<FileName> root, CriteriaQuery<?> query,
-					CriteriaBuilder cb) {
-				Join<FileName, FileDetails> nameJoin = root.join(FileName_.fileNameDetails,JoinType.INNER);
-				nameJoin.on(cb.equal(root.get(FileName_.filenameIsactive), true));
-				Join<FileDetails, PatientDocCategory> detailsJoin = nameJoin.join(FileDetails_.patientDocCategory,JoinType.INNER);
-				detailsJoin.on(cb.equal(detailsJoin.get(PatientDocCategory_.patientDocCategoryIsactive), true));
-				root.join(FileName_.empProfile,JoinType.LEFT);
-				Predicate checkEntity = cb.equal(nameJoin.get(FileDetails_.filedetailsEntityid), testDetailId);
-				Predicate checkScanType = nameJoin.get(FileDetails_.filedetailsScantype).in(ScanType);
-				Predicate finalCheck = cb.and(checkEntity,checkScanType);
-				return finalCheck;
 			}
 		};
 	}
