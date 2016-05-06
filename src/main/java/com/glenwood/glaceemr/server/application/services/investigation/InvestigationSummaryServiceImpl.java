@@ -3414,7 +3414,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				if(paramLen > paramValueMap("PARAM_LABENTRYID"))
 					labEntryParamId = Integer.parseInt(Optional.fromNullable(param[paramValueMap("PARAM_LABENTRYID")]).or("-1").trim());
 				if(paramLen > paramValueMap("PARAM_VALUE"))
-					paramValue = HUtil.ValidateSingleQuote(Optional.fromNullable(param[paramValueMap("PARAM_VALUE")]).or("")).trim();
+					paramValue = HUtil.ValidateSingleQuote(URLDecoder.decode(Optional.fromNullable(param[paramValueMap("PARAM_VALUE")]).or(""),"UTF-8")).trim();
 				if(paramLen > paramValueMap("PARAM_DATE")){
 					String dateString=HUtil.ValidateSingleQuote(Optional.fromNullable(param[paramValueMap("PARAM_DATE")]).or("")).trim();
 					if(!dateString.equalsIgnoreCase("")) {
