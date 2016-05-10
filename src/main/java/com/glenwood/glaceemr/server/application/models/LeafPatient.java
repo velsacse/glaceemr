@@ -119,7 +119,7 @@ public class LeafPatient {
 	@JoinColumn(name="leaf_patient_leaf_library_id", referencedColumnName="leaf_library_id" , insertable=false, updatable=false)
 	private LeafLibrary leafLibraryTable;
 	
-	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER) 
+	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
 	@JsonManagedReference
 	@JoinColumn(name="leaf_patient_encounter_id", referencedColumnName="encounter_id" , insertable=false, updatable=false)
 	private Encounter encounterTable;
