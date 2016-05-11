@@ -397,19 +397,16 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				startDate = MoreObjects.firstNonNull(patientReg.getPatientRegistrationDob(), "").toString();
 			} else if(flowsheetType==2){
 				//Disease Management
+				List<FlowsheetDx> flowsheetDxList=flowsheetDxRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetDxCodeBasedOnFlowsheetTypeId(2, flowsheetType)));
+				ArrayList<String> dxCodes=new ArrayList<String>();
+				for(int j=0;j<flowsheetDxList.size();j++){
+					dxCodes.add(flowsheetDxList.get(j).getFlowsheetDxCode());
+				}
 				CriteriaBuilder builder = em.getCriteriaBuilder();
 				CriteriaQuery<Object> cq = builder.createQuery();
 				Root<ProblemList> root = cq.from(ProblemList.class);
-				Join<ProblemList,FlowsheetDx> problems=root.join("flowsheetDxTable",JoinType.INNER);
-				Join<Join<ProblemList,FlowsheetDx>,Flowsheet> problems1=problems.join("flowsheetTable",JoinType.INNER);
-				Predicate[] restrictions = new Predicate[] {
-						builder.equal(problems1.get("flowsheetType"),2),
-						builder.equal(problems1.get("flowsheetIsactive"),true)
-				};
-				problems1.on(restrictions);
-				problems1.join("flowsheetTypeTable",JoinType.INNER);
 				Predicate[] restrictions1 = new Predicate[] {
-						builder.equal(problems1.get("flowsheetId"),flowsheetId),
+						root.get(ProblemList_.problemListDxCode).in(dxCodes),
 						builder.equal(root.get(ProblemList_.problemListPatientId),patientId)
 				};
 				cq.select(builder.selectCase().when(builder.isNull(root.get(ProblemList_.problemListOnsetDate)), builder.function("to_char", String.class, root.get(ProblemList_.problemListCreatedon),builder.literal("yyyy-MM-dd"))).otherwise(builder.function("to_char", String.class, root.get(ProblemList_.problemListOnsetDate), builder.literal("yyyy-MM-dd"))));
@@ -454,23 +451,22 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		//Query 1
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<FlowsheetNameBean> cq = builder.createQuery(FlowsheetNameBean.class);
-		Root<ProblemList> root = cq.from(ProblemList.class);
-		Join<ProblemList, FlowsheetDx> join=root.join("flowsheetDxTable",JoinType.INNER);
-		Join<Join<ProblemList, FlowsheetDx>, Flowsheet> join1=join.join("flowsheetTable",JoinType.INNER);
+		Root<FlowsheetDx> root = cq.from(FlowsheetDx.class);
+		Join<FlowsheetDx, Flowsheet> join1=root.join("flowsheetTable",JoinType.INNER);
 		join1.on(builder.equal(join1.get(Flowsheet_.flowsheetType), 2),builder.equal(join1.get(Flowsheet_.flowsheetIsactive), true));
-		Join<Join<Join<ProblemList, FlowsheetDx>, Flowsheet>, FlowsheetType> join2=join1.join("flowsheetTypeTable",JoinType.INNER);
+		Join<Join<FlowsheetDx, Flowsheet>, FlowsheetType> join2=join1.join("flowsheetTypeTable",JoinType.INNER);
 		Selection[] selections= new Selection[] { 
 				join1.get( Flowsheet_.flowsheetId ),
 				join1.get( Flowsheet_.flowsheetType),
 				join1.get( Flowsheet_.flowsheetName),
 				join2.get( FlowsheetType_.flowsheetTypeName),
-				builder.selectCase().when(builder.isNull(root.get(ProblemList_.problemListOnsetDate)), builder.function("to_char", String.class, root.get(ProblemList_.problemListCreatedon),builder.literal("yyyy-MM-dd"))).otherwise(builder.function("to_char", String.class, root.get(ProblemList_.problemListOnsetDate),builder.literal("yyyy-MM-dd")))
+				builder.literal("")
 		};
 		cq.select(builder.construct(FlowsheetNameBean.class,selections));
 		cq.distinct(true);
 		Predicate[] restrictions = new Predicate[] {
-				builder.equal(root.get( ProblemList_.problemListPatientId ),patientId),
-				builder.equal(root.get( ProblemList_.problemListIsactive ),true),
+				builder.equal(join1.get( Flowsheet_.flowsheetType ),2),
+				builder.equal(join1.get( Flowsheet_.flowsheetIsactive ),true),
 		};
 		cq.where(restrictions);
 		List<FlowsheetNameBean> namesData=new ArrayList<FlowsheetNameBean>();
@@ -2984,22 +2980,19 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					startDate = MoreObjects.firstNonNull(patientReg.getPatientRegistrationDob(), "").toString();
 				} else if(flowsheetType==2){
 					//Disease Management
+					List<FlowsheetDx> flowsheetDxList=flowsheetDxRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetDxCodeBasedOnFlowsheetTypeId(2, flowsheetType)));
+					ArrayList<String> dxCodes=new ArrayList<String>();
+					for(int j=0;j<flowsheetDxList.size();j++){
+						dxCodes.add(flowsheetDxList.get(j).getFlowsheetDxCode());
+					}
 					CriteriaBuilder builder = em.getCriteriaBuilder();
 					CriteriaQuery<Object> cq = builder.createQuery();
 					Root<ProblemList> root = cq.from(ProblemList.class);
-					Join<ProblemList,FlowsheetDx> problems=root.join("flowsheetDxTable",JoinType.INNER);
-					Join<Join<ProblemList,FlowsheetDx>,Flowsheet> problems1=problems.join("flowsheetTable",JoinType.INNER);
-					Predicate[] restrictions = new Predicate[] {
-							builder.equal(problems1.get("flowsheetType"),2),
-							builder.equal(problems1.get("flowsheetIsactive"),true)
-					};
-					problems1.on(restrictions);
-					problems1.join("flowsheetTypeTable",JoinType.INNER);
 					Predicate[] restrictions1 = new Predicate[] {
-							builder.equal(problems1.get("flowsheetId"),flowsheetId),
+							root.get(ProblemList_.problemListDxCode).in(dxCodes),
 							builder.equal(root.get(ProblemList_.problemListPatientId),patientId)
 					};
-					cq.select(builder.selectCase().when(builder.isNull(root.get(ProblemList_.problemListOnsetDate)), builder.function("to_char", String.class, root.get(ProblemList_.problemListCreatedon),builder.literal("yyyy-MM-dd"))).otherwise(builder.function("to_char", String.class, root.get(ProblemList_.problemListOnsetDate),builder.literal("yyyy-MM-dd"))));
+					cq.select(builder.selectCase().when(builder.isNull(root.get(ProblemList_.problemListOnsetDate)), builder.function("to_char", String.class, root.get(ProblemList_.problemListCreatedon),builder.literal("yyyy-MM-dd"))).otherwise(builder.function("to_char", String.class, root.get(ProblemList_.problemListOnsetDate), builder.literal("yyyy-MM-dd"))));
 					cq.where(restrictions1);
 					List<Object> rstList=em.createQuery(cq).getResultList();
 					if(rstList.size()>0)
@@ -4217,19 +4210,16 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				startDate = MoreObjects.firstNonNull(patientReg.getPatientRegistrationDob(), "").toString();
 			} else if(flowsheetType==2){
 				//Disease Management
+				List<FlowsheetDx> flowsheetDxList=flowsheetDxRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetDxCodeBasedOnFlowsheetTypeId(2, flowsheetType)));
+				ArrayList<String> dxCodes=new ArrayList<String>();
+				for(int j=0;j<flowsheetDxList.size();j++){
+					dxCodes.add(flowsheetDxList.get(j).getFlowsheetDxCode());
+				}
 				CriteriaBuilder builder = em.getCriteriaBuilder();
 				CriteriaQuery<Object> cq = builder.createQuery();
 				Root<ProblemList> root = cq.from(ProblemList.class);
-				Join<ProblemList,FlowsheetDx> problems=root.join("flowsheetDxTable",JoinType.INNER);
-				Join<Join<ProblemList,FlowsheetDx>,Flowsheet> problems1=problems.join("flowsheetTable",JoinType.INNER);
-				Predicate[] restrictions = new Predicate[] {
-						builder.equal(problems1.get("flowsheetType"),2),
-						builder.equal(problems1.get("flowsheetIsactive"),true)
-				};
-				problems1.on(restrictions);
-				problems1.join("flowsheetTypeTable",JoinType.INNER);
 				Predicate[] restrictions1 = new Predicate[] {
-						builder.equal(problems1.get("flowsheetId"),flowsheetId),
+						root.get(ProblemList_.problemListDxCode).in(dxCodes),
 						builder.equal(root.get(ProblemList_.problemListPatientId),patientId)
 				};
 				cq.select(builder.selectCase().when(builder.isNull(root.get(ProblemList_.problemListOnsetDate)), builder.function("to_char", String.class, root.get(ProblemList_.problemListCreatedon),builder.literal("yyyy-MM-dd"))).otherwise(builder.function("to_char", String.class, root.get(ProblemList_.problemListOnsetDate), builder.literal("yyyy-MM-dd"))));

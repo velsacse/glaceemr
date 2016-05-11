@@ -266,6 +266,31 @@ public class FlowsheetSpecification {
 			}
 		};
 	}
+	
+	/**
+	 * Specification to get the list of FlowsheetDx's based on flowsheet Id
+	 * @param flowsheetType
+	 * @param flowsheetId
+	 * @return Specification<FlowsheetDx>
+	 */
+	public static Specification<FlowsheetDx> flowsheetDxCodeBasedOnFlowsheetTypeId(final Integer flowsheetType,final Integer flowsheetId)
+	{
+		return new Specification<FlowsheetDx>() {
+
+			@Override
+			public Predicate toPredicate(Root<FlowsheetDx> root, CriteriaQuery<?> query,CriteriaBuilder cb) {
+				Join<FlowsheetDx,Flowsheet> join=root.join("flowsheetTable", JoinType.INNER);
+				Predicate[] restrictions = new Predicate[] {
+						cb.equal(join.get("flowsheetType"),2),
+						cb.equal(join.get("flowsheetIsactive"),true)
+				};
+				join.on(restrictions);
+				join.join("flowsheetTypeTable",JoinType.INNER);
+				Predicate flowsheetPred=cb.equal(join.get("flowsheetId"),flowsheetId);
+				return flowsheetPred;
+			}
+		};
+	}
 
 
 	/**

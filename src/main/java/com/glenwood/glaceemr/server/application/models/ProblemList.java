@@ -94,11 +94,6 @@ public class ProblemList {
 	@JoinColumn(name="problem_list_coding_systemid",referencedColumnName="coding_system_oid",insertable=false,updatable=false)
 	CodingSystems codingSystems;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="problem_list_dx_code", referencedColumnName="flowsheet_dx_code", insertable=false, updatable=false)
-	@JsonBackReference
-	FlowsheetDx flowsheetDxTable;
-	
 	public Integer getProblemListId() {
 		return problemListId;
 	}
