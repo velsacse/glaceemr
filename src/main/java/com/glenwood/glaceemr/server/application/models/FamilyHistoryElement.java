@@ -58,8 +58,8 @@ public class FamilyHistoryElement implements Serializable{
 	FamilyHistoryDisease familyHistoryDisease;
 	
 	
-	@OneToMany(mappedBy="familyHistoryElement")
-	List<PatientClinicalElements> patientClinicalElements;
+	/*@OneToMany(mappedBy="familyHistoryElement")
+	List<PatientClinicalElements> patientClinicalElements;*/
 
 	
 	@OneToMany(mappedBy="familyHistoryElement")
@@ -131,9 +131,9 @@ public class FamilyHistoryElement implements Serializable{
 	}
 
 
-	public List<PatientClinicalElements> getPatientClinicalElements() {
+	/*public List<PatientClinicalElements> getPatientClinicalElements() {
 		return patientClinicalElements;
-	}
+	}*/
 
 
 	public FamilyHistoryRelationship getFamilyHistoryRelationship() {
@@ -192,10 +192,10 @@ public class FamilyHistoryElement implements Serializable{
 	}
 
 
-	public void setPatientClinicalElements(
+	/*public void setPatientClinicalElements(
 			List<PatientClinicalElements> patientClinicalElements) {
 		this.patientClinicalElements = patientClinicalElements;
-	}
+	}*/
 
 
 	public void setFamilyHistoryRelationship(

@@ -1,0 +1,156 @@
+<dataset>
+
+	<clinical_system clinical_system_id="1"
+		clinical_system_name="Constitutional" clinical_system_hpi_gwid="21"
+		clinical_system_ros_gwid="27" clinical_system_ros_eandmtype="Constitutional"
+		clinical_system_pe_gwid="1" clinical_system_pe_eandmtype="Constitutional"
+		clinical_system_isactive="true" clinical_system_orderby="1">
+	</clinical_system>
+
+
+	<clinical_system_order clinical_system_order_id="2205"
+		clinical_system_order_systemid="1" clinical_system_order_ros="3"
+		clinical_system_order_pe="1" clinical_system_order_templateid="3744">
+	</clinical_system_order>
+
+
+	<ros_element ros_element_id="170" ros_element_name="Fever"
+		ros_element_printtext="fever" ros_element_system_id="27"
+		ros_element_orderby="145" ros_element_gwid="0000100427001008000"
+		ros_element_isactive="true"></ros_element>
+
+	<patient_registration patient_registration_id="3221"
+		patient_registration_dob="2014-01-26" patient_registration_accountno="003221"
+		patient_registration_sex="1"></patient_registration>
+
+	<chart chart_id="7217" chart_patientid="3221"></chart>
+	
+	
+	<patient_registration patient_registration_id="2822"
+		patient_registration_dob="2013-01-10" patient_registration_accountno="002822"
+		patient_registration_sex="1"></patient_registration>
+
+	<chart chart_id="6818" chart_patientid="2822"></chart>
+
+
+
+	<h076 h076001="1" h076003="Arthur" h076005="Blumer" h076008="-2"
+		h076010="8606285767$$" h076011="8606280218" h076015="true" h076016="1"
+		h076018="false" h076019="-2" h076020="Arthur M.D., Blumer" h555555="1"
+		h076021="M.D."></h076>
+
+	<leaf_library leaf_library_id="2156"
+		leaf_library_name="Pediatrics well baby (3744)"
+		leaf_library_description="Pediatrics well baby" leaf_library_group_id="41"
+		leaf_library_order="1138" leaf_library_type="2"
+		leaf_library_tablename="vitals_data" leaf_library_printurl="SoapNotesPrint.Action"
+		leaf_library_speciality_id="1" leaf_library_isactive="true"
+		leaf_library_isreport_needed="true" leaf_library_isfax_needed="true"
+		leaf_library_summary="false" leaf_library_ref_url="SoapNotes.Action"
+		leaf_library_eandm_needed="false" leaf_library_word_needed="true"
+		leaf_library_header="0" leaf_library_soaptemplate_id="3744"
+		leaf_library_isprocedure="false" leaf_library_template_category="0"
+		leaf_library_age_category="-1" leaf_library_start_age="-1"
+		leaf_library_end_age="-1" leaf_library_header_id="3"
+		leaf_library_load_previous="false" leaf_library_isconsultreport="1"
+		leaf_library_display_type="3" leaf_library_notesviewneeded="1"
+		leaf_library_isagebased="true">
+	</leaf_library>
+
+	<encounter encounter_id="14908" encounter_severity="1"
+		encounter_chartid="7217" encounter_ins_review_comment="test"
+		encounter_comment_scribble="test" encounter_instructions_provided="false"
+		encounter_billingcomments="test" encounter_patientcomments="test"
+		encounter_chiefcomplaint_dirty="false" encounter_response_scribble="tet"
+		encounter_status="1" encounter_created_date="2016-04-06 14:24:43.052093"
+		encounter_closed_date="2015-03-18 00:00:00" encounter_doc_response="test msg"
+		encounter_comments="test123" encounter_date="2016-04-06 04:54:43"
+		encounter_chargeable="false" encounter_reason="-1"
+		encounter_already_seen="false" encounter_ins_review="1"
+		encounter_med_review="-1" encounter_user_login_id="-1"
+		encounter_pos="-1" encounter_ref_doctor="-1"
+		encounter_scribbledata="test" encounter_chiefcomp="test"
+		encounter_multireason_id="test" encounter_access_id="test"
+		encounter_access_status="true" encounter_isinstruction="false"
+		encounter_ass_provider="-1,-1" encounter_include_active_med_in_report="false"
+		encounter_patient_episodeid="1" encounter_modifiedon="2015-03-12 00:00:00"
+		medication_attestation_status="test" ENCOUNTER_ISPORTAL="0"
+		encounter_room_isactive="false" transition_of_care="false"
+		summary_of_care="false"></encounter>
+		
+
+
+	<leaf_patient leaf_patient_id="17455"
+		leaf_patient_patient_id="3221" leaf_patient_encounter_id="14908"
+		leaf_patient_leaf_library_id="2156" leaf_patient_created_date="2016-04-23 14:28:54.375129"
+		leaf_patient_lastmoddate="2016-04-23 14:28:54.375129"
+		leaf_patient_iscomplete="false" leaf_patient_isactive="true"
+		leaf_patient_isprinted="false" leaf_patient_isfaxed="false"
+		leaf_patient_sign_two="-1" leaf_patient_problemid="-1"
+		leaf_patient_ma_signed_userid="-1">
+	</leaf_patient>
+
+
+
+
+
+	<clinical_elements clinical_elements_id="2113"
+		clinical_elements_gwid="0000100427001008000" clinical_elements_name="Fever"
+		clinical_elements_notes="Fever" clinical_elements_datatype="3"
+		clinical_elements_isactive="true" clinical_elements_ishistory="false"
+		clinical_elements_gender="0" clinical_elements_startage="-1"
+		clinical_elements_endage="-1"></clinical_elements>
+		
+		
+   <clinical_elements clinical_elements_id="49945"
+		clinical_elements_gwid="0000100400000000001" clinical_elements_name=" ROS Notes"
+		clinical_elements_notes=" ROS Notes" clinical_elements_datatype="2"
+		clinical_elements_isactive="true" clinical_elements_ishistory="false"
+		clinical_elements_gender="0" clinical_elements_startage="-1"
+		clinical_elements_endage="-1"></clinical_elements>
+
+	<clinical_elements clinical_elements_id="15837"
+		clinical_elements_gwid="0000100225100418000" clinical_elements_name="Problems / Parental concerns: Allergies, food, asthma, eczema"
+		clinical_elements_notes="Problems / Parental concerns: Allergies, food, asthma, eczema" clinical_elements_datatype="4"
+		clinical_elements_isactive="true" clinical_elements_ishistory="false"
+		clinical_elements_gender="0" clinical_elements_startage="1825"
+		clinical_elements_endage="7665"></clinical_elements>
+
+
+	<clinical_element_template_mapping
+		clinical_element_template_mapping_id="1647116"
+		clinical_element_template_mapping_gwid="0000100427001008000"
+		clinical_element_template_mapping_templateid="3744"
+		clinical_element_template_mapping_type="3"
+		clinical_element_template_mapping_isfocal="false"></clinical_element_template_mapping>
+
+	<clinical_elements_condition
+		clinical_elements_condition_id="1"
+		clinical_elements_condition_element_id="15837"
+		clinical_elements_condition_startage="1825"
+		clinical_elements_condition_endage="7665">
+	</clinical_elements_condition>
+
+	<patient_clinical_elements
+		patient_clinical_elements_id="2718303"
+		patient_clinical_elements_patientid="3221"
+		patient_clinical_elements_chartid="7217"
+		patient_clinical_elements_encounterid="14908"
+		patient_clinical_elements_gwid="0000100427001008000"
+		patient_clinical_elements_value="false"></patient_clinical_elements>
+
+	<patient_clinical_history
+		patient_clinical_history_id="43345"
+		patient_clinical_history_patientid="2822"
+		patient_clinical_history_chartid="6818" patient_clinical_history_gwid="0000100225100418000"
+		patient_clinical_history_value="1"></patient_clinical_history>
+
+	<patient_clinical_elements
+		patient_clinical_elements_id="2718301"
+		patient_clinical_elements_patientid="3221"
+		patient_clinical_elements_chartid="7217"
+		patient_clinical_elements_encounterid="14908"
+		patient_clinical_elements_gwid="0000100400000000001"
+		patient_clinical_elements_value="Data"></patient_clinical_elements>
+
+</dataset>

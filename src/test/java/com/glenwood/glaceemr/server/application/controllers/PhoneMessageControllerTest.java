@@ -50,7 +50,7 @@ public class PhoneMessageControllerTest {
 	/**
 	 * Testing for getting phone encounter details.
 	 */
-	
+	@Ignore
 	@Test 
 	public void getPhoneEncounters() throws Exception {
 
@@ -77,6 +77,7 @@ public class PhoneMessageControllerTest {
 	/**
 	 * Testing for getting encounter details.
 	 */
+	@Ignore
 	@Test 
 	public void getEncounterDetails() throws Exception {
 

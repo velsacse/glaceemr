@@ -2031,7 +2031,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				gwids.add(hsh_notes.getFlowsheetClinicalParamMapElementgwid());
 				gwidsComplete.add(hsh_notes.getFlowsheetClinicalParamMapElementgwid());
 				//getting list of vital parameters having glenwood id and patient id
-				List<PatientClinicalElements> patientClinicalElements=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getNonHistoryElemPatientDataLessThanEncounter(patientId,encounterId, gwids));
+				List<PatientClinicalElements> patientClinicalElements=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getElemPatientDataLessThanEncounter(patientId,encounterId, gwids));
 				for(int g=0;g<patientClinicalElements.size();g++){
 					ClinicalElements clinicalElementsInner=Optional.fromNullable(clinicalElementsRepository.findOne(PatientClinicalElementsSpecification.getClinicalElement(patientClinicalElements.get(g).getPatientClinicalElementsGwid()))).or(new ClinicalElements());
 					patientClinicalElements.get(g).setClinicalElement(clinicalElementsInner);
@@ -2379,7 +2379,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				List<String> gwids=new ArrayList<String>();
 				gwids.add(hsh_notes.getFlowsheetClinicalParamMapElementgwid());
 				gwidsComplete.add(hsh_notes.getFlowsheetClinicalParamMapElementgwid());
-				List<PatientClinicalElements> patientClinicalElements=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getNonHistoryElemPatientDataLessThanEncounter(patientId, encounterId, gwids));
+				List<PatientClinicalElements> patientClinicalElements=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getElemPatientDataLessThanEncounter(patientId, encounterId, gwids));
 				for(int g=0;g<patientClinicalElements.size();g++){
 					ClinicalElements clinicalElementsInner=Optional.fromNullable(clinicalElementsRepository.findOne(PatientClinicalElementsSpecification.getClinicalElement(patientClinicalElements.get(g).getPatientClinicalElementsGwid()))).or(new ClinicalElements());
 					patientClinicalElements.get(g).setClinicalElement(clinicalElementsInner);

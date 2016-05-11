@@ -208,6 +208,10 @@ public class Encounter {
 	@JoinColumn(name="encounter_visittype",referencedColumnName="categoryid",insertable=false,updatable=false)
     PatientEncounterType patientEncounterType;
 	
+	
+	@OneToMany(mappedBy="encounter",fetch=FetchType.LAZY)
+	List<PatientClinicalElements> patientClinicalElements;
+	
 	/*@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="encounter_chartid",referencedColumnName="chart_id",insertable=false,updatable=false)
@@ -638,4 +642,14 @@ public class Encounter {
 	public void setChartTable(Chart chartTable) {
 		this.chartTable = chartTable;
 	}
+	
+	public List<PatientClinicalElements> getPatientClinicalElements() {
+		return patientClinicalElements;
+	}
+
+	public void setPatientClinicalElements(
+			List<PatientClinicalElements> patientClinicalElements) {
+		this.patientClinicalElements = patientClinicalElements;
+	}
+
 }

@@ -1,10 +1,12 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import static com.jayway.restassured.module.mockmvc.RestAssuredMockMvc.given;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +73,7 @@ public class InternalMessageControllerTest {
 	/**
 	 * Testing for getting encounter details.
 	 */
+	@Ignore
 	@Test 
 	public void getInternalEncounterDetails() throws Exception {
 

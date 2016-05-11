@@ -374,4 +374,15 @@ public class ClinicalDataBean {
 	public void setPatientEpisodeElements(String elementId,PatientEpisodeElementBean patientEpisodeElementBean) {
 		this.patientEpisodeElements.put(elementId,patientEpisodeElementBean);
 	}
+
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+	
+	
 }

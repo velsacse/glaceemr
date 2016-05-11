@@ -7,9 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -71,11 +69,6 @@ public class ClinicalSystem implements Serializable {
 	
 	@OneToMany(mappedBy="clinicalSystem",fetch=FetchType.LAZY)
 	List<PeElementGroup> peElementGroups;	
-	
-	
-	/*@OneToMany(fetch=FetchType.LAZY)
-	@JoinColumn(name = "clinical_system_pe_gwid", referencedColumnName = "pe_element_group_system_id", insertable = false, updatable = false)
-	List<PeElementGroup> peElementGroups;*/
 	
 	
 	public List<PeElementGroup> getPeElementGroups() {

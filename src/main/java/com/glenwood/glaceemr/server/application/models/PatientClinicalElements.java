@@ -63,7 +63,7 @@ public class PatientClinicalElements {
 	@JoinColumn(name="patient_clinical_elements_gwid",referencedColumnName="pe_element_gwid",insertable = false, updatable = false)
 	private PeElement peElement;
 	
-	@ManyToOne(fetch=FetchType.LAZY,optional=false)
+/*	@ManyToOne(fetch=FetchType.LAZY,optional=false)
 	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="patient_clinical_elements_gwid",referencedColumnName="history_element_gwid",insertable = false, updatable = false)
 	private HistoryElement historyElement;
@@ -95,11 +95,6 @@ public class PatientClinicalElements {
 	SurgicalHistoryElementDetails surgicalHistoryElementDetails;
 	
 	
-	
-	public HistoryElement getHistoryElement() {
-		return historyElement;
-	}
-
 	public FamilyHistoryElement getFamilyHistoryElement() {
 		return familyHistoryElement;
 	}
@@ -135,7 +130,7 @@ public class PatientClinicalElements {
 	public void setSurgicalHistoryElementDetails(
 			SurgicalHistoryElementDetails surgicalHistoryElementDetails) {
 		this.surgicalHistoryElementDetails = surgicalHistoryElementDetails;
-	}
+	}*/
 
 	public Long getPatientClinicalElementsId() {
 		return patientClinicalElementsId;
