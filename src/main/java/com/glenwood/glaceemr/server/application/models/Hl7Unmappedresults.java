@@ -1,18 +1,24 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
-
 import java.sql.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -132,6 +138,30 @@ public class Hl7Unmappedresults {
 	@Column(name="hl7_unmappedresults_ispdf")
 	private Integer hl7UnmappedresultsIspdf;
 
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonBackReference
+	@JoinColumn(name="hl7_unmappedresults_filewise_id", referencedColumnName="hl7_result_inbox_id", insertable=false, updatable=false)
+	private Hl7ResultInbox hl7ResultInbox;
+		
+	@ManyToOne(fetch=FetchType.LAZY)
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JoinColumn(name="hl7_unmappedresults_testdetail_id", referencedColumnName="lab_entries_testdetail_id", insertable=false, updatable=false)
+	private LabEntries labEntriesUnmapped;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="hl7_unmappedresults_labcomp_detailid", referencedColumnName="labcompany_details_id", insertable=false, updatable=false)
+	private LabcompanyDetails labCompanyDetails;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JoinColumn(name="hl7_unmappedresults_ordby_docid", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
+	private EmployeeProfile empProfile;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="hl7_unmappedresults_accountno", referencedColumnName="patient_registration_accountno" , insertable=false, updatable=false)
+	private PatientRegistration hl7UnmappedresultsPatTable;
+	
 	public Integer getHl7UnmappedresultsId() {
 		return hl7UnmappedresultsId;
 	}
@@ -429,5 +459,46 @@ public class Hl7Unmappedresults {
 
 	public void setHl7UnmappedresultsIspdf(Integer hl7UnmappedresultsIspdf) {
 		this.hl7UnmappedresultsIspdf = hl7UnmappedresultsIspdf;
+	}
+	
+	public Hl7ResultInbox getHl7ResultInbox() {
+		return hl7ResultInbox;
+	}
+
+	public void setHl7ResultInbox(Hl7ResultInbox hl7ResultInbox) {
+		this.hl7ResultInbox = hl7ResultInbox;
+	}
+
+	public LabEntries getLabEntriesUnmapped() {
+		return labEntriesUnmapped;
+	}
+
+	public void setLabEntriesUnmapped(LabEntries labEntriesUnmapped) {
+		this.labEntriesUnmapped = labEntriesUnmapped;
+	}
+
+	public LabcompanyDetails getLabCompanyDetails() {
+		return labCompanyDetails;
+	}
+
+	public void setLabCompanyDetails(LabcompanyDetails labCompanyDetails) {
+		this.labCompanyDetails = labCompanyDetails;
+	}
+
+	public EmployeeProfile getEmpProfile() {
+		return empProfile;
+	}
+
+	public void setEmpProfile(EmployeeProfile empProfile) {
+		this.empProfile = empProfile;
+	}
+
+	public PatientRegistration getHl7UnmappedresultsPatTable() {
+		return hl7UnmappedresultsPatTable;
+	}
+
+	public void setHl7UnmappedresultsPatTable(
+			PatientRegistration hl7UnmappedresultsPatTable) {
+		this.hl7UnmappedresultsPatTable = hl7UnmappedresultsPatTable;
 	}
 }

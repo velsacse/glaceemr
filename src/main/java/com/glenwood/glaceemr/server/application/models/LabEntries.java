@@ -400,6 +400,9 @@ public class LabEntries {
 	@JsonBackReference
 	private List<LabEntriesParameter> parameters;
 	
+	@OneToMany(mappedBy="labEntries")
+	private List<FileDetails> fileDetails;
+	
 	public List<LabEntriesParameter> getParameters() {
 		return parameters;
 	}
@@ -1329,5 +1332,12 @@ public class LabEntries {
 	public void setLabEntriesDx8codeCodedesc(String labEntriesDx8codeCodedesc) {
 		this.labEntriesDx8codeCodedesc = labEntriesDx8codeCodedesc;
 	}
-	
+
+	public List<FileDetails> getFileDetails() {
+		return fileDetails;
+	}
+
+	public void setFileDetails(List<FileDetails> fileDetails) {
+		this.fileDetails = fileDetails;
+	}	
 }

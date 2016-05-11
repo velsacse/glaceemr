@@ -1,15 +1,21 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "hl7_result_inbox")
@@ -87,6 +93,19 @@ public class Hl7ResultInbox {
 	@Column(name="hl7_result_inbox_placergroupno")
 	private String hl7ResultInboxPlacergroupno;
 
+	@ManyToOne
+	@JsonManagedReference
+	@JoinColumn(name="hl7_result_inbox_accountno", referencedColumnName="patient_registration_accountno", insertable=false, updatable=false)
+	private PatientRegistration patientRegistration;
+
+	@ManyToOne
+	@JoinColumn(name="hl7_result_inbox_labcompanyid", referencedColumnName="id", insertable=false, updatable=false)
+	private Hl7importCompanies importCompanies;
+	
+	@OneToMany(mappedBy="hl7ResultInbox", fetch=FetchType.EAGER)
+	@JsonManagedReference
+	private List<Hl7Unmappedresults> hl7UnmappedResults;
+	
 	public Integer getHl7ResultInboxId() {
 		return hl7ResultInboxId;
 	}
@@ -269,5 +288,29 @@ public class Hl7ResultInbox {
 
 	public void setHl7ResultInboxPlacergroupno(String hl7ResultInboxPlacergroupno) {
 		this.hl7ResultInboxPlacergroupno = hl7ResultInboxPlacergroupno;
+	}
+
+	public PatientRegistration getPatientRegistration() {
+		return patientRegistration;
+	}
+
+	public void setPatientRegistration(PatientRegistration patientRegistration) {
+		this.patientRegistration = patientRegistration;
+	}
+
+	public Hl7importCompanies getImportCompanies() {
+		return importCompanies;
+	}
+
+	public void setImportCompanies(Hl7importCompanies importCompanies) {
+		this.importCompanies = importCompanies;
+	}
+
+	public List<Hl7Unmappedresults> getHl7UnmappedResults() {
+		return hl7UnmappedResults;
+	}
+
+	public void setHl7UnmappedResults(List<Hl7Unmappedresults> hl7UnmappedResults) {
+		this.hl7UnmappedResults = hl7UnmappedResults;
 	}
 }

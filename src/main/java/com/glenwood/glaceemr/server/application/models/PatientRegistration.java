@@ -1,13 +1,14 @@
 package com.glenwood.glaceemr.server.application.models;
 
 
+import java.io.Serializable;
+import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Entity;	
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -24,9 +25,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "patient_registration")
-public class PatientRegistration {
+public class PatientRegistration implements Serializable {
 	@Id
 	@Column(name="patient_registration_id")
 	private Integer patientRegistrationId;
@@ -585,6 +587,9 @@ public class PatientRegistration {
 	@JsonManagedReference
 	private List<PatientInsDetail> patientInsuranceTable;
 	
+	@OneToMany(mappedBy="patientRegistration")
+	private List<Hl7ResultInbox> hl7ResultInbox;
+		
 	public H076 getReferringPhyTable() {
 		return referringPhyTable;
 	}
@@ -2175,5 +2180,13 @@ public class PatientRegistration {
 
 	public void setAlertTable(List<Chart> alertTable) {
 		this.alertTable = alertTable;
+	}
+	
+	public List<Hl7ResultInbox> getHl7ResultInbox() {
+		return hl7ResultInbox;
+	}
+
+	public void setHl7ResultInbox(List<Hl7ResultInbox> hl7ResultInbox) {
+		this.hl7ResultInbox = hl7ResultInbox;
 	}
 }

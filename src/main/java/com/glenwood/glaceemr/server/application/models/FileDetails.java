@@ -116,6 +116,17 @@ public class FileDetails {
 	@JsonManagedReference
 	Encounter encounterTable;
 
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="filedetails_entityid", referencedColumnName="lab_entries_testdetail_id", insertable=false,updatable=false)
+	private LabEntries labEntries;
+	
+	public LabEntries getLabEntries() {
+		return labEntries;
+	}
+
+	public void setLabEntries(LabEntries labEntries) {
+		this.labEntries = labEntries;
+	}
 	
 	public EmployeeProfile getCreatedByEmpProfileTable() {
 		return createdByEmpProfileTable;
