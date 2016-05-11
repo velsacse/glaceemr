@@ -1,0 +1,69 @@
+<dataset>
+    <patient_registration patient_registration_id="7647" ></patient_registration>
+	<chart chart_id="1496" chart_patientid="7647"></chart>
+	<emp_profile emp_profile_empid="1"></emp_profile>
+	
+	<pos_type pos_type_unique_id="1" pos_type_type_id="11" pos_type_type_name="OFFICE VISIT" pos_type_isactive="true" h555555="0"></pos_type>
+	
+	<place_of_service place_of_service_placeid="2" h555555="1" place_of_service_isdme="true"></place_of_service>
+	
+	<pos_table pos_table_relation_id="2" pos_table_place_id="2" pos_table_pos_code="11" pos_table_is_active="true" 
+	h555555="1"	pos_table_isdme="true" pos_table_istransfirst_configured="false"></pos_table>
+	
+	
+	
+	<concentrate_group concentrate_group_id="1" concentrate_group_name="TREES" concentrate_group_status="true" is_food_allergen_group="false"></concentrate_group>
+	<concentrate concentrate_id="2" concentrate_name="Ash" concentrate_volume="0" concentrate_unit="ml" concentrate_groupid="1" concentrate_status="true" concentrate_orderby="2" is_intradermal_needed="true" is_food_allergen="false"></concentrate>
+	<concentrate concentrate_id="3" concentrate_name="Beech" concentrate_volume="0" concentrate_unit="ml" concentrate_groupid="1" concentrate_status="true" concentrate_orderby="3" is_intradermal_needed="true" is_food_allergen="false"></concentrate>
+	<concentrate concentrate_id="4" concentrate_name="Birch" concentrate_volume="0" concentrate_unit="ml" concentrate_groupid="1" concentrate_status="true" concentrate_orderby="4" is_intradermal_needed="true" is_food_allergen="false"></concentrate>
+	<concentrate concentrate_id="11" concentrate_name="Sweet G" concentrate_volume="0" concentrate_unit="ml" concentrate_groupid="1" concentrate_status="true" concentrate_orderby="11" is_intradermal_needed="true" is_food_allergen="false"></concentrate>
+	<concentrate concentrate_id="12" concentrate_name="Sycamore A" concentrate_volume="0" concentrate_unit="ml" concentrate_groupid="1" concentrate_status="true" concentrate_orderby="12" is_intradermal_needed="true" is_food_allergen="false"></concentrate>
+	
+	<skin_test_form_shortcut skin_test_form_shortcut_id="100" skin_test_form_shortcut_name="Aero Allergen Skin Testing Form" 
+	skin_test_form_shortcut_prick_wheal_needed="true" skin_test_form_shortcut_prick_flare_needed="true" 
+	skin_test_form_shortcut_prick_erythema_needed="true" skin_test_form_shortcut_prick_pseudopodia_needed="true"
+	skin_test_form_shortcut_intradermal_wheal_needed="true" skin_test_form_shortcut_intradermal_flare_needed="true" 
+	skin_test_form_shortcut_intradermal_erythema_needed="true" skin_test_form_shortcut_intradermal_pseudopodia_needed="true"
+	></skin_test_form_shortcut>
+	
+	<skin_test_form_shortcut_category_details skin_test_form_shortcut_category_details_id="100" 
+	skin_test_form_shortcut_category_details_shortcut_id="100"
+	skin_test_form_shortcut_category_details_allergen_category_id="1" ></skin_test_form_shortcut_category_details>
+	
+	<skin_test_form_shortcut_allergen_details skin_test_form_shortcut_allergen_details_id="100" 
+	skin_test_form_shortcut_allergen_details_shortcut_id="100"
+	skin_test_form_shortcut_allergen_details_category_details_id="100"
+	skin_test_form_shortcut_allergen_details_allergen_id="2"></skin_test_form_shortcut_allergen_details>
+
+	<skin_test_order_status skin_test_order_status_id="1" skin_test_order_status_name="Pending" skin_test_order_status_desc="Pending"></skin_test_order_status>
+	
+
+	<skin_test_order skin_test_order_id="100" skin_test_order_patient_id="7647" skin_test_order_skin_test_form_shortcut_id="100" 
+	skin_test_order_start_date="2016-05-04" skin_test_order_status="1" skin_test_order_technician="1" skin_test_order_encounter_id="-1" 
+	skin_test_order_mapping_test_detail_id="-1" skin_test_order_dx_code1="J30.1" skin_test_order_dx_desc1="Allergic rhinitis due to pollen" 
+	skin_test_order_dx_code_system_id="2.16.840.1.113883.6.90" skin_test_order_ordering_physician="1" 
+	skin_test_order_ordering_location="1" skin_test_order_created_by="1" skin_test_order_created_on="2016-05-09 22:26:19"
+	skin_test_order_last_modified_by="1" skin_test_order_last_modified_on="2016-05-09 22:26:19"
+	skin_test_order_completed_by="1" skin_test_order_completed_on="2016-05-10 22:26:19" 
+	skin_test_order_reviewed_by="1" skin_test_order_reviewed_on="2016-05-11 22:26:19" 
+	skin_test_order_evaluation_text="test evaluation" skin_test_order_result_comments="test result comments"></skin_test_order>
+	
+	
+	<skin_test_order_entry skin_test_order_entry_id="100" skin_test_order_entry_skin_test_order_id="100" skin_test_order_entry_type_of_test="Prick"
+	skin_test_order_entry_concentration="null" skin_test_order_entry_no_of_units="0" skin_test_order_entry_test_date="2016-05-09"
+	skin_test_order_entry_test_performed_technician="1" skin_test_order_entry_diluent_whealvalue="2" skin_test_order_entry_diluent_flarevalue="2"
+	skin_test_order_entry_diluent_grade="1+" skin_test_order_entry_diluent_erythema="true" skin_test_order_entry_diluent_pseudopodia="true"
+	skin_test_order_entry_histamine_whealvalue="2" skin_test_order_entry_histamine_flarevalue="2" skin_test_order_entry_histamine_grade="2+" 
+	skin_test_order_entry_histamine_erythema="false" skin_test_order_entry_histamine_pseudopodia="true" skin_test_order_entry_encounter_id="-1"
+	skin_test_order_entry_ordering_physician="1" skin_test_order_entry_ordering_location="2" skin_test_order_entry_billed_status="0"
+	skin_test_order_entry_created_by="1" skin_test_order_entry_created_on="2016-05-09 22:26:19"
+	skin_test_order_entry_modified_by="1" skin_test_order_entry_modified_on="2016-05-09 22:26:19"></skin_test_order_entry>
+	
+	<skin_test_order_details skin_test_order_details_id="100" skin_test_order_details_skin_test_order_entry_id="100" 
+	skin_test_order_details_allergen_id="2" skin_test_order_details_allergen_category_id="1" skin_test_order_details_result_value="1+"
+	skin_test_order_details_test_concentration="null" skin_test_order_details_test_date="2015-05-10" skin_test_order_details_whealvalue="2"
+	skin_test_order_details_flarevalue="2" skin_test_order_details_erythema="false" skin_test_order_details_pseudopodia="true"
+	skin_test_order_details_encounter_id="-1" skin_test_order_details_created_by="1" skin_test_order_details_created_on="2016-05-09 23:26:19"
+	skin_test_order_details_modified_by="1" skin_test_order_details_modified_on="2016-05-09 23:26:19"></skin_test_order_details>
+			
+</dataset>

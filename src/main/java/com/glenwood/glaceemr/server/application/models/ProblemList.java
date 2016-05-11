@@ -86,13 +86,15 @@ public class ProblemList {
 	@Column(name="problem_list_inactivated_by")
 	private Integer problemListInactivatedBy;
 
+	@Column(name="problem_list_coding_systemid")
+	private String problemListCodingSystemid;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="problem_list_coding_systemid",referencedColumnName="coding_system_oid",insertable=false,updatable=false)
 	CodingSystems codingSystems;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="problem_list_dx_code", referencedColumnName="flowsheet_dx_code", insertable=false, updatable=false)
 	@JsonBackReference
 	FlowsheetDx flowsheetDxTable;
@@ -264,6 +266,12 @@ public class ProblemList {
 	public void setProblemListInactivatedBy(Integer problemListInactivatedBy) {
 		this.problemListInactivatedBy = problemListInactivatedBy;
 	}
-	
+	public String getProblemListCodingSystemid() {
+		return problemListCodingSystemid;
+	}
+
+	public void setProblemListCodingSystemid(String problemListCodingSystemid) {
+		this.problemListCodingSystemid = problemListCodingSystemid;
+	}	
 	
 }
