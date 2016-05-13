@@ -22,6 +22,7 @@ import com.glenwood.glaceemr.server.application.models.skintests.ConcentrateGrou
 import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrder;
 import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrderEntry;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.DxAndPendingOrdersBean;
+import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestOrderBean;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestOrderDetailsSaveJSON;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestOrderEntrySaveJSON;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestOrderSaveJSON;
@@ -186,9 +187,9 @@ public class SkinTestingFormController {
 	@RequestMapping(value ="/saveSkinTestOrderDetails", method = RequestMethod.POST) 
 	@ResponseBody
 	public EMRResponseBean saveSkinTestOrderDetails(@RequestBody SkinTestOrderDetailsSaveJSON skinTestOrderDetailsSaveJSON) throws Exception {
-		SkinTestOrder skinTestOrder = skinTestingFormService.saveSkinTestOrderDetails(skinTestOrderDetailsSaveJSON);
+		SkinTestOrder skinTestOrder = skinTestingFormService.saveSkinTestOrderDetails(skinTestOrderDetailsSaveJSON,false);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
-		emrResponseBean.setData(skinTestOrder);
+		emrResponseBean.setData(skinTestingFormService.getSkinTestOrderDetails(skinTestOrder.getSkinTestOrderId()));
 		return emrResponseBean;
 	}
 	
@@ -216,7 +217,7 @@ public class SkinTestingFormController {
 	@RequestMapping(value ="/getSkinTestOrderDetails", method = RequestMethod.GET) 
 	@ResponseBody
 	public EMRResponseBean getSkinTestOrder(@RequestParam(value="orderId",required=false,defaultValue="")Integer orderId) throws Exception {
-		SkinTestOrder skinTestOrder = skinTestingFormService.getSkinTestOrderDetails(orderId);
+		SkinTestOrderBean skinTestOrder = skinTestingFormService.getSkinTestOrderDetails(orderId);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(skinTestOrder);
 		return emrResponseBean;

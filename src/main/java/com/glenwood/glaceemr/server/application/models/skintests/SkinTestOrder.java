@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -34,10 +35,10 @@ public class SkinTestOrder {
 	private Integer skinTestOrderId;
 
 	@Column(name="skin_test_order_patient_id")
-	private Long skinTestOrderPatientId;
+	private Integer skinTestOrderPatientId;
 	
 	@Column(name="skin_test_order_skin_test_form_shortcut_id")
-	private Long skinTestOrderSkinTestFormShortcutId;
+	private Integer skinTestOrderSkinTestFormShortcutId;
 	
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@Column(name="skin_test_order_start_date")
@@ -182,27 +183,27 @@ public class SkinTestOrder {
 	@JsonManagedReference
 	List<SkinTestOrderEntry> skinTestOrderEntries;
 	
-	@ManyToOne(cascade=CascadeType.ALL)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="skin_test_order_skin_test_form_shortcut_id",referencedColumnName="skin_test_form_shortcut_id",insertable=false,updatable=false)
 	@JsonManagedReference
 	SkinTestFormShortcut skinTestFormShortcut;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="skin_test_order_technician",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
 	@JsonManagedReference
 	EmployeeProfile technician;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="skin_test_order_ordering_physician",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
 	@JsonManagedReference
 	EmployeeProfile orderingPhysician;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="skin_test_order_reviewed_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
 	@JsonManagedReference
 	EmployeeProfile reviewedBy;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="skin_test_order_completed_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
 	@JsonManagedReference
 	EmployeeProfile completedBy;
@@ -215,20 +216,20 @@ public class SkinTestOrder {
 		this.skinTestOrderId = skinTestOrderId;
 	}
 
-	public Long getSkinTestOrderPatientId() {
+	public Integer getSkinTestOrderPatientId() {
 		return skinTestOrderPatientId;
 	}
 
-	public void setSkinTestOrderPatientId(Long skinTestOrderPatientId) {
+	public void setSkinTestOrderPatientId(Integer skinTestOrderPatientId) {
 		this.skinTestOrderPatientId = skinTestOrderPatientId;
 	}
 
-	public Long getSkinTestOrderSkinTestFormShortcutId() {
+	public Integer getSkinTestOrderSkinTestFormShortcutId() {
 		return skinTestOrderSkinTestFormShortcutId;
 	}
 
 	public void setSkinTestOrderSkinTestFormShortcutId(
-			Long skinTestOrderSkinTestFormShortcutId) {
+			Integer skinTestOrderSkinTestFormShortcutId) {
 		this.skinTestOrderSkinTestFormShortcutId = skinTestOrderSkinTestFormShortcutId;
 	}
 

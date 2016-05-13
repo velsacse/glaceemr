@@ -38,10 +38,6 @@ public class SkinTestOrderDetails {
 	@Column(name="skin_test_order_details_test_concentration")
 	private String skinTestOrderDetailsTestConcentration;
 
-	@JsonSerialize(using = JsonDateSerializer.class)
-	@Column(name="skin_test_order_details_test_date")
-	private Date skinTestOrderDetailsTestDate;
-
 	@Column(name="skin_test_order_details_skin_test_order_entry_id")
 	private Integer skinTestOrderDetailsSkinTestOrderEntryId;
 
@@ -180,15 +176,6 @@ public class SkinTestOrderDetails {
 
 	public void setSkinTestOrderDetailsEncounterId(Integer skinTestOrderDetailsEncounterId) {
 		this.skinTestOrderDetailsEncounterId = skinTestOrderDetailsEncounterId;
-	}
-
-	public Date getSkinTestOrderDetailsTestDate() {
-		return skinTestOrderDetailsTestDate;
-	}
-
-	public void setSkinTestOrderDetailsTestDate(
-			Date skinTestOrderDetailsTestDate) {
-		this.skinTestOrderDetailsTestDate = skinTestOrderDetailsTestDate;
 	}
 
 	public Integer getSkinTestOrderDetailsCreatedBy() {

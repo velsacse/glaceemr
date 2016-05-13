@@ -27,10 +27,15 @@ import com.glenwood.glaceemr.server.application.models.PosType;
 import com.glenwood.glaceemr.server.application.models.PosType_;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.ProblemList_;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrderAllergenCategory;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrderAllergenCategory_;
 import com.glenwood.glaceemr.server.application.models.skintests.SkinTestConcentration;
 import com.glenwood.glaceemr.server.application.models.skintests.SkinTestConcentration_;
 import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcut;
+import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcutAllergenDetails;
+import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcutAllergenDetails_;
 import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcutCategoryDetails;
+import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcutCategoryDetails_;
 import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcut_;
 import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrder_;
 import com.glenwood.glaceemr.server.application.models.skintests.ConcentrateGroup;
@@ -142,8 +147,6 @@ public class SkinTestingFormSpecification {
 				query.distinct(true);
 				Predicate result=cb.and(predicate,predicate1);
 				return result;
-
-
 			}
 		};
 
@@ -209,20 +212,38 @@ public class SkinTestingFormSpecification {
 		};
 	}
 	
-	public static Specification<SkinTestOrder> getSkinTestOrder(int orderId) {
+	public static Specification<SkinTestOrder> getSkinTestOrder(final int orderId) {
 		return new Specification<SkinTestOrder>() {
 
 			@Override
 			public Predicate toPredicate(Root<SkinTestOrder> root,
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
-				Join<SkinTestOrder, SkinTestFormShortcut> join1 = root.join(SkinTestOrder_.skinTestFormShortcut,JoinType.INNER);
-				Join<SkinTestFormShortcut,SkinTestFormShortcutCategoryDetails> join2 = join1.join(SkinTestFormShortcut_.skinTestFormShortcutCategoryDetails,JoinType.INNER);
-//				join2.on(skin)
+				Predicate finalPredicate = null;
+				Join<SkinTestOrder, SkinTestFormShortcut> orderJoin = root.join(SkinTestOrder_.skinTestFormShortcut,JoinType.INNER);
+				Join<SkinTestFormShortcut,SkinTestFormShortcutCategoryDetails> catJoin = orderJoin.join(SkinTestFormShortcut_.skinTestFormShortcutCategoryDetails,JoinType.INNER);
+				Join<SkinTestFormShortcutCategoryDetails,SkinTestFormShortcutAllergenDetails> alleJoin = catJoin.join(SkinTestFormShortcutCategoryDetails_.skinTestFormShortcutAllergenDetails,JoinType.INNER);
+				Predicate pred1 = cb.equal(alleJoin.get(SkinTestFormShortcutAllergenDetails_.skinTestFormShortcutAllergenDetailsCategoryDetailsId),catJoin.get(SkinTestFormShortcutCategoryDetails_.skinTestFormShortcutCategoryDetailsId));
+				Predicate pred2 = cb.equal(catJoin.get(SkinTestFormShortcutCategoryDetails_.skinTestFormShortcutCategoryDetailsShortcutId),orderJoin.get(SkinTestFormShortcut_.skinTestFormShortcutId));
+				Predicate pred3 = cb.equal(orderJoin.get(SkinTestFormShortcut_.skinTestFormShortcutId),root.get(SkinTestOrder_.skinTestOrderSkinTestFormShortcutId));
+				cq.where(pred1,pred2,pred3,cb.and(cb.equal(root.get(SkinTestOrder_.skinTestOrderId) ,orderId)));
+				cq.orderBy(cb.asc(catJoin.get(SkinTestFormShortcutCategoryDetails_.skinTestFormShortcutCategoryDetailsCategoryOrderId)),cb.asc(alleJoin.get(SkinTestFormShortcutAllergenDetails_.skinTestFormShortcutAllergenDetailsAllergenOrderId)));
 				return cq.getRestriction();
 			}
 		};
 	}
 
+	public static Specification<SkinTestOrderAllergenCategory> getSkinTestOrderAllergenCategories(final int orderId) {
+		return new Specification<SkinTestOrderAllergenCategory>() {
+
+			@Override
+			public Predicate toPredicate(Root<SkinTestOrderAllergenCategory> root,CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				Predicate orderPredicate = cb.equal(root.get(SkinTestOrderAllergenCategory_.skinTestOrderAllergenCategoryTestOrderId), orderId);	
+				return orderPredicate;
+			}
+			
+		};
+	}
+	
 	/*public static Specification<Doctorsign> getReviewedUserSignDetails(final int reviewedBy) {
 		return new Specification<Doctorsign>() {
 			

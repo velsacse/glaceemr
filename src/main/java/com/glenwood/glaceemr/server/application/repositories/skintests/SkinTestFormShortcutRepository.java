@@ -11,6 +11,6 @@ import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormSho
 
 @Repository
 public interface SkinTestFormShortcutRepository extends JpaRepository<SkinTestFormShortcut, Integer> ,JpaSpecificationExecutor<SkinTestFormShortcut> {
-	@Query("select current_timestamp() from Users pb where pb.userId=1")
+	@Query("select current_timestamp() from Users pb where 1=1")
 	   Timestamp findCurrentTimeStamp();
 }

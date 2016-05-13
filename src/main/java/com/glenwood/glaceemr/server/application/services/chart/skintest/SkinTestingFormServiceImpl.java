@@ -28,6 +28,8 @@ import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrderAllergen;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrderAllergenCategory;
 import com.glenwood.glaceemr.server.application.models.skintests.Concentrate;
 import com.glenwood.glaceemr.server.application.models.skintests.ConcentrateGroup;
 import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcut;
@@ -50,6 +52,8 @@ import com.glenwood.glaceemr.server.application.repositories.skintests.SkinTestC
 import com.glenwood.glaceemr.server.application.repositories.skintests.SkinTestFormShortcutAllergenDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.skintests.SkinTestFormShortcutCategoryDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.skintests.SkinTestFormShortcutRepository;
+import com.glenwood.glaceemr.server.application.repositories.skintests.SkinTestOrderAllergenCategoryRepository;
+import com.glenwood.glaceemr.server.application.repositories.skintests.SkinTestOrderAllergenRepository;
 import com.glenwood.glaceemr.server.application.repositories.skintests.SkinTestOrderDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.skintests.SkinTestOrderEntryRepository;
 import com.glenwood.glaceemr.server.application.repositories.skintests.SkinTestOrderRepository;
@@ -102,6 +106,10 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 	
 	@Autowired SkinTestConcentrationRepository skinTestConcentrationRepository;
 	
+	@Autowired SkinTestOrderAllergenCategoryRepository orderAllergenCategoryRepository;
+	
+	@Autowired SkinTestOrderAllergenRepository orderAllergenRepository;
+	
 	/**
 	 * To get all the allergens data
 	 */
@@ -149,6 +157,10 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 			formShortcutDetails.setSkinTestFormShortcutCategoryDetailsShortcutId(savedShortcut.getSkinTestFormShortcutId());
 			formShortcutDetails.setSkinTestFormShortcutCategoryDetailsAllergenCategoryId(categoryId);
 			formShortcutDetails.setSkinTestFormShortcutCategoryDetailsCategoryOrderId(categoryOrderId);
+			formShortcutDetails.setSkinTestFormShortcutCategoryDetailsCreatedOn(skinTestFormShortcutRepository.findCurrentTimeStamp());
+			formShortcutDetails.setSkinTestFormShortcutCategoryDetailsCreatedBy(loginId);
+			formShortcutDetails.setSkinTestFormShortcutCategoryDetailsModifiedOn(skinTestFormShortcutRepository.findCurrentTimeStamp());
+			formShortcutDetails.setSkinTestFormShortcutCategoryDetailsModifiedBy(loginId);
 			SkinTestFormShortcutCategoryDetails savedShortcutDetails = skinTestFormShortcutCategoryDetailsRepository.saveAndFlush(formShortcutDetails);
 			JSONArray temp = (JSONArray)obj.get(categoryId.toString());
 			
@@ -161,6 +173,10 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 				shortcutAllergenDetails.setSkinTestFormShortcutAllergenDetailsAllergenOrderId(allergenOrder);
 				shortcutAllergenDetails.setSkinTestFormShortcutAllergenDetailsCategoryDetailsId(savedShortcutDetails.getSkinTestFormShortcutCategoryDetailsId());
 				shortcutAllergenDetails.setSkinTestFormShortcutAllergenDetailsAllergenId(allergenId);
+				shortcutAllergenDetails.setSkinTestFormShortcutAllergenDetailsCreatedOn(skinTestFormShortcutRepository.findCurrentTimeStamp());
+				shortcutAllergenDetails.setSkinTestFormShortcutAllergenDetailsCreatedBy(loginId);
+				shortcutAllergenDetails.setSkinTestFormShortcutAllergenDetailsModifiedOn(skinTestFormShortcutRepository.findCurrentTimeStamp());
+				shortcutAllergenDetails.setSkinTestFormShortcutAllergenDetailsModifiedBy(loginId);
 				skinTestFormShortcutAllergenDetailsRepository.saveAndFlush(shortcutAllergenDetails);
 			}
 			
@@ -288,6 +304,8 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 			
 		}
 		for(SkinTestShortcutBean bean:skinTestShortcuts){
+//			System.out.println(bean.toString());
+			
 		}
 		return skinTestShortcuts;
 	}
@@ -310,6 +328,37 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 		return posList;
 	}
 	
+	public void saveShortcutForPatient(SkinTestOrderSaveJSON skinTestOrderSaveJSON,Integer orderId) {
+		SkinTestFormShortcut skinTestFormShortcut = skinTestFormShortcutRepository.findOne(skinTestOrderSaveJSON.getSkinTestShortcutId());
+		for(SkinTestFormShortcutCategoryDetails categoryDetails:skinTestFormShortcut.getSkinTestFormShortcutCategoryDetails()) {
+			SkinTestOrderAllergenCategory allergenCategory = new SkinTestOrderAllergenCategory();
+			allergenCategory.setSkinTestOrderAllergenCategoryConcentrateGroupId(categoryDetails.getSkinTestFormShortcutCategoryDetailsAllergenCategoryId());
+			allergenCategory.setSkinTestOrderAllergenCategoryConcentrateGroupOrderId(categoryDetails.getSkinTestFormShortcutCategoryDetailsCategoryOrderId());
+			allergenCategory.setSkinTestOrderAllergenCategoryConcentrateGroupName(concentrateGroupRepository.findOne(categoryDetails.getSkinTestFormShortcutCategoryDetailsAllergenCategoryId()).getConcentrateGroupName());
+			allergenCategory.setSkinTestOrderAllergenCategoryCreatedBy(skinTestOrderSaveJSON.getLoginId());
+			allergenCategory.setSkinTestOrderAllergenCategoryCreatedOn(skinTestFormShortcutRepository.findCurrentTimeStamp());
+			allergenCategory.setSkinTestOrderAllergenCategoryTestOrderId(orderId);
+			allergenCategory.setSkinTestOrderAllergenCategoryPatientId(Integer.parseInt(skinTestOrderSaveJSON.getPatientId()));
+			SkinTestOrderAllergenCategory savedCategory = orderAllergenCategoryRepository.saveAndFlush(allergenCategory);
+			for(SkinTestFormShortcutAllergenDetails allergenDetails :categoryDetails.getSkinTestFormShortcutAllergenDetails()) {
+				SkinTestOrderAllergen allergen = new SkinTestOrderAllergen();
+				allergen.setSkinTestOrderAllergenCategoryMapId(savedCategory.getSkinTestOrderAllergenCategoryId());
+				allergen.setSkinTestOrderAllergenConcentrateId(allergenDetails.getSkinTestFormShortcutAllergenDetailsAllergenId());
+				allergen.setSkinTestOrderAllergenConcentrateOrderId(allergenDetails.getSkinTestFormShortcutAllergenDetailsAllergenOrderId());
+				allergen.setSkinTestOrderAllergenConcentrateName(concentrateRepository.findOne(allergenDetails.getSkinTestFormShortcutAllergenDetailsAllergenId()).getConcentrateName());
+				allergen.setIsIntradermalNeeded(concentrateRepository.findOne(allergenDetails.getSkinTestFormShortcutAllergenDetailsAllergenId()).getIsIntradermalNeeded());
+				allergen.setSkinTestOrderAllergenCreatedBy(skinTestOrderSaveJSON.getLoginId());
+				allergen.setSkinTestOrderAllergenCreatedOn(skinTestFormShortcutRepository.findCurrentTimeStamp());
+				allergen.setSkinTestOrderAllergenPatientId(Integer.parseInt(skinTestOrderSaveJSON.getPatientId()));
+				orderAllergenRepository.saveAndFlush(allergen);
+			}
+		}
+	}
+	
+	public void getShortcutForPatient() {
+		
+	}
+	
 	/**
 	 * To save a skin test order for a patient
 	 */
@@ -327,9 +376,9 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 				e.printStackTrace();
 			}
 			SkinTestOrder skinTestOrder = new SkinTestOrder();
-			skinTestOrder.setSkinTestOrderPatientId(Long.parseLong(skinTestOrderSaveJSON.getPatientId().toString()));
+			skinTestOrder.setSkinTestOrderPatientId(Integer.parseInt(skinTestOrderSaveJSON.getPatientId().toString()));
 			skinTestOrder.setSkinTestOrderEncounterId(Integer.parseInt(skinTestOrderSaveJSON.getEncounterId().toString()));
-			skinTestOrder.setSkinTestOrderSkinTestFormShortcutId(Long.parseLong(skinTestOrderSaveJSON.getSkinTestShortcutId().toString()));
+			skinTestOrder.setSkinTestOrderSkinTestFormShortcutId(Integer.parseInt(skinTestOrderSaveJSON.getSkinTestShortcutId().toString()));
 			skinTestOrder.setSkinTestOrderCreatedOn(skinTestOrderRepository.findCurrentTimeStamp());
 			skinTestOrder.setSkinTestOrderLastModifiedOn(skinTestOrderRepository.findCurrentTimeStamp());
 			skinTestOrder.setSkinTestOrderStatus(skinTestOrderSaveJSON.getStatus());
@@ -367,6 +416,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 			skinTestOrder.setSkinTestOrderOrderingLocation(skinTestOrderSaveJSON.getPos());
 			skinTestOrder.setSkinTestOrderNotes(skinTestOrderSaveJSON.getOrderNotes());
 			orderId = skinTestOrderRepository.saveAndFlush(skinTestOrder).getSkinTestOrderId();
+			saveShortcutForPatient(skinTestOrderSaveJSON,orderId);
 			List<String> concentrationsList = skinTestOrderSaveJSON.getConcentrationList();
 			SkinTestOrderEntrySaveJSON entrySaveJSON = new SkinTestOrderEntrySaveJSON();
 			entrySaveJSON.setOrderId(orderId);
@@ -454,35 +504,61 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 			skinTestOrderEntry.setSkinTestOrderEntryConcentration(skinTestOrderEntrySaveJSON.getConcentration());
 		}
 		SkinTestOrderEntry entry = skinTestOrderEntryRepository.saveAndFlush(skinTestOrderEntry);
-		return entry;
+		SkinTestOrderDetailsSaveJSON skinTestOrderDetailsSaveJSON = new SkinTestOrderDetailsSaveJSON();
+		skinTestOrderDetailsSaveJSON.setOrderId(entry.getSkinTestOrderEntrySkinTestOrderId());
+		skinTestOrderDetailsSaveJSON.setOrderEntryId(entry.getSkinTestOrderEntryId());
+		skinTestOrderDetailsSaveJSON.setLoginId(skinTestOrderEntrySaveJSON.getLoginId());
+		skinTestOrderDetailsSaveJSON.setEncounterId(skinTestOrderEntrySaveJSON.getEncounterId());
+		List<SkinTestResultJSON> results = new ArrayList<SkinTestResultJSON>();
+		SkinTestFormShortcut formShortcut = skinTestFormShortcutRepository.findOne(skinTestOrderRepository.findOne(skinTestOrderEntrySaveJSON.getOrderId()).getSkinTestOrderSkinTestFormShortcutId());
+		for(SkinTestFormShortcutCategoryDetails categoryDetails:formShortcut.getSkinTestFormShortcutCategoryDetails()) {
+			for(SkinTestFormShortcutAllergenDetails shortcutAllergenDetails:categoryDetails.getSkinTestFormShortcutAllergenDetails()) {
+				SkinTestResultJSON skinTestResultJSON = new SkinTestResultJSON();
+				skinTestResultJSON.setOrderDetailId(-1);
+				skinTestResultJSON.setAllergenId(shortcutAllergenDetails.getSkinTestFormShortcutAllergenDetailsAllergenId());
+				SkinTestResult skinTestResult = new SkinTestResult();
+				skinTestResult.setconcentrateGroupId(categoryDetails.getSkinTestFormShortcutCategoryDetailsAllergenCategoryId());
+				skinTestResult.setErythema(null);
+				skinTestResult.setFlare(null);
+				skinTestResult.setGrade(null);
+				skinTestResult.setPseudopodia(null);
+				skinTestResult.setWheal(null);
+				skinTestResultJSON.setResult(skinTestResult);
+				results.add(skinTestResultJSON);	
+			}
+		}
+		skinTestOrderDetailsSaveJSON.setResults(results);
+		SkinTestOrder order = saveSkinTestOrderDetails(skinTestOrderDetailsSaveJSON, true);
+		return skinTestOrderEntryRepository.findOne(entry.getSkinTestOrderEntryId());
 	}
 	
 	/**
 	 * To save recorded allergen results in the detail level
 	 */
 	@Override
-	public SkinTestOrder saveSkinTestOrderDetails(SkinTestOrderDetailsSaveJSON skinTestOrderDetailsSaveJSON) throws Exception {
+	public SkinTestOrder saveSkinTestOrderDetails(SkinTestOrderDetailsSaveJSON skinTestOrderDetailsSaveJSON,boolean detailPrimarySave) throws Exception {
 		int orderId;
 		try {
 			orderId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(skinTestOrderDetailsSaveJSON.getOrderId().toString())).or("-1"));
 			int orderEntryId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(skinTestOrderDetailsSaveJSON.getOrderEntryId().toString())).or("-1"));
-			SkinTestOrderEntry skinTestOrderEntry = skinTestOrderEntryRepository.findOne(orderEntryId);
-			skinTestOrderEntry.setSkinTestOrderEntryModifiedBy(skinTestOrderDetailsSaveJSON.getLoginId());
-			skinTestOrderEntry.setSkinTestOrderEntryModifiedOn(skinTestOrderRepository.findCurrentTimeStamp());
-			skinTestOrderEntry.setSkinTestOrderEntryNoOfUnits(skinTestOrderDetailsSaveJSON.getUnits());
-			skinTestOrderEntry.setSkinTestOrderEntryBilledStatus(skinTestOrderDetailsSaveJSON.getBilledStatus());
-			skinTestOrderEntry.setSkinTestOrderEntryDiluentWhealvalue(skinTestOrderDetailsSaveJSON.getDiluentWhealValue());
-			skinTestOrderEntry.setSkinTestOrderEntryDiluentFlarevalue(skinTestOrderDetailsSaveJSON.getDiluentFlareValue());
-			skinTestOrderEntry.setSkinTestOrderEntryDiluentGrade(skinTestOrderDetailsSaveJSON.getDiluentGrade());
-			skinTestOrderEntry.setSkinTestOrderEntryDiluentErythema(skinTestOrderDetailsSaveJSON.getDiluentErythema());
-			skinTestOrderEntry.setSkinTestOrderEntryDiluentPseudopodia(skinTestOrderDetailsSaveJSON.getDiluentPseudopodia());
-			skinTestOrderEntry.setSkinTestOrderEntryHistamineWhealvalue(skinTestOrderDetailsSaveJSON.getHistamineWhealValue());
-			skinTestOrderEntry.setSkinTestOrderEntryHistamineFlarevalue(skinTestOrderDetailsSaveJSON.getHistamineFlareValue());
-			skinTestOrderEntry.setSkinTestOrderEntryHistamineGrade(skinTestOrderDetailsSaveJSON.getHistamineGrade());
-			skinTestOrderEntry.setSkinTestOrderEntryHistamineErythema(skinTestOrderDetailsSaveJSON.getHistamineErythema());
-			skinTestOrderEntry.setSkinTestOrderEntryHistaminePseudopodia(skinTestOrderDetailsSaveJSON.getHistaminePseudopodia());
-			
-			int skinTestOrderEntryId = skinTestOrderEntryRepository.saveAndFlush(skinTestOrderEntry).getSkinTestOrderEntryId();
+			if(!detailPrimarySave) {
+				SkinTestOrderEntry skinTestOrderEntry = skinTestOrderEntryRepository.findOne(orderEntryId);
+				skinTestOrderEntry.setSkinTestOrderEntryModifiedBy(skinTestOrderDetailsSaveJSON.getLoginId());
+				skinTestOrderEntry.setSkinTestOrderEntryModifiedOn(skinTestOrderRepository.findCurrentTimeStamp());
+				skinTestOrderEntry.setSkinTestOrderEntryNoOfUnits(skinTestOrderDetailsSaveJSON.getUnits());
+				skinTestOrderEntry.setSkinTestOrderEntryBilledStatus(skinTestOrderDetailsSaveJSON.getBilledStatus());
+				skinTestOrderEntry.setSkinTestOrderEntryDiluentWhealvalue(skinTestOrderDetailsSaveJSON.getDiluentWhealValue());
+				skinTestOrderEntry.setSkinTestOrderEntryDiluentFlarevalue(skinTestOrderDetailsSaveJSON.getDiluentFlareValue());
+				skinTestOrderEntry.setSkinTestOrderEntryDiluentGrade(skinTestOrderDetailsSaveJSON.getDiluentGrade());
+				skinTestOrderEntry.setSkinTestOrderEntryDiluentErythema(skinTestOrderDetailsSaveJSON.getDiluentErythema());
+				skinTestOrderEntry.setSkinTestOrderEntryDiluentPseudopodia(skinTestOrderDetailsSaveJSON.getDiluentPseudopodia());
+				skinTestOrderEntry.setSkinTestOrderEntryHistamineWhealvalue(skinTestOrderDetailsSaveJSON.getHistamineWhealValue());
+				skinTestOrderEntry.setSkinTestOrderEntryHistamineFlarevalue(skinTestOrderDetailsSaveJSON.getHistamineFlareValue());
+				skinTestOrderEntry.setSkinTestOrderEntryHistamineGrade(skinTestOrderDetailsSaveJSON.getHistamineGrade());
+				skinTestOrderEntry.setSkinTestOrderEntryHistamineErythema(skinTestOrderDetailsSaveJSON.getHistamineErythema());
+				skinTestOrderEntry.setSkinTestOrderEntryHistaminePseudopodia(skinTestOrderDetailsSaveJSON.getHistaminePseudopodia());
+				orderEntryId = skinTestOrderEntryRepository.saveAndFlush(skinTestOrderEntry).getSkinTestOrderEntryId();
+			}
 			for(SkinTestResultJSON skinTestResultJSON: skinTestOrderDetailsSaveJSON.getResults()) {
 				int skinTestOrderDetailsId = skinTestResultJSON.getOrderDetailId();
 				
@@ -500,8 +576,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 				skinTestOrderDetails.setSkinTestOrderDetailsAllergenId(allergenId);
 				skinTestOrderDetails.setSkinTestOrderDetailsResultValue(skinTestResult.getGrade());
 				skinTestOrderDetails.setSkinTestOrderDetailsAllergenCategoryId(skinTestResult.getconcentrateGroupId());
-				skinTestOrderDetails.setSkinTestOrderDetailsTestDate(skinTestOrderDetailsSaveJSON.getTestDate());
-				skinTestOrderDetails.setSkinTestOrderDetailsSkinTestOrderEntryId(skinTestOrderEntryId);
+				skinTestOrderDetails.setSkinTestOrderDetailsSkinTestOrderEntryId(orderEntryId);
 				skinTestOrderDetails.setSkinTestOrderDetailsWhealvalue(skinTestResult.getWheal());
 				skinTestOrderDetails.setSkinTestOrderDetailsFlarevalue(skinTestResult.getFlare());
 				skinTestOrderDetails.setSkinTestOrderDetailsErythema(skinTestResult.isErythema());
@@ -511,10 +586,12 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 				skinTestOrderDetailsRepository.saveAndFlush(skinTestOrderDetails);
 			}
 			SkinTestOrder skinTestOrder = skinTestOrderRepository.findOne(orderId);
-			for(SkinTestOrderEntry orderEntry:skinTestOrder.getSkinTestOrderEntries()) {
+			/*for(SkinTestOrderEntry orderEntry:skinTestOrder.getSkinTestOrderEntries()) {
+				System.out.println(">>"+orderEntry.getSkinTestOrderEntryConcentration());
 				for(SkinTestOrderDetails orderDetails: orderEntry.getSkinTestOrderDetails()) {
+					
 				}
-			}
+			}*/
 			return skinTestOrder;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -602,8 +679,8 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 		List<SkinTestOrder> skinTestOrders = skinTestOrderRepository.findAll(SkinTestingFormSpecification.getSkinTestOrders(patientId));
 		for(SkinTestOrder order:skinTestOrders) {
 			order.getOrderStatus();
-			order.getSkinTestFormShortcut();
-			order.getTechnician();
+			order.getSkinTestFormShortcut().getSkinTestFormShortcutName();
+			order.getOrderingPhysician().getEmpProfileFullname();
 		}
 		return skinTestOrders;
 	}
@@ -612,18 +689,33 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 	 * To get the all details of an order
 	 */
 	@Override
-	public SkinTestOrder getSkinTestOrderDetails(Integer orderId) {
-		SkinTestOrder skinTestOrder = skinTestOrderRepository.findOne(orderId);
-		for (SkinTestFormShortcutCategoryDetails categoryDetails:skinTestOrder.getSkinTestFormShortcut().getSkinTestFormShortcutCategoryDetails()) {
+	public SkinTestOrderBean getSkinTestOrderDetails(Integer orderId) {
+		SkinTestOrder skinTestOrder = skinTestOrderRepository.findOne(SkinTestingFormSpecification.getSkinTestOrder(orderId));
+		skinTestOrder.getSkinTestFormShortcut().getSkinTestFormShortcutName();
+		/*for (SkinTestFormShortcutCategoryDetails categoryDetails:skinTestOrder.getSkinTestFormShortcut().getSkinTestFormShortcutCategoryDetails()) {
 			for(SkinTestFormShortcutAllergenDetails allergenDetails: categoryDetails.getSkinTestFormShortcutAllergenDetails()) {
 				allergenDetails.getSkinTestFormShortcutAllergenDetailsAllergenId();
 			}
-		}
+		}*/
 		for(SkinTestOrderEntry orderEntry:skinTestOrder.getSkinTestOrderEntries()) {
 			for(SkinTestOrderDetails orderDetails: orderEntry.getSkinTestOrderDetails()) {
 			}
 		}
-		return skinTestOrder;
+		SkinTestOrderBean orderBean = new SkinTestOrderBean();
+		orderBean.setSkinTestOrder(skinTestOrder);
+		SkinTestOrderShortCutBean orderShortCutBean = new SkinTestOrderShortCutBean();
+		orderShortCutBean.setOrderId(skinTestOrder.getSkinTestOrderId());
+		List<SkinTestOrderAllergenCategory> orderAllergenCategories = orderAllergenCategoryRepository.findAll(SkinTestingFormSpecification.getSkinTestOrderAllergenCategories(orderId));
+		for(SkinTestOrderAllergenCategory category:orderAllergenCategories) {
+			System.out.println(">>>>>>>>>>"+category.getSkinTestOrderAllergenCategoryConcentrateGroupName());
+			for(SkinTestOrderAllergen allergen: category.getSkinTestOrderAllergens()){
+				allergen.getSkinTestOrderAllergenConcentrateName(); 
+			}
+		}
+		
+		orderShortCutBean.setAllergenCategories(orderAllergenCategories);
+		orderBean.setShortcutBean(orderShortCutBean);
+		return orderBean;
 	}
 
 	/**

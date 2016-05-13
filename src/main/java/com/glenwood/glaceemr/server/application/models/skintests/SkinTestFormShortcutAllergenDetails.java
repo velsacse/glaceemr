@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.models.skintests;
 
+import java.sql.Timestamp;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +15,8 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "skin_test_form_shortcut_allergen_details")
@@ -35,6 +39,20 @@ public class SkinTestFormShortcutAllergenDetails {
 
 	@Column(name="skin_test_form_shortcut_allergen_details_allergen_order_id")
 	private Integer skinTestFormShortcutAllergenDetailsAllergenOrderId;
+	
+	@JsonSerialize(using = JsonTimestampSerializer.class)
+	@Column(name="skin_test_form_shortcut_allergen_details_created_on")
+	private Timestamp skinTestFormShortcutAllergenDetailsCreatedOn;
+	
+	@Column(name="skin_test_form_shortcut_allergen_details_created_by")
+	private Integer skinTestFormShortcutAllergenDetailsCreatedBy;
+	
+	@JsonSerialize(using = JsonTimestampSerializer.class)
+	@Column(name="skin_test_form_shortcut_allergen_details_modified_on")
+	private Timestamp skinTestFormShortcutAllergenDetailsModifiedOn;
+	
+	@Column(name="skin_test_form_shortcut_allergen_details_modified_by")
+	private Integer skinTestFormShortcutAllergenDetailsModifiedBy;
 		
 	@ManyToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name="skin_test_form_shortcut_allergen_details_allergen_id",referencedColumnName="concentrate_id",insertable=false,updatable=false)
@@ -89,6 +107,42 @@ public class SkinTestFormShortcutAllergenDetails {
 	public void setSkinTestFormShortcutAllergenDetailsAllergenOrderId(
 			Integer skinTestFormShortcutAllergenDetailsAllergenOrderId) {
 		this.skinTestFormShortcutAllergenDetailsAllergenOrderId = skinTestFormShortcutAllergenDetailsAllergenOrderId;
+	}
+
+	public Timestamp getSkinTestFormShortcutAllergenDetailsCreatedOn() {
+		return skinTestFormShortcutAllergenDetailsCreatedOn;
+	}
+
+	public void setSkinTestFormShortcutAllergenDetailsCreatedOn(
+			Timestamp skinTestFormShortcutAllergenDetailsCreatedOn) {
+		this.skinTestFormShortcutAllergenDetailsCreatedOn = skinTestFormShortcutAllergenDetailsCreatedOn;
+	}
+
+	public Integer getSkinTestFormShortcutAllergenDetailsCreatedBy() {
+		return skinTestFormShortcutAllergenDetailsCreatedBy;
+	}
+
+	public void setSkinTestFormShortcutAllergenDetailsCreatedBy(
+			Integer skinTestFormShortcutAllergenDetailsCreatedBy) {
+		this.skinTestFormShortcutAllergenDetailsCreatedBy = skinTestFormShortcutAllergenDetailsCreatedBy;
+	}
+
+	public Timestamp getSkinTestFormShortcutAllergenDetailsModifiedOn() {
+		return skinTestFormShortcutAllergenDetailsModifiedOn;
+	}
+
+	public void setSkinTestFormShortcutAllergenDetailsModifiedOn(
+			Timestamp skinTestFormShortcutAllergenDetailsModifiedOn) {
+		this.skinTestFormShortcutAllergenDetailsModifiedOn = skinTestFormShortcutAllergenDetailsModifiedOn;
+	}
+
+	public Integer getSkinTestFormShortcutAllergenDetailsModifiedBy() {
+		return skinTestFormShortcutAllergenDetailsModifiedBy;
+	}
+
+	public void setSkinTestFormShortcutAllergenDetailsModifiedBy(
+			Integer skinTestFormShortcutAllergenDetailsModifiedBy) {
+		this.skinTestFormShortcutAllergenDetailsModifiedBy = skinTestFormShortcutAllergenDetailsModifiedBy;
 	}
 
 	public Concentrate getConcentrate() {

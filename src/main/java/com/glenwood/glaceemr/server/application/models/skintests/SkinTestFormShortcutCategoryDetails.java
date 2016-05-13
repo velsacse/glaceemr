@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models.skintests;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -16,6 +17,8 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "skin_test_form_shortcut_category_details")
@@ -35,6 +38,20 @@ public class SkinTestFormShortcutCategoryDetails {
 
 	@Column(name="skin_test_form_shortcut_category_details_category_order_id")
 	private Integer skinTestFormShortcutCategoryDetailsCategoryOrderId;
+	
+	@JsonSerialize(using = JsonTimestampSerializer.class)
+	@Column(name="skin_test_form_shortcut_category_details_created_on")
+	private Timestamp skinTestFormShortcutCategoryDetailsCreatedOn;
+	
+	@Column(name="skin_test_form_shortcut_category_details_created_by")
+	private Integer skinTestFormShortcutCategoryDetailsCreatedBy;
+	
+	@JsonSerialize(using = JsonTimestampSerializer.class)
+	@Column(name="skin_test_form_shortcut_category_details_modified_on")
+	private Timestamp skinTestFormShortcutCategoryDetailsModifiedOn;
+	
+	@Column(name="skin_test_form_shortcut_category_details_modified_by")
+	private Integer skinTestFormShortcutCategoryDetailsModifiedBy;
 
 	@ManyToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name="skin_test_form_shortcut_category_details_allergen_category_id",referencedColumnName="concentrate_group_id",insertable=false,updatable=false)
@@ -84,6 +101,42 @@ public class SkinTestFormShortcutCategoryDetails {
 	public void setSkinTestFormShortcutCategoryDetailsCategoryOrderId(
 			Integer skinTestFormShortcutCategoryDetailsCategoryOrderId) {
 		this.skinTestFormShortcutCategoryDetailsCategoryOrderId = skinTestFormShortcutCategoryDetailsCategoryOrderId;
+	}
+	
+	public Timestamp getSkinTestFormShortcutCategoryDetailsCreatedOn() {
+		return skinTestFormShortcutCategoryDetailsCreatedOn;
+	}
+
+	public void setSkinTestFormShortcutCategoryDetailsCreatedOn(
+			Timestamp skinTestFormShortcutCategoryDetailsCreatedOn) {
+		this.skinTestFormShortcutCategoryDetailsCreatedOn = skinTestFormShortcutCategoryDetailsCreatedOn;
+	}
+
+	public Integer getSkinTestFormShortcutCategoryDetailsCreatedBy() {
+		return skinTestFormShortcutCategoryDetailsCreatedBy;
+	}
+
+	public void setSkinTestFormShortcutCategoryDetailsCreatedBy(
+			Integer skinTestFormShortcutCategoryDetailsCreatedBy) {
+		this.skinTestFormShortcutCategoryDetailsCreatedBy = skinTestFormShortcutCategoryDetailsCreatedBy;
+	}
+
+	public Timestamp getSkinTestFormShortcutCategoryDetailsModifiedOn() {
+		return skinTestFormShortcutCategoryDetailsModifiedOn;
+	}
+
+	public void setSkinTestFormShortcutCategoryDetailsModifiedOn(
+			Timestamp skinTestFormShortcutCategoryDetailsModifiedOn) {
+		this.skinTestFormShortcutCategoryDetailsModifiedOn = skinTestFormShortcutCategoryDetailsModifiedOn;
+	}
+
+	public Integer getSkinTestFormShortcutCategoryDetailsModifiedBy() {
+		return skinTestFormShortcutCategoryDetailsModifiedBy;
+	}
+
+	public void setSkinTestFormShortcutCategoryDetailsModifiedBy(
+			Integer skinTestFormShortcutCategoryDetailsModifiedBy) {
+		this.skinTestFormShortcutCategoryDetailsModifiedBy = skinTestFormShortcutCategoryDetailsModifiedBy;
 	}
 
 	public SkinTestFormShortcut getSkinTestFormShortcut() {

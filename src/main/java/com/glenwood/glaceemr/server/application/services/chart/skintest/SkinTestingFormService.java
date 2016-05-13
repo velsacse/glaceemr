@@ -29,11 +29,11 @@ public interface SkinTestingFormService {
 	
 	public SkinTestOrderEntry saveSkinTestOrderEntry(SkinTestOrderEntrySaveJSON skinTestOrderEntrySaveJSON) throws Exception;
 	
-	public SkinTestOrder saveSkinTestOrderDetails(SkinTestOrderDetailsSaveJSON skinTestOrderDetailsSaveJSON) throws Exception;
+	public SkinTestOrder saveSkinTestOrderDetails(SkinTestOrderDetailsSaveJSON skinTestOrderDetailsSaveJSON,boolean primarySave) throws Exception;
 	
 	public List<SkinTestOrder> getSkinTestOrders(Integer patientId);
 	
-	public SkinTestOrder getSkinTestOrderDetails(Integer orderId);
+	public SkinTestOrderBean getSkinTestOrderDetails(Integer orderId);
 	
 	public DxAndPendingOrdersBean getDxAndPendingOrders(Integer patientId, Integer encounterId,Integer chartId);
 	

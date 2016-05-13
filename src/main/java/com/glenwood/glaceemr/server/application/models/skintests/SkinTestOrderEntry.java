@@ -111,7 +111,7 @@ public class SkinTestOrderEntry {
 	@Column(name="skin_test_order_entry_billed_status")
 	private Integer skinTestOrderEntryBilledStatus; // 0-Not billed,1-Billed Modified,2-Billed
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY,cascade=CascadeType.ALL)
 	@JoinColumn(name="skin_test_order_entry_skin_test_order_id",referencedColumnName="skin_test_order_id",insertable=false,updatable=false)
 	@JsonBackReference
 	SkinTestOrder skinTestOrder;
