@@ -11,13 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalSystem;
+import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.RosElement;
+import com.glenwood.glaceemr.server.application.models.SoapElementDatalist;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsRepository;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalSystemRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsRepository;
 import com.glenwood.glaceemr.server.application.repositories.ROSElementRepository;
+import com.glenwood.glaceemr.server.application.repositories.ShortcutsRepository;
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.ClinicalConstants;
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.ClinicalDataBean;
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.ClinicalElementBean;
@@ -26,7 +29,10 @@ import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.PatientElementBean;
 import com.glenwood.glaceemr.server.application.specifications.PatientClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.ROSSpecification;
+import com.glenwood.glaceemr.server.application.specifications.ShortcutsSpecification;
 import com.glenwood.glaceemr.server.utils.HUtil;
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 
 @Service
 public class ROSServiceImpl implements ROSService {
@@ -58,17 +64,20 @@ public class ROSServiceImpl implements ROSService {
 	@Autowired
 	PatientDetailsBean patientDetailsBean;
 	
+	@Autowired
+	ShortcutsRepository shortcutsRepository;
+	
 	
 
 	@Override
-	public List<ROSSystemBean> getROSElements(String clientId,Integer patientId, Integer chartId,Integer encounterId, Integer templateId) {
+	public List<ROSSystemBean> getROSElements(String clientId,Integer patientId, Integer chartId,Integer encounterId, Integer templateId, Integer tabId) {
 
 		getROSElements(templateId);
 		setClinicalDataBean(patientId,encounterId,templateId,3,clientId);
-		return frameResponseBean();
+		return frameResponseBean(tabId);
 	}
 
-	private List<ROSSystemBean> frameResponseBean() {
+	private List<ROSSystemBean> frameResponseBean(Integer tabId) {
 		List<ROSSystemBean> responseROSBean=new ArrayList<ROSSystemBean>();
 		LinkedHashMap<Integer,ROSSystemBean> rosHashMap = rosBean.getROS();
 		Set<Entry<Integer,ROSSystemBean>> systemHashMap = rosHashMap.entrySet();
@@ -90,16 +99,23 @@ public class ROSServiceImpl implements ROSService {
 				elementGWId=rosElementBean.getElementGWID();
 				ClinicalElementBean ceBean = clinicalDataBean.getClinicalElements(elementGWId);
 				PatientElementBean patientElementBean=clinicalDataBean.getPatientElements(elementGWId);
+
 				if(ceBean!=null){
 					
 					if(patientElementBean!=null){
 						if(ceBean.getClinicalElementDataType() == ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_BOOLEAN){
-							systemElementsList.add(getROSElementBean(elementName,elementPrintText,elementGWId,ceBean.getClinicalElementDataType(),patientElementBean.getPatientClinicalElementBoolean().toString()));
+							String associatedGWId=rosElementBean.getAssociatedGWID();
+							PatientElementBean patientElementAssociatedBean=clinicalDataBean.getPatientElements(associatedGWId);
+							ROSElementAssociateBean associateBean=getROSElementAssociateBean("", associatedGWId, "", "2", patientElementAssociatedBean != null ? patientElementAssociatedBean.getPatientClinicalElementText() : "", getSoapElementDataList(tabId, "detailoption_"+associatedGWId+"_text"));
+							systemElementsList.add(getROSElementBean(elementName,elementPrintText,elementGWId,ceBean.getClinicalElementDataType(),patientElementBean.getPatientClinicalElementBoolean().toString(),associateBean));
 						}else{
-							systemElementsList.add(getROSElementBean(elementName,elementPrintText,elementGWId,ceBean.getClinicalElementDataType(),patientElementBean.getPatientClinicalElementText().toString()));
+							if(!elementName.equalsIgnoreCase("Element Notes")){
+								ROSElementAssociateBean associateBean=getROSElementAssociateBean(elementName, elementGWId, elementPrintText, ceBean.getClinicalElementDataType()+"", patientElementBean != null ? patientElementBean.getPatientClinicalElementText() : "", getSoapElementDataList(tabId, "element_"+elementGWId));
+								systemElementsList.add(getROSElementBean(elementName,elementPrintText,elementGWId,ceBean.getClinicalElementDataType(),patientElementBean.getPatientClinicalElementText().toString(),associateBean));
+							}
 						}
 					}else{
-						systemElementsList.add(getROSElementBean(elementName,elementPrintText,elementGWId,ceBean.getClinicalElementDataType(),""));
+						systemElementsList.add(getROSElementBean(elementName,elementPrintText,elementGWId,ceBean.getClinicalElementDataType(),"",null));
 					}
 				}
 			}
@@ -121,13 +137,14 @@ public class ROSServiceImpl implements ROSService {
 	}
 
 
-	public ROSElementBean getROSElementBean(String elementName,String elementPrintText,String elementGwid,Integer dataType,String value){
+	public ROSElementBean getROSElementBean(String elementName,String elementPrintText,String elementGwid,Integer dataType,String value, ROSElementAssociateBean associateBean){
 		ROSElementBean elementBean=new ROSElementBean();
 		elementBean.setElementName(elementName);
 		elementBean.setElementGWID(elementGwid);
 		elementBean.setElementPrintText(elementPrintText);
 		elementBean.setDataType(dataType);
 		elementBean.setValue(value);
+		elementBean.setAssociateElement(associateBean);
 		return elementBean;
 	}
 
@@ -159,6 +176,14 @@ public class ROSServiceImpl implements ROSService {
 			rosElementBean.setElementGWID(HUtil.Nz(rosList.getRosElementGwid(),"0000000000000000000"));
 			rosElementBean.setElementName(HUtil.Nz(rosList.getRosElementName(),"-1"));
 			rosElementBean.setElementPrintText(HUtil.Nz(rosList.getRosElementPrinttext(),"-1"));
+			String associateGwid = "0000000000000000000";
+			if(rosList.getClinicalTextMapping() != null){
+				List<ClinicalTextMapping> associateList = rosList.getClinicalTextMapping();
+				if(associateList != null && associateList.size()>0){
+					associateGwid = associateList.get(0).getClinicalTextMappingTextboxGwid();
+				}
+			}
+			rosElementBean.setAssociatedGWID(associateGwid);
 			rosBean.getROS().get(rosList.getRosElementSystemId()).getROSElements().add(rosElementBean);
 		}
 	}
@@ -176,4 +201,23 @@ public class ROSServiceImpl implements ROSService {
 
 	}
 
+	public List<SoapElementDatalist> getSoapElementDataList(Integer tabId, String elementId) {
+		tabId = Integer.parseInt(Optional.fromNullable(tabId+"").or("-1"));
+		elementId = Optional.fromNullable(Strings.emptyToNull(elementId.toString())).or("");
+		return shortcutsRepository.findAll(ShortcutsSpecification.fetchShortcuts(tabId, elementId.trim()));
+	}
+	
+	private ROSElementAssociateBean getROSElementAssociateBean(String elementName, String elementGWID, String elementPrintText, String elementType, String elementValue,
+			List<SoapElementDatalist> elementShortcuts) {
+		
+		ROSElementAssociateBean bean=new ROSElementAssociateBean();
+		bean.setElementName(elementName);
+		bean.setElementGWID(elementGWID);
+		bean.setElementPrintText(elementPrintText);
+		bean.setElementType(elementType);
+		bean.setElementValue(elementValue);
+		bean.setElementShortcuts(elementShortcuts);
+		
+		return bean;
+	}
 }

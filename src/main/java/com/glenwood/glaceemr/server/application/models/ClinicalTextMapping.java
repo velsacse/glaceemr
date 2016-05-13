@@ -41,6 +41,9 @@ public class ClinicalTextMapping {
 	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula = @JoinFormula(value = "split_part(clinical_text_mapping_associated_element,'#',1)", referencedColumnName = "history_element_gwid")) })
 	private HistoryElement historyElement1;
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "clinical_text_mapping_associated_element", referencedColumnName = "ros_element_gwid", insertable = false, updatable = false)
+	private RosElement rosElement;
 	
 	public HistoryElement getHistoryElement1() {
 		return historyElement1;
