@@ -31,13 +31,15 @@ public class ROSController {
 									   @RequestParam(value="chartId") Integer chartId,
 									   @RequestParam(value="encounterId") Integer encounterId,
 									   @RequestParam(value="templateId") Integer templateId,
-									   @RequestParam(value="clientId") String clientId) throws Exception{
+									   @RequestParam(value="clientId") String clientId,
+									   @RequestParam(value="tabId") Integer tabId) throws Exception{
 				
 		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 		chartId=Integer.parseInt(Optional.fromNullable(chartId+"").or("-1"));
 		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
 		templateId=Integer.parseInt(Optional.fromNullable(templateId+"").or("-1"));
-		return rosService.getROSElements(clientId,patientId,chartId,encounterId,templateId);
+		tabId=Integer.parseInt(Optional.fromNullable(tabId+"").or("-1"));
+		return rosService.getROSElements(clientId,patientId,chartId,encounterId,templateId,tabId);
 	}
 	
 	@RequestMapping(value="/ROSNotes",method=RequestMethod.GET)

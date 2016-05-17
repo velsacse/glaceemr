@@ -1,16 +1,20 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "ros_element")
-public class RosElement {
+public class RosElement implements Serializable{
+
+	
+	private static final long serialVersionUID = -4620663540752914167L;
 
 	@Id
 	@Column(name="ros_element_id")
@@ -96,4 +100,14 @@ public class RosElement {
 		this.rosElementIsactive = rosElementIsactive;
 	}
 	
+	@OneToMany(mappedBy="rosElement")
+	List<ClinicalTextMapping> clinicalTextMapping;
+
+	public List<ClinicalTextMapping> getClinicalTextMapping() {
+		return clinicalTextMapping;
+	}
+
+	public void setClinicalTextMapping(List<ClinicalTextMapping> clinicalTextMapping) {
+		this.clinicalTextMapping = clinicalTextMapping;
+	}
 }

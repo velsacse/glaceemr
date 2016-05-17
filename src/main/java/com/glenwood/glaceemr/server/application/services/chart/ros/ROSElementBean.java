@@ -8,7 +8,9 @@ public class ROSElementBean {
 	private String elementPrintText;
 	private Integer dataType;
 	private String value;
-	
+	private String associatedGWID;
+	private ROSElementAssociateBean associateElement;
+		
 	public Integer getDataType() {
 		return dataType;
 	}
@@ -48,5 +50,22 @@ public class ROSElementBean {
 	public void setElementPrintText(String elementPrintText) {
 		this.elementPrintText = elementPrintText;
 	}
+
+	public String getAssociatedGWID() {
+		return associatedGWID;
+	}
+
+	public void setAssociatedGWID(String associatedGWID) {
+		this.associatedGWID = associatedGWID;
+	}
+
+	public ROSElementAssociateBean getAssociateElement() {
+		return associateElement;
+	}
+
+	public void setAssociateElement(ROSElementAssociateBean associateElement) {
+		this.associateElement = associateElement;
+	}
+
 	
 }
