@@ -174,9 +174,9 @@ public class SkinTestingFormController {
 	@RequestMapping(value ="/saveSkinTestOrderEntry", method = RequestMethod.POST) 
 	@ResponseBody
 	public EMRResponseBean saveSkinTestOrderEntry(@RequestBody SkinTestOrderEntrySaveJSON skinTestOrderEntrySaveJSON) throws Exception {
-		SkinTestOrderEntry skinTestOrderEntry = skinTestingFormService.saveSkinTestOrderEntry(skinTestOrderEntrySaveJSON);
+		int entryId = skinTestingFormService.saveSkinTestOrderEntry(skinTestOrderEntrySaveJSON);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
-		emrResponseBean.setData(skinTestOrderEntry);
+		emrResponseBean.setData(skinTestingFormService.getSkinTestOrderEntry(entryId));
 		return emrResponseBean;
 	}
 	

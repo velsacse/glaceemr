@@ -79,7 +79,9 @@ public class SkinTestingFormSpecification {
 
 			@Override
 			public Predicate toPredicate(Root<EmployeeProfile> root,CriteriaQuery<?> cq, CriteriaBuilder cb) {
-				cq.where(root.get(EmployeeProfile_.empProfileGroupid).in("-1","-10"));
+				Predicate p1 = cb.and(root.get(EmployeeProfile_.empProfileGroupid).in("-1","-2","-3","-5","-6","-7","-10","-25"));
+				Predicate p2=cb.equal(root.get(EmployeeProfile_.empProfileIsActive), true);
+				cq.where(p1,p2);
 				return cq.getRestriction();
 			}
 		};

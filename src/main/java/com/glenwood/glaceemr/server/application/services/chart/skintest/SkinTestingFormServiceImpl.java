@@ -462,7 +462,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 	 * For Saving entry (Prick/intradermal) for an order
 	 */
 	@Override
-	public SkinTestOrderEntry saveSkinTestOrderEntry(SkinTestOrderEntrySaveJSON skinTestOrderEntrySaveJSON) throws Exception {
+	public int saveSkinTestOrderEntry(SkinTestOrderEntrySaveJSON skinTestOrderEntrySaveJSON) throws Exception {
 		SkinTestOrderEntry skinTestOrderEntry = new SkinTestOrderEntry();
 		skinTestOrderEntry.setSkinTestOrderEntrySkinTestOrderId(skinTestOrderEntrySaveJSON.getOrderId());
 		skinTestOrderEntry.setSkinTestOrderEntryEncounterId(Integer.parseInt(skinTestOrderEntrySaveJSON.getEncounterId()));
@@ -529,7 +529,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 		}
 		skinTestOrderDetailsSaveJSON.setResults(results);
 		SkinTestOrder order = saveSkinTestOrderDetails(skinTestOrderDetailsSaveJSON, true);
-		return skinTestOrderEntryRepository.findOne(entry.getSkinTestOrderEntryId());
+		return entry.getSkinTestOrderEntryId();
 	}
 	
 	/**
@@ -686,17 +686,28 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 	}
 	
 	/**
+	 * 
+	 */
+	@Override
+	public SkinTestOrderEntry getSkinTestOrderEntry(int entryId) {
+		SkinTestOrderEntry entry = skinTestOrderEntryRepository.findOne(entryId);
+		for(SkinTestOrderDetails details: entry.getSkinTestOrderDetails()) {
+			details.getSkinTestOrderDetailsAllergenId();
+		}
+		return entry;
+	}
+	
+	/**
 	 * To get the all details of an order
 	 */
 	@Override
 	public SkinTestOrderBean getSkinTestOrderDetails(Integer orderId) {
 		SkinTestOrder skinTestOrder = skinTestOrderRepository.findOne(SkinTestingFormSpecification.getSkinTestOrder(orderId));
 		skinTestOrder.getSkinTestFormShortcut().getSkinTestFormShortcutName();
-		/*for (SkinTestFormShortcutCategoryDetails categoryDetails:skinTestOrder.getSkinTestFormShortcut().getSkinTestFormShortcutCategoryDetails()) {
-			for(SkinTestFormShortcutAllergenDetails allergenDetails: categoryDetails.getSkinTestFormShortcutAllergenDetails()) {
-				allergenDetails.getSkinTestFormShortcutAllergenDetailsAllergenId();
-			}
-		}*/
+		if(skinTestOrder.getCompletedBy()!=null)
+			skinTestOrder.getCompletedBy().getEmpProfileFullname();
+		if(skinTestOrder.getReviewedBy()!=null)
+			skinTestOrder.getReviewedBy().getEmpProfileFullname();
 		for(SkinTestOrderEntry orderEntry:skinTestOrder.getSkinTestOrderEntries()) {
 			for(SkinTestOrderDetails orderDetails: orderEntry.getSkinTestOrderDetails()) {
 			}
@@ -707,7 +718,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 		orderShortCutBean.setOrderId(skinTestOrder.getSkinTestOrderId());
 		List<SkinTestOrderAllergenCategory> orderAllergenCategories = orderAllergenCategoryRepository.findAll(SkinTestingFormSpecification.getSkinTestOrderAllergenCategories(orderId));
 		for(SkinTestOrderAllergenCategory category:orderAllergenCategories) {
-			System.out.println(">>>>>>>>>>"+category.getSkinTestOrderAllergenCategoryConcentrateGroupName());
+			category.getSkinTestOrderAllergenCategoryConcentrateGroupName();
 			for(SkinTestOrderAllergen allergen: category.getSkinTestOrderAllergens()){
 				allergen.getSkinTestOrderAllergenConcentrateName(); 
 			}
