@@ -45,9 +45,6 @@ public class LabcompanyDetails {
 	@Column(name="labcompany_details_labloccode")
 	private String labcompanyDetailsLabloccode;
 
-	@Column(name="labcompany_details_sendingappln")
-	private String labcompanyDetailsSendingappln;
-
 	public Integer getLabcompanyDetailsId() {
 		return labcompanyDetailsId;
 	}
@@ -128,14 +125,5 @@ public class LabcompanyDetails {
 
 	public void setLabcompanyDetailsLabloccode(String labcompanyDetailsLabloccode) {
 		this.labcompanyDetailsLabloccode = labcompanyDetailsLabloccode;
-	}
-
-	public String getLabcompanyDetailsSendingappln() {
-		return labcompanyDetailsSendingappln;
-	}
-
-	public void setLabcompanyDetailsSendingappln(
-			String labcompanyDetailsSendingappln) {
-		this.labcompanyDetailsSendingappln = labcompanyDetailsSendingappln;
 	}
 }
