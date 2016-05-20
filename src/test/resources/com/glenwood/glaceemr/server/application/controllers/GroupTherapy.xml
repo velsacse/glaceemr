@@ -1,0 +1,6 @@
+<dataset>
+<pos_table pos_table_relation_id="1"   pos_table_place_id="1"   pos_table_pos_code="21"   pos_table_place_of_service="null"   pos_table_facility_comments="USA MEDICAL GROUP-Hp"   pos_table_is_active="true"   h555555="1"   pos_table_practice="Usa MedicalGroup"   pos_table_isdme="true"   pos_table_istransfirst_configured="false"></pos_table>
+<emp_profile emp_profile_empid="17"  emp_profile_loginid="1"  emp_profile_doctorid="1"  emp_profile_lname="test" emp_profile_mi="t"  emp_profile_fname="demo" emp_profile_fullname="demo t test" emp_profile_groupid="-1" emp_profile_is_active="true" ></emp_profile>
+<therapy_group therapy_group_id="1" therapy_group_is_active="true"></therapy_group>
+
+</dataset>
