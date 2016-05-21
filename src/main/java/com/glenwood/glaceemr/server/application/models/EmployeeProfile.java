@@ -485,4 +485,15 @@ public class EmployeeProfile {
 		this.empProfileCtpNumber = empProfileCtpNumber;
 	}
 
+	@OneToMany(mappedBy="empProfile")
+	public List<PatientReviewedDetails> patientReviewed;
+
+	public List<PatientReviewedDetails> getHistoryReviewed() {
+		return patientReviewed ;
+	}
+
+	public void setHistoryReviewed(List<PatientReviewedDetails> patientReviewed ) {
+		this.patientReviewed = patientReviewed ;
+	}
+	
 }
