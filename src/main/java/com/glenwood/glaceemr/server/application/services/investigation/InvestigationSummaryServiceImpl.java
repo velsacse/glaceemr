@@ -146,6 +146,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSe
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.ClinicalElementsService;
 import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
 import com.glenwood.glaceemr.server.application.specifications.ChartSpecification;
+import com.glenwood.glaceemr.server.application.specifications.EmployeeSpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
 import com.glenwood.glaceemr.server.application.specifications.InitialSettingsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.InvestigationSpecification;
@@ -1913,7 +1914,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	public void  savelab(String requesttosave,Integer encounterIdParam,Integer patientIdParam,Integer chartIdParam,
 			Integer userIdParam,String fullDataParam,String isforwardParam,String forwardto,
 			String ishighpriorityParam,String testidParam) throws Exception{
-		LoginUsers login=loginUsersRepository.findOne(LoginSpecfication.byUserId(userIdParam));
+		EmployeeProfile empProfile=empProfileRepository.findOne(EmployeeSpecification.getUserDetailsByUserId(userIdParam));
+		LoginUsers login=loginUsersRepository.findOne(LoginSpecfication.byUserId(empProfile.getEmpProfileLoginid()));
 		encounterId = encounterIdParam;
 		patientId   = patientIdParam;
 		chartId     = chartIdParam;
