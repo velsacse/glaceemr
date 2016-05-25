@@ -67,6 +67,27 @@ public class ClinicalElementsSpecification {
 	}
 	
 	/**
+	 * 
+	 *   Get Clinical element Details of given GWID
+	 * 
+	 * @param gwid
+	 * 
+	 */
+	
+	public static Specification<ClinicalElements> getActiveClinicalElement(final String gwid){
+
+		return new Specification<ClinicalElements>(){
+			@Override
+			public Predicate toPredicate(Root<ClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate isActive=cb.equal(root.get(ClinicalElements_.clinicalElementsIsactive),true);
+				Predicate isGwid=cb.equal(root.get(ClinicalElements_.clinicalElementsGwid),gwid);
+				return cb.and(isActive,isGwid);
+			}
+
+		};
+	}
+	
+	/**
 	 * Get clinical Element Options for the given GWID
 	 * 
 	 *  @param gwid

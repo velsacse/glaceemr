@@ -2186,18 +2186,22 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						}
 					} 
 				}else{
-					List<ClinicalElements> clinicalElements1=clinicalElementsRepository.findAll(Specifications.where(ClinicalElementsSpecification.getClinicalElement(hsh_notes.getFlowsheetClinicalParamMapElementgwid())));
-					clinicalElementBean = new FS_ClinicalElementBean();
-					performedDate="Never Documented";
-					if(!clinicalVitalParamDate.contains(performedDate))
-						clinicalVitalParamDate.add(performedDate);
-					String vitalName = Optional.fromNullable(clinicalElements1.get(0).getClinicalElementsName()).or("");
-					clinicalElementBean.setClinicalElementId(clinicalElements1.get(0).getClinicalElementsGwid());
-					clinicalElementBean.setClinicalElementName(vitalName);
-					clinicalElementBean.setClinicalElementValue("");
-					clinicalElementBean.setClinicalElementUnits("");
-					clinicalElementBean.setClinicalElementOn(performedDate);
-					arr_clinical.add(clinicalElementBean);
+					List<ClinicalElements> clinicalElements1=clinicalElementsRepository.findAll(Specifications.where(ClinicalElementsSpecification.getActiveClinicalElement(hsh_notes.getFlowsheetClinicalParamMapElementgwid())));
+					if(clinicalElements1!=null){
+						if(clinicalElements1.size()>0){
+							clinicalElementBean = new FS_ClinicalElementBean();
+							performedDate="Never Documented";
+							if(!clinicalVitalParamDate.contains(performedDate))
+								clinicalVitalParamDate.add(performedDate);
+							String vitalName = Optional.fromNullable(clinicalElements1.get(0).getClinicalElementsName()).or("");
+							clinicalElementBean.setClinicalElementId(clinicalElements1.get(0).getClinicalElementsGwid());
+							clinicalElementBean.setClinicalElementName(vitalName);
+							clinicalElementBean.setClinicalElementValue("");
+							clinicalElementBean.setClinicalElementUnits("");
+							clinicalElementBean.setClinicalElementOn(performedDate);
+							arr_clinical.add(clinicalElementBean);
+						}
+					}
 				}
 			} 
 			prevGwId = hsh_notes.getFlowsheetClinicalParamMapElementgwid();
