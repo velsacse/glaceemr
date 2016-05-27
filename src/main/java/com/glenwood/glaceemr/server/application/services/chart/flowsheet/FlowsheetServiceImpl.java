@@ -411,9 +411,13 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				};
 				cq.select(builder.selectCase().when(builder.isNull(root.get(ProblemList_.problemListOnsetDate)), builder.function("to_char", String.class, root.get(ProblemList_.problemListCreatedon),builder.literal("yyyy-MM-dd"))).otherwise(builder.function("to_char", String.class, root.get(ProblemList_.problemListOnsetDate), builder.literal("yyyy-MM-dd"))));
 				cq.where(restrictions1);
-				List<Object> rstList=em.createQuery(cq).getResultList();
-				if(rstList.size()>0)
-					startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
+				try{
+					List<Object> rstList=em.createQuery(cq).getResultList();
+					if(rstList.size()>0)
+						startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
+				}catch(Exception e){
+					
+				}
 			}else if(flowsheetType==3){
 				//Meaningful Use Measures
 				CriteriaBuilder builder = em.getCriteriaBuilder();
