@@ -2040,7 +2040,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				}
 				List<VitalsParameter> vitalsParameter=vitalsParameterRepository.findAll(VitalsSpecification.getUnitsForVitals(gwids));
 
-				ClinicalElements clinicalElements=clinicalElementsRepository.findOne(Specifications.where(ClinicalElementsSpecification.getClinicalElement(hsh_notes.getFlowsheetClinicalParamMapElementgwid())));
+				ClinicalElements clinicalElements=clinicalElementsRepository.findOne(Specifications.where(ClinicalElementsSpecification.getActiveClinicalElement(hsh_notes.getFlowsheetClinicalParamMapElementgwid())));
 				String[] gwIdOverride=new String[1];
 				if(clinicalElements==null)
 					continue;
@@ -2390,7 +2390,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					Encounter encounterEntityInner=Optional.fromNullable(encounterEntityRepository.findOne(EncounterEntitySpecification.EncounterById(Optional.fromNullable(patientClinicalElements.get(g).getPatientClinicalElementsEncounterid()).or(-1)))).or(new Encounter());
 					patientClinicalElements.get(g).setEncounter(encounterEntityInner);
 				}
-				ClinicalElements clinicalElements=clinicalElementsRepository.findOne(Specifications.where(ClinicalElementsSpecification.getClinicalElement(hsh_notes.getFlowsheetClinicalParamMapElementgwid())));
+				ClinicalElements clinicalElements=clinicalElementsRepository.findOne(Specifications.where(ClinicalElementsSpecification.getActiveClinicalElement(hsh_notes.getFlowsheetClinicalParamMapElementgwid())));
 				String[] gwIdOverride=new String[1];
 				if(clinicalElements==null)
 					continue;
@@ -2501,16 +2501,20 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						}
 					} 
 				}else{
-					List<ClinicalElements> clinicalElements1=clinicalElementsRepository.findAll(Specifications.where(ClinicalElementsSpecification.getClinicalElement(hsh_notes.getFlowsheetClinicalParamMapElementgwid())));
-					clinicalElementBean = new FS_ClinicalElementBean();
-					performedDate="Never Documented";
-					String vitalName = Optional.fromNullable(clinicalElements1.get(0).getClinicalElementsName()).or("");
-					clinicalElementBean.setClinicalElementId(clinicalElements1.get(0).getClinicalElementsGwid());
-					clinicalElementBean.setClinicalElementName(vitalName);
-					clinicalElementBean.setClinicalElementValue("");
-					clinicalElementBean.setClinicalElementUnits("");
-					clinicalElementBean.setClinicalElementOn(performedDate);
-					arr_clinical.add(clinicalElementBean);
+					List<ClinicalElements> clinicalElements1=clinicalElementsRepository.findAll(Specifications.where(ClinicalElementsSpecification.getActiveClinicalElement(hsh_notes.getFlowsheetClinicalParamMapElementgwid())));
+					if(clinicalElements1!=null){
+						if(clinicalElements1.size()>0){
+							clinicalElementBean = new FS_ClinicalElementBean();
+							performedDate="Never Documented";
+							String vitalName = Optional.fromNullable(clinicalElements1.get(0).getClinicalElementsName()).or("");
+							clinicalElementBean.setClinicalElementId(clinicalElements1.get(0).getClinicalElementsGwid());
+							clinicalElementBean.setClinicalElementName(vitalName);
+							clinicalElementBean.setClinicalElementValue("");
+							clinicalElementBean.setClinicalElementUnits("");
+							clinicalElementBean.setClinicalElementOn(performedDate);
+							arr_clinical.add(clinicalElementBean);
+						}
+					}
 				}
 			}
 		}
@@ -2848,7 +2852,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		List<FS_ClinicalElementOptionBean> cinicalElementOptionBeans=new ArrayList<FS_ClinicalElementOptionBean>();
 		String[] elementIdArr=gwIds.split("~");
 		for(int i=0;i<elementIdArr.length;i++){
-			ClinicalElements clinicalElements=clinicalElementsRepository.findOne(ClinicalElementsSpecification.getClinicalElement(elementIdArr[i]));
+			ClinicalElements clinicalElements=clinicalElementsRepository.findOne(ClinicalElementsSpecification.getActiveClinicalElement(elementIdArr[i]));
 			List<ClinicalElementsOptions> clinicalElementOptions=clinicalElementsOptionsRepository.findAll(ClinicalElementsSpecification.getclinicalElementOptions(elementIdArr[i]));
 			if(clinicalElementOptions.size()>0){
 				for(int j=0;j<clinicalElementOptions.size();j++){
@@ -3002,9 +3006,13 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					};
 					cq.select(builder.selectCase().when(builder.isNull(root.get(ProblemList_.problemListOnsetDate)), builder.function("to_char", String.class, root.get(ProblemList_.problemListCreatedon),builder.literal("yyyy-MM-dd"))).otherwise(builder.function("to_char", String.class, root.get(ProblemList_.problemListOnsetDate), builder.literal("yyyy-MM-dd"))));
 					cq.where(restrictions1);
-					List<Object> rstList=em.createQuery(cq).getResultList();
-					if(rstList.size()>0)
-						startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
+					try{
+						List<Object> rstList=em.createQuery(cq).getResultList();
+						if(rstList.size()>0)
+							startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
+					}catch(Exception e){
+						
+					}
 				}else if(flowsheetType==3){
 					//Meaningful Use Measures
 					CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -4232,9 +4240,13 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				};
 				cq.select(builder.selectCase().when(builder.isNull(root.get(ProblemList_.problemListOnsetDate)), builder.function("to_char", String.class, root.get(ProblemList_.problemListCreatedon),builder.literal("yyyy-MM-dd"))).otherwise(builder.function("to_char", String.class, root.get(ProblemList_.problemListOnsetDate), builder.literal("yyyy-MM-dd"))));
 				cq.where(restrictions1);
-				List<Object> rstList=em.createQuery(cq).getResultList();
-				if(rstList.size()>0)
-					startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
+				try{
+					List<Object> rstList=em.createQuery(cq).getResultList();
+					if(rstList.size()>0)
+						startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
+				}catch(Exception e){
+					
+				}
 			}else if(flowsheetType==3){
 				//Meaningful Use Measures
 				CriteriaBuilder builder = em.getCriteriaBuilder();
