@@ -200,7 +200,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 				results.setPatientId("-1");
 			} else {
 				PatientRegistration patReg = inboxData.getPatientRegistration();
-				if( patReg.getPatientRegistrationId() != null ) {
+				if( patReg != null ) {
 					results.setPatientId("" + patReg.getPatientRegistrationId());
 				} else {
 					results.setPatientId("-1");	
@@ -414,12 +414,20 @@ public class LabResultsServiceImpl implements LabResultsService {
 					}
 					unmapped.setMapStatus(unmappedResults.getHl7UnmappedresultsMapStatus());
 					unmapped.setResultStatus(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsResultStatus())).or(""));
+					String collectionDate = "";
+					String specimenDate = "";
 					if( labEntries.getLabEntriesSepcimenId() != -1 ) {
 						Specimen specimen = labEntries.getSpecimen();
 						if( specimen != null ) {
 							unmapped.setSpecimenSource(Optional.fromNullable(Strings.emptyToNull("" + specimen.getSpecimenSource())).or(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsSrcOfSpecimen())).or("")));
 							unmapped.setSpecimenCondition(Optional.fromNullable(Strings.emptyToNull("" + specimen.getSpecimenCondition())).or(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsCondOfSpecimen())).or("")));
-							unmapped.setSpecimenCollectedDate(Optional.fromNullable(Strings.emptyToNull("" + formatter.format(specimen.getSpecimenDate()))).or(Optional.fromNullable(Strings.emptyToNull("" + formatter.format(unmappedResults.getHl7UnmappedresultsSpecimenCollectedDate()))).or("")));
+							if( unmappedResults.getHl7UnmappedresultsSpecimenCollectedDate() != null ) {
+								collectionDate = formatter.format(unmappedResults.getHl7UnmappedresultsSpecimenCollectedDate());
+							}
+							if( specimen.getSpecimenDate() != null ) {
+								specimenDate = formatter.format(specimen.getSpecimenDate());
+							}
+							unmapped.setSpecimenCollectedDate(Optional.fromNullable(Strings.emptyToNull(specimenDate)).or(Optional.fromNullable(Strings.emptyToNull(collectionDate)).or("")));
 						} 
 					} else {
 						unmapped.setSpecimenSource(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsSrcOfSpecimen())).or(""));
