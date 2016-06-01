@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -45,7 +46,7 @@ public class PosTable {
 	@Column(name="pos_table_istransfirst_configured",columnDefinition="boolean default false")
 	private Boolean posTableIstransfirstConfigured;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="pos_table_pos_code", referencedColumnName="pos_type_type_id", insertable=false, updatable=false)
 	private PosType posType;

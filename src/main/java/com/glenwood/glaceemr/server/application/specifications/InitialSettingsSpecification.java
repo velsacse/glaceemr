@@ -66,4 +66,40 @@ public class InitialSettingsSpecification {
 			}
 		};
 	}
+	
+	/**
+	 * Specification to get the list based on type
+	 * @param id
+	 * @return Specification<InitialSettings>
+	 */
+	public static Specification<InitialSettings> optionType(final Integer type)
+	{
+		return new Specification<InitialSettings>() {
+
+			@Override
+			public Predicate toPredicate(Root<InitialSettings> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate optionId = cb.equal(root.get(InitialSettings_.initialSettingsOptionType),type);
+				return optionId;
+			}
+		};
+	}
+	
+	/**
+	 * Specification to get the list based on visible
+	 * @param id
+	 * @return Specification<InitialSettings>
+	 */
+	public static Specification<InitialSettings> optionVisible(final Boolean visible)
+	{
+		return new Specification<InitialSettings>() {
+
+			@Override
+			public Predicate toPredicate(Root<InitialSettings> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate optionId = cb.equal(root.get(InitialSettings_.initialSettingsVisible),visible);
+				return optionId;
+			}
+		};
+	}
 }

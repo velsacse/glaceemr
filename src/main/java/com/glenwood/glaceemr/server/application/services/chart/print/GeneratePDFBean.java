@@ -27,8 +27,8 @@ public class GeneratePDFBean {
 		Rectangle rect = new Rectangle(30, 30, 550, 800);
 		writer.setBoxSize("art", rect);
 		//use string builder
-		System.out.println("header:"+headerHTML);
-		System.out.println("footer:"+footerHTML);
+//		System.out.println("header:"+headerHTML);
+//		System.out.println("footer:"+footerHTML);
 		HTMLHeaderFooter header=new HTMLHeaderFooter(patientHeaderHTML, footerHTML,pageVariant,0,PageSize.LETTER);
 		writer.setPageEvent(header);
 		document.setPageSize(PageSize.LETTER);
@@ -53,7 +53,6 @@ public class GeneratePDFBean {
 
 
 		document.close();
-		System.out.println("after closing:::::::");
 	}
 	public void generatePDF(String headerHTML,String patientHeaderPage1HTML,String patientHeaderHTML,
 			String footerHTML,int pageVariant,Rectangle pdfPageSize,int pageOrientation) throws DocumentException, IOException{
@@ -63,8 +62,8 @@ public class GeneratePDFBean {
 		
 		
 		//use string builder
-		System.out.println("header:"+headerHTML);
-		System.out.println("footer:"+footerHTML);
+//		System.out.println("header:"+headerHTML);
+//		System.out.println("footer:"+footerHTML);
 		HTMLHeaderFooter header=new HTMLHeaderFooter(patientHeaderHTML, footerHTML,pageVariant,
 				pageOrientation,pdfPageSize);
 		writer.setPageEvent(header);
@@ -95,7 +94,6 @@ public class GeneratePDFBean {
 
 
 		document.close();
-		System.out.println("after closing222222222::::::::");
 		
 	}
 }

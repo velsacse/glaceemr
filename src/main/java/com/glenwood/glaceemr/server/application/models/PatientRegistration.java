@@ -16,7 +16,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
@@ -2153,7 +2152,7 @@ public class PatientRegistration implements Serializable {
 	}
 
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JsonBackReference
+	@JsonManagedReference
 	@JoinColumn(name="patient_registration_principal_doctor", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
 	private EmployeeProfile empProfile;
 

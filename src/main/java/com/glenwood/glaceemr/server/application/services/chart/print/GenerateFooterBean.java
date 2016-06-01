@@ -44,7 +44,6 @@ public class GenerateFooterBean {
 				
 			}
 		}
-		System.out.println("style==="+style.toString());
 		footerHTML.append("<table width='100%'>");
 		String customText=letterFooter.getGenericLetterFooterCustom().replace("\n", "<br/>");
 		if(letterFooter.getGenericLetterFooterVariant()==1){

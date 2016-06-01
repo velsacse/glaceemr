@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,6 +9,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -177,6 +181,7 @@ public class PatientInsDetail {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonBackReference
+	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="patient_ins_detail_patientid", referencedColumnName="patient_registration_id" , insertable=false, updatable=false)
 	private PatientRegistration patientRegistrationTable;
 	

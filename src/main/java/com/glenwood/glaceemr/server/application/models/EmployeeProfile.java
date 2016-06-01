@@ -3,12 +3,18 @@ package com.glenwood.glaceemr.server.application.models;
 import java.sql.Timestamp;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -485,15 +491,18 @@ public class EmployeeProfile {
 		this.empProfileCtpNumber = empProfileCtpNumber;
 	}
 
-	@OneToMany(mappedBy="empProfile")
-	public List<PatientReviewedDetails> patientReviewed;
+	@ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+	@JsonManagedReference
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JoinColumn(name="emp_profile_speciality", referencedColumnName="h077001" , insertable=false, updatable=false)
+	H077 specialityTable;
 
-	public List<PatientReviewedDetails> getHistoryReviewed() {
-		return patientReviewed ;
+	public H077 getSpecialityTable() {
+		return specialityTable;
 	}
 
-	public void setHistoryReviewed(List<PatientReviewedDetails> patientReviewed ) {
-		this.patientReviewed = patientReviewed ;
+	public void setSpecialityTable(H077 specialityTable) {
+		this.specialityTable = specialityTable;
 	}
 	
 }

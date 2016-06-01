@@ -34,7 +34,7 @@ public class HTMLHeaderFooter extends PdfPageEventHelper {
 			int pageVariant,int pageOrientation,Rectangle pageSize) throws IOException {
 		
 		
-		System.out.println("footer:"+footerHTML);
+//		System.out.println("footer:"+footerHTML);
 		
 		footer = XMLWorkerHelper.parseToElementList(footerHTML, null);
 		
@@ -57,7 +57,7 @@ public class HTMLHeaderFooter extends PdfPageEventHelper {
 	@Override
 	public void onEndPage(PdfWriter writer, Document document) {
 		try {
-			System.out.println("height:"+height+";width:"+width);
+//			System.out.println("height:"+height+";width:"+width);
 			Rectangle rect = new Rectangle(30, 30, width, height);
 
 			ColumnText ct = new ColumnText(writer.getDirectContent());

@@ -7,11 +7,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 /**
  * Text Case Converter & Name Formatter
  * @author chandrahas
  *
  */
+@Component
 public class TextFormatter {
 
 	/**

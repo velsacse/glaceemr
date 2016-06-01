@@ -2,9 +2,14 @@ package com.glenwood.glaceemr.server.application.specifications;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Fetch;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import org.springframework.data.jpa.domain.Specification;
+
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 
@@ -116,6 +121,23 @@ public class PatientRegistrationSpecification {
 			   Predicate personalDetailsPredicate=cb.equal(root.get(PatientRegistration_.patientRegistrationId),patientId);
 			   cq.where(cb.and(personalDetailsPredicate));
 			   return cq.getRestriction();
+		   }
+
+	   };
+   }
+
+
+   public static Specification<PatientRegistration> byPatientId(final int patientId)
+   {
+	   return new Specification<PatientRegistration>() {
+
+		   @Override
+		   public Predicate toPredicate(Root<PatientRegistration> root,
+				   CriteriaQuery<?> cq, CriteriaBuilder cb) {
+
+			   root.fetch(PatientRegistration_.empProfile, JoinType.LEFT);
+			   Predicate pred=cb.equal(root.get(PatientRegistration_.patientRegistrationId),patientId);
+			   return pred;
 		   }
 
 	   };

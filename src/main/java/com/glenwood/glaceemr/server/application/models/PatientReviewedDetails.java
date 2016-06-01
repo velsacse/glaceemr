@@ -16,6 +16,7 @@ import javax.persistence.SequenceGenerator;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -98,6 +99,7 @@ public class PatientReviewedDetails {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="patient_reviewed_details_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
+	@JsonManagedReference
 	@NotFound(action=NotFoundAction.IGNORE)
 	private EmployeeProfile empProfile;
 

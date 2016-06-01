@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.BillingConfigTable;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.LetterHeaderEmp;
+import com.glenwood.glaceemr.server.application.models.LetterHeaderPos;
 import com.glenwood.glaceemr.server.application.models.PlaceOfService;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.PosType;
@@ -15,6 +17,8 @@ import com.glenwood.glaceemr.server.application.models.print.GenericLetterHeader
 import com.glenwood.glaceemr.server.application.models.print.LetterHeaderContent;
 import com.glenwood.glaceemr.server.application.repositories.BillingConfigTableRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
+import com.glenwood.glaceemr.server.application.repositories.LetterHeaderEmpRepository;
+import com.glenwood.glaceemr.server.application.repositories.LetterHeaderPosRepository;
 import com.glenwood.glaceemr.server.application.repositories.PosTableRepository;
 import com.glenwood.glaceemr.server.application.repositories.print.GenericLetterHeaderRepository;
 import com.glenwood.glaceemr.server.application.repositories.print.LetterHeaderContentRepository;
@@ -43,6 +47,12 @@ public class LetterHeaderServiceImpl implements LetterHeaderService{
 	
 	@Autowired
 	BillingConfigTableRepository billingConfigTableRepository;
+	
+	@Autowired
+	LetterHeaderEmpRepository letterHeaderEmpRepository;
+	
+	@Autowired
+	LetterHeaderPosRepository letterHeaderPosRepository;
 	
 	@Override
 	public List<GenericLetterHeader> getLetterHeaderList() {
@@ -125,9 +135,9 @@ public class LetterHeaderServiceImpl implements LetterHeaderService{
 				if(billing != null)
 					state = billing.getBillingConfigTableLookupDesc();
 				String fullName = textFormat.getFormattedName(emp.getEmpProfileFname(), emp.getEmpProfileMi(), emp.getEmpProfileLname(), emp.getEmpProfileCredentials());
-				String fullAddress = textFormat.getAddress(emp.getEmpProfileAddress(), "", emp.getEmpProfileCity(), state, emp.getEmpProfileZip());
+//				String fullAddress = textFormat.getAddress(emp.getEmpProfileAddress(), "", emp.getEmpProfileCity(), state, emp.getEmpProfileZip());
 
-				empBean.add(new EmployeeDataBean(empId, loginId, fullName, fullAddress));
+				empBean.add(new EmployeeDataBean(empId, loginId, fullName, emp.getEmpProfileAddress(), state, emp.getEmpProfileCity(), emp.getEmpProfileZip(), emp.getEmpProfilePhoneno(), emp.getEmpProfileMailid()));
 			}
 		}
 		
@@ -182,5 +192,45 @@ public class LetterHeaderServiceImpl implements LetterHeaderService{
         return posBean;
     }
 
+	@Override
+	public List<LetterHeaderPos> fetchLetterHeaderPOSList(Integer headerId, Integer variantId) {
+		return letterHeaderPosRepository.findAll(LetterHeaderSpecification.fetchPOSDetails(headerId, variantId));
+	}
+
+	@Override
+	public List<LetterHeaderEmp> fetchLetterHeaderEmpList(Integer headerId, Integer variantId) {
+		return letterHeaderEmpRepository.findAll(LetterHeaderSpecification.fetchEmpDetails(headerId, variantId));
+	}
+
+	@Override
+	public List<LetterHeaderPos> getLetterHeaderPOSList(Integer headerId, Integer variantId) {
+		return letterHeaderPosRepository.findAll(LetterHeaderSpecification.getPOSDetails(headerId, variantId));
+	}
+
+	@Override
+	public List<LetterHeaderEmp> getLetterHeaderEmpList(Integer headerId, Integer variantId) {
+		return letterHeaderEmpRepository.findAll(LetterHeaderSpecification.getEmpDetails(headerId, variantId));
+	}
+	
+	@Override
+	public void saveLetterHeaderPOS(LetterHeaderPos letterHeaderPos) {
+		letterHeaderPosRepository.save(letterHeaderPos);
+	}
+	
+	@Override
+	public void saveLetterHeaderEmp(LetterHeaderEmp letterHeaderEmp) {
+		letterHeaderEmpRepository.save(letterHeaderEmp);
+	}
+
+	@Override
+	public void deleteLetterHeaderPos(List<LetterHeaderPos> letterHeaderContent) {
+		letterHeaderPosRepository.delete(letterHeaderContent);
+	}
+
+	@Override
+	public void deleteLetterHeaderEmp(List<LetterHeaderEmp> letterHeaderContent) {
+		letterHeaderEmpRepository.delete(letterHeaderContent); 
+		
+	}
 
 }

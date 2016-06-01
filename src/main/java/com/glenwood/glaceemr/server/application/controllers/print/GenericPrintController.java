@@ -51,6 +51,7 @@ public class GenericPrintController {
 	 */
 	@ApiOperation(value = "Get the list of all generic print styles", notes = "Get the list of all generic print styles")
 	@RequestMapping(value = "/FetchGenericPrintStyleList",method = RequestMethod.GET)
+	@ResponseBody
 	public List<GenericPrintStyle> fetchgenericPrintStyleList() throws Exception{
 		logger.debug("Begin of request to get the list of all generic print styles.");
 		List<GenericPrintStyle> genericPrintStyleList = genericPrintService.getGenericPrintStyleList();
@@ -184,5 +185,45 @@ public class GenericPrintController {
 
 	}
 	
+	@ApiOperation(value = "Get generic print header data", notes = "Get generic print header data")
+	@RequestMapping(value = "/FetchGenericPrintHeaderData",method = RequestMethod.GET)
+	@ResponseBody
+	public String fetchGenericPrintHeader(@RequestParam(value="styleId") Integer styleId,
+			@RequestParam(value="patientId", defaultValue="-1") Integer patientId,
+			@RequestParam(value="encounterId", defaultValue="-1") Integer encounterId,
+			@RequestParam(value="sharedFolderPath", defaultValue="", required=false) String sharedFolderPath) throws Exception{
+		logger.debug("Begin of request to get generic print header data.");
+    	String headerHTML = genericPrintService.getHeaderHTML(styleId, patientId, encounterId, sharedFolderPath);
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded header data");
+		logger.debug("End of request to get generic print header data.");
+		return headerHTML;
+		
+	}
+	
+	@ApiOperation(value = "Get generic print patient header data", notes = "Get generic print patient header data")
+	@RequestMapping(value = "/FetchGenericPrintPatientHeaderData",method = RequestMethod.GET)
+	@ResponseBody
+	public String fetchGenericPrintPatientHeader(@RequestParam(value="styleId") Integer styleId,
+			@RequestParam(value="patientId", defaultValue="-1") Integer patientId,
+			@RequestParam(value="encounterId", defaultValue="-1") Integer encounterId) throws Exception{
+		logger.debug("Begin of request to get generic print patient header data.");
+    	String headerHTML = genericPrintService.getPatientHeaderHTML(styleId, patientId, encounterId);
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded patient header data");
+		logger.debug("End of request to get generic print patient header data.");
+		return headerHTML;
+		
+	}
+	
+	@ApiOperation(value = "Get generic print footer data", notes = "Get generic print footer data")
+	@RequestMapping(value = "/FetchGenericPrintFooterData",method = RequestMethod.GET)
+	@ResponseBody
+	public String fetchGenericPrintFooter(@RequestParam(value="styleId") Integer styleId) throws Exception{
+		logger.debug("Begin of request to get generic print footer data.");
+    	String headerHTML = genericPrintService.getFooterHTML(styleId);
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded footer data");
+		logger.debug("End of request to get generic print footer data.");
+		return headerHTML;
+		
+	}
 }
 

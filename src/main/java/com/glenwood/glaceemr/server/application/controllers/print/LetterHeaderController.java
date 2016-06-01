@@ -12,10 +12,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.glenwood.glaceemr.server.application.models.LetterHeaderEmp;
+import com.glenwood.glaceemr.server.application.models.LetterHeaderPos;
 import com.glenwood.glaceemr.server.application.models.print.GenericLetterHeader;
 import com.glenwood.glaceemr.server.application.models.print.LetterHeaderContent;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.chart.print.genericheader.LetterHeaderEmployeeBean;
+import com.glenwood.glaceemr.server.application.services.chart.print.genericheader.LetterHeaderPosBean;
 import com.glenwood.glaceemr.server.application.services.chart.print.genericheader.LetterHeaderService;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeDataBean;
 import com.glenwood.glaceemr.server.application.services.pos.PosDataBean;
@@ -195,4 +199,92 @@ public class LetterHeaderController {
 		return bean;
 
 	}
+	
+	@ApiOperation(value = "Fetch letter header pos details", notes = "fetch letter header pos details")
+	@RequestMapping(value = "/FetchLetterHeaderPOSList",method = RequestMethod.GET)
+	@ResponseBody
+	public LetterHeaderPosBean fetchLetterHeaderPOSList(@RequestParam(value="headerId") Integer headerId,
+			@RequestParam(value="variantId") Integer variantId) throws Exception{
+		logger.debug("Begin of request to fetch letter header pos details.");
+		
+		List<PosDataBean> posList = letterHeaderService.getPOSDetails();
+		List<LetterHeaderPos> headerPosList = letterHeaderService.fetchLetterHeaderPOSList(headerId,variantId);
+		
+		LetterHeaderPosBean bean = new LetterHeaderPosBean();
+		bean.setPosList(posList);
+		bean.setSavedPosList(headerPosList);
+		
+		logger.debug("End of request to fetch letter header pos details.");
+		return bean;
+	}
+	
+	@ApiOperation(value = "Fetch letter header employee details", notes = "Fetch letter header employee details")
+	@RequestMapping(value = "/FetchLetterHeaderEmpList",method = RequestMethod.GET)
+	@ResponseBody
+	public LetterHeaderEmployeeBean fetchLetterHeaderEmpList(@RequestParam(value="headerId") Integer headerId,
+			@RequestParam(value="variantId") Integer variantId) throws Exception{
+		logger.debug("Begin of request to fetch letter header employee details.");
+		
+		List<EmployeeDataBean> empList = letterHeaderService.getEmployeeDetails();
+		List<LetterHeaderEmp> headerEmpList = letterHeaderService.getLetterHeaderEmpList(headerId,variantId);
+		
+		LetterHeaderEmployeeBean bean = new LetterHeaderEmployeeBean();
+		bean.setEmpList(empList);
+		bean.setSavedEmpList(headerEmpList);
+		
+		logger.debug("End of request to fetch letter header employee details.");
+		return bean;
+	}
+	
+	@ApiOperation(value = "save letter header pos details", notes = "save letter header pos details")
+	@RequestMapping(value = "/SaveLetterHeaderPOSList",method = RequestMethod.POST)
+	public String saveLetterHeaderPOSList(@RequestParam(value="orderValue", defaultValue="") String orderValue,
+			@RequestParam(value="value", defaultValue="") String value,
+			@RequestParam(value="variantId", defaultValue="-1") Integer variantId,
+			@RequestParam(value="headerId", defaultValue="-1") Integer headerId) throws Exception{
+		logger.debug("Begin of request to fetch letter header pos details.");
+		String[] valueArr = value.split("~");
+		String[] orderArr = orderValue.split("~");
+		List<LetterHeaderPos> letterHeaderContent = letterHeaderService.getLetterHeaderPOSList(headerId, variantId);
+		if(letterHeaderContent!=null && !letterHeaderContent.isEmpty()){
+			letterHeaderService.deleteLetterHeaderPos(letterHeaderContent);
+		}
+		for(int i=0; i<valueArr.length; i++){
+			LetterHeaderPos letterHeaderPos = new LetterHeaderPos();
+			letterHeaderPos.setLetterHeaderPosMapId(headerId);
+			letterHeaderPos.setLetterHeaderPosPosid(Integer.parseInt(valueArr[i]));
+			letterHeaderPos.setLetterHeaderPosOrder(Integer.parseInt(orderArr[i]));
+			letterHeaderPos.setLetterHeaderPosVariant(variantId);
+			letterHeaderService.saveLetterHeaderPOS(letterHeaderPos);
+		}
+		
+		logger.debug("End of request to save letter header pos details.");
+		return "Success";
+	}
+	
+	@ApiOperation(value = "Save letter header employee details", notes = "Save letter header employee details")
+	@RequestMapping(value = "/SaveLetterHeaderEmpList",method = RequestMethod.POST)
+	public String saveLetterHeaderEmpList(@RequestParam(value="orderValue", defaultValue="") String orderValue,
+			@RequestParam(value="value", defaultValue="") String value,
+			@RequestParam(value="headerId", defaultValue="") Integer headerId,
+			@RequestParam(value="variantId", defaultValue="-1") Integer variantId) throws Exception{
+		logger.debug("Begin of request to fetch letter header employee details.");
+		String[] valueArr = value.split("~");
+		String[] orderArr = orderValue.split("~");
+		List<LetterHeaderEmp> letterHeaderContent = letterHeaderService.getLetterHeaderEmpList(headerId,variantId);
+		if(letterHeaderContent!=null && !letterHeaderContent.isEmpty()){
+			letterHeaderService.deleteLetterHeaderEmp(letterHeaderContent);
+		}
+		for(int i=0; i<valueArr.length; i++){
+			
+			LetterHeaderEmp letterHeaderEmp = new LetterHeaderEmp();
+			letterHeaderEmp.setLetterHeaderEmpMapId(headerId);
+			letterHeaderEmp.setLetterHeaderEmpEmpid(Integer.parseInt(valueArr[i]));
+			letterHeaderEmp.setLetterHeaderEmpOrder(Integer.parseInt(orderArr[i]));
+			letterHeaderEmp.setLetterHeaderEmpVariant(variantId);
+			letterHeaderService.saveLetterHeaderEmp(letterHeaderEmp);
+		}
+		
+		return "Success";
+	}	
 }
