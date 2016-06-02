@@ -758,7 +758,7 @@ public String getTextOnlyHeaderHTML2(GenericLetterHeader genericLetterheader, Li
 		StringBuffer headerHTML = new StringBuffer();
 		headerHTML.append("<table width='100%' cellpadding='1'>");
 		List<LetterHeaderPos> posList = letterHeaderService.fetchLetterHeaderPOSList(genericLetterheader.getGenericLetterHeaderId(), 1);
-		List<LetterHeaderEmp> empList = letterHeaderService.fetchLetterHeaderEmpList(8160, 1);
+		List<LetterHeaderEmp> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), 1);
 		for(int i=0;i<letterHeaderContentList.size();i++){
 			headerHTML.append("<tr><td style='width:100%;text-align:center;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
 			if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==5){
