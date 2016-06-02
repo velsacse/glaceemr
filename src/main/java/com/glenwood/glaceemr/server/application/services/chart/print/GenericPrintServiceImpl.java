@@ -656,6 +656,54 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	public Encounter getEncounterData(int encounterId) {
 		return encounterRepository.findOne(EncounterSpecification.EncounterById(encounterId, true));
 	}
+
+	@Override
+	public String getLeftHeaderHTML(Integer styleId) {
+		String leftHeaderHTML="";
+		GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
+    	int headerId=genericPrintStyle.getGenericPrintStyleHeaderId();
+    	/*if(headerId>0)
+    		leftHeaderHTML=generateHeaderBean.generateLeftHeader(headerId);*/
+		return leftHeaderHTML;
+	}
 	
-	
+	@Override
+	public CustomGenericBean getCustomeGenericData(Integer styleId, Integer patientId, Integer encounterId, String sharedFolderPath) throws Exception{
+		
+		String headerHTML="",patientHeaderHTML="",leftHeaderHTML="",footerHTML="";
+		CustomGenericBean customGenericBean = new CustomGenericBean();
+		
+		GenericPrintBean genericPrintBean = getCompleteDetails(patientId, encounterId);
+		GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
+		int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
+		int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
+		int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
+
+		PatientDataBean patientDataBean=genericPrintBean.getPatientBean(); 
+		String[] patientDetailsArr=generatePatentDetailsArr(patientDataBean);
+
+		if(letterHeaderId>0){
+			headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedFolderPath, genericPrintBean);
+		}
+
+		if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
+			patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
+		}else{
+			patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
+		}
+
+		if(footerId>0){
+			footerHTML=generateFooterBean.generateFooter(footerId);
+		}
+
+		if(letterHeaderId>0)
+    		leftHeaderHTML=generateHeaderBean.generateLeftHeader(letterHeaderId,genericPrintBean);
+		
+		customGenericBean.setHeaderHTML(headerHTML);
+		customGenericBean.setPatientHeaderHTML(patientHeaderHTML);
+		customGenericBean.setLeftHeaderHTML(leftHeaderHTML);
+		customGenericBean.setFooterHTML(footerHTML);
+		
+		return customGenericBean;
+	}
 }

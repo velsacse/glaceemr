@@ -34,6 +34,8 @@ public interface GenericPrintService {
 	
 	
 	PatientRegistration getTesData(int patientId);
+	public String getLeftHeaderHTML(Integer styleId);
+	CustomGenericBean getCustomeGenericData(Integer patientId, Integer encounterId, Integer styleId, String sharedFolderPath) throws Exception;
 	
 	
 }

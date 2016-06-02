@@ -515,8 +515,10 @@ public class GenerateHeaderBean {
 		if(address != null && !address.isEmpty())
 			finalAddress = address.trim();
 		if(!addressSecondLine.trim().isEmpty())
-			finalAddress = finalAddress + "<br/>" + addressSecondLine.trim();
-		
+			if(!finalAddress.isEmpty())
+				finalAddress = finalAddress + "<br/>" + addressSecondLine.trim();
+			else
+				finalAddress = addressSecondLine.trim();
 		return finalAddress;
 	}
 
@@ -775,5 +777,167 @@ public String getTextOnlyHeaderHTML2(GenericLetterHeader genericLetterheader, Li
 		headerHTML.append("</table>");
 		
 		return headerHTML.toString();
+	}
+
+	public String generateLeftHeader(int headerId, GenericPrintBean genericPrintBean) throws Exception {
+	
+		GenericLetterHeader genericLetterheader=letterHeaderService.getLetterHeaderDetails(headerId);
+		List<LetterHeaderPos> posList = letterHeaderService.fetchLetterHeaderPOSList(genericLetterheader.getGenericLetterHeaderId(), 2);
+		List<LetterHeaderEmp> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), 2);						
+		
+		String leftHeaderHTML="";
+		Integer leftIndex = genericLetterheader.getGenericLetterHeaderLeft();
+		Integer leftAddressIndex = genericLetterheader.getGenericLetterHeaderLeftAddress();
+		String addressFormat = genericLetterheader.getGenericLetterHeaderAddress().toString();
+		
+		List<String> addressList = new ArrayList<String>();
+		List<String> namesList = new ArrayList<String>();
+		List<String> phoneList = new ArrayList<String>();
+		List<String> emailList = new ArrayList<String>();
+		List<String> faxList = new ArrayList<String>();
+		
+		int countLeft =0, countLeftAddress =0;
+		
+		if(leftIndex == 1 || leftAddressIndex == 1){
+			for(int i=0; i< empList.size(); i++){
+				EmployeeDataBean empBean = genericPrintService.parseEmployeeDetail(empList.get(i).getEmpProfile());
+				namesList.add(empBean.getEmpFullname());
+				addressList.add(parseAddress(empBean.getEmpAddress(), empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()));
+				phoneList.add(empBean.getEmpPhNum() != null ? empBean.getEmpPhNum(): "");
+				emailList.add(empBean.getEmpMailId() != null ? empBean.getEmpMailId(): "");
+			}
+			
+			if(leftIndex == 1)
+				countLeft= empList.size();
+			if(leftAddressIndex == 1)
+				countLeftAddress = empList.size();
+		}
+		if(leftIndex == 2 || leftAddressIndex == 2){
+			for(int i=0; i< posList.size(); i++){
+				PosDataBean posBean = genericPrintService.parsePOSDetail(posList.get(i).getPosTable());
+				namesList.add(posBean.getPosName());
+				addressList.add(parseAddress(posBean.getPosAddress(), posBean.getPosCity(), posBean.getPosState(), posBean.getPosZip()));
+				phoneList.add(posBean.getPosPhNum() != null ? posBean.getPosPhNum(): "");
+				faxList.add(posBean.getPosFaxNum() != null ? posBean.getPosFaxNum(): "");
+			}	
+			if(leftIndex == 2)
+				countLeft= posList.size();
+			if(leftAddressIndex == 2)
+				countLeftAddress = posList.size();
+		}
+		
+		if(leftIndex ==0){
+			DefaultPracticeBean defaultPracticeBean = genericPrintBean.getPracticeBean();
+			leftHeaderHTML += "<table width='100%' style='font-size: 12px; font-weight: bold;' cellspacing='0' cellpadding='0'>";
+			leftHeaderHTML += "<tr><td>"+defaultPracticeBean.getPracticeName()+"</td></tr>";
+			leftHeaderHTML += "</table>";
+			leftHeaderHTML += "<br/><br/>";
+		}
+		else if(leftIndex ==1 || leftIndex ==2){
+			if(countLeft >0){
+				leftHeaderHTML += "<table width='100%' style='font-size: 12px; font-weight: bold;' cellspacing='0' cellpadding='0'>";
+				for(int i=0; i<countLeft; i++){
+					if(!namesList.get(i).trim().isEmpty())
+						leftHeaderHTML += "<tr><td>"+namesList.get(i)+"</td></tr>";
+				}
+				leftHeaderHTML += "</table>";
+				leftHeaderHTML += "<br/><br/>";
+			}
+		}		
+		else if(leftIndex ==3){
+			EmployeeDataBean employeeDataBean = genericPrintBean.getPatientBean().getServiceDr();
+			if(employeeDataBean != null){
+				leftHeaderHTML += "<table width='100%' style='font-size: 12px; font-weight: bold;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<tr><td>"+employeeDataBean.getEmpFullname()+"</td></tr>";
+				leftHeaderHTML += "</table>";
+				leftHeaderHTML += "<br/><br/>";
+			}
+		}
+		
+		if(leftAddressIndex ==0){
+			DefaultPracticeBean defaultPracticeBean = genericPrintBean.getPracticeBean();
+			if(defaultPracticeBean != null){
+				leftHeaderHTML += "<table width='100%' style='font-size: 12px;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<tr><td>"+parseAddress(defaultPracticeBean.getPracticeStreet(), defaultPracticeBean.getPracticeCity(), defaultPracticeBean.getPracticeState(), defaultPracticeBean.getPracticeZip())+"</td></tr>";
+				if(addressFormat.charAt(1)=='1' && defaultPracticeBean.getPracticePhoneNum() != null && !defaultPracticeBean.getPracticePhoneNum().trim().isEmpty())
+					leftHeaderHTML += "<tr><td>Ph: "+defaultPracticeBean.getPracticePhoneNum()+"</td></tr>";
+				if(addressFormat.charAt(2)=='1' && defaultPracticeBean.getPracticeFaxNum() != null && !defaultPracticeBean.getPracticeFaxNum().trim().isEmpty())
+					leftHeaderHTML += "<tr><td>Fax: "+defaultPracticeBean.getPracticeFaxNum()+"</td></tr>";
+				if(addressFormat.charAt(3)=='1' && defaultPracticeBean.getPracticeEmail() != null && !defaultPracticeBean.getPracticeEmail().trim().isEmpty())
+					leftHeaderHTML += "<tr><td>Email: "+defaultPracticeBean.getPracticeEmail()+"</td></tr>";
+				if(addressFormat.charAt(4)=='1' && defaultPracticeBean.getPracticeWebAddress() != null && !defaultPracticeBean.getPracticeWebAddress().trim().isEmpty())
+					leftHeaderHTML += "<tr><td>Web: "+defaultPracticeBean.getPracticeWebAddress()+"</td></tr>";
+				leftHeaderHTML += "</table>";
+			}
+		}
+		else if(leftAddressIndex ==1 || leftAddressIndex ==2){
+			if(countLeftAddress >0){
+				leftHeaderHTML += "<table width='100%' style='font-size: 12px;' cellspacing='0' cellpadding='0'><tr><td>";
+				for(int i=0; i<countLeftAddress; i++){
+					leftHeaderHTML += "<table width='100%' style='font-size:12px;'>";
+					if(!addressList.get(i).isEmpty())
+						leftHeaderHTML += "<tr><td>"+addressList.get(i)+"</td></tr>";
+					if(!phoneList.get(i).trim().isEmpty())
+						leftHeaderHTML += "<tr><td>Ph: "+phoneList.get(i)+"</td></tr>";
+					if(leftAddressIndex ==2)
+					if(!faxList.get(i).trim().isEmpty())
+						leftHeaderHTML += "<tr><td>Fax: "+faxList.get(i)+"</td></tr>";
+					if(leftAddressIndex ==1)
+					if(!emailList.get(i).trim().isEmpty())
+						leftHeaderHTML += "<tr><td>Email: "+emailList.get(i)+"</td></tr>";
+					leftHeaderHTML += "</table>";
+					leftHeaderHTML += "<br/>";
+				}
+				leftHeaderHTML += "</td></tr></table>";
+			}
+		}
+		else if(leftAddressIndex ==3){
+			
+			EmployeeDataBean employeeDataBean = genericPrintBean.getPatientBean().getServiceDr();
+			if(employeeDataBean != null){
+
+				leftHeaderHTML += "<table width='100%' style='font-size: 12px;' cellspacing='0' cellpadding='0'><tr><td>";
+				leftHeaderHTML += "<table width='100%' style='font-size: 12px;' cellspacing='0' cellpadding='0'>";
+				if(employeeDataBean.getEmpAddress() != null && !employeeDataBean.getEmpAddress().trim().isEmpty())
+					leftHeaderHTML += "<tr><td>"+parseAddress(employeeDataBean.getEmpAddress(), employeeDataBean.getEmpCity(), employeeDataBean.getEmpState(), employeeDataBean.getEmpZip())+"</td></tr>";
+				if(!employeeDataBean.getEmpPhNum().trim().isEmpty())
+					leftHeaderHTML += "<tr><td>"+employeeDataBean.getEmpPhNum()+"</td></tr>";					
+				if(!employeeDataBean.getEmpMailId().trim().isEmpty())
+					leftHeaderHTML += "<tr><td>"+employeeDataBean.getEmpMailId()+"</td></tr>";
+				leftHeaderHTML += "</table>";
+				leftHeaderHTML += "<br/>";
+				leftHeaderHTML += "</td></tr></table>";
+			}
+		}
+		
+		return leftHeaderHTML; 
+		/*if(leftIndex ==1 || leftIndex ==2 || leftIndex ==4 || leftIndex ==5){
+			leftHeaderHTML = "<table width='100%'>";
+			for(int i=0; i<count; i++){
+				if(!namesList.get(i).trim().isEmpty())
+					leftHeaderHTML += "<tr><td>"+namesList.get(i)+"</td></tr>";
+			}
+			leftHeaderHTML += "</table>";
+			leftHeaderHTML += "<br/>";
+			leftHeaderHTML += "<br/>";
+		}
+		if(leftIndex ==1 || leftIndex ==3 || leftIndex ==4 || leftIndex ==6){
+			
+			leftHeaderHTML += "<table width='100%'>";
+			for(int i=0; i<count; i++){
+				leftHeaderHTML += "<table width='100%'>";
+				if(!addressList.get(i).isEmpty())
+					leftHeaderHTML += "<tr><td>"+addressList.get(i)+"</td></tr>";
+				if(!phoneList.get(i).trim().isEmpty())
+					leftHeaderHTML += "<tr><td>"+phoneList.get(i)+"</td></tr>";
+				if(!faxList.get(i).trim().isEmpty())
+					leftHeaderHTML += "<tr><td>"+faxList.get(i)+"</td></tr>";
+				if(!emailList.get(i).trim().isEmpty())
+					leftHeaderHTML += "<tr><td>"+emailList.get(i)+"</td></tr>";
+				leftHeaderHTML += "</table>";
+				leftHeaderHTML += "<br/>";
+			}
+		}*/
+		
 	}
 }

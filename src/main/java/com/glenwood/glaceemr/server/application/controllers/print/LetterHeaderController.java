@@ -84,8 +84,8 @@ public class LetterHeaderController {
 	@ApiOperation(value = "Save Letter header", notes = "Save Letter header")
 	@RequestMapping(value = "/SaveLetterHeader",method = RequestMethod.POST)
 	public GenericLetterHeader saveLetterHeader(@RequestParam(value="headerName") String headerName,@RequestParam(value="headerType") Integer headerType,
-			@RequestParam(value="leftFormat") Integer leftFormat,@RequestParam(value="addressFormat") Integer addressFormat,
-			@RequestParam(value="isDefault") Boolean isDefault) throws Exception{
+			@RequestParam(value="leftFormat") Integer leftFormat,@RequestParam(value="leftFormatAddress") Integer leftFormatAddress,
+			@RequestParam(value="addressFormat") Integer addressFormat,@RequestParam(value="isDefault") Boolean isDefault) throws Exception{
 		logger.debug("Begin of request to Save Letter header.");
 		
 		GenericLetterHeader newLetterHeader=new GenericLetterHeader();
@@ -93,6 +93,7 @@ public class LetterHeaderController {
 		newLetterHeader.setGenericLetterHeaderType(headerType);
 		newLetterHeader.setGenericLetterHeaderAddress(addressFormat);
 		newLetterHeader.setGenericLetterHeaderLeft(leftFormat);
+		newLetterHeader.setGenericLetterHeaderLeftAddress(leftFormatAddress);
 		newLetterHeader.setGenericLetterHeaderIsDefault(isDefault);
 		newLetterHeader.setGenericLetterHeaderIsActive(true);
 		GenericLetterHeader letterHeader = letterHeaderService.saveLetterHeader(newLetterHeader);
@@ -109,8 +110,8 @@ public class LetterHeaderController {
 	@ApiOperation(value = "Update Letter header", notes = "Update Letter header")
 	@RequestMapping(value = "/UpdateLetterHeader",method = RequestMethod.POST)
 	public GenericLetterHeader updateLetterHeader(@RequestParam(value="headerName") String headerName,@RequestParam(value="headerType") Integer headerType,
-			@RequestParam(value="leftFormat") Integer leftFormat,@RequestParam(value="addressFormat") Integer addressFormat,
-			@RequestParam(value="headerId") Integer headerId,
+			@RequestParam(value="leftFormat") Integer leftFormat,@RequestParam(value="leftFormatAddress") Integer leftFormatAddress,
+			@RequestParam(value="addressFormat") Integer addressFormat,@RequestParam(value="headerId") Integer headerId,
 			@RequestParam(value="isDefault") Boolean isDefault,@RequestParam(value="isActive") Boolean isActive) throws Exception{
 		logger.debug("Begin of request to Save Letter header.");
 		
@@ -120,6 +121,7 @@ public class LetterHeaderController {
 		newLetterHeader.setGenericLetterHeaderType(headerType);
 		newLetterHeader.setGenericLetterHeaderAddress(addressFormat);
 		newLetterHeader.setGenericLetterHeaderLeft(leftFormat);
+		newLetterHeader.setGenericLetterHeaderLeftAddress(leftFormatAddress);
 		newLetterHeader.setGenericLetterHeaderIsDefault(isDefault);
 		newLetterHeader.setGenericLetterHeaderIsActive(isActive);
 		GenericLetterHeader letterHeader = letterHeaderService.saveLetterHeader(newLetterHeader);

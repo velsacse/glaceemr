@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.print.GenericPrintStyle;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.chart.print.CustomGenericBean;
 import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintService;
 import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -225,5 +226,33 @@ public class GenericPrintController {
 		return headerHTML;
 		
 	}
+	
+	@ApiOperation(value = "Get generic print left data", notes = "Get generic print left data")
+	@RequestMapping(value = "/FetchGenericPrintLeftHeaderData",method = RequestMethod.GET)
+	@ResponseBody
+	public String fetchGenericPrintLeftData(@RequestParam(value="styleId") Integer styleId) throws Exception{
+		logger.debug("Begin of request to get generic print left data.");
+    	String headerHTML = genericPrintService.getLeftHeaderHTML(styleId);
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded footer data");
+		logger.debug("End of request to get generic print left data.");
+		return headerHTML;
+		
+	}
+	
+	@ApiOperation(value = "Get generic print data", notes = "Get generic print data")
+	@RequestMapping(value = "/FetchGenericPrintData",method = RequestMethod.GET)
+	@ResponseBody
+	public CustomGenericBean fetchGenericPrint(@RequestParam(value="styleId") Integer styleId,
+			@RequestParam(value="patientId", defaultValue="-1") Integer patientId,
+			@RequestParam(value="encounterId", defaultValue="-1") Integer encounterId,
+			@RequestParam(value="sharedFolderPath", defaultValue="", required=false) String sharedFolderPath) throws Exception{
+		logger.debug("Begin of request to get generic print header data.");
+    	CustomGenericBean bean = genericPrintService.getCustomeGenericData(styleId, patientId, encounterId, sharedFolderPath);
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded header data");
+		logger.debug("End of request to get generic print header data.");
+		return bean;
+		
+	}
+
 }
 

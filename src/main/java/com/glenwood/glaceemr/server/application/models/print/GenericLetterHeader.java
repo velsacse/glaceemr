@@ -34,6 +34,9 @@ public class GenericLetterHeader {
 	@Column(name="generic_letter_header_isactive")
 	private Boolean genericLetterHeaderIsActive;
 
+	@Column(name="generic_letter_header_left_address")
+	private Integer genericLetterHeaderLeftAddress;
+	
 	public Integer getGenericLetterHeaderId() {
 		return genericLetterHeaderId;
 	}
@@ -89,7 +92,15 @@ public class GenericLetterHeader {
 	public void setGenericLetterHeaderIsActive(Boolean genericLetterHeaderIsActive) {
 		this.genericLetterHeaderIsActive = genericLetterHeaderIsActive;
 	}
-	
-	
-	
+
+	public Integer getGenericLetterHeaderLeftAddress() {
+		return genericLetterHeaderLeftAddress;
+	}
+
+	public void setGenericLetterHeaderLeftAddress(
+			Integer genericLetterHeaderLeftAddress) {
+		this.genericLetterHeaderLeftAddress = genericLetterHeaderLeftAddress;
+	}
+
+			
 }
