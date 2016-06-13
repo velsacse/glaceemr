@@ -15,6 +15,7 @@ import com.glenwood.glaceemr.server.application.models.H076;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr;
 import com.glenwood.glaceemr.server.application.models.InsCompany;
+import com.glenwood.glaceemr.server.application.models.LeafLibrary;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PlaceOfService;
@@ -26,6 +27,7 @@ import com.glenwood.glaceemr.server.application.repositories.BillinglookupReposi
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
+import com.glenwood.glaceemr.server.application.repositories.LeafLibraryRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PosTableRepository;
 import com.glenwood.glaceemr.server.application.repositories.print.GenericPrintStyleRepository;
@@ -39,6 +41,7 @@ import com.glenwood.glaceemr.server.application.specifications.BillingLookupSpec
 import com.glenwood.glaceemr.server.application.specifications.EmployeeSpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
 import com.glenwood.glaceemr.server.application.specifications.InitialSettingsSpecification;
+import com.glenwood.glaceemr.server.application.specifications.LeafLibrarySpecification;
 import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PosTableSpecification;
 import com.glenwood.glaceemr.server.application.specifications.print.GenericPrintSpecification;
@@ -83,6 +86,9 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 
 	@Autowired
 	InitialSettingsRepository initialSettingsRepository;
+	
+	@Autowired
+	LeafLibraryRepository leafLibraryRepository;
 	
 	@Override
 	public List<GenericPrintStyle> getGenericPrintStyleList() {
@@ -705,5 +711,25 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		customGenericBean.setFooterHTML(footerHTML);
 		
 		return customGenericBean;
+	}
+
+	@Override
+	public void saveLeafLibrary(LeafLibrary leafLibrary) {
+		leafLibraryRepository.save(leafLibrary);
+	}
+
+	@Override
+	public List<LeafLibrary> getTemplatesList() {		
+		return leafLibraryRepository.findAll(LeafLibrarySpecification.getAllTemplates());
+	}
+
+	@Override
+	public List<LeafLibrary> getStyleTemplatesList(Integer styleId) {
+		return leafLibraryRepository.findAll(LeafLibrarySpecification.getByPrintStyleId(styleId));
+	}
+
+	@Override
+	public LeafLibrary getLeafLibrary(int templateId) {
+		return leafLibraryRepository.findOne(LeafLibrarySpecification.getLeafDetailsById(templateId)) ;
 	}
 }

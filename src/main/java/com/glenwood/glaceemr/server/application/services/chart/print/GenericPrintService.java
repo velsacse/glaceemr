@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.LeafLibrary;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.print.GenericPrintStyle;
@@ -36,6 +37,10 @@ public interface GenericPrintService {
 	PatientRegistration getTesData(int patientId);
 	public String getLeftHeaderHTML(Integer styleId);
 	CustomGenericBean getCustomeGenericData(Integer patientId, Integer encounterId, Integer styleId, String sharedFolderPath) throws Exception;
+	public void saveLeafLibrary(LeafLibrary leafLibrary);
+	public List<LeafLibrary> getTemplatesList();
+	public List<LeafLibrary> getStyleTemplatesList(Integer styleId);
+	public LeafLibrary getLeafLibrary(int templateId);
 	
 	
 }

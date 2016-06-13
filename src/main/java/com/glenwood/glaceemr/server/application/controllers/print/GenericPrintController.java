@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.glenwood.glaceemr.server.application.models.LeafLibrary;
 import com.glenwood.glaceemr.server.application.models.print.GenericPrintStyle;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
@@ -98,7 +99,8 @@ public class GenericPrintController {
 		newGenericPrintStyle.setGenericPrintStyleIsDefault(isDefault);
 		newGenericPrintStyle.setGenericPrintStyleIsActive(true);
 		
-		GenericPrintStyle genericPrintStyle = genericPrintService.saveGenericPrintStyle(newGenericPrintStyle);
+		GenericPrintStyle genericPrintStyle = genericPrintService.saveGenericPrintStyle(newGenericPrintStyle);			
+		
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved generic print style",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved generic print style");
 		logger.debug("End of request to Save generic print style.");
 		return genericPrintStyle;
@@ -127,6 +129,7 @@ public class GenericPrintController {
 		updateGenericPrintStyle.setGenericPrintStyleIsActive(isActive);
 		
 		GenericPrintStyle genericPrintStyle = genericPrintService.saveGenericPrintStyle(updateGenericPrintStyle);
+				
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved generic print style",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved generic print style");
 		logger.debug("End of request to Update generic print style.");
 		return genericPrintStyle;
@@ -254,5 +257,54 @@ public class GenericPrintController {
 		
 	}
 
+	/**
+	 * Request to get template list
+	 * 
+	 */
+	@ApiOperation(value = "Get template list", notes = "Get template list")
+	@RequestMapping(value = "/FetchTemplatesList",method = RequestMethod.GET)
+	public GenericPrintTemplateBean fetchTemplatesList(@RequestParam(value="styleId", defaultValue="-1") Integer styleId) throws Exception{
+		logger.debug("Begin of request to get template list.");
+		
+		List<LeafLibrary> templateList=genericPrintService.getTemplatesList();
+		List<LeafLibrary> styleTemplateList=genericPrintService.getStyleTemplatesList(styleId);
+		
+		GenericPrintTemplateBean bean=new GenericPrintTemplateBean();
+		bean.setTemplateList(templateList);
+		bean.setStyleTemplateList(styleTemplateList);
+		
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded templates list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded templates list for configuration");
+		logger.debug("End of request to get template list.");
+		return bean;
+		
+	}
+	
+	/**
+	 * Request to save style for template
+	 * 
+	 */
+	@ApiOperation(value = "Update style for template", notes = "Update style for template")
+	@RequestMapping(value = "/UpdateTemplatesList",method = RequestMethod.POST)
+	public void updateTemplatesList(@RequestParam(value="styleId") Integer styleId,
+			@RequestParam(value="value") String value) throws Exception{
+		
+		logger.debug("Begin of request to Update style for template.");
+		
+		String[] valueArr=value.split("~");
+		for(int i=0; i<valueArr.length; i++){
+			int templateId=-1;
+			try{
+				templateId= Integer.parseInt(valueArr[i]);
+			}catch(Exception e){
+				templateId=-1;
+			}
+			
+			LeafLibrary leafLibrary=genericPrintService.getLeafLibrary(templateId);			
+			leafLibrary.setLeafLibraryPrintStyleId(styleId);
+			genericPrintService.saveLeafLibrary(leafLibrary);
+		}		
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved style for template",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved style for template");
+		logger.debug("End of request to Update style for template.");
+	}
 }
 

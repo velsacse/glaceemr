@@ -105,6 +105,17 @@ public class LeafLibrary {
 
 	@Column(name="leaf_library_isagebased")
 	private Boolean leafLibraryIsagebased;
+	
+	@Column(name="leaf_library_print_style_id")
+	private Integer leafLibraryPrintStyleId;
+
+	public Integer getLeafLibraryPrintStyleId() {
+		return leafLibraryPrintStyleId;
+	}
+
+	public void setLeafLibraryPrintStyleId(Integer leafLibraryPrintStyleId) {
+		this.leafLibraryPrintStyleId = leafLibraryPrintStyleId;
+	}
 
 	public Integer getLeafLibraryId() {
 		return leafLibraryId;

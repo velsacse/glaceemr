@@ -211,33 +211,24 @@ public class GenerateHeaderBean {
 	public String drawTextHeaderData(LetterHeaderContent letterHeaderContent,String style, GenericPrintBean genericPrintBean, List<LetterHeaderPos> posList, List<LetterHeaderEmp> empList){
 		try{
 			StringBuilder header=new StringBuilder();
-			header.append("<table width='100%' style='text-align:center;'>");
+			header.append("<table width='100%' style='text-align:center;' cellspacing='0' cellpadding='0'>");
 			String customText=letterHeaderContent.getLetterHeaderContentCustom().replace("\n", "<br/>");
 			if(letterHeaderContent.getLetterHeaderContentFlag()==1){	
 				DefaultPracticeBean practiceBean = genericPrintBean.getPracticeBean();
 				if(practiceBean != null && practiceBean.getPracticeName() != null && !practiceBean.getPracticeName().trim().isEmpty())
-					header.append("<tr><td style='"+style+"'>"+practiceBean.getPracticeName()+"</td>");
+					header.append("<tr><td style='"+style+"'>"+practiceBean.getPracticeName()+"</td></tr>");
 				if(customText != null && !customText.trim().isEmpty())
-					header.append("</tr><tr><td style='"+style+"'>"+customText+"</td></tr>");
+					header.append("<tr><td style='"+style+"'>"+customText+"</td></tr>");
 			}else if(letterHeaderContent.getLetterHeaderContentFlag()==2){
 				PatientDataBean patientBean = genericPrintBean.getPatientBean();
-				String principalDr = "";
-				if(patientBean != null){
-					principalDr = patientBean.getPrincipalDr().getEmpFullname();
-					header.append("<tr><td style='"+style+"'>"+principalDr+"</td></tr>");
+				List<PosDataBean> posBean = patientBean.getPosDetails();
+				if(posBean != null && posBean.size()>0 && posBean.get(0) != null){
+					if(posBean.get(0).getPosName() != null && !posBean.get(0).getPosName().isEmpty())
+						header.append("<tr><td style='"+style+"'>"+posBean.get(0).getPosName()+"</td></tr>");
 				}
 				if(customText != null && !customText.trim().isEmpty())
-					header.append("</tr><tr><td style='"+style+"'>"+customText+"</td></tr>");
+					header.append("<tr><td style='"+style+"'>"+customText+"</td></tr>");
 			}else if(letterHeaderContent.getLetterHeaderContentFlag()==3){
-				PatientDataBean patientBean = genericPrintBean.getPatientBean();
-				String serviceDr = "";
-				if(patientBean != null){
-					serviceDr = patientBean.getServiceDr().getEmpFullname();
-					header.append("<tr><td style='"+style+"'>"+serviceDr+"</td></tr>");
-				}
-				if(customText != null && !customText.trim().isEmpty())
-					header.append("</tr><tr><td style='"+style+"'>"+customText+"</td></tr>");
-			}else if(letterHeaderContent.getLetterHeaderContentFlag()==4){
 
 				if(posList != null){
 					header.append("<tr>");
@@ -251,7 +242,25 @@ public class GenerateHeaderBean {
 					header.append("</tr>");
 				}
 				//				header.append("<tr><td style='"+style+"'>Practice Name 1</td><td style='"+style+"'>Practice Name 2</td><td style='"+style+"'>Practice Name 3</td></tr><tr><td colspan='3' style='"+style+"'>"+customText+"</td></tr>");
+			}else if(letterHeaderContent.getLetterHeaderContentFlag()==4){
+				PatientDataBean patientBean = genericPrintBean.getPatientBean();
+				String principalDr = "";
+				if(patientBean != null){
+					principalDr = patientBean.getPrincipalDr().getEmpFullname();
+					header.append("<tr><td style='"+style+"'>"+principalDr+"</td></tr>");
+				}
+				if(customText != null && !customText.trim().isEmpty())
+					header.append("<tr><td style='"+style+"'>"+customText+"</td></tr>");
 			}else if(letterHeaderContent.getLetterHeaderContentFlag()==5){
+				PatientDataBean patientBean = genericPrintBean.getPatientBean();
+				String serviceDr = "";
+				if(patientBean != null){
+					serviceDr = patientBean.getServiceDr().getEmpFullname();
+					header.append("<tr><td style='"+style+"'>"+serviceDr+"</td></tr>");
+				}
+				if(customText != null && !customText.trim().isEmpty())
+					header.append("<tr><td style='"+style+"'>"+customText+"</td></tr>");
+			}else if(letterHeaderContent.getLetterHeaderContentFlag()==6){
 				
 				if(empList != null) {
 					header.append("<tr>");
@@ -266,7 +275,7 @@ public class GenerateHeaderBean {
 				}
 				
 				//			header.append("<tr><td style='"+style+"'>Doctor Name 1</td><td style='"+style+"'>Doctor Name 2</td><td style='"+style+"'>Doctor Name 3</td></tr><tr><td colspan='3' style='"+style+"'>"+customText+"</td></tr>");
-			}else if(letterHeaderContent.getLetterHeaderContentFlag()==6){
+			}else if(letterHeaderContent.getLetterHeaderContentFlag()==7){
 				header.append("<tr><td style='"+style+"'>"+customText+"</td></tr>");
 			}
 			header.append("</table>");
@@ -278,6 +287,8 @@ public class GenerateHeaderBean {
 	
 	public String drawAddressData(LetterHeaderContent letterHeaderContent,String addressFormat, String style, GenericPrintBean genericPrintBean, List<LetterHeaderPos> posList, List<LetterHeaderEmp> empList, int headerFlag) throws Exception{
 		
+		StringBuilder address=new StringBuilder();
+
 		List<String> addressList = new ArrayList<String>();
 		List<String> phoneList = new ArrayList<String>();
 		List<String> faxList = new ArrayList<String>();
@@ -287,221 +298,144 @@ public class GenerateHeaderBean {
 		phoneList.clear();
 		faxList.clear();
 		mailList.clear();
+		address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'><tr>");
 		
-		if((addressFormat).charAt(1)=='1' && letterHeaderContent.getLetterHeaderContentFlag()==3) {
-			if(headerFlag==2){				     // Principal Doctor Address
-				EmployeeDataBean empBean =  genericPrintBean.getPatientBean().getPrincipalDr();				
+		if(letterHeaderContent.getLetterHeaderContentFlag() == 1){				     // Default Practice
+			DefaultPracticeBean practiceBean =  genericPrintBean.getPracticeBean();				
+			if(practiceBean != null){
+				address.append("<td><table width='100%' style='text-align: center;'><tr><td>");
+				if(addressFormat.charAt(1)=='1'){
+					address.append(generateField("",practiceBean.getPracticeStreet(),style));
+					String secondAddress=parseAddress(practiceBean.getPracticeCity(), practiceBean.getPracticeState(), practiceBean.getPracticeZip());
+					address.append(generateField("",secondAddress,style));
+				}
+				if(addressFormat.charAt(2)=='1')
+				address.append(generateField("Phone: ",practiceBean.getPracticePhoneNum(),style));
+				if(addressFormat.charAt(3)=='1')
+				address.append(generateField("Fax: ",practiceBean.getPracticeFaxNum(),style));
+				if(addressFormat.charAt(4)=='1')
+				address.append(generateField("Email: ",practiceBean.getPracticeEmail(),style));
+				if(addressFormat.charAt(5)=='1')
+				address.append(generateField("Web: ",practiceBean.getPracticeWebAddress(),style));
+				address.append("</td></tr></table></td>");
+			}
+		}
+		if(letterHeaderContent.getLetterHeaderContentFlag() == 2){				     // Place of Service
+			PatientDataBean patientBean=genericPrintBean.getPatientBean();
+			List<PosDataBean> posBean=patientBean.getPosDetails();
+
+			if(posBean != null && posBean.size()>0 && posBean.get(0) != null){
+				address.append("<td><table width='100%' style='text-align: center;'><tr><td>");
+				if(addressFormat.charAt(1)=='1'){
+					address.append(generateField("",posBean.get(0).getPosAddress(),style));
+					address.append(generateField("",parseAddress(posBean.get(0).getPosCity(), posBean.get(0).getPosState(), posBean.get(0).getPosZip()),style));
+				}
+				if(addressFormat.charAt(2)=='1')
+				address.append(generateField("Phone: ",posBean.get(0).getPosPhNum(),style));
+				if(addressFormat.charAt(3)=='1')
+				address.append(generateField("Fax: ",posBean.get(0).getPosFaxNum(),style));
+				address.append("</td></tr></table></td>");
+			}
+		}
+		if(letterHeaderContent.getLetterHeaderContentFlag() == 3){					// All Practices
+			for(int i=0; i< posList.size(); i++){
+				float width= (float)100/posList.size();
+				address.append("<td width='"+width+"%'><table width='100%' style='text-align: center;'>");
+				PosDataBean posBean = genericPrintService.parsePOSDetail(posList.get(i).getPosTable());
+				if(addressFormat.charAt(1)=='1'){
+					address.append(generateField("",posBean.getPosAddress(),style));
+					address.append(generateField("",parseAddress(posBean.getPosCity(),posBean.getPosState(),posBean.getPosZip()),style));
+				}
+				if(addressFormat.charAt(2)=='1')
+				address.append(generateField("Phone: ",posBean.getPosPhNum(),style));
+				if(addressFormat.charAt(3)=='1')
+				address.append(generateField("Fax: ",posBean.getPosFaxNum(),style));
+				address.append("</table></td>");
+			}
+
+		}
+		if(letterHeaderContent.getLetterHeaderContentFlag() == 4){					// Principal Doctor Address
+
+			EmployeeDataBean empBean =  genericPrintBean.getPatientBean().getPrincipalDr();				
+			if(empBean != null){
+				address.append("<td><table width='100%' style='text-align: center;'>");
+				if(addressFormat.charAt(1)=='1'){
+					address.append(generateField("",empBean.getEmpAddress(),style));
+					address.append(generateField("",parseAddress(empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()),style));
+				}
+				if(addressFormat.charAt(2)=='1')
+				address.append(generateField("Phone: ",empBean.getEmpPhNum(),style));
+				if(addressFormat.charAt(4)=='1')
+				address.append(generateField("Email: ",empBean.getEmpMailId(),style));
+				address.append("</table></td>");
+			}
+		}
+		if(letterHeaderContent.getLetterHeaderContentFlag() == 5){					// Service Doctor Address
+			EmployeeDataBean empBean =  genericPrintBean.getPatientBean().getServiceDr();				
+			if(empBean != null){
+				address.append("<td><table width='100%' style='text-align: center;'>");
+				if(addressFormat.charAt(1)=='1'){
+					address.append(generateField("",empBean.getEmpAddress(),style));
+					address.append(generateField("",parseAddress(empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()),style));
+				}
+				if(addressFormat.charAt(2)=='1')
+				address.append(generateField("Phone: ",empBean.getEmpPhNum(),style));
+				if(addressFormat.charAt(4)=='1')
+				address.append(generateField("Email: ",empBean.getEmpMailId(),style));
+				address.append("</table></td>");
+			}
+		}
+
+		if(letterHeaderContent.getLetterHeaderContentFlag() == 6){					// All Doctors Address
+			for(int i=0; i< empList.size(); i++){
+				EmployeeDataBean empBean = genericPrintService.parseEmployeeDetail(empList.get(i).getEmpProfile());
 				if(empBean != null){
-
-					addressList.add(parseAddress(empBean.getEmpAddress(), empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()));
-					if(empBean.getEmpPhNum() != null && !empBean.getEmpPhNum().isEmpty())
-						phoneList.add(empBean.getEmpPhNum());
-					if(empBean.getEmpMailId() != null && !empBean.getEmpMailId().isEmpty())
-						mailList.add(empBean.getEmpMailId());
-					
-				}
-			}
-			if(headerFlag==3){					// Service Docor Address
-				EmployeeDataBean empBean =  genericPrintBean.getPatientBean().getServiceDr();				
-				if(empBean != null){
-					addressList.add(parseAddress(empBean.getEmpAddress(), empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()));
-					if(empBean.getEmpPhNum() != null && !empBean.getEmpPhNum().isEmpty())
-						phoneList.add(empBean.getEmpPhNum());
-					if(empBean.getEmpMailId() != null && !empBean.getEmpMailId().isEmpty())
-						mailList.add(empBean.getEmpMailId());
-				}
-			}
-			if(headerFlag==4){
-				for(int i=0; i< posList.size(); i++){
-					PosDataBean posBean = genericPrintService.parsePOSDetail(posList.get(i).getPosTable());
-					addressList.add(parseAddress(posBean.getPosAddress(),posBean.getPosCity(),posBean.getPosState(),posBean.getPosZip()));
-					phoneList.add(posBean.getPosPhNum());
-					faxList.add(posBean.getPosFaxNum());
-				}
-			}
-			if(headerFlag==5){
-				for(int i=0; i< empList.size(); i++){
-					EmployeeDataBean empBean = genericPrintService.parseEmployeeDetail(empList.get(i).getEmpProfile());
-					addressList.add(parseAddress(empBean.getEmpAddress(),empBean.getEmpCity(),empBean.getEmpState(),empBean.getEmpZip()));
-					phoneList.add(empBean.getEmpPhNum());
-					mailList.add(empBean.getEmpMailId());
+					float width= (float)100/empList.size();
+					address.append("<td width='"+width+"%'><table width='100%' style='text-align: center;'>");
+					if(addressFormat.charAt(1)=='1'){
+					address.append(generateField("",empBean.getEmpAddress(),style));
+					address.append(generateField("",parseAddress(empBean.getEmpCity(),empBean.getEmpState(),empBean.getEmpZip()),style));
+					}
+					if(addressFormat.charAt(2)=='1')
+					address.append(generateField("Phone: ",empBean.getEmpPhNum(),style));
+					if(addressFormat.charAt(4)=='1')
+					address.append(generateField("Email: ",empBean.getEmpMailId(),style));
+					address.append("</table></td>");
 				}
 			}
 		}
-		StringBuilder address=new StringBuilder();
-		address.append("<table width='100%' style='text-align: center;'>");
-
-		if((addressFormat).charAt(1)=='1'){
-			if(letterHeaderContent.getLetterHeaderContentFlag()==1){
-				
-				DefaultPracticeBean practiceBean = genericPrintBean.getPracticeBean();
-				if(practiceBean != null){
-					String addressSecondLine = "";
-					if(practiceBean.getPracticeCity() !=  null && !practiceBean.getPracticeCity().isEmpty())
-						addressSecondLine = practiceBean.getPracticeCity().trim()+", "; 
-					if(practiceBean.getPracticeState() != null && !practiceBean.getPracticeState().isEmpty())
-						addressSecondLine = addressSecondLine + practiceBean.getPracticeState().trim() +" ";
-					if(practiceBean.getPracticeZip() != null && !practiceBean.getPracticeZip().isEmpty())
-						addressSecondLine = addressSecondLine + practiceBean.getPracticeZip().trim();
-					if(practiceBean.getPracticeStreet() != null && !practiceBean.getPracticeStreet().isEmpty())
-						address.append("<tr><td style='"+style+"'>"+practiceBean.getPracticeStreet().trim()+"</td></tr>");
-					if(!addressSecondLine.trim().isEmpty())
-						address.append("<tr><td style='"+style+"'>"+addressSecondLine+"</td></tr>");
-				}
-				
-			}else if(letterHeaderContent.getLetterHeaderContentFlag()==2){
-				
-				PatientDataBean patientBean = genericPrintBean.getPatientBean();
-				if(patientBean != null){
-					List<PosDataBean> posBean = patientBean.getPosDetails();
-					if(posBean != null && posBean.size()>0){
-						String addressSecondLine = "";
-						if(posBean.get(0).getPosCity() !=  null && !posBean.get(0).getPosCity().isEmpty())
-							addressSecondLine = posBean.get(0).getPosCity().trim()+", "; 
-						if(posBean.get(0).getPosState() != null && !posBean.get(0).getPosState().isEmpty())
-							addressSecondLine = addressSecondLine + posBean.get(0).getPosState().trim() +" ";
-						if(posBean.get(0).getPosZip() != null && !posBean.get(0).getPosZip().isEmpty())
-							addressSecondLine = addressSecondLine + posBean.get(0).getPosZip().trim();
-						if(posBean.get(0).getPosAddress() != null && !posBean.get(0).getPosAddress().isEmpty())
-							address.append("<tr><td style='"+style+"'>"+posBean.get(0).getPosAddress().trim()+"</td></tr>");
-						if(!addressSecondLine.trim().isEmpty())
-							address.append("<tr><td style='"+style+"'>"+addressSecondLine+"</td></tr>");
-					}
-				}
-				
-			}else if(letterHeaderContent.getLetterHeaderContentFlag()==3){
-
-				address.append("<tr>");				
-				for(int i=0; i< addressList.size(); i++)
-					if(!addressList.get(i).trim().isEmpty())
-						address.append("<td style='"+style+"'>"+addressList.get(i)+"</td>");
-				address.append("</tr>");
-			}
-		}
-		if((addressFormat).charAt(2)=='1'){
-			
-			if(letterHeaderContent.getLetterHeaderContentFlag()==1){
-				DefaultPracticeBean practiceBean = genericPrintBean.getPracticeBean();
-				if(practiceBean != null){
-					if(practiceBean.getPracticePhoneNum() != null && !practiceBean.getPracticePhoneNum().trim().isEmpty()){
-						address.append("<tr>");
-						address.append("<td style='"+style+"'>Phone: "+practiceBean.getPracticePhoneNum()+"</td>");
-						address.append("</tr>");
-					}
-				}
-					
-			}
-			else if(letterHeaderContent.getLetterHeaderContentFlag()==2){
-				PatientDataBean patientBean = genericPrintBean.getPatientBean();
-				if(patientBean != null){
-					List<PosDataBean> posBean = patientBean.getPosDetails();
-					if(posBean != null && posBean.size()>0){
-						if(posBean.get(0).getPosPhNum() != null && !posBean.get(0).getPosPhNum().isEmpty()){
-							address.append("<tr>");
-							address.append("<td style='"+style+"'>Phone: "+posBean.get(0).getPosPhNum()+"</td>");
-							address.append("</tr>");
-						}
-					}
-				}
-			}
-			else if(letterHeaderContent.getLetterHeaderContentFlag()==3){
-				
-				address.append("<tr>");
-				float width= getWidth(phoneList.size());
-				for(int i=0; i< phoneList.size(); i++)
-					if(!phoneList.get(i).trim().isEmpty())
-						address.append("<td style='width:"+width+"%;"+style+"'>Phone: "+phoneList.get(i)+"</td>");
-				address.append("</tr>");
-				
-			}
-		}
-		if((addressFormat).charAt(3)=='1'){
-
-			if(letterHeaderContent.getLetterHeaderContentFlag()==1){
-				DefaultPracticeBean practiceBean = genericPrintBean.getPracticeBean();
-				if(practiceBean != null){
-					if(practiceBean.getPracticeFaxNum() != null && !practiceBean.getPracticeFaxNum().trim().isEmpty()){
-						address.append("<tr>");
-						address.append("<td style='"+style+"'>Fax: "+practiceBean.getPracticeFaxNum()+"</td>");
-						address.append("</tr>");
-					}
-				}
-					
-			}
-			else if(letterHeaderContent.getLetterHeaderContentFlag()==2){
-				PatientDataBean patientBean = genericPrintBean.getPatientBean();
-				if(patientBean != null){
-					List<PosDataBean> posBean = patientBean.getPosDetails();
-					if(posBean != null && posBean.size()>0){
-						if(posBean.get(0).getPosFaxNum() != null && !posBean.get(0).getPosFaxNum().isEmpty()){
-							address.append("<tr>");
-							address.append("<td style='"+style+"'>Fax: "+posBean.get(0).getPosFaxNum()+"</td>");
-							address.append("</tr>");
-						}
-					}
-				}
-			}
-			else if(letterHeaderContent.getLetterHeaderContentFlag()==3){
-					address.append("<tr>");
-					float width= getWidth(faxList.size());
-					for(int i=0; i<faxList.size(); i++){
-						if(!faxList.get(i).trim().isEmpty())
-							address.append("<td style='width:"+width+"%;"+style+"'>Fax: "+faxList.get(i)+"</td>");
-					}
-					address.append("</tr>");
-			}
-
-		}
-		if((addressFormat).charAt(4)=='1'){
-			
-			if(letterHeaderContent.getLetterHeaderContentFlag()==1){
-				DefaultPracticeBean practiceBean = genericPrintBean.getPracticeBean();
-				if(practiceBean != null){
-					if(practiceBean.getPracticeEmail() != null && !practiceBean.getPracticeEmail().trim().isEmpty()){
-						address.append("<tr>");
-						address.append("<td style='"+style+"'>Email: "+practiceBean.getPracticeEmail()+"</td>");
-						address.append("</tr>");
-					}
-				}
-			}
-			else if(letterHeaderContent.getLetterHeaderContentFlag()==2){
-				// Encounter POS don't have Email
-			}
-			else if(letterHeaderContent.getLetterHeaderContentFlag()==3){
-					address.append("<tr>");
-					float width= getWidth(mailList.size());
-					for(int i=0; i<mailList.size(); i++){
-						if(!mailList.get(i).trim().isEmpty())
-							address.append("<td style='width:"+width+"%;"+style+"'>Email: "+mailList.get(i)+"</td>");
-					}
-					address.append("</tr>");
-			}
-
-		}
-		if((addressFormat).charAt(5)=='1'){
-
-			if(letterHeaderContent.getLetterHeaderContentFlag()==1){
-				DefaultPracticeBean practiceBean = genericPrintBean.getPracticeBean();
-				if(practiceBean != null){
-					if(practiceBean.getPracticeWebAddress() != null && !practiceBean.getPracticeWebAddress().trim().isEmpty()){
-						address.append("<tr>");
-						address.append("<td style='"+style+"'>Web: "+practiceBean.getPracticeWebAddress()+"</td>");
-						address.append("</tr>");
-					}
-				}
-			}
-			else if(letterHeaderContent.getLetterHeaderContentFlag()==2){
-				// Encounter POS don't have Web address
-			}
-			else if(letterHeaderContent.getLetterHeaderContentFlag()==3){
-				// don't have Web address
-			}
-
-		}
-		address.append("</table>");
+		
+		address.append("</tr></table>");
 		return address.toString();
 	}
 	
+	/**
+	 * Method to generate field
+	 * @param name
+	 * @param value
+	 * @return
+	 */
+	private String generateField(String name, String value, String style) {
+		
+		String field = "";
+		if(value != null && !value.trim().isEmpty())
+			field = "<tr><td style='"+style+"'>"+name+value+"</td></tr>";
+		return field;
+	}
+
+	private String parseAddress(String city,String state, String zip) {
+		
+		String addressSecondLine = "";
+		if(city !=  null && !city.isEmpty())
+			addressSecondLine = city.trim()+", "; 
+		if(state != null && !state.isEmpty())
+			addressSecondLine = addressSecondLine + state.trim() +" ";
+		if(zip != null && !zip.isEmpty())
+			addressSecondLine = addressSecondLine + zip.trim();
+		
+		return addressSecondLine;
+	}
+
 	private String parseAddress(String address, String city,String state, String zip) {
 		
 		String addressSecondLine = "";
@@ -737,18 +671,22 @@ public class GenerateHeaderBean {
 		List<LetterHeaderEmp> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), 1);
 
 //		List<InitialSettings> initialList= initialSettingsRepository.findAll(Specifications.where(InitialSettingsSpecification.optionType(4)).and(InitialSettingsSpecification.optionVisible(true)));
-		for(int i=0;i<letterHeaderContentList.size();i++){
-			headerHTML.append("<tr><td style='width:100%;text-align:center;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
+		for(int i=0;i<letterHeaderContentList.size();i++){			
 			if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==2){
+				headerHTML.append("<tr><td style='width:100%;text-align:center;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
 				headerHTML.append(drawTextHeaderData(letterHeaderContentList.get(i),generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle()),genericPrintBean,posList,empList));
+				headerHTML.append("</td></tr>");
 			}else if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==3){
+				headerHTML.append("<tr><td style='width:100%;text-align:center;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
 				headerHTML.append(letterHeaderContentList.get(i).getLetterHeaderContentCustom().replace("\n", "<br/>"));
+				headerHTML.append("</td></tr>");
 			}else if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==4){
 				if(letterHeaderContentList.get(i).getLetterHeaderContentFlag()!=4){
+					headerHTML.append("<tr><td style='width:100%;text-align:center;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
 					headerHTML.append(drawAddressData(letterHeaderContentList.get(i),genericLetterheader.getGenericLetterHeaderAddress().toString(),generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle()),genericPrintBean,posList,empList,getHeaderFlag(letterHeaderContentList,2)));
+					headerHTML.append("</td></tr>");
 				}
 			}
-			headerHTML.append("</td></tr>");
 		}
 		headerHTML.append("</table>");
 		
