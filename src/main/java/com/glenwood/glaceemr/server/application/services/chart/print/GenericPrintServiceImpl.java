@@ -28,6 +28,7 @@ import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepositor
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.LeafLibraryRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientInsDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PosTableRepository;
 import com.glenwood.glaceemr.server.application.repositories.print.GenericPrintStyleRepository;
@@ -42,6 +43,7 @@ import com.glenwood.glaceemr.server.application.specifications.EmployeeSpecifica
 import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
 import com.glenwood.glaceemr.server.application.specifications.InitialSettingsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.LeafLibrarySpecification;
+import com.glenwood.glaceemr.server.application.specifications.PatientInsDetailsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PosTableSpecification;
 import com.glenwood.glaceemr.server.application.specifications.print.GenericPrintSpecification;
@@ -89,6 +91,9 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	
 	@Autowired
 	LeafLibraryRepository leafLibraryRepository;
+	
+	@Autowired
+	PatientInsDetailsRepository patientInsDetailsRepository;
 	
 	@Override
 	public List<GenericPrintStyle> getGenericPrintStyleList() {
@@ -145,21 +150,22 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		String[] patientDetailsArr=new String[20];
 		//"Patient Name", "Age", "DOS", "Gender","Account #","Phone #","DOB","Mobile #","Address","Referring Doctor","Insurance Details","Supervising doctor",
 		//"Service/Performing Doctor","Ethinicity","Race","Preffered/Primary Language","Care Group"
-		patientDetailsArr[0]= patientBean.getPatientName() != null ? patientBean.getPatientName() : "";
-		patientDetailsArr[1]= patientBean.getAge() != null ? patientBean.getAge() : "";
-		patientDetailsArr[2]= patientBean.getDos() != null ? patientBean.getDos() : "";
-		patientDetailsArr[3]= patientBean.getGender() != null ? patientBean.getGender() : "";
-		patientDetailsArr[4]= patientBean.getAccountId() != null ? patientBean.getAccountId() : "";
-		patientDetailsArr[5]= patientBean.getPhNum() != null ? patientBean.getPhNum() : "";
-		patientDetailsArr[6]= patientBean.getDob() != null ? patientBean.getDob() : "";
-		patientDetailsArr[7]= patientBean.getMobileNum() != null ? patientBean.getMobileNum() : "";
-		patientDetailsArr[8]= patientBean.getAddress() != null ? patientBean.getAddress() : "";
-		patientDetailsArr[9]= patientBean.getRefPhyName() != null ? patientBean.getRefPhyName() : "";
-		patientDetailsArr[11]=patientBean.getPrincipalDr().getEmpFullname() != null ? patientBean.getPrincipalDr().getEmpFullname() : "";
-		patientDetailsArr[12]=patientBean.getServiceDr().getEmpFullname() != null ? patientBean.getServiceDr().getEmpFullname() : "";
-		patientDetailsArr[13]=patientBean.getEthinicity() != null ? patientBean.getEthinicity() : "";
-		patientDetailsArr[14]=patientBean.getRace() != null ? patientBean.getRace() : "";
-		patientDetailsArr[15]=patientBean.getPrefLang() != null ? patientBean.getPrefLang() : "";
+		patientDetailsArr[0]= isNull(patientBean.getPatientName());
+		patientDetailsArr[1]= isNull(patientBean.getAge());
+		patientDetailsArr[2]= isNull(patientBean.getDos());
+		patientDetailsArr[3]= isNull(patientBean.getGender());
+		patientDetailsArr[4]= isNull(patientBean.getAccountId());
+		patientDetailsArr[5]= isNull(patientBean.getPhNum());
+		patientDetailsArr[6]= isNull(patientBean.getDob());
+		patientDetailsArr[7]= isNull(patientBean.getMobileNum());
+		patientDetailsArr[8]= isNull(patientBean.getAddress());
+		patientDetailsArr[9]= isNull(patientBean.getServiceReferral());
+		patientDetailsArr[10]= getInsuranceName(patientBean);
+		patientDetailsArr[11]=isNull(patientBean.getPrincipalDr().getEmpFullname());
+		patientDetailsArr[12]=isNull(patientBean.getServiceDr().getEmpFullname());
+		patientDetailsArr[13]=isNull(patientBean.getEthinicity());
+		patientDetailsArr[14]=isNull(patientBean.getRace());
+		patientDetailsArr[15]=isNull(patientBean.getPrefLang());
 		
 		return patientDetailsArr;
 		
@@ -174,9 +180,10 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			String patientHeaderPage1;
 			
 			PatientRegistration patientDetails= patientRegistrationRepository.findOne(GenericPrintSpecification.getPatientDetails(patientId));
+			List<PatientInsDetail> insuranceList= patientInsDetailsRepository.findAll(PatientInsDetailsSpecification.getByPatientId(patientId));
 			int encounterId=7328;//printDetails.getEncounterId();
 			Encounter encounter = encounterRepository.findOne(EncounterSpecification.EncounterById(encounterId, true));
-			PatientDataBean patientBean = parsePatientDetails(patientDetails, encounter);
+			PatientDataBean patientBean = parsePatientDetails(patientDetails, encounter, insuranceList);
 			String[] patientDetailsArr=generatePatentDetailsArr(patientBean);
 			String patientHeaderHTML=generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
 			if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
@@ -211,19 +218,14 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		List<Integer> insTypeList = new ArrayList<Integer>();
 		insTypeList.add(1);
 		insTypeList.add(2);
-		insTypeList.add(3);
-		insTypeList.add(4);
-		insTypeList.add(5);
-		insTypeList.add(6);
-		insTypeList.add(7);
-		insTypeList.add(8);
 		
 		PatientRegistration patientDetails= patientRegistrationRepository.findOne(GenericPrintSpecification.getPatientDetails(patientId,insTypeList));
+		List<PatientInsDetail> insuranceList= patientInsDetailsRepository.findAll(PatientInsDetailsSpecification.getByPatientId(patientId));
 		Encounter encounter = encounterRepository.findOne(EncounterSpecification.EncounterById(encounterId, true));
 		List<EmployeeProfile> empList =  employeeProfileRepository.findAll(EmployeeSpecification.getUsersList("asc"));
 		List<PosTable> posList = posTableRepository.findAll(PosTableSpecification.getPOSDetails());
 		
-		PatientDataBean patientBean = parsePatientDetails(patientDetails, encounter);
+		PatientDataBean patientBean = parsePatientDetails(patientDetails, encounter, insuranceList);
 		List<EmployeeDataBean> empolyeeBean = parseEmployeeDetails(empList);
 		List<PosDataBean> posBean = parsePOSDetails(posList);
 		List<InitialSettings> initialList= initialSettingsRepository.findAll(Specifications.where(InitialSettingsSpecification.optionType(4)).and(InitialSettingsSpecification.optionVisible(true)));
@@ -280,7 +282,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	 * @return
 	 * @throws Exception
 	 */
-	private PatientDataBean parsePatientDetails(PatientRegistration patientDetails, Encounter encounter) throws Exception {
+	private PatientDataBean parsePatientDetails(PatientRegistration patientDetails, Encounter encounter, List<PatientInsDetail> practiceList) throws Exception {
 		String patientName = textFormat.getFormattedName(patientDetails.getPatientRegistrationFirstName(), patientDetails.getPatientRegistrationMidInitial(), patientDetails.getPatientRegistrationLastName(), "");
 		String age = textFormat.getAge(patientDetails.getPatientRegistrationDob());
 		String dos = null;
@@ -292,6 +294,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		String state = patientDetails.getPatientRegistrationState();
 		String address = null;
 		String refPhyName = null;
+		String serviceRefName = null;
 		String ethinicity = patientDetails.getPatientRegistrationEthnicity().toString();
 		String race = patientDetails.getPatientRegistrationRace();
 		String prefLang = patientDetails.getPatientRegistrationPreferredLan();
@@ -320,9 +323,12 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		refPhyName = "";
 		if(refPhyEntity != null)
 			refPhyName = textFormat.getFormattedName(refPhyEntity.getH076005(), refPhyEntity.getH076004(), refPhyEntity.getH076003(), refPhyEntity.getH076021());
+		H076 serviceRefEntity = encounter.getReferringTable();
+		serviceRefName = "";
+		if(serviceRefEntity != null)
+			serviceRefName = textFormat.getFormattedName(serviceRefEntity.getH076005(), serviceRefEntity.getH076004(), serviceRefEntity.getH076003(), serviceRefEntity.getH076021());
 		
-		
-//		List<InsuranceDataBean> insuranceBean = parseInsuranceDetails(patientDetails, textFormat);
+		List<InsuranceDataBean> insuranceBean = parseInsuranceDetails(practiceList);
 		
 		EmployeeDataBean principalDrData = null;
 		EmployeeProfile employee = patientDetails.getEmpProfile();
@@ -368,12 +374,11 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			posList = posTableRepository.findAll(PosTableSpecification.getPOSDetailsById(encounter.getEncounterPos()));
 		List<PosDataBean> posBean = parsePOSDetails(posList);
         PatientDataBean bean = new PatientDataBean(patientName, age, dos, gender, accountId, phNum, dob,
-                                                   mobileNum, address, refPhyName, null, posBean, principalDrData,
+                                                   mobileNum, address, refPhyName, serviceRefName, insuranceBean, posBean, principalDrData,
                                                    serviceDrData, ethinicity, race, prefLang, patientId, encounterId);
 		
 		return bean;
 	}
-
 	/**
 	 * Parsing service doctor details
 	 * @param encounter
@@ -455,37 +460,42 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	 * @param textFormat
 	 * @return
 	 */
-	private List<InsuranceDataBean> parseInsuranceDetails(PatientRegistration patientDetails) {
+	private List<InsuranceDataBean> parseInsuranceDetails(List<PatientInsDetail> patientIns) {
 		List<InsuranceDataBean> insuranceBean = new ArrayList<InsuranceDataBean>();
-		List<PatientInsDetail> patientIns = patientDetails
-				.getPatientInsuranceTable();
 		if (patientIns != null)
 			for (int i = 0; i < patientIns.size(); i++) {
 				PatientInsDetail insCompany = patientIns.get(i);
+				String insId = insCompany.getPatientInsDetailPatientinsuranceid();
+				Integer insType = insCompany.getPatientInsDetailInstype();
 				if (insCompany != null) {
 					InsCompAddr insCompAddr = insCompany.getInsCompAddr();
 					if (insCompAddr != null) {
-						String insAddress = insCompAddr.getInsCompAddrAddress();
-						String insCity = insCompAddr.getInsCompAddrCity();
-						String insState = insCompAddr.getInsCompAddrState();
-						String insZip = insCompAddr.getInsCompAddrZip();
+						String insAddress = isNull(insCompAddr.getInsCompAddrAddress());
+						String insCity = isNull(insCompAddr.getInsCompAddrCity());
+						String insState = isNull(insCompAddr.getInsCompAddrState());
+						String insZip = isNull(insCompAddr.getInsCompAddrZip());
 						String insCompId = null;
-						String insCompName = null;
-						String finalAddress = textFormat.getAddress(insAddress,
-								"", insCity, insState, insZip);
+						String insCompName = null;						
 						InsCompany insComp = insCompAddr.getInsCompany();
 						if (insComp != null) {
 							insCompId = insComp.getInsCompanyId().toString();
 							insCompName = insComp.getInsCompanyName();
 						}
 
-						insuranceBean.add(new InsuranceDataBean(insCompId, insCompName, finalAddress));
+						insuranceBean.add(new InsuranceDataBean(insId, insType, insCompId, insCompName, insAddress, insCity, insState, insZip));
 					}
 				}
 			}
 		return insuranceBean;
 	}
 	
+	private String isNull(String value) {
+		if(value == null)
+			return "";
+		else
+			return value.trim();
+	}
+
 	/**
      * Parsing POS details
      * @param posList
@@ -608,21 +618,16 @@ public class GenericPrintServiceImpl implements GenericPrintService{
     	List<Integer> insTypeList = new ArrayList<Integer>();
 		insTypeList.add(1);
 		insTypeList.add(2);
-		insTypeList.add(3);
-		insTypeList.add(4);
-		insTypeList.add(5);
-		insTypeList.add(6);
-		insTypeList.add(7);
-		insTypeList.add(8);
-    	
+		
     	GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
 		int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
 		
     	String patientHeaderHTML = "";
     	PatientRegistration patientDetails= patientRegistrationRepository.findOne(GenericPrintSpecification.getPatientDetails(patientId, insTypeList));
+    	List<PatientInsDetail> insuranceList= patientInsDetailsRepository.findAll(PatientInsDetailsSpecification.getByPatientId(patientId));
 //		int encounterId=7328;//printDetails.getEncounterId();
 		Encounter encounter = encounterRepository.findOne(EncounterSpecification.EncounterById(encounterId, true));
-		PatientDataBean patientBean = parsePatientDetails(patientDetails, encounter);
+		PatientDataBean patientBean = parsePatientDetails(patientDetails, encounter, insuranceList);
 		String[] patientDetailsArr=generatePatentDetailsArr(patientBean);
 		
 		if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
@@ -731,5 +736,21 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	@Override
 	public LeafLibrary getLeafLibrary(int templateId) {
 		return leafLibraryRepository.findOne(LeafLibrarySpecification.getLeafDetailsById(templateId)) ;
+	}
+	
+	public String getInsuranceName(PatientDataBean patientBean){
+		String primInsId="";
+		try{
+			List<InsuranceDataBean> insuranceList= patientBean.getInsuranceDetails();
+			if(insuranceList!= null){
+				for(int i=0;i<insuranceList.size();i++){
+					if(insuranceList.get(i).getInsType()== 1)
+						primInsId= insuranceList.get(i).getInsCompName();
+				}
+			}
+			return primInsId;
+		}catch(Exception e){
+			return "";
+		}
 	}
 }

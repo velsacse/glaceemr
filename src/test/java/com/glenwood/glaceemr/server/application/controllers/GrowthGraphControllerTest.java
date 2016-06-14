@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ public class GrowthGraphControllerTest {
 	 * Testing get default graph id.
 	 */
 	@Test 
+	@Ignore
 	public void getDefaultGraphId() {
 		 
 		 given().
@@ -56,6 +58,7 @@ public class GrowthGraphControllerTest {
 	 * Testing get PatientInfo.
 	 */
 	@Test 
+	@Ignore
 	public void getPatientInfo() {
 		 
 		 given().
@@ -67,6 +70,7 @@ public class GrowthGraphControllerTest {
 	 * Testing get graphlist.
 	 */
 	@Test 
+	@Ignore
 	public void getGraphList() {
 		 
 		 given().

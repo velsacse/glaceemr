@@ -176,6 +176,7 @@ public class PatientInsDetail {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
+	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="patient_ins_detail_insaddressid", referencedColumnName="ins_comp_addr_id" , insertable=false, updatable=false)
 	private InsCompAddr insCompAddr;
 	

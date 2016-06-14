@@ -1,10 +1,12 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import static com.jayway.restassured.module.mockmvc.RestAssuredMockMvc.given;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,7 @@ public class ShortcutsControllerTest {
 	 * Test Adding shortcut
 	 */
 	@Test
+	@Ignore
 	public void addShortcut() {
 		logger.debug("testing for adding shortcuts started\n");
 
@@ -78,6 +81,7 @@ public class ShortcutsControllerTest {
 	 * Test Deleting shortcut
 	 */
 	@Test
+	@Ignore
 	public void deleteShortcut() {
 		logger.debug("testing for delete shortcut started\n");
 

@@ -48,6 +48,7 @@ public class InternalMessageControllerTest {
 	 */
 	
 	@Test 
+	@Ignore
 	public void getEncounters() throws Exception {
 
 		logger.debug("Internal message getEncounters testing starts.\n");
@@ -102,6 +103,7 @@ public class InternalMessageControllerTest {
 	 * Testing for update Internal encounter .
 	 */
 	@Test 
+	@Ignore
 	public void update() throws Exception {
 
 		logger.debug("update Internal encounter testing starts.\n");

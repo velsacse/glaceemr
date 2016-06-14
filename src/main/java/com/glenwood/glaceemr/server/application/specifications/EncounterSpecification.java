@@ -136,7 +136,8 @@ public class EncounterSpecification {
                     CriteriaBuilder cb) {
                 Predicate pred = cb.equal(root.get(Encounter_.encounterId), encounterId);
                 root.fetch(Encounter_.empProfileEmpId,JoinType.LEFT);
-               
+                root.fetch(Encounter_.referringTable,JoinType.LEFT);
+                
                 return pred;
             }
         };

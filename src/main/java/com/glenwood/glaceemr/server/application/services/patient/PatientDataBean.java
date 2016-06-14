@@ -21,8 +21,9 @@ public class PatientDataBean {
 	private String phNum;
 	private String dob;
 	private String mobileNum;
-	private String address;
+	private String address;	
 	private String refPhyName;
+	private String serviceReferral;
 	private List<InsuranceDataBean> insuranceDetails;
 	private List<PosDataBean> posDetails;
 	private EmployeeDataBean principalDr;
@@ -32,14 +33,14 @@ public class PatientDataBean {
 	private String prefLang;
 	private Integer patientId;
 	private Integer encounterId;
+	
 	public PatientDataBean(String patientName, String age, String dos,
 			String gender, String accountId, String phNum, String dob,
 			String mobileNum, String address, String refPhyName,
-			List<InsuranceDataBean> insuranceDetails,
+			String serviceReferral, List<InsuranceDataBean> insuranceDetails,
 			List<PosDataBean> posDetails, EmployeeDataBean principalDr,
 			EmployeeDataBean serviceDr, String ethinicity, String race,
 			String prefLang, Integer patientId, Integer encounterId) {
-		super();
 		this.patientName = patientName;
 		this.age = age;
 		this.dos = dos;
@@ -50,6 +51,7 @@ public class PatientDataBean {
 		this.mobileNum = mobileNum;
 		this.address = address;
 		this.refPhyName = refPhyName;
+		this.serviceReferral = serviceReferral;
 		this.insuranceDetails = insuranceDetails;
 		this.posDetails = posDetails;
 		this.principalDr = principalDr;
@@ -119,6 +121,12 @@ public class PatientDataBean {
 	}
 	public void setRefPhyName(String refPhyName) {
 		this.refPhyName = refPhyName;
+	}
+	public String getServiceReferral() {
+		return serviceReferral;
+	}
+	public void setServiceReferral(String serviceReferral) {
+		this.serviceReferral = serviceReferral;
 	}
 	public List<InsuranceDataBean> getInsuranceDetails() {
 		return insuranceDetails;

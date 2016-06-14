@@ -15,6 +15,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -209,6 +212,20 @@ public class Encounter {
     PatientEncounterType patientEncounterType;
 	
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JoinColumn(name="encounter_ref_doctor",referencedColumnName="h076001",insertable=false,updatable=false)
+	H076 referringTable;
+	
+	public H076 getReferringTable() {
+		return referringTable;
+	}
+
+	public void setReferringTable(H076 referringTable) {
+		this.referringTable = referringTable;
+	}
+
 	@OneToMany(mappedBy="encounter",fetch=FetchType.LAZY)
 	List<PatientClinicalElements> patientClinicalElements;
 	

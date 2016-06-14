@@ -106,6 +106,7 @@ public class PhoneMessageControllerTest {
 	 * Testing for sendreply phone encounter .
 	 */
 	@Test 
+	@Ignore
 	public void sendreply() throws Exception {
 
 		logger.debug("sendreply phone encounter testing starts.\n");
@@ -117,6 +118,7 @@ public class PhoneMessageControllerTest {
 	 * Testing for update phone encounter .
 	 */
 	@Test 
+	@Ignore
 	public void update() throws Exception {
 
 		logger.debug("update phone encounter testing starts.\n");
