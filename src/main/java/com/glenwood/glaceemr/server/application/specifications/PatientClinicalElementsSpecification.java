@@ -45,7 +45,7 @@ public class PatientClinicalElementsSpecification {
 	 * @param gwids
 	 * 
 	 */
-	public static Specification<PatientClinicalElements> getNonHistoryElemPatientData(final String clientId,final Integer patientId,final Integer encounterId,final String gwidPattern){
+	public static Specification<PatientClinicalElements> getNonHistoryElemPatientData(final Integer patientId,final Integer encounterId,final String gwidPattern){
 
 		return new Specification<PatientClinicalElements>(){
 
@@ -56,9 +56,7 @@ public class PatientClinicalElementsSpecification {
 				if(encounterId!=-1)
 					encounterPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
 				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
-				Predicate gwidPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),"000"+gwidPattern);
-				Predicate clientIdPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),clientId+gwidPattern);
-				Predicate elementPred=cb.or(gwidPred,clientIdPred);
+				Predicate elementPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),gwidPattern);
 				Predicate isHistoryPred=cb.equal(paramJoin.get(ClinicalElements_.clinicalElementsIshistory),false);
 				Predicate finalPred=null;
 				if(encounterId!=-1)
@@ -85,7 +83,7 @@ public class PatientClinicalElementsSpecification {
 	 * 
 	 */
 
-	public static Specification<PatientClinicalElements> getElemPatientDataLessThanEncounter(final Integer patientId,final Integer encounterId,final List<String> gwids){
+	public static Specification<PatientClinicalElements> getNonHistoryElemPatientDataLessThanEncounter(final Integer patientId,final Integer encounterId,final List<String> gwids){
 
 		return new Specification<PatientClinicalElements>(){
 
@@ -110,13 +108,13 @@ public class PatientClinicalElementsSpecification {
 	}
 
 	/**
-	 * Get PatientClinicalData for patientId and encounterId and given GWID 
+	 * Get PatientClinicalData for patientId and encounterId and given GWID Pattern
 	 * @param patientId
 	 * @param encounterId
 	 * @param gwids
 	 * 
 	 */
-	public static Specification<PatientClinicalElements> getPatClinicalDataByGWID(final Integer patientId,final Integer encounterId,final String gwid){
+	public static Specification<PatientClinicalElements> getPatClinicalDataByGWID(final Integer patientId,final Integer encounterId,final String gwidPattern){
 
 		return new Specification<PatientClinicalElements>(){
 
@@ -125,7 +123,7 @@ public class PatientClinicalElementsSpecification {
 				Join<PatientClinicalElements,ClinicalElements> paramJoin=root.join(PatientClinicalElements_.clinicalElement,JoinType.INNER);
 				Predicate encounterPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
 				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
-				Predicate elementPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),gwid);
+				Predicate elementPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),gwidPattern);
 				return cb.and(patientPred,elementPred,encounterPred);
 
 			}
@@ -156,31 +154,7 @@ public class PatientClinicalElementsSpecification {
 
 		};
 	}
-	
-	/**
-	 * Get PatientClinicalData for given patientId and encounterId and GWID Pattern with clientId
-	 * @param patientId
-	 * @param encounterId
-	 * @param gwids
-	 * 
-	 */
-	public static Specification<PatientClinicalElements> getPatClinicalDataByGWIDPattern(final String clientId,final Integer patientId,final Integer encounterId,final String gwidPattern){
-		return new Specification<PatientClinicalElements>(){
-			@Override
-			public Predicate toPredicate(Root<PatientClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Join<PatientClinicalElements,ClinicalElements> paramJoin=root.join(PatientClinicalElements_.clinicalElement,JoinType.INNER);
-				Predicate encounterPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
-				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
-				Predicate gwidPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),"000"+gwidPattern);
-				Predicate clientIdPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),clientId+gwidPattern);
-				Predicate elementPred=cb.or(gwidPred,clientIdPred);
-				return cb.and(patientPred,elementPred,encounterPred);
-			}
 
-		};
-	}
-	
-	
 	
 	/**
 	 * Get PatientClinicalData for patientId and encounterId and given GWIDS
@@ -205,31 +179,26 @@ public class PatientClinicalElementsSpecification {
 
 		};
 	}
-	
-	
-	
 
 
 
 
 	/**
 	 * 
-	 * GET patientClinicalHistory for GWID pattern with clientId
+	 * GET patientClinicalHistory for GWIDS given
 	 * 
 	 * @param patientId
 	 * @param gwids
 	 * 
 	 */
-	public static Specification<PatientClinicalHistory> getHistoryElemPatientData(final String clientId,final Integer patientId,final String gwidPattern){
+	public static Specification<PatientClinicalHistory> getHistoryElemPatientData(final Integer patientId,final String gwidPattern){
 
 		return new Specification<PatientClinicalHistory>(){
 
 			@Override
 			public Predicate toPredicate(Root<PatientClinicalHistory> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
 				Join<PatientClinicalHistory,ClinicalElements> paramJoin=root.join(PatientClinicalHistory_.clinicalElement,JoinType.INNER);
-				Predicate gwidPred=cb.like(root.get(PatientClinicalHistory_.patientClinicalHistoryGwid),"000"+gwidPattern);
-				Predicate clientIdPred=cb.like(root.get(PatientClinicalHistory_.patientClinicalHistoryGwid),clientId+gwidPattern);
-				Predicate elementPred=cb.or(gwidPred,clientIdPred);
+				Predicate elementPred=cb.like(root.get(PatientClinicalHistory_.patientClinicalHistoryGwid),gwidPattern);
 				Predicate patientPred=cb.equal(root.get(PatientClinicalHistory_.patientClinicalHistoryPatientid),patientId);
 				Predicate isHistoryPred=cb.equal(paramJoin.get(ClinicalElements_.clinicalElementsIshistory),true);
 				return cb.and(elementPred,patientPred,isHistoryPred);
@@ -290,6 +259,7 @@ public class PatientClinicalElementsSpecification {
 				Predicate finalGWIDPred=cb.or(defGWIDPred,clientGWIDPred);
 				Predicate genderPred=root.get(ClinicalElements_.clinicalElementsGender).in(patientSex,0);
 				Predicate finalPred=cb.and(patientPred,finalGWIDPred,genderPred);
+
 				if(isAgeBased==true){
 					Join<ClinicalElements, ClinicalElementsCondition> condParamJoin=root.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
 					Predicate defaultstartAge=cb.isNull(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage));
@@ -312,6 +282,7 @@ public class PatientClinicalElementsSpecification {
 
 
 
+
 	/**
 	 * GET Patient clinical Data for vitals pre-load From LastVisit 
 	 * @param patientId
@@ -319,7 +290,7 @@ public class PatientClinicalElementsSpecification {
 	 * @param gwids
 	 * 
 	 */
-	public static Specification<PatientClinicalElements> getPrevEncounterPatVitalData(final String clientId,final Integer patientId,final Integer prevEncId,final String gwidPattern){
+	public static Specification<PatientClinicalElements> getPrevEncounterPatVitalData(final Integer patientId,final Integer prevEncId,final String gwidPattern){
 
 		return new Specification<PatientClinicalElements>(){
 
@@ -327,9 +298,7 @@ public class PatientClinicalElementsSpecification {
 			public Predicate toPredicate(Root<PatientClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
 				Join<PatientClinicalElements,VitalsParameter> paramJoin=root.join(PatientClinicalElements_.vitalsParameter,JoinType.INNER);
 				Join<PatientClinicalElements,ClinicalElements> clinicalJoin=root.join(PatientClinicalElements_.clinicalElement,JoinType.INNER);
-				Predicate gwidPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),"000"+gwidPattern);
-				Predicate clientIdPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),clientId+gwidPattern);
-				Predicate elementPred=cb.or(gwidPred,clientIdPred);
+				Predicate elementPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),gwidPattern);
 				Predicate encounterPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),prevEncId);
 				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
 				Predicate preLoadPred=cb.equal(paramJoin.get(VitalsParameter_.vitalsParameterPreloadFromLastVisit),true);
@@ -374,18 +343,19 @@ public class PatientClinicalElementsSpecification {
 	 * @param ageInDay
 	 * @return
 	 */
-	public static Specification<ClinicalElements> getEncPatientClinicalData(final String clientId,final boolean isAgeBased,final Integer patientId,final Integer encounterId,final Short patientSex,final String gwidPattern,final Integer ageInDay){
+	public static Specification<ClinicalElements> getEncPatientClinicalData(final String clientId,final boolean isAgeBased,final Integer encounterId,final Short patientSex,final String gwidPattern,final Integer ageInDay){
 		return new Specification<ClinicalElements>(){
 			@Override
 			public Predicate toPredicate(Root<ClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
 				Join<ClinicalElements,PatientClinicalElements> paramJoin=root.join(ClinicalElements_.patientClinicalElements,JoinType.INNER);
 				Predicate encounterPred=cb.equal(paramJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
-				Predicate patientPred=cb.equal(paramJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
-				Predicate gwidPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),"000"+gwidPattern);
+				
+				Predicate gwidPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),clientId+gwidPattern);
 				Predicate clientIdPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),clientId+gwidPattern);
 				Predicate finalgwidPred=cb.or(gwidPred,clientIdPred);
+				
 				Predicate genderPred=root.get(ClinicalElements_.clinicalElementsGender).in(patientSex,0);
-				Predicate finalPred=cb.and(encounterPred,patientPred,finalgwidPred,genderPred);
+				Predicate finalPred=cb.and(encounterPred,finalgwidPred,genderPred);
 
 				if(isAgeBased==true){
 					Join<ClinicalElements,ClinicalElementsCondition> condParamJoin=root.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
@@ -401,7 +371,7 @@ public class PatientClinicalElementsSpecification {
 				return finalPred;
 			}
 		};
-	}		
+	}			
 
 
 	/**
@@ -618,7 +588,7 @@ public class PatientClinicalElementsSpecification {
 		};
 	}		
 	
-
+	
 	/**
 	 * Get patient hx  data for given patient  
 	 * 
@@ -648,7 +618,126 @@ public class PatientClinicalElementsSpecification {
 		};
 	}
 	
+	/**
+	 * Get PatientClinicalData for patientId and encounterId and given GWID Pattern with clientId
+	 * 
+	 * @param patientId
+	 * @param encounterId
+	 * @param gwids
+	 * 
+	 */
+	public static Specification<PatientClinicalElements> getPatClinicalDataByGWIDPattern(final String clientId,final Integer patientId,final Integer encounterId,final String gwidPattern){
 
+		return new Specification<PatientClinicalElements>(){
+
+			@Override
+			public Predicate toPredicate(Root<PatientClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Join<PatientClinicalElements,ClinicalElements> paramJoin=root.join(PatientClinicalElements_.clinicalElement,JoinType.INNER);
+				Predicate encounterPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
+				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
+				
+				Predicate gwidPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),"000"+gwidPattern);
+				Predicate clientIdPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),clientId+gwidPattern);
+				Predicate elementPred=cb.or(gwidPred,clientIdPred);
+				
+				return cb.and(patientPred,elementPred,encounterPred);
+
+			}
+
+		};
+	}
+	
+	/**
+	 *
+	 *  Get PatientClinicalElements data for given GWID and it is not a history element
+	 * @param patientId
+	 * @param encounterId
+	 * @param gwids
+	 * 
+	 */
+	public static Specification<PatientClinicalElements> getNonHistoryElemPatientData(final String clientId,final Integer patientId,final Integer encounterId,final String gwidPattern){
+
+		return new Specification<PatientClinicalElements>(){
+
+			@Override
+			public Predicate toPredicate(Root<PatientClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Join<PatientClinicalElements,ClinicalElements> paramJoin=root.join(PatientClinicalElements_.clinicalElement,JoinType.INNER);
+				Predicate encounterPred=null;
+				if(encounterId!=-1)
+					encounterPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
+				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
+				Predicate gwidPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),"000"+gwidPattern);
+				Predicate clientIdPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),clientId+gwidPattern);
+				Predicate elementPred=cb.or(gwidPred,clientIdPred);
+				Predicate isHistoryPred=cb.equal(paramJoin.get(ClinicalElements_.clinicalElementsIshistory),false);
+				Predicate finalPred=null;
+				if(encounterId!=-1)
+					finalPred= cb.and(encounterPred,patientPred,elementPred,isHistoryPred);
+				else
+					finalPred= cb.and(patientPred,elementPred,isHistoryPred);
+
+				return finalPred;
+
+			}
+
+		};
+	}
+	
+	/**
+	 * GET Patient clinical Data for vitals pre-load From LastVisit 
+	 * @param patientId
+	 * @param prevEncId
+	 * @param gwids
+	 * 
+	 */
+	public static Specification<PatientClinicalElements> getPrevEncounterPatVitalData(final String clientId,final Integer patientId,final Integer prevEncId,final String gwidPattern){
+
+		return new Specification<PatientClinicalElements>(){
+
+			@Override
+			public Predicate toPredicate(Root<PatientClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Join<PatientClinicalElements,VitalsParameter> paramJoin=root.join(PatientClinicalElements_.vitalsParameter,JoinType.INNER);
+				Join<PatientClinicalElements,ClinicalElements> clinicalJoin=root.join(PatientClinicalElements_.clinicalElement,JoinType.INNER);
+				
+				Predicate gwidPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),"000"+gwidPattern);
+				Predicate clientIdPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),clientId+gwidPattern);
+				Predicate elementPred=cb.or(gwidPred,clientIdPred);
+				
+				Predicate encounterPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),prevEncId);
+				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
+				Predicate preLoadPred=cb.equal(paramJoin.get(VitalsParameter_.vitalsParameterPreloadFromLastVisit),true);
+				Predicate isHistoryPred=cb.equal(clinicalJoin.get(ClinicalElements_.clinicalElementsIshistory),false);
+				return cb.and(encounterPred,patientPred,elementPred,isHistoryPred,preLoadPred);
+			}
+		};
+	}	
+
+	/**
+	 * 
+	 * GET patientClinicalHistory for GWID pattern with clientId
+	 * 
+	 * @param patientId
+	 * @param gwids
+	 * 
+	 */
+	public static Specification<PatientClinicalHistory> getHistoryElemPatientData(final String clientId,final Integer patientId,final String gwidPattern){
+
+		return new Specification<PatientClinicalHistory>(){
+
+			@Override
+			public Predicate toPredicate(Root<PatientClinicalHistory> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Join<PatientClinicalHistory,ClinicalElements> paramJoin=root.join(PatientClinicalHistory_.clinicalElement,JoinType.INNER);
+				Predicate gwidPred=cb.like(root.get(PatientClinicalHistory_.patientClinicalHistoryGwid),"000"+gwidPattern);
+				Predicate clientIdPred=cb.like(root.get(PatientClinicalHistory_.patientClinicalHistoryGwid),clientId+gwidPattern);
+				Predicate elementPred=cb.or(gwidPred,clientIdPred);
+				Predicate patientPred=cb.equal(root.get(PatientClinicalHistory_.patientClinicalHistoryPatientid),patientId);
+				Predicate isHistoryPred=cb.equal(paramJoin.get(ClinicalElements_.clinicalElementsIshistory),true);
+				return cb.and(elementPred,patientPred,isHistoryPred);
+			}
+
+		};
+	}
+	
 	/**
 	 * Get PatientClinicalData for patientId for given GWIDS with encounter data's order by encounter date
 	 * @param patientId
@@ -674,29 +763,35 @@ public class PatientClinicalElementsSpecification {
 
 		};
 	}
-
-
-
 	
 	/**
-	 * 
-	 * GET patientClinicalHistory for GWIDS given
-	 * 
+	 *
+	 *  Get PatientClinicalElements data for given GWID and it is not a history element and its less than or equal to that encounter
 	 * @param patientId
+	 * @param encounterId
 	 * @param gwids
 	 * 
 	 */
-	public static Specification<PatientClinicalHistory> getHistoryElemPatientData(final Integer patientId,final String gwidPattern){
 
-		return new Specification<PatientClinicalHistory>(){
+	public static Specification<PatientClinicalElements> getElemPatientDataLessThanEncounter(final Integer patientId,final Integer encounterId,final List<String> gwids){
+
+		return new Specification<PatientClinicalElements>(){
 
 			@Override
-			public Predicate toPredicate(Root<PatientClinicalHistory> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Join<PatientClinicalHistory,ClinicalElements> paramJoin=root.join(PatientClinicalHistory_.clinicalElement,JoinType.INNER);
-				Predicate elementPred=cb.like(root.get(PatientClinicalHistory_.patientClinicalHistoryGwid),gwidPattern);
-				Predicate patientPred=cb.equal(root.get(PatientClinicalHistory_.patientClinicalHistoryPatientid),patientId);
-				Predicate isHistoryPred=cb.equal(paramJoin.get(ClinicalElements_.clinicalElementsIshistory),true);
-				return cb.and(elementPred,patientPred,isHistoryPred);
+			public Predicate toPredicate(Root<PatientClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Join<PatientClinicalElements,ClinicalElements> paramJoin=root.join(PatientClinicalElements_.clinicalElement,JoinType.INNER);
+				Predicate encounterPred=null;
+				if(encounterId!=-1)
+					encounterPred=cb.lessThanOrEqualTo(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
+				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
+				Predicate elementPred=root.get(PatientClinicalElements_.patientClinicalElementsGwid).in(gwids);
+				Predicate finalPred=null;
+				if(encounterId!=-1)
+					finalPred= cb.and(encounterPred,patientPred,elementPred);
+				else
+					finalPred= cb.and(patientPred,elementPred);
+				return finalPred;
+
 			}
 
 		};

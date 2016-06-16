@@ -96,6 +96,9 @@ public class LeafPatient {
 	@Column(name="leaf_patient_np_alert_id")
 	private Integer leafPatientNpAlertId;
 
+	@Column(name="leaf_library_isfaxed")
+	private Boolean leafLibraryIsfaxed;
+
 	@Column(name="leaf_patient_ccdetails")
 	private String leafPatientCcdetails;
 
@@ -111,15 +114,83 @@ public class LeafPatient {
 	@Column(name="leaf_patient_notes_starttime")
 	private String leafPatientNotesStarttime;
 
+	@Column(name="leaf_patient_plan_mode")
+	private Boolean leafPatientPlanMode;
+	
 	@ManyToOne(fetch=FetchType.EAGER,cascade=CascadeType.ALL)
 	@JsonManagedReference
 	@JoinColumn(name="leaf_patient_leaf_library_id", referencedColumnName="leaf_library_id" , insertable=false, updatable=false)
 	private LeafLibrary leafLibraryTable;
 	
-	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
+	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER) 
 	@JsonManagedReference
 	@JoinColumn(name="leaf_patient_encounter_id", referencedColumnName="encounter_id" , insertable=false, updatable=false)
 	private Encounter encounterTable;
+	
+	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
+	@JoinColumn(name="leaf_patient_problemid", referencedColumnName="h629001" , insertable=false, updatable=false)
+	private H629 h629;
+	
+	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
+	@JoinColumn(name="leaf_patient_created_by", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
+	private EmployeeProfile empProfile_createdBy;
+	
+	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
+	@JoinColumn(name="leaf_patient_last_modyby", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
+	private EmployeeProfile empProfile_lastModifiedBy;
+	
+	
+	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
+	@JoinColumn(name="leaf_patient_ma_signed_userid", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
+	private EmployeeProfile empProfile_ma_signed_userid;
+	
+	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
+	@JoinColumn(name="leaf_patient_sign_userid", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
+	private EmployeeProfile empProfile_sign_userid;
+	
+	
+	
+	public EmployeeProfile getEmpProfile_sign_userid() {
+		return empProfile_sign_userid;
+	}
+
+	public void setEmpProfile_sign_userid(EmployeeProfile empProfile_sign_userid) {
+		this.empProfile_sign_userid = empProfile_sign_userid;
+	}
+
+	public H629 getH629() {
+		return h629;
+	}
+
+	public void setH629(H629 h629) {
+		this.h629 = h629;
+	}
+
+	
+	public EmployeeProfile getEmpProfile_createdBy() {
+		return empProfile_createdBy;
+	}
+
+	public void setEmpProfile_createdBy(EmployeeProfile empProfile_createdBy) {
+		this.empProfile_createdBy = empProfile_createdBy;
+	}
+
+	public EmployeeProfile getEmpProfile_lastModifiedBy() {
+		return empProfile_lastModifiedBy;
+	}
+
+	public void setEmpProfile_lastModifiedBy(EmployeeProfile empProfile_lastModifiedBy) {
+		this.empProfile_lastModifiedBy = empProfile_lastModifiedBy;
+	}
+
+	public EmployeeProfile getEmpProfile_ma_signed_userid() {
+		return empProfile_ma_signed_userid;
+	}
+
+	public void setEmpProfile_ma_signed_userid(
+			EmployeeProfile empProfile_ma_signed_userid) {
+		this.empProfile_ma_signed_userid = empProfile_ma_signed_userid;
+	}
 	
 	public Integer getLeafPatientId() {
 		return leafPatientId;
@@ -329,7 +400,14 @@ public class LeafPatient {
 		this.leafPatientNpAlertId = leafPatientNpAlertId;
 	}
 
-	
+	public Boolean getLeafLibraryIsfaxed() {
+		return leafLibraryIsfaxed;
+	}
+
+	public void setLeafLibraryIsfaxed(Boolean leafLibraryIsfaxed) {
+		this.leafLibraryIsfaxed = leafLibraryIsfaxed;
+	}
+
 	public String getLeafPatientCcdetails() {
 		return leafPatientCcdetails;
 	}
@@ -368,5 +446,13 @@ public class LeafPatient {
 
 	public void setLeafPatientNotesStarttime(String leafPatientNotesStarttime) {
 		this.leafPatientNotesStarttime = leafPatientNotesStarttime;
+	}
+	
+	public Boolean getLeafPatientPlanMode() {
+		return leafPatientPlanMode;
+	}
+
+	public void setLeafPatientPlanMode(Boolean leafPatientPlanMode) {
+		this.leafPatientPlanMode = leafPatientPlanMode;
 	}
 }

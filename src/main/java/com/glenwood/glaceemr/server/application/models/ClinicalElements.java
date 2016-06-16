@@ -99,15 +99,30 @@ public class ClinicalElements implements Serializable{
 	@OneToMany(mappedBy="clinicalElement")
 	List<ClinicalElementsOptions> clinicalElementsOptions;
 	
+	@OneToMany(mappedBy="clinicalElement")
+	List<PatientVitals> patientVitals;
+	
+	
+	@OneToMany(mappedBy="clinicalElements")
+	List<ClinicalTextMapping> clinicalTextMappings;
+	
 	/*
 	 * DO NOT MAKE THESE BIDIRECTIONAL RELATIONSHIPS IN CLINCIAL ELEMNETS EAGER
 	 * 
 	 * */
 	
 	
-	
 	public List<ClinicalElementTemplateMapping> getClinicalElementTemplateMapping() {
 		return clinicalElementTemplateMapping;
+	}
+
+	public List<ClinicalTextMapping> getClinicalTextMappings() {
+		return clinicalTextMappings;
+	}
+
+	public void setClinicalTextMappings(
+			List<ClinicalTextMapping> clinicalTextMappings) {
+		this.clinicalTextMappings = clinicalTextMappings;
 	}
 
 	public void setClinicalElementTemplateMapping(

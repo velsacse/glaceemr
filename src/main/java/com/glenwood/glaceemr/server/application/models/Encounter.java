@@ -3,6 +3,7 @@ package com.glenwood.glaceemr.server.application.models;
 import java.sql.Timestamp;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -226,8 +227,6 @@ public class Encounter {
 		this.referringTable = referringTable;
 	}
 
-	@OneToMany(mappedBy="encounter",fetch=FetchType.LAZY)
-	List<PatientClinicalElements> patientClinicalElements;
 	
 	/*@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -652,12 +651,55 @@ public class Encounter {
 	@JoinColumn(name="encounter_chartid",referencedColumnName="chart_id",insertable=false,updatable=false)
     Chart chartTable;
 
+	@OneToMany(mappedBy="encounter",fetch=FetchType.LAZY)
+	List<PatientClinicalElements> patientClinicalElements;
+
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="encounter_service_doctor", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
+	@JsonManagedReference
+	EmployeeProfile encounterEmployeeProfileTable;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="encounter_pos", referencedColumnName="pos_table_relation_id", insertable=false,updatable=false)
+	@JsonManagedReference
+	PosTable encounterPosTable;
+	
+	
+	@ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.ALL,optional = false)
+	//@LazyToOne(LazyToOneOption.NO_PROXY)
+	@JoinColumn(name="encounter_patient_episodeid", referencedColumnName="admission_episode", insertable=false,updatable=false)
+	Admission admission;
+	
 	public Chart getChartTable() {
 		return chartTable;
 	}
 
 	public void setChartTable(Chart chartTable) {
 		this.chartTable = chartTable;
+	}
+	
+	public Admission getAdmission() {
+		return admission;
+	}
+
+	public void setAdmission(Admission admission) {
+		this.admission = admission;
+	}
+
+	public EmployeeProfile getEncounterEmployeeProfileTable() {
+		return encounterEmployeeProfileTable;
+	}
+
+	public void setEncounterEmployeeProfileTable(EmployeeProfile encounterEmployeeProfileTable) {
+		this.encounterEmployeeProfileTable = encounterEmployeeProfileTable;
+	}
+
+	public PosTable getEncounterPosTable() {
+		return encounterPosTable;
+	}
+
+	public void setEncounterPosTable(PosTable encounterPosTable) {
+		this.encounterPosTable = encounterPosTable;
 	}
 	
 	public List<PatientClinicalElements> getPatientClinicalElements() {
@@ -668,5 +710,6 @@ public class Encounter {
 			List<PatientClinicalElements> patientClinicalElements) {
 		this.patientClinicalElements = patientClinicalElements;
 	}
+	
 
 }

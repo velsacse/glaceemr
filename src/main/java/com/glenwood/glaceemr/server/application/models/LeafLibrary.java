@@ -1,8 +1,15 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -105,7 +112,7 @@ public class LeafLibrary {
 
 	@Column(name="leaf_library_isagebased")
 	private Boolean leafLibraryIsagebased;
-	
+
 	@Column(name="leaf_library_print_style_id")
 	private Integer leafLibraryPrintStyleId;
 
@@ -116,7 +123,67 @@ public class LeafLibrary {
 	public void setLeafLibraryPrintStyleId(Integer leafLibraryPrintStyleId) {
 		this.leafLibraryPrintStyleId = leafLibraryPrintStyleId;
 	}
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "leaf_library_group_id", referencedColumnName = "leaf_group_id", insertable = false, updatable = false)
+	private LeafGroup leafGroup;
+	
+	@OneToMany(mappedBy="leafLibrary")
+	List<ProviderLeafMapping> providerLeafMappings;
+	
+	@OneToMany(mappedBy = "leafLibraryTable")
+	List<LeafPatient> leafPatients;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "leaf_library_name", referencedColumnName = "h616002", insertable = false, updatable = false)
+	private H616 h616;
+	
+	
+	@OneToOne(fetch=FetchType.LAZY,optional=false)
+	@JoinColumn(name="leaf_library_id", referencedColumnName="h448003" , insertable=false, updatable=false)
+	private H448 h448;
+	
+	public List<LeafPatient> getLeafPatients() {
+		return leafPatients;
+	}
 
+	public void setLeafPatients(List<LeafPatient> leafPatients) {
+		this.leafPatients = leafPatients;
+	}
+
+	public H448 getH448() {
+		return h448;
+	}
+
+	public void setH448(H448 h448) {
+		this.h448 = h448;
+	}
+
+	public LeafGroup getLeafGroup() {
+		return leafGroup;
+	}
+
+	public void setLeafGroup(LeafGroup leafGroup) {
+		this.leafGroup = leafGroup;
+	}
+
+	public List<ProviderLeafMapping> getProviderLeafMappings() {
+		return providerLeafMappings;
+	}
+
+	public void setProviderLeafMappings(
+			List<ProviderLeafMapping> providerLeafMappings) {
+		this.providerLeafMappings = providerLeafMappings;
+	}
+
+	public H616 getH616() {
+		return h616;
+	}
+
+	public void setH616(H616 h616) {
+		this.h616 = h616;
+	}
+	
 	public Integer getLeafLibraryId() {
 		return leafLibraryId;
 	}

@@ -87,26 +87,36 @@ public class PatientAllergies {
 	@Column(name="patallerg_codesystem")
 	public String patAllergCodeSystem;
 
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="patallerg_createdby", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
-	@JsonManagedReference
 	EmployeeProfile empProfileAllgCreatedByTable;
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="patallerg_resolvedby", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
-	@JsonManagedReference
 	EmployeeProfile empProfileAllgResolvedByTable;
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="patallerg_inactiveby", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
-	@JsonManagedReference
 	EmployeeProfile empProfileAllgInactiveByTable;
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="patallerg_modifiedby", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
-	@JsonManagedReference
 	EmployeeProfile empProfileAllgModifiedByTable;
 	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="patallerg_typeid", referencedColumnName="allergtype_id", insertable=false, updatable=false)
+	AllergiesType allergiesType;
+	
+	
+	
+	public AllergiesType getAllergiesType() {
+		return allergiesType;
+	}
+
+	public void setAllergiesType(AllergiesType allergiesType) {
+		this.allergiesType = allergiesType;
+	}
+
 	/**
 	 * Getters and Setters
 	 */

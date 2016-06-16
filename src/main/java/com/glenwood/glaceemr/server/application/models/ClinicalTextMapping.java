@@ -45,6 +45,29 @@ public class ClinicalTextMapping {
 	@JoinColumn(name = "clinical_text_mapping_associated_element", referencedColumnName = "ros_element_gwid", insertable = false, updatable = false)
 	private RosElement rosElement;
 	
+	public RosElement getRosElement() {
+		return rosElement;
+	}
+
+	public void setRosElement(RosElement rosElement) {
+		this.rosElement = rosElement;
+	}
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "clinical_text_mapping_textbox_gwid", referencedColumnName = "clinical_elements_gwid", insertable = false, updatable = false)
+	private ClinicalElements clinicalElements;
+
+	
+	
+	
+	public ClinicalElements getClinicalElements() {
+		return clinicalElements;
+	}
+
+	public void setClinicalElements(ClinicalElements clinicalElements) {
+		this.clinicalElements = clinicalElements;
+	}
+
 	public HistoryElement getHistoryElement1() {
 		return historyElement1;
 	}

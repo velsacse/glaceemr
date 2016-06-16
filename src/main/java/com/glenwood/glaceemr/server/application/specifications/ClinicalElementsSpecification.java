@@ -1,15 +1,22 @@
 package com.glenwood.glaceemr.server.application.specifications;
 
-import java.util.List;
 import java.sql.Timestamp;
-import com.glenwood.glaceemr.server.application.models.ClinicalElementsCondition;
-import com.glenwood.glaceemr.server.application.models.ClinicalElementsCondition_;
-import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMapping;
-import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMapping_;
+import java.util.List;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.springframework.data.jpa.domain.Specification;
+
+import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMapping;
+import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMapping_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
+import com.glenwood.glaceemr.server.application.models.ClinicalElementsCondition;
+import com.glenwood.glaceemr.server.application.models.ClinicalElementsCondition_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements_;
@@ -19,15 +26,9 @@ import com.glenwood.glaceemr.server.application.models.SoapElementDatalist;
 import com.glenwood.glaceemr.server.application.models.SoapElementDatalist_;
 import com.glenwood.glaceemr.server.application.models.TemplateMappingOptions;
 import com.glenwood.glaceemr.server.application.models.TemplateMappingOptions_;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-
 
 public class ClinicalElementsSpecification {
-
+	
 	/**
 	 * Get the clinical element details of given GWID's
 	 * 
@@ -45,7 +46,7 @@ public class ClinicalElementsSpecification {
 
 		};
 	}
-	
+
 	/**
 	 * 
 	 *   Get Clinical element Details of given GWID
@@ -149,6 +150,7 @@ public class ClinicalElementsSpecification {
 			@Override
 			public Predicate toPredicate(Root<ClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
 			
+				root.fetch(ClinicalElements_.clinicalTextMappings,JoinType.LEFT);
 				Predicate defgwid=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),"000"+gwidPattern);
 				Predicate clientIdgwid=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),clientId+gwidPattern);
 				Predicate finalgwid=cb.or(defgwid,clientIdgwid);
@@ -159,7 +161,6 @@ public class ClinicalElementsSpecification {
 
 		};
 	}
-	
 	
 	/**
 	 * Specification for default Age condition 
@@ -267,14 +268,12 @@ public class ClinicalElementsSpecification {
 				if(isAgeBased==true){
 					finalPred=cb.and(finalPred,age);
 				}
-				query.distinct(true);
+				
 				return finalPred;
 			}
 
 		};
 	}
-	
-	
 	
 	/**
 	 * Get the clinical element falling under age Rule

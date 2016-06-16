@@ -8,6 +8,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
+import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory;
 import com.glenwood.glaceemr.server.application.models.PatientEpisodeAttributeDetails;
@@ -66,7 +67,20 @@ public class ClinicalDataBean {
 			clinicalElementBean.setClinicalElementTextDimension(HUtil.Nz(element.getClinicalElementsTextDimension(),""));
 			clinicalElementBean.setClinicalElementGender(Integer.parseInt(HUtil.Nz(element.getClinicalElementsGender(),"false")));
 			clinicalElementBean.setClinicalElementIsSelect(Integer.parseInt(HUtil.Nz(element.getClinicalElementsIsselect(),"-1")));
+			
+		
+			for (ClinicalTextMapping clinicalTextMapping : element.getClinicalTextMappings()) {
+				ClinicalTextMapping mapping = new ClinicalTextMapping();	
+				mapping.setClinicalTextMappingAssociatedElement(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingAssociatedElement(),""));
+				mapping.setClinicalTextMappingId(Integer.parseInt(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingId(),"-1")));
+				mapping.setClinicalTextMappingIsdate(Boolean.parseBoolean(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingIsdate(),"false")));
+				mapping.setClinicalTextMappingPopupType(Integer.parseInt(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingPopupType(),"-1")));
+				mapping.setClinicalTextMappingTextboxGwid(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingTextboxGwid(),""));
+				clinicalElementBean.getClinicalTextMappings().add(clinicalTextMapping);
+			}
+			
 			this.setClinicalElements(HUtil.Nz(element.getClinicalElementsGwid(),"-1"), clinicalElementBean);
+		
 		}
 	}
 
@@ -87,6 +101,24 @@ public class ClinicalDataBean {
 			setPatientElementBeanData(clinicalElementDataType,patElmtBean,elementData,clinicalElementGWId);
 		}
 	}
+	
+	
+	/**
+	 * 
+	 * Sets Patient Vitals Data to {@link PatientElementBean}
+	 * 
+	 * @param patientElementData
+	 *//*
+	public void setPatientVitalsClinicalData(List<PatientVitals> patientVitalsElementData) {
+		for (PatientVitals patData : patientVitalsElementData) {
+			PatientElementBean patElmtBean=new PatientElementBean();
+			String clinicalElementGWId=HUtil.Nz(patData.getPatientVitalsGwid(),"-1");
+			int clinicalElementDataType=Integer.parseInt(HUtil.Nz(patData.getClinicalElement().getClinicalElementsDatatype(),"-1"));
+			patElmtBean.setPatientClinicalElementId(Integer.parseInt(HUtil.Nz(patData.getPatientVitalsId(),"-1")));
+			String elementData=HUtil.Nz(patData.getPatientVitalsValue(),"-1").trim();
+			setPatientElementBeanData(clinicalElementDataType,patElmtBean,elementData,clinicalElementGWId);
+		}
+	}*/
 
 
 

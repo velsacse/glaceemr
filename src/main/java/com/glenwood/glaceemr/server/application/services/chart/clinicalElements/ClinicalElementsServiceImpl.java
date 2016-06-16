@@ -2,11 +2,14 @@ package com.glenwood.glaceemr.server.application.services.chart.clinicalElements
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
+
 import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMapping;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
@@ -29,6 +32,7 @@ import com.glenwood.glaceemr.server.application.repositories.LeafPatientReposito
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalHistoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientVitalsRepository;
 import com.glenwood.glaceemr.server.application.specifications.ClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
@@ -43,9 +47,7 @@ import com.glenwood.glaceemr.server.utils.HUtil;
 @Service
 public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 
-	@Autowired
-	ClinicalElementsOptionsRepository clinicalElementsOptionsRepository;
-
+	
 	@Autowired
 	ClinicalElementsRepository clinicalElementsRepository;
 
@@ -61,6 +63,9 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 	@Autowired
 	ClinicalTextMappingRepository clinicalTextMappingRepository;
 
+	@Autowired
+	ClinicalElementsOptionsRepository clinicalElementsOptionsRepository;
+
 	@Autowired 
 	PatientRegistrationRepository patientRegRepository;
 
@@ -74,13 +79,20 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 	LeafPatientRepository leafPatientRepository;
 
 	@Autowired
+	ClinicalElementTemplateMappingRepository clinicalElementTemplateMappingRepository;
+
+	@Autowired
 	EncounterPlanRepository encounterPlanRepository;
 	
 	@Autowired
-	PatientDetailsBean patientDetailsBean;
+	PatientVitalsRepository patientVitalsRepository;
+
+
+	Short patientSex=0;
+	Date patDOB=new Date();
+	Integer ageinDay=0;
 	
-	@Autowired
-	ClinicalElementTemplateMappingRepository clinicalElementTemplateMappingRepository;
+	
 	
 	@Override
 	public List<ClinicalElementsOptions> getClinicalElementOptions(String gwid) {
@@ -89,37 +101,35 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 	}
 
 	@Override
-	public ClinicalDataBean setVitalsClinicalData(String gwidPattern,Integer patientId,Integer encounterId,Boolean isDischargeVitals,Integer admssEpisode) {
-		clinicalDataBean.setClinicalData(clinicalElementsRepository.findAll(Specifications.where(ClinicalElementsSpecification.getClinicalElementsByGWIDPattern(clinicalDataBean.getClientId(),gwidPattern,patientDetailsBean.getAgeinDay(), patientDetailsBean.getPatientSex())).and(ClinicalElementsSpecification.defaultAgePed(-1)).or(ClinicalElementsSpecification.patientAgePed(patientDetailsBean.getAgeinDay()))));
-		List<Encounter> enc= encounterEntityRepository.findAll(EncounterEntitySpecification.getPrevEncHavingData(patientId,encounterId));
-		List<PatientClinicalElements> patientData=null;
-		if(isDischargeVitals){
+	public ClinicalDataBean setVitalsClinicalData(String gwidPattern,Integer patientId, Integer encounterId, Boolean isDischargeVitals,Integer admssEpisode, short patientSex, Integer ageinDay) {
+		clinicalDataBean.setClinicalData(clinicalElementsRepository.findAll(Specifications.where(ClinicalElementsSpecification.getClinicalElementsByGWIDPattern(clinicalDataBean.clientId,gwidPattern,ageinDay, patientSex)).and(ClinicalElementsSpecification.defaultAgePed(-1)).or(ClinicalElementsSpecification.patientAgePed(ageinDay))));
+		
+		List<PatientClinicalElements> patientData=Collections.emptyList();
+		List<PatientClinicalHistory> patientHistoryData=null;
+		if(!isDischargeVitals.booleanValue()){
+			List<Encounter> enc= encounterEntityRepository.findAll(EncounterEntitySpecification.getPrevEncHavingData(patientId,encounterId));
 			if(enc.size()>0 && enc.get(0)!=null){
-				if(patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinicalDataByGWIDPattern(clinicalDataBean.getClientId(),patientId,encounterId,gwidPattern)).size()>0){
-					patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getNonHistoryElemPatientData(clinicalDataBean.getClientId(),patientId,encounterId,gwidPattern));
+				if(patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinicalDataByGWIDPattern(clinicalDataBean.clientId,patientId,encounterId,gwidPattern)).size()>0){
+					patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getNonHistoryElemPatientData(clinicalDataBean.clientId,patientId,encounterId,gwidPattern));
 				}
 				else{
-					patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPrevEncounterPatVitalData(clinicalDataBean.getClientId(),patientId, enc.get(0).getEncounterId(), gwidPattern));
+					patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPrevEncounterPatVitalData(clinicalDataBean.clientId,patientId, enc.get(0).getEncounterId(), gwidPattern));
 				}
 			}else{
-				patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getNonHistoryElemPatientData(clinicalDataBean.getClientId(),patientId,encounterId,gwidPattern));
+				patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getNonHistoryElemPatientData(clinicalDataBean.clientId,patientId,encounterId,gwidPattern));
 			}
-		}else{/*
-			patientVitalsRepository.findAll(DischargeVitalSpecification.getDichargeVitalsByEncounterId(patientId, encounterId, admssEpisode));
-		*/}
-
-		List<PatientClinicalHistory> patientHistoryData=patientClinicalHistoryRepository.findAll(PatientClinicalElementsSpecification.getHistoryElemPatientData(clinicalDataBean.getClientId(),patientId, gwidPattern));
-		clinicalDataBean.setPatientClinicalData(patientData);
-		clinicalDataBean.setHistoryDatatoPatElementBean(patientHistoryData);
+			clinicalDataBean.setPatientClinicalData(patientData);
+			patientHistoryData=patientClinicalHistoryRepository.findAll(PatientClinicalElementsSpecification.getHistoryElemPatientData(clinicalDataBean.clientId,patientId, gwidPattern));
+			clinicalDataBean.setHistoryDatatoPatElementBean(patientHistoryData);
+		}else{
+			/*System.out.println("YES DISCHARGE VITALS");
+			List<PatientVitals> patientVitals = patientVitalsRepository.findAll(DischargeVitalSpecification.getDichargeVitalsByEncounterId(patientId, encounterId, admssEpisode));
+			clinicalDataBean.setPatientVitalsClinicalData(patientVitals);*/
+		}
+		
 		return clinicalDataBean;
+		
 	}
-
-
-	/**
-	 * 
-	 * Return true if clinical element is active else false
-	 * @param gwid 
-	 */ 
 
 	@Override
 	public boolean isClinicalElemActive(String gwid){
@@ -155,14 +165,15 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 			return null;
 	}
 
+
 	public void getPatientDetails(Integer patientId){
 		List<PatientRegistration> patRegistration=patientRegRepository.findAll(PatientRegistrationSpecification.getPatientPersonalDetails(patientId));
 		for (PatientRegistration patientRegistration : patRegistration) {
-			patientDetailsBean.setPatientSex(patientRegistration.getPatientRegistrationSex().shortValue());
-			patientDetailsBean.setPatDOB(patientRegistration.getPatientRegistrationDob());
-			SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
-			patientDetailsBean.setAgeinDay((int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patientDetailsBean.getPatDOB())) , new java.util.Date() ))));
+			patientSex=patientRegistration.getPatientRegistrationSex().shortValue();
+			patDOB=patientRegistration.getPatientRegistrationDob();
 		}
+		SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
+		ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date() )));
 	}
 
 	public List<ClinicalElements> setClinicalDataBean(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String gwidPattern){
@@ -177,12 +188,13 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		 * Set clinical elements to ClinicalDataBean
 		 * 
 		 * */
-		List<ClinicalElements> clinicalelements=clinicalElementsRepository.findAll(ClinicalElementsSpecification.getClinicalElements(templateId, patientDetailsBean.getPatientSex(), tabType,leafPatient.get(0).getLeafPatientCreatedDate()==null?"-1":leafPatient.get(0).getLeafPatientCreatedDate().toString(), patientDetailsBean.getAgeinDay(),isAgeBased));
+
+		List<ClinicalElements> clinicalelements=clinicalElementsRepository.findAll(ClinicalElementsSpecification.getClinicalElements(templateId, patientSex, tabType,leafPatient.get(0).getLeafPatientCreatedDate()==null?"-1":leafPatient.get(0).getLeafPatientCreatedDate().toString(), ageinDay,isAgeBased));
 		clinicalDataBean.setClinicalData(clinicalelements);
 		if(encounterId==-1){
-			clinicalelements=clinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinicalHistoryData(clinicalDataBean.getClientId(),isAgeBased, patientId, patientDetailsBean.getPatientSex(), gwidPattern, patientDetailsBean.getAgeinDay()));
+			clinicalelements=clinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinicalHistoryData(clinicalDataBean.clientId,isAgeBased, patientId, patientSex, gwidPattern, ageinDay));
 		}else{
-			clinicalelements=clinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getEncPatientClinicalData(clinicalDataBean.getClientId(),isAgeBased, patientId,encounterId, patientDetailsBean.getPatientSex(), gwidPattern, patientDetailsBean.getAgeinDay()));
+			clinicalelements=clinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getEncPatientClinicalData(clinicalDataBean.clientId,isAgeBased, encounterId, patientSex, gwidPattern, ageinDay));
 		}
 		clinicalDataBean.setClinicalData(clinicalelements);
 
@@ -191,8 +203,8 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		 * 
 		 * */
 
-		List<PatientClinicalElements> patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getNonHistoryElemPatientData(clinicalDataBean.getClientId(),patientId,encounterId,gwidPattern));
-		List<PatientClinicalHistory> patientHistoryData=patientClinicalHistoryRepository.findAll(PatientClinicalElementsSpecification.getHistoryElemPatientData(clinicalDataBean.getClientId(),patientId, gwidPattern));
+		List<PatientClinicalElements> patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getNonHistoryElemPatientData(clinicalDataBean.clientId,patientId,encounterId,gwidPattern));
+		List<PatientClinicalHistory> patientHistoryData=patientClinicalHistoryRepository.findAll(PatientClinicalElementsSpecification.getHistoryElemPatientData(clinicalDataBean.clientId,patientId, gwidPattern));
 		clinicalDataBean.setPatientClinicalData(patientData);
 		clinicalDataBean.setHistoryDatatoPatElementBean(patientHistoryData);
 
@@ -217,12 +229,12 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		 * 
 		 * */
 
-		List<ClinicalElements> clinicalelements=clinicalElementsRepository.findAll(ClinicalElementsSpecification.getClinicalElements(templateId, patientDetailsBean.getPatientSex(), tabType,leafPatient.get(0).getLeafPatientCreatedDate()==null?"-1":leafPatient.get(0).getLeafPatientCreatedDate().toString(), patientDetailsBean.getAgeinDay(),isAgeBased));
+		List<ClinicalElements> clinicalelements=clinicalElementsRepository.findAll(ClinicalElementsSpecification.getClinicalElements(templateId, patientSex, tabType,leafPatient.get(0).getLeafPatientCreatedDate()==null?"-1":leafPatient.get(0).getLeafPatientCreatedDate().toString(), ageinDay,isAgeBased));
 		clinicalDataBean.setClinicalData(clinicalelements);
 		if(encounterId==-1){
-			clinicalelements=clinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinicalHistoryData(clinicalDataBean.getClientId(),isAgeBased, patientId, patientDetailsBean.getPatientSex(), gwidPattern, patientDetailsBean.getAgeinDay()));
+			clinicalelements=clinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinicalHistoryData(clinicalDataBean.clientId,isAgeBased, patientId, patientSex, gwidPattern, ageinDay));
 		}else{
-			clinicalelements=clinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getEncPatientClinicalData(clinicalDataBean.getClientId(),isAgeBased, patientId,encounterId, patientDetailsBean.getPatientSex(), gwidPattern, patientDetailsBean.getAgeinDay()));
+			clinicalelements=clinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getEncPatientClinicalData(clinicalDataBean.clientId,isAgeBased, encounterId, patientSex, gwidPattern, ageinDay));
 		}
 		clinicalDataBean.setClinicalData(clinicalelements);
 
@@ -233,10 +245,10 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 
 
 		if(encounterId==-1){
-			List<PatientClinicalHistory> patientHistoryData=patientClinicalHistoryRepository.findAll(PatientClinicalElementsSpecification.getHistoryElemPatientData(clinicalDataBean.getClientId(),patientId, gwidPattern));
+			List<PatientClinicalHistory> patientHistoryData=patientClinicalHistoryRepository.findAll(PatientClinicalElementsSpecification.getHistoryElemPatientData(clinicalDataBean.clientId,patientId, gwidPattern));
 			clinicalDataBean.setPatientHistoryData(patientHistoryData);
 		}	else{
-			List<PatientClinicalElements> patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getNonHistoryElemPatientData(clinicalDataBean.getClientId(),patientId,encounterId,gwidPattern));
+			List<PatientClinicalElements> patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getNonHistoryElemPatientData(clinicalDataBean.clientId,patientId,encounterId,gwidPattern));
 			clinicalDataBean.setPatientClinData(patientData);
 		}
 		return clinicalelements;
@@ -328,9 +340,4 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 			}
 		}
 	}
-
-	
-
-
-
 }

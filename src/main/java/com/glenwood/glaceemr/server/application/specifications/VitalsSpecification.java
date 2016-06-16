@@ -25,6 +25,34 @@ import com.glenwood.glaceemr.server.application.models.VitalsParameter_;
 
 public class VitalsSpecification {
 	
+	public static Specification<VitalGroup> getVitalActiveGrps(final Integer patientId,final Integer groupId,final short patientSex){
+
+		return new Specification<VitalGroup>(){
+
+			@Override
+			public Predicate toPredicate(Root<VitalGroup> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Join<VitalGroup,VitalsParameter> paramJoin=root.join(VitalGroup_.vitalsParameter,JoinType.INNER);			
+				Predicate isTrue=cb.equal(paramJoin.get(VitalsParameter_.vitalsParameterIsactive),true);
+				Predicate patgender=cb.equal(paramJoin.get(VitalsParameter_.vitalsParameterGender),patientSex);
+				Predicate patDefaultGender=cb.equal(paramJoin.get(VitalsParameter_.vitalsParameterGender),0);
+				Predicate grpPred=null;
+				if(groupId!=-1)
+					grpPred=cb.equal(root.get(VitalGroup_.vitalGroupId),groupId);
+				Predicate compPredicate=cb.or(patgender,patDefaultGender);
+				query.orderBy(cb.asc(root.get(VitalGroup_.vitalGroupOrderby)));
+				query.distinct(true);
+				Predicate finalPred=null;
+				if(groupId!=-1)
+					finalPred=cb.and(isTrue,compPredicate,grpPred);
+				else
+					finalPred=cb.and(isTrue,compPredicate);
+				return finalPred;
+			}
+
+		};
+	}
+
+	
 	public static Specification<VitalsParameter> vitalsActiveGwId(final List<String> gwid){
 		return new Specification<VitalsParameter>() {
 			@Override
@@ -68,7 +96,40 @@ public class VitalsSpecification {
 	}
 
 	
+	public static Specification<VitalsParameter> isVitalActive(final String gwid){
+		return new Specification<VitalsParameter>() {
+			@Override
+			public Predicate toPredicate(Root<VitalsParameter> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate isGwid=cb.equal(root.get(VitalsParameter_.vitalsParameterGwId),gwid);
+				Predicate isActive=cb.equal(root.get(VitalsParameter_.vitalsParameterIsactive),true);
+				return cb.and(isGwid,isActive);
+			}
+		};
+	}
 	
+	public static Specification<UnitsOfMeasure> getUnit(final Integer unitId){
+		return new Specification<UnitsOfMeasure>() {
+			@Override
+			public Predicate toPredicate(Root<UnitsOfMeasure> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				return cb.equal(root.get(UnitsOfMeasure_.unitsOfMeasureId),unitId);
+			}
+		};
+	}
 	
+	public static Specification<VitalsParameter> getVitalElements(final Short patientSex,final Integer groupId){
+		return new Specification<VitalsParameter>() {
+			@Override
+			public Predicate toPredicate(Root<VitalsParameter> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				root.fetch(VitalsParameter_.vitalsParameterCondition,JoinType.INNER);
+				root.fetch(VitalsParameter_.unitsOfMeasureTable,JoinType.LEFT);
+				Predicate isTrue = cb.equal(root.get(VitalsParameter_.vitalsParameterIsactive),true);
+				Predicate isGroup = cb.equal(root.get(VitalsParameter_.vitalsParameterGroup),groupId);
+				Predicate gender = root.get(VitalsParameter_.vitalsParameterGender).in(patientSex,0);
+				Predicate finalPred = cb.and(isTrue,isGroup,gender);
+				query.orderBy(cb.asc(root.get(VitalsParameter_.vitalsParameterDisplayOrder)));
+				return finalPred;
+			}
+		};
+	}
 	
 }

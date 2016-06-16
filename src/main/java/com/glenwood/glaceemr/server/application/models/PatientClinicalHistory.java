@@ -38,7 +38,7 @@ public class PatientClinicalHistory {
 	
 	
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY,optional=false)
 	@JoinColumn(name="patient_clinical_history_gwid",referencedColumnName="clinical_elements_gwid",insertable = false, updatable = false)
 	private ClinicalElements clinicalElement;
 

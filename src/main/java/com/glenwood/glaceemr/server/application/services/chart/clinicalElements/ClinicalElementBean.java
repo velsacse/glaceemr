@@ -1,5 +1,11 @@
 package com.glenwood.glaceemr.server.application.services.chart.clinicalElements;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
+
 
 
 
@@ -17,6 +23,9 @@ public class ClinicalElementBean {
 	private String clinicalElementTextDimension;
 	private Integer clinicalElementGender;
 	private Integer clinicalElementIsSelect;
+	private List<ClinicalTextMapping> clinicalTextMappings;
+	
+	
 	public ClinicalElementBean(){
 		clinicalElementName="";
 		clinicalElementNotes="";
@@ -31,7 +40,21 @@ public class ClinicalElementBean {
 		clinicalElementGender=0;
 		clinicalElementTextDimension="10";
 		clinicalElementIsSelect = -1;
+		clinicalTextMappings=new ArrayList<ClinicalTextMapping>();
 	}
+	
+	
+	public List<ClinicalTextMapping> getClinicalTextMappings() {
+		return clinicalTextMappings;
+	}
+
+
+	public void setClinicalTextMappings(List<ClinicalTextMapping> clinicalTextMappings) {
+		this.clinicalTextMappings = clinicalTextMappings;
+	}
+
+	
+	
 	public String getClinicalElementName() {
 		return clinicalElementName;
 	}

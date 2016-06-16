@@ -58,7 +58,7 @@ public class ROSSpecification {
 
 			@Override
 			public Predicate toPredicate(Root<RosElement> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				root.join(RosElement_.clinicalTextMapping, JoinType.LEFT);
+				root.fetch(RosElement_.clinicalTextMapping, JoinType.LEFT);
 				Predicate sysPred=root.get(RosElement_.rosElementSystemId).in(systemId);
 				Predicate isActivePred=cb.equal(root.get(RosElement_.rosElementIsactive),true);
 				query.orderBy(cb.asc(root.get(RosElement_.rosElementOrderby)));
