@@ -9,8 +9,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.Admission;
@@ -92,7 +90,8 @@ public class AdmissionSpecification {
 				root.fetch(Admission_.h479,JoinType.LEFT);
 				Predicate patPred=cb.equal(root.get(Admission_.admissionPatientId),patientId);
 				Predicate admissionActive=cb.equal(root.get(Admission_.admissionStatus),2);
-				return cb.and(patPred,admissionActive);
+				query.where(patPred,admissionActive).orderBy(cb.desc(root.get(Admission_.admissionId)));
+				return query.getRestriction();
 				
 				
 			}

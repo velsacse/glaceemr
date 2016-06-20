@@ -5,7 +5,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 
@@ -187,5 +186,21 @@ public class AssessmentSpecification {
 
 	}
 	
-	
+	/**
+	 * Ordering dx
+	 * @param keyword
+	 * @return
+	 */
+	public static Specification<H611> getOrder()	{
+		return new Specification<H611>() {
+
+			@Override
+			public Predicate toPredicate(Root<H611> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				
+				query.orderBy(cb.asc(root.get(H611_.h611010)));
+				return query.getRestriction();
+			}
+		};
+	}
 }
