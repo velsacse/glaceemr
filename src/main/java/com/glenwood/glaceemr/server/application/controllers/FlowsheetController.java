@@ -80,9 +80,15 @@ public class FlowsheetController {
 			@ApiParam(name="patientId",value="patient id") @RequestParam(value="patientId", required=true, defaultValue="-1") Integer patientId,
 			@ApiParam(name="encounterId",value="encounter id") @RequestParam(value="encounterId", required=true, defaultValue="-1") Integer encounterId) throws Exception{
 		logger.debug("Begin of request to get the complete flowsheet details based on flowsheet id and patient Id.");
+		  System.out.println("before request  for Flowsheet "+System.currentTimeMillis());
+	        long starttime=System.currentTimeMillis();
 		FlowsheetBean flowsheetData = flowsheetService.getFlowsheetData(-1,flowsheetId,patientId,encounterId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully loaded data for flowsheet="+flowsheetId+" for the patient having PatientId="+patientId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully loaded data for flowsheet="+flowsheetId+" for the patient having PatientId="+patientId);
 		logger.debug("End of request to get the complete flowsheet details based on flowsheet id and patient Id.");
+		 System.out.println("After request  for flowsheet "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
+
+		
 		return flowsheetData;
 	}
 	
@@ -103,9 +109,13 @@ public class FlowsheetController {
 			@ApiParam(name="encounterId",value="encounter id")  @RequestParam(value="encounterId", required=true, defaultValue="-1") Integer encounterId,
 			@ApiParam(name="dxCode",value="dx code")  @RequestParam(value="dxCode", required=true, defaultValue="") String dxCode) throws Exception{
 		logger.debug("Begin of request to get the complete flowsheet details based on flowsheet id and patient Id for multiple sheets.");
+		  System.out.println("before request  for MEANINGFULUSE "+System.currentTimeMillis());
+	        long starttime=System.currentTimeMillis();
 		List<FlowsheetBean> flowsheetData = flowsheetService.getFlowsheetDataList(flowsheetType,dxCode,patientId,encounterId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully loaded data for flowsheet type="+flowsheetType+" for the patient having PatientId="+patientId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully loaded data for flowsheet type="+flowsheetType+" for the patient having PatientId="+patientId);
 		logger.debug("End of request to get the complete flowsheet details based on flowsheet id and patient Id for multiple sheets.");
+	     System.out.println("After request  for MEANINGFULUSE"+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
 		return flowsheetData;
 	}
 	
@@ -194,4 +204,6 @@ public class FlowsheetController {
 		logger.debug("End of request to get the complete flowsheet details based on flowsheet id and patient Id.");
 		return flowsheetData;
 	}
+	
+	
 }
