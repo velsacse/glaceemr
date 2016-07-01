@@ -111,7 +111,6 @@ public class AdmissionServiceImpl implements AdmissionService {
 				newadmssObj.setAdmissionPosId(admission.getPos());
 				newadmssObj.setAdmissionPatientId(admission.getPatientId());
 				newadmssObj.setAdmissionStatus(1);
-				System.out.println("room No "+admission.getRoomNo());
 				newadmssObj.setAdmissionRoom(admission.getRoomNo());
 				newadmssObj.setAdmissionNotes(admission.getNotes());
 
@@ -217,7 +216,6 @@ public class AdmissionServiceImpl implements AdmissionService {
 				PatientEpisode patEpisode=null;
 				if((patEpisode = getPatientEpisodebyEpisodeId(admiss.getAdmissionEpisode()))!=null){
 					patEpisode.setPatientEpisodeStatus(1);
-					System.out.println("loginId"+loginId);
 					patEpisode.setPatientEpisodeModifiedBy(loginId);
 					patEpisode.setPatientEpisodeModifiedDate(new Timestamp(date.getTime()));
 					patientEpisodeRepository.saveAndFlush(patEpisode);
@@ -303,7 +301,6 @@ public class AdmissionServiceImpl implements AdmissionService {
 
 	@Override
 	public String getAdmissionEncDetails(Integer admssEpisode) {
-		System.out.println("admssEpisode"+admssEpisode);
 		List<Encounter> admssEnc=encounterEntityRepository.findAll(AdmissionSpecification.getAdmissionEncByEpisodeId(admssEpisode));
 		JSONArray encDataJson= new JSONArray();
 		for (int i=0;i<admssEnc.size();i++) {
@@ -322,7 +319,6 @@ public class AdmissionServiceImpl implements AdmissionService {
 		List<H496> admssLeafFaxDet = null;
 		List<PatientAllergies> admissionAllergiesDet = null;
 		try {
-			System.out.println(">>>"+admssEpisode);
 			List<Encounter> admssEnc=encounterEntityRepository.findAll(AdmissionSpecification.getAdmissionEncByEpisodeId(admssEpisode));
 			List<Integer> encounterIds = new ArrayList<Integer>();
 			for (Encounter encounter : admssEnc) {
@@ -344,7 +340,6 @@ public class AdmissionServiceImpl implements AdmissionService {
 			e.printStackTrace();
 		}
 		AdmissionLeafBean admissionLeafBean = new AdmissionLeafBean();
-		System.out.println(admissionLeafs);
 		admissionLeafBean.setAdmissionLeafBean(admissionLeafs);
 		admissionLeafBean.setAdmissionLeafFaxBean(admssLeafFaxDet);
 		admissionLeafBean.setAllergyBean(admissionAllergiesDet);

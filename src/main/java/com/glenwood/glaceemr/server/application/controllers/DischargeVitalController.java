@@ -40,7 +40,6 @@ public class DischargeVitalController {
 	public List<PatientVitals> getAdmissionEncDetails(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId,
 								@RequestParam(value="chartId",required=false, defaultValue="") Integer encounterId,
 								@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
-		System.out.println(dischargeVitalService.getDischartgeVitals(patientId,encounterId,admssEpisode).size());
 		return dischargeVitalService.getDischartgeVitals(patientId,encounterId,admssEpisode);
 	}
 	
