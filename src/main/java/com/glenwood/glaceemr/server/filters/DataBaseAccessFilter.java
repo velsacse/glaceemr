@@ -131,12 +131,12 @@ public class DataBaseAccessFilter implements Filter {
 
 		while(headerNames.hasMoreElements()){
 			String header = headerNames.nextElement();
-			if(header.trim().equalsIgnoreCase("authorization")){
+			/*if(header.trim().equalsIgnoreCase("authorization")){
 				String basecut[]=httpRequest.getHeader(header).split("Basic");
 				byte[] valueDecoded= Base64.decodeBase64(basecut[1].getBytes() );
 				password=new String(valueDecoded).split(":")[1];
 
-			}
+			}*/
 
 			if(header.trim().equalsIgnoreCase("Database")){
 				tennantId = HUtil.Nz(httpRequest.getHeader(header).toString(),"-1");
