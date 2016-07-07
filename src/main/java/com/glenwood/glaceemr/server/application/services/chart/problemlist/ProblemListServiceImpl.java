@@ -124,7 +124,6 @@ public class ProblemListServiceImpl implements ProblemListService{
 	       List<ProblemList> dxs = problemListRepository.findAll(ProblemListSpecification.getDataToEdit(patientId,problemId));
 			if( dxs.size() > 0 ) {
 				for (ProblemList dx : dxs) {
-					System.out.println("\n\n onset date is==="+onsetDate);
 					
 					if(!onsetDate.trim().equals("")){
 						if(onsetDate.contains("/")){
@@ -134,14 +133,12 @@ public class ProblemListServiceImpl implements ProblemListService{
 							DateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd");
 							Date date2 = (Date) formatter2.parse(onsetDate);
 							
-							System.out.println("date fater parsing===="+date2);
 							dx.setProblemListOnsetDate(date2);
 						}else if(onsetDate.contains("-")){
 							DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy"); 
 							Date date = (Date) formatter.parse(onsetDate);
 							DateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd");
 							Date date2 = (Date) formatter2.parse(onsetDate);
-							System.out.println("date fater parsing===="+date2);
 							dx.setProblemListOnsetDate(date2);
 							
 						}
@@ -194,7 +191,6 @@ public class ProblemListServiceImpl implements ProblemListService{
 		             for(String currentProblemId:problemIdStr.split(",")){
 		            	
 		                int currentPid=Integer.parseInt(currentProblemId);
-		                System.out.println("\n\n each problem id===="+currentPid);
 		                ProblemList plist = problemListRepository.findOne(currentPid);
 		                plist.setProblemListIsactive(false);
 		         		problemListRepository.saveAndFlush(plist);

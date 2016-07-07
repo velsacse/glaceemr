@@ -73,7 +73,6 @@ public class AdmissionController {
 	@RequestMapping(value="/getAdmissionEncounterDetails",method=RequestMethod.GET)
 	@ResponseBody
 	public String getAdmissionEncDetails(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
-		System.out.println("admssEpisodein controlle"+admssEpisode);
 		return admissionService.getAdmissionEncDetails(admssEpisode);
 	}
 	

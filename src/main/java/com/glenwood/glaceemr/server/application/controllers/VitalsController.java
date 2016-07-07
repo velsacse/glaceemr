@@ -53,7 +53,6 @@ public class VitalsController {
 		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
 		groupId=Integer.parseInt(Optional.fromNullable(groupId+"").or("-1"));
 		isDischargeVitals=Boolean.parseBoolean(Optional.fromNullable(isDischargeVitals+"").or("false"));
-		System.out.println("isDischargeVitals"+isDischargeVitals);
 		admssEpisode=Integer.parseInt(Optional.fromNullable(admssEpisode+"").or("-1"));
 		return vitalService.setVitals(patientId,encounterId,groupId,isDischargeVitals,admssEpisode,clientId);
 	}

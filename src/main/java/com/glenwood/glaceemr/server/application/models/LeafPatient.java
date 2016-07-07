@@ -96,9 +96,6 @@ public class LeafPatient {
 	@Column(name="leaf_patient_np_alert_id")
 	private Integer leafPatientNpAlertId;
 
-	@Column(name="leaf_library_isfaxed")
-	private Boolean leafLibraryIsfaxed;
-
 	@Column(name="leaf_patient_ccdetails")
 	private String leafPatientCcdetails;
 
@@ -398,14 +395,6 @@ public class LeafPatient {
 
 	public void setLeafPatientNpAlertId(Integer leafPatientNpAlertId) {
 		this.leafPatientNpAlertId = leafPatientNpAlertId;
-	}
-
-	public Boolean getLeafLibraryIsfaxed() {
-		return leafLibraryIsfaxed;
-	}
-
-	public void setLeafLibraryIsfaxed(Boolean leafLibraryIsfaxed) {
-		this.leafLibraryIsfaxed = leafLibraryIsfaxed;
 	}
 
 	public String getLeafPatientCcdetails() {

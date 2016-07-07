@@ -58,9 +58,7 @@ public class PlanReferralControllerTest {
 	@Test
 	@Ignore
 	public void getReferralList() {
-		 logger.debug("Getting referral list- Test");
-		 System.out.println("referral list::"+given().param("encounterId", "6701").param("chartId", "1196").
-		 		 when().get("/ReferralSummary.Action/listReferral").body().print());
+		 logger.debug("Getting referral list- Test");		 
 		 given().param("encounterId", "6701").param("chartId", "1196").
 		 		 when().get("/ReferralSummary.Action/listReferral").then().
 	             statusCode(HttpServletResponse.SC_OK).contentType(ContentType.JSON).
