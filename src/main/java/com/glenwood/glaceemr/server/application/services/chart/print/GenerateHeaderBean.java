@@ -118,13 +118,13 @@ public class GenerateHeaderBean {
 				for(int i=0;i<letterHeaderContentList.size();i++){
 					if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==1){
 						if(letterHeaderContentList.get(i).getLetterHeaderContentFlag()==1){
-							headerHTML.append("<td>"+getGenericImage(letterHeaderContentList.get(i),shareFolderPath,"float:left;")+"</td>");
+							headerHTML.append("<td width='33.3%'>"+getGenericImage(letterHeaderContentList.get(i),shareFolderPath,"float:left;")+"</td>");
 							break;
 						}
 					}
 				}
 
-				headerHTML.append("<td width='100%'>"+getTextOnlyHeaderHTML(genericLetterheader, letterHeaderContentList, genericPrintBean)+"</td>");
+				headerHTML.append("<td width='33.3%'>"+getTextOnlyHeaderHTML(genericLetterheader, letterHeaderContentList, genericPrintBean)+"</td>");
 
 				for(int i=0;i<letterHeaderContentList.size();i++){
 					if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==1){
@@ -141,7 +141,7 @@ public class GenerateHeaderBean {
 				headerHTML.append("<tr>");
 				for(int i=0;i<letterHeaderContentList.size();i++){
 					if(letterHeaderContentList.get(i).getLetterHeaderContentVariant() ==1 && letterHeaderContentList.get(i).getLetterHeaderContentFlag()==1 && letterHeaderContentList.get(i).getLetterHeaderContentCustom()!=""){
-						headerHTML.append("<td><div align='left' style='align-items: left;width:100%;'>"+getGenericImage(letterHeaderContentList.get(i), shareFolderPath, letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"</div></td>");
+						headerHTML.append("<td width='33.3%'><div align='left' style='align-items: left;width:100%;'>"+getGenericImage(letterHeaderContentList.get(i), shareFolderPath, letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"</div></td>");
 					}
 				}
 				headerHTML.append("<td style='width:80%'>");
@@ -162,9 +162,10 @@ public class GenerateHeaderBean {
 
 	private String getGenericImage(LetterHeaderContent letterHeaderContent, String shareFolderPath, String styleStr) {
 		
-		StringBuffer imageHTML = new StringBuffer();
+		StringBuffer imageHTML = new StringBuffer("");
 		int flag = letterHeaderContent.getLetterHeaderContentFlag();
 		String style = getGenericImageStyle(letterHeaderContent);
+		if(letterHeaderContent.getLetterHeaderContentCustom()!=null && !letterHeaderContent.getLetterHeaderContentCustom().trim().isEmpty())
 		imageHTML.append("<img src='"+shareFolderPath+"/"+ letterHeaderContent.getLetterHeaderContentCustom()+"' id='headerImg"+flag+"' name='headerImg"+flag+"' style='"+styleStr+style+"'/>");
 		return imageHTML.toString();
 	}
@@ -309,10 +310,32 @@ public class GenerateHeaderBean {
 					String secondAddress=parseAddress(practiceBean.getPracticeCity(), practiceBean.getPracticeState(), practiceBean.getPracticeZip());
 					address.append(generateField("",secondAddress,style));
 				}
-				if(addressFormat.charAt(2)=='1')
-				address.append(generateField("Phone: ",practiceBean.getPracticePhoneNum(),style));
-				if(addressFormat.charAt(3)=='1')
-				address.append(generateField("Fax: ",practiceBean.getPracticeFaxNum(),style));
+				if(addressFormat.charAt(2)=='1'){					
+					String finalPhNum = practiceBean.getPracticePhoneNum();
+					try{
+						if(finalPhNum.indexOf("-")!=-1){
+							String[] arr= 	finalPhNum.split("-");
+							if(arr.length == 3)
+							finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+						}
+					}catch(Exception e){
+						finalPhNum = practiceBean.getPracticePhoneNum();
+					}
+					address.append(generateField("Phone: ",finalPhNum,style));
+				}
+				if(addressFormat.charAt(3)=='1'){
+					String finalFaxNum = practiceBean.getPracticeFaxNum();
+					try{
+						if(finalFaxNum.indexOf("-")!=-1){
+							String[] arr= 	finalFaxNum.split("-");
+							if(arr.length == 3)
+								finalFaxNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+						}
+					}catch(Exception e){
+						finalFaxNum = practiceBean.getPracticePhoneNum();
+					}
+					address.append(generateField("Fax: ",finalFaxNum,style));
+				}
 				if(addressFormat.charAt(4)=='1')
 				address.append(generateField("Email: ",practiceBean.getPracticeEmail(),style));
 				if(addressFormat.charAt(5)=='1')
@@ -330,10 +353,32 @@ public class GenerateHeaderBean {
 					address.append(generateField("",posBean.get(0).getPosAddress(),style));
 					address.append(generateField("",parseAddress(posBean.get(0).getPosCity(), posBean.get(0).getPosState(), posBean.get(0).getPosZip()),style));
 				}
-				if(addressFormat.charAt(2)=='1')
-				address.append(generateField("Phone: ",posBean.get(0).getPosPhNum(),style));
-				if(addressFormat.charAt(3)=='1')
-				address.append(generateField("Fax: ",posBean.get(0).getPosFaxNum(),style));
+				if(addressFormat.charAt(2)=='1'){
+					String finalPhNum= posBean.get(0).getPosPhNum();
+					try{
+						if(finalPhNum.indexOf("-")!=-1){
+							String[] arr= 	finalPhNum.split("-");
+							if(arr.length == 3)
+								finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+						}
+					}catch(Exception e){
+						finalPhNum = posBean.get(0).getPosPhNum();
+					}
+					address.append(generateField("Phone: ",finalPhNum,style));
+				}
+				if(addressFormat.charAt(3)=='1'){
+					String finalFaxNum= posBean.get(0).getPosFaxNum();
+					try{
+						if(finalFaxNum.indexOf("-")!=-1){
+							String[] arr= 	finalFaxNum.split("-");
+							if(arr.length == 3)
+								finalFaxNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+						}
+					}catch(Exception e){
+						finalFaxNum = posBean.get(0).getPosFaxNum();
+					}
+					address.append(generateField("Fax: ",finalFaxNum,style));
+				}
 				address.append("</td></tr></table></td>");
 			}
 		}
@@ -346,10 +391,32 @@ public class GenerateHeaderBean {
 					address.append(generateField("",posBean.getPosAddress(),style));
 					address.append(generateField("",parseAddress(posBean.getPosCity(),posBean.getPosState(),posBean.getPosZip()),style));
 				}
-				if(addressFormat.charAt(2)=='1')
-				address.append(generateField("Phone: ",posBean.getPosPhNum(),style));
-				if(addressFormat.charAt(3)=='1')
-				address.append(generateField("Fax: ",posBean.getPosFaxNum(),style));
+				if(addressFormat.charAt(2)=='1'){
+					String finalPhNum= posBean.getPosPhNum();
+					try{
+						if(finalPhNum.indexOf("-")!=-1){
+							String[] arr= 	finalPhNum.split("-");
+							if(arr.length == 3)
+								finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+						}
+					}catch(Exception e){
+						finalPhNum = posBean.getPosPhNum();
+					}
+					address.append(generateField("Phone: ",finalPhNum,style));
+				}
+				if(addressFormat.charAt(3)=='1'){
+					String finalFaxNum= posBean.getPosFaxNum();
+					try{
+						if(finalFaxNum.indexOf("-")!=-1){
+							String[] arr= 	finalFaxNum.split("-");
+							if(arr.length == 3)
+								finalFaxNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+						}
+					}catch(Exception e){
+						finalFaxNum = posBean.getPosFaxNum();
+					}
+					address.append(generateField("Fax: ",finalFaxNum,style));
+				}
 				address.append("</table></td>");
 			}
 
@@ -363,8 +430,19 @@ public class GenerateHeaderBean {
 					address.append(generateField("",empBean.getEmpAddress(),style));
 					address.append(generateField("",parseAddress(empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()),style));
 				}
-				if(addressFormat.charAt(2)=='1')
-				address.append(generateField("Phone: ",empBean.getEmpPhNum(),style));
+				if(addressFormat.charAt(2)=='1'){
+					String finalPhNum= empBean.getEmpPhNum();
+					try{
+						if(finalPhNum.indexOf("-")!=-1){
+							String[] arr= 	finalPhNum.split("-");
+							if(arr.length == 3)
+								finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+						}
+					}catch(Exception e){
+						finalPhNum = empBean.getEmpPhNum();
+					}
+					address.append(generateField("Phone: ",finalPhNum,style));
+				}
 				if(addressFormat.charAt(4)=='1')
 				address.append(generateField("Email: ",empBean.getEmpMailId(),style));
 				address.append("</table></td>");
@@ -378,8 +456,19 @@ public class GenerateHeaderBean {
 					address.append(generateField("",empBean.getEmpAddress(),style));
 					address.append(generateField("",parseAddress(empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()),style));
 				}
-				if(addressFormat.charAt(2)=='1')
-				address.append(generateField("Phone: ",empBean.getEmpPhNum(),style));
+				if(addressFormat.charAt(2)=='1'){
+					String finalPhNum= empBean.getEmpPhNum();
+					try{
+						if(finalPhNum.indexOf("-")!=-1){
+							String[] arr= 	finalPhNum.split("-");
+							if(arr.length == 3)
+								finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+						}
+					}catch(Exception e){
+						finalPhNum = empBean.getEmpPhNum();
+					}
+					address.append(generateField("Phone: ",finalPhNum,style));
+				}
 				if(addressFormat.charAt(4)=='1')
 				address.append(generateField("Email: ",empBean.getEmpMailId(),style));
 				address.append("</table></td>");
@@ -396,8 +485,19 @@ public class GenerateHeaderBean {
 					address.append(generateField("",empBean.getEmpAddress(),style));
 					address.append(generateField("",parseAddress(empBean.getEmpCity(),empBean.getEmpState(),empBean.getEmpZip()),style));
 					}
-					if(addressFormat.charAt(2)=='1')
-					address.append(generateField("Phone: ",empBean.getEmpPhNum(),style));
+					if(addressFormat.charAt(2)=='1'){
+						String finalPhNum= empBean.getEmpPhNum();
+						try{
+							if(finalPhNum.indexOf("-")!=-1){
+								String[] arr= 	finalPhNum.split("-");
+								if(arr.length == 3)
+									finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+							}
+						}catch(Exception e){
+							finalPhNum = empBean.getEmpPhNum();
+						}
+						address.append(generateField("Phone: ",finalPhNum,style));
+					}
 					if(addressFormat.charAt(4)=='1')
 					address.append(generateField("Email: ",empBean.getEmpMailId(),style));
 					address.append("</table></td>");
