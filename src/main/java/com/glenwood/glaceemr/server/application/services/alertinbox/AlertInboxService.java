@@ -138,4 +138,9 @@ public interface AlertInboxService {
 	Integer getAlertCategoryId(Integer actionMap, Integer catType);
 	
 	List<AlertEvent> getAlertsByEncIdAndCatId(Integer encounterId,Integer categoryId);
+
+	List<AlertEvent> getConversion(String alertid);
+
+	List<AlertEvent> forwardIcmAlert(Integer alertid, Integer userId, Integer encounterid,Integer patientid, Integer categoryid,
+			Integer forwardto, String message, Integer parentalertid);
 }

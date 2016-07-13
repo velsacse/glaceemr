@@ -33,9 +33,9 @@ public class EmployeeSpecification {
 				Predicate predicate=query.where(cb.and(cb.isNotNull(root.get(EmployeeProfile_.empProfileEmpid))),activeEmployee).getRestriction();
 
 				if(sort.equalsIgnoreCase("asc"))
-					query.orderBy(cb.asc(root.get(EmployeeProfile_.empProfileGroupid)));
+					query.orderBy(cb.asc(root.get(EmployeeProfile_.empProfileGroupid)),cb.asc(root.get(EmployeeProfile_.empProfileFullname)));
 				if(sort.equalsIgnoreCase("desc"))
-					query.orderBy(cb.desc(root.get(EmployeeProfile_.empProfileGroupid)));	
+					query.orderBy(cb.desc(root.get(EmployeeProfile_.empProfileGroupid)),cb.asc(root.get(EmployeeProfile_.empProfileFullname)));
 				return predicate;
 			}
 		};

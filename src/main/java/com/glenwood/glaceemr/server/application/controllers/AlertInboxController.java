@@ -156,6 +156,7 @@ public class AlertInboxController {
 			@ApiParam(name="pageno",value="no of the page") @RequestParam(value="pageno", required=false, defaultValue="1") int pageno, 
 			@ApiParam(name="pagesize",value="size ofthe page") @RequestParam(value="pagesize", required=false, defaultValue="10") int pagesize){
 		logger.debug("Getting alerts by category id "+categoryId);
+
 		List<AlertInboxBean> alertInboxBeans=alertInboxService.getAlertsByCategory(userId,categoryId,pageno,pagesize);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		return alertInboxBeans;
@@ -487,5 +488,40 @@ public class AlertInboxController {
 		logger.debug("Creating the alert with id "+fromid);	
 		List<AlertEvent> alertEvent=alertInboxService.composeAlert(Integer.parseInt(fromid),toIdList,Integer.parseInt(status),Integer.parseInt(categoryid),Integer.parseInt(refid),Integer.parseInt(patientid),Integer.parseInt(encounterid),msg,Integer.parseInt(chartid),Integer.parseInt(roomid),Integer.parseInt(parentid));
 		return alertEvent;
+	}
+	
+	@ApiOperation(value = "getConversation", notes = "get internal communication message conversion")
+	@RequestMapping(value = "/getConversation", method = RequestMethod.GET)
+	@ResponseBody
+	@ApiResponses(value= {
+		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
+		    @ApiResponse(code = 404, message = "when user alert id does not exist"),
+		    @ApiResponse(code = 500, message = "Internal server error")})
+	public List<AlertEvent> getConversation(
+			@ApiParam(name="alertid",value="alert id") @RequestParam(value="alertid",required=true) String alertid){
+		
+		List<AlertEvent> alerts=alertInboxService.getConversion(alertid);
+		return alerts;
+	}
+	
+	@ApiOperation(value = "forwardIcmAlert", notes = "forward internal communication message")
+	@RequestMapping(value = "/forwardIcmAlert", method = RequestMethod.GET)
+	@ResponseBody
+	@ApiResponses(value= {
+		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
+		    @ApiResponse(code = 404, message = "when user alert id does not exist"),
+		    @ApiResponse(code = 500, message = "Internal server error")})
+	public List<AlertEvent> forwardIcmAlert(
+			@ApiParam(name="alertid",value="alert id") @RequestParam(value="alertid",required=true) Integer alertid,
+			@ApiParam(name="userid",value="logged in user id") @RequestParam(value="userid",required=true) Integer userId,
+			@ApiParam(name="categoryid",value="category id") @RequestParam(value="categoryid",required=true, defaultValue="37" ) Integer categoryid,
+			@ApiParam(name="patientid",value="patient id") @RequestParam(value="patientid",required=true, defaultValue="-1111") Integer patientid,
+			@ApiParam(name="encounterid",value="encounter id") @RequestParam(value="encounterid",required=true, defaultValue="-1" ) Integer encounterid,
+			@ApiParam(name="forwardto",value="to id") @RequestParam(value="forwardto",required=true) Integer forwardto,
+			@ApiParam(name="message",value="message") @RequestParam(value="message",required=true, defaultValue="") String message,
+			@ApiParam(name="parentalertid",value="parent alertid") @RequestParam(value="parentalertid",required=true, defaultValue="-1" ) Integer parentalertid){
+	
+		List<AlertEvent> alerts=alertInboxService.forwardIcmAlert(alertid,userId,encounterid,patientid,categoryid,forwardto,message,parentalertid);
+		return alerts;
 	}
 }

@@ -11,6 +11,8 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.glenwood.glaceemr.server.application.models.AlertArchive;
+import com.glenwood.glaceemr.server.application.models.AlertArchive_;
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertCategory_;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
@@ -76,7 +78,7 @@ public class AlertInboxSpecification {
 				
 				Expression<Integer> expr=root.get(AlertEvent_.alertEventId);
 				Predicate predicate=query.where(expr.in(alertIdList)).getRestriction();
-				
+				root.fetch(AlertEvent_.empProfileTableFrom,JoinType.LEFT);
 				return predicate;
 			}
 		};
@@ -165,4 +167,46 @@ public class AlertInboxSpecification {
 
 		};
 	}
+
+	/**
+	 * used to get alerts from alert_archive based on parentid and categoryid
+	 * @param parentId
+	 * @param categoryId
+	 * @return
+	 */
+	 
+	public static Specification<AlertArchive> inactiveAlertsByParentid(final Integer parentId,final Integer categoryId) {
+		return new Specification<AlertArchive>() {
+			
+			@Override
+			public Predicate toPredicate(Root<AlertArchive> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				root.fetch(AlertArchive_.empProfileTableFrom,JoinType.LEFT);
+				Predicate predicate=query.where(cb.and(
+						cb.or(cb.equal(root.get(AlertArchive_.alertEventParentalertid), parentId ),cb.equal(root.get(AlertArchive_.alertEventId), parentId ))
+						,cb.equal(root.get(AlertArchive_.alertEventCategoryId),categoryId ))).getRestriction();
+				query.orderBy(cb.desc(root.get(AlertArchive_.alertEventCreatedDate)));
+				return predicate;
+			}
+		};
+	}
+	
+	/**
+	 * Used to get max id based on category
+	 * @param categoryId
+	 * @return
+	 */
+	public static Specification<AlertEvent> getMaxId(final Integer categoryId) {
+		return new Specification<AlertEvent>() {
+			
+			@Override
+			public Predicate toPredicate(Root<AlertEvent> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate predicate=query.where(cb.equal(root.get(AlertEvent_.alertEventCategoryId), categoryId)).getRestriction();
+				cb.max(root.get(AlertEvent_.alertEventId));
+				return predicate;
+			}
+		};
+	}
+	
 }

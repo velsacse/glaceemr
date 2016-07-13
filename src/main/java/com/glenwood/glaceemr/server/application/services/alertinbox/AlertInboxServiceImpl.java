@@ -47,6 +47,7 @@ import com.glenwood.glaceemr.server.application.models.Room_;
 import com.glenwood.glaceemr.server.application.repositories.AlertArchiveRepository;
 import com.glenwood.glaceemr.server.application.repositories.AlertCategoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.AlertInboxRepository;
+import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmployeeProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.specifications.AlertArchiveSpecification;
@@ -77,6 +78,9 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 
 	@Autowired
 	EmployeeProfileRepository empProfileRepository;
+
+	@Autowired
+	ChartRepository chartRepository;
 
 	@Autowired
 	EntityManagerFactory emf ;
@@ -162,9 +166,9 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 				rootAlertCategory.get(AlertCategory_.alertCategoryDisplayOrder)));
 		cq.groupBy(rootAlertCategory.get(AlertCategory_.alertCategoryId),
 				rootAlertCategory.get(AlertCategory_.alertCategoryName),
-//				joinAcAI.get(AlertEvent_.alertEventRead),
+				//				joinAcAI.get(AlertEvent_.alertEventRead),
 				rootAlertCategory.get(AlertCategory_.alertCategoryDisplayOrder)
-//				,rootAlertCategory.get(AlertCategory_.alertCategoryGroup)
+				//				,rootAlertCategory.get(AlertCategory_.alertCategoryGroup)
 				);
 		cq.orderBy(builder.asc(rootAlertCategory.get(AlertCategory_.alertCategoryId)));
 
@@ -214,7 +218,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 				String categoryName=categoryNameList.get(i);
 				String categoryOrder=categoryOrderList.get(i);
 
-//				System.out.println("Category Id>>"+categoryId+"\tCategory Name>>"+categoryName+"\tCount>>"+totalCount);
+				//				System.out.println("Category Id>>"+categoryId+"\tCategory Name>>"+categoryName+"\tCount>>"+totalCount);
 				categoryNameList.set(i, "-1");
 
 				for(int j=0;j<categoryNameList.size();j++){
@@ -693,8 +697,10 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 						.orderBy(builder.desc(joinAcAe.get(AlertEvent_.alertEventCreatedDate)));
 
 		Query query=em.createQuery(cq);
-		query.setFirstResult((pageno-1)*10);	// Page no (offset)
-		query.setMaxResults(pagesize);		// Page size (No of results)
+		if(pagesize != -1){
+			query.setFirstResult((pageno-1)*10);	// Page no (offset)
+			query.setMaxResults(pagesize);		// Page size (No of results)
+		}
 		List<Object> alertsResultList=query.getResultList();
 
 		List<AlertInboxBean> aiblist=parseAlerts(alertsResultList);
@@ -1026,15 +1032,35 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 	public List<AlertEvent> composeAlert(int fromId, List<Integer> toIdList,
 			int status, int categoryId, int refId, int patientId,
 			int encounterId, String msg, int chartId, int roomId, int parentId) {
-		
-		String lastName="", firstName="", midInitial="";
-		PatientRegistration patient=patientRegistrationRepository.findOne(PatientRegistrationSpecification.PatientId(patientId+""));
-		
 
-		lastName=Optional.fromNullable(patient.getPatientRegistrationLastName()).or(" ");
-		firstName=Optional.fromNullable(patient.getPatientRegistrationFirstName()).or(" ");
-		midInitial=Optional.fromNullable(patient.getPatientRegistrationMidInitial()).or(" ");
-		
+		String lastName="", firstName="", midInitial="";
+		int  refid=refId;
+
+		if(categoryId==37){
+			CriteriaBuilder qb = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = qb.createQuery();
+
+			Root<AlertEvent> root = cq.from(AlertEvent.class);
+			cq.select(qb.max(root.get(AlertEvent_.alertEventRefId)));
+			cq.where(qb.equal(root.get(AlertEvent_.alertEventCategoryId), 37));
+
+			Query query=em.createQuery(cq);
+			Object maxIdObj=query.getSingleResult();
+
+			if(maxIdObj!=null)
+				refid = (int) maxIdObj;
+
+			if(refid < 1)
+				refid = 1;
+		}
+		PatientRegistration patient=patientRegistrationRepository.findOne(PatientRegistrationSpecification.PatientId(patientId+""));
+		if(patient!=null){
+
+			lastName=Optional.fromNullable(patient.getPatientRegistrationLastName()).or(" ");
+			firstName=Optional.fromNullable(patient.getPatientRegistrationFirstName()).or(" ");
+			midInitial=Optional.fromNullable(patient.getPatientRegistrationMidInitial()).or(" ");
+		}
+
 		List<AlertEvent> alertEventList=null;
 		List<Integer> alertId=new ArrayList<>();
 		for(int i=0;i<toIdList.size();i++)
@@ -1044,9 +1070,10 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			aug.setAlertEventTo(toIdList.get(i));
 			aug.setAlertEventStatus(status);
 			aug.setAlertEventCategoryId(categoryId);
-			aug.setAlertEventRefId(refId);
+			aug.setAlertEventRefId(refid);
 			aug.setAlertEventPatientId(patientId);
-			aug.setAlertEventPatientName(lastName+", "+firstName+" "+midInitial);		//Lastname, Firstname MidInitial
+			if(patient!=null)
+				aug.setAlertEventPatientName(lastName+", "+firstName+" "+midInitial);		//Lastname, Firstname MidInitial
 			aug.setAlertEventEncounterId(encounterId);
 			aug.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
 			aug.setAlertEventMessage(msg);
@@ -1059,7 +1086,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		}
 		alertEventList=alertInboxRepository.findAll(AlertInboxSpecification.byAlertId(alertId));
 		return alertEventList;
-	
+
 	}
 
 	@Override
@@ -1120,7 +1147,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 	public List<AlertEvent> alertByEncounter(List<Integer> encounterIdList) {
 		List<AlertEvent> alertEventList=alertInboxRepository.findAll(AlertInboxSpecification.byEncounterId(encounterIdList));
 		List<AlertArchive> alertArchiveList=alertArchiveRepository.findAll(AlertArchiveSpecification.byEncounterId(encounterIdList));
-		
+
 		for (AlertArchive aa : alertArchiveList) {
 
 			AlertEvent ae=new AlertEvent();
@@ -1158,10 +1185,10 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			ae.setEmpProfileTableTo(aa.getEmpProfileTableTo());
 			alertEventList.add(ae);
 		}
-		
+
 		return alertEventList;
 	}
-	
+
 	@Override
 	public AlertEvent getAlertId(Integer patientId, Integer encounterId, Integer refId) {
 		AlertEvent alertEvent = alertInboxRepository.findOne(AlertInboxSpecification.getAlertData(patientId, encounterId, refId));
@@ -1183,8 +1210,106 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 	@Override
 	public List<AlertEvent> getAlertsByEncIdAndCatId(Integer encounterId,
 			Integer categoryId) {
-		
+
 		List<AlertEvent> alerts=alertInboxRepository.findAll(AlertInboxSpecification.byEncIdAndCatId(encounterId,categoryId));
 		return alerts;
 	}
+	
+	/**
+	 *method which is used to get conversion based on parent id from alert_archive table 
+	 */
+	@Override
+	public List<AlertEvent> getConversion(String alertid) {
+		List<Integer> alertId = new ArrayList<Integer>();
+		alertId.add(Integer.parseInt(alertid));
+
+		AlertEvent activeAlert = alertInboxRepository.findOne(AlertInboxSpecification.byAlertId(alertId));
+		int parentId = activeAlert.getAlertEventParentalertid();
+
+		List<AlertEvent> alerts = new ArrayList<AlertEvent>();
+
+		if(parentId!=-1){
+			List<AlertArchive> inactiveAlerts = alertArchiveRepository.findAll(AlertInboxSpecification.inactiveAlertsByParentid(parentId,37));
+			for(int i=0;i<inactiveAlerts.size();i++){
+
+				AlertArchive aa = inactiveAlerts.get(i);
+				AlertEvent ae = new AlertEvent();
+
+				ae.setAlertEventCategoryId(aa.getAlertEventCategoryId());
+				ae.setAlertEventChartId(aa.getAlertEventChartId());
+				if(aa.getAlertEventClosedDate()!=null) 
+					ae.setAlertEventClosedDate(aa.getAlertEventClosedDate());
+				ae.setAlertEventCreatedDate(aa.getAlertEventCreatedDate());
+				ae.setAlertEventEncounterId(aa.getAlertEventEncounterId());
+				ae.setAlertEventFrom(aa.getAlertEventFrom());
+				ae.setAlertEventFrompage(aa.getAlertEventFrompage());
+				ae.setAlertEventHighlight(aa.getAlertEventHighlight());
+				ae.setAlertEventId(aa.getAlertEventId());
+				ae.setAlertEventIsgroupalert(aa.getAlertEventIsgroupalert());
+				ae.setAlertEventMessage(aa.getAlertEventMessage());
+				ae.setAlertEventModifiedby(aa.getAlertEventModifiedby());
+				if(aa.getAlertEventModifiedDate()!=null)
+					ae.setAlertEventModifiedDate(aa.getAlertEventModifiedDate());
+				ae.setAlertEventParentalertid(aa.getAlertEventParentalertid());
+				ae.setAlertEventPatientId(aa.getAlertEventPatientId());
+				ae.setAlertEventPatientName(aa.getAlertEventPatientName());
+				ae.setAlertEventRead(aa.getAlertEventRead());
+				ae.setAlertEventReadby(aa.getAlertEventReadby());
+				if(aa.getAlertEventReadDate()!=null)
+					ae.setAlertEventReadDate(aa.getAlertEventReadDate());
+				ae.setAlertEventRefId(aa.getAlertEventRefId());
+				ae.setAlertEventRoomId(aa.getAlertEventRoomId());
+				ae.setAlertEventStatus(aa.getAlertEventStatus());
+				ae.setAlertEventStatus1(aa.getAlertEventStatus1());
+				ae.setAlertEventTo(aa.getAlertEventTo());
+				ae.setAlertEventUnknown(aa.getAlertEventUnknown());
+				ae.setEmpProfileTableFrom(aa.getEmpProfileTableFrom());
+
+				alerts.add(ae);
+			}
+		}
+		alerts.add(activeAlert);
+		return alerts;
+	}
+	
+	/**
+	 * method which is used to create new alert and it will delete existing alert and before that insert an alert to alert_archive
+	 */
+	@Override
+	public List<AlertEvent> forwardIcmAlert(Integer alertid, Integer userId, Integer encounterid,Integer patientid,
+			Integer categoryid, Integer forwardto, String message,
+			Integer parentalertid) {
+
+		List<AlertEvent> alerts=null;
+		int chartid = -1;
+		int encId=-1;
+		int roomid=-1;
+
+		List<Integer> alertIdList = new ArrayList<Integer>();
+		alertIdList.add(alertid);
+
+		try{
+			if(patientid!=-1111 && patientid!=-1){
+				AlertEvent alertInfo = alertInboxRepository.findOne(AlertInboxSpecification.byAlertId(alertIdList));
+
+				if(alertInfo != null){
+					chartid = alertInfo.getAlertEventChartId();
+					encId = alertInfo.getAlertEventEncounterId();
+
+					if(encounterid==-1)
+						encounterid=encId;
+					roomid = alertInfo.getAlertEventRoomId();
+				}
+			}
+		}catch(Exception ex){}
+
+		List<Integer> forwardtoList = new ArrayList<Integer>();
+		forwardtoList.add(forwardto);
+
+		alerts=composeAlert(userId,forwardtoList,1,categoryid,-1,patientid,encounterid,message,chartid,roomid,parentalertid);
+
+		deleteAlert(alertIdList, userId);
+		return alerts;
+	}
+
 }
