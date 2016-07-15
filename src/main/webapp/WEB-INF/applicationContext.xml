@@ -74,7 +74,7 @@
 			</map>
 
 		</property>
-		<property name="defaultTargetDataSource" ref="concreteDataSourceGlace" />
+		<property name="defaultTargetDataSource" ref="concreteDataSourceOne" />
 	</bean>
 
 <bean id="objectmapper" class="com.fasterxml.jackson.databind.ObjectMapper"></bean>
