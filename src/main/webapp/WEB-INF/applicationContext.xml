@@ -19,7 +19,11 @@
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
         http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-	<context:component-scan base-package="com.glenwood.glaceemr.server" />
+	<context:component-scan base-package="com.glenwood.glaceemr.server.filters" />
+	<context:component-scan base-package="com.glenwood.glaceemr.server.utils" />
+	<context:component-scan base-package="com.glenwood.glaceemr.server.application.Bean" />
+	<context:component-scan base-package="com.glenwood.glaceemr.server.application.controllers" />
+	<context:component-scan base-package="com.glenwood.glaceemr.server.application.services" />
 	<jpa:repositories base-package="com.glenwood.glaceemr.server.application.repositories" />
 
 	 <mvc:annotation-driven>
@@ -70,7 +74,7 @@
 			</map>
 
 		</property>
-		<property name="defaultTargetDataSource" ref="concreteDataSourceOne" />
+		<property name="defaultTargetDataSource" ref="concreteDataSourceGlace" />
 	</bean>
 
 <bean id="objectmapper" class="com.fasterxml.jackson.databind.ObjectMapper"></bean>
