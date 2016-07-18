@@ -290,6 +290,12 @@ public class GenericPrintController {
 		
 		logger.debug("Begin of request to Update style for template.");
 		
+		List<LeafLibrary> leafLibraryStyle = genericPrintService.getLeafLibraryStyle(styleId);
+		for(int i=0; i<leafLibraryStyle.size(); i++){
+			LeafLibrary leafLibrary = leafLibraryStyle.get(i);
+			leafLibrary.setLeafLibraryPrintStyleId(null);
+			genericPrintService.saveLeafLibrary(leafLibrary);
+		}
 		String[] valueArr=value.split("~");
 		for(int i=0; i<valueArr.length; i++){
 			int templateId=-1;

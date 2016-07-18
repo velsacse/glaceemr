@@ -288,9 +288,9 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		String dos = null;
 		String gender = patientDetails.getPatientRegistrationSex().toString();
 		String accountId = patientDetails.getPatientRegistrationAccountno();
-		String phNum = patientDetails.getPatientRegistrationPhoneNo();
+		String phNum = formatPhoneNum(patientDetails.getPatientRegistrationPhoneNo());
 		String dob = textFormat.getFormattedDate(patientDetails.getPatientRegistrationDob());
-		String mobileNum = patientDetails.getPatientRegistrationCellno();
+		String mobileNum = formatPhoneNum(patientDetails.getPatientRegistrationCellno());
 		String state = patientDetails.getPatientRegistrationState();
 		String address = null;
 		String refPhyName = null;
@@ -379,6 +379,8 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		
 		return bean;
 	}
+
+
 	/**
 	 * Parsing service doctor details
 	 * @param encounter
@@ -752,5 +754,35 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		}catch(Exception e){
 			return "";
 		}
+	}
+
+	/**
+	 * Get template based on generic print style id 
+	 */
+	@Override
+	public List<LeafLibrary> getLeafLibraryStyle(Integer styleId) {
+		return leafLibraryRepository.findAll(LeafLibrarySpecification.getByPrintStyleId(styleId));
+	}
+	
+	/**
+	 * Formatting phone number
+	 * @param phoneNum
+	 * @return
+	 */
+	private String formatPhoneNum(String phoneNum) {
+		try{
+			if(phoneNum == null)
+				return null;
+			else{
+				if(phoneNum.indexOf("-")!=-1){
+					String[] arr= phoneNum.split("-");
+					if(arr.length == 3)
+						phoneNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+				}
+			}
+		}catch(Exception e){
+			return phoneNum;
+		}
+		return phoneNum;
 	}
 }

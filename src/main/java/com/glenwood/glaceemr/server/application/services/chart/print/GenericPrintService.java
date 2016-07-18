@@ -41,6 +41,7 @@ public interface GenericPrintService {
 	public List<LeafLibrary> getTemplatesList();
 	public List<LeafLibrary> getStyleTemplatesList(Integer styleId);
 	public LeafLibrary getLeafLibrary(int templateId);
+	public List<LeafLibrary> getLeafLibraryStyle(Integer styleId);
 	
 	
 }
