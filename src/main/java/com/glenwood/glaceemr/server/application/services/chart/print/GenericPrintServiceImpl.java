@@ -161,8 +161,8 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		patientDetailsArr[8]= isNull(patientBean.getAddress());
 		patientDetailsArr[9]= isNull(patientBean.getServiceReferral());
 		patientDetailsArr[10]= getInsuranceName(patientBean);
-		patientDetailsArr[11]=isNull(patientBean.getPrincipalDr().getEmpFullname());
-		patientDetailsArr[12]=isNull(patientBean.getServiceDr().getEmpFullname());
+		patientDetailsArr[11]=patientBean.getPrincipalDr()!= null? isNull(patientBean.getPrincipalDr().getEmpFullname()) : "";
+		patientDetailsArr[12]=patientBean.getServiceDr()!=null ? isNull(patientBean.getServiceDr().getEmpFullname()) : "";
 		patientDetailsArr[13]=isNull(patientBean.getEthinicity());
 		patientDetailsArr[14]=isNull(patientBean.getRace());
 		patientDetailsArr[15]=isNull(patientBean.getPrefLang());
@@ -288,9 +288,9 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		String dos = null;
 		String gender = patientDetails.getPatientRegistrationSex().toString();
 		String accountId = patientDetails.getPatientRegistrationAccountno();
-		String phNum = formatPhoneNum(patientDetails.getPatientRegistrationPhoneNo());
+		String phNum = textFormat.getFormattedPhoneNum(patientDetails.getPatientRegistrationPhoneNo());
 		String dob = textFormat.getFormattedDate(patientDetails.getPatientRegistrationDob());
-		String mobileNum = formatPhoneNum(patientDetails.getPatientRegistrationCellno());
+		String mobileNum = textFormat.getFormattedPhoneNum(patientDetails.getPatientRegistrationCellno());
 		String state = patientDetails.getPatientRegistrationState();
 		String address = null;
 		String refPhyName = null;
@@ -323,7 +323,9 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		refPhyName = "";
 		if(refPhyEntity != null)
 			refPhyName = textFormat.getFormattedName(refPhyEntity.getH076005(), refPhyEntity.getH076004(), refPhyEntity.getH076003(), refPhyEntity.getH076021());
-		H076 serviceRefEntity = encounter.getReferringTable();
+		H076 serviceRefEntity=null;
+		if(encounter != null)
+			serviceRefEntity = encounter.getReferringTable();
 		serviceRefName = "";
 		if(serviceRefEntity != null)
 			serviceRefName = textFormat.getFormattedName(serviceRefEntity.getH076005(), serviceRefEntity.getH076004(), serviceRefEntity.getH076003(), serviceRefEntity.getH076021());
@@ -379,8 +381,6 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		
 		return bean;
 	}
-
-
 	/**
 	 * Parsing service doctor details
 	 * @param encounter
@@ -764,25 +764,4 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		return leafLibraryRepository.findAll(LeafLibrarySpecification.getByPrintStyleId(styleId));
 	}
 	
-	/**
-	 * Formatting phone number
-	 * @param phoneNum
-	 * @return
-	 */
-	private String formatPhoneNum(String phoneNum) {
-		try{
-			if(phoneNum == null)
-				return null;
-			else{
-				if(phoneNum.indexOf("-")!=-1){
-					String[] arr= phoneNum.split("-");
-					if(arr.length == 3)
-						phoneNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
-				}
-			}
-		}catch(Exception e){
-			return phoneNum;
-		}
-		return phoneNum;
-	}
 }

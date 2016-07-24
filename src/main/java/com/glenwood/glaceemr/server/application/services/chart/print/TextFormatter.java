@@ -448,6 +448,26 @@ public class TextFormatter {
 
 		return result;
 	}
+
+	/**
+	 * Method to format phone number
+	 * @param input
+	 * @return
+	 */
+	public String getFormattedPhoneNum(String input) {
+		try{
+			if(input == null)
+				return "";
+			else if(input.indexOf("-")!=-1){
+				String[] arr= 	input.split("-");
+				if(arr.length == 3)
+					input = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+			}
+			return input;
+		}catch(Exception e){
+			return "";
+		}
+	}
 	
 }
 
