@@ -185,7 +185,7 @@ public class AlertInboxSpecification {
 				Predicate predicate=query.where(cb.and(
 						cb.or(cb.equal(root.get(AlertArchive_.alertEventParentalertid), parentId ),cb.equal(root.get(AlertArchive_.alertEventId), parentId ))
 						,cb.equal(root.get(AlertArchive_.alertEventCategoryId),categoryId ))).getRestriction();
-				query.orderBy(cb.desc(root.get(AlertArchive_.alertEventCreatedDate)));
+				query.orderBy(cb.asc(root.get(AlertArchive_.alertEventCreatedDate)));
 				return predicate;
 			}
 		};
