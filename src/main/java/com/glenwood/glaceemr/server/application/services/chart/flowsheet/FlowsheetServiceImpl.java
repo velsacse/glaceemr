@@ -16,6 +16,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -1362,23 +1363,15 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}
 
 	public String getCurrentDate(){
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery();
-		cq.from(PatientRegistration.class);
-		cq.select(builder.concat(builder.concat(builder.function("to_char", String.class, builder.currentTimestamp(),builder.literal("MM/DD/YYYY"))," "), builder.function("to_char", String.class, builder.currentTimestamp(),builder.literal("HH12:MI:SS AM"))));
-		String currentDate = em.createQuery(cq).getResultList().get(0).toString();
-		return currentDate;
+		Query query = em.createNativeQuery("SELECT to_char(now(),'MM/dd/yyyy HH:MI:ss am')");
+		return query.getSingleResult().toString(); 
 	}
 
 	public String getTodayDate(){
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery();
-		cq.from(PatientRegistration.class);
-		cq.select(builder.function("to_char", String.class,builder.currentTimestamp(),builder.literal("MM/dd/yyyy HH:MI:ss am")));
-		String todayDate = em.createQuery(cq).getResultList().get(0).toString();
-		return todayDate;
+		Query query = em.createNativeQuery("SELECT to_char(now(),'MM/dd/yyyy HH:MI:ss am')");
+		return query.getSingleResult().toString(); 
 	}
-
+	
 	@SuppressWarnings("rawtypes")
 	public List<HmrBean> getFlowSheetRuleQueryPatientBased(Integer patientId,List<String> groupIds, String startDate,Integer flowsheetElementType) throws java.text.ParseException{
 		//Query 1
@@ -2653,6 +2646,9 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		List<String> classIdsComplete=new ArrayList<String>();
 		while(itr_drugs.hasNext()){
 			hsh_notes = itr_drugs.next();
+			if(hsh_notes.getFlowsheetDrugClassId()!=null)
+			{
+				
 			if(!classId.equalsIgnoreCase(hsh_notes.getFlowsheetDrugClassId())){
 				List<String> classIds=new ArrayList<String>();
 				classIds.add(hsh_notes.getFlowsheetDrugClassId());
@@ -2724,8 +2720,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					arr_drugs.add(drugBean);
 				}
 				classId = hsh_notes.getFlowsheetDrugClassId();
-			}
-		}
+			}}
+	}
 		if(classIdsComplete.size()>0)
 			arr_drugs = checkFlowSheetRulesForDrugData(patientId,flowsheetId,classIdsComplete, arr_drugs, startDate);
 		return arr_drugs;
