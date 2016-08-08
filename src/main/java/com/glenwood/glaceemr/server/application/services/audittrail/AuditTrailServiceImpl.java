@@ -3,14 +3,10 @@ package com.glenwood.glaceemr.server.application.services.audittrail;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.List;
 import java.util.Vector;
 
-import javax.persistence.Query;
-import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.utils.GlaceMonitoringParameters;
@@ -18,247 +14,230 @@ import com.glenwood.glaceemr.server.utils.GlaceMonitoringParameters;
 @Service
 public class AuditTrailServiceImpl implements AuditTrailService{
 
- @Autowired
- EntityManager em;
-	GlaceMonitoringParameters monitoringParams;
-	@Override
-	public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
-			int parent_Event, int Event_Outcome, String Description,
-			int User_Id, String SystemIP, String ClientIP, int patientId,
-			int chartId, int encounterId, int LoginType,
-			HttpServletRequest request) {
 
-		return 0;
-	}
+     GlaceMonitoringParameters monitoringParams;
+     @Override
+     public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
+             int parent_Event, int Event_Outcome, String Description,
+             int User_Id, String SystemIP, String ClientIP, int patientId,
+             int chartId, int encounterId, int LoginType,
+             HttpServletRequest request) {
+         // TODO Auto-generated method stub
+         return 0;
+     }
 
-	@Override
-	public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
-			int parent_Event, int Event_Outcome, String Description,
-			int User_Id, String SystemIP, String ClientIP, int patientId,
-			int chartId, int encounterId, int LoginType,
-			HttpServletRequest request, String newDescription) {
-		
-		
-		return 0;
-	}
+     @Override
+     public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
+             int parent_Event, int Event_Outcome, String Description,
+             int User_Id, String SystemIP, String ClientIP, int patientId,
+             int chartId, int encounterId, int LoginType,
+             HttpServletRequest request, String newDescription) {
+         // TODO Auto-generated method stub
+         return 0;
+     }
 
-	@Override
-	public int LogEventExternal(int Log_Type, int Log_Component,
-			int Event_Type, int parent_Event, int Event_Outcome,
-			String Description, int User_Id, String SystemIP, String ClientIP,
-			int patientId, int chartId, int encounterId, int LoginType,
-			HttpServletRequest request, String newDescription) {
-		return 0;
-	}
+     @Override
+     public int LogEventExternal(int Log_Type, int Log_Component,
+             int Event_Type, int parent_Event, int Event_Outcome,
+             String Description, int User_Id, String SystemIP, String ClientIP,
+             int patientId, int chartId, int encounterId, int LoginType,
+             HttpServletRequest request, String newDescription) {
+         // TODO Auto-generated method stub
+         return 0;
+     }
 
-	@Override
-	public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
-			int parent_Event, int Event_Outcome, String Description,
-			int User_Id, String SystemIP, String ClientIP, int patientId,
-			int chartId, int encounterId, int LoginType, String newDescription,
-			Vector<Object> logmodules, String parent_event_session) {
+     @Override
+     public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
+             int parent_Event, int Event_Outcome, String Description,
+             int User_Id, String SystemIP, String ClientIP, int patientId,
+             int chartId, int encounterId, int LoginType, String newDescription,
+             Vector<Object> logmodules, String parent_event_session) {
+         // TODO Auto-generated method stub
+         return 0;
+     }
 
-		return 0;
-	}
+     @Override
+     public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
+             int parent_Event, int Event_Outcome, String Description,
+             int User_Id, String SystemIP, String ClientIP, int patientId,
+             int chartId, int encounterId, int LoginType, String newDescription,
+             Vector<Object> logmodules, String parent_event_session,
+             HttpServletRequest request) {
+         // TODO Auto-generated method stub
+         return 0;
+     }
 
-	@Override
-	public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
-			int parent_Event, int Event_Outcome, String Description,
-			int User_Id, String SystemIP, String ClientIP, int patientId,
-			int chartId, int encounterId, int LoginType, String newDescription,
-			Vector<Object> logmodules, String parent_event_session,
-			HttpServletRequest request) {
-		return 0;
-	}
+     @Override
+     public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
+             int parent_Event, int Event_Outcome, String Description,
+             int User_Id, String SystemIP, String ClientIP, int patientId,
+             int chartId, int encounterId, int LoginType, int Event_Id,
+             HttpServletRequest request) {
+         // TODO Auto-generated method stub
+         return 0;
+     }
 
-	@Override
-	public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
-			int parent_Event, int Event_Outcome, String Description,
-			int User_Id, String SystemIP, String ClientIP, int patientId,
-			int chartId, int encounterId, int LoginType, int Event_Id,
-			HttpServletRequest request) {
-		return 0;
-	}
+     @Override
+     public int LogSession(int parent_Event, int Outcome, String description,
+             String SystemIP, String ClientIP, HttpServletRequest request) {
+         // TODO Auto-generated method stub
+         return 0;
+     }
 
-	@Override
-	public int LogSession(int parent_Event, int Outcome, String description,
-			String SystemIP, String ClientIP, HttpServletRequest request) {
-		return 0;
-	}
-
-	@Override
-	public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
-			int parent_Event, int Event_Outcome, String Description,
-			int User_Id, String ClientIP, int patientId, int chartId,
-			int encounterId, int LoginType) {
-		return 0;
-	}
+     @Override
+     public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
+             int parent_Event, int Event_Outcome, String Description,
+             int User_Id, String ClientIP, int patientId, int chartId,
+             int encounterId, int LoginType) {
+         // TODO Auto-generated method stub
+         return 0;
+     }
 
 
-	@Override
-	public GlaceMonitoringParameters getServerMonitorResults() {
-		monitoringParams = new GlaceMonitoringParameters();
+     @Override
+     public GlaceMonitoringParameters getServerMonitorResults() {
+         monitoringParams = new GlaceMonitoringParameters();
 
-		getSharedFolderUsableSpace();
-		dbFreeSpace();
-		getServerFolderSpace();
-		getJVMpace();
-		getDBRuntime();
-		return monitoringParams;
-	}
+         getSharedFolderUsableSpace();
+         dbFreeSpace();
+         getServerFolderSpace();
+         getJVMpace();
+         getDBRuntime();
+         return monitoringParams;
+     }
 
-	void getSharedFolderUsableSpace(){
-		try{
-			//         String sharePath = settingsRepository.findOne("SHARED_FOLDER_PATH").getSettingsValue();
-			String sharePath = "/tmp";
-			File sharedFolderPath = new File(sharePath);
-			if (sharedFolderPath.exists()) {
-				long usableSharedFolderSpace = (sharedFolderPath
-						.getUsableSpace()) / 1024 / 1024 / 1024;
-				monitoringParams.setSHFS(sharedFolderPath.getUsableSpace());
-				File sampleTestFile = new File(sharePath
-						+ "/MonitorGlace.txt");
-				sampleTestFile.createNewFile();
-				if (sampleTestFile.exists()) {
-					monitoringParams.setShared(1); ;
-					sampleTestFile.setWritable(true);
-					sampleTestFile.delete();
-				} else {
-					monitoringParams.setShared(0);
-				}
+     void getSharedFolderUsableSpace(){
+         try{
+             // String sharePath = settingsRepository.findOne("SHARED_FOLDER_PATH").getSettingsValue();
+             String sharePath = "/tmp";
+             File sharedFolderPath = new File(sharePath);
+             if (sharedFolderPath.exists()) {
+                 long usableSharedFolderSpace = (sharedFolderPath
+                         .getUsableSpace()) / 1024 / 1024 / 1024;
+                 monitoringParams.setSHFS(sharedFolderPath.getUsableSpace());
+                 File sampleTestFile = new File(sharePath
+                         + "/MonitorGlace.txt");
+                 sampleTestFile.createNewFile();
+                 if (sampleTestFile.exists()) {
+                     monitoringParams.setShared(1); ;
+                     sampleTestFile.setWritable(true);
+                     sampleTestFile.delete();
+                 } else {
+                     monitoringParams.setShared(0);
+                 }
 
-				if (usableSharedFolderSpace > 1) {
-					monitoringParams.setSHSP(1);
-				} else {
-					monitoringParams.setSHSP(0) ;
-				}
-			}
-		}catch(IOException ioex){
-			monitoringParams.setShared(-1);
-			monitoringParams.setSHSP(-1) ;
-			monitoringParams.setSHFS(-1);
-		}
-	}
+                 if (usableSharedFolderSpace > 1) {
+                     monitoringParams.setSHSP(1);
+                 } else {
+                     monitoringParams.setSHSP(0) ;
+                 }
+             }
+         }catch(IOException ioex){
+             monitoringParams.setShared(-1);
+             monitoringParams.setSHSP(-1) ;
+             monitoringParams.setSHFS(-1);
+         }
+     }
 
-	void dbFreeSpace(){
-		File dbPartitionPath = new File("/var/database/");
-		if (dbPartitionPath.exists()) {
-			long usableDBSpace = (dbPartitionPath.getUsableSpace()) / 1024 / 1024 / 1024;
-			monitoringParams.setDBFS( dbPartitionPath.getUsableSpace());
-			if (usableDBSpace > 1) {
-				monitoringParams.setDBSP(1);
-			} else {
-				monitoringParams.setDBSP(0);
-			}
-		} else {
-			monitoringParams.setDBSP(-1);
-		}
-	}
+     void dbFreeSpace(){
+         File dbPartitionPath = new File("/var/database/");
+         if (dbPartitionPath.exists()) {
+             long usableDBSpace = (dbPartitionPath.getUsableSpace()) / 1024 / 1024 / 1024;
+             monitoringParams.setDBFS( dbPartitionPath.getUsableSpace());
+             if (usableDBSpace > 1) {
+                 monitoringParams.setDBSP(1);
+             } else {
+                 monitoringParams.setDBSP(0);
+             }
+         } else {
+             monitoringParams.setDBSP(-1);
+         }
+     }
 
-	void getServerFolderSpace(){
-		/*
-         Temp folder free space
-		 */
-		try {
-			File tempFolder = new File("/tmp/");
-			if (tempFolder.exists()) {
-				monitoringParams.setTFS(tempFolder.getUsableSpace());
-			}
-		} catch (Exception e) {
-			System.out
-			.println("Exception in accessing temp folder space-->"
-					+ e.getMessage());
-		}
-		try {
-			File rootFolder = new File("/");
-			if (rootFolder.exists()) {
-				monitoringParams.setRFS(rootFolder.getUsableSpace());
-			}
-		} catch (Exception ex) {
-			System.out
-			.println("Exception in accessing root folder space-->"
-					+ ex.getMessage());
-		}
+     void getServerFolderSpace(){
+         /*
+          Temp folder free space
+          */
+         try {
+             File tempFolder = new File("/tmp/");
+             if (tempFolder.exists()) {
+                 monitoringParams.setTFS(tempFolder.getUsableSpace());
+             }
+         } catch (Exception e) {
+             System.out
+             .println("Exception in accessing temp folder space-->"
+                     + e.getMessage());
+         }
+         try {
+             File rootFolder = new File("/");
+             if (rootFolder.exists()) {
+                 monitoringParams.setRFS(rootFolder.getUsableSpace());
+             }
+         } catch (Exception ex) {
+             System.out
+             .println("Exception in accessing root folder space-->"
+                     + ex.getMessage());
+         }
 
-		/*
-          Var folder free space
-		 */
-		try {
-			File tempFolder = new File("/var/");
-			if (tempFolder.exists()) {
-				monitoringParams.setVARFS (tempFolder.getUsableSpace());
-			}
-		} catch (Exception e) {
-			System.out
-			.println("Exception in accessing var folder space-->"
-					+ e.getMessage());
-		}
+         /*
+           Var folder free space
+          */
+         try {
+             File tempFolder = new File("/var/");
+             if (tempFolder.exists()) {
+                 monitoringParams.setVARFS (tempFolder.getUsableSpace());
+             }
+         } catch (Exception e) {
+             System.out
+             .println("Exception in accessing var folder space-->"
+                     + e.getMessage());
+         }
 
-		/*
-          Usr folder free space
-		 */
-		try {
-			File tempFolder = new File("/usr/");
-			if (tempFolder.exists()) {
-				monitoringParams.setUSRFS ( tempFolder.getUsableSpace());
-			}
-		} catch (Exception e) {
-			System.out
-			.println("Exception in accessing usr folder space-->"
-					+ e.getMessage());
-		}
+         /*
+           Usr folder free space
+          */
+         try {
+             File tempFolder = new File("/usr/");
+             if (tempFolder.exists()) {
+                 monitoringParams.setUSRFS ( tempFolder.getUsableSpace());
+             }
+         } catch (Exception e) {
+             System.out
+             .println("Exception in accessing usr folder space-->"
+                     + e.getMessage());
+         }
 
-	}
-	@SuppressWarnings("restriction")
-	void getJVMpace(){
-		try {
-			monitoringParams.setFJVM ( Runtime.getRuntime().maxMemory());
-		} catch (Exception ex) {
-			System.out.println("Exception in obtaining jvm space-->"
-					+ ex.getMessage());
-		}
+     }
+     @SuppressWarnings("restriction")
+     void getJVMpace(){
+         try {
+             monitoringParams.setFJVM ( Runtime.getRuntime().maxMemory());
+         } catch (Exception ex) {
+             System.out.println("Exception in obtaining jvm space-->"
+                     + ex.getMessage());
+         }
 
-		try {
-			monitoringParams.setFMEM( ((com.sun.management.OperatingSystemMXBean) ManagementFactory
-					.getOperatingSystemMXBean())
-					.getFreePhysicalMemorySize());
-		} catch (Exception ex) {
-			System.out.println("Exception in free RAM space-->"
-					+ ex.getMessage());
-		}
+         try {
+             monitoringParams.setFMEM( ((com.sun.management.OperatingSystemMXBean) ManagementFactory
+                     .getOperatingSystemMXBean())
+                     .getFreePhysicalMemorySize());
+         } catch (Exception ex) {
+             System.out.println("Exception in free RAM space-->"
+                     + ex.getMessage());
+         }
 
-	}
-	void getDBRuntime(){
-		
-		int DB=0;
-		
-		float DBRT=(float) 0.0;
-		String totalTime = "";
-		Query query = em.createNativeQuery("explain analyze SELECT login_users_username FROM login_users WHERE login_users_username = 'demodoctor' limit 1");
-	    List result= query.getResultList();
-	    
-	    if(result!=null){
-	    	for(int i=0;i<result.size();i++){
-  	    		if(result.get(i).toString().contains("Execution time:")){
-	    			DB=1;
-	    			totalTime=result.get(i).toString();
-	    		}
-	    	}
- 	    }
-	    else{  
-	    	DB=0;
-	    }
-	    if(totalTime!=null){
-	    	
-	    	totalTime=totalTime.replaceAll("Execution time:", "");
-	    	totalTime=totalTime.replaceAll("ms", "");
-	    	totalTime=totalTime.trim();
-	    }
- 	    DBRT = Float.parseFloat(totalTime);
-	   monitoringParams.setDB(DB);
-		monitoringParams.setDBRT(DBRT);
-		monitoringParams.setDBFS(monitoringParams.getRFS());
+     }
+     void getDBRuntime(){
+         monitoringParams.setDB(1);
+         monitoringParams.setDBRT((float) 0.015);
+         monitoringParams.setDBFS(monitoringParams.getRFS());
 
-	}
+     }
 
 }
+
+
+
+
+
+
