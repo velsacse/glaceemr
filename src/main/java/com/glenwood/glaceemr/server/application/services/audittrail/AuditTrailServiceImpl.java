@@ -3,10 +3,14 @@ package com.glenwood.glaceemr.server.application.services.audittrail;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.List;
 import java.util.Vector;
 
+import javax.persistence.Query;
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.utils.GlaceMonitoringParameters;
@@ -14,7 +18,8 @@ import com.glenwood.glaceemr.server.utils.GlaceMonitoringParameters;
 @Service
 public class AuditTrailServiceImpl implements AuditTrailService{
 
-
+ @Autowired
+ EntityManager em;
 	GlaceMonitoringParameters monitoringParams;
 	@Override
 	public int LogEvent(int Log_Type, int Log_Component, int Event_Type,
@@ -22,7 +27,7 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 			int User_Id, String SystemIP, String ClientIP, int patientId,
 			int chartId, int encounterId, int LoginType,
 			HttpServletRequest request) {
-		// TODO Auto-generated method stub
+
 		return 0;
 	}
 
@@ -32,7 +37,8 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 			int User_Id, String SystemIP, String ClientIP, int patientId,
 			int chartId, int encounterId, int LoginType,
 			HttpServletRequest request, String newDescription) {
-		// TODO Auto-generated method stub
+		
+		
 		return 0;
 	}
 
@@ -42,7 +48,6 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 			String Description, int User_Id, String SystemIP, String ClientIP,
 			int patientId, int chartId, int encounterId, int LoginType,
 			HttpServletRequest request, String newDescription) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -52,7 +57,7 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 			int User_Id, String SystemIP, String ClientIP, int patientId,
 			int chartId, int encounterId, int LoginType, String newDescription,
 			Vector<Object> logmodules, String parent_event_session) {
-		// TODO Auto-generated method stub
+
 		return 0;
 	}
 
@@ -63,7 +68,6 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 			int chartId, int encounterId, int LoginType, String newDescription,
 			Vector<Object> logmodules, String parent_event_session,
 			HttpServletRequest request) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -73,14 +77,12 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 			int User_Id, String SystemIP, String ClientIP, int patientId,
 			int chartId, int encounterId, int LoginType, int Event_Id,
 			HttpServletRequest request) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public int LogSession(int parent_Event, int Outcome, String description,
 			String SystemIP, String ClientIP, HttpServletRequest request) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -89,7 +91,6 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 			int parent_Event, int Event_Outcome, String Description,
 			int User_Id, String ClientIP, int patientId, int chartId,
 			int encounterId, int LoginType) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -228,8 +229,34 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 
 	}
 	void getDBRuntime(){
-		monitoringParams.setDB(0);
-		monitoringParams.setDBRT((float) 0.015);
+		
+		int DB=0;
+		
+		float DBRT=(float) 0.0;
+		String totalTime = "";
+		Query query = em.createNativeQuery("explain analyze SELECT login_users_username FROM login_users WHERE login_users_username = 'demodoctor' limit 1");
+	    List result= query.getResultList();
+	    
+	    if(result!=null){
+	    	for(int i=0;i<result.size();i++){
+  	    		if(result.get(i).toString().contains("Execution time:")){
+	    			DB=1;
+	    			totalTime=result.get(i).toString();
+	    		}
+	    	}
+ 	    }
+	    else{  
+	    	DB=0;
+	    }
+	    if(totalTime!=null){
+	    	
+	    	totalTime=totalTime.replaceAll("Execution time:", "");
+	    	totalTime=totalTime.replaceAll("ms", "");
+	    	totalTime=totalTime.trim();
+	    }
+ 	    DBRT = Float.parseFloat(totalTime);
+	   monitoringParams.setDB(DB);
+		monitoringParams.setDBRT(DBRT);
 		monitoringParams.setDBFS(monitoringParams.getRFS());
 
 	}
