@@ -160,6 +160,8 @@ public class LabResultsSpecification {
 				resultsJoin.on(isActive);
 				Predicate checkOrdBy = resultsJoin.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdbyDocid).in(doctorId);
 				query.distinct(true);
+				query.orderBy(cb.desc(root.get(Hl7ResultInbox_.hl7ResultInboxPlacedDate)));
+
 				return checkOrdBy;
 			}	
 		};
