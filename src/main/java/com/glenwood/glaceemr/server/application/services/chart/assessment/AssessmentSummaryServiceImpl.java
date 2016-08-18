@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.services.chart.assessment;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -15,11 +17,14 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.repositories.AssessmentRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
+import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.specifications.AssessmentSpecification;
+import com.glenwood.glaceemr.server.application.specifications.ProblemListSpecification;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -33,6 +38,9 @@ public class AssessmentSummaryServiceImpl implements AssessmentSummaryService{
 	@Autowired
 	EncounterRepository encounterRepository;
 	
+	@Autowired
+	ProblemListRepository problemListRepository;
+
 	@Autowired
 	EntityManagerFactory emf ;
 	
@@ -91,7 +99,7 @@ public class AssessmentSummaryServiceImpl implements AssessmentSummaryService{
 		String dxStatus = Optional.fromNullable(Strings.emptyToNull("" + assessmentDetailsObj.getString("DxStatus"))).or("-2");
 		String assessmentComment = Optional.fromNullable(Strings.emptyToNull("" + assessmentDetailsObj.getString("assessmentComment"))).or(" ");
 		List<H611> dupDxCode = assessmentRepository.findAll(Specifications.where(AssessmentSpecification.DxByPatientId(patientId)).and(AssessmentSpecification.DxByEncounterId(encounterId)).and(AssessmentSpecification.DxByCode(dxCode)));
-			if(dupDxCode.size()<1 &&(!dxCode.trim().equalsIgnoreCase(""))){	
+		if(dupDxCode.size()<1 &&(!dxCode.trim().equalsIgnoreCase(""))){	
 			}
 		}
 				
@@ -113,5 +121,52 @@ public class AssessmentSummaryServiceImpl implements AssessmentSummaryService{
 		List<H611> dxData = assessmentRepository.findAll(Specifications.where(AssessmentSpecification.getDataToEdit(patientId,encounterId,dxCode,problemId)));
 		return dxData;
 	}
+	
+
+	/**
+	 * Method to send current encounter assessments to problem list 
+	 */
+	@Override
+	public String moveToProblemList(Integer patientId,Integer encounterId,Integer userId) throws Exception {
+		
+		List<H611> currentdiagnosis=getCurrentDiagnosis(patientId, encounterId);
+		
+		for(int i=0;i<currentdiagnosis.size();i++){
+			
+			H611 assessmentDetailsObj=currentdiagnosis.get(i);
+			String dxCode = assessmentDetailsObj.getH611005();
+			String dxdesc = assessmentDetailsObj.getH611006();
+			String ass_cmt = assessmentDetailsObj.getH611015();			
+			String codeSystem = assessmentDetailsObj.getH611CodingSystemid();
+			
+			if(dxCode!= null)
+				dxCode= dxCode.trim();
+			long count= problemListRepository.count(ProblemListSpecification.getByDxcode(dxCode, patientId));
+			
+			if(count==0){
+			ProblemList problem = new ProblemList();
+			problem.setProblemListPatientId(patientId);
+			problem.setProblemListId(-1);
+			problem.setProblemListDxCode(dxCode);
+			problem.setProblemListDxDescp(dxdesc);
+			problem.setProblemListComments(ass_cmt);
+			problem.setProblemListChronicity(-1);
+			problem.setProblemListCreatedby(userId);
+			problem.setProblemListCreatedon(new Timestamp(new Date().getTime()));
+			problem.setProblemListLastModOn(new Timestamp(new Date().getTime()));
+			problem.setProblemListIsresolved(false);
+			problem.setProblemListIsactive(true);
+			problem.setProblemListOnsetDate(null);
+			problem.setProblemListCodingSystemid(codeSystem);
+			problem.setH063015(-1);
+			problemListRepository.save(problem);
+			}
+			
+		}
+				
+		return "success";
+	}
 
 }
+
+

@@ -3,10 +3,7 @@ package com.glenwood.glaceemr.server.application.services.chart.assessment;
 import java.util.List;
 
 import org.json.JSONObject;
-import org.springframework.data.domain.Page;
-
 import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.Icdm;
 
 
 public interface AssessmentSummaryService {
@@ -38,5 +35,16 @@ public interface AssessmentSummaryService {
 	 */
 	List<H611> getEditData(Integer patientId, Integer encounterId,
 			String dxCode, Integer problemId);
-	
+
+	/**
+	 * Method to send current encounter assessments to problem list 
+	 * @param patientId
+	 * @param encounterId
+	 * @param userId
+	 * @return
+	 * @throws Exception
+	 */
+
+	String moveToProblemList(Integer patientId,Integer encounterId,Integer userId) throws Exception;
 }
+

@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.assessment.AssessmentSummaryService;
 import com.glenwood.glaceemr.server.application.services.chart.problemlist.ProblemListService;
@@ -115,6 +113,24 @@ public class AssessmentSummaryController {
 		
 		List<H611> editData = assessmentService.getEditData(patientId,encounterId,dxCode,problemId);
 		return editData;
+	}
+
+	/**
+	 * Method to send current encounter assessments to problem list 
+	 * @param patientId
+	 * @param encounterId
+	 * @param userId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ProblemlistData",method = RequestMethod.GET)
+	public String loadProblemlist(
+			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
+			@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId,
+			@RequestParam(value="userId", required=false, defaultValue="") Integer userId) throws Exception {
+		logger.debug("load data corresponds to current dx");		
+		String message = assessmentService.moveToProblemList(patientId,encounterId,userId);
+		return message;
 	}
 
 }
