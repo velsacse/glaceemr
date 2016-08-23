@@ -2,15 +2,11 @@ package com.glenwood.glaceemr.server.application.specifications;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.glenwood.glaceemr.server.application.models.CodingSystems;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.ProblemList_;
 
@@ -89,5 +85,27 @@ public class ProblemListSpecification {
 		};
 
 	}
+	/**
+	 * Specification to retrieve data corresponding to problem list page by considering dxCode
+	 * @param dxCode
+	 * @param patienId
+	 * @return
+	 */
+	public static Specification<ProblemList> getByDxcode(final String dxCode,final int patienId) {
+		return new Specification<ProblemList>() {
+
+			@Override
+			public Predicate toPredicate(Root<ProblemList> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {			
+				Predicate dxcodePred=cb.equal(root.get(ProblemList_.problemListDxCode),dxCode);
+				Predicate patientPred=cb.equal(root.get(ProblemList_.problemListPatientId),patienId);
+				Predicate activePred=cb.equal(root.get(ProblemList_.problemListIsactive),true);
+				Predicate result=cb.and(dxcodePred,patientPred,activePred);
+				return result;
+
+			}
+		};
+
+	}	
 
 }
