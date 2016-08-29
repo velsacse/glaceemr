@@ -12,6 +12,8 @@ import javax.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.Admission;
+import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
+import com.glenwood.glaceemr.server.application.models.AdmissionRoom_;
 import com.glenwood.glaceemr.server.application.models.Admission_;
 import com.glenwood.glaceemr.server.application.models.ConsultFaxTracking;
 import com.glenwood.glaceemr.server.application.models.ConsultFaxTracking_;
@@ -57,7 +59,8 @@ public class AdmissionSpecification {
 				
 				root.fetch(Admission_.empProfile,JoinType.INNER);
 				root.fetch(Admission_.posTable,JoinType.INNER);
-				root.fetch(Admission_.h479,JoinType.LEFT);
+				root.fetch(Admission_.admissionBlockTable,JoinType.LEFT);
+				root.fetch(Admission_.admissionRoomTable,JoinType.LEFT);
 				Predicate patPred=cb.equal(root.get(Admission_.admissionPatientId),patientId);
 				Predicate admissionActive=cb.equal(root.get(Admission_.admissionStatus),1);
 				return cb.and(patPred,admissionActive);
@@ -87,7 +90,8 @@ public class AdmissionSpecification {
 				
 				root.fetch(Admission_.empProfile,JoinType.INNER);
 				root.fetch(Admission_.posTable,JoinType.INNER);
-				root.fetch(Admission_.h479,JoinType.LEFT);
+				root.fetch(Admission_.admissionBlockTable,JoinType.LEFT);
+				root.fetch(Admission_.admissionRoomTable,JoinType.LEFT);
 				Predicate patPred=cb.equal(root.get(Admission_.admissionPatientId),patientId);
 				Predicate admissionActive=cb.equal(root.get(Admission_.admissionStatus),2);
 				query.where(patPred,admissionActive).orderBy(cb.desc(root.get(Admission_.admissionId)));
@@ -302,7 +306,28 @@ public class AdmissionSpecification {
 
         };
     }
-	
+
+    /**
+     * Get rooms in specific block
+     * @param encounterList
+     * @return
+     */
+    public static Specification<AdmissionRoom> getRooms(final Integer blockId)
+    {
+        return new Specification<AdmissionRoom>() {
+
+            @Override
+            public Predicate toPredicate(Root<AdmissionRoom> root,
+                    CriteriaQuery<?> cq, CriteriaBuilder cb) {
+                Predicate blockPred=cb.equal(root.get(AdmissionRoom_.admissionRoomBlockId), blockId);
+                cq.where(blockPred).orderBy(cb.asc(root.get(AdmissionRoom_.admissionRoomOrder)));
+                return cq.getRestriction();
+            }
+
+        };
+    }
+    
+    
 	/*public static Specification<LeafLibrary> getFequentList(final Integer userId){
 
 		return new Specification<LeafLibrary>(){

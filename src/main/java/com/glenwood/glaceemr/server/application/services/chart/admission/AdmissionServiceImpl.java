@@ -12,22 +12,22 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.Admission;
+import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.H496;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientEpisode;
 import com.glenwood.glaceemr.server.application.repositories.AdmissionRepository;
+import com.glenwood.glaceemr.server.application.repositories.AdmissionRoomRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
 import com.glenwood.glaceemr.server.application.repositories.H496Repository;
@@ -43,8 +43,6 @@ import com.glenwood.glaceemr.server.application.specifications.LeafPatientSpecfi
 
 @Service
 public class AdmissionServiceImpl implements AdmissionService {
-
-	private Logger logger = Logger.getLogger(AdmissionServiceImpl.class);
 
 	@Autowired
 	AdmissionRepository admissionRepository;
@@ -76,6 +74,9 @@ public class AdmissionServiceImpl implements AdmissionService {
 	@Autowired
 	H496Repository H496Repository;
 	
+	@Autowired
+	AdmissionRoomRepository admissionRoomRepository;
+	
 	@PersistenceContext
 	EntityManager entityManager;
 	
@@ -106,12 +107,14 @@ public class AdmissionServiceImpl implements AdmissionService {
 				}
 
 				java.sql.Date admssDate = new java.sql.Date(parsed.getTime());
-				newadmssObj.setAdmissionAdmittedDate(admssDate);
+				newadmssObj.setAdmissionAdmittedDate(admssDate);				
+				newadmssObj.setAdmissionTime(admission.getAdmissionTime());
 				newadmssObj.setAdmissionDoctorId(admission.getAdmssProvider());
 				newadmssObj.setAdmissionPosId(admission.getPos());
 				newadmssObj.setAdmissionPatientId(admission.getPatientId());
 				newadmssObj.setAdmissionStatus(1);
 				newadmssObj.setAdmissionRoom(admission.getRoomNo());
+				newadmssObj.setAdmissionBlock(admission.getBlockNo());
 				newadmssObj.setAdmissionNotes(admission.getNotes());
 
 
@@ -346,8 +349,10 @@ public class AdmissionServiceImpl implements AdmissionService {
 		return admissionLeafBean;
 	}
 
-
-	
-	
+	@Override
+	public List<AdmissionRoom> getRooms(Integer blockId) {
+		
+		return admissionRoomRepository.findAll(AdmissionSpecification.getRooms(blockId));
+	}
 
 }

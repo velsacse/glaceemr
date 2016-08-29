@@ -11,6 +11,9 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.Encounter;
@@ -55,4 +58,26 @@ public class DischargeVitalSpecification {
 		};
 	}
 	
+	public static Specification<PatientVitals> getDichargeVitalsByPatientId(final Integer patientId, final Integer encounterId, final Integer admissionEpisode){
+
+		return new Specification<PatientVitals>(){
+
+			@Override
+			public Predicate toPredicate(Root<PatientVitals> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Join<PatientVitals, Encounter> encPatVitalJoin = root.join(PatientVitals_.encounter,JoinType.INNER);
+				root.join(PatientVitals_.clinicalElement,JoinType.INNER);
+				query.orderBy(cb.asc(root.get(PatientVitals_.patientVitalsGwid)),cb.asc(root.get(PatientVitals_.patientVitalsDateOfRecording)),cb.asc(root.get(PatientVitals_.patientVitalsTimeOfRecording)));
+				return cb.and(cb.equal(root.get(PatientVitals_.patientVitalsPatientid), patientId),
+							  cb.lessThanOrEqualTo(root.get(PatientVitals_.patientVitalsEncounterid), encounterId));
+				
+			}
+
+		};
+	}
+	
+	public static Pageable getLimitedDischargeVitals(int pageIndex, int pageOffset){
+
+		return new PageRequest(pageIndex, pageOffset, Sort.Direction.DESC,"patientVitalsDateOfRecording,patientVitalsTimeOfRecording");
+	}
+
 }

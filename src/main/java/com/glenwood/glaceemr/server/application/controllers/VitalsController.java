@@ -54,9 +54,26 @@ public class VitalsController {
 		groupId=Integer.parseInt(Optional.fromNullable(groupId+"").or("-1"));
 		isDischargeVitals=Boolean.parseBoolean(Optional.fromNullable(isDischargeVitals+"").or("false"));
 		admssEpisode=Integer.parseInt(Optional.fromNullable(admssEpisode+"").or("-1"));
-		return vitalService.setVitals(patientId,encounterId,groupId,isDischargeVitals,admssEpisode,clientId);
+		return vitalService.setVitals(patientId,encounterId,groupId,isDischargeVitals,admssEpisode,clientId,0);
 	}
 	
-	
+	@RequestMapping(value="/VitalGroups/VitalPrint",method=RequestMethod.GET)
+	@ResponseBody
+	public DischargeVitalBean getGroupVitalsPrint(@RequestParam(value="patientId") Integer patientId,
+									@RequestParam(value="chartId") Integer chartId,
+									@RequestParam(value="encounterId") Integer encounterId,
+									@RequestParam(value="groupId") Integer groupId,
+									@RequestParam(value="dischargeVitals") Boolean isDischargeVitals,
+									@RequestParam(value="admssEpisode") Integer admssEpisode,
+									@RequestParam(value="clientId") String clientId) throws Exception{
+		
+		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
+		chartId=Integer.parseInt(Optional.fromNullable(chartId+"").or("-1"));
+		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
+		groupId=Integer.parseInt(Optional.fromNullable(groupId+"").or("-1"));
+		isDischargeVitals=Boolean.parseBoolean(Optional.fromNullable(isDischargeVitals+"").or("false"));
+		admssEpisode=Integer.parseInt(Optional.fromNullable(admssEpisode+"").or("-1"));
+		return vitalService.setVitals(patientId,encounterId,groupId,isDischargeVitals,admssEpisode,clientId,1);
+	}
 	
 }

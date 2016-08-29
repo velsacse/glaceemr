@@ -190,6 +190,11 @@ public class Admission implements Serializable{
 	@Column(name="admission_discharge_doctor_id")
 	private Integer admissionDischargeDocId;
 	
+	@Column(name="admission_block")
+	private Integer admissionBlock;
+	
+	@Column(name="admission_time")
+	private String admissionTime;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "admission_doctor_id", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
@@ -200,8 +205,12 @@ public class Admission implements Serializable{
 	private PosTable posTable;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name = "admission_room", referencedColumnName = "h479001", insertable = false, updatable = false)
-	private H479 h479;
+	@JoinColumn(name = "admission_block", referencedColumnName = "admission_block_id", insertable = false, updatable = false)
+	private AdmissionBlock admissionBlockTable;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "admission_room", referencedColumnName = "admission_room_id", insertable = false, updatable = false)
+	private AdmissionRoom admissionRoomTable;
 	
 	@OneToMany(mappedBy="admission")
 	private List<Encounter> encounter;
@@ -676,14 +685,36 @@ public class Admission implements Serializable{
 		this.admissionNotes = admissionNotes;
 	}
 
-	public H479 getH479() {
-		return h479;
+	public Integer getAdmissionBlock() {
+		return admissionBlock;
 	}
 
-	public void setH479(H479 h479) {
-		this.h479 = h479;
+	public void setAdmissionBlock(Integer admissionBlock) {
+		this.admissionBlock = admissionBlock;
 	}
-	
-	
-	
+
+	public AdmissionBlock getAdmissionBlockTable() {
+		return admissionBlockTable;
+	}
+
+	public void setAdmissionBlockTable(AdmissionBlock admissionBlockTable) {
+		this.admissionBlockTable = admissionBlockTable;
+	}
+
+	public AdmissionRoom getAdmissionRoomTable() {
+		return admissionRoomTable;
+	}
+
+	public void setAdmissionRoomTable(AdmissionRoom admissionRoomTable) {
+		this.admissionRoomTable = admissionRoomTable;
+	}
+
+	public String getAdmissionTime() {
+		return admissionTime;
+	}
+
+	public void setAdmissionTime(String admissionTime) {
+		this.admissionTime = admissionTime;
+	}	
+
 }

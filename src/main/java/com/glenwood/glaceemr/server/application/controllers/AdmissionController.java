@@ -2,8 +2,6 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,8 +12,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.Admission;
+import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
 import com.glenwood.glaceemr.server.application.models.Encounter;
-import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionBean;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionLeafBean;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionService;
@@ -91,7 +89,11 @@ public class AdmissionController {
 		return admissionService.getAdmissionLeafs(admssEpisode);
 	}
 	
-	
+	@RequestMapping(value="/getRooms",method=RequestMethod.GET)
+	@ResponseBody
+	public List<AdmissionRoom> getRooms(@RequestParam(value="blockId",required=false, defaultValue="-1") Integer blockId) throws Exception{
+		return admissionService.getRooms(blockId);
+	}	
 	
 	public AdmissionBean getAdmissionBeanData(AdmissionBean dataJson){
 		
@@ -103,7 +105,7 @@ public class AdmissionController {
 		dataJson.setChartId(Integer.parseInt(Optional.fromNullable(dataJson.getChartId()+"").or("-1")));
 		dataJson.setUserId(Integer.parseInt(Optional.fromNullable(dataJson.getUserId()+"").or("-1")));
 		dataJson.setLoginId(Integer.parseInt(Optional.fromNullable(dataJson.getLoginId()+"").or("-1")));
-		dataJson.setAdmissionEpisode(Integer.parseInt(Optional.fromNullable(dataJson.getAdmissionEpisode()+"").or("-1")));
+		dataJson.setAdmissionEpisode(Integer.parseInt(Optional.fromNullable(dataJson.getAdmissionEpisode()+"").or("-1")));		
 		
 		return dataJson;
 	}

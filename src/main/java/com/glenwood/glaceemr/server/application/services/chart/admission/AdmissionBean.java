@@ -1,14 +1,11 @@
 package com.glenwood.glaceemr.server.application.services.chart.admission;
 
-import java.util.List;
-
-
-
 public class AdmissionBean {
 	
 	Integer patientId;
 	Integer chartId;
 	String admissionDate;
+	String admissionTime;
 	Integer admssProvider;
 	Integer pos;
 	String selectedDx;
@@ -16,9 +13,8 @@ public class AdmissionBean {
 	Integer loginId;
 	Integer admissionEpisode;
 	Integer roomNo;
+	Integer blockNo;
 	String notes;
-	
-	
 	
 	public Integer getAdmissionEpisode() {
 		return admissionEpisode;
@@ -86,7 +82,17 @@ public class AdmissionBean {
 	public void setNotes(String notes) {
 		this.notes = notes;
 	}
-	
-	
+	public Integer getBlockNo() {
+		return blockNo;
+	}
+	public void setBlockNo(Integer blockNo) {
+		this.blockNo = blockNo;
+	}
+	public String getAdmissionTime() {
+		return admissionTime;
+	}
+	public void setAdmissionTime(String admissionTime) {
+		this.admissionTime = admissionTime;
+	}
 	
 }

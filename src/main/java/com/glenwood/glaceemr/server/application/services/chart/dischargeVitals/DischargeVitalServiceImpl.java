@@ -111,14 +111,19 @@ public class DischargeVitalServiceImpl implements DischargeVitalService{
 				String clinicalElementGwid = idString[0].toString();
 				String dateString = idString[1].toString();
 				String timeString = idString[2].toString();
+				String elementEncounterId = "";
+				if(idString.length>3 && idString[3] != null)
+					elementEncounterId = idString[3].toString();
+				else
+					elementEncounterId = encounterId.toString();
 				Date date = new java.sql.Date((new SimpleDateFormat("yyyy-MM-dd").parse(dateString).getTime()));
 				Timestamp time = new Timestamp((new SimpleDateFormat("hh:mm:ss").parse(timeString).getTime()));
 				if(operation.equalsIgnoreCase("delete") &&  !dataMap.containsKey(dataEntry.getKey())){
-					patientVitalsToDelete.add(patientVitalsRepository.findOne(DischargeVitalSpecification.getDichargeVitalsByGwid(date, time, clinicalElementGwid, patientId, encounterId)));
+					patientVitalsToDelete.add(patientVitalsRepository.findOne(DischargeVitalSpecification.getDichargeVitalsByGwid(date, time, clinicalElementGwid, patientId, Integer.parseInt(elementEncounterId))));
 				}else if (operation.equalsIgnoreCase("save")){
 					//System.out.println("date"+date.toString()+"time"+time.toString()+"gwid"+clinicalElementGwid+"patientId"+patientId+"encounterId"+encounterId);
 					
-					PatientVitals patientVital = patientVitalsRepository.findOne(DischargeVitalSpecification.getDichargeVitalsByGwid(date, time, clinicalElementGwid, patientId, encounterId));
+					PatientVitals patientVital = patientVitalsRepository.findOne(DischargeVitalSpecification.getDichargeVitalsByGwid(date, time, clinicalElementGwid, patientId, Integer.parseInt(elementEncounterId)));
 					if(patientVital != null){
 						patientVital.setPatientVitalsValue(dataEntry.getValue());
 						patientVitalsRepository.saveAndFlush(patientVital);
@@ -127,7 +132,7 @@ public class DischargeVitalServiceImpl implements DischargeVitalService{
 						addPatientVital.setPatientVitalsGwid(clinicalElementGwid);
 						addPatientVital.setPatientVitalsChartid(chartId);
 						addPatientVital.setPatientVitalsPatientid(patientId);
-						addPatientVital.setPatientVitalsEncounterid(encounterId);
+						addPatientVital.setPatientVitalsEncounterid(Integer.parseInt(elementEncounterId));
 						addPatientVital.setPatientVitalsDateOfRecording(date);
 						addPatientVital.setPatientVitalsTimeOfRecording(time);
 						addPatientVital.setPatientVitalsValue(dataEntry.getValue());

@@ -3,10 +3,8 @@ package com.glenwood.glaceemr.server.application.services.chart.admission;
 import java.util.List;
 
 import com.glenwood.glaceemr.server.application.models.Admission;
+import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
 import com.glenwood.glaceemr.server.application.models.Encounter;
-import com.glenwood.glaceemr.server.application.models.LeafPatient;
-
-
 
 public interface AdmissionService  {
 
@@ -25,5 +23,7 @@ public interface AdmissionService  {
 	String getAdmissionEncDetails(Integer admssEpisode);
 
 	AdmissionLeafBean getAdmissionLeafs(Integer admssEpisode);
+
+	List<AdmissionRoom> getRooms(Integer blockId);
 	
 }

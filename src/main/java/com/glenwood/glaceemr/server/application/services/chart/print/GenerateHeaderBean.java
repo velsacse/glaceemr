@@ -772,7 +772,16 @@ public class GenerateHeaderBean {
 				if(count%attributeCount==0){
 					pHeaderHTML.append("<tr>");
 				}
-				pHeaderHTML.append("<td width='33%'><font style='font-weight:bold;font-size:12px;font-family:Arial;'>");
+				String alignStyle="";
+				if(patientHeaderDetails.size()==attributeCount){
+					if(count%attributeCount==0)
+						alignStyle="text-align: left;";
+					else if(count%attributeCount==attributeCount-1)
+						alignStyle="text-align: right;";
+					else
+						alignStyle="text-align: center;";
+				}
+				pHeaderHTML.append("<td width='33%' style='"+alignStyle+"'><font style='font-weight:bold;font-size:12px;font-family:Arial;'>");
 				pHeaderHTML.append(attributes[patientHeaderDetails.get(i).getComponentId()]);
 				if(!patientDetailsArr[patientHeaderDetails.get(i).getComponentId()].equalsIgnoreCase("")){
 					pHeaderHTML.append(":</font>&nbsp;<font style='font-size:12px;font-family:Arial;'>");

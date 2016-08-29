@@ -77,13 +77,15 @@ public class VitalsServiceImpl implements VitalsService {
 	Short patientSex=0;
 	Date patDOB=null;
 	Integer ageinDay=0;
+	Integer fromPrint=0;
 	
 	private Logger logger = Logger.getLogger(VitalsServiceImpl.class);
 
 
 
 	@Override
-	public DischargeVitalBean setVitals(Integer patientId,Integer encounterId,Integer groupId,Boolean isDischargeVitals,Integer admssEpisode,String clientId)throws Exception{
+	public DischargeVitalBean setVitals(Integer patientId,Integer encounterId,Integer groupId,Boolean isDischargeVitals,Integer admssEpisode,String clientId,Integer fromPrint)throws Exception{
+		this.fromPrint=fromPrint;
 		getPatientDetails(patientId);
 		clinicalDataBean.clientId=clientId;
 		getActiveVitalsGroup(patientId,groupId);
@@ -108,6 +110,7 @@ public class VitalsServiceImpl implements VitalsService {
 
 
 	public void getPatientDetails(Integer patientId){
+		try{
 		List<PatientRegistration> patRegistration=patientRegRepository.findAll(PatientRegistrationSpecification.getPatientPersonalDetails(patientId));
 		for (PatientRegistration patientRegistration : patRegistration) {
 			patientSex=patientRegistration.getPatientRegistrationSex().shortValue();
@@ -115,6 +118,9 @@ public class VitalsServiceImpl implements VitalsService {
 		}
 		SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
 		ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date() )));
+		}catch(Exception e){
+			
+		}
 		
 	}
 
@@ -321,7 +327,11 @@ public class VitalsServiceImpl implements VitalsService {
 
 
 	private Map<String, HashMap<String, String>> framePatientData(Integer patientId,Integer encounterId,Integer admssEpisode) {
-		List<PatientVitals> patientVitals = patientVitalsRepository.findAll(DischargeVitalSpecification.getDichargeVitalsByEncounterId(patientId, encounterId, admssEpisode));
+		List<PatientVitals> patientVitals = null;
+		if(fromPrint==0)
+			patientVitals=patientVitalsRepository.findAll(DischargeVitalSpecification.getDichargeVitalsByEncounterId(patientId, encounterId, admssEpisode));
+		else
+			patientVitals=patientVitalsRepository.findAll(DischargeVitalSpecification.getDichargeVitalsByPatientId(patientId, encounterId, admssEpisode));
 		Map<String, HashMap<String, String>> vitalData = new HashMap<String, HashMap<String,String>>();
 		
 		boolean weightVisited = false;
@@ -346,36 +356,36 @@ public class VitalsServiceImpl implements VitalsService {
 				
 				if(!heightVisited){
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], heightValue[0]);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), heightValue[0]);
 					vitalData.put(patientVital.getPatientVitalsGwid()+"_inFt", dataMap);
 					
 					
 					
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], heightValue[1]);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), heightValue[1]);
 					vitalData.put(patientVital.getPatientVitalsGwid()+"_inFtin", dataMap);
 					
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], heightValue[2]);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), heightValue[2]);
 					vitalData.put(patientVital.getPatientVitalsGwid()+"_ininches", dataMap);
 					
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], heightValue[3]);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), heightValue[3]);
 					vitalData.put(patientVital.getPatientVitalsGwid()+"_incms", dataMap);
 				
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], heightValue[3]);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), heightValue[3]);
 					vitalData.put(patientVital.getPatientVitalsGwid(), dataMap);
 					heightVisited = true;
 				
 				}
 				else{
-					vitalData.get(patientVital.getPatientVitalsGwid()+"_inFt").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], heightValue[0]);
+					vitalData.get(patientVital.getPatientVitalsGwid()+"_inFt").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), heightValue[0]);
 					
-					vitalData.get(patientVital.getPatientVitalsGwid()+"_inFtin").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], heightValue[1]);
-					vitalData.get(patientVital.getPatientVitalsGwid()+"_ininches").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], heightValue[2]);
-					vitalData.get(patientVital.getPatientVitalsGwid()+"_incms").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], heightValue[3]);
-					vitalData.get(patientVital.getPatientVitalsGwid()).put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], heightValue[3]);
+					vitalData.get(patientVital.getPatientVitalsGwid()+"_inFtin").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), heightValue[1]);
+					vitalData.get(patientVital.getPatientVitalsGwid()+"_ininches").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), heightValue[2]);
+					vitalData.get(patientVital.getPatientVitalsGwid()+"_incms").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), heightValue[3]);
+					vitalData.get(patientVital.getPatientVitalsGwid()).put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), heightValue[3]);
 				}
 				
 			}
@@ -394,36 +404,36 @@ public class VitalsServiceImpl implements VitalsService {
 				
 				if(!weightVisited){
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], weightValue[0]);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), weightValue[0]);
 					vitalData.put(patientVital.getPatientVitalsGwid()+"_inlbs", dataMap);
 					
 					
 					
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], weightValue[1]);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), weightValue[1]);
 					vitalData.put(patientVital.getPatientVitalsGwid()+"_inLbsOz", dataMap);
 					
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], weightValue[2]);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), weightValue[2]);
 					vitalData.put(patientVital.getPatientVitalsGwid()+"_inounce", dataMap);
 					
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], weightValue[3]);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), weightValue[3]);
 					vitalData.put(patientVital.getPatientVitalsGwid()+"_inkg", dataMap);
 				
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], weightValue[3]);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), weightValue[3]);
 					vitalData.put(patientVital.getPatientVitalsGwid(), dataMap);
 					
 					weightVisited = true;
 				}
 				else{
-					vitalData.get(patientVital.getPatientVitalsGwid()+"_inlbs").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], weightValue[0]);
+					vitalData.get(patientVital.getPatientVitalsGwid()+"_inlbs").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), weightValue[0]);
 					
-					vitalData.get(patientVital.getPatientVitalsGwid()+"_inLbsOz").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], weightValue[1]);
-					vitalData.get(patientVital.getPatientVitalsGwid()+"_inounce").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], weightValue[2]);
-					vitalData.get(patientVital.getPatientVitalsGwid()+"_inkg").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], weightValue[3]);
-					vitalData.get(patientVital.getPatientVitalsGwid()).put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], weightValue[3]);
+					vitalData.get(patientVital.getPatientVitalsGwid()+"_inLbsOz").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), weightValue[1]);
+					vitalData.get(patientVital.getPatientVitalsGwid()+"_inounce").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), weightValue[2]);
+					vitalData.get(patientVital.getPatientVitalsGwid()+"_inkg").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), weightValue[3]);
+					vitalData.get(patientVital.getPatientVitalsGwid()).put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), weightValue[3]);
 				}
 				
 			}
@@ -441,17 +451,17 @@ public class VitalsServiceImpl implements VitalsService {
 				HashMap<String, String> dataMap = null;
 				if(!tempVisited){
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], patientVital.getPatientVitalsValue());
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), patientVital.getPatientVitalsValue());
 					vitalData.put(patientVital.getPatientVitalsGwid(), dataMap);
 				
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], elementCelciusValue);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), elementCelciusValue);
 					vitalData.put(patientVital.getPatientVitalsGwid()+"_celcius", dataMap);
 					
 					tempVisited= true;
 				}else{
-					vitalData.get(patientVital.getPatientVitalsGwid()).put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], patientVital.getPatientVitalsValue());
-					vitalData.get(patientVital.getPatientVitalsGwid()+"_celcius").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], elementCelciusValue);
+					vitalData.get(patientVital.getPatientVitalsGwid()).put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), patientVital.getPatientVitalsValue());
+					vitalData.get(patientVital.getPatientVitalsGwid()+"_celcius").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), elementCelciusValue);
 				}
 			}
 			//Head Circumference
@@ -469,25 +479,25 @@ public class VitalsServiceImpl implements VitalsService {
 				
 				if(!headCirVisited){
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], patientVital.getPatientVitalsValue());
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), patientVital.getPatientVitalsValue());
 					vitalData.put(patientVital.getPatientVitalsGwid(), dataMap);
 				
 					dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], elementInchesValue);
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), elementInchesValue);
 					vitalData.put(patientVital.getPatientVitalsGwid()+"_ininches", dataMap);
 					
 					headCirVisited = true;
 				}else{
-					vitalData.get(patientVital.getPatientVitalsGwid()).put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], patientVital.getPatientVitalsValue());
-					vitalData.get(patientVital.getPatientVitalsGwid()+"_ininches").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], elementInchesValue);
+					vitalData.get(patientVital.getPatientVitalsGwid()).put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), patientVital.getPatientVitalsValue());
+					vitalData.get(patientVital.getPatientVitalsGwid()+"_ininches").put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), elementInchesValue);
 				}
 			}
 			else {
 				if(vitalData.containsKey(patientVital.getPatientVitalsGwid())){
-					vitalData.get(patientVital.getPatientVitalsGwid()).put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], patientVital.getPatientVitalsValue());
+					vitalData.get(patientVital.getPatientVitalsGwid()).put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), patientVital.getPatientVitalsValue());
 				}else{
 					HashMap<String, String> dataMap = new HashMap<String, String>();
-					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1], patientVital.getPatientVitalsValue());
+					dataMap.put(patientVital.getPatientVitalsDateOfRecording().toString()+"_"+patientVital.getPatientVitalsTimeOfRecording().toString().split(" ")[1]+"_"+patientVital.getPatientVitalsEncounterid(), patientVital.getPatientVitalsValue());
 					vitalData.put(patientVital.getPatientVitalsGwid(), dataMap);
 				}
 			}

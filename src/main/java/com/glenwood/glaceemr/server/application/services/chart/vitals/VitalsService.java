@@ -12,6 +12,6 @@ public interface VitalsService  {
 
 	public List<VitalsParameter> getGroupVitals(Integer patientId,Integer encounterId, Integer groupId) throws Exception;
 	
-	public DischargeVitalBean setVitals(Integer patientId,Integer encounterId, Integer groupId,Boolean isDischargeVitals,Integer admssEpisode ,String clientId) throws Exception;
+	public DischargeVitalBean setVitals(Integer patientId,Integer encounterId, Integer groupId,Boolean isDischargeVitals,Integer admssEpisode ,String clientId, Integer fromPrint) throws Exception;
 
 }
