@@ -65,6 +65,24 @@ public class ReferralSpecification {
 	}
 	
 	/**
+	 * Get referral based on patient id
+	 * @param patientId
+	 * @return
+	 */
+	public static Specification<Referral> findByPatientId(final Integer patientId)
+	{
+		return new Specification<Referral>() {
+			
+			@Override
+			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate pred = cb.equal((root.get(Referral_.h413035)), patientId);
+				return pred;
+			}
+		};
+	}
+	
+	/**
 	 * Get referral based on chart id
 	 * @param chartId
 	 * @return
@@ -86,6 +104,34 @@ public class ReferralSpecification {
 	}
 
 	/**
+	 * Get referrals based on patient id, encounter id, referredbyname, referredtoname
+	 * @param patientId
+	 * @param encounterId
+	 * @param fromName
+	 * @param toName
+	 * @return
+	 */
+	public static Specification<Referral> findByName(final Integer patientId, final Integer encounterId, final String fromName, final String toName)
+	{
+		return new Specification<Referral>() {
+			
+			@Override
+			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				
+				Predicate fromNamePred = cb.like(cb.upper(root.get(Referral_.h413005)), fromName.toUpperCase());
+				Predicate toNamePred = cb.like(cb.upper(root.get(Referral_.h413006)), toName.toUpperCase());
+				Predicate patientPred = cb.equal(root.get(Referral_.h413035), patientId);
+				Predicate encounterPred = cb.equal(root.get(Referral_.h413003), patientId);
+				
+				query.where(cb.and(patientPred,encounterPred,fromNamePred,toNamePred));
+				
+				return query.getRestriction();
+			}
+		};
+	}
+	
+	/**
 	 * Get referral not having status 2
 	 * @param status
 	 * @return
@@ -101,6 +147,25 @@ public class ReferralSpecification {
 				Predicate pred = cb.notEqual(root.get(Referral_.h413041), status);
 				
 				return pred;
+			}
+		};
+	}
+
+	/**
+	 * Ordering referrals based on ordered date in descending order
+	 * @return
+	 */
+	public static Specification<Referral> orderByOrderedDate()
+	{
+		return new Specification<Referral>() {
+			
+			@Override
+			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				
+				query.orderBy(cb.desc(root.get(Referral_.h413004)));
+				
+				return query.getRestriction();
 			}
 		};
 	}
@@ -138,6 +203,23 @@ public class ReferralSpecification {
 				query.where(pred).orderBy(cb.desc(root.get(Referral_.h413004)));
 				Join<Referral,PatientRegistration> patRegJoin= root.join("patientRegistrationTable",JoinType.INNER);
 				Join<Referral,EmployeeProfile> empProfileJoin= root.join("empprofileTable",JoinType.LEFT);
+				return query.getRestriction();
+			}
+		};
+	}
+	
+	/**
+	 * Ordering referrals based on referral id in descending order
+	 * @return
+	 */
+	public static Specification<Referral> orderByIdDesc()
+	{
+		return new Specification<Referral>() {
+			
+			@Override
+			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				query.orderBy(cb.desc(root.get(Referral_.h413001)));
 				return query.getRestriction();
 			}
 		};

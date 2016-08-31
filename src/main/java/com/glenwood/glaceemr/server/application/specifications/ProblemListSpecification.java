@@ -2,11 +2,14 @@ package com.glenwood.glaceemr.server.application.specifications;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.glenwood.glaceemr.server.application.models.CodingSystems;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.ProblemList_;
 
@@ -107,5 +110,43 @@ public class ProblemListSpecification {
 		};
 
 	}	
+	
+	/**
+	 * Get leaf details of patient
+	 * @param patientId
+	 * @return
+	 */
+	public static Specification<ProblemList> getPatientProblems(final Integer patientId)
+	{
+		return new Specification<ProblemList>() {
+			
+			@Override
+			public Predicate toPredicate(Root<ProblemList> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Join<ProblemList,CodingSystems> problemCodingJoin= root.join(ProblemList_.codingSystems,JoinType.INNER);
+				Predicate pred = cb.equal(root.get(ProblemList_.problemListPatientId),patientId);
+				query.where(pred).orderBy(cb.asc(root.get(ProblemList_.problemListDxCode)));
+				return pred;
+			}
+		};
+	}
+	
+	/**
+	 * Check active status
+	 * @param active
+	 * @return
+	 */
+	public static Specification<ProblemList> isActive(final Boolean active)
+	{
+		return new Specification<ProblemList>() {
+			
+			@Override
+			public Predicate toPredicate(Root<ProblemList> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate pred = cb.equal(root.get(ProblemList_.problemListIsactive),active);
+				return pred;
+			}
+		};
+	}
 
 }

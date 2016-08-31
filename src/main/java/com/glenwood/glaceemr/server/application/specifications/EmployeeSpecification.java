@@ -87,6 +87,153 @@ public class EmployeeSpecification {
 		};
 	}
 
+	
+	////////////////////
+	
+	
+	/**
+	 * Search employees using login id
+	 * @param loginId 
+	 * @return  
+	 */
+	public static Specification<EmployeeProfile> findByEmpLoginId(final Integer loginId)
+	{
+		return new Specification<EmployeeProfile>() {
+			
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate pred = cb.equal(root.get(EmployeeProfile_.empProfileLoginid), loginId);
+				return pred;
+			}
+		};
+	}
 
-
+	/**
+	 * Search using first name
+	 * @param fname
+	 * @return
+	 */
+	public static Specification<EmployeeProfile> findByEmpFNameNotLike(final String fname)
+	{
+		return new Specification<EmployeeProfile>() {
+			
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				query.where(cb.notLike(cb.lower(root.get(EmployeeProfile_.empProfileFname)), fname.toLowerCase())).orderBy(cb.asc(root.get(EmployeeProfile_.empProfileDoctorid)));
+				return query.getRestriction();
+			}
+		};
+	}
+	
+	/**
+	 * Search using last name
+	 * @param lname
+	 * @return
+	 */
+	public static Specification<EmployeeProfile> findByEmpLNameNotLike(final String lname)
+	{
+		return new Specification<EmployeeProfile>() {
+			
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate pred = cb.notLike(cb.lower(root.get(EmployeeProfile_.empProfileLname)), lname.toLowerCase());
+				return pred;
+			}
+		};
+	}
+	
+	/**
+	 * Check active status
+	 * @param active
+	 * @return
+	 */
+	public static Specification<EmployeeProfile> isActive(final Boolean active)
+	{
+		return new Specification<EmployeeProfile>() {
+			
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate pred = cb.equal(root.get(EmployeeProfile_.empProfileIsActive), active);
+				return pred;
+			}
+		};
+	}
+	
+	/**
+	 * Search using group id, in -1 and-10
+	 * @return
+	 */
+	public static Specification<EmployeeProfile> findByGroupId()
+	{
+		return new Specification<EmployeeProfile>() {
+			
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				query.where(root.get(EmployeeProfile_.empProfileGroupid).in(-1,-10));
+				return query.getRestriction();
+			}
+		};
+	}
+	
+	/**
+	 * Ordering with group Id in ascending order
+	 * @return
+	 */
+	public static Specification<EmployeeProfile> orderByGroupId()
+	{
+		return new Specification<EmployeeProfile>() {
+			
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				
+				query.orderBy(cb.asc(root.get(EmployeeProfile_.empProfileGroupid)));
+				return query.getRestriction();
+			}
+		};
+	}
+	
+	/**
+	 * Search using employee Id
+	 * @param empId
+	 * @return
+	 */
+	public static Specification<EmployeeProfile> findByEmpId(final Integer empId)
+	{
+		return new Specification<EmployeeProfile>() {
+			
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				
+				Predicate pred = cb.equal(root.get(EmployeeProfile_.empProfileEmpid), empId);
+				return pred;
+			}
+		};
+	}
+	
+	/**
+	 * Search using group Id
+	 * @param groupId
+	 * @return
+	 */
+	public static Specification<EmployeeProfile> findByGroupId(final Integer groupId)
+	{
+		return new Specification<EmployeeProfile>() {
+			
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				
+				Predicate pred = cb.equal(root.get(EmployeeProfile_.empProfileGroupid), groupId);
+				return pred;
+			}
+		};
+	}
+	
 }
