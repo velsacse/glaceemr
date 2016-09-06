@@ -2,75 +2,157 @@ package com.glenwood.glaceemr.server.application.services.referral;
 
 public class ReferralForm {
 	
-	public String reason;
+	private String patientId;
 	
-	public Integer apptBy;
+	private String encounterId;
 	
-	public String apptNotes;
+	private String chartId;
 	
-	public Integer apptConfirmed;
+	private String refId;
 	
-	public String apptContactPerson;
+	private String loginId;
 	
-	public String apptDate;
+	private String userId;
 	
-	public String apptTime;
+	private String editReferral;
 	
-	public Integer authBy;
+	private String referredToId;
 	
-	public String authNotes;
+	private String reason;
 	
-	public String authDate;
+	private String apptBy;
 	
-	public String authExpDate;
+	private String apptNotes;
 	
-	public Integer authNeeded;
+	private short apptConfirmed;
 	
-	public String authNumber;
+	private String apptContactPerson;
 	
-	public Integer numofVisits;
+	private String apptDate;
 	
-	public Integer authDone;
+	private String apptTime;
 	
-	public String consComment;
+	private String authBy;
 	
-	public Integer isConsReportReceived;
+	private String authNotes;
 	
-	public String consReportReceivedDate;
+	private String authDate;
 	
-	public Integer isConsReportReviewed;
+	private String authExpDate;
 	
-	public String consReportReviewedDate;
+	private short authNeeded;
 	
-	public String guarantorName;
+	private String authNumber;
 	
-	public String hospitalName;
+	private Integer numofVisits;
 	
-	public Boolean isSummaryCare;
+	private short authDone;
 	
-	public String orderedDate;
+	private String consComment;
 	
-	public Integer patientNotified;
+	private short isConsReportReceived;
 	
-	public String address;
+	private String consReportReceivedDate;
 	
-	public String fax;
+	private short isConsReportReviewed;
 	
-	public String phone;
+	private String consReportReviewedDate;
 	
-	public String specialization;
+	private String guarantorName;
 	
-	public String dx;
+	private String hospitalName;
 	
-	public String referredBy;
+	private Boolean isSummaryCare;
 	
-	public String referredTo;
+	private String orderedDate;
 	
-	public Integer status;
+	private short patientNotified;
 	
-	public String referralNotes;
+	private String address;
 	
-	public String printLeaf;
+	private String fax;
+	
+	private String phone;
+	
+	private String specialization;
+	
+	private String dx;
+	
+	private String referredBy;
+	
+	private String referredTo;
+	
+	private Integer status;
+	
+	private String referralNotes;
+	
+	private String printLeaf;
+	
+	private String rdx;
+	
+	public String getPatientId() {
+		return patientId;
+	}
+
+	public void setPatientId(String patientId) {
+		this.patientId = patientId;
+	}
+
+	public String getEncounterId() {
+		return encounterId;
+	}
+
+	public void setEncounterId(String encounterId) {
+		this.encounterId = encounterId;
+	}
+
+	public String getChartId() {
+		return chartId;
+	}
+
+	public void setChartId(String chartId) {
+		this.chartId = chartId;
+	}
+
+	public String getRefId() {
+		return refId;
+	}
+
+	public void setRefId(String refId) {
+		this.refId = refId;
+	}
+
+	public String getLoginId() {
+		return loginId;
+	}
+
+	public void setLoginId(String loginId) {
+		this.loginId = loginId;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getEditReferral() {
+		return editReferral;
+	}
+
+	public void setEditReferral(String editReferral) {
+		this.editReferral = editReferral;
+	}
+
+	public String getReferredToId() {
+		return referredToId;
+	}
+
+	public void setReferredToId(String referredToId) {
+		this.referredToId = referredToId;
+	}
 
 	public String getReason() {
 		return reason;
@@ -80,11 +162,11 @@ public class ReferralForm {
 		this.reason = reason;
 	}
 
-	public Integer getApptBy() {
+	public String getApptBy() {
 		return apptBy;
 	}
 
-	public void setApptBy(Integer apptBy) {
+	public void setApptBy(String apptBy) {
 		this.apptBy = apptBy;
 	}
 
@@ -96,11 +178,11 @@ public class ReferralForm {
 		this.apptNotes = apptNotes;
 	}
 
-	public Integer getApptConfirmed() {
+	public short getApptConfirmed() {
 		return apptConfirmed;
 	}
 
-	public void setApptConfirmed(Integer apptConfirmed) {
+	public void setApptConfirmed(short apptConfirmed) {
 		this.apptConfirmed = apptConfirmed;
 	}
 
@@ -128,11 +210,11 @@ public class ReferralForm {
 		this.apptTime = apptTime;
 	}
 
-	public Integer getAuthBy() {
+	public String getAuthBy() {
 		return authBy;
 	}
 
-	public void setAuthBy(Integer authBy) {
+	public void setAuthBy(String authBy) {
 		this.authBy = authBy;
 	}
 
@@ -160,11 +242,11 @@ public class ReferralForm {
 		this.authExpDate = authExpDate;
 	}
 
-	public Integer getAuthNeeded() {
+	public short getAuthNeeded() {
 		return authNeeded;
 	}
 
-	public void setAuthNeeded(Integer authNeeded) {
+	public void setAuthNeeded(short authNeeded) {
 		this.authNeeded = authNeeded;
 	}
 
@@ -184,11 +266,11 @@ public class ReferralForm {
 		this.numofVisits = numofVisits;
 	}
 
-	public Integer getAuthDone() {
+	public short getAuthDone() {
 		return authDone;
 	}
 
-	public void setAuthDone(Integer authDone) {
+	public void setAuthDone(short authDone) {
 		this.authDone = authDone;
 	}
 
@@ -200,11 +282,11 @@ public class ReferralForm {
 		this.consComment = consComment;
 	}
 
-	public Integer getIsConsReportReceived() {
+	public short getIsConsReportReceived() {
 		return isConsReportReceived;
 	}
 
-	public void setIsConsReportReceived(Integer isConsReportReceived) {
+	public void setIsConsReportReceived(short isConsReportReceived) {
 		this.isConsReportReceived = isConsReportReceived;
 	}
 
@@ -216,11 +298,11 @@ public class ReferralForm {
 		this.consReportReceivedDate = consReportReceivedDate;
 	}
 
-	public Integer getIsConsReportReviewed() {
+	public short getIsConsReportReviewed() {
 		return isConsReportReviewed;
 	}
 
-	public void setIsConsReportReviewed(Integer isConsReportReviewed) {
+	public void setIsConsReportReviewed(short isConsReportReviewed) {
 		this.isConsReportReviewed = isConsReportReviewed;
 	}
 
@@ -264,11 +346,11 @@ public class ReferralForm {
 		this.orderedDate = orderedDate;
 	}
 
-	public Integer getPatientNotified() {
+	public short getPatientNotified() {
 		return patientNotified;
 	}
 
-	public void setPatientNotified(Integer patientNotified) {
+	public void setPatientNotified(short patientNotified) {
 		this.patientNotified = patientNotified;
 	}
 
@@ -350,6 +432,14 @@ public class ReferralForm {
 
 	public void setPrintLeaf(String printLeaf) {
 		this.printLeaf = printLeaf;
+	}
+
+	public String getRdx() {
+		return rdx;
+	}
+
+	public void setRdx(String rdx) {
+		this.rdx = rdx;
 	}
 	
 	

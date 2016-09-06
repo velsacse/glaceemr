@@ -255,7 +255,6 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 				else if(initialList.get(i).getInitialSettingsOptionName().trim().equalsIgnoreCase("city"))
 					practiceBean.setPracticeCity(initialList.get(i).getInitialSettingsOptionValue());
 				else if(initialList.get(i).getInitialSettingsOptionName().trim().equalsIgnoreCase("state")){
-					practiceBean.setPracticeName(initialList.get(i).getInitialSettingsOptionValue());
 					List<BillingConfigTable> billing = billingConfigTableRepository.findAll(BillingConfigTableSpecification.getState(initialList.get(i).getInitialSettingsOptionValue()));
 					if(billing != null && billing.size()>0)
 						practiceBean.setPracticeState(billing.get(0).getBillingConfigTableLookupDesc());
