@@ -9,12 +9,12 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -83,8 +83,8 @@ public class FileName {
 	@JsonManagedReference
 	private EmployeeProfile empProfile;
 		
-	@OneToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
-	@JsonManagedReference
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JsonBackReference
 	@JoinColumn(name="filename_scanid", referencedColumnName="filedetails_id",  insertable=false, updatable=false)
 	private FileDetails fileNameDetails;
 
@@ -231,22 +231,4 @@ public class FileName {
 	public void setFilenameIsnotespresent(Boolean filenameIsnotespresent) {
 		this.filenameIsnotespresent = filenameIsnotespresent;
 	}
-
-	/*public EmployeeProfile getEmpProfileReviewedUser() {
-		return empProfileReviewedUser;
-	}
-
-	public EmployeeProfile getEmpProfileCreatedUser() {
-		return empProfileCreatedUser;
-	}
-
-	public void setEmpProfileReviewedUser(EmployeeProfile empProfileReviewedUser) {
-		this.empProfileReviewedUser = empProfileReviewedUser;
-	}
-
-	public void setEmpProfileCreatedUser(EmployeeProfile empProfileCreatedUser) {
-		this.empProfileCreatedUser = empProfileCreatedUser;
-	}*/
-	
-	
 }
