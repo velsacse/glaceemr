@@ -267,13 +267,15 @@ public class LabResultsServiceImpl implements LabResultsService {
 					results.setCategoryName("Unknown Docs");
 					results.setFileDetailId("-1");
 				}
-				FileName fileName = fileDetails.getFileName();
-				results.setFileNameId("" + fileName.getFilenameId());
-				if( fileName.getFilenameIsreviewed().equals(true) ) {
-					results.setIsReviewed("1");
-				} else {
-					results.setIsReviewed("0");
-				}				
+				List<FileName> fileName = fileDetails.getFileName();
+				for(i=0;i<fileName.size();i++){
+					results.setFileNameId("" + fileName.get(i).getFilenameId());
+					if( fileName.get(i).getFilenameIsreviewed().equals(true) ) {
+						results.setIsReviewed("1");
+					} else {
+						results.setIsReviewed("0");
+					}	
+				}
 			} else {
 				results.setInboxStatus("5");
 				results.setCategoryName("Unknown Docs");

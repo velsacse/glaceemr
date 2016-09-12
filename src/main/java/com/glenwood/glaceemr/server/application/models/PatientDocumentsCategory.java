@@ -7,7 +7,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "patient_doc_category")
-public class PatientDocCategory {
+public class PatientDocumentsCategory {
 
 	@Id
 	@Column(name="patient_doc_category_id")
@@ -28,6 +28,9 @@ public class PatientDocCategory {
 	@Column(name="patient_doc_category_isbilling")
 	private Boolean patientDocCategoryIsbilling;
 
+	@Column(name="isadvanced_dir_category")
+	private Boolean isadvancedDirCategory;
+	
 	
 	public Integer getPatientDocCategoryId() {
 		return patientDocCategoryId;
@@ -52,6 +55,10 @@ public class PatientDocCategory {
 	public Boolean getPatientDocCategoryIsbilling() {
 		return patientDocCategoryIsbilling;
 	}
+	
+	public Boolean getIsadvancedDirCategory() {
+		return isadvancedDirCategory;
+	}
 
 	public void setPatientDocCategoryId(Integer patientDocCategoryId) {
 		this.patientDocCategoryId = patientDocCategoryId;
@@ -75,6 +82,10 @@ public class PatientDocCategory {
 
 	public void setPatientDocCategoryIsbilling(Boolean patientDocCategoryIsbilling) {
 		this.patientDocCategoryIsbilling = patientDocCategoryIsbilling;
+	}
+	
+	public void setIsadvancedDirCategory(Boolean isadvancedDirCategory) {
+		this.isadvancedDirCategory = isadvancedDirCategory;
 	}
 	
 	

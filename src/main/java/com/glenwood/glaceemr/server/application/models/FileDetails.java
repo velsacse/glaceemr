@@ -1,6 +1,8 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,6 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
@@ -86,21 +89,27 @@ public class FileDetails {
 	@Column(name="filedetails_issigned")
 	private Boolean filedetailsIssigned;
 	
+
+	@Column(name="filedetails_templateid")
+	private BigInteger filedetailsTemplateid;
 	
 	@OneToOne(cascade=CascadeType.ALL,mappedBy="fileDetails")
 	@JsonBackReference
     PatientPortalSharedDocs patientPortalSharedDocs;
 	
 	
-	@OneToOne(mappedBy="fileNameDetails")
-	@JsonBackReference
-	private FileName fileName;
+	@OneToMany(mappedBy="fileNameDetails")
+	@JsonManagedReference
+	private List<FileName> fileName;
+
 	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="filedetails_categoryid", referencedColumnName="patient_doc_category_id", insertable=false,updatable=false)
 	@JsonManagedReference
-	PatientDocCategory patientDocCategory;
+	PatientDocumentsCategory patientDocCategory;
 	
+	
+
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="filedetails_createdby", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
 	@JsonManagedReference
@@ -157,11 +166,17 @@ public class FileDetails {
 		return patientPortalSharedDocs;
 	}
 
-	public FileName getFileName() {
+	
+
+	public List<FileName> getFileName() {
 		return fileName;
 	}
 
-	public PatientDocCategory getPatientDocCategory() {
+	public void setFileName(List<FileName> fileName) {
+		this.fileName = fileName;
+	}
+
+	public PatientDocumentsCategory getPatientDocCategory() {
 		return patientDocCategory;
 	}
 
@@ -170,11 +185,9 @@ public class FileDetails {
 		this.patientPortalSharedDocs = patientPortalSharedDocs;
 	}
 
-	public void setFileName(FileName fileName) {
-		this.fileName = fileName;
-	}
+	
 
-	public void setPatientDocCategory(PatientDocCategory patientDocCategory) {
+	public void setPatientDocCategory(PatientDocumentsCategory patientDocCategory) {
 		this.patientDocCategory = patientDocCategory;
 	}
 
@@ -253,6 +266,10 @@ public class FileDetails {
 	public Boolean getFiledetailsIssigned() {
 		return filedetailsIssigned;
 	}
+	
+	public BigInteger getFiledetailsTemplateid() {
+		return filedetailsTemplateid;
+	}
 
 	public void setFiledetailsId(Integer filedetailsId) {
 		this.filedetailsId = filedetailsId;
@@ -330,6 +347,10 @@ public class FileDetails {
 		this.filedetailsIssigned = filedetailsIssigned;
 	}
 	
+	public void setFiledetailsTemplateid(BigInteger filedetailsTemplateid) {
+		this.filedetailsTemplateid = filedetailsTemplateid;
+	}
+
 	
 	
 }
