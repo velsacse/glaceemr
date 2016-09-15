@@ -1,8 +1,8 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
-
 import java.sql.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,6 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -327,7 +329,215 @@ public class ServiceDetail {
 
 	@Column(name="service_detail_dxsystem")
 	private String serviceDetailDxsystem;
+	
+	@Column(name="service_detail_dx1desc")
+	private String serviceDetailDx1desc;
+	
+	@Column(name="service_detail_dx2desc")
+	private String serviceDetailDx2desc;
 
+	@Column(name="service_detail_dx3desc")
+	private String serviceDetailDx3desc;
+
+	@Column(name="service_detail_dx4desc")
+	private String serviceDetailDx4desc;
+	
+	@Column(name="service_detail_dx5desc")
+	private String serviceDetailDx5desc;
+	
+	@Column(name="service_detail_dx6desc")
+	private String serviceDetailDx6desc;
+	
+	@Column(name="service_detail_dx7desc")
+	private String serviceDetailDx7desc;
+	
+	@Column(name="service_detail_dx8desc")
+	private String serviceDetailDx8desc;
+	
+	@Column(name="service_detail_dx9desc")
+	private String serviceDetailDx9desc;
+	
+	@Column(name="service_detail_dx10desc")
+	private String serviceDetailDx10desc;
+	
+	@Column(name="service_detail_dx11desc")
+	private String serviceDetailDx11desc;
+	
+	@Column(name="service_detail_dx12desc")
+	private String serviceDetailDx12desc;
+	
+	@Column(name="service_detail_dx13desc")
+	private String serviceDetailDx13desc;
+	
+	@Column(name="service_detail_dx14desc")
+	private String serviceDetailDx14desc;
+	
+	@Column(name="service_detail_dx15desc")
+	private String serviceDetailDx15desc;
+	
+	@Column(name="service_detail_dx16desc")
+	private String serviceDetailDx16desc;
+
+	@Column(name="service_detail_dx17desc")
+	private String serviceDetailDx17desc;
+	
+	@Column(name="service_detail_dx18desc")
+	private String serviceDetailDx18desc;
+	
+	@Column(name="service_detail_dx19desc")
+	private String serviceDetailDx19desc;
+
+	@Column(name="service_detail_dx20desc")
+	private String serviceDetailDx20desc;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JoinColumn(name="service_detail_cptid", referencedColumnName="cpt_id" , insertable=false, updatable=false)
+	private Cpt cpt;
+	
+	@OneToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_id", referencedColumnName="associate_service_detail_service_id" , insertable=false, updatable=false)
+	private AssociateServiceDetails associateDetails;
+	
+    @ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_referralid", referencedColumnName="authorization_referral_id"  , insertable=false, updatable=false)
+	private AuthorizationReferral authorizationReferral;
+
+
+    @ManyToOne(fetch=FetchType.LAZY)
+  	@JsonManagedReference
+//  	@NotFound(action=NotFoundAction.IGNORE)
+  	@JoinColumn(name="service_detail_posid", referencedColumnName="pos_table_relation_id"  , insertable=false, updatable=false)
+  	private PosTable posTable;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+  	@JsonManagedReference
+//  	@NotFound(action=NotFoundAction.IGNORE)
+  	@JoinColumn(name="service_detail_sdoctorid", referencedColumnName="emp_profile_empid"  , insertable=false, updatable=false)
+  	private EmployeeProfile sdoctors;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+  	@JsonManagedReference
+//  	@NotFound(action=NotFoundAction.IGNORE)
+  	@JoinColumn(name="service_detail_bdoctorid", referencedColumnName="emp_profile_empid"  , insertable=false, updatable=false)
+  	private EmployeeProfile bdoctors;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+  	@JsonManagedReference
+//  	@NotFound(action=NotFoundAction.IGNORE)
+  	@JoinColumn(name="service_detail_primaryins", referencedColumnName="patient_ins_detail_id" , insertable=false, updatable=false)
+  	private PatientInsDetail patientInsDetail;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+  	@JsonManagedReference
+//  	@NotFound(action=NotFoundAction.IGNORE)
+  	@JoinColumn(name="service_detail_secondaryins", referencedColumnName="patient_ins_detail_id" , insertable=false, updatable=false)
+  	private PatientInsDetail secInsDetail;
+    
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_dx1",referencedColumnName="icdm_icdcode",insertable=false,updatable=false)
+    private Icdm icdm1;
+	
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JsonManagedReference
+	@JoinColumn(name="service_detail_dx2",referencedColumnName="icdm_icdcode",insertable=false,updatable=false)
+    private Icdm icdm2;
+	
+    @ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_dx3",referencedColumnName="icdm_icdcode",insertable=false,updatable=false)
+    private Icdm icdm3;
+	
+    @ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_dx4",referencedColumnName="icdm_icdcode",insertable=false,updatable=false)
+    private Icdm icdm4;
+	
+    @ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_dx5",referencedColumnName="icdm_icdcode",insertable=false,updatable=false)
+    private Icdm icdm5;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_dx6",referencedColumnName="icdm_icdcode",insertable=false,updatable=false)
+    private Icdm icdm6;
+	
+    @ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_dx7",referencedColumnName="icdm_icdcode",insertable=false,updatable=false)
+    private Icdm icdm7;
+	
+    @ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_dx8",referencedColumnName="icdm_icdcode",insertable=false,updatable=false)
+    private Icdm icdm8;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JsonManagedReference
+    @JoinColumn(name="service_detail_submit_status",referencedColumnName="submit_status_code",insertable=false,updatable=false)
+    private SubmitStatus submitStatus;
+	
+    public SubmitStatus getSubmitStatus() {
+		return submitStatus;
+	}
+
+
+	public void setSubmitStatus(SubmitStatus submitStatus) {
+		this.submitStatus = submitStatus;
+	}
+
+
+	public PatientInsDetail getPatientInsDetail() {
+		return patientInsDetail;
+	}
+
+
+	public void setPatientInsDetail(PatientInsDetail patientInsDetail) {
+		this.patientInsDetail = patientInsDetail;
+	}
+	 
+    public PatientInsDetail getSecInsDetail() {
+		return secInsDetail;
+	}
+
+
+	public void setSecInsDetail(PatientInsDetail secInsDetail) {
+		this.secInsDetail = secInsDetail;
+	}
+	
+	public EmployeeProfile getBdoctors() {
+		return bdoctors;
+	}
+
+
+	public void setBdoctors(EmployeeProfile bdoctors) {
+		this.bdoctors = bdoctors;
+	}
+
+
+	public EmployeeProfile getSdoctors() {
+		return sdoctors;
+	}
+
+
+	public void setSdoctors(EmployeeProfile sdoctors) {
+		this.sdoctors = sdoctors;
+	}
+
+	public PosTable getPosTable() {
+		return posTable;
+	}
+
+
+	public void setPosTable(PosTable posTable) {
+		this.posTable = posTable;
+	}
+    
 	public Integer getServiceDetailId() {
 		return serviceDetailId;
 	}
@@ -1147,6 +1357,312 @@ public class ServiceDetail {
 		this.serviceDetailDxsystem = serviceDetailDxsystem;
 	}
 	
+	public Cpt getCpt() {
+		return cpt;
+	}
+
+
+	public void setCpt(Cpt cpt) {
+		this.cpt = cpt;
+	}
 	
+	public AssociateServiceDetails getAssociateDetails() {
+		return associateDetails;
+	}
+
+
+	public void setAssociateDetails(AssociateServiceDetails associateDetails) {
+		this.associateDetails = associateDetails;
+	}
+
+
+	public AuthorizationReferral getAuthorizationReferral() {
+		return authorizationReferral;
+	}
+
+
+	public void setAuthorizationReferral(AuthorizationReferral authorizationReferral) {
+		this.authorizationReferral = authorizationReferral;
+	}
+
+
+	public Icdm getIcdm1() {
+		return icdm1;
+	}
+
+
+	public void setIcdm1(Icdm icdm1) {
+		this.icdm1 = icdm1;
+	}
+
+
+	public Icdm getIcdm2() {
+		return icdm2;
+	}
+
+
+	public void setIcdm2(Icdm icdm2) {
+		this.icdm2 = icdm2;
+	}
+
+
+	public Icdm getIcdm3() {
+		return icdm3;
+	}
+
+
+	public void setIcdm3(Icdm icdm3) {
+		this.icdm3 = icdm3;
+	}
+
+
+	public Icdm getIcdm4() {
+		return icdm4;
+	}
+
+
+	public void setIcdm4(Icdm icdm4) {
+		this.icdm4 = icdm4;
+	}
+
+
+	public Icdm getIcdm5() {
+		return icdm5;
+	}
+
+
+	public void setIcdm5(Icdm icdm5) {
+		this.icdm5 = icdm5;
+	}
+
+
+	public Icdm getIcdm6() {
+		return icdm6;
+	}
+
+
+	public void setIcdm6(Icdm icdm6) {
+		this.icdm6 = icdm6;
+	}
+
+
+	public Icdm getIcdm7() {
+		return icdm7;
+	}
+
+
+	public void setIcdm7(Icdm icdm7) {
+		this.icdm7 = icdm7;
+	}
+
+
+	public Icdm getIcdm8() {
+		return icdm8;
+	}
+
+
+	public void setIcdm8(Icdm icdm8) {
+		this.icdm8 = icdm8;
+	}
+
+
+	public String getServiceDetailDx1desc() {
+		return serviceDetailDx1desc;
+	}
+
+
+	public void setServiceDetailDx1desc(String serviceDetailDx1desc) {
+		this.serviceDetailDx1desc = serviceDetailDx1desc;
+	}
+
+
+	public String getServiceDetailDx2desc() {
+		return serviceDetailDx2desc;
+	}
+
+
+	public void setServiceDetailDx2desc(String serviceDetailDx2desc) {
+		this.serviceDetailDx2desc = serviceDetailDx2desc;
+	}
+
+
+	public String getServiceDetailDx3desc() {
+		return serviceDetailDx3desc;
+	}
+
+
+	public void setServiceDetailDx3desc(String serviceDetailDx3desc) {
+		this.serviceDetailDx3desc = serviceDetailDx3desc;
+	}
+
+
+	public String getServiceDetailDx4desc() {
+		return serviceDetailDx4desc;
+	}
+
+
+	public void setServiceDetailDx4desc(String serviceDetailDx4desc) {
+		this.serviceDetailDx4desc = serviceDetailDx4desc;
+	}
+
+
+	public String getServiceDetailDx5desc() {
+		return serviceDetailDx5desc;
+	}
+
+
+	public void setServiceDetailDx5desc(String serviceDetailDx5desc) {
+		this.serviceDetailDx5desc = serviceDetailDx5desc;
+	}
+
+
+	public String getServiceDetailDx6desc() {
+		return serviceDetailDx6desc;
+	}
+
+
+	public void setServiceDetailDx6desc(String serviceDetailDx6desc) {
+		this.serviceDetailDx6desc = serviceDetailDx6desc;
+	}
+
+
+	public String getServiceDetailDx7desc() {
+		return serviceDetailDx7desc;
+	}
+
+
+	public void setServiceDetailDx7desc(String serviceDetailDx7desc) {
+		this.serviceDetailDx7desc = serviceDetailDx7desc;
+	}
+
+
+	public String getServiceDetailDx8desc() {
+		return serviceDetailDx8desc;
+	}
+
+
+	public void setServiceDetailDx8desc(String serviceDetailDx8desc) {
+		this.serviceDetailDx8desc = serviceDetailDx8desc;
+	}
+
+
+	public String getServiceDetailDx9desc() {
+		return serviceDetailDx9desc;
+	}
+
+
+	public void setServiceDetailDx9desc(String serviceDetailDx9desc) {
+		this.serviceDetailDx9desc = serviceDetailDx9desc;
+	}
+
+
+	public String getServiceDetailDx10desc() {
+		return serviceDetailDx10desc;
+	}
+
+
+	public void setServiceDetailDx10desc(String serviceDetailDx10desc) {
+		this.serviceDetailDx10desc = serviceDetailDx10desc;
+	}
+
+
+	public String getServiceDetailDx11desc() {
+		return serviceDetailDx11desc;
+	}
+
+
+	public void setServiceDetailDx11desc(String serviceDetailDx11desc) {
+		this.serviceDetailDx11desc = serviceDetailDx11desc;
+	}
+
+
+	public String getServiceDetailDx12desc() {
+		return serviceDetailDx12desc;
+	}
+
+
+	public void setServiceDetailDx12desc(String serviceDetailDx12desc) {
+		this.serviceDetailDx12desc = serviceDetailDx12desc;
+	}
+
+
+	public String getServiceDetailDx13desc() {
+		return serviceDetailDx13desc;
+	}
+
+
+	public void setServiceDetailDx13desc(String serviceDetailDx13desc) {
+		this.serviceDetailDx13desc = serviceDetailDx13desc;
+	}
+
+
+	public String getServiceDetailDx14desc() {
+		return serviceDetailDx14desc;
+	}
+
+
+	public void setServiceDetailDx14desc(String serviceDetailDx14desc) {
+		this.serviceDetailDx14desc = serviceDetailDx14desc;
+	}
+
+
+	public String getServiceDetailDx15desc() {
+		return serviceDetailDx15desc;
+	}
+
+
+	public void setServiceDetailDx15desc(String serviceDetailDx15desc) {
+		this.serviceDetailDx15desc = serviceDetailDx15desc;
+	}
+
+
+	public String getServiceDetailDx16desc() {
+		return serviceDetailDx16desc;
+	}
+
+
+	public void setServiceDetailDx16desc(String serviceDetailDx16desc) {
+		this.serviceDetailDx16desc = serviceDetailDx16desc;
+	}
+
+
+	public String getServiceDetailDx17desc() {
+		return serviceDetailDx17desc;
+	}
+
+
+	public void setServiceDetailDx17desc(String serviceDetailDx17desc) {
+		this.serviceDetailDx17desc = serviceDetailDx17desc;
+	}
+
+
+	public String getServiceDetailDx18desc() {
+		return serviceDetailDx18desc;
+	}
+
+
+	public void setServiceDetailDx18desc(String serviceDetailDx18desc) {
+		this.serviceDetailDx18desc = serviceDetailDx18desc;
+	}
+
+
+	public String getServiceDetailDx19desc() {
+		return serviceDetailDx19desc;
+	}
+
+
+	public void setServiceDetailDx19desc(String serviceDetailDx19desc) {
+		this.serviceDetailDx19desc = serviceDetailDx19desc;
+	}
+
+
+	public String getServiceDetailDx20desc() {
+		return serviceDetailDx20desc;
+	}
+
+
+	public void setServiceDetailDx20desc(String serviceDetailDx20desc) {
+		this.serviceDetailDx20desc = serviceDetailDx20desc;
+	}
 
 }

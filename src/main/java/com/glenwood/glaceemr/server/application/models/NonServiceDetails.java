@@ -172,6 +172,19 @@ public class NonServiceDetails {
 	@JsonManagedReference
     NamesMapping namesMapping;
 
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="non_service_detail_payment_cpt_id", referencedColumnName="cpt_id", insertable=false, updatable=false)
+	@JsonManagedReference
+    Cpt cpt;
+	
+	public Cpt getCpt() {
+		return cpt;
+	}
+
+
+	public void setCpt(Cpt cpt) {
+		this.cpt = cpt;
+	}
 
 	public Long getNonServiceDetailId() {
 		return nonServiceDetailId;

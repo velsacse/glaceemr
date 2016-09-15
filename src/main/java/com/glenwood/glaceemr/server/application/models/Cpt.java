@@ -7,9 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -146,8 +148,8 @@ public class Cpt {
 	}
 
 
-	@OneToOne(fetch=FetchType.LAZY)
-    @JsonManagedReference
+	@ManyToOne(fetch=FetchType.LAZY)
+    @JsonBackReference
     @JoinColumn(name="cpt_cptcode", referencedColumnName="cpt_code" , insertable=false, updatable=false)
     Quickcpt quickCpt;
 	

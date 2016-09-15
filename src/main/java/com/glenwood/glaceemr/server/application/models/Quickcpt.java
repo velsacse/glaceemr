@@ -1,10 +1,16 @@
 package com.glenwood.glaceemr.server.application.models;
 
 
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 
 @Entity
@@ -24,6 +30,18 @@ public class Quickcpt {
 	@Column(name="cpt_desc")
 	private String cptDesc;
 
+	@OneToMany(mappedBy="quickCpt",fetch=FetchType.EAGER)
+	@JsonManagedReference
+	Set<Cpt> cpt;
+
+	public Set<Cpt> getCpt() {
+		return cpt;
+	}
+
+	public void setCpt(Set<Cpt> cpt) {
+		this.cpt = cpt;
+	}
+	
 	public String getCptDesc() {
 		return cptDesc;
 	}
