@@ -942,6 +942,11 @@ public class GenerateHeaderBean {
 		int countLeft =0, countLeftAddress =0;
 		
 		if(leftIndex == 1 || leftAddressIndex == 1){
+			addressList.clear();
+			namesList.clear();
+			phoneList.clear();
+			emailList.clear();
+			faxList.clear();
 			for(int i=0; i< empList.size(); i++){
 				EmployeeDataBean empBean = genericPrintService.parseEmployeeDetail(empList.get(i).getEmpProfile());
 				namesList.add(empBean.getEmpFullname());
@@ -956,6 +961,14 @@ public class GenerateHeaderBean {
 				countLeftAddress = empList.size();
 		}
 		if(leftIndex == 2 || leftAddressIndex == 2){
+			if(leftAddressIndex == 2){
+				addressList.clear();				
+				phoneList.clear();
+				emailList.clear();
+				faxList.clear();
+			}else if(leftIndex == 2){
+				namesList.clear();
+			}
 			for(int i=0; i< posList.size(); i++){
 				PosDataBean posBean = genericPrintService.parsePOSDetail(posList.get(i).getPosTable());
 				namesList.add(posBean.getPosName());
