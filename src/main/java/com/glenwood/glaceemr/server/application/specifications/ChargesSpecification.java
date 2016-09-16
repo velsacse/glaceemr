@@ -2,7 +2,6 @@ package com.glenwood.glaceemr.server.application.specifications;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.Chart;
@@ -35,6 +33,7 @@ import com.glenwood.glaceemr.server.application.models.H611_;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InitialSettings_;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr;
+import com.glenwood.glaceemr.server.application.models.InsCompAddr_;
 import com.glenwood.glaceemr.server.application.models.InsCompany;
 import com.glenwood.glaceemr.server.application.models.NonServiceDetails;
 import com.glenwood.glaceemr.server.application.models.NonServiceDetails_;
@@ -96,6 +95,9 @@ public class ChargesSpecification {
 				Join<PatientInsDetail,InsCompAddr> insCompAddr=root.join(PatientInsDetail_.insCompAddr,JoinType.INNER);
 				Join<Join<PatientInsDetail,InsCompAddr>, InsCompany> insComp=insCompAddr.join("insCompany",JoinType.INNER);
 				Predicate patientIdValidation=cb.equal(root.get(PatientInsDetail_.patientInsDetailPatientid),patientId);
+				if (Long.class != query.getResultType()) {
+					root.fetch(PatientInsDetail_.insCompAddr).fetch(InsCompAddr_.insCompany);
+				}
 				return query.where(patientIdValidation).orderBy(cb.asc(root.get(PatientInsDetail_.patientInsDetailInstype))).getRestriction();
 			}
 		};
