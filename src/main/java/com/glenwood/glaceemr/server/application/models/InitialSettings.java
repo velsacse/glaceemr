@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -7,7 +9,12 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "initial_settings")
-public class InitialSettings {
+public class InitialSettings  implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="initial_settings_option_id")

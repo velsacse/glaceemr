@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -16,6 +17,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.LazyToOne;
+import org.hibernate.annotations.LazyToOneOption;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
@@ -26,7 +29,12 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "encounter")
-public class Encounter {
+public class Encounter implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@SequenceGenerator(name = "sequence", sequenceName = "encounter_id_seq")
@@ -666,10 +674,23 @@ public class Encounter {
 	
 	
 	@ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.ALL,optional = false)
-	//@LazyToOne(LazyToOneOption.NO_PROXY)
+	@LazyToOne(LazyToOneOption.NO_PROXY)
 	@JoinColumn(name="encounter_patient_episodeid", referencedColumnName="admission_episode", insertable=false,updatable=false)
 	Admission admission;
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="encounter_pos", referencedColumnName="pos_table_relation_id", insertable=false, updatable=false)
+	PosTable posTable;
+	
+	public PosTable getPosTable() {
+		return posTable;
+	}
+
+	public void setPosTable(PosTable posTable) {
+		this.posTable = posTable;
+	}
+
 	public Chart getChartTable() {
 		return chartTable;
 	}

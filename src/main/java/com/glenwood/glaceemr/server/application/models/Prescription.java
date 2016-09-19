@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.sql.Date;
 import java.util.List;
@@ -14,6 +15,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -21,8 +25,13 @@ import com.glenwood.glaceemr.server.utils.JsonDateSerializer;
 
 @Entity
 @Table(name = "doc_presc")
-public class Prescription {
+public class Prescription implements Serializable{
 	
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="doc_presc_id")
@@ -52,6 +61,7 @@ public class Prescription {
 	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="doc_presc_encounter_id",referencedColumnName="encounter_id",insertable=false,updatable=false)
+	@NotFound(action=NotFoundAction.IGNORE)
 	@JsonManagedReference
 	Encounter encounter;
 	

@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.NotFound;
@@ -496,6 +497,19 @@ public class EmployeeProfile {
 	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="emp_profile_speciality", referencedColumnName="h077001" , insertable=false, updatable=false)
 	H077 specialityTable;
+
+	@OneToMany(fetch=FetchType.EAGER,cascade=CascadeType.ALL,mappedBy="employeeProfile")
+	@JsonManagedReference
+	List<PrescriberDetails> prescriberDetails;
+	
+		
+	public List<PrescriberDetails> getPrescriberDetails() {
+		return prescriberDetails;
+	}
+
+	public void setPrescriberDetails(List<PrescriberDetails> prescriberDetails) {
+		this.prescriberDetails = prescriberDetails;
+	}
 
 	public H077 getSpecialityTable() {
 		return specialityTable;

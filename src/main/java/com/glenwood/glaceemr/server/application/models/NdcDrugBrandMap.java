@@ -207,6 +207,19 @@ public class NdcDrugBrandMap implements Serializable{
 	@JsonManagedReference
 	Prescriberspecificdrug prescriberspecificdrug;
 	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="brand_code",referencedColumnName="brand_code",insertable=false,updatable=false)
+	@JsonManagedReference
+	Brandname brandName;
+	
+	public Brandname getBrandName() {
+		return brandName;
+	}
+
+	public void setBrandName(Brandname brandName) {
+		this.brandName = brandName;
+	}
+
 
 	@Column(name="drug_inner_pack_unit_id")
 	private String drugInnerPackUnitId;

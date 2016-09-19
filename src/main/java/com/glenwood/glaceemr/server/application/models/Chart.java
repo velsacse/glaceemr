@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 import javax.persistence.CascadeType;
@@ -12,13 +13,21 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name="chart")
-public class Chart {
+public class Chart implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="chart_id")
@@ -105,6 +114,7 @@ public class Chart {
 
 	@OneToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
 	@JsonManagedReference
+	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="chart_patientid", referencedColumnName="patient_registration_id", insertable=false, updatable=false)
 	private PatientRegistration patientRegistrationTable;
 	

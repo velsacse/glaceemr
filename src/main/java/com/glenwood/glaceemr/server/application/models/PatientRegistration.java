@@ -2111,6 +2111,20 @@ public class PatientRegistration implements Serializable {
 	@JsonBackReference
 	@JoinColumn(name="patient_registration_accttype", referencedColumnName="account_type_id" , insertable=false, updatable=false)
 	private AccountType ptAccType;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonBackReference
+	@JoinColumn(name="patient_registration_id", referencedColumnName="auth_master_patient_id" , insertable=false, updatable=false)
+	AuthorizationMaster authMaster;
+	
+	public AuthorizationMaster getAuthMaster() {
+		return authMaster;
+	}
+
+	public void setAuthMaster(AuthorizationMaster authMaster) {
+		this.authMaster = authMaster;
+	}
+
 	public String getPatientRegistrationMidInitial() {
 		return patientRegistrationMidInitial;
 	}
@@ -2188,4 +2202,40 @@ public class PatientRegistration implements Serializable {
 	public void setHl7ResultInbox(List<Hl7ResultInbox> hl7ResultInbox) {
 		this.hl7ResultInbox = hl7ResultInbox;
 	}
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="patient_registration_id",referencedColumnName="patient_id",insertable=false,updatable=false)
+	@JsonManagedReference
+	NoMatchFoundPatient nomatchfoundpatient;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="patient_registration_pos_id",referencedColumnName="pos_table_relation_id",insertable=false,updatable=false)
+	@JsonManagedReference
+	PosTable posTable;
+	
+
+	
+	public PosTable getPosTable() {
+		return posTable;
+	}
+
+	public void setPosTable(PosTable posTable) {
+		this.posTable = posTable;
+	}
+
+//	public Reference getReference() {
+//		return reference;
+//	}
+//
+//	public void setReference(Reference reference) {
+//		this.reference = reference;
+//	}
+
+	public NoMatchFoundPatient getNomatchfoundpatient() {
+		return nomatchfoundpatient;
+	}
+
+	public void setNomatchfoundpatient(NoMatchFoundPatient nomatchfoundpatient) {
+		this.nomatchfoundpatient = nomatchfoundpatient;
+	}
+	
 }
