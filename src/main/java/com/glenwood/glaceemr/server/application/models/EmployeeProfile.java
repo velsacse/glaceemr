@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -23,8 +25,11 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @Entity
 @Table(name = "emp_profile")
-public class EmployeeProfile {
-
+public class EmployeeProfile implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	@Id
 	@Column(name="emp_profile_empid")
 	private Integer empProfileEmpid;
@@ -79,7 +84,7 @@ public class EmployeeProfile {
 
 	@Column(name="emp_profile_notes")
 	private String empProfileNotes;
-
+	
 	@Column(name="emp_profile_groupid")
 	private Integer empProfileGroupid;
 

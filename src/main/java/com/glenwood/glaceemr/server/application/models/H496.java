@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -15,12 +16,18 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "h496")
-public class H496 {
+public class H496 implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="h496_h496001_seq")
@@ -83,7 +90,7 @@ public class H496 {
 	private String h496018;
 
 	@Column(name="h496019")
-	private String h496019;
+	private int h496019;
 
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="h496020")
@@ -126,14 +133,37 @@ public class H496 {
 	private String h496RetriesNote;
 
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
 	@JoinColumn(name = "h496001", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
 	private EmployeeProfile empProfile;
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name = "h496004", referencedColumnName = "fax_folder_id", insertable = false, updatable = false)
+	private FaxFolder faxFolder;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name = "h496008", referencedColumnName = "statusid", insertable = false, updatable = false)
+	private FaxStatus faxStatus;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name = "h496012", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
+	private EmployeeProfile chart_users_1;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name = "h496013", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
+	private EmployeeProfile chart_users_2;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name = "h496019", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
+	private EmployeeProfile chart_users_3;
 	
 	@OneToMany(mappedBy = "h496" , fetch=FetchType.LAZY)
 	List<ConsultFaxTracking> consultFaxTrackings;
-	
-	
 	
 	public List<ConsultFaxTracking> getConsultFaxTrackings() {
 		return consultFaxTrackings;
@@ -142,15 +172,7 @@ public class H496 {
 	public void setConsultFaxTrackings(List<ConsultFaxTracking> consultFaxTrackings) {
 		this.consultFaxTrackings = consultFaxTrackings;
 	}
-
-	public EmployeeProfile getEmpProfile() {
-		return empProfile;
-	}
-
-	public void setEmpProfile(EmployeeProfile empProfile) {
-		this.empProfile = empProfile;
-	}
-
+	
 	public Integer getH496001() {
 		return h496001;
 	}
@@ -295,11 +317,11 @@ public class H496 {
 		this.h496018 = h496018;
 	}
 
-	public String getH496019() {
+	public int getH496019() {
 		return h496019;
 	}
 
-	public void setH496019(String h496019) {
+	public void setH496019(int h496019) {
 		this.h496019 = h496019;
 	}
 
@@ -406,6 +428,52 @@ public class H496 {
 	public void setH496RetriesNote(String h496RetriesNote) {
 		this.h496RetriesNote = h496RetriesNote;
 	}
-	
-	
+
+	public FaxFolder getFaxFolder() {
+		return faxFolder;
+	}
+
+	public void setFaxFolder(FaxFolder faxFolder) {
+		this.faxFolder = faxFolder;
+	}
+
+	public EmployeeProfile getEmpProfile() {
+		return empProfile;
+	}
+
+	public void setEmpProfile(EmployeeProfile empProfile) {
+		this.empProfile = empProfile;
+	}
+
+	public EmployeeProfile getChart_users_1() {
+		return chart_users_1;
+	}
+
+	public void setChart_users_1(EmployeeProfile chart_users_1) {
+		this.chart_users_1 = chart_users_1;
+	}
+
+	public EmployeeProfile getChart_users_2() {
+		return chart_users_2;
+	}
+
+	public void setChart_users_2(EmployeeProfile chart_users_2) {
+		this.chart_users_2 = chart_users_2;
+	}
+
+	public EmployeeProfile getChart_users_3() {
+		return chart_users_3;
+	}
+
+	public void setChart_users_3(EmployeeProfile chart_users_3) {
+		this.chart_users_3 = chart_users_3;
+	}
+
+	public FaxStatus getFaxStatus() {
+		return faxStatus;
+	}
+
+	public void setFaxStatus(FaxStatus faxStatus) {
+		this.faxStatus = faxStatus;
+	}
 }
