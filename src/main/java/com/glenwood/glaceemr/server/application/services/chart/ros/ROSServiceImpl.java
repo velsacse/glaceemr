@@ -115,7 +115,20 @@ public class ROSServiceImpl implements ROSService {
 							}
 						}
 					}else{
-						systemElementsList.add(getROSElementBean(elementName,elementPrintText,elementGWId,ceBean.getClinicalElementDataType(),"",null));
+						if(ceBean.getClinicalElementDataType() == ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_BOOLEAN){
+							String associatedGWId=rosElementBean.getAssociatedGWID();
+							PatientElementBean patientElementAssociatedBean=clinicalDataBean.getPatientElements(associatedGWId);
+							ROSElementAssociateBean associateBean=getROSElementAssociateBean("", associatedGWId, "", "2", patientElementAssociatedBean != null ? patientElementAssociatedBean.getPatientClinicalElementText() : "", getSoapElementDataList(tabId, "detailoption_"+associatedGWId+"_text"));
+							systemElementsList.add(getROSElementBean(elementName,elementPrintText,elementGWId,ceBean.getClinicalElementDataType(),"",associateBean));
+						}else if(ceBean.getClinicalElementDataType() == ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_TEXT){
+							if(!elementName.equalsIgnoreCase("Element Notes")){
+								ROSElementAssociateBean associateBean=getROSElementAssociateBean(elementName, elementGWId, elementPrintText, ceBean.getClinicalElementDataType()+"", patientElementBean != null ? patientElementBean.getPatientClinicalElementText() : "", getSoapElementDataList(tabId, "element_"+elementGWId));
+								systemElementsList.add(getROSElementBean(elementName,elementPrintText,elementGWId,ceBean.getClinicalElementDataType(),"",associateBean));
+							}
+						}
+						else{
+							systemElementsList.add(getROSElementBean(elementName,elementPrintText,elementGWId,ceBean.getClinicalElementDataType(),"",null));
+						}
 					}
 				}
 			}
