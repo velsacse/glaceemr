@@ -12,9 +12,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
@@ -503,7 +504,8 @@ public class EmployeeProfile implements Serializable {
 	@JoinColumn(name="emp_profile_speciality", referencedColumnName="h077001" , insertable=false, updatable=false)
 	H077 specialityTable;
 
-	@OneToMany(fetch=FetchType.EAGER,cascade=CascadeType.ALL,mappedBy="employeeProfile")
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="employeeProfile")
+	@LazyCollection(LazyCollectionOption.FALSE)
 	@JsonManagedReference
 	List<PrescriberDetails> prescriberDetails;
 	
