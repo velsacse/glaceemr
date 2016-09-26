@@ -55,6 +55,7 @@ public class UserGroupControllerTest {
 	 * Testing for getting UserGroup details.
 	 */
 	@Test 
+	@Ignore
 	public void getUserGroupDetails() throws Exception {
 		long UserGroupCount = UserGroupRepository.count();
 		logger.debug("User Group getUserGroupDetails testing starts.\nUserGroupCount count is "+UserGroupCount);
@@ -72,6 +73,7 @@ public class UserGroupControllerTest {
 	 * Testing for getting UserGroup details By GroupId.
 	 */
 	@Test 
+	@Ignore
 	public void getUserGroupDetailsByGroupId() throws Exception {
 		long UserGroupCount = UserGroupRepository.count();
 		logger.debug("User Group getUserGroupDetailsByGroupId testing starts.\nUserGroupCount count is "+UserGroupCount);
@@ -89,6 +91,7 @@ public class UserGroupControllerTest {
 	 * Testing for create UserGroup
 	 */
 	@Test 
+	@Ignore
 	public void createUserGroup() throws Exception {
 		long UserGroupCount = UserGroupRepository.count();
 		logger.debug("User Group createUserGroup testing starts.\nUserGroupCount count is "+UserGroupCount);
@@ -102,6 +105,7 @@ public class UserGroupControllerTest {
 	 * Testing for update UserGroup details
 	 */
 	@Test 
+	@Ignore
 	public void updateUserGroup() throws Exception {
 		long UserGroupCount = UserGroupRepository.count();
 		logger.debug("User Group updateUserGroup testing starts.\nUserGroupCount count is "+UserGroupCount);
@@ -115,6 +119,7 @@ public class UserGroupControllerTest {
 	 * Testing for delete UserGroup details
 	 */
 	@Test 
+	@Ignore
 	public void deleteUserGroup() throws Exception {
 		long UserGroupCount = UserGroupRepository.count();
 		logger.debug("User Group deleteUserGroup testing starts.\nUserGroupCount count is "+UserGroupCount);

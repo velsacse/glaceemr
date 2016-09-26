@@ -12,6 +12,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.jayway.restassured.module.mockmvc.RestAssuredMockMvc;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,7 @@ public class FlowsheetControllerTest {
 	 * Using rest Assured
 	 */
 	@Test 
+	@Ignore
 	public void getFlowsheetsTest() throws Exception {
         given().
         param("flowsheetType", 1).when().get("/Flowsheet/Flowsheets").then().

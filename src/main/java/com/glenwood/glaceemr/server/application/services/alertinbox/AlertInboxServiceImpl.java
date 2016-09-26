@@ -698,8 +698,8 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 
 		Query query=em.createQuery(cq);
 		if(pagesize != -1){
-			query.setFirstResult((pageno-1)*10);	// Page no (offset)
-			query.setMaxResults(pagesize);		// Page size (No of results)
+			query.setFirstResult((pageno-1)*20);	// Page no (offset)
+			query.setMaxResults(20);		// Page size (No of results)
 		}
 		List<Object> alertsResultList=query.getResultList();
 
