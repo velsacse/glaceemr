@@ -244,11 +244,13 @@ public class InvestigationSummaryController {
 	public String saveNewOrder(@RequestParam(value = "encounterId", required = false, defaultValue = "") Integer encounterId,
 			@RequestParam(value = "chartId", required = false, defaultValue = "") Integer chartId,
 			@RequestParam(value = "patientId", required = false, defaultValue = "") Integer patientId,
-			@RequestParam(value = "labTestIds", required = false, defaultValue = "") String labTestIds) throws Exception {
+			@RequestParam(value = "labTestIds", required = false, defaultValue = "") String labTestIds,
+			@RequestParam(value = "userId", required = false, defaultValue = "-1") int userId)
+			throws Exception {
 		String testIdArray[] = labTestIds.split("','");
 		for (int i = 1; i < testIdArray.length; i++) {
 			LabDescription testDetails = investigationService.getNewTestDetails(Integer.parseInt(testIdArray[i]));
-			investigationService.saveNewLab(testDetails, encounterId, Integer.parseInt(testIdArray[i]), chartId, patientId);
+			investigationService.saveNewLab(testDetails, encounterId, Integer.parseInt(testIdArray[i]),userId, chartId, patientId);
 		}
 		return "success";
 	}

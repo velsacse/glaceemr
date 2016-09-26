@@ -948,10 +948,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	 * Method to save newly added lab
 	 */
 	@Override
-	public String saveNewLab(LabDescription testDetails, Integer encounterId, Integer testId, Integer chartId, Integer patientId) throws Exception {
+	public String saveNewLab(LabDescription testDetails, Integer encounterId, Integer testId,Integer userId,Integer chartId, Integer patientId) throws Exception {		
 		String saveData = formSaveObject(testDetails, encounterId, testId, chartId);
 		this.chartId = chartId;
-		savelab("1", encounterId, patientId, chartId, this.empId, saveData, "-1", "-1", "false", "" + testId);
+		savelab("1", encounterId, patientId, chartId, userId, saveData, "-1", "-1", "false", "" + testId);
 		return "success";
 	}
 

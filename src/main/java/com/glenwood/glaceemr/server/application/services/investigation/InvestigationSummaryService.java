@@ -41,7 +41,7 @@ public interface InvestigationSummaryService {
 	 * @param encounterId
 	 * @return
 	 */
-	String saveNewLab(LabDescription testDetails, Integer encounterId, Integer testId, Integer chartId, Integer patientId) throws Exception;
+	String saveNewLab(LabDescription testDetails, Integer encounterId, Integer testId,Integer userId, Integer chartId, Integer patientId) throws Exception;
 	
 	/**
 	 * Method to get test details of a newly ordered lab
