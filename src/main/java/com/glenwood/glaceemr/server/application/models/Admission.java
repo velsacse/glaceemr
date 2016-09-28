@@ -18,6 +18,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 
 
 @Entity
@@ -212,6 +214,19 @@ public class Admission implements Serializable{
 	@JoinColumn(name = "admission_room", referencedColumnName = "admission_room_id", insertable = false, updatable = false)
 	private AdmissionRoom admissionRoomTable;
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name = "admission_patient_id", referencedColumnName = "patient_registration_id", insertable = false, updatable = false)
+	private PatientRegistration  patientRegistration;
+	
+	public PatientRegistration getPatientRegistration() {
+		return patientRegistration;
+	}
+
+	public void setPatientRegistration(PatientRegistration patientRegistration) {
+		this.patientRegistration = patientRegistration;
+	}
+
 	@OneToMany(mappedBy="admission")
 	private List<Encounter> encounter;
 	

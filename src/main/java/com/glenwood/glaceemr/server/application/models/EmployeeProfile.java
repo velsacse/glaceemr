@@ -19,6 +19,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -161,8 +162,20 @@ public class EmployeeProfile implements Serializable {
 	@JsonManagedReference
 	List<Encounter> encounterServiceDr;
 	
+	@OneToMany(mappedBy="empProfile")
+	@JsonBackReference
+	List<Admission> admission;
+	
 	public Integer getEmpProfileEmpid() {
 		return empProfileEmpid;
+	}
+
+	public List<Admission> getAdmission() {
+		return admission;
+	}
+
+	public void setAdmission(List<Admission> admission) {
+		this.admission = admission;
 	}
 
 	public void setEmpProfileEmpid(Integer empProfileEmpid) {

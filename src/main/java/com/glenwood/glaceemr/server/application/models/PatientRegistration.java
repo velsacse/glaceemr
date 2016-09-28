@@ -16,6 +16,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
@@ -587,6 +590,10 @@ public class PatientRegistration implements Serializable {
 	private List<PatientInsDetail> patientInsuranceTable;
 	
 	@OneToMany(mappedBy="patientRegistration")
+	@JsonBackReference
+	List<Admission> admission;
+
+	@OneToMany(mappedBy="patientRegistration")
 	private List<Hl7ResultInbox> hl7ResultInbox;
 		
 	public H076 getReferringPhyTable() {
@@ -596,6 +603,14 @@ public class PatientRegistration implements Serializable {
 	public void setReferringPhyTable(H076 referringPhyTable) {
 		this.referringPhyTable = referringPhyTable;
 	}			
+	
+	public List<Admission> getAdmission() {
+		return admission;
+	}
+
+	public void setAdmission(List<Admission> admission) {
+		this.admission = admission;
+	}
 	
 	public List<PatientInsDetail> getPatientInsuranceTable() {
 		return patientInsuranceTable;
@@ -2112,16 +2127,16 @@ public class PatientRegistration implements Serializable {
 	@JoinColumn(name="patient_registration_accttype", referencedColumnName="account_type_id" , insertable=false, updatable=false)
 	private AccountType ptAccType;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JsonBackReference
-	@JoinColumn(name="patient_registration_id", referencedColumnName="auth_master_patient_id" , insertable=false, updatable=false)
-	AuthorizationMaster authMaster;
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="patientRegistration")
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@JsonManagedReference
+	List<AuthorizationMaster> authMaster;
 	
-	public AuthorizationMaster getAuthMaster() {
+	public List<AuthorizationMaster> getAuthMaster() {
 		return authMaster;
 	}
 
-	public void setAuthMaster(AuthorizationMaster authMaster) {
+	public void setAuthMaster(List<AuthorizationMaster> authMaster) {
 		this.authMaster = authMaster;
 	}
 
@@ -2167,6 +2182,7 @@ public class PatientRegistration implements Serializable {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
+	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="patient_registration_principal_doctor", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
 	private EmployeeProfile empProfile;
 

@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -64,6 +65,9 @@ public class PosTable {
 	@JsonManagedReference
 	List<Encounter> encounter;
 	
+	@OneToMany(mappedBy="posTable")
+	@JsonBackReference
+	List<Admission> admission;
 
 	public PlaceOfService getPlaceOfService() {
 		return placeOfService;
