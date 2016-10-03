@@ -17,7 +17,7 @@ public interface ReferralService {
 	
 	public Referral getReferralPlan(Integer referralId);
 	
-	public void saveReferralPlan(Integer patientId, String reason, String notes, String dx);
+	public void saveReferralPlan(Integer patientId, String reason, String notes, String dx,Integer criticalstatus);
 	
 	public ReferralListBean getListOfReferrals(Integer chartId);
 	

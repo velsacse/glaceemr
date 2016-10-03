@@ -200,6 +200,7 @@ public class Referral {
 	@Column(name="summary_care_record_provided_electronic")
 	private Integer summaryCareRecordProvidedElectronic;
 	
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="referral_reviewed_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
@@ -209,6 +210,12 @@ public class Referral {
 	@JsonManagedReference
 	@JoinColumn(name="h413035",referencedColumnName="patient_registration_id",insertable=false,updatable=false)
 	PatientRegistration patientRegistrationTable;
+	
+	@Column(name="referral_critical_status")
+	private Integer criticalStatus;
+	
+	@Column(name="referral_delinquency_days")
+	private Integer delinquencyDays;
 	
 	public Integer getH413001() {
 		return h413001;
@@ -677,6 +684,24 @@ public class Referral {
 
 	public PatientRegistration getPatientRegistrationTable() {
 		return patientRegistrationTable;
+	}
+	
+	
+	
+	public Integer getCriticalStatus() {
+		return criticalStatus;
+	}
+
+	public void setCriticalStatus(Integer criticalStatus) {
+		this.criticalStatus = criticalStatus;
+	}
+	
+	public Integer getDelinquencyDays() {
+		return delinquencyDays;
+	}
+
+	public void setDelinquencyDays(Integer delinquencyDays) {
+		this.delinquencyDays = delinquencyDays;
 	}
 
 	public void setPatientRegistrationTable(

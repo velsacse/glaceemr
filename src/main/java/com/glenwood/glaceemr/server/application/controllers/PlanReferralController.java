@@ -136,10 +136,11 @@ public class PlanReferralController {
 			  @RequestParam(value="referralId",required = false) Integer referralId,
 			  @RequestParam(value="reason",required = false) String reason,
 			  @RequestParam(value="notes",required = false) String notes,
+			  @RequestParam(value="criticalstatus",required = false) Integer criticalstatus,
 			  @RequestParam(value="diagnosis",required = false, defaultValue="") String diagnosis) throws JSONException {
 		
-		logger.debug("Saving referral::referralId"+referralId+" reason"+reason+" notes"+notes);
-		referralService.saveReferralPlan(referralId,reason,notes,diagnosis);
+		logger.debug("Saving referral::referralId"+referralId+" reason"+reason+" notes"+notes+"criticalstatus"+criticalstatus);
+		referralService.saveReferralPlan(referralId,reason,notes,diagnosis,criticalstatus);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.UPDATE,1,AuditLogConstants.SUCCESS,"Update Referral Details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral details updated");
 		return "success";
 	}
