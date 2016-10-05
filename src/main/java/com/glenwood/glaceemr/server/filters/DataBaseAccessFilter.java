@@ -178,7 +178,7 @@ public class DataBaseAccessFilter implements Filter {
 			if(db[0]!= null){
 				System.out.println("***request is from GWT***"+db[0]);
 				TennantContextHolder.setTennantId(db[0].trim().toLowerCase());
-				request.getServletContext().getRequestDispatcher("/api/emr/user"+params[1]).forward(multiReadRequest, response);
+				request.getServletContext().getRequestDispatcher("/api/"+params[1]).forward(multiReadRequest, response);
 			}
 		}else{
 			System.out.println("***request is from legacy***"+TennantContextHolder.getTennantId());
