@@ -24,7 +24,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Api(value = "PatientReview", description = "To get patient review information", consumes="application/json")
 @RestController
-@RequestMapping(value="PatientReview")
+@RequestMapping(value="/user/PatientReview")
 public class PatientReviewController {
 
 	@Autowired

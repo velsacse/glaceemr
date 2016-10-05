@@ -21,7 +21,7 @@ import com.wordnik.swagger.annotations.Api;
 @Api(value = "Vitals", description = "Vitals Data", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="/VitalElements.Action")
+@RequestMapping(value="/user/VitalElements.Action")
 public class VitalsController {
 	
 	

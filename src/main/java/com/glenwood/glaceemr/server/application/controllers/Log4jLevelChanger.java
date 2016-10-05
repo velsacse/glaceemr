@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Transactional
-@RequestMapping(value = "/log4j")
+@RequestMapping(value = "/user/log4j")
 public class Log4jLevelChanger {
 
 	protected final Logger logger = Logger.getLogger(Log4jLevelChanger.class);

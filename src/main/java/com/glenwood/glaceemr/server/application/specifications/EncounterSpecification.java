@@ -13,6 +13,8 @@ import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.EncounterPlan;
 import com.glenwood.glaceemr.server.application.models.EncounterPlan_;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
+import com.glenwood.glaceemr.server.application.models.H113;
+import com.glenwood.glaceemr.server.application.models.H113_;
 
 
 public class EncounterSpecification {
@@ -142,5 +144,23 @@ public class EncounterSpecification {
             }
         };
     }
+    
+
+	/**
+	 * 
+	 * get Encounter reason id
+	 * 
+	 * @param reason id
+	 * @return
+	 */
+	public static Specification<H113> getEncounterReasonId(final String reasonType, final Integer reasonGroup) {
+		return new Specification<H113>() {
+			@Override
+			public Predicate toPredicate(Root<H113> root, CriteriaQuery<?> cq,CriteriaBuilder cb) {
+				
+				return cq.where(cb.equal(cb.upper(root.get(H113_.h113004)), "REFILLS"), cb.equal(root.get(H113_.h113008), reasonGroup)).getRestriction();
+			}
+		};
+	}
 
 }

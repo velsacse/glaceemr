@@ -26,7 +26,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "GenericPrintConfiguration", description = "Generic Print Styles", consumes="application/json")
 @RestController
-@RequestMapping(value="/GenericPrintStyle.Action")
+@RequestMapping(value="/user/GenericPrintStyle.Action")
 public class GenericPrintController {
 
 	@Autowired

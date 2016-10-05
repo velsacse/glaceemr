@@ -20,7 +20,7 @@ import com.wordnik.swagger.annotations.Api;
 @Api(value = "DischargeVitals", description = "Multiple Vital Recording", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="/DischargeVitals")
+@RequestMapping(value="/user/DischargeVitals")
 public class DischargeVitalController {
 
 	

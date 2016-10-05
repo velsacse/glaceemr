@@ -14,10 +14,10 @@ public class Billinglookup {
 	private Integer blookId;
 
 	@Column(name="blook_group")
-	private Integer blookGroup;
+	private Short blookGroup;
 
 	@Column(name="blook_intid")
-	private Integer blookIntid;
+	private Short blookIntid;
 
 	@Column(name="blook_charid")
 	private String blookCharid;
@@ -32,10 +32,10 @@ public class Billinglookup {
 	private String blookExtra;
 
 	@Column(name="blook_subgroup")
-	private Integer blookSubgroup;
+	private Short blookSubgroup;
 
 	@Column(name="blook_orderby")
-	private Integer blookOrderby;
+	private Short blookOrderby;
 
 	@Column(name="blook_isactive")
 	private Boolean blookIsactive;
@@ -51,19 +51,19 @@ public class Billinglookup {
 		this.blookId = blookId;
 	}
 
-	public Integer getBlookGroup() {
+	public Short getBlookGroup() {
 		return blookGroup;
 	}
 
-	public void setBlookGroup(Integer blookGroup) {
+	public void setBlookGroup(Short blookGroup) {
 		this.blookGroup = blookGroup;
 	}
 
-	public Integer getBlookIntid() {
+	public Short getBlookIntid() {
 		return blookIntid;
 	}
 
-	public void setBlookIntid(Integer blookIntid) {
+	public void setBlookIntid(Short blookIntid) {
 		this.blookIntid = blookIntid;
 	}
 
@@ -99,19 +99,19 @@ public class Billinglookup {
 		this.blookExtra = blookExtra;
 	}
 
-	public Integer getBlookSubgroup() {
+	public Short getBlookSubgroup() {
 		return blookSubgroup;
 	}
 
-	public void setBlookSubgroup(Integer blookSubgroup) {
+	public void setBlookSubgroup(Short blookSubgroup) {
 		this.blookSubgroup = blookSubgroup;
 	}
 
-	public Integer getBlookOrderby() {
+	public Short getBlookOrderby() {
 		return blookOrderby;
 	}
 
-	public void setBlookOrderby(Integer blookOrderby) {
+	public void setBlookOrderby(Short blookOrderby) {
 		this.blookOrderby = blookOrderby;
 	}
 

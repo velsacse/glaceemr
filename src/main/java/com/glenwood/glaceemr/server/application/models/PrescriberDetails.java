@@ -2,7 +2,6 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-
 import java.sql.Date;
 import java.util.List;
 
@@ -16,10 +15,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
+
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -205,6 +206,7 @@ public class PrescriberDetails implements Serializable{
 	@JsonManagedReference
 	List<LocationDetails> locationDetails;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
 	@JsonBackReference
 	@JoinColumn(name="doctorid", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)

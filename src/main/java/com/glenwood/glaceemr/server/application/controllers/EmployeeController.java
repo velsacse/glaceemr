@@ -21,7 +21,7 @@ import com.wordnik.swagger.annotations.ApiResponse;
 @Api(value = "/Employee", description = "To deal with employee details.", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="Employee.Action")
+@RequestMapping(value="/user/Employee.Action")
 public class EmployeeController {
 	
 	@Autowired

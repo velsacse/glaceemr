@@ -26,7 +26,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "Internal messages", description = "API for internal messages encounter", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="InternalMessages")
+@RequestMapping(value="/user/InternalMessages")
 public class InternalMessagesController {
 
 	@Autowired

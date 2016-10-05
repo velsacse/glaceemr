@@ -595,6 +595,12 @@ public class PatientRegistration implements Serializable {
 
 	@OneToMany(mappedBy="patientRegistration")
 	private List<Hl7ResultInbox> hl7ResultInbox;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JsonManagedReference
+	@JoinColumn(name="patient_registration_guarantorid", referencedColumnName="guarantor_key", insertable=false, updatable=false)
+	private Guarantor guaranatorDetails;
 		
 	public H076 getReferringPhyTable() {
 		return referringPhyTable;
@@ -2252,6 +2258,14 @@ public class PatientRegistration implements Serializable {
 
 	public void setNomatchfoundpatient(NoMatchFoundPatient nomatchfoundpatient) {
 		this.nomatchfoundpatient = nomatchfoundpatient;
+	}
+
+	public Guarantor getGuaranatorDetails() {
+		return guaranatorDetails;
+	}
+
+	public void setGuaranatorDetails(Guarantor guaranatorDetails) {
+		this.guaranatorDetails = guaranatorDetails;
 	}
 	
 }

@@ -4,10 +4,14 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -50,10 +54,17 @@ public class VaccineReport {
 	@Column(name="vaccine_report_last_modified")
 	private Timestamp vaccineReportLastModified;
 	
-	@ManyToOne
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="vaccine_report_vaccine_id", referencedColumnName="lab_description_testid", insertable=false, updatable=false)
 	LabDescription labDescriptionTable;
+	
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="vaccine_report_userid", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
+	EmployeeProfile employeeProfile;
 
 	public Integer getVaccineReportId() {
 		return vaccineReportId;
@@ -133,6 +144,14 @@ public class VaccineReport {
 
 	public void setVaccineReportLastModified(Timestamp vaccineReportLastModified) {
 		this.vaccineReportLastModified = vaccineReportLastModified;
+	}
+
+	public EmployeeProfile getEmployeeProfile() {
+		return employeeProfile;
+	}
+
+	public void setEmployeeProfile(EmployeeProfile employeeProfile) {
+		this.employeeProfile = employeeProfile;
 	}
 
 	public LabDescription getLabDescriptionTable() {

@@ -47,7 +47,7 @@ public class Prescription implements Serializable{
 	@Column(name="doc_presc_start_date")
 	private Date docPrescStartDate;
 	
-	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="doc_presc_provider_id",referencedColumnName="emp_profile_empid",insertable=false, updatable=false)
 	@JsonManagedReference

@@ -23,7 +23,7 @@ import com.wordnik.swagger.annotations.Api;
 
 @Api(value = "Assessment", description = "gets list of active problems of a patient", consumes="application/json")
 @RestController
-@RequestMapping(value="Assessment.Action")
+@RequestMapping(value="/user/Assessment.Action")
 public class AssessmentSummaryController {
 	
 	@Autowired

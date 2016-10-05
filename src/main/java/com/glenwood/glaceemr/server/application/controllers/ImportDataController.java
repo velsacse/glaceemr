@@ -17,7 +17,7 @@ import com.wordnik.swagger.annotations.Api;
 @Api(value = "Import", description = "Import Clinical Data ", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="/ImportData.Action")
+@RequestMapping(value="/user/ImportData.Action")
 public class ImportDataController {
 
 

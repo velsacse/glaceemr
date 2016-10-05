@@ -26,7 +26,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
  * @author software
  *
  */
-@Api(value = "Shortcuts", description = "To get element shortcuts", consumes="application/json")
+@Api(value = "/user/Shortcuts", description = "To get element shortcuts", consumes="application/json")
 
 @RestController
 @RequestMapping(value="Shortcuts.Action")

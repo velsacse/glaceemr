@@ -1,7 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
-
 import java.sql.Date;
 import java.util.List;
 
@@ -13,10 +12,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
+
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -62,6 +63,7 @@ public class TherapySession {
 	@Column(name="therapy_session_end_time")
 	private String therapySessionEndTime;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="therapy_session_provider_id", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)

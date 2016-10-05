@@ -24,7 +24,7 @@ import com.wordnik.swagger.annotations.Api;
 @Api(value = "Admission", description = "Admission", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="/Admission")
+@RequestMapping(value="/user/Admission")
 public class AdmissionController {
 
 

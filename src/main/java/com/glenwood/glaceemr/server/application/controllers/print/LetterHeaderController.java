@@ -30,7 +30,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "LetterHeaderConfiguration", description = "Letter Header", consumes="application/json")
 @RestController
-@RequestMapping(value="/LetterHeader.Action")
+@RequestMapping(value="/user/LetterHeader.Action")
 public class LetterHeaderController {
 	
 	@Autowired

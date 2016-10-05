@@ -1,7 +1,9 @@
 package com.glenwood.glaceemr.server.application.services.chart.prescription;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map; 
@@ -18,20 +20,44 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.glenwood.glaceemr.server.application.models.AlertCategory;
+import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.CurrentMedication;
 import com.glenwood.glaceemr.server.application.models.DrugSchedule;
+import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.H113;
+import com.glenwood.glaceemr.server.application.models.H802;
+import com.glenwood.glaceemr.server.application.models.H802_;
+import com.glenwood.glaceemr.server.application.models.H810;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlan;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
+import com.glenwood.glaceemr.server.application.models.PharmacyFilterBean;
+import com.glenwood.glaceemr.server.application.models.PharmacyMapping;
+import com.glenwood.glaceemr.server.application.models.PharmacyMapping_;
+import com.glenwood.glaceemr.server.application.models.PortalRefillRequestBean;
 import com.glenwood.glaceemr.server.application.models.Prescription;
 import com.glenwood.glaceemr.server.application.models.Prescription_;
+import com.glenwood.glaceemr.server.application.repositories.AlertCategoryRepository;
+import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
 import com.glenwood.glaceemr.server.application.repositories.CurrentMedicationRepository;
 import com.glenwood.glaceemr.server.application.repositories.DrugScheduleRepository;
+import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
+import com.glenwood.glaceemr.server.application.repositories.H113Repository;
+import com.glenwood.glaceemr.server.application.repositories.H802Repository;
+import com.glenwood.glaceemr.server.application.repositories.H810Respository;
 import com.glenwood.glaceemr.server.application.repositories.MedAdministrationLogRepository;
 import com.glenwood.glaceemr.server.application.repositories.MedAdministrationPlanRepository;
 import com.glenwood.glaceemr.server.application.repositories.MedAdministrationPlanShortcutRepository;
+import com.glenwood.glaceemr.server.application.repositories.PharmDetailsRepository;
+import com.glenwood.glaceemr.server.application.repositories.PharmacyMappingRepository;
 import com.glenwood.glaceemr.server.application.repositories.PrescriptionRepository;
+import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
+import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
+import com.glenwood.glaceemr.server.application.specifications.PharmacyFilterSpecification;
+import com.glenwood.glaceemr.server.application.specifications.PortalAlertSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PrescripitonSpecification;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 
@@ -57,6 +83,30 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	
 	@Autowired
 	MedAdministrationPlanShortcutRepository medAdministrationPlanShortcutRepository;
+	
+	@Autowired
+	H113Repository h113Repository;
+	
+	@Autowired
+	EncounterRepository encounterRepository;
+	
+	@Autowired
+	AlertEventRepository alertEventRepository;
+	
+	@Autowired
+	PharmDetailsRepository pharmDetailsRepository;
+	
+	@Autowired
+	H802Repository h802Repository;
+	
+	@Autowired
+	PharmacyMappingRepository pharmacyMappingRepository;
+	
+	@Autowired
+	AlertCategoryRepository alertCategoryRepository;
+	
+	@Autowired
+	H810Respository h810Respository;
 	
 	@PersistenceContext
 	EntityManager em;
@@ -354,6 +404,164 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	public List<MedsAdminPlanShortcut> getMedAdminPlanShortcuts() {
 		List<MedsAdminPlanShortcut> shortcutsList = medAdministrationPlanShortcutRepository.findAll();
 		return shortcutsList;
+	}
+	
+	@Override
+	public PharmacyFilterBean getPharmacyList(PharmacyFilterBean pharmacyFilterBean) {
+		
+		pharmacyFilterBean.setPharmacyList(pharmDetailsRepository.findAll(PharmacyFilterSpecification.getPharmaciesBy(pharmacyFilterBean),
+				PharmacyFilterSpecification.createPharmacyPaginationRequest(pharmacyFilterBean.getPageIndex(), pharmacyFilterBean.getPageOffset())).getContent());
+		
+		pharmacyFilterBean.setTotalPharamaciesCount(pharmDetailsRepository.count(PharmacyFilterSpecification.getPharmaciesBy(pharmacyFilterBean)));
+		
+		return pharmacyFilterBean;
+	}
+
+	@Override
+	public EMRResponseBean requestRefill(PortalRefillRequestBean requestBean) {
+		
+		String requestedMedicine="";
+		
+		Timestamp requestedDate=new Timestamp(new Date().getTime());
+		
+		int requestId=getNewPortalRefillRequestId();		
+		
+		for(int i=0;i<requestBean.getPrecriptionList().size();i++){
+		
+		H802 prescriptionMed=new H802();
+		prescriptionMed.setH802002(requestId);
+		prescriptionMed.setH802003(requestBean.getPatientId());
+		prescriptionMed.setH802004(1);
+		prescriptionMed.setH802005(requestedDate.toString());
+		prescriptionMed.setH802006(requestBean.getPrecriptionList().get(i).getPrescriptionId());
+		prescriptionMed.setH802007(1);
+		prescriptionMed.setH802008(0);
+		
+		requestedMedicine = requestedMedicine.equalsIgnoreCase("") ? "" : requestedMedicine + ",";
+		requestedMedicine = requestedMedicine+requestBean.getPrecriptionList().get(i).getPrescriptionName()+" ["+requestBean.getPrecriptionList().get(i).getPrescriptionDosage()+"]";
+		
+		h802Repository.saveAndFlush(prescriptionMed);
+		}
+		
+		String requestComments = "Request Type : Refill requested from patient portal \r\n Medication : "+requestedMedicine+"\r\n Comments : "+requestBean.getComments()+" \r\n Suggested Pharmacy : "+requestBean.getPharmacyName();
+		
+		PharmacyMapping pharmacy=new PharmacyMapping();
+		pharmacy.setPharmacyMappingMapid(getNewPharmacyMappingId());
+		pharmacy.setPharmacyMappingPatid(requestBean.getPatientId());
+		pharmacy.setPharmacyMappingPharmacyid(requestBean.getPharmacyId());
+		pharmacy.setPharmacyMappingUsrGrpid(2);
+		
+		pharmacyMappingRepository.saveAndFlush(pharmacy);
+		
+		Encounter requestEncounter=new Encounter();
+		requestEncounter.setEncounterChartid(requestBean.getChartId());
+		requestEncounter.setEncounterDate(requestedDate);
+		requestEncounter.setEncounterComments(requestComments);
+		requestEncounter.setEncounterChargeable(true);
+		requestEncounter.setEncounterAlreadySeen(false);
+		requestEncounter.setEncounterType(Short.valueOf("3"));
+		requestEncounter.setEncounterReason(getEncounterReasonId("Refills", 2));
+		requestEncounter.setEncounterStatus(Short.valueOf("1"));
+		
+		requestEncounter=encounterRepository.saveAndFlush(requestEncounter);
+		
+		String requestInfo      = "Request " + requestedMedicine + " for Refillment as on " + requestedDate;
+		
+		H810 paymentAlertCategory=h810Respository.findOne(PortalAlertSpecification.getPortalAlertCategoryByName("Refill Request"));
+		boolean sendToAll =paymentAlertCategory.getH810005();  
+		int provider = Integer.parseInt(paymentAlertCategory.getH810003());
+		int forwardTo = Integer.parseInt(paymentAlertCategory.getH810004());
+
+		AlertCategory alertCategory=alertCategoryRepository.findOne(AlertCategorySpecification.getAlertCategoryByName("Refill Request"));
+		
+		AlertEvent alert=new AlertEvent();
+		alert.setAlertEventCategoryId(alertCategory.getAlertCategoryId());
+		alert.setAlertEventStatus(1);
+		alert.setAlertEventPatientId(requestBean.getPatientId());
+		alert.setAlertEventPatientName(requestBean.getUsername());
+		alert.setAlertEventEncounterId(requestEncounter.getEncounterId());
+		alert.setAlertEventRefId(Integer.parseInt(String.valueOf(requestId)));
+		alert.setAlertEventMessage(requestInfo);
+		alert.setAlertEventRoomId(-1);
+		alert.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+		alert.setAlertEventModifiedby(-100);
+		alert.setAlertEventFrom(-100);
+
+
+		if(provider==0 && forwardTo==0)
+			alert.setAlertEventTo(-1);
+		else {
+			if(sendToAll){
+				if(forwardTo!=provider){
+					alert.setAlertEventTo(forwardTo);
+					AlertEvent alert2=alert;
+					alert2.setAlertEventTo(provider);
+					alertEventRepository.saveAndFlush(alert2);
+				} else {
+					alert.setAlertEventTo(forwardTo);
+				}            	 
+			}else{
+				if(forwardTo!=0){
+					alert.setAlertEventTo(forwardTo);
+				} else {
+					alert.setAlertEventTo(provider);
+				}
+			}
+		}
+
+		alertEventRepository.saveAndFlush(alert);
+		
+		
+
+		EMRResponseBean reposnseBean=new EMRResponseBean();
+		reposnseBean.setCanUserAccess(true);
+		reposnseBean.setLogin(true);
+		reposnseBean.setIsAuthorizationPresent(true);
+		reposnseBean.setData("Refill request sent successfully");
+		
+		return reposnseBean;
+	}
+	
+	public Integer getNewPortalRefillRequestId() {
+
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<H802> root = cq.from(H802.class);
+		cq.select(builder.max(root.get(H802_.h802002)));
+		Integer requestId=(Integer) em.createQuery(cq).getSingleResult();
+
+		return requestId+1;
+	}
+	
+	public Integer getNewPharmacyMappingId() {
+
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<PharmacyMapping> root = cq.from(PharmacyMapping.class);
+		cq.select(builder.max(root.get(PharmacyMapping_.pharmacyMappingMapid)));
+		Integer mapId=(Integer) em.createQuery(cq).getSingleResult();
+
+		return mapId+1;
+	}
+	
+	public Integer getEncounterReasonId(String reasonType, int reasonGroup) {
+
+		H113 encounterReason=h113Repository.findOne(EncounterSpecification.getEncounterReasonId(reasonType, reasonGroup));
+		return encounterReason.getH113003();
+	}
+
+	@Override
+	public List<Prescription> getPatientRefillRequestMedications(int patientId, int chartId) {
+		
+		List<Prescription> medList=prescriptionRepository.findAll(PrescripitonSpecification.getPatientCompletedMedications(patientId, chartId));
+		
+		return medList;
+	}
+
+	@Override
+	public List<Encounter> getPatientRefillRequestHistory(int patientId, int chartId) {
+		
+		return encounterRepository.findAll(PrescripitonSpecification.getRefillRequestHistory(3, getEncounterReasonId("Refills", 2), chartId));		
 	}
 	
 }

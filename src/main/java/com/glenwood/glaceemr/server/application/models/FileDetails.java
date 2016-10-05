@@ -18,6 +18,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -89,46 +92,53 @@ public class FileDetails {
 	@Column(name="filedetails_issigned")
 	private Boolean filedetailsIssigned;
 	
-
 	@Column(name="filedetails_templateid")
-	private BigInteger filedetailsTemplateid;
+	private BigInteger filedetailsTemplateId;
+	
 	
 	@OneToOne(cascade=CascadeType.ALL,mappedBy="fileDetails")
 	@JsonBackReference
     PatientPortalSharedDocs patientPortalSharedDocs;
 	
 	
-	@OneToMany(mappedBy="fileNameDetails")
+	@OneToMany(mappedBy="fileNameDetails",fetch =FetchType.LAZY)
 	@JsonManagedReference
 	private List<FileName> fileName;
-
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
 	@JoinColumn(name="filedetails_categoryid", referencedColumnName="patient_doc_category_id", insertable=false,updatable=false)
 	@JsonManagedReference
 	PatientDocumentsCategory patientDocCategory;
 	
-	
-
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
 	@JoinColumn(name="filedetails_createdby", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
 	@JsonManagedReference
 	EmployeeProfile createdByEmpProfileTable;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="filedetails_lastmodifiedby", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
 	@JsonManagedReference
 	EmployeeProfile lastModifiedByEmpProfileTable;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="filedetails_encounterid", referencedColumnName="encounter_id", insertable=false,updatable=false)
 	@JsonManagedReference
 	Encounter encounterTable;
-
+	
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="filedetails_templateid", referencedColumnName="forms_template_id", insertable=false,updatable=false)
+	@JsonManagedReference
+	FormsTemplate formsTemplate;
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="filedetails_entityid", referencedColumnName="lab_entries_testdetail_id", insertable=false,updatable=false)
 	private LabEntries labEntries;
-	
+
 	public LabEntries getLabEntries() {
 		return labEntries;
 	}
@@ -148,7 +158,7 @@ public class FileDetails {
 	public EmployeeProfile getLastModifiedByEmpProfileTable() {
 		return lastModifiedByEmpProfileTable;
 	}
-
+					
 	public void setLastModifiedByEmpProfileTable(
 			EmployeeProfile lastModifiedByEmpProfileTable) {
 		this.lastModifiedByEmpProfileTable = lastModifiedByEmpProfileTable;
@@ -166,14 +176,8 @@ public class FileDetails {
 		return patientPortalSharedDocs;
 	}
 
-	
-
 	public List<FileName> getFileName() {
 		return fileName;
-	}
-
-	public void setFileName(List<FileName> fileName) {
-		this.fileName = fileName;
 	}
 
 	public PatientDocumentsCategory getPatientDocCategory() {
@@ -185,7 +189,9 @@ public class FileDetails {
 		this.patientPortalSharedDocs = patientPortalSharedDocs;
 	}
 
-	
+	public void setFileName(List<FileName> fileName) {
+		this.fileName = fileName;
+	}
 
 	public void setPatientDocCategory(PatientDocumentsCategory patientDocCategory) {
 		this.patientDocCategory = patientDocCategory;
@@ -266,10 +272,6 @@ public class FileDetails {
 	public Boolean getFiledetailsIssigned() {
 		return filedetailsIssigned;
 	}
-	
-	public BigInteger getFiledetailsTemplateid() {
-		return filedetailsTemplateid;
-	}
 
 	public void setFiledetailsId(Integer filedetailsId) {
 		this.filedetailsId = filedetailsId;
@@ -346,11 +348,21 @@ public class FileDetails {
 	public void setFiledetailsIssigned(Boolean filedetailsIssigned) {
 		this.filedetailsIssigned = filedetailsIssigned;
 	}
-	
-	public void setFiledetailsTemplateid(BigInteger filedetailsTemplateid) {
-		this.filedetailsTemplateid = filedetailsTemplateid;
+
+	public BigInteger getFiledetailsTemplateId() {
+		return filedetailsTemplateId;
 	}
 
-	
+	public void setFiledetailsTemplateId(BigInteger filedetailsTemplateId) {
+		this.filedetailsTemplateId = filedetailsTemplateId;
+	}
+
+	public FormsTemplate getFormsTemplate() {
+		return formsTemplate;
+	}
+
+	public void setFormsTemplate(FormsTemplate formsTemplate) {
+		this.formsTemplate = formsTemplate;
+	}
 	
 }

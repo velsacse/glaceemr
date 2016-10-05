@@ -395,6 +395,47 @@ public class PrescripitonSpecification {
 			}
 		};
 	}
+	
+	/**
+	 * Specification to get the patients completed medications
+	 * @param patientId
+	 * @param chartId
+	 * @return Specification<Prescription>
+	 */
+	public static Specification<Prescription> getPatientCompletedMedications(final Integer patientId, final Integer chartId)
+	{
+		return new Specification<Prescription>() {
+
+			@Override
+			public Predicate toPredicate(Root<Prescription> root, CriteriaQuery<?> cq,
+					CriteriaBuilder cb) {
+				
+				Expression<Integer> prescStatus=root.get(Prescription_.docPrescStatus);
+				Predicate prescStatusPredicate=cb.and(cb.equal(root.get(Prescription_.docPrescIsActive), true), prescStatus.in(1,2,3)); 
+				Predicate patientIdPredicate = cb.equal(root.get(Prescription_.docPrescPatientId), patientId);
+				return cq.where(prescStatusPredicate, patientIdPredicate).getRestriction();
+			}
+		};
+	}
+	
+	/**
+	 * Specification to get the patient's refill request history
+	 * @param patientId
+	 * @param chartId
+	 * @return Specification<Encounter>
+	 */
+	public static Specification<Encounter> getRefillRequestHistory(final int encounterType, final Integer encounterReason, final int chartId)
+	{
+		return new Specification<Encounter>() {
+
+			@Override
+			public Predicate toPredicate(Root<Encounter> root, CriteriaQuery<?> cq,
+					CriteriaBuilder cb) {
+				
+				return cq.where(cb.equal(root.get(Encounter_.encounterChartid), chartId), cb.equal(root.get(Encounter_.encounterType), encounterType), cb.equal(root.get(Encounter_.encounterReason), encounterReason)).orderBy(cb.desc(root.get(Encounter_.encounterDate))).getRestriction();
+			}
+		};
+	}
 }
 
 

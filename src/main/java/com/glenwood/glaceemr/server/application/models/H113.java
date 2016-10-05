@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -7,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "h113")
-public class H113 {
+public class H113 implements Serializable{
 
 	@Id
 	@Column(name="h113001")

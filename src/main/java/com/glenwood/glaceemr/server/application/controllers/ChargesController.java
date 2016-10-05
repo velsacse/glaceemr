@@ -47,7 +47,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value="Charges Page")
 @RestController
 @Transactional
-@RequestMapping(value = "/Charges")
+@RequestMapping(value = "/user/Charges")
 public class ChargesController {
 	
 	@Autowired

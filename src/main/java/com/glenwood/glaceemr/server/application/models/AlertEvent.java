@@ -149,6 +149,11 @@ public class AlertEvent {
 	@JsonManagedReference
 	@JoinColumn(name="alert_event_encounter_id",referencedColumnName="encounter_id",insertable=false,updatable=false)
 	Encounter encounterTableId;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="alert_event_ref_id", referencedColumnName="portal_message_alertid", insertable=false, updatable=false)
+	private PortalMessage portalMessage;
 
 
 	public Integer getAlertEventId() {
@@ -486,5 +491,15 @@ public class AlertEvent {
 
 	public void setEncounterTableId(Encounter encounterTableId) {
 		this.encounterTableId = encounterTableId;
+	}
+
+
+	public PortalMessage getPortalMessage() {
+		return portalMessage;
+	}
+
+
+	public void setPortalMessage(PortalMessage portalMessage) {
+		this.portalMessage = portalMessage;
 	}
 }

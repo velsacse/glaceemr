@@ -85,6 +85,18 @@ public class H809 {
 	@Column(name="security_answer3")
 	private String securityAnswer3;
 	
+	@Column(name="password_reset")
+	private Integer passwordReset;
+	
+	@Column(name="from_portal")
+	private boolean fromPortal;
+	
+	@Column(name="from_portal_isactive")
+	private boolean fromPortalIsactive;
+	
+	@Column(name="h809_token")
+	private String h809Token;
+	
 	@OneToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="h809002", referencedColumnName="chart_patientid", insertable=false, updatable=false)
@@ -240,6 +252,37 @@ public class H809 {
 
 	public void setSecurityAnswer3(String securityAnswer3) {
 		this.securityAnswer3 = securityAnswer3;
+	}
+	public Integer getPasswordReset() {
+		return passwordReset;
+	}
+
+	public void setPasswordReset(Integer passwordReset) {
+		this.passwordReset = passwordReset;
+	}
+
+	public boolean isFromPortal() {
+		return fromPortal;
+	}
+
+	public void setFromPortal(boolean fromPortal) {
+		this.fromPortal = fromPortal;
+	}
+
+	public boolean isFromPortalIsactive() {
+		return fromPortalIsactive;
+	}
+
+	public void setFromPortalIsactive(boolean fromPortalIsactive) {
+		this.fromPortalIsactive = fromPortalIsactive;
+	}
+
+	public String getH809Token() {
+		return h809Token;
+	}
+
+	public void setH809Token(String h809Token) {
+		this.h809Token = h809Token;
 	}
 
 	public Chart getChartH809Table() {

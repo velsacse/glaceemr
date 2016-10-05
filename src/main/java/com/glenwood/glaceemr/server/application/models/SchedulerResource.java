@@ -2,8 +2,13 @@ package com.glenwood.glaceemr.server.application.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "sch_resource")
@@ -39,6 +44,11 @@ public class SchedulerResource {
 
 	@Column(name="sch_resource_isexport")
 	private Boolean schResourceIsexport;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="sch_resource_doctor_id", referencedColumnName="pos_table_relation_id", updatable=false, insertable=false)
+	PosTable ApptBookLocation;
 
 	public Integer getSchResourceId() {
 		return schResourceId;
@@ -119,4 +129,13 @@ public class SchedulerResource {
 	public void setSchResourceIsexport(Boolean schResourceIsexport) {
 		this.schResourceIsexport = schResourceIsexport;
 	}
+
+	public PosTable getApptBookLocation() {
+		return ApptBookLocation;
+	}
+
+	public void setApptBookLocation(PosTable apptBookLocation) {
+		ApptBookLocation = apptBookLocation;
+	}
+	
 }

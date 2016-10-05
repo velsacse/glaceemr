@@ -28,7 +28,7 @@ import com.wordnik.swagger.annotations.Api;
 @Api(value = "ReferralTabletSummary", description = "To get referral details", consumes="application/json")
 
 @RestController
-@RequestMapping(value="ReferralTabletSummary.Action")
+@RequestMapping(value="/user/ReferralTabletSummary.Action")
 public class ReferralController {
 	
 	@Autowired

@@ -33,7 +33,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "/RefillRequest", description = "To get the denial drug details", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value = "RefillRequest")
+@RequestMapping(value = "/user/RefillRequest")
 public class RefillRequestController {
 	
 	@Autowired

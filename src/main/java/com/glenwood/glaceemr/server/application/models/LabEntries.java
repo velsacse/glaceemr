@@ -366,31 +366,43 @@ public class LabEntries {
 	@JoinColumn(name="lab_entries_ord_by", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
 	private EmployeeProfile empProfile;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="lab_entries_perf_by", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
+	private EmployeeProfile labPerformedBy;
+	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="lab_entries_chartid", referencedColumnName="chart_id" , insertable=false, updatable=false)
 	private Chart chart;
 		
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="lab_entries_test_id", referencedColumnName="lab_description_testid" , insertable=false, updatable=false)
 	private LabDescription labDescriptionTable;
 		
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="lab_entries_encounter_id", referencedColumnName="encounter_id" , insertable=false, updatable=false)
 	private Encounter encounter;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="lab_entries_groupid", referencedColumnName="lab_groups_id" , insertable=false, updatable=false)
 	private LabGroups labGroups;
 
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="lab_entries_sepcimen_id", referencedColumnName="specimen_id" , insertable=false, updatable=false)
 	private Specimen specimen;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@OneToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="lab_entries_testdetail_id",referencedColumnName="vaccination_consent_form_testdetail_id", insertable=false, updatable=false)
@@ -399,6 +411,12 @@ public class LabEntries {
 	@OneToMany(mappedBy="labEntriesTable")
 	@JsonBackReference
 	private List<LabEntriesParameter> parameters;
+	
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="lab_entries_lot_no", referencedColumnName="vaccine_order_details_id", insertable=false, updatable=false)
+	private VaccineOrderDetails vaccineOrderDetails;
 	
 	@OneToMany(mappedBy="labEntries")
 	private List<FileDetails> fileDetails;
@@ -526,15 +544,6 @@ public class LabEntries {
 	public Timestamp getLabEntriesPerfOn() {
 		return labEntriesPerfOn;
 	}
-
-	public LabDescription getLabDescription() {
-		return labDescriptionTable;
-	}
-
-	public void setLabDescription(LabDescription labDescriptionTable) {
-		this.labDescriptionTable = labDescriptionTable;
-	}
-
 
 	public void setLabEntriesPerfOn(Timestamp labEntriesPerfOn) {
 		this.labEntriesPerfOn = labEntriesPerfOn;
@@ -1333,11 +1342,28 @@ public class LabEntries {
 		this.labEntriesDx8codeCodedesc = labEntriesDx8codeCodedesc;
 	}
 
+	public EmployeeProfile getLabPerformedBy() {
+		return labPerformedBy;
+	}
+
+	public void setLabPerformedBy(EmployeeProfile labPerformedBy) {
+		this.labPerformedBy = labPerformedBy;
+	}
+
+	public VaccineOrderDetails getVaccineOrderDetails() {
+		return vaccineOrderDetails;
+	}
+
+	public void setVaccineOrderDetails(VaccineOrderDetails vaccineOrderDetails) {
+		this.vaccineOrderDetails = vaccineOrderDetails;
+	}
+
 	public List<FileDetails> getFileDetails() {
 		return fileDetails;
 	}
 
 	public void setFileDetails(List<FileDetails> fileDetails) {
 		this.fileDetails = fileDetails;
-	}	
+	}
+	
 }

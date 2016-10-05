@@ -5,8 +5,7 @@
 	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:lang="http://www.springframework.org/schema/lang"
 	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:cache="http://www.springframework.org/schema/cache"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
@@ -22,20 +21,25 @@
 	<context:component-scan base-package="com.glenwood.glaceemr.server.filters" />
 	<context:component-scan base-package="com.glenwood.glaceemr.server.utils" />
 	<context:component-scan base-package="com.glenwood.glaceemr.server.application.Bean" />
-	<context:component-scan base-package="com.glenwood.glaceemr.server.application.controllers" />
-	<context:component-scan base-package="com.glenwood.glaceemr.server.application.services" />
-	<jpa:repositories base-package="com.glenwood.glaceemr.server.application.repositories" />
+	<context:component-scan
+		base-package="com.glenwood.glaceemr.server.application.controllers" />
+	<context:component-scan
+		base-package="com.glenwood.glaceemr.server.application.services" />
+	<jpa:repositories
+		base-package="com.glenwood.glaceemr.server.application.repositories" />
 
-	 <mvc:annotation-driven>
-        <mvc:message-converters>
-            <!-- Use the HibernateAware mapper instead of the default -->
-            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-                <property name="objectMapper">
-                    <bean class="com.glenwood.glaceemr.server.utils.HibernateAwareObjectMapper" />
-                </property>
-            </bean>
-        </mvc:message-converters>
-    </mvc:annotation-driven>
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<!-- Use the HibernateAware mapper instead of the default -->
+			<bean
+				class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="objectMapper">
+					<bean
+						class="com.glenwood.glaceemr.server.utils.HibernateAwareObjectMapper" />
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
 
 	<!-- <bean id="jdbcEmployeeDAO" class="com.glenwood.glaceemr.server.application.model.dao.JDBCEmployeeDAOImpl"> 
 		</bean> -->
@@ -48,49 +52,48 @@
 		</property>
 	</bean>
 
-	<bean id="abstractDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" 
-	    p:driverClassName="${jdbc.driverClassName}" 
-	    p:username="${jdbc.username}" p:password="${jdbc.password}" >
+	<bean id="abstractDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close" p:driverClassName="${jdbc.driverClassName}"
+		p:username="${jdbc.username}" p:password="${jdbc.password}">
 
-			 <property name="initialSize" value="0" />
-			
-			<property name="maxIdle" value="1" />
-			
-			<property name="minIdle" value="0" />
-			
-			<property name="validationQuery" value="SELECT 1" />
-			
-			<property name="testOnBorrow" value="true" />
-			
-			<property name="testWhileIdle" value="true" />
-			
-			<property name="timeBetweenEvictionRunsMillis" value="180000" />
-			
-			<property name="numTestsPerEvictionRun" value="100" />
-			
-			<property name="minEvictableIdleTimeMillis" value="120000" />
-			
-			<property name="removeAbandonedTimeout" value="60" />
-			
-			<property name="logAbandoned" value="true" />
-			
-			<property name="maxActive" value="30" />
-			
-			<property name="maxWait" value="3000" />
-			
-			<property name="removeAbandoned" value="true" />
-</bean>
+		<property name="initialSize" value="0" />
+
+		<property name="maxIdle" value="1" />
+
+		<property name="minIdle" value="0" />
+
+		<property name="validationQuery" value="SELECT 1" />
+
+		<property name="testOnBorrow" value="true" />
+
+		<property name="testWhileIdle" value="true" />
+
+		<property name="timeBetweenEvictionRunsMillis" value="180000" />
+
+		<property name="numTestsPerEvictionRun" value="100" />
+
+		<property name="minEvictableIdleTimeMillis" value="120000" />
+
+		<property name="removeAbandonedTimeout" value="60" />
+
+		<property name="logAbandoned" value="true" />
+
+		<property name="maxActive" value="30" />
+
+		<property name="maxWait" value="3000" />
+
+		<property name="removeAbandoned" value="true" />
+	</bean>
 
 	<bean id="concreteDataSourceOne" parent="abstractDataSource"
 		p:url="${jdbc.databaseurlOne}" />
-
 	<bean id="concreteDataSourceTwo" parent="abstractDataSource"
 		p:url="${jdbc.databaseurlTwo}" />
-		<bean id="concreteDataSourceDev" parent="abstractDataSource"
+	<bean id="concreteDataSourceDev" parent="abstractDataSource"
 		p:url="${jdbc.databaseurlDev}" />
-		<bean id="concreteDataSourceGlace" parent="abstractDataSource"
+	<bean id="concreteDataSourceGlace" parent="abstractDataSource"
 		p:url="${jdbc.databaseurlGlace}" />
-		
+
 
 	<bean id="dataSource"
 		class="com.glenwood.glaceemr.server.datasource.TennantAwareDataSource">
@@ -103,16 +106,17 @@
 			</map>
 
 		</property>
-		<property name="defaultTargetDataSource" ref="concreteDataSourceOne" />
+		<property name="defaultTargetDataSource" ref="concreteDataSourceGlace" />
 	</bean>
 
-<bean id="objectmapper" class="com.fasterxml.jackson.databind.ObjectMapper"></bean>
+	<bean id="objectmapper" class="com.fasterxml.jackson.databind.ObjectMapper"></bean>
 
 	<bean id="EntityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
 		p:persistenceUnitName="PersistenceUnit" p:dataSource-ref="dataSource">
-		 <!-- THIS IS WHERE THE MODELS ARE -->
-		<property name="packagesToScan" value="com.glenwood.glaceemr.server.application.models" />
+		<!-- THIS IS WHERE THE MODELS ARE -->
+		<property name="packagesToScan"
+			value="com.glenwood.glaceemr.server.application.models" />
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
 				p:showSql="${hibernate.show_sql}" p:generateDdl="false"
@@ -120,19 +124,16 @@
 		</property>
 	</bean>
 
-<!-- Ecache related stuff -->
-<!-- <cache:annotation-driven />
-<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" 
-                p:cache-manager-ref="ehcache"/>
-<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
-                p:config-location="classpath:ehcache.xml" p:shared="true"/>  -->
+	<!-- Ecache related stuff -->
+	<!-- <cache:annotation-driven /> <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" 
+		p:cache-manager-ref="ehcache"/> <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" 
+		p:config-location="classpath:ehcache.xml" p:shared="true"/> -->
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="EntityManagerFactory" />
 	</bean>
 	<tx:annotation-driven />
-<bean id="sessionMap"
-		class="com.glenwood.glaceemr.server.utils.SessionMap"
+	<bean id="sessionMap" class="com.glenwood.glaceemr.server.utils.SessionMap"
 		scope="session">
 
 		<!-- this next element effects the proxying of the surrounding bean -->
@@ -140,15 +141,18 @@
 	</bean>
 
 	<!-- Configuration Bean -->
-	
+
 	<mvc:default-servlet-handler />
 	<mvc:interceptors>
-		<bean
-			class="com.glenwood.glaceemr.server.utils.EMRRequestInterceptor" />
+		<bean class="com.glenwood.glaceemr.server.utils.EMRRequestInterceptor" />
 	</mvc:interceptors>
 	<!-- Swagger -->
-	<context:property-placeholder location="classpath:/swagger.properties"/>
-     <bean id="springSwaggerConfig" class="com.mangofactory.swagger.configuration.SpringSwaggerConfig" />
-	
+	<context:property-placeholder location="classpath:/swagger.properties" />
+	<bean id="springSwaggerConfig"
+		class="com.mangofactory.swagger.configuration.SpringSwaggerConfig" />
+	<!-- File Upload -->	
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+
 
 </beans>

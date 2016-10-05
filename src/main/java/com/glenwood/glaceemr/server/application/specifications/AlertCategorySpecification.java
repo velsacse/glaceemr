@@ -93,4 +93,23 @@ public class AlertCategorySpecification {
 			}
 		};
 	}
+	
+	/**
+	 * Method to get alert category by alert name
+	 * @param categoryName
+	 * @return
+	 */
+	public static Specification<AlertCategory> getAlertCategoryByName(final String alertCategory) {
+		return new Specification<AlertCategory>() {
+
+			@Override
+			public Predicate toPredicate(Root<AlertCategory> root,
+					CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				
+				Predicate categoryPredicate = cb.equal(cb.upper(root.get(AlertCategory_.alertCategoryDisplayName)),alertCategory.toUpperCase());
+				
+				return categoryPredicate;
+			}
+		};
+	}
 }

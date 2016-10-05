@@ -6,6 +6,11 @@ import java.util.Map;
 import org.json.JSONException; 
 
 import com.glenwood.glaceemr.server.application.models.DrugSchedule;
+import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.PharmacyFilterBean;
+import com.glenwood.glaceemr.server.application.models.PortalRefillRequestBean;
+import com.glenwood.glaceemr.server.application.models.Prescription;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
  
 /**
@@ -105,4 +110,35 @@ public interface PrescriptionService {
 	 * To get the medication administration plan shortcuts
 	 */
 	List getMedAdminPlanShortcuts();
+	
+	/**
+	 * To get the list of filtered pharmacies
+	 * @param PharmacyFilterBean
+	 * @return the list of list of filtered pharmacies
+	 */
+	PharmacyFilterBean getPharmacyList(PharmacyFilterBean pharmacyFilterBean);
+	
+	/**
+	 * To get the list of filtered pharmacies
+	 * @param PharmacyFilterBean
+	 * @return the refill request status
+	 */
+	EMRResponseBean requestRefill(PortalRefillRequestBean portalRefillRequestBean);
+
+	
+	/**
+	 * To get the list of patient's completed medications which are eligible for refill request
+	 * @param patientId
+	 * @param chartId
+	 * @return list of Prescriptions
+	 */
+	List<Prescription> getPatientRefillRequestMedications(int patientId, int chartId);
+	
+	/**
+	 * To get the patient Refill Request history
+	 * @param patientId
+	 * @param chartId
+	 * @return list of refill requests
+	 */
+	List<Encounter> getPatientRefillRequestHistory(int patientId, int chartId);
 }

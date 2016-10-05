@@ -20,7 +20,7 @@ import com.wordnik.swagger.annotations.Api;
 
 @Api(value = "ProblemList", description = "Contains all the operations related to problem list", consumes="application/json")
 @RestController
-@RequestMapping(value="ProblemList")
+@RequestMapping(value="/user/ProblemList")
 public class ProblemListController {
 
 	

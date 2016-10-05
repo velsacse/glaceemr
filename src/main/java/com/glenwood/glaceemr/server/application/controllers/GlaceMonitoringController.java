@@ -16,7 +16,7 @@ import com.glenwood.glaceemr.server.utils.GlaceMonitoringParameters;
  *
  */
 @RestController
-@RequestMapping(value="monitor")
+@RequestMapping(value="/user/monitor")
 
 public class GlaceMonitoringController {
 	@Autowired

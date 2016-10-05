@@ -124,10 +124,33 @@ public class DataBaseAccessFilter implements Filter {
 			}
 		}
 
-		String tennantId = HUtil.Nz(request.getParameter("dbname"),"-1");
+		String tennantId="-1";
+		
+		HttpServletRequest httpRequest = (HttpServletRequest) request;
+		
+		tennantId=HUtil.Nz(httpRequest.getHeader("TENNANTDB"),"-1");
+		
+		if(tennantId.equalsIgnoreCase("-1"))
+			tennantId=HUtil.Nz(request.getParameter("dbname"),"-1");
+
 		if(tennantId != "-1"){
-			TennantContextHolder.setTennantId(tennantId.trim().toLowerCase());
+			TennantContextHolder.setTennantId(tennantId);
 		}
+		
+		if(multiReadRequest.getRequestURI().contains("portal_login_security_check")){
+			System.out.println("***request is from portal***"+TennantContextHolder.getTennantId());
+			chain.doFilter(request, response);
+			return;
+		}
+		
+		String params[] = multiReadRequest.getRequestURI().split("api/");
+		String[] portalParams = params[0].split("/portal/");
+		if(portalParams.length>1){
+			System.out.println("***request is from portal***"+TennantContextHolder.getTennantId());
+			chain.doFilter(request, response);
+			return;
+		}
+			
 
 		while(headerNames.hasMoreElements()){
 			String header = headerNames.nextElement();
@@ -135,7 +158,6 @@ public class DataBaseAccessFilter implements Filter {
 				String basecut[]=httpRequest.getHeader(header).split("Basic");
 				byte[] valueDecoded= Base64.decodeBase64(basecut[1].getBytes() );
 				password=new String(valueDecoded).split(":")[1];
-
 			}*/
 
 			if(header.trim().equalsIgnoreCase("Database")){
@@ -147,17 +169,16 @@ public class DataBaseAccessFilter implements Filter {
 			}
 		}
 		//		HttpServletRequest httpReq = (HttpServletRequest) request;
-
 		//		System.out.println("request URI--->"+httpReq.getRequestURI());
 		//		System.out.println("request url--->"+httpReq.getRequestURL());
-		String params[] = multiReadRequest.getRequestURI().split("api/");
+		
 		String[] dbParams = params[0].split("/glaceemr_backend/");
 		if(dbParams.length>1){
 			String db[] = dbParams[1].split("/");
 			if(db[0]!= null){
 				System.out.println("***request is from GWT***"+db[0]);
 				TennantContextHolder.setTennantId(db[0].trim().toLowerCase());
-				request.getServletContext().getRequestDispatcher("/api/"+params[1]).forward(multiReadRequest, response);
+				request.getServletContext().getRequestDispatcher("/api/emr/user"+params[1]).forward(multiReadRequest, response);
 			}
 		}else{
 			System.out.println("***request is from legacy***"+TennantContextHolder.getTennantId());

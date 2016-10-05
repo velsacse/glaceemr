@@ -50,7 +50,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "InvestigationController", description = "Contains the methods to get and save the order details.", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value = "/Investigation")
+@RequestMapping(value = "/user/Investigation")
 public class InvestigationSummaryController {
 
 	@Autowired

@@ -23,7 +23,7 @@ import com.wordnik.swagger.annotations.Api;
  * @author Manikandan
  *
  */
-@Api(value = "/Scheduler", description = "To get the appointments based on date and resource.", consumes="application/json")
+@Api(value = "/user/Scheduler", description = "To get the appointments based on date and resource.", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="Scheduler")

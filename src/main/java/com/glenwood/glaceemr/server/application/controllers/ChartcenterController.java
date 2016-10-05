@@ -19,7 +19,7 @@ import com.wordnik.swagger.annotations.Api;
 
 @Api(value = "PatientLookup", description = "gets list of active patients", consumes="application/json")
 @RestController
-@RequestMapping(value="PatientSearch.Action")
+@RequestMapping(value="/user/PatientSearch.Action")
 public class ChartcenterController {
 
 	@Autowired(required=true)

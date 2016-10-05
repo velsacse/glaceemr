@@ -23,7 +23,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
  
 @Api(value = "GenericFooterConfiguration", description = "Generic Footer", consumes="application/json")
 @RestController
-@RequestMapping(value="/LetterFooter.Action")
+@RequestMapping(value="/user/LetterFooter.Action")
 public class GenericFooterController {
 	
 	@Autowired

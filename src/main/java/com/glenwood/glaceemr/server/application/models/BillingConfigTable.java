@@ -24,6 +24,9 @@ public class BillingConfigTable {
 
 	@Column(name="billing_config_table_mapping_desc")
 	private String billingConfigTableMappingDesc;
+	
+	@Column(name="billing_config_table_is_active")
+	private Boolean billingConfigTableIsActive;
 
 	public Integer getBillingConfigTableId() {
 		return billingConfigTableId;
@@ -65,6 +68,13 @@ public class BillingConfigTable {
 			String billingConfigTableMappingDesc) {
 		this.billingConfigTableMappingDesc = billingConfigTableMappingDesc;
 	}
-	
+
+	public Boolean getBillingConfigTableIsActive() {
+		return billingConfigTableIsActive;
+	}
+
+	public void setBillingConfigTableIsActive(Boolean billingConfigTableIsActive) {
+		this.billingConfigTableIsActive = billingConfigTableIsActive;
+	}
 	
 }

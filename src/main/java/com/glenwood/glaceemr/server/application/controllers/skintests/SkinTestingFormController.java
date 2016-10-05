@@ -42,7 +42,7 @@ import com.wordnik.swagger.annotations.Api;
  */
 @Api(value = "Skin Testing Forms", description = "contains the methods to create/edit/get the skin testing sheets (Shortcuts) and to perform the skin tests on patients", consumes="application/json")
 @RestController
-@RequestMapping(value = "/SkinTestingForms.Action")
+@RequestMapping(value = "/user/SkinTestingForms.Action")
 public class SkinTestingFormController {
 	
 	/*@Autowired

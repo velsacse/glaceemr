@@ -25,7 +25,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "OverrideAlerts", description = "Contains the methods to override the element details.", consumes="application/json")
 @RestController
-@RequestMapping(value="OverrideAlerts")
+@RequestMapping(value="/user/OverrideAlerts")
 public class OverrideAlertsController {
 	
 	@Autowired(required=true)

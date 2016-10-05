@@ -32,7 +32,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value="/Documents",description="To deal with category details",consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="Documents")
+@RequestMapping(value="/user/Documents")
 public class DocumentsController {
 
 	@Autowired

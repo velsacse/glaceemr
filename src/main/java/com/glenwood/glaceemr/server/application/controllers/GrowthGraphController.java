@@ -33,7 +33,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "GrowthGraph", description = "To get list of vital for a patient and details about patient", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="GrowthGraph")
+@RequestMapping(value="/user/GrowthGraph")
 public class GrowthGraphController {
 
 	@Autowired

@@ -28,7 +28,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "HospitalSuperbill", description = "To get the list of admitted patients and updations", consumes="application/json")
 @RestController
-@RequestMapping(value="HospitalSuperbill")
+@RequestMapping(value="/user/HospitalSuperbill")
 public class HospitalSuperBillController {
 	
 	@Autowired

@@ -34,7 +34,7 @@ import com.wordnik.swagger.annotations.Api;
 @Api(value = "Group Therapy", description = "contains the methods of Group Therapy", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value = "/GroupTherapy.Action")
+@RequestMapping(value = "/user/GroupTherapy.Action")
 
 public class GroupTherapyController {
 	@Autowired

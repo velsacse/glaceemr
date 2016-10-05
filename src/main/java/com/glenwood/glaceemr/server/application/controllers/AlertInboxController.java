@@ -53,7 +53,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "AlertInbox", description = "To get list of alerts and update the alerts", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="AlertInbox.Action")
+@RequestMapping(value="/user/AlertInbox.Action")
 public class AlertInboxController {
 
 	@Autowired

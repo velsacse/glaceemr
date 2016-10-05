@@ -18,7 +18,7 @@ import com.wordnik.swagger.annotations.Api;
 @Api(value = "ROS", description = "ROS Data", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="/ROSElements")
+@RequestMapping(value="/user/ROSElements")
 public class ROSController {
 	
 	

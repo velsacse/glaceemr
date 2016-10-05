@@ -200,11 +200,13 @@ public class Encounter implements Serializable {
 		this.empProfileEmpId = empProfileEmpId;
 	}
 
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="encounter_service_doctor",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
 	EmployeeProfile empProfileEmpId;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="encounter_created_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
@@ -662,6 +664,7 @@ public class Encounter implements Serializable {
 	@OneToMany(mappedBy="encounter",fetch=FetchType.LAZY)
 	List<PatientClinicalElements> patientClinicalElements;
 
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="encounter_service_doctor", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
 	@JsonManagedReference

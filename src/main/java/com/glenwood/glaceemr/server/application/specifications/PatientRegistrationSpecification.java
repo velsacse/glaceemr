@@ -3,13 +3,18 @@ package com.glenwood.glaceemr.server.application.specifications;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Fetch;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.H809;
+import com.glenwood.glaceemr.server.application.models.H809_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 
@@ -106,6 +111,34 @@ public class PatientRegistrationSpecification {
 		};
 	}
 	
+	
+	/**
+	 * @param username	: used to get patient details of a patient of that username.
+	 * @return list of patient details.
+	 */	
+	public static Specification<H809> getPatientDetailsByUsername(final String username) {
+
+		   return new Specification<H809>() {
+
+			@Override
+			public Predicate toPredicate(Root<H809> root,
+					CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				
+				Join<H809, Chart> h809PatRegJoin=root.join(H809_.chartH809Table,JoinType.INNER);
+				Join<Chart, PatientRegistration> patRegChartJoin=h809PatRegJoin.join(Chart_.patientRegistrationTable,JoinType.INNER);
+				
+			    Predicate personalDetailsPredicate=cb.equal(cb.upper(root.get(H809_.h809004)),username.toUpperCase());
+				
+			    root.fetch(H809_.chartH809Table,JoinType.INNER).fetch(Chart_.patientRegistrationTable);
+			    
+			    cq.where(cb.and(personalDetailsPredicate));
+				return cq.getRestriction();
+			}
+			   
+		};
+	   
+	}
+	
 	/**
 	 * @param patientId	: used to get patient details of a patient of that particular id
 	 * @return BooleanExpression is a  predicate  
@@ -114,17 +147,21 @@ public class PatientRegistrationSpecification {
    {
 	   return new Specification<PatientRegistration>() {
 
-		   @Override
-		   public Predicate toPredicate(Root<PatientRegistration> root,
-				   CriteriaQuery<?> cq, CriteriaBuilder cb) {
-
-			   Predicate personalDetailsPredicate=cb.equal(root.get(PatientRegistration_.patientRegistrationId),patientId);
-			   cq.where(cb.and(personalDetailsPredicate));
-			   return cq.getRestriction();
-		   }
-
-	   };
+		@Override
+		public Predicate toPredicate(Root<PatientRegistration> root,
+				CriteriaQuery<?> cq, CriteriaBuilder cb) {
+			
+			root.fetch(PatientRegistration_.guaranatorDetails, JoinType.LEFT);
+		    Predicate personalDetailsPredicate=cb.equal(root.get(PatientRegistration_.patientRegistrationId),patientId);
+			
+		    cq.where(cb.and(personalDetailsPredicate));
+			return cq.getRestriction();
+		}
+		   
+	};
    }
+	
+	
 
 
    public static Specification<PatientRegistration> byPatientId(final int patientId)

@@ -24,7 +24,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "/WorkflowAlert.Action", description = "To get list of WorkFlowAlert and also to create,update and delete the WorkFlowAlerts", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="WorkflowAlert.Action")
+@RequestMapping(value="/user/WorkflowAlert.Action")
 public class WorkflowAlertController {
 	
 	@Autowired

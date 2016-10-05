@@ -24,7 +24,7 @@ import com.glenwood.glaceemr.server.application.services.patient.PatientService;
 
 @RestController
 @Transactional
-@RequestMapping(value = "/PatientController.Action")
+@RequestMapping(value = "/user/PatientController.Action")
 public class TestPatientController {
 
 

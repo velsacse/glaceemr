@@ -8,53 +8,120 @@
       http://www.springframework.org/schema/beans 
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-	<!-- Rest authentication entry point configuration -->
-	<http use-expressions="true"  create-session="stateless" entry-point-ref="customAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
-		<intercept-url pattern="/api/api-docs**" access="permitAll" />
-	<intercept-url pattern="/api/api-docs/**" access="permitAll" />
-		<intercept-url pattern="/api/**" access="isAuthenticated()" />
-			<sec:form-login authentication-success-handler-ref="mySuccessHandler" />
-			<sec:access-denied-handler ref="accessDeniedHandler" />
-		 <http-basic />
+	<!--***************************** Rest authentication entry point configuration for glaceemr *****************************-->
+	<http use-expressions="true" create-session="stateless"
+		entry-point-ref="customAuthenticationEntryPoint"
+		authentication-manager-ref="authenticationManager" pattern="/api/emr/**">
+		<intercept-url pattern="/api/emr/api-docs**" access="permitAll" />
+		<intercept-url pattern="/api/emr/api-docs/**" access="permitAll" />
+		<intercept-url pattern="/api/emr/user/**" access="isAuthenticated()" />
+		<sec:form-login authentication-success-handler-ref="mySuccessHandler" />
+		<sec:access-denied-handler ref="accessDeniedHandler" />
+		<http-basic />
 	</http>
 
 
 	<!-- Entry point for REST service. -->
-	<beans:bean id="customAuthenticationEntryPoint"
-		class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationEntryPoint">
+	<beans:bean id="customAuthenticationEntryPoint" class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationEntryPoint">
 	</beans:bean>
-	
+
 	<!-- Custom User details service which is provide the user data -->
-	<beans:bean id="customUserDetailsService"
-			class="com.glenwood.glaceemr.server.application.Bean.CustomUserDetailsService" />
+	<beans:bean id="customUserDetailsService" class="com.glenwood.glaceemr.server.application.Bean.CustomUserDetailsService" />
 
 	<!-- Connect the custom authentication success handler -->
-	<beans:bean id="mySuccessHandler"
-			class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationSuccessHandler" />
+	<beans:bean id="mySuccessHandler" class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationSuccessHandler" />
 
 	<!-- Using Authentication Access Denied handler -->
-	<beans:bean id="accessDeniedHandler"
-		class="com.glenwood.glaceemr.server.application.Bean.CustomAccessDeniedHandler">
+	<beans:bean id="accessDeniedHandler" class="com.glenwood.glaceemr.server.application.Bean.CustomAccessDeniedHandler">
 		<beans:property name="errorPage" value="/api/login/accessDenied" />
 	</beans:bean>
-	
+
 	<!-- Authentication manager -->
-	<!-- <authentication-manager alias="authenticationManager">
-			<authentication-provider user-service-ref="customUserDetailsService">
-			</authentication-provider>
-		</authentication-manager> -->
-	
-<authentication-manager alias="authenticationManager">
-			 <authentication-provider ref="customAuthenticationProvider" />
-		</authentication-manager> 
+	<!-- <authentication-manager alias="authenticationManager"> <authentication-provider 
+		user-service-ref="customUserDetailsService"> </authentication-provider> </authentication-manager> -->
+
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider ref="customAuthenticationProvider" />
+	</authentication-manager>
 	<!-- Enable the annotations for defining the secure role -->
 	<global-method-security secured-annotations="enabled" />
-	
-	
-	<beans:bean id="customAuthenticationProvider" class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationProvider">
 
-    <beans:property name="userDetailsService" ref="customUserDetailsService" />
-</beans:bean>
+
+	<beans:bean id="customAuthenticationProvider"
+		class="com.glenwood.glaceemr.server.application.Bean.CustomAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="customUserDetailsService" />
+	</beans:bean>
+	
+	<!--***************************** Rest authentication entry point configuration for glaceportal *****************************-->
+	<http access-decision-manager-ref="accessDecisionManager" authentication-manager-ref="portalAuthenticationManager"
+		use-expressions="true" entry-point-ref="portalAuthenticationEntryPoint" pattern="/api/portal/**">
+		<access-denied-handler ref="portalAccessDeniedHandler" />
+
+		<intercept-url pattern="/api/portal/api-docs**" access="permitAll" />
+		<intercept-url pattern="/api/portal/api-docs/**" access="permitAll" />
+        <intercept-url pattern="/api/portal/login/**" access="permitAll" />
+		<intercept-url pattern="/api/portal/user/**" access="isAuthenticated()" />
+		
+
+		<form-login login-processing-url="/api/portal/login/portal_login_security_check" 
+		    username-parameter="username"
+			password-parameter="password"
+			authentication-success-handler-ref="portalAuthenticationSuccessHandler"
+			authentication-failure-handler-ref="portalAuthenticationFailureHandler" />
+		<logout logout-url="/PortalLogout" logout-success-url="/api/portal/login/PortalLoginAndLogout/LoggedOut" delete-cookies="JSESSIONID" />
+		
+		<!-- <session-management invalid-session-url="/PortalLogout.jsp">
+        <concurrency-control expired-url="/PortalLogout.jsp"/>
+        </session-management> -->
+		<!-- <http-basic /> -->
+		
+	</http>
+	
+	<!-- Connect the custom authentication success handler -->
+	<beans:bean id="portalAuthenticationSuccessHandler" class="com.glenwood.glaceemr.server.application.authentication.portal.PortalAuthenticationSuccessHandler" />
+	<beans:bean id="portalAuthenticationFailureHandler" class="com.glenwood.glaceemr.server.application.authentication.portal.PortalAuthenticationFailureHandler" />
+	<!-- Using Authentication Access Denied handler -->
+	<beans:bean id="portalAccessDeniedHandler" class="com.glenwood.glaceemr.server.application.authentication.portal.PortalAccessDeniedHandler">
+		<beans:property name="errorPage" value="/api/portal/login/accessDenied" />
+	</beans:bean>
+
+	<beans:bean id="portalLogoutSuccessHandler" class="com.glenwood.glaceemr.server.application.authentication.portal.PortalLogoutSuccessHandler">
+	</beans:bean>
+
+	<beans:bean id="portalAuthenticationProvider" class="com.glenwood.glaceemr.server.application.authentication.portal.PortalAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="portalUserDetailsService" />
+	</beans:bean>
+
+	<!-- Entry point for REST service. -->
+	<beans:bean id="portalAuthenticationEntryPoint" class="com.glenwood.glaceemr.server.application.authentication.portal.PortalAuthenticationEntryPoint">
+	</beans:bean>
+
+	<!-- Custom User details service which is provide the user data -->
+	<beans:bean id="portalUserDetailsService" class="com.glenwood.glaceemr.server.application.authentication.portal.PortalUserDetailsService" />
+	
+	<authentication-manager id="portalAuthenticationManager">
+		<authentication-provider user-service-ref="portalUserDetailsService">
+		</authentication-provider>
+	</authentication-manager>
+	
+
+
+	<!--***************************** Authentication Managers and Access Decision Managers *****************************-->
+	<beans:bean id="accessDecisionManager"
+		class="org.springframework.security.access.vote.AffirmativeBased">
+		<beans:property name="decisionVoters">
+			<beans:list>
+				<beans:bean
+					class="org.springframework.security.web.access.expression.WebExpressionVoter" />
+				<beans:bean class="org.springframework.security.access.vote.RoleVoter">
+					<beans:property name="rolePrefix" value="" />
+				</beans:bean>
+				<beans:bean
+					class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+	
 
 
 </beans:beans>

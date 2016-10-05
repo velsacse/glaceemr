@@ -16,6 +16,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -132,6 +135,7 @@ public class H496 implements Serializable {
 	@Column(name="h496_retries_note")
 	private String h496RetriesNote;
 
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name = "h496001", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
@@ -147,16 +151,19 @@ public class H496 implements Serializable {
 	@JoinColumn(name = "h496008", referencedColumnName = "statusid", insertable = false, updatable = false)
 	private FaxStatus faxStatus;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name = "h496012", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
 	private EmployeeProfile chart_users_1;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name = "h496013", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
 	private EmployeeProfile chart_users_2;
 
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name = "h496019", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)

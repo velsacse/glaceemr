@@ -37,7 +37,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "LabResultsController", description = "Contains the methods to get and save the results details.", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value = "/LabResults")
+@RequestMapping(value = "/user/LabResults")
 public class LabResultsController {
 	
 	@Autowired

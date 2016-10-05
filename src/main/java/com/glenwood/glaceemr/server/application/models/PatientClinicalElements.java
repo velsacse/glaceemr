@@ -63,6 +63,12 @@ public class PatientClinicalElements {
 	@JoinColumn(name="patient_clinical_elements_gwid",referencedColumnName="pe_element_gwid",insertable = false, updatable = false)
 	private PeElement peElement;
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JsonManagedReference
+	@JoinColumn(name="patient_clinical_elements_gwid", referencedColumnName="plan_instruction_gwid", insertable=false, updatable=false)
+	private PlanInstruction planInstruction;
+	
 /*	@ManyToOne(fetch=FetchType.LAZY,optional=false)
 	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="patient_clinical_elements_gwid",referencedColumnName="history_element_gwid",insertable = false, updatable = false)
@@ -206,4 +212,29 @@ public class PatientClinicalElements {
 	public void setEncounter(Encounter encounter) {
 		this.encounter = encounter;
 	}
+
+	public PeElementDetailOption getPeElementDetailOption() {
+		return peElementDetailOption;
+	}
+
+	public void setPeElementDetailOption(PeElementDetailOption peElementDetailOption) {
+		this.peElementDetailOption = peElementDetailOption;
+	}
+
+	public PeElement getPeElement() {
+		return peElement;
+	}
+
+	public void setPeElement(PeElement peElement) {
+		this.peElement = peElement;
+	}
+
+	public PlanInstruction getPlanInstruction() {
+		return planInstruction;
+	}
+
+	public void setPlanInstruction(PlanInstruction planInstruction) {
+		this.planInstruction = planInstruction;
+	}
+	
 }

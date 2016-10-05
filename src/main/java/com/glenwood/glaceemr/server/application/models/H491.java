@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,6 +13,10 @@ import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
+
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -106,11 +111,13 @@ public class H491 implements Serializable {
 	@JoinColumn(name = "h491013", referencedColumnName = "statusid", insertable = false, updatable = false)
 	private InFaxStatus faxStatus;
 
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name = "h491014", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
 	private EmployeeProfile  emplopyeeProfile;
 
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name = "h491015", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)

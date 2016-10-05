@@ -19,7 +19,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "Phone messages", description = "API for phone messages encounter", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="PhoneMessages")
+@RequestMapping(value="/user/PhoneMessages")
 public class PhoneMessagesController {
 	
 	@Autowired

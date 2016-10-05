@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.sql.Date;
 
@@ -20,7 +21,7 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "sch_appt_parameter")
-public class SchedulerAppointmentParameter {
+public class SchedulerAppointmentParameter implements Serializable{
 
 	@Id
 	@Column(name="sch_appt_parameter_id")

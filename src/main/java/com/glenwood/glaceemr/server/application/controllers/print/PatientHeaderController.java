@@ -23,7 +23,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "PatientHeaderConfiguration", description = "Patient Header", consumes="application/json")
 @RestController
-@RequestMapping(value="/GenericPatientHeader.Action")
+@RequestMapping(value="/user/GenericPatientHeader.Action")
 public class PatientHeaderController {
 	
 	@Autowired

@@ -31,7 +31,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Api(value = "Flowsheet", description = "Contains the methods to get and save the details of flowsheet.", consumes="application/json")
 @RestController
-@RequestMapping(value="Flowsheet")
+@RequestMapping(value="/user/Flowsheet")
 public class FlowsheetController {
 	
 	@Autowired(required=true)

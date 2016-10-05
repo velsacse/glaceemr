@@ -26,7 +26,7 @@ import com.wordnik.swagger.annotations.Api;
 @Api(value = "Fax", description = "Fax", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="/Fax")
+@RequestMapping(value="/user/Fax")
 public class FaxController {
 
 	@Autowired

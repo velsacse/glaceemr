@@ -17,7 +17,7 @@ import com.wordnik.swagger.annotations.Api;
 
 @Api(value = "Examination", description = "Examination Data", consumes="application/json")
 @RestController
-@RequestMapping(value="/ExaminationElements.Action")
+@RequestMapping(value="/user/ExaminationElements.Action")
 public class ExaminationController {
 
 

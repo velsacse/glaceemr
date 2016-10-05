@@ -3,6 +3,7 @@ package com.glenwood.glaceemr.server.application.models;
 import java.sql.Timestamp;
 import java.sql.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -126,6 +127,11 @@ public class SchedulerAppointment {
 	@JsonManagedReference
 	@JoinColumn(name="sch_appt_type",referencedColumnName="h113003",insertable=false,updatable=false)
 	H113 h113ApptType;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="sch_appt_reason",referencedColumnName="h113003",insertable=false,updatable=false)
+	H113 h113ApptReason;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -147,6 +153,11 @@ public class SchedulerAppointment {
 	@JoinColumn(name="sch_appt_patient_id",referencedColumnName="workflow_patientid",insertable=false,updatable=false)
 	Workflow workflowPatientId;
 	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="sch_appt_resource", referencedColumnName="sch_resource_id", insertable=false, updatable=false)
+	@JsonManagedReference
+	SchedulerResource schResProvider;
+
 	public Integer getSchApptId() {
 		return schApptId;
 	}
@@ -378,4 +389,77 @@ public class SchedulerAppointment {
 	public void setH101028(Integer h101028) {
 		this.h101028 = h101028;
 	}
+
+	public PatientRegistration getPatRegPatientId() {
+		return patRegPatientId;
+	}
+
+	public void setPatRegPatientId(PatientRegistration patRegPatientId) {
+		this.patRegPatientId = patRegPatientId;
+	}
+
+	public H113 getH113ApptStatus() {
+		return h113ApptStatus;
+	}
+
+	public void setH113ApptStatus(H113 h113ApptStatus) {
+		this.h113ApptStatus = h113ApptStatus;
+	}
+
+	public H113 getH113ApptType() {
+		return h113ApptType;
+	}
+
+	public void setH113ApptType(H113 h113ApptType) {
+		this.h113ApptType = h113ApptType;
+	}
+
+	public H113 getH113ApptReason() {
+		return h113ApptReason;
+	}
+
+	public void setH113ApptReason(H113 h113ApptReason) {
+		this.h113ApptReason = h113ApptReason;
+	}
+
+	public SchedulerAppointmentParameter getSchApptParam() {
+		return schApptParam;
+	}
+
+	public void setSchApptParam(SchedulerAppointmentParameter schApptParam) {
+		this.schApptParam = schApptParam;
+	}
+
+	public SchedulerResource getSchResLoc() {
+		return schResLoc;
+	}
+
+	public void setSchResLoc(SchedulerResource schResLoc) {
+		this.schResLoc = schResLoc;
+	}
+
+	public H076 getSchRefDrId() {
+		return schRefDrId;
+	}
+
+	public void setSchRefDrId(H076 schRefDrId) {
+		this.schRefDrId = schRefDrId;
+	}
+
+	public Workflow getWorkflowPatientId() {
+		return workflowPatientId;
+	}
+
+	public void setWorkflowPatientId(Workflow workflowPatientId) {
+		this.workflowPatientId = workflowPatientId;
+	}
+
+	public SchedulerResource getSchResProvider() {
+		return schResProvider;
+	}
+
+	public void setSchResProvider(SchedulerResource schResProvider) {
+		this.schResProvider = schResProvider;
+	}
+	
 }
