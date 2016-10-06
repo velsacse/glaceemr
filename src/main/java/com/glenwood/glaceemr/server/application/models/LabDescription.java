@@ -13,6 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -254,6 +257,7 @@ public class LabDescription implements Serializable {
 	@JsonManagedReference
 	List<VaccineReport> vaccineReportTable;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="lab_description_testid", referencedColumnName="lab_freqorder_testid" , insertable=false, updatable=false)
