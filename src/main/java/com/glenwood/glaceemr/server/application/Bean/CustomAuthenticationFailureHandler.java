@@ -22,7 +22,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 /*			request_origin_URL = request.getParameter("request_origin_url");
 			Assert.notNull(request_origin_URL, "request origin url is empty");
 			response.sendRedirect(request_origin_URL+"/loginGWT.html?errorString=Login Failed");
-*/            RequestDispatcher dispatcher = request.getRequestDispatcher("/api/login/loginFailed");
+*/            RequestDispatcher dispatcher = request.getRequestDispatcher("/api/emr/login/loginFailed");
             dispatcher.forward(request, response);
 
 		} catch (Exception e) {

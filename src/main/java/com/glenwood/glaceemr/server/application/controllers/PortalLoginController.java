@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 
@@ -31,6 +33,20 @@ public class PortalLoginController {
 	ObjectMapper objectMapper;
 	
 	
+	@RequestMapping(value = "/LoggedIn",method = RequestMethod.GET)
+	public EMRResponseBean logIn() throws Exception 
+	{		
+				
+		EMRResponseBean responseBean=new EMRResponseBean();
+		responseBean.setSuccess(true);
+		responseBean.setCanUserAccess(true);
+		responseBean.setLogin(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setData("Logged In");
+		
+		return responseBean;
+	}
+	
 	@RequestMapping(value = "/LoggedOut",method = RequestMethod.GET)
 	public EMRResponseBean logOut() throws Exception 
 	{		
@@ -45,16 +61,23 @@ public class PortalLoginController {
 		return responseBean;
 	}
 	
+	@RequestMapping(value = "/LoginFailed",method = RequestMethod.GET)
+	public void loginFailure(HttpServletResponse response) throws Exception 
+	{		
+				
+		response.sendRedirect("https://portal.glaceemr.com/glaceportal_login/portal.jsp?practiceid="+TennantContextHolder.getTennantId()+"&log=0");
+	}
+	
 	@RequestMapping(value = "/SessionExpired",method = RequestMethod.GET)
 	public void redirectToLoginOnSessionExpiry(HttpServletResponse response) throws Exception 
 	{		
-			response.sendRedirect(request.getScheme()+"://"+request.getServerName()+"/glaceportal_login/login.html?log=4");	
+			response.sendRedirect("https://portal.glaceemr.com/glaceportal_login/portal.jsp?practiceid="+TennantContextHolder.getTennantId()+"&log=4");	
 	}
 	
 	@RequestMapping(value = "/InvalidSession",method = RequestMethod.GET)
 	public void redirectToLoginOnInvalidSession(HttpServletResponse response) throws Exception 
 	{		
-		response.sendRedirect(request.getScheme()+"://"+request.getServerName()+"/glaceportal_login/login.html?log=5");	
+		response.sendRedirect("https://portal.glaceemr.com/glaceportal_login/portal.jsp?practiceid="+TennantContextHolder.getTennantId()+"&log=5");	
 	}
 	
 	@RequestMapping(value = "/ValidateSession",method = RequestMethod.GET)

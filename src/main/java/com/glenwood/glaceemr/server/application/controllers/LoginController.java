@@ -23,7 +23,7 @@ import com.glenwood.glaceemr.server.utils.EMRResponseBean;
  *
  */
 @RestController
-@RequestMapping(value="/user/login")
+@RequestMapping(value="/login")
 
 public class LoginController {
 

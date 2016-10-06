@@ -31,7 +31,7 @@ public class PortalLogoutSuccessHandler implements LogoutSuccessHandler{
   
         httpServletResponse.setStatus(HttpServletResponse.SC_OK);  
         //redirect to login  
-        RequestDispatcher dispatcher = httpServletRequest.getRequestDispatcher("/api/login/loggedOut");
+        RequestDispatcher dispatcher = httpServletRequest.getRequestDispatcher("/api/portal/login/PortalLoginAndLogout/LoggedOut");
         dispatcher.forward(httpServletRequest, httpServletResponse);
 
 //        httpServletResponse.sendRedirect("/office/login/loggedOut");  
