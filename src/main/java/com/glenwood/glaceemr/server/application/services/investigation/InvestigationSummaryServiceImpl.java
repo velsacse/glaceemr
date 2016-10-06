@@ -1924,7 +1924,14 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		toDay = new String();
 		Calendar cal = new GregorianCalendar();
 		toDay = (cal.get(Calendar.MONTH)+ 1) + "/" + cal.get(Calendar.DATE) + "/" + cal.get(Calendar.YEAR);
-		fullData = URLDecoder.decode(fullDataParam,"UTF-8");
+//		fullData = URLDecoder.decode(fullDataParam,"UTF-8");
+		try {
+            fullDataParam = fullDataParam.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+            fullDataParam = fullDataParam.replaceAll("\\+", "%2B");
+            fullData = URLDecoder.decode(fullDataParam,"UTF-8");
+        } catch (Exception e) {
+            e.printStackTrace();
+}
 		defaultDoctor = Optional.fromNullable(login.getLoginUsersDefaultDoctor()).or(-1);
 		isforward=isforwardParam;
 		toId=Integer.parseInt(Optional.fromNullable(forwardto).or("-1"));
