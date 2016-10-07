@@ -24,6 +24,7 @@ public class PortalSessionBean {
 	String glaceTomcatUrl;
 	String glaceSpringContext;
 	String glaceTomcatContext;
+	String glaceSpringUrl;
 	
 	public String getUsername() {
 		return username;
@@ -156,6 +157,12 @@ public class PortalSessionBean {
 	}
 	public void setGlaceTomcatContext(String glaceTomcatContext) {
 		this.glaceTomcatContext = glaceTomcatContext;
+	}
+	public String getGlaceSpringUrl() {
+		return glaceSpringUrl;
+	}
+	public void setGlaceSpringUrl(String glaceSpringUrl) {
+		this.glaceSpringUrl = glaceSpringUrl;
 	}
 	
 }

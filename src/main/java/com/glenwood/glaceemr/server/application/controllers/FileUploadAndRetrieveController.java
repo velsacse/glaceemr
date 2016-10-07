@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.glenwood.glaceemr.server.application.models.ImageDetailsBean;
 import com.glenwood.glaceemr.server.application.services.portal.fileUploadService.FileUploadService;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.PortalDocumentsService;
 import com.glenwood.glaceemr.server.utils.HUtil;
@@ -101,7 +103,7 @@ public class FileUploadAndRetrieveController {
 			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
 			@ApiResponse(code = 500, message = "Internal server error.")})
 	@ResponseBody
-	public String retrievePatientProfilePicture(
+	public ImageDetailsBean retrievePatientProfilePicture(
 			@ApiParam(name="patientId", value="") 
 			@RequestParam(value="patientId", required=false, defaultValue="0") int patientId)
 	{ 
@@ -117,12 +119,18 @@ public class FileUploadAndRetrieveController {
 			fileInputStream.read(byteFileStore);
 			
 			String encodedFile=Base64.encodeBase64String(byteFileStore);
+			
+			ImageDetailsBean imageBean=new ImageDetailsBean();
+			
+			imageBean.setImageBase64String(encodedFile);
+			
 			System.out.println("Image retrieved successfully!");
-			return encodedFile;
+			
+			return imageBean;
 
 		}catch(Exception ex){
 			ex.printStackTrace();
-			return "Profile picture retrieval failed";
+			return null;
 		}
 	}
 	
@@ -221,9 +229,9 @@ public class FileUploadAndRetrieveController {
 		        String fileType = fileUploadAndRetrieveService.parseFileType(filePath);
 		        if(isToDownLoad.equals("true")){
 
-		            response.setContentType("application/force-download");   
+		            response.setContentType("application/pdf");   
 		            response.setHeader("Content-Transfer-Encoding", "binary");
-		            response.setHeader("Content-Disposition","attachment; filename=\"" + fileName +"\"");
+		            response.setHeader("Content-Disposition","inline; filename=\"" + fileName +"\"");
 		        }
 		        response.setContentType(fileUploadAndRetrieveService.getResponseContentType(fileType));
 		        writeToResponse(filePath,response);
@@ -271,9 +279,9 @@ public class FileUploadAndRetrieveController {
 		        String fileType = fileUploadAndRetrieveService.parseFileType(filePath);
 		        if(isToDownLoad.equals("true")){
 
-		            response.setContentType("application/force-download");   
+		            response.setContentType("application/pdf");   
 		            response.setHeader("Content-Transfer-Encoding", "binary");
-		            response.setHeader("Content-Disposition","attachment; filename=\"" + fileName +"\"");
+		            response.setHeader("Content-Disposition","inline; filename=\"" + fileName +"\"");
 		        }
 		        response.setContentType(fileUploadAndRetrieveService.getResponseContentType(fileType));
 		        writeToResponse(filePath,response);

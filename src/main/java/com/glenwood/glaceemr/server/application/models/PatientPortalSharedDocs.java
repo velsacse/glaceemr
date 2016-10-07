@@ -42,12 +42,12 @@ public class PatientPortalSharedDocs {
 	@Column(name="patient_portal_shareddocs_sharedon")
 	private Timestamp patientPortalShareddocsSharedon;
 	
-	@OneToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY )
+	@OneToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER )
 	@JoinColumn(name="patient_portal_shareddocs_filedetid", referencedColumnName="filedetails_id", insertable=false, updatable=false)
 	@JsonManagedReference
 	FileDetails fileDetails;
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
 	@JoinColumn(name="patient_portal_shareddocs_sharedby", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
 	@JsonManagedReference
 	EmployeeProfile empProfileSharedUser;

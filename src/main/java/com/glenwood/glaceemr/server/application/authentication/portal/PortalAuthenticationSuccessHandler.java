@@ -1,4 +1,5 @@
 package com.glenwood.glaceemr.server.application.authentication.portal;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -56,27 +57,29 @@ public class PortalAuthenticationSuccessHandler implements AuthenticationSuccess
 
 			if(sessionMap.getPortalPassworResetCount()<=0){
 
-				response.sendRedirect(portal_apache_url+portal_login_context+"/PortalRegistration.jsp?patientId="+sessionMap.getPortalUserID()+"&practiceId="+dbAccountId);
+				response.sendRedirect("https://patientportal.glaceemr.com/glaceportal_login/PortalRegistration.jsp?patientId="+sessionMap.getPortalUserID()+"&practiceId="+dbAccountId);
 				return;
 			}
 
 			if(sessionMap.getIsPortalUserActive()!=1){
 
-				response.sendRedirect(portal_apache_url+portal_login_context+"/portal.jsp?practiceId="+dbAccountId+"&log=8");
+				response.sendRedirect("https://patientportal.glaceemr.com/glaceportal_login/portal.jsp?practiceId="+dbAccountId+"&log=8");
 				return;
 			}
 
 			if(sessionMap.getIsOldPortalUser()!=1){
 
-				response.sendRedirect(portal_apache_url+portal_login_context+"/portal.jsp?practiceId="+dbAccountId+"&log=8");
+				response.sendRedirect("https://patientportal.glaceemr.com/glaceportal_login/portal.jsp?practiceId="+dbAccountId+"&log=8");
 				return;
 			}
-
-
+			
+			response.addCookie(new Cookie("JSESSIONID", request.getSession().getId()));
+			response.addHeader("PORTALSESSIONID", request.getSession().getId());
+						
 			if(dbAccountId.equalsIgnoreCase("glace"))
-				response.sendRedirect(portal_apache_url+"/glaceportal.html?user="+request.getParameter("username")+"&tennantDB="+dbAccountId);
+				response.sendRedirect(portal_apache_url+"/glaceportal.html?user="+request.getParameter("username")+"&tennantDB="+dbAccountId+"&ID="+request.getSession().getId());
 			else
-				response.sendRedirect(portal_apache_url+"/portal/glaceportal.html?user="+request.getParameter("username")+"&tennantDB="+dbAccountId);
+				response.sendRedirect(portal_apache_url+"/portal/glaceportal.html?user="+request.getParameter("username")+"&tennantDB="+dbAccountId+"&ID="+request.getSession().getId());
 
 		}catch(Exception ex){
 			try {
