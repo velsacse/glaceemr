@@ -143,6 +143,12 @@ public class DataBaseAccessFilter implements Filter {
 			return;
 		}
 		
+		if(multiReadRequest.getRequestURI().contains("JVMManager.jsp")){
+			System.out.println("***request is from JVM***"+TennantContextHolder.getTennantId());
+			chain.doFilter(request, response);
+			return;
+		}
+		
 		String params[] = multiReadRequest.getRequestURI().split("api/");
 		String[] portalParams = params[0].split("/portal/");
 		if(portalParams.length>1){
