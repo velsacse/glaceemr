@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+
 import java.sql.Timestamp;
 
 import java.sql.Date;

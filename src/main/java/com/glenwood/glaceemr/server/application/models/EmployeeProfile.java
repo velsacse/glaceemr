@@ -538,5 +538,15 @@ public class EmployeeProfile implements Serializable {
 	public void setSpecialityTable(H077 specialityTable) {
 		this.specialityTable = specialityTable;
 	}
+	@OneToMany(mappedBy="employeetableByCreatedName")
+	private List<WarfarinLog> warfarinlogcreatedby;
 	
+	@OneToMany(mappedBy="employeetableModifiesName")
+	private List<WarfarinLog> warfarinlogmodifiedby;
+	
+	@OneToMany(mappedBy="employeetableReviewedName")
+	private List<WarfarinLog> warfarinlogreviewedby;
+	
+	@OneToMany(mappedBy="employeetableByEnteredName")
+	private List<WarfarinLog> warfarinlogenteredby;
 }

@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
+
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 import javax.persistence.CascadeType;
@@ -20,10 +22,11 @@ import org.hibernate.annotations.NotFoundAction;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
-
+@SuppressWarnings("serial")
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @Entity
 @Table(name = "lab_entries_parameter")
-public class LabEntriesParameter {
+public class LabEntriesParameter implements Serializable{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="lab_entries_parameter_id_seq")
@@ -83,7 +86,7 @@ public class LabEntriesParameter {
 	private LabEntries labEntriesTable;
 	
 	@NotFound(action=NotFoundAction.IGNORE) 
-	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.EAGER)
+	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.LAZY)
 	@JoinColumn(name="lab_entries_parameter_mapid", referencedColumnName="lab_parameters_id", insertable=false, updatable=false)
 	@JsonManagedReference
 	LabParameters labParametersTable;
@@ -237,4 +240,15 @@ public class LabEntriesParameter {
 	public void setLabEntriesTable(LabEntries labEntriesTable) {
 		this.labEntriesTable = labEntriesTable;
 	}
+	/*
+	@ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.ALL,optional = false)
+	@JoinColumn(name="lab_entries_parameter_mapid",referencedColumnName="lab_parameter_code_paramid", nullable=false, insertable=false, updatable=false)
+	@JsonManagedReference
+	LabParameterCode labparametercode;  
+	/*
+	@OneToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="lab_entries_parameter_mapid",referencedColumnName="patient_episode_id", nullable=false, insertable=false, updatable=false)
+	PatientEpisode patientepisodeTable;
+	*/
 }
