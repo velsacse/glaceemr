@@ -34,23 +34,23 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 
 	@Autowired
 	PatientRegistrationRepository patientRegistrationRepository;
-	
+
 	@Autowired
 	PatientClinicalElementsRepository patientClinicalElementsRepository;
-	
+
 	@Autowired
 	InitialSettingsRepository initialSettingsRepository;
-	
+
 	@Autowired
 	H650Repository h650Repository;
-	
+
 	@Autowired
 	EntityManagerFactory emf ;
 
 	@PersistenceContext
 	EntityManager em;
-	
-	
+
+
 	/**
 	 * To get default graph id based on patient id
 	 * @param patientId
@@ -58,24 +58,24 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 	 */
 	@Override
 	public String getDefaultGraphId(String patientId) {
-		
+
 		Integer AgeInDays;
-			PatientRegistration patientRegistration=patientRegistrationRepository.findOne(PatientRegistrationSpecification.getPatientPersonalDetails(Integer.parseInt(patientId)));
-			AgeInDays		 = DateUtil.dateDiff( DateUtil.DATE , patientRegistration.getPatientRegistrationDob() , new Date()) ;
-			String defaultGraphId="";
-			if (AgeInDays <= 1095){
-				if (patientRegistration.getPatientRegistrationSex()==1)
-					defaultGraphId = "1"; // Wt-Age & Ht-Age for Boys 0-36 month
-				else
-					defaultGraphId = "2";	// Wt-Age & Ht-Age for Girls 0-36 month 
-			}
-			else{
-				if (patientRegistration.getPatientRegistrationSex()==1)
-					defaultGraphId = "5"; // Wt-Age & Ht-Age for Boys 2-20 Years
-				else
-					defaultGraphId = "6";	// Wt-Age & Ht-Age for Girls 2-20 Years
-			}
-			return defaultGraphId;
+		PatientRegistration patientRegistration=patientRegistrationRepository.findOne(PatientRegistrationSpecification.getPatientPersonalDetails(Integer.parseInt(patientId)));
+		AgeInDays		 = DateUtil.dateDiff( DateUtil.DATE , patientRegistration.getPatientRegistrationDob() , new Date()) ;
+		String defaultGraphId="";
+		if (AgeInDays <= 1095){
+			if (patientRegistration.getPatientRegistrationSex()==1)
+				defaultGraphId = "1"; // Wt-Age & Ht-Age for Boys 0-36 month
+			else
+				defaultGraphId = "2";	// Wt-Age & Ht-Age for Girls 0-36 month 
+		}
+		else{
+			if (patientRegistration.getPatientRegistrationSex()==1)
+				defaultGraphId = "5"; // Wt-Age & Ht-Age for Boys 2-20 Years
+			else
+				defaultGraphId = "6";	// Wt-Age & Ht-Age for Girls 2-20 Years
+		}
+		return defaultGraphId;
 	}
 
 	/**
@@ -85,26 +85,26 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 	 */
 	@Override
 	public GrowthGraphPatientData getpatientinfo(String patientId) {
-		
+
 		PatientRegistration patientData=patientRegistrationRepository.findOne(
 				PatientRegistrationSpecification.getPatientPersonalDetails(Integer.parseInt(patientId)));
-		
+
 		int AgeInYear = (int)(DateUtil.dateDiff( DateUtil.DATE , patientData.getPatientRegistrationDob() , new java.util.Date() )/365);
-		
+
 		int isNewGrowthGraph=Integer.parseInt(
 				initialSettingsRepository.findOne(
 						InitialSettingsSpecification.optionName("New Growth Graph")).
 						getInitialSettingsOptionValue());
-		
+
 		GrowthGraphPatientData patientInfoBean=new GrowthGraphPatientData(
 				patientData.getPatientRegistrationAccountno(),
 				patientData.getPatientRegistrationFirstName(),
 				patientData.getPatientRegistrationId(),
 				patientData.getPatientRegistrationSex(),
 				AgeInYear,isNewGrowthGraph);
-		
+
 		return patientInfoBean;
-		
+
 	}
 
 	/**
@@ -114,60 +114,50 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 	 */
 	@Override
 	public List<GrowthGraphVitalData> getVitalValues(String patientId) {
-		
+
 		List<GrowthGraphVitalData> clinicalDataBeans=new ArrayList<GrowthGraphVitalData>();
-		
+
 		PatientRegistration patientRegistration=patientRegistrationRepository.findOne(PatientRegistrationSpecification.getPatientPersonalDetails(Integer.parseInt(patientId)));
-		
-        List<String> gwids=new ArrayList<String>(Arrays.asList("0000200200100023000","0000200200100024000","0000200200100039000"));//Gwdid of height,weight and head circumference
+
+		List<String> gwids=new ArrayList<String>(Arrays.asList("0000200200100023000","0000200200100024000","0000200200100039000"));//Gwdid of height,weight and head circumference
 		List<PatientClinicalElements> patientDetails=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinicalDataByGWDID(Integer.parseInt(patientId), gwids));
-		
-		Date prevEncounterDate=patientDetails.get(0).getEncounter().getEncounterDate();
+		Date prevEncounterDate=null;
 		String currentEncounterDateStr=null;
 		String prevEncounterDateStr=null;
 		Date currentEncounterDate=null;
-		Date encounterDate=null;	
-		
-		GrowthGraphVitalData dataBean=new GrowthGraphVitalData("", "", "", "-", 0, 0, 0);//Initializing the default values
-		
-		
-		for(int i=0;i<patientDetails.size();i++){
 
+		GrowthGraphVitalData dataBean=new GrowthGraphVitalData("", "", "", "-", 0, 0, 0);//Initializing the default values
+
+
+		for(int i=0;i<patientDetails.size();i++){
+			if(i==0){
+				prevEncounterDate=patientDetails.get(0).getEncounter().getEncounterDate();
+			}
 			currentEncounterDate=patientDetails.get(i).getEncounter().getEncounterDate();
-			
+
 			SimpleDateFormat form = new SimpleDateFormat("MM/dd/yyyy");
-			
+
 			currentEncounterDateStr=form.format(currentEncounterDate);
 			prevEncounterDateStr=form.format(prevEncounterDate);	
-			
+			boolean isAdded=false;
+
 			String gwdId=patientDetails.get(i).getPatientClinicalElementsGwid();
 			String value=patientDetails.get(i).getPatientClinicalElementsValue();
-			
-			
-			if(prevEncounterDateStr.equalsIgnoreCase(currentEncounterDateStr)||(i==patientDetails.size()-1)){	//before updating list clinicalDataBeans 
-				
-			if(gwdId.equalsIgnoreCase("0000200200100039000"))//0000200200100039000 is gwdId of Head Circumference
-				dataBean.setHeadCircumference(value);
-			if(gwdId.equalsIgnoreCase("0000200200100024000"))//0000200200100024000 is gwdId of weight
-				dataBean.setWeight(value);
-			if(gwdId.equalsIgnoreCase("0000200200100023000"))//0000200200100023000 is gwdId Height 
-				dataBean.setHeight(""+Double.parseDouble(value)*0.393700787);
-			
+
+			if(prevEncounterDateStr.equalsIgnoreCase(currentEncounterDateStr)){	
+				if(gwdId.equalsIgnoreCase("0000200200100039000"))//0000200200100039000 is gwdId of Head Circumference
+					dataBean.setHeadCircumference(value);
+				if(gwdId.equalsIgnoreCase("0000200200100024000"))//0000200200100024000 is gwdId of weight
+					dataBean.setWeight(value);
+				if(gwdId.equalsIgnoreCase("0000200200100023000"))//0000200200100023000 is gwdId Height 
+					dataBean.setHeight(""+Double.parseDouble(value)*0.393700787);
 			}
-			
-			
-			if((i==patientDetails.size()-1))
-				encounterDate=patientDetails.get(i).getEncounter().getEncounterDate();
-			else if(i!=0)
-				encounterDate=patientDetails.get(i-1).getEncounter().getEncounterDate();
-			
-			
-			
-			if(!(prevEncounterDateStr.equalsIgnoreCase(currentEncounterDateStr))||(i==patientDetails.size()-1)){//it is used to save previous encounter information into bean
-				
-				int ageInDays = ((DateUtil.dateDiff( DateUtil.DATE , patientRegistration.getPatientRegistrationDob() ,encounterDate)%366)%30) ;
-				int ageInYear = (int)(DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,encounterDate )/366);
-				int ageInMonth = (int)((DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,encounterDate)%366)/30);
+
+			if(!(prevEncounterDateStr.equalsIgnoreCase(currentEncounterDateStr))){
+
+				int ageInDays = ((DateUtil.dateDiff( DateUtil.DATE , patientRegistration.getPatientRegistrationDob() ,prevEncounterDate)%366)%30) ;
+				int ageInYear = (int)(DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,prevEncounterDate )/366);
+				int ageInMonth = (int)((DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,prevEncounterDate)%366)/30);
 
 				dataBean.setAgeInDay(ageInDays);
 				dataBean.setAgeInMonth(ageInMonth);
@@ -179,24 +169,31 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 					dataBean.setEncounterDate(prevEncounterDateStr);
 
 				clinicalDataBeans.add(dataBean);
+				isAdded=true;
 				dataBean=new GrowthGraphVitalData("", "", "", "-", 0, 0, 0);
 			}
 			
-			
-			if(!(prevEncounterDateStr.equalsIgnoreCase(currentEncounterDateStr))){//after updating list clinicalDataBeans
-			
-				if(gwdId.equalsIgnoreCase("0000200200100039000"))//0000200200100039000 is gwdId of Head Circumference
-					dataBean.setHeadCircumference(value);
-				if(gwdId.equalsIgnoreCase("0000200200100024000"))//0000200200100024000 is gwdId of weight 
-					dataBean.setWeight(value);
-				if(gwdId.equalsIgnoreCase("0000200200100023000"))//0000200200100023000 is gwdId of Height 
-					dataBean.setHeight(""+Double.parseDouble(value)*0.393700787);
+			if(i==(patientDetails.size()-1) && !isAdded){
+				int ageInDays = ((DateUtil.dateDiff( DateUtil.DATE , patientRegistration.getPatientRegistrationDob() ,currentEncounterDate)%366)%30) ;
+				int ageInYear = (int)(DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,currentEncounterDate )/366);
+				int ageInMonth = (int)((DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,currentEncounterDate)%366)/30);
+
+				dataBean.setAgeInDay(ageInDays);
+				dataBean.setAgeInMonth(ageInMonth);
+				dataBean.setAgeInYear(ageInYear);
+
+				if(i==patientDetails.size()-1)
+					dataBean.setEncounterDate(currentEncounterDateStr);
+				else
+					dataBean.setEncounterDate(prevEncounterDateStr);
+
+				clinicalDataBeans.add(dataBean);
+				isAdded=true;
+				dataBean=new GrowthGraphVitalData("", "", "", "-", 0, 0, 0);
 			}
 			
-			
-			prevEncounterDate=currentEncounterDate;
 		}
-		
+
 		return clinicalDataBeans;
 	}
 
@@ -207,14 +204,14 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 	 */
 	@Override
 	public List<H650> getGraphList(String patientId) {
-		
+
 
 		PatientRegistration patientRegistration=patientRegistrationRepository.findOne(PatientRegistrationSpecification.getPatientPersonalDetails(Integer.parseInt(patientId)));
 		int ageInMonth = (int)((DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,new Date() )%365)/30);
 		Integer sex=patientRegistration.getPatientRegistrationSex();
-		
+
 		List<H650> graphData=h650Repository.findAll(GrowthGraphSpecification.byAgeandSex(ageInMonth, sex));
-		
+
 		return graphData;
 	}
 }
