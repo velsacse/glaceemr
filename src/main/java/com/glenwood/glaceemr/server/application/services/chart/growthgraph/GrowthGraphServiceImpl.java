@@ -168,6 +168,15 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 				dataBean=new GrowthGraphVitalData("", "", "", "-", 0, 0, 0);
 			}
 			
+			if(!(prevEncounterDateStr.equalsIgnoreCase(currentEncounterDateStr))){	
+				if(gwdId.equalsIgnoreCase("0000200200100039000"))//0000200200100039000 is gwdId of Head Circumference
+					dataBean.setHeadCircumference(value);
+				if(gwdId.equalsIgnoreCase("0000200200100024000"))//0000200200100024000 is gwdId of weight
+					dataBean.setWeight(value);
+				if(gwdId.equalsIgnoreCase("0000200200100023000"))//0000200200100023000 is gwdId Height 
+					dataBean.setHeight(""+Double.parseDouble(value)*0.393700787);
+			}
+			
 			if(i==(patientDetails.size()-1)){
 				int ageInDays = ((DateUtil.dateDiff( DateUtil.DATE , patientRegistration.getPatientRegistrationDob() ,currentEncounterDate)%366)%30) ;
 				int ageInYear = (int)(DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,currentEncounterDate )/366);
