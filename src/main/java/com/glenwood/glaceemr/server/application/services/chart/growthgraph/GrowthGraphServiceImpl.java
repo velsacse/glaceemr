@@ -169,7 +169,8 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 					dataBean.setEncounterDate(prevEncounterDateStr);
 
 				clinicalDataBeans.add(dataBean);
-				isAdded=true;
+				if(i==(patientDetails.size()-1))
+					isAdded=true;
 				dataBean=new GrowthGraphVitalData("", "", "", "-", 0, 0, 0);
 			}
 			
@@ -191,6 +192,8 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 				isAdded=true;
 				dataBean=new GrowthGraphVitalData("", "", "", "-", 0, 0, 0);
 			}
+			
+			prevEncounterDate=currentEncounterDate;
 			
 		}
 
