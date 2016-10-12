@@ -3,8 +3,6 @@ package com.glenwood.glaceemr.server.application.services.chart.problemlist;
 import java.util.List;
 
 import org.json.JSONException;
-import org.springframework.stereotype.Service;
-
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 
 /**
@@ -56,5 +54,7 @@ public interface ProblemListService {
 	 * @throws Exception
 	 */
 	void deleteDataSave(Integer patientId, String deleteData) throws Exception;
+
+	List<ProblemList> deleteDataSaveFetch(Integer patientId, String deleteData) throws JSONException;
 
 }

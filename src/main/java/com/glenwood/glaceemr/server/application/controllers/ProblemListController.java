@@ -124,5 +124,21 @@ public class ProblemListController {
 	}
 	
 	
+	/**
+	 * Method to delete a problem from problem list while importing in Assessment
+	 * @param patientId
+	 * @param deleteData
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/DeleteSaveFetch",method = RequestMethod.GET)
+	public List<ProblemList> deleteDxDataAndFetch(
+			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
+			@RequestParam(value="deleteData", required=false, defaultValue="") String deleteData) throws Exception {
+		logger.debug("Problem list delete");
+		logger.error("Problem list delete");
+		
+	    return problemListService.deleteDataSaveFetch(patientId,deleteData);
+	}
 	
 }
