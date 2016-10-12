@@ -139,7 +139,6 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 
 			currentEncounterDateStr=form.format(currentEncounterDate);
 			prevEncounterDateStr=form.format(prevEncounterDate);	
-			boolean isAdded=false;
 
 			String gwdId=patientDetails.get(i).getPatientClinicalElementsGwid();
 			String value=patientDetails.get(i).getPatientClinicalElementsValue();
@@ -163,18 +162,13 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 				dataBean.setAgeInMonth(ageInMonth);
 				dataBean.setAgeInYear(ageInYear);
 
-				if(i==patientDetails.size()-1)
-					dataBean.setEncounterDate(currentEncounterDateStr);
-				else
-					dataBean.setEncounterDate(prevEncounterDateStr);
+				dataBean.setEncounterDate(prevEncounterDateStr);
 
 				clinicalDataBeans.add(dataBean);
-				if(i==(patientDetails.size()-1))
-					isAdded=true;
 				dataBean=new GrowthGraphVitalData("", "", "", "-", 0, 0, 0);
 			}
 			
-			if(i==(patientDetails.size()-1) && !isAdded){
+			if(i==(patientDetails.size()-1)){
 				int ageInDays = ((DateUtil.dateDiff( DateUtil.DATE , patientRegistration.getPatientRegistrationDob() ,currentEncounterDate)%366)%30) ;
 				int ageInYear = (int)(DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,currentEncounterDate )/366);
 				int ageInMonth = (int)((DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,currentEncounterDate)%366)/30);
@@ -183,13 +177,9 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 				dataBean.setAgeInMonth(ageInMonth);
 				dataBean.setAgeInYear(ageInYear);
 
-				if(i==patientDetails.size()-1)
-					dataBean.setEncounterDate(currentEncounterDateStr);
-				else
-					dataBean.setEncounterDate(prevEncounterDateStr);
+				dataBean.setEncounterDate(currentEncounterDateStr);
 
 				clinicalDataBeans.add(dataBean);
-				isAdded=true;
 				dataBean=new GrowthGraphVitalData("", "", "", "-", 0, 0, 0);
 			}
 			
