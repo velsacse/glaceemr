@@ -1,4 +1,6 @@
 package com.glenwood.glaceemr.server.application.authentication.portal;
+import java.io.PrintWriter;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -8,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.services.portalLogin.PortalLoginService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -18,11 +21,15 @@ public class PortalAuthenticationSuccessHandler implements AuthenticationSuccess
 
 	@Autowired
 	EMRResponseBean emrResponseBean;
+	
 	@Autowired
 	SessionMap sessionMap;
 
 	@Autowired
 	PortalLoginService portalLoginService;
+	
+	@Autowired
+	ObjectMapper objectMapper;
 
 
 	@Override
@@ -53,33 +60,32 @@ public class PortalAuthenticationSuccessHandler implements AuthenticationSuccess
 			sessionMap.setGlaceTomcatUrl(portal_tomcat_url);
 			sessionMap.setGlaceTomcatContext(portal_tomcat_context);
 			sessionMap.setGlaceSpringContext(portal_spring_context);
-
+			
+			PrintWriter out=response.getWriter();
+			response.addCookie(new Cookie("JSESSIONID", request.getSession().getId()));
+			response.addHeader("PORTALSESSIONID", request.getSession().getId());
+			response.setContentType("application/json"); 
 
 			if(sessionMap.getPortalPassworResetCount()<=0){
 
-				response.sendRedirect("https://patientportal.glaceemr.com/glaceportal_login/PortalRegistration.jsp?patientId="+sessionMap.getPortalUserID()+"&practiceId="+dbAccountId);
+				out.println("{\"sessionId\":\""+request.getSession().getId()+"\",\"userId\":"+sessionMap.getPortalUserID()+",\"login\":true,\"isAuthenticated\":true,\"log\":12}");
 				return;
 			}
 
 			if(sessionMap.getIsPortalUserActive()!=1){
 
-				response.sendRedirect("https://patientportal.glaceemr.com/glaceportal_login/portal.jsp?practiceId="+dbAccountId+"&log=8");
+				out.println("{\"sessionId\":\""+request.getSession().getId()+"\",\"userId\":"+sessionMap.getPortalUserID()+",\"login\":true,\"isAuthenticated\":true,\"log\":8}");
 				return;
 			}
 
 			if(sessionMap.getIsOldPortalUser()!=1){
 
-				response.sendRedirect("https://patientportal.glaceemr.com/glaceportal_login/portal.jsp?practiceId="+dbAccountId+"&log=8");
+				out.println("{\"sessionId\":\""+request.getSession().getId()+"\",\"userId\":"+sessionMap.getPortalUserID()+",\"login\":true,\"isAuthenticated\":true,\"log\":8}");
 				return;
 			}
+
 			
-			response.addCookie(new Cookie("JSESSIONID", request.getSession().getId()));
-			response.addHeader("PORTALSESSIONID", request.getSession().getId());
-						
-			if(dbAccountId.equalsIgnoreCase("glace"))
-				response.sendRedirect(portal_apache_url+"/glaceportal.html?user="+request.getParameter("username")+"&tennantDB="+dbAccountId+"&ID="+request.getSession().getId());
-			else
-				response.sendRedirect(portal_apache_url+"/portal/glaceportal.html?user="+request.getParameter("username")+"&tennantDB="+dbAccountId+"&ID="+request.getSession().getId());
+			out.println("{\"sessionId\":\""+request.getSession().getId()+"\",\"userId\":"+sessionMap.getPortalUserID()+",\"login\":true,\"isAuthenticated\":true,\"log\":-1}");
 
 		}catch(Exception ex){
 			try {

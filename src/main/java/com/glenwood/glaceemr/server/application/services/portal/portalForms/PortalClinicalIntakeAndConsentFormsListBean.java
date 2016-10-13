@@ -10,6 +10,8 @@ public class PortalClinicalIntakeAndConsentFormsListBean {
 	List<ClinicalIntakeFormBean> clinicalIntakeFormsList;
 	
 	List<FileDetails> consentFormsList;
+	
+	String oldEmrSessionId;
 
 	public List<ClinicalIntakeFormBean> getClinicalIntakeFormsList() {
 		return clinicalIntakeFormsList;
@@ -26,6 +28,14 @@ public class PortalClinicalIntakeAndConsentFormsListBean {
 
 	public void setConsentFormsList(List<FileDetails> consentFormsList) {
 		this.consentFormsList = consentFormsList;
+	}
+
+	public String getOldEmrSessionId() {
+		return oldEmrSessionId;
+	}
+
+	public void setOldEmrSessionId(String oldEmrSessionId) {
+		this.oldEmrSessionId = oldEmrSessionId;
 	}
 	
 }

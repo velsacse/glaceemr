@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.authentication.portal;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -17,17 +18,19 @@ public class PortalAuthenticationFailureHandler implements AuthenticationFailure
 	public void onAuthenticationFailure(HttpServletRequest request,
 			HttpServletResponse response, AuthenticationException exception)
 			throws IOException, ServletException {
-		//logger.info("In custom authentication failure handler");
+		
+		PrintWriter out=response.getWriter();
+		response.setContentType("application/json"); 
+		
 		try{
+			
 			System.out.println("In PortalAuthenticationFailureHandler");
-			String portal_login_url = request.getParameter("portal_login_url");
-			Assert.notNull(portal_login_url, "baseURL is empty");
-			response.sendRedirect(portal_login_url+"&log=0");
+			out.println("{\"sessionId\":\"-1\",\"userId\":-1,\"login\":false,\"isAuthenticated\":false,\"log\":0}");
 			
 		}catch(Exception ex){
 			
 			ex.printStackTrace();
-			response.sendRedirect(request.getParameter("portal_login_url")+"&log=0");
+			out.println("{\"sessionId\":\"-1\",\"userId\":-1,\"login\":false,\"isAuthenticated\":false,\"log\":0}");
 		}
 		
 	}
