@@ -1,6 +1,5 @@
 package com.glenwood.glaceemr.server.application.services.chart.problemlist;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.Date;
 import java.text.DateFormat;
@@ -182,21 +181,46 @@ public class ProblemListServiceImpl implements ProblemListService{
      */
 	@Override
 	public void deleteDataSave(Integer patientId, String deleteData) throws JSONException {
-		
-		             JSONObject problemIdObj=new JSONObject(deleteData);
-		             JSONArray problemIdArray=(JSONArray) problemIdObj.get("ProblemIdArr");
-		
-		             String problemIdStr=problemIdArray.toString().replace("[\"", "").replace("\"]", "");
-		             
-		             for(String currentProblemId:problemIdStr.split(",")){
-		            	
-		                int currentPid=Integer.parseInt(currentProblemId);
-		                ProblemList plist = problemListRepository.findOne(currentPid);
-		                plist.setProblemListIsactive(false);
-		         		problemListRepository.saveAndFlush(plist);
-		                 
-		             }
-		
+
+		JSONObject problemIdObj=new JSONObject(deleteData);
+		JSONArray problemIdArray=(JSONArray) problemIdObj.get("ProblemIdArr");
+
+		String problemIdStr=problemIdArray.toString().replace("[\"", "").replace("\"]", "");
+
+		for(String currentProblemId:problemIdStr.split(",")){
+
+			int currentPid=Integer.parseInt(currentProblemId);
+			ProblemList plist = problemListRepository.findOne(currentPid);
+			plist.setProblemListIsactive(false);
+			problemListRepository.saveAndFlush(plist);
+
+		}
+
 	}
 
+	 /**
+     * Method to delete a problem from problem list
+	 * @return 
+     */
+	@Override
+	public List<ProblemList> deleteDataSaveFetch(Integer patientId, String deleteData) throws JSONException {
+
+		JSONObject problemIdObj=new JSONObject(deleteData);
+		JSONArray problemIdArray=(JSONArray) problemIdObj.get("ProblemIdArr");
+
+		String problemIdStr=problemIdArray.toString().replace("[\"", "").replace("\"]", "");
+
+		for(String currentProblemId:problemIdStr.split(",")){
+
+			int currentPid=Integer.parseInt(currentProblemId);
+			ProblemList plist = problemListRepository.findOne(currentPid);
+			plist.setProblemListIsactive(false);
+			problemListRepository.saveAndFlush(plist);
+
+		}
+
+		return getActiveProblems(patientId);
+	}
+
+	
 }
