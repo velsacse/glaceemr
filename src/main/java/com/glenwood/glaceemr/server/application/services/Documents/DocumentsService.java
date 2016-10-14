@@ -4,15 +4,21 @@ import java.util.List;
 
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
+import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsNotes;
 
 public interface DocumentsService {
 
 	List<Object> getCategoryList(int patientId);
 	List<FileDetails> getFileDetailsByPatientId(int patientId,int categoryId );
-	List<FileDetails> getFileList(int patientId,int categoryId, int fileNameId);
+	FileDetails getFileList(String fileDetailsId);
 	List<PatientDocumentsNotes> getDocNotesDetails(int notesFilenameId);
-	void deleteFile(int fileNameId);
-	void deleteFolder(int fileDetailsId);
+	List<PatientDocumentsNotes> addDocNotesDetails(int notesFilenameId, String notesPatientNotes,int userId);
+	List<FileName> getInfo(int fileNameId);
+	void deleteFile(int fileNameId,int patientId);
+	void deleteFolder(String fileDetailsId);
 	List<AlertEvent> forwardAlert(int fromId, List<Integer> toIdList,int status, int alertid,int docCategoryid, int refId, int patientId,int encounterId, String msg, int chartId, int roomId,int parentId);
+	List<FileDetails> reviewGroupOfDocs(String fileDetailsId,int categoryId,int patientId,int userId);
+	List<FileName> reviewDocuments(int fileNameId,int userId);
+	FileDetails alertByCategory(String alertId,int patientId);
 }

@@ -2,15 +2,19 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -30,6 +34,14 @@ public class PatientDocumentsNotes {
 	@Column(name="notes_patientnotes")
 	private String notesPatientnotes;
 
+	public EmployeeProfile getCreatedByEmpProfileTable() {
+		return createdByEmpProfileTable;
+	}
+
+	public void setCreatedByEmpProfileTable(EmployeeProfile createdByEmpProfileTable) {
+		this.createdByEmpProfileTable = createdByEmpProfileTable;
+	}
+
 	@Column(name="notes_createdby")
 	private Integer notesCreatedby;
 
@@ -46,6 +58,13 @@ public class PatientDocumentsNotes {
 
 	@Column(name="notes_status")
 	private Integer notesStatus;
+	
+	
+
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="notes_createdby", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
+	@JsonManagedReference
+	EmployeeProfile createdByEmpProfileTable;
 
 	public Integer getNotesId() {
 		return notesId;

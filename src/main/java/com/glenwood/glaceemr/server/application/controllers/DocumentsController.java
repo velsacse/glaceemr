@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.Bean.DocumentsCategoryBean;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
+import com.glenwood.glaceemr.server.application.models.AlertPatientDocMapping;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsNotes;
@@ -32,7 +33,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value="/Documents",description="To deal with category details",consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="/user/Documents")
+@RequestMapping(value="Documents")
 public class DocumentsController {
 
 	@Autowired
@@ -56,6 +57,7 @@ public class DocumentsController {
 	@ResponseBody
 	public List<Object> getCategoryList(@RequestParam(value="patientId",required=false, defaultValue="-1") Integer patientId) throws Exception
 	{
+		System.out.print("*****************");
 		List<Object> catDetails= documentsService.getCategoryList(patientId);
 		return catDetails;
 	}
@@ -78,6 +80,194 @@ public class DocumentsController {
 	{
 		List<FileDetails> filecatDetails= documentsService.getFileDetailsByPatientId(patientId,categoryId);
 		return filecatDetails;
+	}
+
+	/**
+	 * To get the list of files of a particular patient based on categoryId and fileNameId
+	 * @param patientId
+	 * @param categoryId
+	 * @param fileNameId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/getFileList",method = RequestMethod.GET)
+	@ApiOperation(value="Returns list of files",response = FileDetails.class)
+	@ApiResponses(value= {
+			@ApiResponse(code = 200, message = "Successful retrieval of Employee details"),
+			@ApiResponse(code = 404, message = "when File id does not exist"),
+			@ApiResponse(code = 500, message = "Internal server error")})
+	@ResponseBody
+	/*public List<FileDetails> getFileList(@RequestParam(value="patientId",required= true, defaultValue="-1") Integer patientId , @RequestParam(value="categoryId", required= true, defaultValue="-1") Integer categoryId, @RequestParam(value="fileNameId", required= true, defaultValue="-1") Integer fileNameId ) throws Exception{
+		List<FileDetails> fileDetails=documentsService.getFileList(patientId,categoryId,fileNameId);
+		return fileDetails;*/
+	public FileDetails getFileList(@RequestParam(value="fileDetailsId", required= true, defaultValue="-1")String fileDetailsId) throws Exception{
+		FileDetails fileDetails=documentsService.getFileList(fileDetailsId);
+		return fileDetails;
+	}
+
+	/**
+	 * To get Info about documents
+	 * @param fileNameId
+	 * @return
+	 * @throws Exception
+	 */
+
+	@RequestMapping(value="/getInfo",method = RequestMethod.GET)
+	@ApiOperation(value="Returns list of files",response = FileDetails.class)
+	@ApiResponses(value= {
+			@ApiResponse(code = 200, message = "Successful retrieval of Employee details"),
+			@ApiResponse(code = 404, message = "when File id does not exist"),
+			@ApiResponse(code = 500, message = "Internal server error")})
+	@ResponseBody
+	public List<FileName> getInfo(@RequestParam(value="fileNameId", required= true, defaultValue="-1") Integer fileNameId
+			) throws Exception{
+		List<FileName> fileName=documentsService.getInfo(fileNameId);
+		return fileName;
+	}
+
+
+	/**
+	 * To get Document notes
+	 * @param notesFilenameId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/getNotesByFileId", method=RequestMethod.GET)
+	@ApiOperation(value="Returns notes for a document", response=PatientDocumentsNotes.class)
+	@ApiResponses(value={
+			@ApiResponse(code = 200, message = "Successful retrieval of Employee details"),
+			@ApiResponse(code = 404, message = "when Notes id does not exist"),
+			@ApiResponse(code = 500, message = "Internal server error")})
+	@ResponseBody
+	public List<PatientDocumentsNotes> getDocNotes(@RequestParam(value="notesFilenameId", required= true, defaultValue="-1")Integer notesFilenameId) throws Exception{
+		List<PatientDocumentsNotes> patientDocNotes= documentsService.getDocNotesDetails(notesFilenameId);
+		return patientDocNotes;
+	}
+
+	/**
+	 * To add comments in Notes option
+	 * @param notesFilenameId
+	 * @param notesPatientNotes
+	 * @param userId
+	 * @return
+	 * @throws Exception
+	 */
+
+	@RequestMapping(value="/addNotesByFileId", method=RequestMethod.GET)
+	@ApiOperation(value="Returns notes for a document", response=PatientDocumentsNotes.class)
+	@ApiResponses(value={
+			@ApiResponse(code = 200, message = "Successful retrieval of Employee details"),
+			@ApiResponse(code = 404, message = "when Notes id does not exist"),
+			@ApiResponse(code = 500, message = "Internal server error")})
+	@ResponseBody
+	public List<PatientDocumentsNotes> addDocNotes(@RequestParam(value="notesFilenameId", required= true, defaultValue="-1")Integer notesFilenameId,
+			@RequestParam(value="notesPatientNotes", required=false, defaultValue="")String notesPatientNotes,
+			@RequestParam(value="userId",required=true)Integer userId) throws Exception{
+		List<PatientDocumentsNotes> patientDocNotes= documentsService.addDocNotesDetails(notesFilenameId,notesPatientNotes,userId);
+		return patientDocNotes;
+	}
+
+	/**
+	 * To delete a folder by passing its folderId
+	 * @param fileDetailsId
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/deleteFolder",method= RequestMethod.GET)
+	@ApiOperation(value="Returns that folder", response= FileDetails.class)
+	@ApiResponses(value= {
+			@ApiResponse(code = 200, message = "Successful retrieval of folder details"),
+			@ApiResponse(code = 404, message = "when that folder id does not exist"),
+			@ApiResponse(code = 500, message = "Internal server error")})
+	@ResponseBody
+	public void deleteFolder(@RequestParam(value="fileDetailsId", required= true,defaultValue="-1")String fileDetailsId)throws Exception{
+		documentsService.deleteFolder(fileDetailsId);			
+	}
+
+	/**
+	 * To delete a file by passing its fileId
+	 * @param fileNameId
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/deleteFile", method=RequestMethod.GET)
+	@ApiOperation(value="deletes that particular document", response=FileName.class)
+	@ApiResponses(value={
+			@ApiResponse(code = 200, message = "Successful retrieval of file details"),
+			@ApiResponse(code = 404, message = "when file id  does not exist"),
+			@ApiResponse(code = 500, message = "Internal server error")})
+	@ResponseBody
+	public void  deleteFile(@RequestParam(value="fileNameId", required=true, defaultValue="-1")Integer fileNameId,
+			@ApiParam(name="patientId",value="patient id")@RequestParam(value="patientId",required= false, defaultValue="-1") Integer patientId) throws Exception{
+		documentsService.deleteFile(fileNameId,patientId);
+	}
+
+	/**
+	 * To review group of documents
+	 * @param fileDetailsId
+	 * @param patientId
+	 * @param categoryId
+	 * @param userId
+	 * @return
+	 */
+	@ApiOperation(value="reviewGroupOfDocs", notes="Review Documents based on fileNameId")
+	@RequestMapping(value="/reviewGroupOfDocs", method=RequestMethod.GET)
+	@ResponseBody
+	@ApiResponses(value={
+			@ApiResponse(code=200,message = "Successful retrieval of review alerts"),
+			@ApiResponse(code=404, message=""),
+			@ApiResponse(code=500,message="Internal server error")
+	})
+	public List<FileDetails> reviewGroupOfDocs(
+			@ApiParam(name="fileDetailsId",value="list of file name")@RequestParam(value="fileDetailsId",required=true)String fileDetailsId,
+			@ApiParam(name="patientId",value="list of file name")@RequestParam(value="patientId",required=true)Integer patientId,
+			@ApiParam(name="categoryId",value="list of file name")@RequestParam(value="categoryId",required=true)Integer categoryId,
+			@ApiParam(name="userd", value="login user id")@RequestParam(value="userId",required=true)Integer userId){
+		List<FileDetails> fileDetails=documentsService.reviewGroupOfDocs(fileDetailsId,categoryId,patientId,userId);
+		return fileDetails;
+
+	}
+
+	/**
+	 * To review a single file
+	 * @param fileNameId
+	 * @param userId
+	 * @return
+	 */
+
+	@ApiOperation(value="ReviewDocuments", notes="Review Documents based on fileNameId")
+	@RequestMapping(value="/reviewDocuments", method=RequestMethod.GET)
+	@ResponseBody
+	@ApiResponses(value={
+			@ApiResponse(code=200,message = "Successful retrieval of review alerts"),
+			@ApiResponse(code=404, message=""),
+			@ApiResponse(code=500,message="Internal server error")
+	})
+	public List<FileName> reviewDocuments(
+			@ApiParam(name="fileNameId",value="list of file name")@RequestParam(value="fileNameId",required=true)Integer fileNameId,
+			@ApiParam(name="userId", value="login user id")@RequestParam(value="userId",required=true)Integer userId){
+		List<FileName> fileName=documentsService.reviewDocuments(fileNameId, userId);
+		return fileName;
+
+	}
+
+	/**
+	 * To get details when a message is forwarded from patient documents
+	 * @param alertId
+	 * @param patientId
+	 * @return
+	 */
+	@RequestMapping(value="/getDetailsByAlertId", method=RequestMethod.GET)
+	@ApiOperation(value="getDetailsByAlertId", notes="getting details by passing alert id",response= AlertPatientDocMapping.class)
+	@ResponseBody
+	@ApiResponses(value={
+			@ApiResponse(code=200,message = "Successful retrieval of review alerts"),
+			@ApiResponse(code=404, message=""),
+			@ApiResponse(code=500,message="Internal server error")
+	})
+	public FileDetails alertByCategory(
+			@ApiParam(name="alertId",value="Alert id")@RequestParam(value="alertId",required=true)String alertId,
+			@ApiParam(name="patientId",value="patient id")@RequestParam(value="patientId",required= false, defaultValue="-1") Integer patientId){
+		FileDetails alertPatientDocMapping=documentsService.alertByCategory(alertId,patientId);
+		return alertPatientDocMapping;
 	}
 
 	/**
@@ -128,73 +318,5 @@ public class DocumentsController {
 		return alertEvent;
 	}
 
-	/**
-	 * To get the list of files of a particular patient based on categoryId and fileNameId
-	 * @param patientId
-	 * @param categoryId
-	 * @param fileNameId
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value="/getFileList",method = RequestMethod.GET)
-	@ApiOperation(value="Returns list of files",response = FileDetails.class)
-	@ApiResponses(value= {
-			@ApiResponse(code = 200, message = "Successful retrieval of Employee details"),
-			@ApiResponse(code = 404, message = "when File id does not exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
-	@ResponseBody
-	public List<FileDetails> getFileList(@RequestParam(value="patientId",required= true, defaultValue="-1") Integer patientId , @RequestParam(value="categoryId", required= true, defaultValue="-1") Integer categoryId, @RequestParam(value="fileNameId", required= true, defaultValue="-1") Integer fileNameId ) throws Exception{
-		List<FileDetails> fileDetails=documentsService.getFileList(patientId,categoryId,fileNameId);
-		return fileDetails;
-	}
 
-	/**
-	 * To get Document notes
-	 * @param notesFilenameId
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value="/getNotesByFileId", method=RequestMethod.GET)
-	@ApiOperation(value="Returns notes for a document", response=PatientDocumentsNotes.class)
-	@ApiResponses(value={
-			@ApiResponse(code = 200, message = "Successful retrieval of Employee details"),
-			@ApiResponse(code = 404, message = "when Notes id does not exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
-	@ResponseBody
-	public List<PatientDocumentsNotes> getDocNotes(@RequestParam(value="notesFilenameId", required= true, defaultValue="-1")Integer notesFilenameId) throws Exception{
-		List<PatientDocumentsNotes> patientDocNotes= documentsService.getDocNotesDetails(notesFilenameId);
-		return patientDocNotes;
-	}
-
-	/**
-	 * To delete a folder by passing its folderId
-	 * @param fileDetailsId
-	 * @throws Exception
-	 */
-	@RequestMapping(value="/deleteFolder",method= RequestMethod.GET)
-	@ApiOperation(value="Returns that folder", response= FileDetails.class)
-	@ApiResponses(value= {
-			@ApiResponse(code = 200, message = "Successful retrieval of folder details"),
-			@ApiResponse(code = 404, message = "when that folder id does not exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
-	@ResponseBody
-	public void deleteFolder(@RequestParam(value="fileDetailsId", required= true,defaultValue="-1")Integer fileDetailsId)throws Exception{
-		documentsService.deleteFolder(fileDetailsId);			
-	}
-
-	/**
-	 * To delete a file by passing its fileId
-	 * @param fileNameId
-	 * @throws Exception
-	 */
-	@RequestMapping(value="/deleteFile", method=RequestMethod.GET)
-	@ApiOperation(value="deletes that particular document", response=FileName.class)
-	@ApiResponses(value={
-			@ApiResponse(code = 200, message = "Successful retrieval of file details"),
-			@ApiResponse(code = 404, message = "when file id  does not exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
-	@ResponseBody
-	public void  deleteFile(@RequestParam(value="fileNameId", required=true, defaultValue="-1")Integer fileNameId) throws Exception{
-		documentsService.deleteFile(fileNameId);
-	}
 }

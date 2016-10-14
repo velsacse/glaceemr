@@ -14,6 +14,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -23,13 +26,13 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @Table(name = "filename")
 public class FileName {
 
-	
+	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="filename_filename_id_seq")
 	@SequenceGenerator(name ="filename_filename_id_seq", sequenceName="filename_filename_id_seq", allocationSize=1)
 	@Column(name="filename_id")
 	private Integer filenameId;
 
-	@Id
+
 	@Column(name="filename_scanid",unique=true)
 	private Integer filenameScanid;
 
@@ -77,16 +80,31 @@ public class FileName {
 
 	@Column(name="filename_isnotespresent")
 	private Boolean filenameIsnotespresent;
-	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+
+	@ManyToOne(cascade=CascadeType.ALL)
+	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinColumn(name="filename_reviewedby", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
 	@JsonManagedReference
 	private EmployeeProfile empProfile;
-		
+
+	public EmployeeProfile getCreatedByEmpProfileTable() {
+		return createdByEmpProfileTable;
+	}
+
+	public void setCreatedByEmpProfileTable(EmployeeProfile createdByEmpProfileTable) {
+		this.createdByEmpProfileTable = createdByEmpProfileTable;
+	}
+
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
-	@JsonBackReference
+	@JoinColumn(name="filename_createdby", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
+	@JsonManagedReference
+	EmployeeProfile createdByEmpProfileTable;
+
+
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="filename_scanid", referencedColumnName="filedetails_id",  insertable=false, updatable=false)
-	private FileDetails fileNameDetails;
+	@JsonBackReference
+	FileDetails fileNameDetails;
 
 	public EmployeeProfile getEmpProfile() {
 		return empProfile;
