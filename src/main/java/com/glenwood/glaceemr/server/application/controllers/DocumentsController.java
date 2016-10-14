@@ -57,7 +57,6 @@ public class DocumentsController {
 	@ResponseBody
 	public List<Object> getCategoryList(@RequestParam(value="patientId",required=false, defaultValue="-1") Integer patientId) throws Exception
 	{
-		System.out.print("*****************");
 		List<Object> catDetails= documentsService.getCategoryList(patientId);
 		return catDetails;
 	}
