@@ -17,7 +17,7 @@ public interface DocumentsService {
 	List<FileName> getInfo(int fileNameId);
 	void deleteFile(int fileNameId,int patientId);
 	void deleteFolder(String fileDetailsId);
-	List<AlertEvent> forwardAlert(int fromId, List<Integer> toIdList,int status, int alertid,int docCategoryid, int refId, int patientId,int encounterId, String msg, int chartId, int roomId,int parentId);
+	List<AlertEvent> forwardAlert(int fromId, List<Integer> toIdList,int status, String alertid,int docCategoryid, int refId, int patientId,int encounterId, String msg, int chartId, int roomId,int parentId);
 	List<FileDetails> reviewGroupOfDocs(String fileDetailsId,int categoryId,int patientId,int userId);
 	List<FileName> reviewDocuments(int fileNameId,int userId);
 	FileDetails alertByCategory(String alertId,int patientId);

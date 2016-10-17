@@ -84,16 +84,12 @@ public class DocumentsSpecification {
 			
 			public Predicate toPredicate(Root<FileDetails> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
-				//Join<FileDetails,FileName> file=root.join(FileDetails_.fileName,JoinType.INNER);
 				root.fetch(FileDetails_.fileName,JoinType.INNER);
 				String list[]=fileDetailsId.split(",");
 				List<Integer> fileDetailsIdl=new ArrayList<Integer>();
 				for(int i=0;i<list.length;i++){
 					fileDetailsIdl.add(Integer.parseInt(list[i]));	
 				}
-				//Join<FileName,FileDetails> file=root.join(FileName_.fileNameDetails,JoinType.INNER);
-				//root.fetch(FileName_.fileNameDetails,JoinType.INNER);
-				//Predicate predicate=cb.equal(file.get(FileName_.filenameScanid),fileDetailsId);
 				Predicate predicate= root.get(FileDetails_.filedetailsId).in(fileDetailsIdl);
 				return predicate;
 			}
@@ -327,23 +323,6 @@ public class DocumentsSpecification {
 			}
 		};
 	}
-
-	/*public static Specification<FileDetails> getFileList(final int patientId,final int categoryId,final int fileNameId){
-		return new Specification<FileDetails>() {
-
-			@Override
-			public Predicate toPredicate(Root<FileDetails> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-
-				Join<FileDetails, FileName> fileid=root.join(FileDetails_.fileName,JoinType.INNER);
-				root.fetch(FileDetails_.patientDocCategory,JoinType.INNER);
-				Predicate catpredicate=cb.equal(root.get(FileDetails_.filedetailsCategoryid),categoryId);
-				Predicate patpredicate=cb.equal(root.get(FileDetails_.filedetailsPatientid),patientId);
-				Predicate filepredicate=cb.equal(fileid.get(FileName_.filenameId),fileNameId);
-				return query.where(cb.and(catpredicate,patpredicate,filepredicate)).getRestriction();
-			}
-		};
-	}
-	 */
 
 }
 

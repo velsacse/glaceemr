@@ -30,10 +30,10 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author Soundarya
  *
  */
-@Api(value="/Documents",description="To deal with category details",consumes="application/json")
+@Api(value="/user/Documents",description="To deal with category details",consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="Documents")
+@RequestMapping(value="/user/Documents")
 public class DocumentsController {
 
 	@Autowired
@@ -96,9 +96,6 @@ public class DocumentsController {
 			@ApiResponse(code = 404, message = "when File id does not exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	/*public List<FileDetails> getFileList(@RequestParam(value="patientId",required= true, defaultValue="-1") Integer patientId , @RequestParam(value="categoryId", required= true, defaultValue="-1") Integer categoryId, @RequestParam(value="fileNameId", required= true, defaultValue="-1") Integer fileNameId ) throws Exception{
-		List<FileDetails> fileDetails=documentsService.getFileList(patientId,categoryId,fileNameId);
-		return fileDetails;*/
 	public FileDetails getFileList(@RequestParam(value="fileDetailsId", required= true, defaultValue="-1")String fileDetailsId) throws Exception{
 		FileDetails fileDetails=documentsService.getFileList(fileDetailsId);
 		return fileDetails;
@@ -313,7 +310,7 @@ public class DocumentsController {
 			toIdList.add(Integer.parseInt(s));
 		}
 		logger.debug("Creating the alert with id "+fromid);	
-		List<AlertEvent> alertEvent=documentsService.forwardAlert(Integer.parseInt(fromid),toIdList,Integer.parseInt(status),Integer.parseInt(alertid),Integer.parseInt(docCategoryid),Integer.parseInt(refid),Integer.parseInt(patientid),Integer.parseInt(encounterid),msg,Integer.parseInt(chartid),Integer.parseInt(roomid),Integer.parseInt(parentid));
+		List<AlertEvent> alertEvent=documentsService.forwardAlert(Integer.parseInt(fromid),toIdList,Integer.parseInt(status),alertid,Integer.parseInt(docCategoryid),Integer.parseInt(refid),Integer.parseInt(patientid),Integer.parseInt(encounterid),msg,Integer.parseInt(chartid),Integer.parseInt(roomid),Integer.parseInt(parentid));
 		return alertEvent;
 	}
 

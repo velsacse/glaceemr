@@ -343,20 +343,18 @@ public  class DocumentsServiceImpl implements DocumentsService{
 	 */
 	@Override
 	public List<AlertEvent> forwardAlert(int fromId, List<Integer> toIdList,
-			int status, int alertid,int docCategoryid,int refId, int patientId,
+			int status, String alertid,int docCategoryid,int refId, int patientId,
 			int encounterId, String msg, int chartId, int roomId, int parentId) {
 
 		String lastName="", firstName="", midInitial="";
 		int  refid=refId;
-
-
-		if(alertid==37){
+		if(alertid.equals("37")){
 			CriteriaBuilder qb = em.getCriteriaBuilder();
 			CriteriaQuery<Object> cq = qb.createQuery();
 
 			Root<AlertEvent> root = cq.from(AlertEvent.class);
 			cq.select(qb.max(root.get(AlertEvent_.alertEventRefId)));
-			cq.where(qb.equal(root.get(AlertEvent_.alertEventCategoryId), 37));
+			cq.where(qb.equal(root.get(AlertEvent_.alertEventCategoryId),37));
 
 			Query query=em.createQuery(cq);
 			Object maxIdObj=query.getSingleResult();
@@ -385,7 +383,7 @@ public  class DocumentsServiceImpl implements DocumentsService{
 			aug.setAlertEventFrom(fromId);
 			aug.setAlertEventTo(toIdList.get(i));
 			aug.setAlertEventStatus(status);
-			aug.setAlertEventCategoryId(alertid);
+			aug.setAlertEventCategoryId(Integer.parseInt(alertid));
 			aug.setAlertEventRefId(refid);
 			aug.setAlertEventPatientId(patientId);
 			if(patient!=null)
