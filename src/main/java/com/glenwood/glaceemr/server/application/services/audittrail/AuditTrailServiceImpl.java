@@ -238,6 +238,12 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 
 		float DBRT=(float) 0.0;
 		try{
+			DB=1;
+		    DBRT=1	;	
+			monitoringParams.setDB(DB);
+			monitoringParams.setDBRT(DBRT);
+			monitoringParams.setDBFS(monitoringParams.getRFS());
+			/*
 			
 			String totalTime = "0.0";
 			Calendar calendar = Calendar.getInstance();
@@ -259,10 +265,10 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 			DBRT =timeDiff;
 			
 
-		}catch(Exception e)
+		*/}catch(Exception e)
 		{
 			e.printStackTrace();
-		}finally
+		}/*finally
 		{
 		
 			try{
@@ -275,7 +281,7 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 				e.printStackTrace();
 			}
 			
-		}
+		}*/
 		
 		
 	}
