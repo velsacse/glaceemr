@@ -241,9 +241,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 "<br><br>"+
 "<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Welcome and thank you for creating your Patient Portal account! To complete the account creation process click on the below link.</label>"+
 "<br><br>"+
-"<label style='font-weight:bold;font-size:14px;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Practice ID: <span style='font-weight:normal;color:#1e1e1e;font-size:16px;'>"+practiceId.toUpperCase()+"</span><span style='font-weight:normal;color:green;font-size:16px;'>&nbsp;&nbsp;[Use this Practice Id along with your credentials while logging in through Patient Portal.]</span></label>"+
-"<br><br>"+
-"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='color:#1773cf' href='https://portal.glaceemr.com/glaceportal_login/UserRegistration?requestFor=AccountActivation&userId="+patientDetails.getPatientRegistrationId()+"&practiceId="+"glace"+"'>Click here to activate your Patient Portal account</a></label>"+
+"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='color:#1773cf' href='https://patientportal.glaceemr.com/glaceportal_login/UserRegistration?requestFor=AccountActivation&userId="+patientDetails.getPatientRegistrationId()+"&practiceId="+"glace"+"'>Click here to activate your Patient Portal account</a></label>"+
 "<br><br>"+
 "<label style='width:100%;padding:10px 5px;'>Thanks and Regards,</label>"+
 "<br>"+
@@ -454,7 +452,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 	"<br><br>"+
 	"<label style='font-weight:bold;font-size:14px;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password: <span style='font-weight:normal;color:#1e1e1e;font-size:16px;'>"+portalUser.getH809010()+"</span></label>"+
 	"<br><br>"+
-	"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='color:#1773cf' href='https://portal.glaceemr.com/glaceportal_login/portal.jsp?practiceId="+practiceId+"'>Click here to login into portal</a></label>"+
+	"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='color:#1773cf' href='https://patientportal.glaceemr.com/glaceportal_login/portal.jsp?practiceId="+practiceId+"'>Click here to login into portal</a></label>"+
 	"<br><br>"+
 	"<label style='width:100%;padding:10px 5px;'>Thanks and Regards,</label>"+
 	"<br>"+

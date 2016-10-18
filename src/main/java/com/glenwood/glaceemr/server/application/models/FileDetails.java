@@ -105,24 +105,25 @@ public class FileDetails {
 	@JsonManagedReference
 	private List<FileName> fileName;
 
-
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
 	@JoinColumn(name="filedetails_categoryid", referencedColumnName="patient_doc_category_id", insertable=false,updatable=false)
 	@JsonManagedReference
 	PatientDocumentsCategory patientDocCategory;
 
-
-
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
 	@JoinColumn(name="filedetails_createdby", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
 	@JsonManagedReference
 	EmployeeProfile createdByEmpProfileTable;
 
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="filedetails_lastmodifiedby", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
 	@JsonManagedReference
 	EmployeeProfile lastModifiedByEmpProfileTable;
 
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="filedetails_encounterid", referencedColumnName="encounter_id", insertable=false,updatable=false)
 	@JsonManagedReference

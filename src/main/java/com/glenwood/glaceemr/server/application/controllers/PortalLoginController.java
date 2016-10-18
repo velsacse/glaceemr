@@ -65,19 +65,19 @@ public class PortalLoginController {
 	public void loginFailure(HttpServletResponse response) throws Exception 
 	{		
 				
-		response.sendRedirect("https://portal.glaceemr.com/glaceportal_login/portal.jsp?practiceid="+TennantContextHolder.getTennantId()+"&log=0");
+		response.sendRedirect("https://patientportal.glaceemr.com/glaceportal_login/portal.jsp?practiceid="+TennantContextHolder.getTennantId()+"&log=0");
 	}
 	
 	@RequestMapping(value = "/SessionExpired",method = RequestMethod.GET)
 	public void redirectToLoginOnSessionExpiry(HttpServletResponse response) throws Exception 
 	{		
-			response.sendRedirect("https://portal.glaceemr.com/glaceportal_login/portal.jsp?practiceid="+TennantContextHolder.getTennantId()+"&log=4");	
+			response.sendRedirect("https://patientportal.glaceemr.com/glaceportal_login/portal.jsp?practiceid="+TennantContextHolder.getTennantId()+"&log=4");	
 	}
 	
 	@RequestMapping(value = "/InvalidSession",method = RequestMethod.GET)
 	public void redirectToLoginOnInvalidSession(HttpServletResponse response) throws Exception 
 	{		
-		response.sendRedirect("https://portal.glaceemr.com/glaceportal_login/portal.jsp?practiceid="+TennantContextHolder.getTennantId()+"&log=5");	
+		response.sendRedirect("https://patientportal.glaceemr.com/glaceportal_login/portal.jsp?practiceid="+TennantContextHolder.getTennantId()+"&log=5");	
 	}
 	
 	@RequestMapping(value = "/ValidateSession",method = RequestMethod.GET)

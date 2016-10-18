@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.models.ImageDetailsBean;
+import com.glenwood.glaceemr.server.application.models.FileDataBean;
 import com.glenwood.glaceemr.server.application.services.portal.fileUploadService.FileUploadService;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.PortalDocumentsService;
 import com.glenwood.glaceemr.server.utils.HUtil;
@@ -58,9 +60,8 @@ public class FileUploadAndRetrieveController {
 	HttpServletRequest request;
 	
 	String pathSeperator = java.io.File.separator;
-
-
-	@RequestMapping(value="/upload/profilePicture", method = RequestMethod.POST, produces= "text/html")
+	
+	@RequestMapping(value="/upload/image", method = RequestMethod.POST, produces= "text/html")
 	@ApiOperation(value = "Uploads user patient picture and returns the saved path", notes = "Uploads user profile picture and returns the saved path.", response = User.class)
 	@ApiResponses(value= {
 			@ApiResponse(code = 200, message = "Patient profile picture upload successfull."),
@@ -93,6 +94,38 @@ public class FileUploadAndRetrieveController {
 			return "Profile picture upload failed";
 		}
 	}
+
+
+	@RequestMapping(value="/upload/profilePicture", method = RequestMethod.POST)
+	@ApiOperation(value = "Uploads user patient picture and returns the saved path", notes = "Uploads user profile picture and returns the saved path.", response = User.class)
+	@ApiResponses(value= {
+			@ApiResponse(code = 200, message = "Patient profile picture upload successfull."),
+			@ApiResponse(code = 404, message = "Patient profile picture to be uploaded not found."),
+			@ApiResponse(code = 500, message = "Internal server error.")})
+	@ResponseBody
+	public String uploadPatientProfilePicture(@RequestBody FileDataBean dataBean)
+	{ 
+		try{			
+			
+			int patientId=dataBean.getPatientId();
+			
+			Assert.notNull(patientId, "entity Id is not passed");
+
+			String absolutePath = fileUploadAndRetrieveService.getSharedFolderPath()+"/photo/";
+			Assert.notNull(absolutePath, "absolute path is empty");
+			
+			BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(absolutePath+patientId+".jpg")));
+			stream.write(dataBean.getByteArrayContent());
+			stream.close();
+			System.out.println("File uploaded successfully!");
+
+			return "<html>Profile Picture uploaded successfully!</html>";
+
+		}catch(Exception ex){
+			ex.printStackTrace();
+			return "Profile picture upload failed";
+		}
+	}
 	
 	
 	
@@ -103,26 +136,26 @@ public class FileUploadAndRetrieveController {
 			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
 			@ApiResponse(code = 500, message = "Internal server error.")})
 	@ResponseBody
-	public ImageDetailsBean retrievePatientProfilePicture(
+	public FileDataBean retrievePatientProfilePicture(
 			@ApiParam(name="patientId", value="") 
 			@RequestParam(value="patientId", required=false, defaultValue="0") int patientId)
 	{ 
 		try{
-			Assert.notNull(patientId, "entity Id is not passed");
-
+			Assert.notNull(patientId, "patientId Id is not passed");
 			String absolutePath = fileUploadAndRetrieveService.getSharedFolderPath()+"/photo/";
 			Assert.notNull(absolutePath, "absolute path is empty");
 			File imageFile=new File(absolutePath+patientId+".jpg");
 			byte[] byteFileStore=new byte[(int) imageFile.length()];
 			
+			@SuppressWarnings("resource")
 			FileInputStream fileInputStream=new FileInputStream(imageFile);
 			fileInputStream.read(byteFileStore);
 			
 			String encodedFile=Base64.encodeBase64String(byteFileStore);
 			
-			ImageDetailsBean imageBean=new ImageDetailsBean();
+			FileDataBean imageBean=new FileDataBean();
 			
-			imageBean.setImageBase64String(encodedFile);
+			imageBean.setStringContent(encodedFile);
 			
 			System.out.println("Image retrieved successfully!");
 			
@@ -134,54 +167,65 @@ public class FileUploadAndRetrieveController {
 		}
 	}
 	
-	@RequestMapping(value="/retrieve/image/", method = RequestMethod.GET)
+	@RequestMapping(value="/retrieve/image", method = RequestMethod.GET)
 	@ApiOperation(value = "Retrieves user patient picture and returns base64 String format", notes = "Uploads user profile picture and returns the saved path.", response = User.class)
 	@ApiResponses(value= {
 			@ApiResponse(code = 200, message = "Patient profile picture retrieve successfull."),
 			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
 			@ApiResponse(code = 500, message = "Internal server error.")})
 	@ResponseBody
-	public String retrievePatientImageDocuments(@ApiParam(name="patientId", value="") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
+	public FileDataBean retrievePatientImageDocuments(@ApiParam(name="patientId", value="") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
 			@ApiParam(name="fileName", value="") @RequestParam(value="fileName", required=false, defaultValue="0") String fileName,
 			@ApiParam(name="fileCategory", value="") @RequestParam(value="fileCategory", required=false, defaultValue="0") String fileCategory)
 	{ 
 		try{
+			
+			System.out.println("In retrievePatientImageDocuments1");
+			
 			Assert.notNull(patientId, "patient Id is not passed");
 			Assert.notNull(fileName, "fileName is not passed");
 			Assert.notNull(fileCategory, "fileCategory is not passed");
 			
-			String absolutePath=null;
-			
+			Assert.notNull(patientId, "patientId Id is not passed");
+			String absolutePath = null;
 			if(fileCategory.equalsIgnoreCase("SharedDocument"))
 				 absolutePath=fileUploadAndRetrieveService.getSharedFolderPath()+pathSeperator+"Attachments"+pathSeperator+patientId+pathSeperator+fileName;
 			else if(fileCategory.equalsIgnoreCase("ProfilePicture"))
 				 absolutePath=fileUploadAndRetrieveService.getSharedFolderPath()+pathSeperator+"photo"+pathSeperator+patientId+pathSeperator+fileName;
-			
 			Assert.notNull(absolutePath, "absolute path is empty");
-			File imageFile=new File(absolutePath);
+			File imageFile=new File(absolutePath+patientId+".jpg");
 			byte[] byteFileStore=new byte[(int) imageFile.length()];
+			System.out.println("In retrievePatientImageDocuments2");
 			
 			FileInputStream fileInputStream=new FileInputStream(imageFile);
 			fileInputStream.read(byteFileStore);
+			System.out.println("In retrievePatientImageDocuments3");
 			
 			String encodedFile=Base64.encodeBase64String(byteFileStore);
+			
+			FileDataBean imageBean=new FileDataBean();
+			System.out.println("In retrievePatientImageDocuments4");
+			imageBean.setStringContent(encodedFile);
+			
 			System.out.println("Image retrieved successfully!");
-			return encodedFile;
+			
+			return imageBean;
+			
 
 		}catch(Exception ex){
 			ex.printStackTrace();
-			return "<html>File retrieved successfully!</html>";
+			return null;
 		}
 	}
 	
-	@RequestMapping(value="/retrieve/html/", method = RequestMethod.GET)
+	@RequestMapping(value="/retrieve/html", method = RequestMethod.GET)
 	@ApiOperation(value = "Retrieves patient html document in String format.", notes = "Retrieves patient html document in String format.", response = User.class)
 	@ApiResponses(value= {
 			@ApiResponse(code = 200, message = "Patient profile picture retrieve successfull."),
 			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
 			@ApiResponse(code = 500, message = "Internal server error.")})
 	@ResponseBody
-	public String retrievePatientHTMLDocuments(@ApiParam(name="patientId", value="") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
+	public FileDataBean retrievePatientHTMLDocuments(@ApiParam(name="patientId", value="") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
 			@ApiParam(name="fileName", value="") @RequestParam(value="fileName", required=false, defaultValue="0") String fileName,
 			@ApiParam(name="fileCategory", value="") @RequestParam(value="fileCategory", required=false, defaultValue="0") String fileCategory)
 	{ 
@@ -199,11 +243,14 @@ public class FileUploadAndRetrieveController {
 			Assert.notNull(absolutePath, "absolute path is empty");
 			Document htmlDocument=Jsoup.parse(new File(absolutePath), "UTF-8");
 			
-			return htmlDocument.outerHtml();
+			FileDataBean htmlBean=new FileDataBean();
+			htmlBean.setStringContent(htmlDocument.outerHtml());
+			
+			return htmlBean;
 
 		}catch(Exception ex){
 			ex.printStackTrace();
-			return "File not found.";
+			return null;
 		}
 	}
 	
@@ -215,7 +262,7 @@ public class FileUploadAndRetrieveController {
 			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
 			@ApiResponse(code = 500, message = "Internal server error.")})
 	@ResponseBody
-	public void filePreviewByFileId(@ApiParam(name="patientId", value="") @PathVariable("patientId") int patientId,
+	public FileDataBean filePreviewByFileId(@ApiParam(name="patientId", value="") @PathVariable("patientId") int patientId,
 			@ApiParam(name="fileName", value="") @PathVariable("fileName") String fileDetailsName,
 			@ApiParam(name="isToDownload", value="") @RequestParam(value="isToDownload",required = false)String isToDownLoad,
 			HttpServletRequest request,HttpServletResponse response)
@@ -234,9 +281,13 @@ public class FileUploadAndRetrieveController {
 		            response.setHeader("Content-Disposition","inline; filename=\"" + fileName +"\"");
 		        }
 		        response.setContentType(fileUploadAndRetrieveService.getResponseContentType(fileType));
-		        writeToResponse(filePath,response);
+		        FileDataBean dataBean=new FileDataBean();
+		        dataBean.setByteArrayContent(readAndReturnFileStream(filePath,response));
+		        
+		        return dataBean;
 		}catch(Exception ex){
 			ex.printStackTrace();
+			return null;
 		}
 	}
 	
@@ -248,7 +299,7 @@ public class FileUploadAndRetrieveController {
 			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
 			@ApiResponse(code = 500, message = "Internal server error.")})
 	@ResponseBody
-	public void filePreviewByFileName(@ApiParam(name="patientId", value="") @PathVariable("patientId") int patientId,
+	public FileDataBean filePreviewByFileName(@ApiParam(name="patientId", value="") @PathVariable("patientId") int patientId,
 			@ApiParam(name="fileCategory", value="") @PathVariable("fileCategory") String fileCategory,
 			@ApiParam(name="fileName", value="") @PathVariable("fileName") String fileDetailsName,
 			@ApiParam(name="isToDownload", value="") @RequestParam(value="isToDownload",required = false)String isToDownLoad,
@@ -284,9 +335,12 @@ public class FileUploadAndRetrieveController {
 		            response.setHeader("Content-Disposition","inline; filename=\"" + fileName +"\"");
 		        }
 		        response.setContentType(fileUploadAndRetrieveService.getResponseContentType(fileType));
-		        writeToResponse(filePath,response);
+		        FileDataBean dataBean=new FileDataBean();
+		        dataBean.setByteArrayContent(readAndReturnFileStream(filePath,response));
+		        return dataBean;
 		}catch(Exception ex){
 			ex.printStackTrace();
+			return null;
 		}
 	}
 
@@ -309,6 +363,31 @@ public class FileUploadAndRetrieveController {
             throw e;
         }finally{            
             if(sos!=null)sos.close();
+            if(bin!=null)bin.close();
+            if(fin!=null)fin.close();
+        }
+
+    }
+    
+    public byte[] readAndReturnFileStream(String filePath, HttpServletResponse response)throws Exception{
+        
+        FileInputStream fin = null;
+        BufferedInputStream bin = null;
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try{
+            fin = new FileInputStream(filePath);
+            bin = new BufferedInputStream(fin);
+            byte b[] = new byte[1024];
+            int length;
+            while((length=bin.read(b))!=-1){
+            	outputStream.write(b,0,length);
+            }
+            outputStream.flush();  
+            return outputStream.toByteArray();
+        }catch(Exception e){
+            throw e;
+        }finally{            
+            if(outputStream!=null)outputStream.close();
             if(bin!=null)bin.close();
             if(fin!=null)fin.close();
         }

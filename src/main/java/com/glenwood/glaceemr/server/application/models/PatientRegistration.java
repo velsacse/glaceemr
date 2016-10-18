@@ -2200,8 +2200,8 @@ public class PatientRegistration implements Serializable {
 		this.empProfile = empProfile;
 	}
 	
-	@OneToOne
-	@JsonManagedReference
+	@OneToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JsonBackReference
 	@JoinColumn(name="patient_registration_id", referencedColumnName="chart_patientid" , insertable=false, updatable=false)
 	private Chart chartTable;
 	

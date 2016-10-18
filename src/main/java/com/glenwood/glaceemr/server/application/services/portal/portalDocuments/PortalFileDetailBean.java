@@ -9,6 +9,8 @@ public class PortalFileDetailBean {
 	String fileName;
 	
 	String filePath;
+	
+	String fileContent;
 
 	public int getPatientId() {
 		return patientId;
@@ -41,7 +43,13 @@ public class PortalFileDetailBean {
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
 	}
-	
-	
+
+	public String getFileContent() {
+		return fileContent;
+	}
+
+	public void setFileContent(String fileContent) {
+		this.fileContent = fileContent;
+	}
 	
 }
