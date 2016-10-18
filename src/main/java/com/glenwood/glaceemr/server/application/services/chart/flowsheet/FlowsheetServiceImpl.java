@@ -547,7 +547,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	 * Method to get the list of lab group ids's configured for the flowsheet
 	 * @return List<Integer>
 	 */
-	public List<Integer> getFlowsheetLabGroupId(Integer flowsheetId, Integer patientId){
+/*	public List<Integer> getFlowsheetLabGroupId(Integer flowsheetId, Integer patientId){
 		List<Integer> groupIds=new ArrayList<Integer>();
 		groupIds.add(-2);
 		List<Integer> gender=new ArrayList<Integer>();
@@ -558,6 +558,19 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			if(i==0)
 				groupIds.clear();
 			groupIds.add(flowsheetLabGroupId.get(i).getFlowsheetLabStandardGroupid());
+		}
+		return groupIds;
+	}*/
+	public List<Integer> getFlowsheetLabGroupId(Integer flowsheetId, Integer patientId){
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+    
+		List<Integer> groupIds=new ArrayList<Integer>();
+		groupIds.add(-2);
+		try{
+		String query= "select lab_standard_group_id from lab_standard_group inner join flowsheet_lab on flowsheet_lab_standard_groupid=lab_standard_group_id  where flowsheet_lab_mapid ="+flowsheetId+" and lab_standard_group_gender=5 or lab_standard_group_gender in(select patient_registration_sex from patient_registration where patient_registration_id="+patientId+")";
+		groupIds.addAll( em.createNativeQuery(query).getResultList() );
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 		return groupIds;
 	}
