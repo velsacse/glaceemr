@@ -32,7 +32,7 @@ public class AuditTrailServiceImpl implements AuditTrailService{
 			int User_Id, String SystemIP, String ClientIP, int patientId,
 			int chartId, int encounterId, int LoginType,
 			HttpServletRequest request) {
-
+ 
 		return 0;
 	}
 
