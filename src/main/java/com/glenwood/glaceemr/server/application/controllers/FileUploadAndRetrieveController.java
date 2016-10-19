@@ -193,7 +193,7 @@ public class FileUploadAndRetrieveController {
 			else if(fileCategory.equalsIgnoreCase("ProfilePicture"))
 				 absolutePath=fileUploadAndRetrieveService.getSharedFolderPath()+pathSeperator+"photo"+pathSeperator+patientId+pathSeperator+fileName;
 			Assert.notNull(absolutePath, "absolute path is empty");
-			File imageFile=new File(absolutePath+patientId+".jpg");
+			File imageFile=new File(absolutePath);
 			byte[] byteFileStore=new byte[(int) imageFile.length()];
 			System.out.println("In retrievePatientImageDocuments2");
 			
