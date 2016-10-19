@@ -17,6 +17,7 @@ import com.glenwood.glaceemr.server.application.models.SchedulerAppointmentBean;
 import com.glenwood.glaceemr.server.application.models.SchedulerResource;
 import com.glenwood.glaceemr.server.application.models.SchedulerResourceCategory;
 import com.glenwood.glaceemr.server.application.services.scheduler.SchedulerService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 /**
  * 
@@ -38,11 +39,13 @@ public class SchedulerController {
 	 */
 	@RequestMapping(value="/getresources",method=RequestMethod.GET)
 	@ResponseBody
-	public List<SchedulerResource> getResources(){
+	public EMRResponseBean getResources(){
 		
 			List<SchedulerResource> schedulerResources=schedulerService.getResources();
+			EMRResponseBean emrResponseBean=new EMRResponseBean();
+			emrResponseBean.setData(schedulerResources);
 		
-		return schedulerResources;
+		return emrResponseBean;
 	}
 	
 	/**
@@ -51,21 +54,24 @@ public class SchedulerController {
 	 */
 	@RequestMapping(value="/getresourcecategory",method=RequestMethod.GET)
 	@ResponseBody
-	public List<SchedulerResourceCategory> getResourceCategories(){
+	public EMRResponseBean getResourceCategories(){
 		
 			List<SchedulerResourceCategory> schedulerResourceCategories=schedulerService.getResourceCategories();
+			EMRResponseBean emrResponseBean=new EMRResponseBean();
+			emrResponseBean.setData(schedulerResourceCategories);
 		
-		return schedulerResourceCategories;
+		return emrResponseBean;
 	}
 	
 	/**
 	 * To get appointment based on date.
 	 * @return
+	 * @param apptDate
+	 * @param resourceId
 	 */
 	@RequestMapping(value="/getappointments",method=RequestMethod.GET)
 	@ResponseBody
-	public List<SchedulerAppointmentBean> getAppointments(@RequestParam(value="apptdate",required=true,defaultValue="t") String apptDate,
-															@RequestParam(value="resourceid") String resourceId){
+	public EMRResponseBean getAppointments(@RequestParam(value="apptdate",required=true,defaultValue="t") String apptDate, @RequestParam(value="resourceid") String resourceId){
 			
 			SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 			Date date=null; 
@@ -77,7 +83,10 @@ public class SchedulerController {
 			}
 			
 			List<SchedulerAppointmentBean> schedulerAppointments=schedulerService.getAppointments(date,resourceId);
-		
-		return schedulerAppointments;
+
+			EMRResponseBean emrResponseBean=new EMRResponseBean();
+			emrResponseBean.setData(schedulerAppointments);
+			
+		return emrResponseBean;
 	}
 }

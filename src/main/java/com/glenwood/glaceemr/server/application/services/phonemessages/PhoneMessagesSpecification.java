@@ -44,11 +44,13 @@ public class PhoneMessagesSpecification {
 				Predicate[] predicateApUserId;
 				
 					try{
-						dateStarting=new Date(startDate);
+						if(!startDate.equals("-1"))
+							dateStarting=new Date(startDate);
+						if(!endDate.equals("-1"))
 						dateEnding=new Date(endDate);
 					}
 					catch(Exception e){
-						System.out.println("Date parsing error.");
+						System.out.println("Date parsing error.\nStartdate "+startDate+"\nEnddate "+endDate+"\nPatientId "+patientId);
 					}
 					
 					if(dateStarting!=null&&dateEnding!=null){
