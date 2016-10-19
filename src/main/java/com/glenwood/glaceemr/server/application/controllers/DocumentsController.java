@@ -19,6 +19,7 @@ import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsNotes;
 import com.glenwood.glaceemr.server.application.services.Documents.DocumentsService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -55,10 +56,12 @@ public class DocumentsController {
 			@ApiResponse(code = 404, message = "when patient id does not exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<Object> getCategoryList(@RequestParam(value="patientId",required=false, defaultValue="-1") Integer patientId) throws Exception
+	public EMRResponseBean getCategoryList(@RequestParam(value="patientId",required=false, defaultValue="-1") Integer patientId) throws Exception
 	{
 		List<Object> catDetails= documentsService.getCategoryList(patientId);
-		return catDetails;
+		EMRResponseBean result=new EMRResponseBean();
+		result.setData(catDetails);
+		return result;
 	}
 
 	/**
@@ -75,10 +78,12 @@ public class DocumentsController {
 			@ApiResponse(code = 404, message = "when patientId and CategoryId does not exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<FileDetails> getFileDetailsByPatientId(@RequestParam(value="patientId",required=true, defaultValue="-1") Integer patientId , @RequestParam(value="categoryId", required=true, defaultValue="-1") Integer categoryId) throws Exception
+	public EMRResponseBean getFileDetailsByPatientId(@RequestParam(value="patientId",required=true, defaultValue="-1") Integer patientId , @RequestParam(value="categoryId", required=true, defaultValue="-1") Integer categoryId) throws Exception
 	{
 		List<FileDetails> filecatDetails= documentsService.getFileDetailsByPatientId(patientId,categoryId);
-		return filecatDetails;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(filecatDetails);
+		return result;
 	}
 
 	/**
@@ -96,9 +101,11 @@ public class DocumentsController {
 			@ApiResponse(code = 404, message = "when File id does not exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public FileDetails getFileList(@RequestParam(value="fileDetailsId", required= true, defaultValue="-1")String fileDetailsId) throws Exception{
+	public EMRResponseBean getFileList(@RequestParam(value="fileDetailsId", required= true, defaultValue="-1")String fileDetailsId) throws Exception{
 		FileDetails fileDetails=documentsService.getFileList(fileDetailsId);
-		return fileDetails;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(fileDetails);
+		return result;
 	}
 
 	/**
@@ -115,10 +122,12 @@ public class DocumentsController {
 			@ApiResponse(code = 404, message = "when File id does not exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<FileName> getInfo(@RequestParam(value="fileNameId", required= true, defaultValue="-1") Integer fileNameId
+	public EMRResponseBean getInfo(@RequestParam(value="fileNameId", required= true, defaultValue="-1") Integer fileNameId
 			) throws Exception{
 		List<FileName> fileName=documentsService.getInfo(fileNameId);
-		return fileName;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(fileName);
+		return result;
 	}
 
 
@@ -135,9 +144,11 @@ public class DocumentsController {
 			@ApiResponse(code = 404, message = "when Notes id does not exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PatientDocumentsNotes> getDocNotes(@RequestParam(value="notesFilenameId", required= true, defaultValue="-1")Integer notesFilenameId) throws Exception{
+	public EMRResponseBean getDocNotes(@RequestParam(value="notesFilenameId", required= true, defaultValue="-1")Integer notesFilenameId) throws Exception{
 		List<PatientDocumentsNotes> patientDocNotes= documentsService.getDocNotesDetails(notesFilenameId);
-		return patientDocNotes;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(patientDocNotes);
+		return result;
 	}
 
 	/**
@@ -156,11 +167,13 @@ public class DocumentsController {
 			@ApiResponse(code = 404, message = "when Notes id does not exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PatientDocumentsNotes> addDocNotes(@RequestParam(value="notesFilenameId", required= true, defaultValue="-1")Integer notesFilenameId,
+	public EMRResponseBean addDocNotes(@RequestParam(value="notesFilenameId", required= true, defaultValue="-1")Integer notesFilenameId,
 			@RequestParam(value="notesPatientNotes", required=false, defaultValue="")String notesPatientNotes,
 			@RequestParam(value="userId",required=true)Integer userId) throws Exception{
 		List<PatientDocumentsNotes> patientDocNotes= documentsService.addDocNotesDetails(notesFilenameId,notesPatientNotes,userId);
-		return patientDocNotes;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(patientDocNotes);
+		return result;
 	}
 
 	/**
@@ -212,13 +225,15 @@ public class DocumentsController {
 			@ApiResponse(code=404, message=""),
 			@ApiResponse(code=500,message="Internal server error")
 	})
-	public List<FileDetails> reviewGroupOfDocs(
+	public EMRResponseBean reviewGroupOfDocs(
 			@ApiParam(name="fileDetailsId",value="list of file name")@RequestParam(value="fileDetailsId",required=true)String fileDetailsId,
 			@ApiParam(name="patientId",value="list of file name")@RequestParam(value="patientId",required=true)Integer patientId,
 			@ApiParam(name="categoryId",value="list of file name")@RequestParam(value="categoryId",required=true)Integer categoryId,
 			@ApiParam(name="userd", value="login user id")@RequestParam(value="userId",required=true)Integer userId){
 		List<FileDetails> fileDetails=documentsService.reviewGroupOfDocs(fileDetailsId,categoryId,patientId,userId);
-		return fileDetails;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(fileDetails);
+		return result;
 
 	}
 
@@ -237,11 +252,13 @@ public class DocumentsController {
 			@ApiResponse(code=404, message=""),
 			@ApiResponse(code=500,message="Internal server error")
 	})
-	public List<FileName> reviewDocuments(
+	public EMRResponseBean reviewDocuments(
 			@ApiParam(name="fileNameId",value="list of file name")@RequestParam(value="fileNameId",required=true)Integer fileNameId,
 			@ApiParam(name="userId", value="login user id")@RequestParam(value="userId",required=true)Integer userId){
 		List<FileName> fileName=documentsService.reviewDocuments(fileNameId, userId);
-		return fileName;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(fileName);
+		return result;
 
 	}
 
@@ -259,11 +276,13 @@ public class DocumentsController {
 			@ApiResponse(code=404, message=""),
 			@ApiResponse(code=500,message="Internal server error")
 	})
-	public FileDetails alertByCategory(
+	public EMRResponseBean alertByCategory(
 			@ApiParam(name="alertId",value="Alert id")@RequestParam(value="alertId",required=true)String alertId,
 			@ApiParam(name="patientId",value="patient id")@RequestParam(value="patientId",required= false, defaultValue="-1") Integer patientId){
 		FileDetails alertPatientDocMapping=documentsService.alertByCategory(alertId,patientId);
-		return alertPatientDocMapping;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(alertPatientDocMapping);
+		return result;
 	}
 
 	/**
@@ -290,7 +309,7 @@ public class DocumentsController {
 			@ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 			@ApiResponse(code = 404, message = "when user id or alert id does not exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> createAlerts(
+	public EMRResponseBean createAlerts(
 			@ApiParam(name="fromid",value="logged in user id") @RequestParam(value="fromid",required=true) String fromid,
 			@ApiParam(name="toid",value="to id") @RequestParam(value="toid",required=true) String toid,
 			@ApiParam(name="status",value="alert status") @RequestParam(value="status",required=true, defaultValue="1") String status,
@@ -311,7 +330,9 @@ public class DocumentsController {
 		}
 		logger.debug("Creating the alert with id "+fromid);	
 		List<AlertEvent> alertEvent=documentsService.forwardAlert(Integer.parseInt(fromid),toIdList,Integer.parseInt(status),alertid,Integer.parseInt(docCategoryid),Integer.parseInt(refid),Integer.parseInt(patientid),Integer.parseInt(encounterid),msg,Integer.parseInt(chartid),Integer.parseInt(roomid),Integer.parseInt(parentid));
-		return alertEvent;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(alertEvent);
+		return result;
 	}
 
 
