@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.GlaceMonitoringParameters;
 
 
@@ -24,15 +25,16 @@ public class GlaceMonitoringController {
 
 	@RequestMapping(value = "/GlaceMonitoringAdapter",method = RequestMethod.GET,produces="text/html")
 	@ResponseBody
-	public String glaceMonitoringAdapter() throws Exception {
+	public EMRResponseBean glaceMonitoringAdapter() throws Exception {
 		GlaceMonitoringParameters monitoringParams = auditTrailService.getServerMonitorResults();
 		String glaceMonitoringResult = "Shared:" + monitoringParams.getShared() + "\n" + "DB:" + monitoringParams.getDB() + "\n"
 				+ "DBRT:" + monitoringParams.getDBRT() + "\n" + "DBFS:" + monitoringParams.getDBFS() + "\n"
 				+ "SHFS:" + monitoringParams.getSHFS() + "\n" + "TFS:" + monitoringParams.getTFS() + "\n" + "RFS:"
 				+ monitoringParams.getRFS() + "\n" + "FMEM:" + monitoringParams.getFMEM() + "\n" + "FJVM:" + monitoringParams.getFJVM()
 				+ "\n" + "VARFS:" + monitoringParams.getVARFS() + "\n" + "USRFS:" + monitoringParams.getUSRFS();
-
-		return glaceMonitoringResult;
+		EMRResponseBean monitoringResult=new EMRResponseBean();
+		monitoringResult.setData(glaceMonitoringResult);
+		return monitoringResult;
 	}
 
 }

@@ -22,6 +22,7 @@ import com.glenwood.glaceemr.server.application.services.chart.RefillRequest.Med
 import com.glenwood.glaceemr.server.application.services.chart.RefillRequest.PatientRefillDataBean;
 import com.glenwood.glaceemr.server.application.services.chart.RefillRequest.RefillRequestService;
 import com.glenwood.glaceemr.server.application.services.chart.RefillRequest.SSMessageBean;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -53,13 +54,15 @@ public class RefillRequestController {
 	
 	@RequestMapping(value ="/byId", method = RequestMethod.GET) 
 	@ResponseBody
-	public List<Prescription> getdenieddrugs(@RequestParam(value="encounterid",required=false,defaultValue="-1")Integer encounterid,@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid)throws Exception
+	public EMRResponseBean getdenieddrugs(@RequestParam(value="encounterid",required=false,defaultValue="-1")Integer encounterid,@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid)throws Exception
 	{
 		logger.debug("Getting  the encounter id"+encounterid);
 		logger.debug("Getting  the patientid "+patientid);
 		List<Prescription> drugs=refillrequestservice.getDeniedDrugs(encounterid,patientid);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-		return drugs;
+		EMRResponseBean drugData=new EMRResponseBean();
+		drugData.setData(drugs);
+		return drugData;
 	}
 	
 	
@@ -74,11 +77,13 @@ public class RefillRequestController {
             @ApiResponse(code = 200, message = "Successful retrieval of User group details"),
             @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public SSMessageBean getCount()throws Exception
+	public EMRResponseBean getCount()throws Exception
 	{
 		SSMessageBean drugs=refillrequestservice.getCount();
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-		return drugs;
+		EMRResponseBean alertCountBean=new EMRResponseBean();
+		alertCountBean.setData(drugs);
+		return alertCountBean;
 	}
 	
 	
@@ -97,11 +102,13 @@ public class RefillRequestController {
             @ApiResponse(code = 404, message = "when group id does not exist"),
             @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public MedicationListBean getalertinbox(@ApiParam(name="erxUserAlertType", value="erx User Alert Type") @RequestParam(value="erxUserAlertType",required=false,defaultValue="MYALERT")String erxUserAlertType,@ApiParam(name="userId", value="userId") @RequestParam(value="userId",required=false,defaultValue="-1")String userId,@ApiParam(name="isNewPage", value="isNewPage") @RequestParam(value="isNewPage",required=false,defaultValue="false") boolean isNewPage)throws Exception
+	public EMRResponseBean getalertinbox(@ApiParam(name="erxUserAlertType", value="erx User Alert Type") @RequestParam(value="erxUserAlertType",required=false,defaultValue="MYALERT")String erxUserAlertType,@ApiParam(name="userId", value="userId") @RequestParam(value="userId",required=false,defaultValue="-1")String userId,@ApiParam(name="isNewPage", value="isNewPage") @RequestParam(value="isNewPage",required=false,defaultValue="false") boolean isNewPage)throws Exception
 	{
 		MedicationListBean drugs=refillrequestservice.getAlertInbox(erxUserAlertType,userId,isNewPage);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-		return drugs;
+		EMRResponseBean alertDataBean=new EMRResponseBean();
+		alertDataBean.setData(drugs);
+		return alertDataBean;
 	}
 	
 	
@@ -119,10 +126,12 @@ public class RefillRequestController {
             @ApiResponse(code = 404, message = "when group id does not exist"),
             @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public String isCloseAlert(@ApiParam(name="userId", value="userId") @RequestParam(value="userId",required=false,defaultValue="-1")int userId,@ApiParam(name="alertId", value="alertId") @RequestParam(value="alertId",required=false,defaultValue="-1")String alertId,@ApiParam(name="alertEventIds", value="alertEventIds") @RequestParam(value="alertEventIds",required=false,defaultValue="-1")String alertEventIds) throws Exception
+	public EMRResponseBean isCloseAlert(@ApiParam(name="userId", value="userId") @RequestParam(value="userId",required=false,defaultValue="-1")int userId,@ApiParam(name="alertId", value="alertId") @RequestParam(value="alertId",required=false,defaultValue="-1")String alertId,@ApiParam(name="alertEventIds", value="alertEventIds") @RequestParam(value="alertEventIds",required=false,defaultValue="-1")String alertEventIds) throws Exception
 	{
 		String responseString=refillrequestservice.isCloseAlert(userId,alertId,alertEventIds);
-		return responseString;
+		EMRResponseBean closingMessage=new EMRResponseBean();
+		closingMessage.setData(responseString);
+		return closingMessage;
 	}
 	
 	
@@ -139,10 +148,12 @@ public class RefillRequestController {
             @ApiResponse(code = 404, message = "when group id does not exist"),
             @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<SSMessageInbox> mergeRequest(@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId,@ApiParam(name="alertId", value="alertId") @RequestParam(value="alertId",required=false,defaultValue="-1")String alertId) throws Exception
+	public EMRResponseBean mergeRequest(@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId,@ApiParam(name="alertId", value="alertId") @RequestParam(value="alertId",required=false,defaultValue="-1")String alertId) throws Exception
 	{
 		List<SSMessageInbox> responseString=refillrequestservice.mergeRequest(patientId,alertId);
-		return responseString;
+		EMRResponseBean mergeStatusMessage=new EMRResponseBean();
+		mergeStatusMessage.setData(responseString);
+		return mergeStatusMessage;
 		
 	}
 	
@@ -159,14 +170,16 @@ public class RefillRequestController {
             @ApiResponse(code = 404, message = "when group id does not exist"),
             @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PatientRefillDataBean pendingRequest(@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId) throws Exception
+	public EMRResponseBean pendingRequest(@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId) throws Exception
 	{
 		String appt=refillrequestservice.BillingConfig(patientId);
 		String lastVisitPOS=refillrequestservice.getPosDetails(patientId);
 		PatientRegistration patdata=refillrequestservice.getPatientData(patientId);
 		List<SSMessageInbox> pedingdata=refillrequestservice.patRequestsData(patientId);
 		PatientRefillDataBean databean=new PatientRefillDataBean(appt,lastVisitPOS,patdata,pedingdata);
-		return databean;
+		EMRResponseBean requestDataBean=new EMRResponseBean();
+		requestDataBean.setData(databean);
+		return requestDataBean;
 		
 	}
 	
