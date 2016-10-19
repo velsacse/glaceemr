@@ -16,6 +16,7 @@ import com.glenwood.glaceemr.server.application.models.H496;
 import com.glenwood.glaceemr.server.application.services.fax.FaxFolderBean;
 import com.glenwood.glaceemr.server.application.services.fax.FaxService;
 import com.glenwood.glaceemr.server.application.services.fax.FaxuserlistBean;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 
 /**
@@ -40,10 +41,13 @@ public class FaxController {
 	 */
 	@RequestMapping(value="/getOutboxDetails",method=RequestMethod.GET)
 	@ResponseBody
-	public  List<Object> getOutboxDetails(@RequestParam(value="faxFolderId",required=true,defaultValue="2")Integer h496004,
+	public  EMRResponseBean getOutboxDetails(@RequestParam(value="faxFolderId",required=true,defaultValue="2")Integer h496004,
 			@RequestParam(value="userId",required=true,defaultValue="-1")Integer userId,
 			@RequestParam(value="pageNo",required=true,defaultValue="1")Integer pageNo) throws Exception{
-		return faxService.getOutboxDetails(h496004,userId,pageNo);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(faxService.getOutboxDetails(h496004,userId,pageNo));
+	
+	return emrResponseBean;
 	}
 
 	/**
@@ -57,13 +61,16 @@ public class FaxController {
 	 */
 	@RequestMapping(value="/getInboxDetails",method=RequestMethod.GET)
 	@ResponseBody
-	public  List<Object> getInboxDetails(
+	public  EMRResponseBean getInboxDetails(
 			@RequestParam(value="folderId",required=true,defaultValue="1")Integer h491010,
 			@RequestParam(value="faxStatusId",required=false,defaultValue="-1")Integer h491013,
 			@RequestParam(value="forwaredUserId",required=true,defaultValue="0")Integer h491014,
 			@RequestParam(value="faxLocation",required=false,defaultValue="1")Integer h491017_faxbox,
 			@RequestParam(value="pageNo",required=true,defaultValue="1")int pageNo) throws Exception{
-		return ( faxService).getInboxDetails(h491010,h491013,h491014,h491017_faxbox,pageNo);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(( faxService).getInboxDetails(h491010,h491013,h491014,h491017_faxbox,pageNo));
+	
+	return emrResponseBean;
 	}
 
 	/**
@@ -75,10 +82,13 @@ public class FaxController {
 	 */
 	@RequestMapping(value="/getFaxFolderCount",method=RequestMethod.GET)
 	@ResponseBody
-	public  List<FaxFolderBean> getFaxFolderCount(
+	public  EMRResponseBean getFaxFolderCount(
 			@RequestParam(value="faxLocation",required=false,defaultValue="1")Integer fax_location,
 			@RequestParam(value="userId",required=true,defaultValue="-1")Integer userId) throws Exception{
-		return faxService.getFaxFolderCount(fax_location,userId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(faxService.getFaxFolderCount(fax_location,userId));
+		
+		return emrResponseBean;
 	}
 
 	/**
@@ -122,9 +132,12 @@ public class FaxController {
 	 */
 	@RequestMapping(value="/getForwardUserList",method=RequestMethod.GET)
 	@ResponseBody
-	public  List<FaxuserlistBean> getForwardUserList(
+	public  EMRResponseBean getForwardUserList(
 			@RequestParam(value="emp_profile_groupid",required=false,defaultValue="-1")Integer empProfileGroupid)throws Exception{
-		return faxService.getForwardUserList(empProfileGroupid);		
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(faxService.getForwardUserList(empProfileGroupid));
+		
+		return emrResponseBean;
 	}
 
 	/**
@@ -138,12 +151,15 @@ public class FaxController {
 	 */
 	@RequestMapping(value="/forwardFax",method=RequestMethod.GET)
 	@ResponseBody
-	public  List<H491> forwardFax(
+	public  EMRResponseBean forwardFax(
 			@RequestParam(value="faxId",required=true,defaultValue="-1")String  faxId,
 			@RequestParam(value="fowardTo",required=true,defaultValue="-1")Integer forwardTO,
 			@RequestParam(value="folderId",required=true,defaultValue="-3")Integer folderID,
 			@RequestParam(value="userId",required=true,defaultValue="-1")Integer userId)throws Exception{
-		return faxService.forwardFax(faxId,forwardTO,folderID,userId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(faxService.forwardFax(faxId,forwardTO,folderID,userId));
+		
+		return emrResponseBean;
 	}
 
 	/**
@@ -157,12 +173,15 @@ public class FaxController {
 	 */
 	@RequestMapping(value="/getInFaxDetails",method=RequestMethod.GET)
 	@ResponseBody
-	public  List<H491> getInFaxDetails(
+	public EMRResponseBean getInFaxDetails(
 			@RequestParam(value="userId",required=false,defaultValue="-1")Integer userId,
 			@RequestParam(value="faxId",required=true,defaultValue="-1")Integer faxId,
 			@RequestParam(value="faxTab",required=true,defaultValue="0")Integer faxTab,
 			@RequestParam(value="faxFolder",required=true,defaultValue="1")Integer faxFolder)throws Exception{
-		return faxService.getInFaxDetails(faxId, userId, faxTab, faxFolder);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(faxService.getInFaxDetails(faxId, userId, faxTab, faxFolder));
+		
+		return emrResponseBean;
 	}
 
 	/**
@@ -175,11 +194,14 @@ public class FaxController {
 	 */
 	@RequestMapping(value="/getOutFaxDetails",method=RequestMethod.GET)
 	@ResponseBody
-	public  List<H496> getOutFaxDetails(
+	public EMRResponseBean getOutFaxDetails(
 			@RequestParam(value="faxId",required=true,defaultValue="-1")Integer faxId,
 			@RequestParam(value="faxTab",required=true,defaultValue="0")Integer faxTab,
 			@RequestParam(value="faxFolder",required=true,defaultValue="2")Integer faxFolder)throws Exception{
-		return faxService.getOutFaxDetails(faxId, faxTab, faxFolder);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(faxService.getOutFaxDetails(faxId, faxTab, faxFolder));
+
+		return emrResponseBean;
 	}
 
 	/**
@@ -190,8 +212,11 @@ public class FaxController {
 	 */
 	@RequestMapping(value="/getSignatureDetails",method=RequestMethod.GET)
 	@ResponseBody
-	public  List<DoctorSign> getSignatureDetails(
+	public  EMRResponseBean getSignatureDetails(
 			@RequestParam(value="loginId",required=true,defaultValue="-1")Integer empProfileLoginid)throws Exception{
-		return faxService.getSignatureDetails(empProfileLoginid);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(faxService.getSignatureDetails(empProfileLoginid));
+
+		return emrResponseBean;
 	}
 }
