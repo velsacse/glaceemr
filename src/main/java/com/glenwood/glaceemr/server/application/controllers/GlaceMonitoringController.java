@@ -23,18 +23,16 @@ public class GlaceMonitoringController {
 	@Autowired
 	AuditTrailService auditTrailService;
 
-	@RequestMapping(value = "/GlaceMonitoringAdapter",method = RequestMethod.GET,produces="text/html")
+	@RequestMapping(value = "/GlaceMonitoringAdapter",method = RequestMethod.POST,produces="text/html")
 	@ResponseBody
-	public EMRResponseBean glaceMonitoringAdapter() throws Exception {
+	public String glaceMonitoringAdapter() throws Exception {
 		GlaceMonitoringParameters monitoringParams = auditTrailService.getServerMonitorResults();
 		String glaceMonitoringResult = "Shared:" + monitoringParams.getShared() + "\n" + "DB:" + monitoringParams.getDB() + "\n"
 				+ "DBRT:" + monitoringParams.getDBRT() + "\n" + "DBFS:" + monitoringParams.getDBFS() + "\n"
 				+ "SHFS:" + monitoringParams.getSHFS() + "\n" + "TFS:" + monitoringParams.getTFS() + "\n" + "RFS:"
 				+ monitoringParams.getRFS() + "\n" + "FMEM:" + monitoringParams.getFMEM() + "\n" + "FJVM:" + monitoringParams.getFJVM()
 				+ "\n" + "VARFS:" + monitoringParams.getVARFS() + "\n" + "USRFS:" + monitoringParams.getUSRFS();
-		EMRResponseBean monitoringResult=new EMRResponseBean();
-		monitoringResult.setData(glaceMonitoringResult);
-		return monitoringResult;
+		return glaceMonitoringResult;
 	}
 
 }
