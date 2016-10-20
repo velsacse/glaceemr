@@ -59,7 +59,7 @@ public class PatientSharedDocumentLog {
 	@Column(name="patient_shared_document_log_status")
 	private Boolean patientSharedDocumentLogStatus;
 	
-	@OneToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@OneToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
 	@JoinColumn(name="patient_shared_document_log_encounter_id", referencedColumnName="encounter_id", insertable=false,updatable=false)
 	@JsonManagedReference
 	Encounter docsLogEncounterTable;

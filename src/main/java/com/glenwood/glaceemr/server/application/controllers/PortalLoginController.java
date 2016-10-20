@@ -1,8 +1,4 @@
-/**
- * 
- */
 package com.glenwood.glaceemr.server.application.controllers;
-
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,8 +13,6 @@ import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 
-
-
 @RestController
 @RequestMapping(value="/login/PortalLoginAndLogout")
 @Api(value="PortalLoginController", description="Manages the login mechanism")
@@ -31,13 +25,14 @@ public class PortalLoginController {
 	
 	@Autowired
 	ObjectMapper objectMapper;
-	
+
+	@Autowired
+	EMRResponseBean responseBean;
 	
 	@RequestMapping(value = "/LoggedIn",method = RequestMethod.GET)
 	public EMRResponseBean logIn() throws Exception 
 	{		
 				
-		EMRResponseBean responseBean=new EMRResponseBean();
 		responseBean.setSuccess(true);
 		responseBean.setCanUserAccess(true);
 		responseBean.setLogin(true);
@@ -51,7 +46,6 @@ public class PortalLoginController {
 	public EMRResponseBean logOut() throws Exception 
 	{		
 				
-		EMRResponseBean responseBean=new EMRResponseBean();
 		responseBean.setSuccess(true);
 		responseBean.setCanUserAccess(true);
 		responseBean.setLogin(false);

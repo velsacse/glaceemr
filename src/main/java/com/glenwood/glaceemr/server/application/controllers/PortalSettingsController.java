@@ -1,6 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,18 +10,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
-import com.glenwood.glaceemr.server.application.models.EncryptedPatientDetails;
-import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistrationBean;
-import com.glenwood.glaceemr.server.application.models.PortalConfigBean;
-import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailServiceImpl;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
-import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PatientProfileSettingsFields;
-import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalBillingConfigFields;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalSettingsService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -51,7 +45,9 @@ public class PortalSettingsController {
 	
 	@Autowired
 	EmployeeService employeeService;
-	
+
+	@Autowired
+	EMRResponseBean responseBean;
 	
 	/**
 	 * @return List of patient profile settings fields with available options.
@@ -64,9 +60,22 @@ public class PortalSettingsController {
 		    @ApiResponse(code = 404, message = "Details doesn't exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PatientProfileSettingsFields getPatientProfileSettingsFieldsOprions(){
-		
-		return portalSettingsService.getPatientProfileSettingsFieldsList();
+	public EMRResponseBean getPatientProfileSettingsFieldsOprions(){
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.getPatientProfileSettingsFieldsList());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving profile settings fields!");
+			return responseBean;
+		}
 		
 	}
 	
@@ -81,9 +90,22 @@ public class PortalSettingsController {
 		    @ApiResponse(code = 404, message = "Details doesn't exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalBillingConfigFields getPortalBillingConfigFields(){
-		
-		return portalSettingsService.getPortalBillingConfigFields();
+	public EMRResponseBean getPortalBillingConfigFields(){
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.getPortalBillingConfigFields());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in portal billing config fields!");
+			return responseBean;
+		}
 		
 	}
 	
@@ -99,12 +121,23 @@ public class PortalSettingsController {
 		    @ApiResponse(code = 404, message = "Details doesn't exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<EmployeeProfile> getEmployeesList(@ApiParam(name="groupId", value="groupId of the employees") @RequestParam(value="groupId", required=false, defaultValue="") String groupId,
+	public EMRResponseBean getEmployeesList(@ApiParam(name="groupId", value="groupId of the employees") @RequestParam(value="groupId", required=false, defaultValue="") String groupId,
 			@ApiParam(name="sort", value="sort order of the result") @RequestParam(value="sort", required=false, defaultValue="") String sort){
-		
-		List<EmployeeProfile> employeesList=employeeService.getEmployeeDetails(groupId, sort);
-		
-		return employeesList;
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(employeeService.getEmployeeDetails(groupId, sort));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving the principal doctors list!");
+			return responseBean;
+		}
 		
 	}
 	
@@ -119,11 +152,22 @@ public class PortalSettingsController {
 		    @ApiResponse(code = 404, message = "Details doesn't exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PosTable> getActivePosList(){
-		
-		List<PosTable> posList=portalSettingsService.getActivePosList();
-		
-		return posList;
+	public EMRResponseBean getActivePosList(){
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.getActivePosList());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving the pos list!");
+			return responseBean;
+		}
 		
 	}
 	
@@ -138,11 +182,22 @@ public class PortalSettingsController {
 		    @ApiResponse(code = 404, message = "Details doesn't exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<EmployeeProfile> getProvidersList(){
-		
-		List<EmployeeProfile> providersList=portalSettingsService.getProvidersList();
-		
-		return providersList;
+	public EMRResponseBean getProvidersList(){
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.getProvidersList());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving the providers list!");
+			return responseBean;
+		}
 		
 	}
 	
@@ -158,11 +213,22 @@ public class PortalSettingsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public  PatientRegistration saveDemographicChanges(@RequestBody PatientRegistrationBean regDetailsBean) throws Exception{
-		
-		PatientRegistration registrationDetails = portalSettingsService.saveDemographicChanges(regDetailsBean);
+	public  EMRResponseBean saveDemographicChanges(@RequestBody PatientRegistrationBean regDetailsBean) throws Exception{
 
-		return registrationDetails;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.saveDemographicChanges(regDetailsBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in saving the demographic changes!");
+			return responseBean;
+		}
 	}
 	
 	
@@ -178,10 +244,23 @@ public class PortalSettingsController {
 		    @ApiResponse(code = 404, message = "Details doesn't exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EncryptedPatientDetails getActiveSessionForOldEMR(@ApiParam(name="patientId", value="gets the session details from old emr") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getActiveSessionForOldEMR(@ApiParam(name="patientId", value="gets the session details from old emr") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="groupId of the employees") @RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
-		
-		return portalSettingsService.getActiveSessionForOldEMR(patientId, chartId);
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.getActiveSessionForOldEMR(patientId, chartId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving the old emr actice session!");
+			return responseBean;
+		}
 		
 	}
 	
@@ -199,11 +278,22 @@ public class PortalSettingsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalConfigBean getPatientPlanOfCareList(String JSESSIONID, @ApiParam(name="patientId", value="patient's id whose portal config details are to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPortalConfigDetails(String JSESSIONID, @ApiParam(name="patientId", value="patient's id whose portal config details are to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose portal config details are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
 
-        PortalConfigBean portalConfigBean = portalSettingsService.getPortalConfigDetails(patientId, chartId);
-		
-		return portalConfigBean;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.getPortalConfigDetails(patientId, chartId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving portal config fields!");
+			return responseBean;
+		}
 	}
 }

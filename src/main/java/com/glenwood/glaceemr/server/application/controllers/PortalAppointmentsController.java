@@ -16,19 +16,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.models.AlertEvent;
-import com.glenwood.glaceemr.server.application.models.AppointmentDetailsBean;
 import com.glenwood.glaceemr.server.application.models.ApptRequestBean;
-import com.glenwood.glaceemr.server.application.models.PortalApptRequest;
-import com.glenwood.glaceemr.server.application.models.PortalSchedulerAppointmentBean;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointment;
 import com.glenwood.glaceemr.server.application.models.SchedulerApptBookingBean;
-import com.glenwood.glaceemr.server.application.models.SchedulerLock;
-import com.glenwood.glaceemr.server.application.models.SchedulerResource;
-import com.glenwood.glaceemr.server.application.models.SchedulerResourceCategory;
-import com.glenwood.glaceemr.server.application.models.SchedulerTemplateDetail;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.portalAppointments.PortalAppointmentsService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -51,6 +44,9 @@ public class PortalAppointmentsController {
 	@Autowired
 	AuditTrailService auditTrailService;
 	
+	@Autowired
+	EMRResponseBean responseBean;
+	
 	Logger logger=LoggerFactory.getLogger(LoginController.class);
 	
 	
@@ -67,22 +63,34 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<SchedulerAppointment> getPatientAppointmentsList(@ApiParam(name="patientId", value="patient's id whose appointments list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
+	public EMRResponseBean getPatientAppointmentsList(@ApiParam(name="patientId", value="patient's id whose appointments list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
 			@ApiParam(name="appointmentsType", value="type of appointment (Future, Past, Present)") @RequestParam(value="appointmentsType", required=false, defaultValue="present") String appointmentsType,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 		
-		List<SchedulerAppointment> patientAppointmentsList;
-		if(appointmentsType.equalsIgnoreCase("all"))
-			patientAppointmentsList=portalAppointmentsService.getPatientTotalAppointmentsList(patientId, pageOffset, pageIndex);
-		else if(appointmentsType.equalsIgnoreCase("future"))
-			 patientAppointmentsList=portalAppointmentsService.getPatientFutureAppointmentsList(patientId, pageOffset, pageIndex);
-		else if(appointmentsType.equalsIgnoreCase("past"))
-			patientAppointmentsList=portalAppointmentsService.getPatientPastAppointmentsList(patientId, pageOffset, pageIndex);
-		else 
-			patientAppointmentsList=portalAppointmentsService.getPatientTodaysAppointmentsList(patientId, pageOffset, pageIndex);
-			
-		return patientAppointmentsList;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			List<SchedulerAppointment> patientAppointmentsList;
+			if(appointmentsType.equalsIgnoreCase("all"))
+				patientAppointmentsList=portalAppointmentsService.getPatientTotalAppointmentsList(patientId, pageOffset, pageIndex);
+			else if(appointmentsType.equalsIgnoreCase("future"))
+				 patientAppointmentsList=portalAppointmentsService.getPatientFutureAppointmentsList(patientId, pageOffset, pageIndex);
+			else if(appointmentsType.equalsIgnoreCase("past"))
+				patientAppointmentsList=portalAppointmentsService.getPatientPastAppointmentsList(patientId, pageOffset, pageIndex);
+			else 
+				patientAppointmentsList=portalAppointmentsService.getPatientTodaysAppointmentsList(patientId, pageOffset, pageIndex);
+			responseBean.setSuccess(true);
+			responseBean.setData(patientAppointmentsList);
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient appointments list!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -98,13 +106,26 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PortalSchedulerAppointmentBean> getPatientAppointments(@ApiParam(name="patientId", value="patient's id whose appointments list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
+	public EMRResponseBean getPatientAppointments(@ApiParam(name="patientId", value="patient's id whose appointments list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
 			@ApiParam(name="appointmentsType", value="type of appointment (Future, Past, Present)") @RequestParam(value="appointmentsType", required=false, defaultValue="present") String appointmentsType,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.getPatientAppointments(patientId, pageOffset, pageIndex, appointmentsType));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient appointments list!");
+			return responseBean;
+		}
 			
-		return portalAppointmentsService.getPatientAppointments(patientId, pageOffset, pageIndex, appointmentsType);
 	}
 	
 	/**
@@ -119,13 +140,25 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PortalApptRequest> getPatientAppointmentRequestsList(@ApiParam(name="patientId", value="patient's id whose appointment requests list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
+	public EMRResponseBean getPatientAppointmentRequestsList(@ApiParam(name="patientId", value="patient's id whose appointment requests list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 		
-		List<PortalApptRequest> patientAppointmentRequestsList=portalAppointmentsService.getPortalApptRequestList(patientId, pageOffset, pageIndex);
-			
-		return patientAppointmentRequestsList;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.getPortalApptRequestList(patientId, pageOffset, pageIndex));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient appointment requests list!");
+			return responseBean;
+		}
+		
 	}
 	
 	/**
@@ -141,11 +174,23 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public AppointmentDetailsBean getAppointmentDetails() throws Exception{
+	public EMRResponseBean getAppointmentDetails() throws Exception{
 		
-		AppointmentDetailsBean appointmentDetailsBean=portalAppointmentsService.getAppointmentDetails();
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 		
-		return appointmentDetailsBean;
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.getAppointmentDetails());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving appointment details!");
+			return responseBean;
+		}
+		
 	}
 	
 	
@@ -153,6 +198,7 @@ public class PortalAppointmentsController {
 	 * Booked Slots List by resourceId and apptDate
 	 * @return List of Booked Slots
 	 */
+	@SuppressWarnings("deprecation")
 	@RequestMapping(value = "/BookedSlots", method = RequestMethod.GET)
     @ApiOperation(value = "List of booked slots", notes = "List of booked slots", response = User.class)
 	@ApiResponses(value= {
@@ -160,13 +206,23 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "No locations exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<SchedulerAppointment> getBookedSlotsList(@ApiParam(name="resourceId", value="") @RequestParam(value="resourceId", required=false, defaultValue="0") int resourceId,
+	public EMRResponseBean getBookedSlotsList(@ApiParam(name="resourceId", value="") @RequestParam(value="resourceId", required=false, defaultValue="0") int resourceId,
 			@ApiParam(name="apptDate", value="") @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate) throws Exception{
 		
-		@SuppressWarnings("deprecation")
-		List<SchedulerAppointment> bookedSlotsList=portalAppointmentsService.getBookedSlots(resourceId, new Date(apptDate));
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 		
-		return bookedSlotsList;
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.getBookedSlots(resourceId, new Date(apptDate)));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving provider's booked slots list1");
+			return responseBean;
+		}
 	}
 	
 	
@@ -174,6 +230,7 @@ public class PortalAppointmentsController {
 	 * Locked Slots List by resourceId and apptDate
 	 * @return List of Locked Slots
 	 */
+	@SuppressWarnings("deprecation")
 	@RequestMapping(value = "/LockedSlots", method = RequestMethod.GET)
     @ApiOperation(value = "List of Locked Slots", notes = "List of Locked Slots", response = User.class)
 	@ApiResponses(value= {
@@ -181,13 +238,23 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "No locations exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<SchedulerLock> getLockedSlotsList(@ApiParam(name="resourceId", value="") @RequestParam(value="resourceId", required=false, defaultValue="0") int resourceId,
+	public EMRResponseBean getLockedSlotsList(@ApiParam(name="resourceId", value="") @RequestParam(value="resourceId", required=false, defaultValue="0") int resourceId,
 			@ApiParam(name="apptDate", value="") @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate) throws Exception{
 		
-		@SuppressWarnings("deprecation")
-		List<SchedulerLock> lockedSlotsList=portalAppointmentsService.getLockedSlots(resourceId, new Date(apptDate));
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 		
-		return lockedSlotsList;
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.getLockedSlots(resourceId, new Date(apptDate)));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving provider's locked slots list!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -201,17 +268,28 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "No locations exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<SchedulerResource> getAppointmentBookLocationsList() throws Exception{
+	public EMRResponseBean getAppointmentBookLocationsList() throws Exception{
 		
-		List<SchedulerResource> appointmentBookLocationsList=portalAppointmentsService.getApptBookLocationList();
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 		
-		return appointmentBookLocationsList;
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.getApptBookLocationList());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving appointment booking locations list!");
+			return responseBean;
+		}
 	}
 	
 
 	/**
 	 * Appointment Booking Locations.
-	 * @return List of Appointment Booking Locations
+	 * @return List of Appointment Booking Categories
 	 */
 	@RequestMapping(value = "/AppointmentBookCategoriesList", method = RequestMethod.GET)
     @ApiOperation(value = "List of Appointment Booking Categories", notes = "Returns List of Appointment Booking Categories.", response = User.class)
@@ -220,11 +298,22 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "No locations exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<SchedulerResourceCategory> getAppointmentBookCategoriesList() throws Exception{
+	public EMRResponseBean getAppointmentBookCategoriesList() throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 		
-		List<SchedulerResourceCategory> appointmentBookLocationsList=portalAppointmentsService.getSchResourceCategoriesList();
-		
-		return appointmentBookLocationsList;
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.getSchResourceCategoriesList());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving appointment booking categories list!");
+			return responseBean;
+		}
 	}
 	
 	
@@ -240,11 +329,23 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "No locations exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<SchedulerResource> getApptBookDoctorsList(@ApiParam(name="posId", value="place of service id form where we want the doctors List") @RequestParam(value="posId", required=false, defaultValue="0") int posId) throws Exception{
+	public EMRResponseBean getApptBookDoctorsList(@ApiParam(name="posId", value="place of service id form where we want the doctors List") @RequestParam(value="posId", required=false, defaultValue="0") int posId) throws Exception{
 		
-		List<SchedulerResource> appointmentBookDoctorsList=portalAppointmentsService.getApptBookDoctorsList(posId);
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 		
-		return appointmentBookDoctorsList;
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.getApptBookDoctorsList(posId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving appointment providers list!");
+			return responseBean;
+		}
+		
 	}
 	
 	
@@ -261,13 +362,24 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "Not Found"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	List<SchedulerTemplateDetail> getApptFreeSlotsByProviderIdAndDate(@ApiParam(name="providerId", value="") @RequestParam(value="providerId", required=false, defaultValue="0") int providerId,
+	public EMRResponseBean getApptFreeSlotsByProviderIdAndDate(@ApiParam(name="providerId", value="") @RequestParam(value="providerId", required=false, defaultValue="0") int providerId,
 			@ApiParam(name="apptDate", value="") @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate){
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 		
-		@SuppressWarnings("deprecation")
-		List<SchedulerTemplateDetail> freeSlotsList=portalAppointmentsService.getApptFreeSlotsByProviderIdAndDate(providerId, new Date(apptDate));
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.getApptFreeSlotsByProviderIdAndDate(providerId, new Date(apptDate)));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving provider's free slots list!");
+			return responseBean;
+		}
 		
-		return freeSlotsList;
 	}
 	
 	
@@ -283,11 +395,23 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public  AlertEvent createPortalAppointmentRequestAlert(@RequestBody ApptRequestBean apptRequestAlertEventBean) throws Exception{
-				
-		AlertEvent apptRequestAlertEventPreivewBean=portalAppointmentsService.createPortalAppointmentRequest(apptRequestAlertEventBean);
+	public  EMRResponseBean createPortalAppointmentRequestAlert(@RequestBody ApptRequestBean apptRequestAlertEventBean) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+			
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.createPortalAppointmentRequest(apptRequestAlertEventBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in requesting an appointment!");
+			return responseBean;
+		}
 		
-		return apptRequestAlertEventPreivewBean;
 	}
 	
 	/**
@@ -301,11 +425,23 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 404, message = "Appointment Booking Failure"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public  SchedulerAppointment bookAppointment(@RequestBody SchedulerApptBookingBean schedulerApptBookingBean) throws Exception{
+	public  EMRResponseBean bookAppointment(@RequestBody SchedulerApptBookingBean schedulerApptBookingBean) throws Exception{
 		
-		SchedulerAppointment responseBean=portalAppointmentsService.bookAppointment(schedulerApptBookingBean);
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 		
-		return responseBean;
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalAppointmentsService.bookAppointment(schedulerApptBookingBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in booking an appointment!");
+			return responseBean;
+		}
+		
 	}
 
 	

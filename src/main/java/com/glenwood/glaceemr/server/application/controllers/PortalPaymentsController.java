@@ -1,7 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import java.util.List;
-
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.CreditCardPaymentBean;
-import com.glenwood.glaceemr.server.application.models.H093;
-import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
-import com.glenwood.glaceemr.server.application.models.PortalPatientPaymentsSummary;
-import com.glenwood.glaceemr.server.application.models.PortalPatientStatementBean;
-import com.glenwood.glaceemr.server.application.models.PosTable;
-import com.glenwood.glaceemr.server.application.models.ReceiptDetail;
 import com.glenwood.glaceemr.server.application.services.portal.portalPayments.PortalPaymentsService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -41,6 +34,9 @@ public class PortalPaymentsController {
 	
 	@Autowired
 	PortalPaymentsService portalPaymentsService;
+
+	@Autowired
+	EMRResponseBean responseBean;
 	
 	/**
 	 * @param patientId 		: Required patient's id 
@@ -55,12 +51,25 @@ public class PortalPaymentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<H093> getPatientStatementHistory(@ApiParam(name="patientId", value="patient's id whose statement history is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPatientStatementHistory(@ApiParam(name="patientId", value="patient's id whose statement history is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id whose statement history are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
-		
-		return portalPaymentsService.getPatientStatementHistory(patientId, chartId, pageOffset, pageIndex);
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalPaymentsService.getPatientStatementHistory(patientId, chartId, pageOffset, pageIndex));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving the patient statement history!");
+			return responseBean;
+		}
 	}
 	
 	
@@ -77,12 +86,25 @@ public class PortalPaymentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<ReceiptDetail> getPatientPaymentHistory(@ApiParam(name="patientId", value="patient's id whose bill history is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPatientPaymentHistory(@ApiParam(name="patientId", value="patient's id whose bill history is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id whose bill history are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
-		
-		return portalPaymentsService.getPatientPaymentHistory(patientId, chartId, pageOffset, pageIndex);
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalPaymentsService.getPatientPaymentHistory(patientId, chartId, pageOffset, pageIndex));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving the patient payment history!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -98,9 +120,22 @@ public class PortalPaymentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalPatientPaymentsSummary getPatientPaymentsDeails(@ApiParam(name="patientId", value="patient's id whose payments summary is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
-		
-		return portalPaymentsService.getPatientPaymentsSummary(patientId);
+	public EMRResponseBean getPatientPaymentsDeails(@ApiParam(name="patientId", value="patient's id whose payments summary is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalPaymentsService.getPatientPaymentsSummary(patientId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving the patient payment summary!");
+			return responseBean;
+		}
 	}
 	
 	
@@ -116,9 +151,22 @@ public class PortalPaymentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PatientInsDetail> getPatientInsDetails(@ApiParam(name="patientId", value="patient's id whose payments summary is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
-		
-		return portalPaymentsService.getPatientInsDetails(patientId);
+	public EMRResponseBean getPatientInsDetails(@ApiParam(name="patientId", value="patient's id whose payments summary is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalPaymentsService.getPatientInsDetails(patientId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving the patient insurances!");
+			return responseBean;
+		}
 	}
 	
 	
@@ -135,9 +183,22 @@ public class PortalPaymentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public  ReceiptDetail processPaymentTransaction(@RequestBody CreditCardPaymentBean paymentDetailsBean) throws Exception{
-		
-		return portalPaymentsService.processPaymentTransaction(paymentDetailsBean);
+	public  EMRResponseBean processPaymentTransaction(@RequestBody CreditCardPaymentBean paymentDetailsBean) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalPaymentsService.processPaymentTransaction(paymentDetailsBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in credit card payment!");
+			return responseBean;
+		}
 	}
 	
 	
@@ -155,12 +216,24 @@ public class PortalPaymentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalPatientStatementBean getPatientStatementDetails(@ApiParam(name="patientId", value="patient's id whose  statement details bean is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPatientStatementDetails(@ApiParam(name="patientId", value="patient's id whose  statement details bean is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="billId", value="bill id of the statement details bean to be retrieved") @RequestParam(value="billId", required=false, defaultValue="") int billId,
 			@ApiParam(name="billType", value="bill type of the statement details bean to be retrieved") @RequestParam(value="billType", required=false, defaultValue="") String billType) throws Exception{
-		
-		PortalPatientStatementBean portalPatientStatementBean=portalPaymentsService.getPatientStatementFileDetails(patientId, billId, billType);
-		return portalPatientStatementBean;
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalPaymentsService.getPatientStatementFileDetails(patientId, billId, billType));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving the patient statement!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -174,9 +247,22 @@ public class PortalPaymentsController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PosTable> getTransFirstConfiguredPosList() throws Exception{
-		
-		return portalPaymentsService.getTransFirstConfiguredPosList();
+	public EMRResponseBean getTransFirstConfiguredPosList() throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalPaymentsService.getTransFirstConfiguredPosList());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retieving transfirst configured pos list!");
+			return responseBean;
+		}
 	}
 	
 	
