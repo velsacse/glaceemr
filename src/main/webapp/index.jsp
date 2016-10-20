@@ -4,9 +4,15 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Welcome To Glenwood EMR</title>
+<title>GlaceEMR - Services</title>
 </head>
 <body>
-Welcome To Glenwood Services !
+Welcome To Glenwood Services !<br>
+<b>
+IP :
+<%
+String serverIP = request.getLocalAddr();%>
+<%=serverIP%>
+</b>
 </body>
 </html>
