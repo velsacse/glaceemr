@@ -41,6 +41,9 @@ public class PortalRecoverUserPasswordController {
 	portalRecoverUserPasswordService portalRecoverPasswordService;
 	
 	Logger logger=LoggerFactory.getLogger(LoginController.class);
+
+	@Autowired
+	EMRResponseBean responseBean;
 	
 	/**
 	 * Appointment Requests list of a patient.
@@ -54,11 +57,22 @@ public class PortalRecoverUserPasswordController {
 		    @ApiResponse(code = 404, message = "Patient with given username does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public RecoverPortalPasswordBean getPatientAppointmentRequestsList(@RequestBody RecoverPortalPasswordBean recoverPasswordBean) throws Exception{
-		
-		RecoverPortalPasswordBean recoverBean=portalRecoverPasswordService.authenticateUsernameAndGetSecurityQuestions(recoverPasswordBean);
-			
-		return recoverBean;
+	public EMRResponseBean getPatientAppointmentRequestsList(@RequestBody RecoverPortalPasswordBean recoverPasswordBean) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(false);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalRecoverPasswordService.authenticateUsernameAndGetSecurityQuestions(recoverPasswordBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in authenticating the username!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -75,9 +89,20 @@ public class PortalRecoverUserPasswordController {
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getAppointmentDetails(@RequestBody RecoverPortalPasswordBean recoverPasswordBean) throws Exception{
-		
-		EMRResponseBean emrBean=portalRecoverPasswordService.authenticateSecurityQuestions(recoverPasswordBean);
-		
-		return emrBean;
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(false);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalRecoverPasswordService.authenticateSecurityQuestions(recoverPasswordBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in authenticating security questions!");
+			return responseBean;
+		}
 	}	
 }

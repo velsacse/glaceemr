@@ -20,16 +20,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
-import com.glenwood.glaceemr.server.application.models.H809;
-import com.glenwood.glaceemr.server.application.models.PortalUser;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailServiceImpl;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PatientRegistrationSetupFields;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalPatientRegistrationBean;
-import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalRegistrationResponse;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalSettingsService;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PrincipalDoctor;
 import com.glenwood.glaceemr.server.application.services.portalLogin.PortalLoginService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -61,6 +59,8 @@ public class PortalPatientRegistrationController {
 	@Autowired
 	EmployeeService employeeService;
 
+	@Autowired
+	EMRResponseBean responseBean;
 
 	/**
 	 * @return List of patient profile settings fields with available options.
@@ -73,26 +73,41 @@ public class PortalPatientRegistrationController {
 			@ApiResponse(code = 404, message = "Details doesn't exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PatientRegistrationSetupFields getPatientProfileSettingsFieldsOprions(){
+	public EMRResponseBean getPatientProfileSettingsFieldsOprions(){
 
-		PatientRegistrationSetupFields setupFields=new PatientRegistrationSetupFields();
-		setupFields.setPatientProfileSettingsFields(portalSettingsService.getPatientProfileSettingsFieldsList());
-		setupFields.setPortalBillingConfigFields(portalSettingsService.getPortalBillingConfigFields());
 
-		List<EmployeeProfile> doctorsList=employeeService.getEmployeeDetails("-1", "asc");
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 
-		List<PrincipalDoctor> principalDoctorsList=new ArrayList<PrincipalDoctor>();
+		try {
+			
+			PatientRegistrationSetupFields setupFields=new PatientRegistrationSetupFields();
+			setupFields.setPatientProfileSettingsFields(portalSettingsService.getPatientProfileSettingsFieldsList());
+			setupFields.setPortalBillingConfigFields(portalSettingsService.getPortalBillingConfigFields());
 
-		for(int i=0;i<doctorsList.size();i++){
-			PrincipalDoctor doctor=new PrincipalDoctor();
-			doctor.setPrincipalDoctorId(doctorsList.get(i).getEmpProfileEmpid());
-			doctor.setPrincipalDoctorName(doctorsList.get(i).getEmpProfileFullname());
-			principalDoctorsList.add(doctor);
+			List<EmployeeProfile> doctorsList=employeeService.getEmployeeDetails("-1", "asc");
+
+			List<PrincipalDoctor> principalDoctorsList=new ArrayList<PrincipalDoctor>();
+
+			for(int i=0;i<doctorsList.size();i++){
+				PrincipalDoctor doctor=new PrincipalDoctor();
+				doctor.setPrincipalDoctorId(doctorsList.get(i).getEmpProfileEmpid());
+				doctor.setPrincipalDoctorName(doctorsList.get(i).getEmpProfileFullname());
+				principalDoctorsList.add(doctor);
+			}
+
+			setupFields.setPrincipalDoctorsList(principalDoctorsList);
+			
+			responseBean.setSuccess(true);
+			responseBean.setData(setupFields);
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient registration setup fields!");
+			return responseBean;
 		}
-
-		setupFields.setPrincipalDoctorsList(principalDoctorsList);
-
-		return setupFields;
 
 	}
 
@@ -108,13 +123,25 @@ public class PortalPatientRegistrationController {
 			@ApiResponse(code = 404, message = "Details doesn't exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalRegistrationResponse verifyUsername(@ApiParam(name="username", value="username to be verified") @RequestParam(value="username", required=false, defaultValue="-1") String username,
+	public EMRResponseBean verifyUsername(@ApiParam(name="username", value="username to be verified") @RequestParam(value="username", required=false, defaultValue="-1") String username,
 			@ApiParam(name="dob", value="username to be verified") @RequestParam(value="dob", required=false, defaultValue="-1") String dob,
 			@ApiParam(name="firstName", value="username to be verified") @RequestParam(value="firstName", required=false, defaultValue="-1") String firstName,
 			@ApiParam(name="lastName", value="username to be verified") @RequestParam(value="lastName", required=false, defaultValue="-1") String lastName){
 
-		PortalRegistrationResponse response=portalLoginService.checkDuplicatePatientData(username, dob, firstName, lastName);
-		return response;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalLoginService.checkDuplicatePatientData(username, dob, firstName, lastName));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in veryfying the username!");
+			return responseBean;
+		}
 
 	}
 
@@ -134,11 +161,23 @@ public class PortalPatientRegistrationController {
 			@ApiResponse(code = 404, message = "Details doesn't exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalRegistrationResponse registerNewUser(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
+	public EMRResponseBean registerNewUser(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
 			@ApiParam(name="dbname", value="username to be verified") @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
-		PortalRegistrationResponse response=portalLoginService.registerNewUserForPortal(objectMapper.readValue(registrationDetailsString, PortalPatientRegistrationBean.class), dbname);				
-		return response;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalLoginService.registerNewUserForPortal(objectMapper.readValue(registrationDetailsString, PortalPatientRegistrationBean.class), dbname));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in registering the new patient for patient portal and emr!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -157,11 +196,23 @@ public class PortalPatientRegistrationController {
 			@ApiResponse(code = 404, message = "Details doesn't exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalRegistrationResponse registerExistingUser(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
+	public EMRResponseBean registerExistingUser(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
 			@ApiParam(name="dbname", value="username to be verified") @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
-		PortalRegistrationResponse response=portalLoginService.registerExistingUserForPortal(objectMapper.readValue(registrationDetailsString, PortalPatientRegistrationBean.class), dbname);				
-		return response;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalLoginService.registerExistingUserForPortal(objectMapper.readValue(registrationDetailsString, PortalPatientRegistrationBean.class), dbname));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in registering the existing emr patient for patient portal!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -180,11 +231,23 @@ public class PortalPatientRegistrationController {
 			@ApiResponse(code = 404, message = "Details doesn't exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalRegistrationResponse requestSignupCredentials(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
+	public EMRResponseBean requestSignupCredentials(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
 			@ApiParam(name="dbname", value="username to be verified") @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
-		PortalRegistrationResponse response=portalLoginService.requestSignupCredentials(objectMapper.readValue(registrationDetailsString, PortalPatientRegistrationBean.class), dbname);				
-		return response;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalLoginService.requestSignupCredentials(objectMapper.readValue(registrationDetailsString, PortalPatientRegistrationBean.class), dbname));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving the signup credentials!");
+			return responseBean;
+		}
 	}
 	
 	
@@ -204,11 +267,23 @@ public class PortalPatientRegistrationController {
 			@ApiResponse(code = 404, message = "Details doesn't exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalRegistrationResponse activateAccount(@ApiParam(name="patientId", value="patient id to activate the account") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
+	public EMRResponseBean activateAccount(@ApiParam(name="patientId", value="patient id to activate the account") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
 			@ApiParam(name="practiceId", value="practice id") @RequestParam(value="practiceId", required=false, defaultValue="0") String practiceId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
-		
-		PortalRegistrationResponse response=portalLoginService.activateUserAccount(patientId);
-		return response;
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalLoginService.activateUserAccount(patientId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in activating the patient portal account!");
+			return responseBean;
+		}
 	}
 
 }

@@ -1,6 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +10,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.glenwood.glaceemr.server.application.models.FileDetails;
-import com.glenwood.glaceemr.server.application.models.LabEntries;
-import com.glenwood.glaceemr.server.application.models.PortalLabResultBean;
-import com.glenwood.glaceemr.server.application.models.PortalLabResultsConfigBean;
+
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.portalLabResults.PortalLabResultsService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -48,18 +45,31 @@ public class PortalLabResultsController {
 	@Autowired
 	PortalLabResultsService portalLabResultsService;
 
+	@Autowired
+	EMRResponseBean responseBean;
 	/**
 	 * Method to get list of lab results based on patient Id
 	 * 
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/PortalLabResultsConfigBean", method = RequestMethod.GET)
-	public PortalLabResultsConfigBean getPatientLabResultList()
+	public EMRResponseBean getPatientLabResultList()
 			throws Exception {
 
-		PortalLabResultsConfigBean portalLabResultsConfigBean = portalLabResultsService
-				.getPortalLabResultsConfigBean();
-		return portalLabResultsConfigBean;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalLabResultsService.getPortalLabResultsConfigBean());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving portal labresults config bean!");
+			return responseBean;
+		}
 	}
 
 	/**
@@ -68,17 +78,27 @@ public class PortalLabResultsController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/PatientLabResultsList", method = RequestMethod.GET)
-	public List<LabEntries> getPatientLabResultList(
+	public EMRResponseBean getPatientLabResultList(
 			@RequestParam(value = "patientId", required = false, defaultValue = "") int patientId,
 			@RequestParam(value = "chartId", required = false, defaultValue = "") int chartId,
 			@ApiParam(name = "pageOffset", value = "offset of the page") @RequestParam(value = "pageOffset", required = false, defaultValue = "5") int pageOffset,
 			@ApiParam(name = "pageIndex", value = "index of the page") @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
 					throws Exception {
 
-		List<LabEntries> labResultsList = portalLabResultsService
-				.getPatientLabResultsList(patientId, chartId, pageOffset,
-						pageIndex);
-		return labResultsList;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalLabResultsService.getPatientLabResultsList(patientId, chartId, pageOffset, pageIndex));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient's lab results list!");
+			return responseBean;
+		}
 	}
 
 	/**
@@ -87,7 +107,7 @@ public class PortalLabResultsController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/PatientLabResultParametersList", method = RequestMethod.GET)
-	public PortalLabResultBean getPatientLabResultParametersList(
+	public EMRResponseBean getPatientLabResultParametersList(
 			@RequestParam(value = "testDetailId", required = false, defaultValue = "") int testDetailId,
 			@RequestParam(value = "chartId", required = false, defaultValue = "") int chartId,
 			@RequestParam(value = "patientId", required = false, defaultValue = "") int patientId,
@@ -95,10 +115,20 @@ public class PortalLabResultsController {
 			@ApiParam(name = "pageIndex", value = "index of the page") @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
 					throws Exception {
 
-		PortalLabResultBean labResultParametersList = portalLabResultsService
-				.getPatientLabResultParametersList(testDetailId, chartId, patientId, pageOffset,
-						pageIndex);
-		return labResultParametersList;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalLabResultsService.getPatientLabResultParametersList(testDetailId, chartId, patientId, pageOffset,pageIndex));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving lab result parameters list!");
+			return responseBean;
+		}
 	}
 
 	/**
@@ -114,13 +144,23 @@ public class PortalLabResultsController {
 			@ApiResponse(code = 404, message = "file with given id does not exist"),
 			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public FileDetails getLabAttachmentsDetails(@ApiParam(name="patientId", value="patient's id whose lab attchments details are to be retrieved") @RequestParam(value="patientId", required=true, defaultValue="") int patientId,
+	public EMRResponseBean getLabAttachmentsDetails(@ApiParam(name="patientId", value="patient's id whose lab attchments details are to be retrieved") @RequestParam(value="patientId", required=true, defaultValue="") int patientId,
 			@ApiParam(name="fileDetailEntityId", value="patient's id whose lab attchments details are to be retrieved") @RequestParam(value="fileDetailEntityId", required=true, defaultValue="") int fileDetailEntityId) throws Exception{
 
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 
-		FileDetails fileDetails = portalLabResultsService.getLabAttachmentsFileDetails(patientId, fileDetailEntityId);
-
-		return fileDetails;
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalLabResultsService.getLabAttachmentsFileDetails(patientId, fileDetailEntityId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retieving lab attachemnts!");
+			return responseBean;
+		}
 	}
 
 }

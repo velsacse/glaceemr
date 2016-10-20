@@ -71,7 +71,7 @@
 			password-parameter="password"
 			authentication-success-handler-ref="portalAuthenticationSuccessHandler"
 			authentication-failure-handler-ref="portalAuthenticationFailureHandler" />
-		<logout logout-url="/PortalLogout" logout-success-url="/api/portal/login/PortalLoginAndLogout/LoggedOut" delete-cookies="JSESSIONID" />
+		<logout logout-url="/api/portal/login/PortalLogout" logout-success-url="/api/portal/login/PortalLoginAndLogout/LoggedOut" delete-cookies="JSESSIONID" />
 		
 		<!-- <session-management invalid-session-url="/PortalLogout.jsp">
         <concurrency-control expired-url="/PortalLogout.jsp"/>

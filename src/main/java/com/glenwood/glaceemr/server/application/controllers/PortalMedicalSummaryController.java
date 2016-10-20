@@ -1,7 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +12,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.models.H809;
-import com.glenwood.glaceemr.server.application.models.PortalSessionBean;
-import com.glenwood.glaceemr.server.application.models.PatientAllergies;
-import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
-import com.glenwood.glaceemr.server.application.models.PatientRegistration;
-import com.glenwood.glaceemr.server.application.models.PortalMedicalSummaryBean;
-import com.glenwood.glaceemr.server.application.models.PortalPlanOfCareBean;
-import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.portalMedicalSummary.PortalMedicalSummaryService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -45,6 +36,9 @@ public class PortalMedicalSummaryController {
 	
 	@Autowired
 	ObjectMapper objectMapper;
+
+	@Autowired
+	EMRResponseBean responseBean;
 	
 	Logger logger=LoggerFactory.getLogger(LoginController.class);
 	
@@ -61,10 +55,22 @@ public class PortalMedicalSummaryController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalSessionBean getSessionMap() throws Exception{
-		
-		PortalSessionBean patientDetailsList=portalMedicalSummaryService.getSessionMap();
-		return patientDetailsList;
+	public EMRResponseBean getSessionMap() throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getSessionMap());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving portal session!");
+			return responseBean;
+		}
 	}
 	
 	
@@ -80,10 +86,22 @@ public class PortalMedicalSummaryController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<H809> getPatientDetailsByUsername(@ApiParam(name="username", value="patient's username whose details are to be retrieved") @RequestParam(value="username", required=false, defaultValue="") String username) throws Exception{
-		
-		List<H809> patientDetailsList=portalMedicalSummaryService.getPatientDetailsByUsername(username);
-		return patientDetailsList;
+	public EMRResponseBean getPatientDetailsByUsername(@ApiParam(name="username", value="patient's username whose details are to be retrieved") @RequestParam(value="username", required=false, defaultValue="") String username) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getPatientDetailsByUsername(username));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient details!");
+			return responseBean;
+		}
 	}
 	
 	
@@ -103,12 +121,22 @@ public class PortalMedicalSummaryController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PatientRegistration getPatientPersonalDetails(@ApiParam(name="patientId", value="patient's id whose personal details are to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
-		
-		PatientRegistration personalDetailsList=portalMedicalSummaryService.getPatientPersonalDetails(patientId);
-		
-		
-		return personalDetailsList;
+	public EMRResponseBean getPatientPersonalDetails(@ApiParam(name="patientId", value="patient's id whose personal details are to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getPatientPersonalDetails(patientId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient personal details!");
+			return responseBean;
+		}
 	}
 	
 
@@ -124,15 +152,25 @@ public class PortalMedicalSummaryController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<ProblemList> getPatientProblemsList(@ApiParam(name="patientId", value="patient's id whose problem list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPatientProblemsList(@ApiParam(name="patientId", value="patient's id whose problem list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="problemType", value="type of problem list is to be retrieved") @RequestParam(value="problemType", required=false, defaultValue="") String problemType,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
-		
-		List<ProblemList> problemsList=portalMedicalSummaryService.getPatientProblemList(patientId, problemType, pageOffset, pageIndex);
-		
-		
-		return problemsList;
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getPatientProblemList(patientId, problemType, pageOffset, pageIndex));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient problems list!");
+			return responseBean;
+		}
 	}
 	
      
@@ -149,14 +187,24 @@ public class PortalMedicalSummaryController {
 		    @ApiResponse(code = 404, message = "Patient with given chart id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PatientAllergies> getPatientAllergies(@ApiParam(name="chartId", value="chart id of a patient, whose allergies are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId,
+	public EMRResponseBean getPatientAllergies(@ApiParam(name="chartId", value="chart id of a patient, whose allergies are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
-		
-		List<PatientAllergies> patientAllergies=portalMedicalSummaryService.getPatientAllergies(chartId, pageOffset, pageIndex);
-		
-		
-		return patientAllergies;
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getPatientAllergies(chartId, pageOffset, pageIndex));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient allergies!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -172,13 +220,25 @@ public class PortalMedicalSummaryController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PortalPlanOfCareBean> getPatientPlanOfCareList(@ApiParam(name="patientId", value="patient's id whose problem list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPatientPlanOfCareList(@ApiParam(name="patientId", value="patient's id whose problem list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose allergies are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
-		
-		List<PortalPlanOfCareBean> planOfCareList=portalMedicalSummaryService.getPlanOfCare(patientId, chartId, pageOffset, pageIndex);
-		return planOfCareList;
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getPlanOfCare(patientId, chartId, pageOffset, pageIndex));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient plan of care!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -194,15 +254,25 @@ public class PortalMedicalSummaryController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PatientClinicalElements> getPatientPlanOfCarePlanTypesList(@ApiParam(name="patientId", value="patient's id whose problem list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPatientPlanOfCarePlanTypesList(@ApiParam(name="patientId", value="patient's id whose problem list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="encounterId", value="chart id of a patient, whose allergies are to be retrieved") @RequestParam(value="encounterId", required=false, defaultValue="") int encounterId,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
-		
-		List<PatientClinicalElements> planOfCarePlanTypesList=portalMedicalSummaryService.getPlanOfCareDetails(patientId, encounterId, pageOffset, pageIndex);
-		
-		
-		return planOfCarePlanTypesList;
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getPlanOfCareDetails(patientId, encounterId, pageOffset, pageIndex));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving plan of care plan types list!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -218,13 +288,23 @@ public class PortalMedicalSummaryController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PortalMedicalSummaryBean getPortalMedicalSummaryDetails(@ApiParam(name="patientId", value="patient's id whose medical summary details are to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPortalMedicalSummaryDetails(@ApiParam(name="patientId", value="patient's id whose medical summary details are to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose medical summary details are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
-		
-		PortalMedicalSummaryBean summaryDetails=portalMedicalSummaryService.getPortalMedicalSummaryDetails(patientId, chartId);
-		
-		
-		return summaryDetails;
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getPortalMedicalSummaryDetails(patientId, chartId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient medical summary details!");
+			return responseBean;
+		}
 	}
 	
 }

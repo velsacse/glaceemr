@@ -1,7 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import java.util.List;
-
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -15,11 +13,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.models.PatientFeedback;
-import com.glenwood.glaceemr.server.application.models.PatientFeedbackQuestionnaire;
 import com.glenwood.glaceemr.server.application.models.PatientFeedbackSaveBean;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.portalPatientFeedback.PortalPatientFeedbackService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -41,6 +38,9 @@ public class PortalPatientFeedbackController {
 	AuditTrailService auditTrailService;
 	
 	Logger logger=LoggerFactory.getLogger(LoginController.class);
+
+	@Autowired
+	EMRResponseBean responseBean;
 	
 	/**
 	 * Appointment list of a patient appointments.
@@ -55,9 +55,22 @@ public class PortalPatientFeedbackController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<PatientFeedbackQuestionnaire> getPatientAppointmentsList() throws Exception{
-		
-		return portalPatientFeedbackService.getPatientFeedbackSurveyQuestionnaire();
+	public EMRResponseBean getPatientAppointmentsList() throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalPatientFeedbackService.getPatientFeedbackSurveyQuestionnaire());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving feedback questionnaire!");
+			return responseBean;
+		}
 	}
 	
 	/**
@@ -73,9 +86,22 @@ public class PortalPatientFeedbackController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PatientFeedback saveCahpsSurvey(@RequestBody PatientFeedbackSaveBean feedbackSaveBean) throws Exception{
-		
-		return portalPatientFeedbackService.savePatientFeedback(feedbackSaveBean);
+	public EMRResponseBean saveCahpsSurvey(@RequestBody PatientFeedbackSaveBean feedbackSaveBean) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalPatientFeedbackService.savePatientFeedback(feedbackSaveBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in saving patient feedback!");
+			return responseBean;
+		}
 	}
 
 }

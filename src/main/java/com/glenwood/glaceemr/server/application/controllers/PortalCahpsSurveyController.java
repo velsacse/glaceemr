@@ -1,7 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import java.util.List;
-
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -16,11 +14,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.models.CahpsQuestionnaire;
-import com.glenwood.glaceemr.server.application.models.PatientCahpsSurvey;
 import com.glenwood.glaceemr.server.application.models.PatientSurveySaveBean;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.portalCahpsSurvey.PortalCahpsSurveyService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -42,6 +39,9 @@ public class PortalCahpsSurveyController {
 	
 	@Autowired
 	AuditTrailService auditTrailService;
+
+	@Autowired
+	EMRResponseBean responseBean;
 	
 	Logger logger=LoggerFactory.getLogger(LoginController.class);
 	
@@ -59,9 +59,23 @@ public class PortalCahpsSurveyController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<CahpsQuestionnaire> getPatientCahpsQuestionnaire(@ApiParam(name="patientAge", value="patient age to retrieve the corresponding cahps questionnaire") @RequestParam(value="patientAge", required=false, defaultValue="0") int patientAge) throws Exception{
+	public EMRResponseBean getPatientCahpsQuestionnaire(@ApiParam(name="patientAge", value="patient age to retrieve the corresponding cahps questionnaire") @RequestParam(value="patientAge", required=false, defaultValue="0") int patientAge) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalCahpsSurveyService.getPatientCahpsSurveyQuestionnaire(patientAge));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient cahps questionnaire!");
+			return responseBean;
+		}
 		
-		return portalCahpsSurveyService.getPatientCahpsSurveyQuestionnaire(patientAge);
 	}
 	
 	
@@ -78,9 +92,23 @@ public class PortalCahpsSurveyController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PatientCahpsSurvey saveCahpsSurvey(@RequestBody PatientSurveySaveBean surveySaveBean) throws Exception{
+	public EMRResponseBean saveCahpsSurvey(@RequestBody PatientSurveySaveBean surveySaveBean) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 		
-		return portalCahpsSurveyService.saveCahpsSurvey(surveySaveBean);
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalCahpsSurveyService.saveCahpsSurvey(surveySaveBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in saving patient cahps survey!");
+			return responseBean;
+		}
+		
 	}
 	
 }
