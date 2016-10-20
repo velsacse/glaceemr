@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.services.chart.ros.ROSService;
 import com.glenwood.glaceemr.server.application.services.chart.ros.ROSSystemBean;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.Api;
 
@@ -27,7 +28,7 @@ public class ROSController {
 	
 	@RequestMapping(value="/ROSElements",method=RequestMethod.GET)
 	@ResponseBody
-	public List<ROSSystemBean> getROSElement(@RequestParam(value="patientId") Integer patientId,
+	public EMRResponseBean getROSElement(@RequestParam(value="patientId") Integer patientId,
 									   @RequestParam(value="chartId") Integer chartId,
 									   @RequestParam(value="encounterId") Integer encounterId,
 									   @RequestParam(value="templateId") Integer templateId,
@@ -39,21 +40,22 @@ public class ROSController {
 		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
 		templateId=Integer.parseInt(Optional.fromNullable(templateId+"").or("-1"));
 		tabId=Integer.parseInt(Optional.fromNullable(tabId+"").or("-1"));
-		return rosService.getROSElements(clientId,patientId,chartId,encounterId,templateId,tabId);
+		List<ROSSystemBean> ROSBean = rosService.getROSElements(clientId,patientId,chartId,encounterId,templateId,tabId);
+		EMRResponseBean ROSElement= new EMRResponseBean();
+		ROSElement.setData(ROSBean);
+		return ROSElement;
 	}
 	
 	@RequestMapping(value="/ROSNotes",method=RequestMethod.GET)
 	@ResponseBody
-	public String getROSNotes(@RequestParam(value="patientId") Integer patientId,
+	public EMRResponseBean getROSNotes(@RequestParam(value="patientId") Integer patientId,
 							 @RequestParam(value="encounterId") Integer encounterId) throws Exception{
 		
 		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
-		return rosService.getROSNotes(patientId,encounterId);
+		String notes=rosService.getROSNotes(patientId,encounterId);
+		EMRResponseBean ROSNotes= new EMRResponseBean();
+		ROSNotes.setData(notes);
+		return ROSNotes;
 	}
-
-	
-
-
-	
 }

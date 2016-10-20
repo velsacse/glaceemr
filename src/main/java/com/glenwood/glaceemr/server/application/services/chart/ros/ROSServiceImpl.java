@@ -169,13 +169,15 @@ public class ROSServiceImpl implements ROSService {
 		List<String> activeRosSystemIds = new ArrayList<String>();
 		activeRosSystemIds.add("-1");
 		for(int i=0; i<rosSystems.size(); i++){
-			ROSSystemBean rosSystemBean=new ROSSystemBean(); 
+			ROSSystemBean rosSystemBean=new ROSSystemBean();
+			if(rosSystems.get(i)!=null){
 			rosSystemBean.setSytemId(Integer.parseInt(HUtil.Nz(rosSystems.get(i).getClinicalSystemRosGwid(),"-1")));
 			rosSystemBean.setSystemName(HUtil.Nz(rosSystems.get(i).getClinicalSystemName(),"-1"));
 			rosSystemBean.setEandMType(HUtil.Nz(rosSystems.get(i).getClinicalSystemRosEandmtype(),"-1"));
 			rosSystemBean.setDeferredGWID(HUtil.Nz(rosSystems.get(i).getClinicalSystemRosDeferredGwid(),""));
 			activeRosSystemIds.add(rosSystemBean.getSystemId()+"");
 			rosBean.getROS().put(rosSystemBean.getSystemId(), rosSystemBean);
+		}
 		}
 		getROSActiveElementBySystem(activeRosSystemIds);
 	}

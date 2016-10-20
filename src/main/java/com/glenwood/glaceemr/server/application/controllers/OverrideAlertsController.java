@@ -14,6 +14,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogCons
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.reports.OverrideAlertsService;
 import com.glenwood.glaceemr.server.application.services.chart.reports.OverrideBean;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -51,11 +52,13 @@ public class OverrideAlertsController {
 	@ApiOperation(value = "Override the flowsheet elements(includes vitals, clinical elements and medication section)", notes = "Override the flowsheet elements(includes vitals, clinical elements and medication section)")
 	@RequestMapping(value = "/OverrideFlowsheet",method = RequestMethod.POST)
 	@ResponseBody
-	public String getFlowsheets(@RequestBody OverrideBean overrideBean) throws Exception{
+	public EMRResponseBean getFlowsheets(@RequestBody OverrideBean overrideBean) throws Exception{
 		logger.debug("Begin of request to override the Flowsheet data(includes vitals, clinical elements and medication section overriding functionality.)");
 		String overrideAlertMessage = overrideAlertsService.insertAlert(overrideBean.getElementids(),overrideBean.getPatientid(),overrideBean.getFsElementType(),overrideBean.getFlowsheetId(),overrideBean.getUserId(),overrideBean.getReason(),overrideBean.getData());
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.HMR,AuditLogConstants.HMR,1,AuditLogConstants.SUCCESS,"Successfully overridden test from flowsheet view (elementids="+overrideBean.getElementids()+", PatientID="+overrideBean.getPatientid()+",InstanceId=-100 )",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.HMR,request,"Successfully overridden test from flowsheet view (elementids="+overrideBean.getElementids()+", PatientID="+overrideBean.getPatientid()+",InstanceId=-100 )");
 		logger.debug("End of request to override the Flowsheet data(includes vitals, clinical elements and medication section overriding functionality.)");
-		return overrideAlertMessage;
+		EMRResponseBean alertMessage=new EMRResponseBean();
+		alertMessage.setData(overrideAlertMessage);
+		return alertMessage;
 	}
 }
