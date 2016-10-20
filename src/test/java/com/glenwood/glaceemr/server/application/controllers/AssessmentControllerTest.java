@@ -47,7 +47,7 @@ public class AssessmentControllerTest {
 	@Autowired 
 	AssessmentRepository assessmentRepository;
 	
-	private Logger logger = Logger.getLogger(PlanReferralControllerTest.class);
+	private Logger logger = Logger.getLogger(AssessmentControllerTest.class);
 	
 	
 	@Before

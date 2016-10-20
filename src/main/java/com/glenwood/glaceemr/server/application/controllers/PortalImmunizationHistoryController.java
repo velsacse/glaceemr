@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.VaccineUpdateBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalImmunizationHistory.PortalImmunizationHistoryService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
@@ -28,9 +27,6 @@ public class PortalImmunizationHistoryController {
 
 	@Autowired
 	PortalImmunizationHistoryService portalImmunizationHistoryService;
-
-	@Autowired
-	ObjectMapper objectMapper;
 
 	@Autowired
 	EMRResponseBean responseBean;

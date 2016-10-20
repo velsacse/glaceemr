@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.PatientRegistrationBean;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailServiceImpl;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalSettingsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
@@ -30,15 +28,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value="PortalSettingsController", description="Can be used to retrieve patient profile "
 		+ "settings fields details, set the preferences e.t.c..")
 public class PortalSettingsController {
-
-	
-	@Autowired
-	ObjectMapper objectMapper;
-	
-	@Autowired
-	AuditTrailServiceImpl auditTrailService;
-	
-	Logger logger=LoggerFactory.getLogger(LoginController.class);
 	
 	@Autowired
 	PortalSettingsService portalSettingsService;
@@ -48,6 +37,8 @@ public class PortalSettingsController {
 
 	@Autowired
 	EMRResponseBean responseBean;
+	
+	Logger logger=LoggerFactory.getLogger(PortalSettingsController.class);
 	
 	/**
 	 * @return List of patient profile settings fields with available options.

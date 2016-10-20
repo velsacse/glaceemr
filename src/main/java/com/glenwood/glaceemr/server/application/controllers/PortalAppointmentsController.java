@@ -15,11 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.ApptRequestBean;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointment;
 import com.glenwood.glaceemr.server.application.models.SchedulerApptBookingBean;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.portalAppointments.PortalAppointmentsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
@@ -39,15 +37,9 @@ public class PortalAppointmentsController {
 	PortalAppointmentsService portalAppointmentsService;
 	
 	@Autowired
-	ObjectMapper objectMapper;
-	
-	@Autowired
-	AuditTrailService auditTrailService;
-	
-	@Autowired
 	EMRResponseBean responseBean;
 	
-	Logger logger=LoggerFactory.getLogger(LoginController.class);
+	Logger logger=LoggerFactory.getLogger(PortalAppointmentsController.class);
 	
 	
 	/**

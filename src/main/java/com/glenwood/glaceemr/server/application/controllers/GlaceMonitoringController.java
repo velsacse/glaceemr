@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
-import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.GlaceMonitoringParameters;
 
 
@@ -20,6 +19,7 @@ import com.glenwood.glaceemr.server.utils.GlaceMonitoringParameters;
 @RequestMapping(value="/glacemonitor/monitor")
 
 public class GlaceMonitoringController {
+	
 	@Autowired
 	AuditTrailService auditTrailService;
 

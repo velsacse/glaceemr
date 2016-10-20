@@ -34,6 +34,7 @@ public class LoginController {
 	EMRResponseBean emrResponseBean;
 
 	Logger logger=LoggerFactory.getLogger(LoginController.class);
+	
 	@RequestMapping(value = "accessDenied",method = RequestMethod.GET)
 	public EMRResponseBean accessDenied(HttpServletRequest request,HttpServletResponse response) 
 	{

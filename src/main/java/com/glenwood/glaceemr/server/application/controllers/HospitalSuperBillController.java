@@ -40,10 +40,10 @@ public class HospitalSuperBillController {
 	@Autowired
 	SessionMap sessionMap;
 	
-    private Logger logger = Logger.getLogger(HospitalSuperBillController.class);
-	
 	@Autowired
 	HttpServletRequest request;
+	
+    private Logger logger = Logger.getLogger(HospitalSuperBillController.class);
 	
 	/**
 	 * To get the admitted patients list

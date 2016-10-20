@@ -30,6 +30,7 @@ public class ChartcenterController {
 	
 	@Autowired
 	SessionMap sessionMap;
+	
 	@Autowired
 	HttpServletRequest request;
 	

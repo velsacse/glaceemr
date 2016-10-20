@@ -3,8 +3,6 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -25,9 +23,7 @@ import com.glenwood.glaceemr.server.application.services.chart.prescription.Inta
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionBean;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -48,14 +44,6 @@ public class PrescriptionController {
 	
 	@Autowired
 	PrescriptionService prescriptionService;
-	@Autowired
-	AuditTrailService auditTrailService;
-	
-	@Autowired
-	SessionMap sessionMap;
-	
-	@Autowired
-	HttpServletRequest request;
 	
 	private Logger logger = Logger.getLogger(PrescriptionController.class);
 	

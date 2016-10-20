@@ -20,7 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 @RequestMapping(value="/user/ExaminationElements.Action")
 public class ExaminationController {
 
-
 	@Autowired
 	ExaminationService examinationService;
 

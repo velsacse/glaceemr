@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.Cpt;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.H611;
@@ -35,10 +31,8 @@ import com.glenwood.glaceemr.server.application.models.SaveServicesBean;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.models.SubmitStatus;
 import com.glenwood.glaceemr.server.application.models.UpdateServiceBean;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.charges.ChargesPageBasicDetailsBean;
 import com.glenwood.glaceemr.server.application.services.chart.charges.ChargesServices;
-import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.wordnik.swagger.annotations.Api;
@@ -52,20 +46,6 @@ public class ChargesController {
 	
 	@Autowired
 	ChargesServices chargesServices;
-	
-	@Autowired
-	AuditTrailService auditTrailService;
-	
-	@Autowired
-	SessionMap sessionMap;
-	
-	@Autowired
-	HttpServletRequest request;
-
-	@Autowired
-	ObjectMapper objectmapper;
-	
-	private Logger logger = Logger.getLogger(ChargesController.class);
 	
 	/**
 	 * Basic information to add new service

@@ -20,7 +20,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailServiceImpl;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PatientRegistrationSetupFields;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalPatientRegistrationBean;
@@ -46,11 +45,6 @@ public class PortalPatientRegistrationController {
 	ObjectMapper objectMapper;
 
 	@Autowired
-	AuditTrailServiceImpl auditTrailService;
-
-	Logger logger=LoggerFactory.getLogger(LoginController.class);
-
-	@Autowired
 	PortalSettingsService portalSettingsService;
 
 	@Autowired
@@ -61,6 +55,8 @@ public class PortalPatientRegistrationController {
 
 	@Autowired
 	EMRResponseBean responseBean;
+
+	Logger logger=LoggerFactory.getLogger(PortalPatientRegistrationController.class);
 
 	/**
 	 * @return List of patient profile settings fields with available options.

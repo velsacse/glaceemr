@@ -1,7 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,12 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.glenwood.glaceemr.server.application.models.DoctorSign;
-import com.glenwood.glaceemr.server.application.models.H491;
-import com.glenwood.glaceemr.server.application.models.H496;
-import com.glenwood.glaceemr.server.application.services.fax.FaxFolderBean;
 import com.glenwood.glaceemr.server.application.services.fax.FaxService;
-import com.glenwood.glaceemr.server.application.services.fax.FaxuserlistBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 
@@ -32,6 +25,7 @@ public class FaxController {
 
 	@Autowired
 	FaxService faxService;
+	
 	/**
 	 * API to get Outboxdetails of fax
 	 * @param h496004

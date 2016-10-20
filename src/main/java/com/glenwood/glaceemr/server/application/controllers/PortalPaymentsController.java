@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.CreditCardPaymentBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalPayments.PortalPaymentsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
@@ -27,10 +26,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value="PortalPaymentsController", description="Handles all the requests regarding bill payment of"
 		+ " a patient such as Bill Payment ,Oustanding Bill, Payment History, Statement History e.t.c.")
 public class PortalPaymentsController {
-
-	
-	@Autowired
-	ObjectMapper objectMapper;
 	
 	@Autowired
 	PortalPaymentsService portalPaymentsService;

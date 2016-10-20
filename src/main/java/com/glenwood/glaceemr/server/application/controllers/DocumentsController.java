@@ -40,7 +40,7 @@ public class DocumentsController {
 	@Autowired
 	DocumentsService documentsService;
 
-	private Logger logger = Logger.getLogger(AlertInboxController.class);
+	private Logger logger = Logger.getLogger(DocumentsController.class);
 
 	/**
 	 * TO get category list based on patientId, If the patientId is not provided then it displays all category list

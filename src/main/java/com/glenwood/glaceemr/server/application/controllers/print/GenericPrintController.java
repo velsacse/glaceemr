@@ -18,9 +18,8 @@ import com.glenwood.glaceemr.server.application.models.print.GenericPrintStyle;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.print.CustomGenericBean;
-import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintService;
 import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintBean;
-import com.glenwood.glaceemr.server.utils.SessionMap;
+import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -37,9 +36,6 @@ public class GenericPrintController {
 	
 	@Autowired
 	AuditTrailService auditTrailService;
-	
-	@Autowired
-	SessionMap sessionMap;
 	
 	@Autowired
 	HttpServletRequest request;

@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.RecoverPortalPasswordBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalRecoverUserPasswordService;
 import com.glenwood.glaceemr.server.application.services.portal.portalAppointments.PortalAppointmentsService;
@@ -32,15 +30,9 @@ public class PortalRecoverUserPasswordController {
 	PortalAppointmentsService portalAppointmentsService;
 	
 	@Autowired
-	ObjectMapper objectMapper;
-	
-	@Autowired
-	AuditTrailService auditTrailService;
-	
-	@Autowired
 	portalRecoverUserPasswordService portalRecoverPasswordService;
 	
-	Logger logger=LoggerFactory.getLogger(LoginController.class);
+	Logger logger=LoggerFactory.getLogger(PortalRecoverUserPasswordController.class);
 
 	@Autowired
 	EMRResponseBean responseBean;

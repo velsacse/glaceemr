@@ -3,8 +3,6 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,10 +12,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.PatientReviewedDetails;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.patientreview.PatientReviewDetailsBean;
 import com.glenwood.glaceemr.server.application.services.chart.patientreview.PatientReviewService;
-import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -26,15 +22,6 @@ import com.wordnik.swagger.annotations.ApiParam;
 @RestController
 @RequestMapping(value="/user/PatientReview")
 public class PatientReviewController {
-
-	@Autowired
-	AuditTrailService auditTrailService;
-
-	@Autowired
-	SessionMap sessionMap;
-
-	@Autowired
-	HttpServletRequest request;
 	
 	@Autowired
 	PatientReviewService patientReviewService; 
