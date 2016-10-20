@@ -29,6 +29,7 @@ public class ExceptionController {
      
      @Autowired
      SessionMap sessionMap;
+     
      /**
       *
       * @return emrResponseBean object with custom values set

@@ -39,9 +39,7 @@ public class PhoneMessageControllerTest {
 	@Autowired
 	private WebApplicationContext webApplicationContext;
 
-	
-
-	private Logger logger = Logger.getLogger(UserGroupControllerTest.class);
+	private Logger logger = Logger.getLogger(PhoneMessageControllerTest.class);
 
 	@Before
 	public void setUp() {

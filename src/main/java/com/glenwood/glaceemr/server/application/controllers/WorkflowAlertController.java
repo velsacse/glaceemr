@@ -1,8 +1,6 @@
 package com.glenwood.glaceemr.server.application.controllers;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +13,6 @@ import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.Room;
 import com.glenwood.glaceemr.server.application.models.Workflow;
 import com.glenwood.glaceemr.server.application.services.workflowalerts.WorkflowAlertService;
-import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -29,12 +26,6 @@ public class WorkflowAlertController {
 	
 	@Autowired
 	WorkflowAlertService workFlowAlertService;
-
-	@Autowired
-	SessionMap sessionMap;
-
-	@Autowired
-	HttpServletRequest request;
 	
 	@RequestMapping(value = "/getworkflowconfigstatus", method = RequestMethod.GET)
 	@ResponseBody

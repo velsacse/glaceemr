@@ -3,8 +3,6 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,25 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.ProblemList;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.problemlist.ProblemListService;
-import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 
 @Api(value = "ProblemList", description = "Contains all the operations related to problem list", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/ProblemList")
 public class ProblemListController {
-
-	
-	@Autowired
-	AuditTrailService auditTrailService;
-
-	@Autowired
-	SessionMap sessionMap;
-
-	@Autowired
-	HttpServletRequest request;
 	
 	@Autowired
 	ProblemListService problemListService;

@@ -1,7 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,8 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.portalMedicalSummary.PortalMedicalSummaryService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
@@ -30,17 +26,9 @@ public class PortalMedicalSummaryController {
 
 	@Autowired
 	PortalMedicalSummaryService portalMedicalSummaryService;
-	
-	@Autowired
-	AuditTrailService auditTrailService;
-	
-	@Autowired
-	ObjectMapper objectMapper;
 
 	@Autowired
 	EMRResponseBean responseBean;
-	
-	Logger logger=LoggerFactory.getLogger(LoginController.class);
 	
 	
 	/**

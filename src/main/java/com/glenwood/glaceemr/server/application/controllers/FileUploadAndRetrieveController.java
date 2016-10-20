@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.FileDataBean;
 import com.glenwood.glaceemr.server.application.services.portal.fileUploadService.FileUploadService;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.PortalDocumentsService;
@@ -46,9 +45,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
 public class FileUploadAndRetrieveController {
 
 	@Autowired
-	ObjectMapper objectMapper;
-
-	@Autowired
 	FileUploadService fileUploadAndRetrieveService;
 
 	@Autowired
@@ -56,9 +52,6 @@ public class FileUploadAndRetrieveController {
 
 	@Autowired
 	PortalDocumentsController portalDocumentsController;
-
-	@Autowired
-	HttpServletRequest request;
 
 	@Autowired
 	EMRResponseBean responseBean;

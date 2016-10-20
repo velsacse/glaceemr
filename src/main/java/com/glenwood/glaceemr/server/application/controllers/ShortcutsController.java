@@ -32,13 +32,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping(value="/user/Shortcuts.Action")
 public class ShortcutsController {
 	
-	
-	
 	@Autowired
 	AuditTrailService auditTrailService;
-	
-	@Autowired
-	SessionMap sessionMap;
 	
 	@Autowired
 	HttpServletRequest request;

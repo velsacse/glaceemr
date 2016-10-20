@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
@@ -22,9 +21,6 @@ public class PortalLoginController {
 	
 	@Autowired
 	HttpServletRequest request;
-	
-	@Autowired
-	ObjectMapper objectMapper;
 
 	@Autowired
 	EMRResponseBean responseBean;

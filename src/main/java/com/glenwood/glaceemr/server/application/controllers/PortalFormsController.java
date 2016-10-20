@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.portalForms.PortalConsentFormDetailsBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalForms.PortalFormsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
@@ -33,15 +31,9 @@ public class PortalFormsController {
 	PortalFormsService portalFormsService;
 
 	@Autowired
-	ObjectMapper objectMapper;
-
-	@Autowired
-	AuditTrailService auditTrailService;
-
-	@Autowired
 	EMRResponseBean responseBean;
 
-	Logger logger = LoggerFactory.getLogger(LoginController.class);
+	Logger logger = LoggerFactory.getLogger(PortalFormsController.class);
 
 	/**
 	 * Appointment list of a patient appointments.

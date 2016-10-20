@@ -1,7 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,10 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.portalLabResults.PortalLabResultsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -32,15 +28,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Transactional
 @RequestMapping(value = "/user/PortalLabResults")
 public class PortalLabResultsController {
-
-	@Autowired
-	AuditTrailService auditTrailService;
-
-	@Autowired
-	SessionMap sessionMap;
-
-	@Autowired
-	HttpServletRequest request;
 
 	@Autowired
 	PortalLabResultsService portalLabResultsService;

@@ -2,9 +2,6 @@ package com.glenwood.glaceemr.server.application.controllers.skintests;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.glenwood.glaceemr.server.application.controllers.PrescriptionController;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.skintests.ConcentrateGroup;
@@ -30,7 +26,6 @@ import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTest
 import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestShortcutBean;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestingFormService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 
 /**
@@ -45,19 +40,9 @@ import com.wordnik.swagger.annotations.Api;
 @RequestMapping(value = "/user/SkinTestingForms.Action")
 public class SkinTestingFormController {
 	
-	/*@Autowired
-	AuditTrailService auditTrailService;*/
-	
-	@Autowired
-	SessionMap sessionMap;
-	
-	@Autowired
-	HttpServletRequest request;
-	
 	@Autowired
 	SkinTestingFormService skinTestingFormService;
 	
-	private Logger logger = Logger.getLogger(PrescriptionController.class);
 	
 	/**
 	 * To load the allergen categories with its allergens
@@ -110,7 +95,6 @@ public class SkinTestingFormController {
 		JSONArray data1 = new JSONArray(data);
 		JSONArray categoryOrder1 = new JSONArray(categoryOrder);
 		skinTestingFormService.saveSkinTestSheet(sheetName,data1, categoryOrder1,otherDetails1,loginId);
-		EMRResponseBean emrResponseBean = new EMRResponseBean();
 	}
 	
 	/**
@@ -125,7 +109,6 @@ public class SkinTestingFormController {
 			@RequestParam(value="otherDetails",required=false,defaultValue="")JSONObject otherDetails,
 			@RequestParam(value="loginId",required=false,defaultValue="-1")Integer loginId) throws Exception {
 		skinTestingFormService.editSkinTestSheet(sheetId,data, categoryOrder,otherDetails,loginId);
-		EMRResponseBean emrResponseBean = new EMRResponseBean();
 	}
 	
 	/**

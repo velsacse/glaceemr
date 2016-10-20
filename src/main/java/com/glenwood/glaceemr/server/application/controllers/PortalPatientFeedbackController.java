@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.PatientFeedbackSaveBean;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.portal.portalPatientFeedback.PortalPatientFeedbackService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
@@ -30,17 +28,11 @@ public class PortalPatientFeedbackController {
 	
 	@Autowired
 	PortalPatientFeedbackService portalPatientFeedbackService;
-	
-	@Autowired
-	ObjectMapper objectMapper;
-	
-	@Autowired
-	AuditTrailService auditTrailService;
-	
-	Logger logger=LoggerFactory.getLogger(LoginController.class);
 
 	@Autowired
 	EMRResponseBean responseBean;
+	
+	Logger logger=LoggerFactory.getLogger(PortalPatientFeedbackController.class);
 	
 	/**
 	 * Appointment list of a patient appointments.

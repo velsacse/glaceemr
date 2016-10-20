@@ -18,8 +18,10 @@ import com.wordnik.swagger.annotations.Api;
 @Transactional
 @RequestMapping(value="/user/ImportData.Action")
 public class ImportDataController {
+	
 	@Autowired
 	ImportDataService importDataService;
+	
 	@RequestMapping(value="/ImportEncounterList",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getImportEncList(@RequestParam(value="patientId") Integer patientId,

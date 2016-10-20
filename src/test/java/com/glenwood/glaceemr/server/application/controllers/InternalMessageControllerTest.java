@@ -34,10 +34,11 @@ import com.jayway.restassured.module.mockmvc.RestAssuredMockMvc;
 @DatabaseSetup("InternalMessageData.xml")
 @WebAppConfiguration
 public class InternalMessageControllerTest {
+	
 	@Autowired
 	private WebApplicationContext webApplicationContext;
 	
-	private Logger logger = Logger.getLogger(UserGroupControllerTest.class);
+	private Logger logger = Logger.getLogger(InternalMessageControllerTest.class);
 	
 	@Before
 	public void setUp() {

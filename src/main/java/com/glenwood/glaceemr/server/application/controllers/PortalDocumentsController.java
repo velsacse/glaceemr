@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.PortalDocumentsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
@@ -27,9 +26,6 @@ public class PortalDocumentsController {
 	
 	@Autowired
 	PortalDocumentsService documentsService;
-	
-	@Autowired
-	ObjectMapper objectMapper;
 	
 	@Autowired
 	EMRResponseBean responseBean;

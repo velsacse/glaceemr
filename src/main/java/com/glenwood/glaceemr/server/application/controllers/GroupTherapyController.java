@@ -3,8 +3,6 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +19,6 @@ import com.glenwood.glaceemr.server.application.services.GroupTherapy.AddNewGrou
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyGroupBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyLogBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyPatientsBean;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
-import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.Api;
 
@@ -37,17 +33,9 @@ import com.wordnik.swagger.annotations.Api;
 @RequestMapping(value = "/user/GroupTherapy.Action")
 
 public class GroupTherapyController {
+	
 	@Autowired
 	AddNewGroupService addNewGroupService;
-	
-	@Autowired
-	AuditTrailService auditTrailService;
-	
-	@Autowired
-	SessionMap sessionMap;
-	
-	@Autowired
-	HttpServletRequest request;
 	
 	private Logger logger = Logger.getLogger(GroupTherapyController.class);
 	

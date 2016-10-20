@@ -26,7 +26,7 @@ public class PhoneMessagesController {
 	PhoneMessagesService phoneMessageService;
 
 	@Autowired
-	EncounterRepository encounterEntityRepository;
+	EncounterRepository encounterRepository;
 	
 	/**
 	 * To get the list of phone messages based on the patient id

@@ -23,8 +23,6 @@ import com.wordnik.swagger.annotations.Api;
 @RequestMapping(value="/user/DischargeVitals")
 public class DischargeVitalController {
 
-	
-	
 	@Autowired
 	DischargeVitalService dischargeVitalService;
 

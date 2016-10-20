@@ -2,8 +2,6 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.LabEntries;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.labresults.AttachLabData;
 import com.glenwood.glaceemr.server.application.services.labresults.DocumentData;
 import com.glenwood.glaceemr.server.application.services.labresults.LabResultsService;
@@ -22,7 +19,6 @@ import com.glenwood.glaceemr.server.application.services.labresults.ResultDetail
 import com.glenwood.glaceemr.server.application.services.labresults.ResultList;
 import com.glenwood.glaceemr.server.application.services.labresults.SaveData;
 import com.glenwood.glaceemr.server.application.services.labresults.UsersList;
-import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -39,20 +35,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Transactional
 @RequestMapping(value = "/user/LabResults")
 public class LabResultsController {
-	
-	@Autowired
-	AuditTrailService auditTrailService;
-
-	@Autowired
-	SessionMap sessionMap;
-
-	@Autowired
-	HttpServletRequest request;
 
 	@Autowired
 	LabResultsService labResultsService;
 
-	private Logger logger = Logger.getLogger(InvestigationSummaryController.class);
+	private Logger logger = Logger.getLogger(LabResultsController.class);
 	
 	/**
 	 * Method to get users list
