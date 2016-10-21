@@ -26,6 +26,7 @@ import com.glenwood.glaceemr.server.application.models.PatientPortalSharedDocs;
 import com.glenwood.glaceemr.server.application.models.PatientPortalSharedDocs_;
 import com.glenwood.glaceemr.server.application.models.PatientSharedDocumentLog;
 import com.glenwood.glaceemr.server.application.models.PatientSharedDocumentLog_;
+import com.glenwood.glaceemr.server.application.models.SchedulerAppointment_;
 
 public class PortalDocumentsSpecification {
 
@@ -45,23 +46,23 @@ public class PortalDocumentsSpecification {
 				//Join<FileDetails, FileName> detailsNameJoin=docsDetailsJoin.join(FileDetails_.fileName,JoinType.INNER);
 				//Predicate isFileActive=cb.equal(detailsNameJoin.get(FileName_.filenameIsactive), true);
 				//detailsNameJoin.on(isFileActive);
+				//Join<FileName, EmpProfile> nameProfileReviewedByJoin=detailsNameJoin.join(FileName_.empProfileReviewedUser,JoinType.INNER);
+				//Join<FileName, EmpProfile> nameProfileCreatedByJoin=detailsNameJoin.join(FileName_.empProfileCreatedUser,JoinType.INNER);
+				//Join<PatientPortalSharedDocs, EmployeeProfile> docsProfileSharedByJoin=root.join(PatientPortalSharedDocs_.empProfileSharedUser,JoinType.INNER);
+				//root.fetch(PatientPortalSharedDocs_.fileDetails,JoinType.INNER).fetch(FileDetails_.encounterTable,JoinType.INNER);
+				//root.fetch(PatientPortalSharedDocs_.fileDetails,JoinType.INNER).fetch(FileDetails_.createdByEmpProfileTable,JoinType.INNER);
+				//root.fetch(PatientPortalSharedDocs_.fileDetails,JoinType.INNER).fetch(FileDetails_.lastModifiedByEmpProfileTable,JoinType.INNER);
+				
+				if(Long.class!=cq.getResultType()){
+					root.fetch(PatientPortalSharedDocs_.fileDetails,JoinType.INNER).fetch(FileDetails_.patientDocCategory);
+					root.fetch(PatientPortalSharedDocs_.fileDetails,JoinType.INNER).fetch(FileDetails_.fileName);
+					root.fetch(PatientPortalSharedDocs_.empProfileSharedUser,JoinType.INNER);
+				}
 				
 				Join<FileDetails, PatientDocumentsCategory> detailsCategoryJoin=docsDetailsJoin.join(FileDetails_.patientDocCategory,JoinType.INNER);
 				Predicate isCategoryActive=cb.equal(detailsCategoryJoin.get(PatientDocumentsCategory_.patientDocCategoryIsactive), true);
 				detailsCategoryJoin.on(isCategoryActive);
 				
-				//Join<FileName, EmpProfile> nameProfileReviewedByJoin=detailsNameJoin.join(FileName_.empProfileReviewedUser,JoinType.INNER);
-				//Join<FileName, EmpProfile> nameProfileCreatedByJoin=detailsNameJoin.join(FileName_.empProfileCreatedUser,JoinType.INNER);
-				//Join<PatientPortalSharedDocs, EmployeeProfile> docsProfileSharedByJoin=root.join(PatientPortalSharedDocs_.empProfileSharedUser,JoinType.INNER);
-
-				//root.fetch(PatientPortalSharedDocs_.fileDetails,JoinType.INNER).fetch(FileDetails_.patientDocCategory);
-				//root.fetch(PatientPortalSharedDocs_.fileDetails,JoinType.INNER).fetch(FileDetails_.fileName);
-				
-				//root.fetch(PatientPortalSharedDocs_.empProfileSharedUser,JoinType.INNER);
-				//root.fetch(PatientPortalSharedDocs_.fileDetails,JoinType.INNER).fetch(FileDetails_.encounterTable,JoinType.INNER);
-				//root.fetch(PatientPortalSharedDocs_.fileDetails,JoinType.INNER).fetch(FileDetails_.createdByEmpProfileTable,JoinType.INNER);
-				//root.fetch(PatientPortalSharedDocs_.fileDetails,JoinType.INNER).fetch(FileDetails_.lastModifiedByEmpProfileTable,JoinType.INNER);
-
 				Predicate patIdPredicate=cq.where(cb.equal(docsDetailsJoin.get(FileDetails_.filedetailsPatientid), patientId)).getRestriction();
 
 				return patIdPredicate;
@@ -79,18 +80,20 @@ public class PortalDocumentsSpecification {
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
 				Join<PatientSharedDocumentLog, Encounter> docsLogEncounterJoin=root.join(PatientSharedDocumentLog_.docsLogEncounterTable,JoinType.INNER);
-				Join<Encounter, EmployeeProfile> encounterEmpProJoin=docsLogEncounterJoin.join(Encounter_.empProfileEmpId,JoinType.INNER);
+				//Join<Encounter, EmployeeProfile> encounterEmpProJoin=docsLogEncounterJoin.join(Encounter_.empProfileEmpId,JoinType.INNER);
+				
+				if(Long.class!=cq.getResultType()){
+					root.fetch(PatientSharedDocumentLog_.docsLogEncounterTable);
+					root.fetch(PatientSharedDocumentLog_.docsLogEncounterTable).fetch(Encounter_.empProfileEmpId,JoinType.INNER);
+					root.fetch(PatientSharedDocumentLog_.docsLogEncounterTable).fetch(Encounter_.patientEncounterType,JoinType.INNER);
+				}
+				
 
 				cq.where(cb.and(cb.equal(root.get(PatientSharedDocumentLog_.patientSharedDocumentLogStatus),true),
 						cb.equal(root.get(PatientSharedDocumentLog_.patientSharedDocumentLogSharedMode), 1),
 						cb.equal(root.get(PatientSharedDocumentLog_.patientSharedDocumentLogPatientId), patientId)));
-
-				/*cq.orderBy(cb.desc(docsLogEncounterJoin.get(Encounter_.encounterDate)),cb.desc(root.get(PatientSharedDocumentLog_.patientSharedDocumentLogSharedOn)));*/
-
-				//root.fetch(PatientSharedDocumentLog_.docsLogEncounterTable);
-				//root.fetch(PatientSharedDocumentLog_.docsLogEncounterTable).fetch(Encounter_.empProfileEmpId,JoinType.INNER);
-				//root.fetch(PatientSharedDocumentLog_.docsLogEncounterTable).fetch(Encounter_.patientEncounterType,JoinType.INNER);
-				//root.fetch(PatientSharedDocumentLog_.docsLogEncounterTable).fetch(Encounter_.encounterPosDetails,JoinType.INNER);
+				
+				//cq.orderBy(cb.desc(docsLogEncounterJoin.get(Encounter_.encounterDate)),cb.desc(root.get(PatientSharedDocumentLog_.patientSharedDocumentLogSharedOn)));
 
 				return cq.getRestriction();
 			}

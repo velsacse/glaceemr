@@ -107,9 +107,7 @@ public class PortalLabResultsServiceImpl implements PortalLabResultsService{
 		List<LabEntriesParameter> labResultParametersList = labEntriesParametersRepository.findAll(PortalLabResultsSpecification.getLabResultParameters(testDetailId, chartId));
 		
 		List<PortalLabParametersBean> prametersList=new ArrayList<PortalLabParametersBean>();
-		
-		List<LabParameterCode> codeSystemParamList=labParameterCodeRepository.findAll(PortalLabResultsSpecification.getLabParamCodeSystem("LOINC"));
-		
+				
 		for(int i=0;i<labResultParametersList.size();i++){
 			
 			/*for(int j=0;j<codeSystemParamList.size();j++){

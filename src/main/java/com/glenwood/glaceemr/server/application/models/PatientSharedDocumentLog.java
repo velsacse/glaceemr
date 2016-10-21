@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
@@ -59,10 +60,15 @@ public class PatientSharedDocumentLog {
 	@Column(name="patient_shared_document_log_status")
 	private Boolean patientSharedDocumentLogStatus;
 	
-	@OneToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
+	@OneToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="patient_shared_document_log_encounter_id", referencedColumnName="encounter_id", insertable=false,updatable=false)
 	@JsonManagedReference
 	Encounter docsLogEncounterTable;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="patient_shared_document_log_shared_by", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
+	@JsonManagedReference
+	EmployeeProfile docsLogSharedBy;
 
 
 	public Integer getPatientSharedDocumentLogId() {
@@ -170,6 +176,13 @@ public class PatientSharedDocumentLog {
 	public void setDocsLogEncounterTable(Encounter docsLogEncounterTable) {
 		this.docsLogEncounterTable = docsLogEncounterTable;
 	}
-	
+
+	public EmployeeProfile getDocsLogSharedBy() {
+		return docsLogSharedBy;
+	}
+
+	public void setDocsLogSharedBy(EmployeeProfile docsLogSharedBy) {
+		this.docsLogSharedBy = docsLogSharedBy;
+	}
 	
 }
