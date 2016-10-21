@@ -473,11 +473,9 @@ public class ExaminationServiceImpl implements ExaminationService{
 										if(optionFlag==true)break;
 									if((!detailOptionGwid.equalsIgnoreCase("-1")) && (type==4 || type==5 )){
 										LinkedHashMap<Integer, ClinicalElementOptionBean> clinicalElementOptions = new LinkedHashMap<Integer, ClinicalElementOptionBean>();
-										boolean clinicalOptionFlag=false;
 										for(int n=0;n<clinicaldetailOptions.size();n++){
 											ClinicalElementOptionBean optionbean = new ClinicalElementOptionBean();
 											if(detailOptionGwid.equalsIgnoreCase(HUtil.Nz(clinicaldetailOptions.get(n).getClinicalElementsOptionsGwid(),"-1"))){
-												clinicalOptionFlag=true;
 												detailOptionGwid	=	HUtil.Nz(clinicaldetailOptions.get(n).getClinicalElementsOptionsGwid(),"-1");
 												optionbean.setClinicalelementoptionId(Integer.parseInt(HUtil.Nz(clinicaldetailOptions.get(n).getClinicalElementsOptionsId(),"-1")));
 												optionbean.setClinicalelementoptionGwid(HUtil.Nz(clinicaldetailOptions.get(n).getClinicalElementsOptionsGwid(),"-1"));
@@ -488,8 +486,6 @@ public class ExaminationServiceImpl implements ExaminationService{
 												clinicaldetailOptions.remove(n);
 												n--;
 											}
-											else
-												if(clinicalOptionFlag==true)break;
 
 										}	
 										edobean.setClinicalElementOption(clinicalElementOptions);
