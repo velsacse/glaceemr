@@ -1,4 +1,4 @@
-package com.glenwood.glaceemr.server.application.controllers.print;
+package com.glenwood.glaceemr.server.application.services.chart.print;
 
 import java.util.List;
 

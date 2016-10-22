@@ -1,4 +1,4 @@
-package com.glenwood.glaceemr.server.application.controllers.print;
+package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
@@ -18,8 +18,11 @@ import com.glenwood.glaceemr.server.application.models.print.GenericPrintStyle;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.print.CustomGenericBean;
-import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintBean;
 import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintService;
+import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintBean;
+import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintTemplateBean;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -38,6 +41,9 @@ public class GenericPrintController {
 	AuditTrailService auditTrailService;
 	
 	@Autowired
+	SessionMap sessionMap;
+	
+	@Autowired
 	HttpServletRequest request;
 	
 	private Logger logger = Logger.getLogger(GenericPrintController.class);
@@ -50,12 +56,14 @@ public class GenericPrintController {
 	@ApiOperation(value = "Get the list of all generic print styles", notes = "Get the list of all generic print styles")
 	@RequestMapping(value = "/FetchGenericPrintStyleList",method = RequestMethod.GET)
 	@ResponseBody
-	public List<GenericPrintStyle> fetchgenericPrintStyleList() throws Exception{
+	public EMRResponseBean fetchgenericPrintStyleList() throws Exception{
 		logger.debug("Begin of request to get the list of all generic print styles.");
 		List<GenericPrintStyle> genericPrintStyleList = genericPrintService.getGenericPrintStyleList();
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded header list for configuration");
 		logger.debug("End of request to get the list of all generic print styles.");
-		return genericPrintStyleList;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(genericPrintStyleList);
+		return respBean;
 		
 	}
 	
@@ -66,12 +74,14 @@ public class GenericPrintController {
 	 */
 	@ApiOperation(value = "Get generic print styles", notes = "Get generic print styles")
 	@RequestMapping(value = "/FetchGenericPrintStyle",method = RequestMethod.GET)
-	public GenericPrintStyle fetchgenericPrintStyle(@RequestParam(value="styleId") Integer styleId) throws Exception{
+	public EMRResponseBean fetchgenericPrintStyle(@RequestParam(value="styleId") Integer styleId) throws Exception{
 		logger.debug("Begin of request to get the list of all generic print styles.");
 		GenericPrintStyle genericPrintStyleList = genericPrintService.getGenericPrintStyle(styleId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded header list for configuration");
 		logger.debug("End of request to get the list of all generic print styles.");
-		return genericPrintStyleList;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(genericPrintStyleList);
+		return respBean;
 		
 	}
 	
@@ -81,7 +91,7 @@ public class GenericPrintController {
 	 */
 	@ApiOperation(value = "Save generic print style", notes = "Save generic print style")
 	@RequestMapping(value = "/saveGenericPrintStyle",method = RequestMethod.POST)
-	public GenericPrintStyle saveGenericPrintStyle(@RequestParam(value="styleName") String styleName,@RequestParam(value="letterHeaderId") Integer letterHeaderId,
+	public EMRResponseBean saveGenericPrintStyle(@RequestParam(value="styleName") String styleName,@RequestParam(value="letterHeaderId") Integer letterHeaderId,
 			@RequestParam(value="patientHeaderId") Integer patientHeaderId,@RequestParam(value="footerId") Integer footerId,
 			@RequestParam(value="isDefault") Boolean isDefault) throws Exception{
 		
@@ -99,7 +109,9 @@ public class GenericPrintController {
 		
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved generic print style",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved generic print style");
 		logger.debug("End of request to Save generic print style.");
-		return genericPrintStyle;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(genericPrintStyle);
+		return respBean;
 		
 	}
 	
@@ -109,7 +121,7 @@ public class GenericPrintController {
 	 */
 	@ApiOperation(value = "Update generic print style", notes = "Update generic print style")
 	@RequestMapping(value = "/updateGenericPrintStyle",method = RequestMethod.POST)
-	public GenericPrintStyle updateGenericPrintStyle(@RequestParam(value="styleName") String styleName,@RequestParam(value="letterHeaderId") Integer letterHeaderId,
+	public EMRResponseBean updateGenericPrintStyle(@RequestParam(value="styleName") String styleName,@RequestParam(value="letterHeaderId") Integer letterHeaderId,
 			@RequestParam(value="patientHeaderId") Integer patientHeaderId,@RequestParam(value="footerId") Integer footerId,@RequestParam(value="styleId") Integer styleId,
 			@RequestParam(value="isDefault") Boolean isDefault,@RequestParam(value="isActive") Boolean isActive) throws Exception{
 		
@@ -128,7 +140,9 @@ public class GenericPrintController {
 				
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved generic print style",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved generic print style");
 		logger.debug("End of request to Update generic print style.");
-		return genericPrintStyle;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(genericPrintStyle);
+		return respBean;
 		
 	}
 	
@@ -175,20 +189,22 @@ public class GenericPrintController {
 	@ApiOperation(value = "Getting note print", notes = "Getting note print for specific patient")
 	@RequestMapping(value = "/GetPrint", method = RequestMethod.GET)
 	@ResponseBody
-	public GenericPrintBean getCompleteDetails(@RequestParam(value="patientId",required = false) Integer patientId,
+	public EMRResponseBean getCompleteDetails(@RequestParam(value="patientId",required = false) Integer patientId,
 			@RequestParam(value="encounterId",required = false) Integer encounterId) throws Exception {
 	
 		logger.debug("Begin of request to get the list of employees and patient details.");
 		GenericPrintBean bean = genericPrintService.getCompleteDetails(patientId, encounterId);
 		logger.debug("End of request to get the list of employees and patient details.");
-		return bean;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(bean);
+		return respBean;
 
 	}
 	
 	@ApiOperation(value = "Get generic print header data", notes = "Get generic print header data")
 	@RequestMapping(value = "/FetchGenericPrintHeaderData",method = RequestMethod.GET)
 	@ResponseBody
-	public String fetchGenericPrintHeader(@RequestParam(value="styleId") Integer styleId,
+	public EMRResponseBean fetchGenericPrintHeader(@RequestParam(value="styleId") Integer styleId,
 			@RequestParam(value="patientId", defaultValue="-1") Integer patientId,
 			@RequestParam(value="encounterId", defaultValue="-1") Integer encounterId,
 			@RequestParam(value="sharedFolderPath", defaultValue="", required=false) String sharedFolderPath) throws Exception{
@@ -196,52 +212,60 @@ public class GenericPrintController {
     	String headerHTML = genericPrintService.getHeaderHTML(styleId, patientId, encounterId, sharedFolderPath);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded header data");
 		logger.debug("End of request to get generic print header data.");
-		return headerHTML;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(headerHTML);
+		return respBean;
 		
 	}
 	
 	@ApiOperation(value = "Get generic print patient header data", notes = "Get generic print patient header data")
 	@RequestMapping(value = "/FetchGenericPrintPatientHeaderData",method = RequestMethod.GET)
 	@ResponseBody
-	public String fetchGenericPrintPatientHeader(@RequestParam(value="styleId") Integer styleId,
+	public EMRResponseBean fetchGenericPrintPatientHeader(@RequestParam(value="styleId") Integer styleId,
 			@RequestParam(value="patientId", defaultValue="-1") Integer patientId,
 			@RequestParam(value="encounterId", defaultValue="-1") Integer encounterId) throws Exception{
 		logger.debug("Begin of request to get generic print patient header data.");
     	String headerHTML = genericPrintService.getPatientHeaderHTML(styleId, patientId, encounterId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded patient header data");
 		logger.debug("End of request to get generic print patient header data.");
-		return headerHTML;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(headerHTML);
+		return respBean;
 		
 	}
 	
 	@ApiOperation(value = "Get generic print footer data", notes = "Get generic print footer data")
 	@RequestMapping(value = "/FetchGenericPrintFooterData",method = RequestMethod.GET)
 	@ResponseBody
-	public String fetchGenericPrintFooter(@RequestParam(value="styleId") Integer styleId) throws Exception{
+	public EMRResponseBean fetchGenericPrintFooter(@RequestParam(value="styleId") Integer styleId) throws Exception{
 		logger.debug("Begin of request to get generic print footer data.");
     	String headerHTML = genericPrintService.getFooterHTML(styleId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded footer data");
 		logger.debug("End of request to get generic print footer data.");
-		return headerHTML;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(headerHTML);
+		return respBean;
 		
 	}
 	
 	@ApiOperation(value = "Get generic print left data", notes = "Get generic print left data")
 	@RequestMapping(value = "/FetchGenericPrintLeftHeaderData",method = RequestMethod.GET)
 	@ResponseBody
-	public String fetchGenericPrintLeftData(@RequestParam(value="styleId") Integer styleId) throws Exception{
+	public EMRResponseBean fetchGenericPrintLeftData(@RequestParam(value="styleId") Integer styleId) throws Exception{
 		logger.debug("Begin of request to get generic print left data.");
     	String headerHTML = genericPrintService.getLeftHeaderHTML(styleId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded footer data");
 		logger.debug("End of request to get generic print left data.");
-		return headerHTML;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(headerHTML);
+		return respBean;
 		
 	}
 	
 	@ApiOperation(value = "Get generic print data", notes = "Get generic print data")
 	@RequestMapping(value = "/FetchGenericPrintData",method = RequestMethod.GET)
 	@ResponseBody
-	public CustomGenericBean fetchGenericPrint(@RequestParam(value="styleId") Integer styleId,
+	public EMRResponseBean fetchGenericPrint(@RequestParam(value="styleId") Integer styleId,
 			@RequestParam(value="patientId", defaultValue="-1") Integer patientId,
 			@RequestParam(value="encounterId", defaultValue="-1") Integer encounterId,
 			@RequestParam(value="sharedFolderPath", defaultValue="", required=false) String sharedFolderPath) throws Exception{
@@ -249,7 +273,9 @@ public class GenericPrintController {
     	CustomGenericBean bean = genericPrintService.getCustomeGenericData(styleId, patientId, encounterId, sharedFolderPath);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded header data");
 		logger.debug("End of request to get generic print header data.");
-		return bean;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(bean);
+		return respBean;
 		
 	}
 
@@ -259,7 +285,7 @@ public class GenericPrintController {
 	 */
 	@ApiOperation(value = "Get template list", notes = "Get template list")
 	@RequestMapping(value = "/FetchTemplatesList",method = RequestMethod.GET)
-	public GenericPrintTemplateBean fetchTemplatesList(@RequestParam(value="styleId", defaultValue="-1") Integer styleId) throws Exception{
+	public EMRResponseBean fetchTemplatesList(@RequestParam(value="styleId", defaultValue="-1") Integer styleId) throws Exception{
 		logger.debug("Begin of request to get template list.");
 		
 		List<LeafLibrary> templateList=genericPrintService.getTemplatesList();
@@ -271,7 +297,9 @@ public class GenericPrintController {
 		
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded templates list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded templates list for configuration");
 		logger.debug("End of request to get template list.");
-		return bean;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(bean);
+		return respBean;
 		
 	}
 	
