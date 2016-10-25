@@ -3,6 +3,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -23,7 +25,9 @@ import com.glenwood.glaceemr.server.application.services.chart.prescription.Inta
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionBean;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -44,6 +48,14 @@ public class PrescriptionController {
 	
 	@Autowired
 	PrescriptionService prescriptionService;
+	@Autowired
+	AuditTrailService auditTrailService;
+	
+	@Autowired
+	SessionMap sessionMap;
+	
+	@Autowired
+	HttpServletRequest request;
 	
 	private Logger logger = Logger.getLogger(PrescriptionController.class);
 	
@@ -59,9 +71,9 @@ public class PrescriptionController {
 	
 	public EMRResponseBean getactivemedwithclass(@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid)throws Exception{
 		Map<String, Object> drugs=prescriptionService.getactivemedwithclass(patientid);
-		EMRResponseBean emrResponseBean = new EMRResponseBean();
-		emrResponseBean.setData(drugs);
-		return emrResponseBean;
+		EMRResponseBean activeMedsByPatient = new EMRResponseBean();
+		activeMedsByPatient.setData(drugs);
+		return activeMedsByPatient;
 	}
 	
 	/**
@@ -76,11 +88,13 @@ public class PrescriptionController {
 	@RequestMapping(value ="/ByMonth", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public Map<String, Object> getOneMonthActiveMeds(@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid,
+	public EMRResponseBean getOneMonthActiveMeds(@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid,
 			@RequestParam(value="month",required=false,defaultValue="-1")Integer whichMonth,
 			@RequestParam(value="year",required=false,defaultValue="-1")Integer year)throws Exception{
 		Map<String, Object> drugs=prescriptionService.getOneMonthActiveMeds(patientid,whichMonth,year);
-		return drugs;
+		EMRResponseBean activeMedsByMonth = new EMRResponseBean();
+		activeMedsByMonth.setData(drugs);
+		return activeMedsByMonth;
 	}
 	
 	/**
@@ -119,10 +133,12 @@ public class PrescriptionController {
 	@RequestMapping(value ="/getMedAdminLogHistory", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public List getMedAdministrationLogHistory(@RequestParam(value="planId",required=false,defaultValue="-1")Integer planId)throws Exception{
+	public EMRResponseBean getMedAdministrationLogHistory(@RequestParam(value="planId",required=false,defaultValue="-1")Integer planId)throws Exception{
 		@SuppressWarnings("unchecked")
 		List<MedsAdminLog> logDetails = prescriptionService.getMedicationAdminLogHistory(planId);
-		return logDetails;
+		EMRResponseBean logHistory = new EMRResponseBean();
+		logHistory.setData(logDetails);
+		return logHistory;
 	}
 
 	/**
@@ -133,10 +149,12 @@ public class PrescriptionController {
 	@RequestMapping(value ="/getMedAdminLog", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public List getMedAdminLog(@RequestParam(value="logId",required=false,defaultValue="-1")Integer logId)throws Exception{
+	public EMRResponseBean getMedAdminLog(@RequestParam(value="logId",required=false,defaultValue="-1")Integer logId)throws Exception{
 		@SuppressWarnings("unchecked")
 		List<MedsAdminLog> logDetails = prescriptionService.getMedicationAdminLog(logId);
-		return logDetails;
+		EMRResponseBean logData = new EMRResponseBean();
+		logData.setData(logDetails);
+		return logData;
 	}
 	
 	/**
@@ -176,11 +194,13 @@ public class PrescriptionController {
 	@RequestMapping(value ="/patientid", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public PrescriptionBean getactivemedicalsupplies(@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid)throws Exception{
+	public EMRResponseBean getactivemedicalsupplies(@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid)throws Exception{
 		logger.debug("In medical supplies");
 		PrescriptionBean drugs=prescriptionService.getactivemedicalsupplies(patientid);
 		logger.debug("Got the medical supplies data");
-		return drugs;
+		EMRResponseBean activeMedSupplies = new EMRResponseBean();
+		activeMedSupplies.setData(drugs);
+		return activeMedSupplies;
 	}
 	
 	/*To get the take and frequency list based on selected medications
@@ -188,12 +208,13 @@ public class PrescriptionController {
 	 */
 		@RequestMapping(value="/getTakeAndFrequencyList", method = RequestMethod.GET)
 		@ResponseBody
-		public List<DrugSchedule> getTakeAndFrequencyList(@RequestParam(value="brandname",required=false,defaultValue="-1")String brandname,@RequestParam(value="mode",required=false,defaultValue="-1")String mode)throws Exception{
+		public EMRResponseBean getTakeAndFrequencyList(@RequestParam(value="brandname",required=false,defaultValue="-1")String brandname,@RequestParam(value="mode",required=false,defaultValue="-1")String mode)throws Exception{
 
 			logger.debug("In getting frequency list");
 			List<DrugSchedule> schedulename=prescriptionService.getfrequencylist(brandname.replaceAll("'","''"),mode);
-
-			return schedulename;
+			EMRResponseBean frequencyList = new EMRResponseBean();
+			frequencyList.setData(schedulename);
+			return frequencyList;
 
 		}
 
@@ -203,11 +224,12 @@ public class PrescriptionController {
 		 */
 		@RequestMapping(value="/getFrequencyListall", method = RequestMethod.GET)
 		@ResponseBody
-		public List<DrugSchedule> getFrequencyListall(@RequestParam(value="brandname",required=false,defaultValue="-1")String brandname,@RequestParam(value="mode",required=false,defaultValue="-1")String mode)throws Exception{
+		public EMRResponseBean getFrequencyListall(@RequestParam(value="brandname",required=false,defaultValue="-1")String brandname,@RequestParam(value="mode",required=false,defaultValue="-1")String mode)throws Exception{
 			logger.debug("In getting all  frequency list");
 			List<DrugSchedule> schedulename=prescriptionService.getfrequencylistall(brandname.replaceAll("'","''"),mode);
-
-			return schedulename;
+			EMRResponseBean frequencyList = new EMRResponseBean();
+			frequencyList.setData(schedulename);
+			return frequencyList;
 
 		}
 
@@ -216,11 +238,12 @@ public class PrescriptionController {
 		 */
 		@RequestMapping(value="/gettake", method = RequestMethod.GET)
 		@ResponseBody
-		public List<IntakeBean> gettake(@RequestParam(value="brandname",required=false,defaultValue="-1")String brandname)throws Exception{
+		public EMRResponseBean gettake(@RequestParam(value="brandname",required=false,defaultValue="-1")String brandname)throws Exception{
 			logger.debug("In getting t list");
 			List<IntakeBean> takevalues=prescriptionService.gettake(brandname.replaceAll("'","''"));
-
-			return takevalues;
+			EMRResponseBean intakeData = new EMRResponseBean();
+			intakeData.setData(takevalues);
+			return intakeData;
 
 		}
 	
@@ -245,10 +268,12 @@ public class PrescriptionController {
 	 */
 	@RequestMapping(value ="/getMedAdminPlanShortcuts", method = RequestMethod.GET) 
 	@ResponseBody
-	public List getMedAdminPlanShortcuts()throws Exception{
+	public EMRResponseBean getMedAdminPlanShortcuts()throws Exception{
 		logger.debug("In getMedAdminPlanShortcuts");
 		List<MedsAdminPlanShortcut> shortcutsList = prescriptionService.getMedAdminPlanShortcuts();
-		return shortcutsList;
+		EMRResponseBean medShortcuts = new EMRResponseBean();
+		medShortcuts.setData(shortcutsList);
+		return medShortcuts;
 	}
 	
 	/**
@@ -262,10 +287,12 @@ public class PrescriptionController {
 		    @ApiResponse(code = 404, message = "Pharmacy list retrieval failure"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public PharmacyFilterBean getPharmacyList(@RequestBody PharmacyFilterBean pharmacyFilterBean)throws Exception{
+	public EMRResponseBean getPharmacyList(@RequestBody PharmacyFilterBean pharmacyFilterBean)throws Exception{
 		
 		PharmacyFilterBean list=prescriptionService.getPharmacyList(pharmacyFilterBean);
-		return list;
+		EMRResponseBean pharmacyList = new EMRResponseBean();
+		pharmacyList.setData(list);
+		return pharmacyList;
 	}
 	
 	
@@ -282,10 +309,13 @@ public class PrescriptionController {
 		    @ApiResponse(code = 404, message = "Pharmacy list retrieval failure"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<Encounter> getPatientRefillRequestHistory(@ApiParam(name="patientId", value="patient's id whose refill request history is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPatientRefillRequestHistory(@ApiParam(name="patientId", value="patient's id whose refill request history is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose refill request history is to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
 		
-		return prescriptionService.getPatientRefillRequestHistory(patientId, chartId);
+		List<Encounter> encounterData= prescriptionService.getPatientRefillRequestHistory(patientId, chartId);
+		EMRResponseBean encounterList = new EMRResponseBean();
+		encounterList.setData(encounterData);
+		return encounterList;
 	}
 	
 	/**
@@ -301,10 +331,13 @@ public class PrescriptionController {
 		    @ApiResponse(code = 404, message = "Pharmacy list retrieval failure"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<Prescription> getPatientRefillRequestMedications(@ApiParam(name="patientId", value="patient's id whose completed medications list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPatientRefillRequestMedications(@ApiParam(name="patientId", value="patient's id whose completed medications list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose completed medications are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
 		
-		return prescriptionService.getPatientRefillRequestMedications(patientId, chartId);
+		List<Prescription> refillMedications= prescriptionService.getPatientRefillRequestMedications(patientId, chartId);
+		EMRResponseBean refillReqMeds = new EMRResponseBean();
+		refillReqMeds.setData(refillMedications);
+		return refillReqMeds;
 	}
 	
 	/**
