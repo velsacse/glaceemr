@@ -1,7 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
-
 import java.sql.Date;
 import java.util.List;
 
@@ -12,7 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -126,7 +125,7 @@ public class Guarantor {
 	private String guarantorNotes;
 
 	@OneToMany(mappedBy="patientRegistrationGuarantorid", fetch=FetchType.LAZY)
-	@JsonManagedReference
+	@JsonBackReference
 	List<PatientRegistration> patientRegTable;
 	
 	public Integer getGuarantorKey() {
