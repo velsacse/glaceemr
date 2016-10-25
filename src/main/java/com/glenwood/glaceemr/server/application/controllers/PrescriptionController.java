@@ -57,6 +57,9 @@ public class PrescriptionController {
 	@Autowired
 	HttpServletRequest request;
 	
+	@Autowired
+	EMRResponseBean responseBean;
+	
 	private Logger logger = Logger.getLogger(PrescriptionController.class);
 	
 	/**
@@ -70,10 +73,22 @@ public class PrescriptionController {
 	@ResponseBody
 	
 	public EMRResponseBean getactivemedwithclass(@RequestParam(value="patientid",required=false,defaultValue="-1")Integer patientid)throws Exception{
-		Map<String, Object> drugs=prescriptionService.getactivemedwithclass(patientid);
-		EMRResponseBean activeMedsByPatient = new EMRResponseBean();
-		activeMedsByPatient.setData(drugs);
-		return activeMedsByPatient;
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			Map<String, Object> drugs=prescriptionService.getactivemedwithclass(patientid);
+			responseBean.setSuccess(true);
+			responseBean.setData(drugs);
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving active meds!");
+			return responseBean;
+		}		
 	}
 	
 	/**
@@ -277,7 +292,7 @@ public class PrescriptionController {
 	}
 	
 	/**
-	 * @return Booked Appointment Details bean
+	 * @return EMRResponseBean with pharmacy list
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/PharmacyList", method = RequestMethod.POST)
@@ -288,18 +303,28 @@ public class PrescriptionController {
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getPharmacyList(@RequestBody PharmacyFilterBean pharmacyFilterBean)throws Exception{
-		
-		PharmacyFilterBean list=prescriptionService.getPharmacyList(pharmacyFilterBean);
-		EMRResponseBean pharmacyList = new EMRResponseBean();
-		pharmacyList.setData(list);
-		return pharmacyList;
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(prescriptionService.getPharmacyList(pharmacyFilterBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving pharmacy list!");
+			return responseBean;
+		}		
 	}
 	
 	
 	/**
 	 * @param patientId 
 	 * @param chartId
-	 * @return completed prescription list
+	 * @return EMRResponseBEan with completed prescription list
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/RefillRequestHistory", method = RequestMethod.GET)
@@ -312,16 +337,27 @@ public class PrescriptionController {
 	public EMRResponseBean getPatientRefillRequestHistory(@ApiParam(name="patientId", value="patient's id whose refill request history is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose refill request history is to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
 		
-		List<Encounter> encounterData= prescriptionService.getPatientRefillRequestHistory(patientId, chartId);
-		EMRResponseBean encounterList = new EMRResponseBean();
-		encounterList.setData(encounterData);
-		return encounterList;
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(prescriptionService.getPatientRefillRequestHistory(patientId, chartId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving refill request history!");
+			return responseBean;
+		}	
 	}
 	
 	/**
 	 * @param patientId 
 	 * @param chartId
-	 * @return completed prescription list
+	 * @return EMRResponseBean with refill request medications
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/RefillRequestMedications", method = RequestMethod.GET)
@@ -334,14 +370,24 @@ public class PrescriptionController {
 	public EMRResponseBean getPatientRefillRequestMedications(@ApiParam(name="patientId", value="patient's id whose completed medications list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose completed medications are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
 		
-		List<Prescription> refillMedications= prescriptionService.getPatientRefillRequestMedications(patientId, chartId);
-		EMRResponseBean refillReqMeds = new EMRResponseBean();
-		refillReqMeds.setData(refillMedications);
-		return refillReqMeds;
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(prescriptionService.getPatientRefillRequestMedications(patientId, chartId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving refill request medications!");
+			return responseBean;
+		}	
 	}
 	
 	/**
-	 * @return Refill Request
+	 * @return EMRResponseBean with request status
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/RefillRequest", method = RequestMethod.POST)
