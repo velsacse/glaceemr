@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.glenwood.glaceemr.server.application.models.GrowthGraphPatientData;
 import com.glenwood.glaceemr.server.application.models.GrowthGraphVitalData;
+import com.glenwood.glaceemr.server.application.models.GrowthGraphPatientData;
 import com.glenwood.glaceemr.server.application.models.H650;
 import com.glenwood.glaceemr.server.application.services.chart.growthgraph.GrowthGraphService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -48,11 +49,13 @@ public class GrowthGraphController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of "),
 		    @ApiResponse(code = 404, message = "when patient id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public String defaultGraphId(
+	public EMRResponseBean defaultGraphId(
 			@ApiParam(name="patientId",value="patient id") @RequestParam(value="patientid", required=false, defaultValue="true") String patientId){
 		
 			String defaultId=growthGraphService.getDefaultGraphId(patientId);
-		return defaultId;
+			EMRResponseBean result= new EMRResponseBean();
+			result.setData(defaultId);
+		return result;
 	}
 	
 	/**
@@ -66,11 +69,13 @@ public class GrowthGraphController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of patient data"),
 		    @ApiResponse(code = 404, message = "when patient id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public GrowthGraphPatientData getpatientinfo(
+	public EMRResponseBean getpatientinfo(
 			@ApiParam(name="patientId",value="patient id") @RequestParam(value="patientid", required=false, defaultValue="true") String patientId){
 		
 		GrowthGraphPatientData patientDetails=growthGraphService.getpatientinfo(patientId);
-		return patientDetails;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(patientDetails);
+		return result;
 	}
 	
 	/**
@@ -84,11 +89,13 @@ public class GrowthGraphController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of graph vital data's"),
 		    @ApiResponse(code = 404, message = "when patient id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<GrowthGraphVitalData> getVitalValues(
+	public EMRResponseBean getVitalValues(
 			@ApiParam(name="patientId",value="patient id") @RequestParam(value="patientid", required=false, defaultValue="true") String patientId){
 		
 		List<GrowthGraphVitalData> patientDetails=growthGraphService.getVitalValues(patientId);
-		return patientDetails;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(patientDetails);
+		return result;
 	}
 	
 	/**
@@ -102,10 +109,12 @@ public class GrowthGraphController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of graph list"),
 		    @ApiResponse(code = 404, message = "when patient id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<H650> getGraphList(
+	public EMRResponseBean getGraphList(
 			@ApiParam(name="patientId",value="patient id") @RequestParam(value="patientid", required=false, defaultValue="true") String patientId){
 		
 		List<H650> patientDetails=growthGraphService.getGraphList(patientId);
-		return patientDetails;
+		EMRResponseBean result= new EMRResponseBean();
+		result.setData(patientDetails);
+		return result;
 	}
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
 import com.glenwood.glaceemr.server.application.services.internalmessages.InternalMessagesService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -37,12 +38,13 @@ public class InternalMessagesController {
 	
 	@RequestMapping(value = "/getEncounters", method = RequestMethod.GET)
 	@ResponseBody
-	public List<Encounter> getIMEncounters(@RequestParam(value="patientid", required=true, defaultValue="") String patientId){
+	public EMRResponseBean getIMEncounters(@RequestParam(value="patientid", required=true, defaultValue="") String patientId){
 		
 			// For internal messages encounter type = 4
 			List<Encounter> encounterList=internalMessagesService.getIMEncounters(patientId);
-			
-		return encounterList;
+			EMRResponseBean result= new EMRResponseBean();
+			result.setData(encounterList);
+		return result;
 	}
 	
 	/**
@@ -53,11 +55,13 @@ public class InternalMessagesController {
 	@ApiOperation(value = "Get particular encounter details", notes = "To get the particular encounter details based on the encounter id")	
 	@RequestMapping(value = "/getEncounterDetails", method = RequestMethod.GET)
 	@ResponseBody
-	public Encounter getEncounterDetails(
+	public EMRResponseBean getEncounterDetails(
 			@RequestParam(value="encounterid", required=true, defaultValue="1") String encounterId){
 		
 			Encounter encounter=internalMessagesService.getEncounterDetails(encounterId);
-		return encounter;
+			EMRResponseBean result= new EMRResponseBean();
+			result.setData(encounter);
+		return result;
 	}
 	
 	/**
@@ -68,7 +72,7 @@ public class InternalMessagesController {
 	@ApiOperation(value = "update particular encounter details", notes = "To update the particular encounter details based on the encounter id")	
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
 	@ResponseBody
-	public Encounter update(
+	public EMRResponseBean update(
 			@RequestParam(value="encounterid", required=true, defaultValue="1") String encounterId,
 			@RequestParam(value="patientid", required=true, defaultValue="1") String patientId,
 			@RequestParam(value="chartid", required=true, defaultValue="-1") String chartId,
@@ -80,8 +84,9 @@ public class InternalMessagesController {
 			@RequestParam(value="encountertype", required=true, defaultValue="1") String encounterType){
 		
 			Encounter encounter=internalMessagesService.update(encounterId,patientId,chartId,userId,serviceDoctor,message,severity,status,encounterType);
-			
-		return encounter;
+			EMRResponseBean result= new EMRResponseBean();
+			result.setData(encounter);
+		return result;
 	}
 	
 	/**
@@ -92,7 +97,7 @@ public class InternalMessagesController {
 	@ApiOperation(value = "create new encounter details", notes = "To create new encounter details")	
 	@RequestMapping(value = "/compose", method = RequestMethod.POST)
 	@ResponseBody
-	public Encounter compose(
+	public EMRResponseBean compose(
 			@RequestParam(value="patientid", required=true, defaultValue="1") String patientId,
 			@RequestParam(value="chartid", required=true, defaultValue="1") String chartId,
 			@RequestParam(value="userid", required=true, defaultValue="-1111") String userId,
@@ -103,8 +108,9 @@ public class InternalMessagesController {
 			@RequestParam(value="encountertype", required=true, defaultValue="4") String encounterType){
 		
 			Encounter encounter=internalMessagesService.compose(patientId,chartId,userId,serviceDoctor,toId,message,severity,encounterType);
-			
-		return encounter;
+			EMRResponseBean result= new EMRResponseBean();
+			result.setData(encounter);
+		return result;
 	}
 	
 }
