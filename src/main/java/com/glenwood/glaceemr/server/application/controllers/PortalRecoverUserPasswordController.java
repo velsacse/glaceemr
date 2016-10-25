@@ -80,16 +80,14 @@ public class PortalRecoverUserPasswordController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getAppointmentDetails(@RequestBody RecoverPortalPasswordBean recoverPasswordBean) throws Exception{
+	public EMRResponseBean getAuthenticationDetails(@RequestBody RecoverPortalPasswordBean recoverPasswordBean) throws Exception{
 
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(false);
 
 		try {
-			responseBean.setSuccess(true);
-			responseBean.setData(portalRecoverPasswordService.authenticateSecurityQuestions(recoverPasswordBean));
-			return responseBean;
+			return portalRecoverPasswordService.authenticateSecurityQuestions(recoverPasswordBean);
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);

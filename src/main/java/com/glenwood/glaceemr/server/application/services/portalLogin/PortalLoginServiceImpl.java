@@ -89,6 +89,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		return portalUser;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public PortalRegistrationResponse checkDuplicatePatientData(String username, String dob, String firstName, String lastName) {
 		
@@ -198,6 +199,18 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		portalUser.setH809006(1);
 		portalUser.setH809009(0);
 		portalUser.setH809010(registrationBean.getPatRegPassword());
+		registrationBean.setSecurityQuestion1(registrationBean.getSecurityQuestion1().replaceAll("'", "''"));
+		registrationBean.setSecurityQuestion2(registrationBean.getSecurityQuestion2().replaceAll("'", "''"));
+		registrationBean.setSecurityQuestion3(registrationBean.getSecurityQuestion3().replaceAll("'", "''"));
+		registrationBean.setSecurityAnswer1(registrationBean.getSecurityAnswer1().replaceAll("'", "''"));
+		registrationBean.setSecurityAnswer2(registrationBean.getSecurityAnswer2().replaceAll("'", "''"));
+		registrationBean.setSecurityAnswer3(registrationBean.getSecurityAnswer3().replaceAll("'", "''"));
+		portalUser.setSecurityQuestion1(registrationBean.getSecurityQuestion1());
+		portalUser.setSecurityAnswer1(registrationBean.getSecurityAnswer1());
+		portalUser.setSecurityQuestion2(registrationBean.getSecurityQuestion2());
+		portalUser.setSecurityAnswer2(registrationBean.getSecurityAnswer2());
+		portalUser.setSecurityQuestion3(registrationBean.getSecurityQuestion3());
+		portalUser.setSecurityAnswer3(registrationBean.getSecurityAnswer3());
 		portalUser.setPasswordReset(0);
 		portalUser.setAccessTime(new Timestamp(new Date().getTime()));
 		portalUser.setFromPortal(true);		
@@ -390,18 +403,18 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		return portalUser;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public PortalRegistrationResponse requestSignupCredentials(PortalPatientRegistrationBean registrationBean, String practiceId)throws IOException, JSONException {
 		
 		PortalRegistrationResponse regResponse=new PortalRegistrationResponse();
-		PatientRegistration patientDetails;
 		
 		List<PatientRegistration> patientsList=new ArrayList<PatientRegistration>();
 		
 		if(registrationBean.getPatRegFirstName()!=null&&registrationBean.getPatRegLastName()!=null&&registrationBean.getPatRegDOB()!=null&&registrationBean.getPatRegEmailId()!=null)
 			patientsList=patientRegistrationRepository.findAll(PortalLoginSpecification.getPatientsList(new java.sql.Date(new Date(registrationBean.getPatRegDOB()).getTime()),
 						registrationBean.getPatRegFirstName(), registrationBean.getPatRegLastName(), registrationBean.getPatRegEmailId()));
-		
+				
 		if(patientsList.size()>1){
 			regResponse.setSuccess(false);
 			regResponse.setMessage("Multiple users exist with same details. Please contact our customer support.");
