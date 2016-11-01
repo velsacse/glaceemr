@@ -14,6 +14,7 @@ import com.glenwood.glaceemr.server.application.models.H611;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.services.chart.assessment.AssessmentSummaryService;
 import com.glenwood.glaceemr.server.application.services.chart.problemlist.ProblemListService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 
 
@@ -38,14 +39,15 @@ public class AssessmentSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/CurrentDiagnosis",method = RequestMethod.GET)
-	public List<H611> getCurrentDiagnosis(
+	public EMRResponseBean getCurrentDiagnosis(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId) throws Exception {
 		logger.debug("getting current diagnosis");
 		logger.error("getting current diagnosis");
 		List<H611> currentProblems = assessmentService.getCurrentDiagnosis(patientId,encounterId);
-		
-		return currentProblems;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(currentProblems);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -55,12 +57,14 @@ public class AssessmentSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/SaveCodes",method = RequestMethod.GET)
-	public boolean saveCurrentDiagnosis(
+	public EMRResponseBean saveCurrentDiagnosis(
 			@RequestParam(value="assessListobj", required=false, defaultValue="") JSONObject assessListobj) throws Exception {
 		logger.debug("getting current diagnosis");
 		logger.error("getting current diagnosis");
 		Boolean success = assessmentService.saveDiagnosis(assessListobj);
-		return success;		
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(success);
+		return emrResponseBean;		
 	}
 	
 	
@@ -71,13 +75,14 @@ public class AssessmentSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/ActiveProblems",method = RequestMethod.GET)
-	public List<ProblemList> activeProblems(
+	public EMRResponseBean activeProblems(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception {
 		logger.debug("Fetching active problems");
 		logger.error("Fetching active problems");		
 		List<ProblemList> currentProblems = problemListService.getActiveProblems(patientId);
-		
-		return currentProblems;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(currentProblems);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -90,7 +95,7 @@ public class AssessmentSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/EditFetch",method = RequestMethod.GET)
-	public List<H611> loadEditData(
+	public EMRResponseBean loadEditData(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId,
 			@RequestParam(value="dxCode", required=false, defaultValue="") String dxCode,
@@ -99,7 +104,9 @@ public class AssessmentSummaryController {
 		logger.error("Fetching data corresponds to edit dx");
 		
 		List<H611> editData = assessmentService.getEditData(patientId,encounterId,dxCode,problemId);
-		return editData;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(editData);
+		return emrResponseBean;
 	}
 
 	/**
@@ -111,13 +118,15 @@ public class AssessmentSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/ProblemlistData",method = RequestMethod.GET)
-	public String loadProblemlist(
+	public EMRResponseBean loadProblemlist(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId,
 			@RequestParam(value="userId", required=false, defaultValue="") Integer userId) throws Exception {
 		logger.debug("load data corresponds to current dx");		
 		String message = assessmentService.moveToProblemList(patientId,encounterId,userId);
-		return message;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(message);
+		return emrResponseBean;
 	}
 
 }
