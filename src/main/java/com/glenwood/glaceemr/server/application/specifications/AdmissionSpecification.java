@@ -326,7 +326,32 @@ public class AdmissionSpecification {
 
         };
     }
-    
+        
+    /**
+     * Get selected past admission
+     * @param admissionId
+     * @return
+     */
+    public static Specification<Admission> byPastAdmissionId(final Integer admissionId) {
+    	return new Specification<Admission>() {
+
+			@Override
+			public Predicate toPredicate(Root<Admission> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				
+				root.fetch(Admission_.empProfile,JoinType.INNER);
+				root.fetch(Admission_.posTable,JoinType.INNER);
+				root.fetch(Admission_.admissionBlockTable,JoinType.LEFT);
+				root.fetch(Admission_.admissionRoomTable,JoinType.LEFT);
+				Predicate episodePred= cb.equal(root.get(Admission_.admissionId), admissionId);
+				Predicate statusPred= cb.equal(root.get(Admission_.admissionStatus), 2);
+				query.where(episodePred,statusPred).orderBy(cb.desc(root.get(Admission_.admissionId)));
+				return query.getRestriction();
+			}
+    		
+    		
+		};
+    }
     
 	/*public static Specification<LeafLibrary> getFequentList(final Integer userId){
 

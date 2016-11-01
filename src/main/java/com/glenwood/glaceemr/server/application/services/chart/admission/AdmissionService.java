@@ -14,7 +14,7 @@ public interface AdmissionService  {
 
 	String dischargePatient(Integer patientId,Integer loginId,Integer userId);
 	
-	List<Admission> getPastAdmission(Integer patientId);
+	Admission getPastAdmission(Integer admissionId);
 
 	List<Admission> getLeafDetails(Integer encounterId, Integer userId);
 
@@ -24,6 +24,10 @@ public interface AdmissionService  {
 
 	AdmissionLeafBean getAdmissionLeafs(Integer admssEpisode);
 
-	List<AdmissionRoom> getRooms(Integer blockId);
+	List<AdmissionRoom> getRooms(Integer blockId);	
+
+	Admission getAdmissionPast(Integer patientId);
+
+	List<String> getPastAdmissionDates(Integer patientId);
 	
 }

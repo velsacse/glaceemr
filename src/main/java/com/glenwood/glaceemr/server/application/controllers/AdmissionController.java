@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionBean;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionLeafBean;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.Api;
 
@@ -31,6 +33,12 @@ public class AdmissionController {
 	@Autowired
 	AdmissionService admissionService;
 
+	/**
+	 * To Create and update Admission details
+	 * @param dataJson
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/saveAdmission",method=RequestMethod.POST)
 	@ResponseBody
 	public String createAdmission(@RequestBody AdmissionBean dataJson) throws Exception{
@@ -38,6 +46,12 @@ public class AdmissionController {
 		return admissionService.saveAdmission(dataJson);
 	}
 	
+	/**
+	 * To Get open admission details
+	 * @param patientId
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/getAdmission",method=RequestMethod.GET)
 	@ResponseBody
 	public Admission getAdmission(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
@@ -45,7 +59,14 @@ public class AdmissionController {
 	}
 	
 	
-	
+	/**
+	 * To Discharge patient (closing admission)
+	 * @param patientId
+	 * @param loginId
+	 * @param userId
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/dischargePatient",method=RequestMethod.GET)
 	@ResponseBody
 	public String dischargePatient(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId,
@@ -54,13 +75,54 @@ public class AdmissionController {
 		return admissionService.dischargePatient(patientId,loginId,userId);
 	}
 	
-
+	/**
+	 * To Get selected past Admission details
+	 * @param admissionId
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/getPastAdmission",method=RequestMethod.GET)
 	@ResponseBody
-	public List<Admission> getPastAdmission(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
-		return admissionService.getPastAdmission(patientId);
+	public EMRResponseBean getPastAdmission(@RequestParam(value="admissionId",required=false, defaultValue="") Integer admissionId) throws Exception{
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(admissionService.getPastAdmission(admissionId));
+		return respBean;
 	}
 	
+	/**
+	 * To Get recently closed Admission details
+	 * @param patientId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/getAdmissionPast",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getPastAdmissionPast(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(admissionService.getAdmissionPast(patientId));
+		return respBean;
+	}
+	
+	/**
+	 * To Get past admission dates
+	 * @param patientId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/getPastAdmissionDates",method=RequestMethod.GET)
+	public EMRResponseBean getPastAdmissionDates(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(admissionService.getPastAdmissionDates(patientId));
+		return respBean;
+	}
+	
+	/**
+	 * To Get clinical notes
+	 * @param encounterId
+	 * @param userId
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/getLeafDetails",method=RequestMethod.GET)
 	@ResponseBody
 	public List<Admission> getLeafDetails(@RequestParam(value="encounterId",required=false, defaultValue="") Integer encounterId,
@@ -68,13 +130,24 @@ public class AdmissionController {
 		return admissionService.getLeafDetails(encounterId,userId);
 	}
 	
+	/**
+	 * To Get encounter list corresponding to Episode
+	 * @param admssEpisode
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/getAdmissionEncounterDetails",method=RequestMethod.GET)
 	@ResponseBody
 	public String getAdmissionEncDetails(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
 		return admissionService.getAdmissionEncDetails(admssEpisode);
 	}
 	
-	
+	/**
+	 * Creating clinical note
+	 * @param dataJson
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/openLeaf",method=RequestMethod.POST)
 	@ResponseBody
 	public Encounter openAdmissionLeaf(@RequestBody AdmissionBean dataJson) throws Exception{
@@ -82,19 +155,35 @@ public class AdmissionController {
 		return admissionService.openAdmissionLeaf(dataJson);
 	}
 	
-	
+	/**
+	 * To Get clinical notes and Allergies details
+	 * @param admssEpisode
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/AdmissionLeafs",method=RequestMethod.GET)
 	@ResponseBody
 	public AdmissionLeafBean getAdmissionLeafs(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
 		return admissionService.getAdmissionLeafs(admssEpisode);
 	}
 	
+	/**
+	 * To Get Rooms of selected Block
+	 * @param blockId
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/getRooms",method=RequestMethod.GET)
 	@ResponseBody
 	public List<AdmissionRoom> getRooms(@RequestParam(value="blockId",required=false, defaultValue="-1") Integer blockId) throws Exception{
 		return admissionService.getRooms(blockId);
 	}	
 	
+	/**
+	 * Setting default values to data
+	 * @param dataJson
+	 * @return
+	 */
 	public AdmissionBean getAdmissionBeanData(AdmissionBean dataJson){
 		
 		dataJson.setAdmissionDate(Optional.fromNullable(dataJson.getAdmissionDate()+"").or("-1"));

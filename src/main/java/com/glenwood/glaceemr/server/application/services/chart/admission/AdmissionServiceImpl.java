@@ -11,6 +11,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.Admission;
 import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
+import com.glenwood.glaceemr.server.application.models.Admission_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.H496;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
@@ -80,7 +84,9 @@ public class AdmissionServiceImpl implements AdmissionService {
 	@PersistenceContext
 	EntityManager entityManager;
 	
-	
+	/**
+	 * To create/update Admission
+	 */
 	@Override
 	public String saveAdmission( AdmissionBean admission) {
 
@@ -167,6 +173,22 @@ public class AdmissionServiceImpl implements AdmissionService {
 
 	}
 
+	/**
+	 * Get recently closed Admission details 
+	 */
+	@Override
+	public Admission getAdmissionPast(Integer patientId) {
+		List<Admission> admission=admissionRepository.findAll(AdmissionSpecification.getPastAdmissionByPatientId(patientId));
+		if(admission.size() > 0){
+			return admission.get(0);
+		}else{
+			return null;
+		}
+	}
+	
+	/**
+	 * Get open Admission details
+	 */
 	@Override
 	public Admission getAdmission(Integer patientId) {
 		List<Admission> admission=admissionRepository.findAll(AdmissionSpecification.getAdmissionByPatientId(patientId));
@@ -177,8 +199,7 @@ public class AdmissionServiceImpl implements AdmissionService {
 		}
 	}
 	
-	
-	@Override
+/*	@Override
 	public List<Admission> getPastAdmission(Integer patientId) {
 		List<Admission> admission=admissionRepository.findAll(AdmissionSpecification.getPastAdmissionByPatientId(patientId));
 		if(admission.size() > 0){
@@ -186,8 +207,13 @@ public class AdmissionServiceImpl implements AdmissionService {
 		}else{
 			return Collections.<Admission>emptyList();
 		}
-	}
+	}*/
 
+	/**
+	 * Get patient episode details
+	 * @param patEpisodeId
+	 * @return
+	 */
 	public PatientEpisode getPatientEpisodebyEpisodeId(Integer patEpisodeId){
 		
 		List<PatientEpisode> patEpisode=null;
@@ -197,7 +223,9 @@ public class AdmissionServiceImpl implements AdmissionService {
 			return null;
 	}
 	
-	
+	/**
+	 * Discharge patient
+	 */
 	@Override
 	public String dischargePatient(Integer patientId,Integer loginId,Integer userId) {
 
@@ -235,17 +263,21 @@ public class AdmissionServiceImpl implements AdmissionService {
 	
 	}
 
-	
-
-	
-
-	
+	/**
+	 * Open template
+	 * @param encounterId
+	 * @param userId
+	 * @return
+	 */
 	
 	public List<Admission> openAdmissionTemplate(Integer encounterId, Integer userId) {
 		
 		return null;
 	}
 
+	/**
+	 * Creating clinical note
+	 */
 	@Override
 	public Encounter openAdmissionLeaf(AdmissionBean admission) {
 		
@@ -295,6 +327,9 @@ public class AdmissionServiceImpl implements AdmissionService {
 		
 	}
 
+	/**
+	 * Get encounter leaf details
+	 */
 	@Override
 	public List<Admission> getLeafDetails(Integer encounterId, Integer userId) {
 		leafLibraryRepository.findAll(Specifications.where(AdmissionSpecification.A()).and(AdmissionSpecification.B(encounterId, userId)));
@@ -302,6 +337,9 @@ public class AdmissionServiceImpl implements AdmissionService {
 		return null;
 	}
 
+	/**
+	 * Get Admission encounterIds
+	 */
 	@Override
 	public String getAdmissionEncDetails(Integer admssEpisode) {
 		List<Encounter> admssEnc=encounterEntityRepository.findAll(AdmissionSpecification.getAdmissionEncByEpisodeId(admssEpisode));
@@ -316,6 +354,9 @@ public class AdmissionServiceImpl implements AdmissionService {
 		return encDataJson.toString();
 	}
 
+	/**
+	 * Get Admission clinical notes
+	 */
 	@Override
 	public AdmissionLeafBean getAdmissionLeafs(Integer admssEpisode) {
 		List<LeafPatient> admissionLeafs = null;
@@ -349,10 +390,59 @@ public class AdmissionServiceImpl implements AdmissionService {
 		return admissionLeafBean;
 	}
 
+	/**
+	 * Get Rooms of selected block
+	 */
 	@Override
 	public List<AdmissionRoom> getRooms(Integer blockId) {
 		
 		return admissionRoomRepository.findAll(AdmissionSpecification.getRooms(blockId));
 	}
+	
+	/**
+	 * Get Past admission dates
+	 */
+	@Override
+	public List<String> getPastAdmissionDates(Integer patientId) {
+		
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+		Root<Admission> root= cq.from(Admission.class);
+		cq.multiselect(root.get(Admission_.admissionId), root.get(Admission_.admissionDate), root.get(Admission_.admissionTime)).
+			where(builder.equal(root.get(Admission_.admissionPatientId), patientId),builder.equal(root.get(Admission_.admissionStatus), 2)).
+			orderBy(builder.desc(root.get(Admission_.admissionId)));
+		
+		List<Object[]> list=entityManager.createQuery(cq).getResultList();
+		List<String> resultList= new ArrayList<String>();
+		for(Object[] values : list) {
+			try{
+				Integer admissionId= Integer.parseInt(values[0].toString());
+				SimpleDateFormat format= new SimpleDateFormat("yyyy-MM-dd");
+				Date dateStr= null;
+				try {
+					if(values[1] != null)
+						dateStr = format.parse(values[1].toString());
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}		
+				if(dateStr != null){
+					String admissionDate= new SimpleDateFormat("MM/dd/yyyy").format(dateStr);
+					String admissionTime= values[2]!= null ? values[2].toString(): "";
+					resultList.add(admissionId+"###"+admissionDate+" "+admissionTime.trim());
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		
+		return resultList;
+	}
 
+	/**
+	 * Get selected past admission details
+	 */
+	@Override
+	public Admission getPastAdmission(Integer admissionId) {
+		return admissionRepository.findOne(AdmissionSpecification.byPastAdmissionId(admissionId));
+	}
 }
