@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.services.chart.problemlist.ProblemListService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 
 @Api(value = "ProblemList", description = "Contains all the operations related to problem list", consumes="application/json")
@@ -31,13 +32,14 @@ public class ProblemListController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/ActiveProblems",method = RequestMethod.GET)
-	public List<ProblemList> activeProblems(
+	public EMRResponseBean activeProblems(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception {
 		logger.debug("Fetching active problems");
 		logger.error("Fetching active problems");		
 		List<ProblemList> currentProblems = problemListService.getActiveProblems(patientId);
-		
-		return currentProblems;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(currentProblems);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -47,12 +49,14 @@ public class ProblemListController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/InactiveProblems",method = RequestMethod.GET)
-	public List<ProblemList> inactiveProblems(
+	public EMRResponseBean inactiveProblems(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception {
 		logger.debug("Fetching inactive and resolved problems");
 		logger.error("Fetching inactive and resolved problems");		
 		List<ProblemList> currentProblems = problemListService.getInactiveProblems(patientId);
-		return currentProblems;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(currentProblems);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -63,14 +67,16 @@ public class ProblemListController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/EditFetch",method = RequestMethod.GET)
-	public List<ProblemList> loadEditData(
+	public EMRResponseBean loadEditData(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="problemId", required=false, defaultValue="") Integer problemId) throws Exception {
 		logger.debug("Fetching data corresponds to edit dx");
 		logger.error("Fetching data corresponds to edit dx");
 		
 		List<ProblemList> editData = problemListService.getEditData(patientId,problemId);
-		return editData;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(editData);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -82,14 +88,16 @@ public class ProblemListController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/EditSave",method = RequestMethod.GET)
-	public String saveEditData(
+	public EMRResponseBean saveEditData(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="userId", required=false, defaultValue="") Integer userId,
 			@RequestParam(value="saveData", required=false, defaultValue="") String saveData) throws Exception {
 		logger.debug("Updating problem list data");
 		logger.error("Updating problem list data");		
 		problemListService.editDataSave(patientId,userId,saveData);
-	    return "edited";
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData("edited");
+	    return emrResponseBean;
 	}
 	
 	/**
@@ -100,13 +108,15 @@ public class ProblemListController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/DeleteSave",method = RequestMethod.GET)
-	public String deleteDxData(
+	public EMRResponseBean deleteDxData(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="deleteData", required=false, defaultValue="") String deleteData) throws Exception {
 		logger.debug("Problem list delete");
 		logger.error("Problem list delete");
 		problemListService.deleteDataSave(patientId,deleteData);
-	    return "deleted";
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData("deleted");
+	    return emrResponseBean;
 	}
 	
 	
@@ -118,13 +128,15 @@ public class ProblemListController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/DeleteSaveFetch",method = RequestMethod.GET)
-	public List<ProblemList> deleteDxDataAndFetch(
+	public EMRResponseBean deleteDxDataAndFetch(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="deleteData", required=false, defaultValue="") String deleteData) throws Exception {
 		logger.debug("Problem list delete");
 		logger.error("Problem list delete");
 		
-	    return problemListService.deleteDataSaveFetch(patientId,deleteData);
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(problemListService.deleteDataSaveFetch(patientId,deleteData));
+	    return emrResponseBean;
 	}
 	
 }
