@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
@@ -17,6 +18,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogCons
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.referral.ReferralBean;
 import com.glenwood.glaceemr.server.application.services.referral.ReferralService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -69,14 +71,16 @@ public class PlanReferralController {
 	@ApiOperation(value = "Getting referral list", notes = "Getting referral list based on encounterid and chartId")
 	@RequestMapping(value = "/listReferral", method = RequestMethod.GET)
 	@ResponseBody
-	public List<Referral> getReferralList(@RequestParam(value="encounterId",required = false) Integer encounterId,
+	public EMRResponseBean getReferralList(@RequestParam(value="encounterId",required = false) Integer encounterId,
 			   @RequestParam(value="chartId",required = false) Integer chartId,
 			   @RequestParam(value="dxCode",required = false,defaultValue="") String dx) throws JSONException {
 	
 		logger.debug("Getting referral list::encounterId"+encounterId+" chartId"+chartId+" dxCode"+dx);
 		List<Referral> result = referralService.getListOfReferralsPlan(encounterId,chartId,dx);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"View Referrals details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referrals details viewed");		
-		return result;
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"View Referrals details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referrals details viewed");
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(result);
+		return respBean;
 
 	}
 	
@@ -90,7 +94,7 @@ public class PlanReferralController {
 	@ApiOperation(value = "Getting referral and diagnosis", notes = "Getting referral details and patient dianosis data")
 	@RequestMapping(value = "/GetReferralWithDiagnosis", method = RequestMethod.GET)
 	@ResponseBody
-	public ReferralBean getReferral(@RequestParam(value="referralId",required = false,defaultValue="-1") Integer referralId,
+	public EMRResponseBean getReferral(@RequestParam(value="referralId",required = false,defaultValue="-1") Integer referralId,
 			@RequestParam(value="chartId",required = false,defaultValue="-1") Integer chartId,
 			@RequestParam(value="encounterId",required = false,defaultValue="-1") Integer encounterId)
 			    throws JSONException {
@@ -98,7 +102,9 @@ public class PlanReferralController {
 		logger.debug("Getting referral::referralId"+referralId);
 		ReferralBean result = referralService.getReferral(referralId, chartId, encounterId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"View Referral details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral details viewed");
-		return result;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(result);
+		return respBean;
 
 	}
 	
@@ -111,13 +117,15 @@ public class PlanReferralController {
 	@ApiOperation(value = "Getting referral", notes = "Getting referral based on referralId")
 	@RequestMapping(value = "/GetReferral", method = RequestMethod.GET)
 	@ResponseBody
-	public Referral getReferral(@RequestParam(value="referralId",required = false,defaultValue="-1") Integer referralId)
+	public EMRResponseBean getReferral(@RequestParam(value="referralId",required = false,defaultValue="-1") Integer referralId)
 			    throws JSONException {
 		
 		logger.debug("Getting referral::referralId"+referralId);
 		Referral result = referralService.getReferralPlan(referralId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"View Referral details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral details viewed");
-		return result;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(result);
+		return respBean;
 
 	}
 	
@@ -132,7 +140,7 @@ public class PlanReferralController {
 	@ApiOperation(value = "Saving referral", notes = "Saving referral details based on referralId")
 	@RequestMapping(value = "/SaveReferral", method = RequestMethod.GET)
 	@ResponseBody
-	public String saveReferral(
+	public EMRResponseBean saveReferral(
 			  @RequestParam(value="referralId",required = false) Integer referralId,
 			  @RequestParam(value="reason",required = false) String reason,
 			  @RequestParam(value="notes",required = false) String notes,
@@ -142,7 +150,9 @@ public class PlanReferralController {
 		logger.debug("Saving referral::referralId"+referralId+" reason"+reason+" notes"+notes+"criticalstatus"+criticalstatus);
 		referralService.saveReferralPlan(referralId,reason,notes,diagnosis,criticalstatus);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.UPDATE,1,AuditLogConstants.SUCCESS,"Update Referral Details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral details updated");
-		return "success";
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData("success");
+		return respBean;
 	}
 		
 	/** 
@@ -155,13 +165,15 @@ public class PlanReferralController {
 	@ApiOperation(value = "Cancel referral", notes = "Change referral status to cancel and save active user id in cancelled by field")
 	@RequestMapping(value = "/CancelReferral", method = RequestMethod.GET)
 	@ResponseBody
-	public String cancelReferral(@RequestParam(value="loginId",required = false, defaultValue = "-1") Integer loginID,
+	public EMRResponseBean cancelReferral(@RequestParam(value="loginId",required = false, defaultValue = "-1") Integer loginID,
 			   @RequestParam(value="referralId",required = false, defaultValue = "-1") Integer referralId) throws JSONException {
 		
 		logger.debug("Cancelling referral::referralId"+referralId+" loginId"+loginID);
 		referralService.cancelReferral(loginID,referralId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.CANCELED,1,AuditLogConstants.SUCCESS,"Cancel Referral",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral cancelled");
-		return "success";
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData("success");
+		return respBean;
 
 	}
 	
