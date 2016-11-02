@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.UserGroup;
 import com.glenwood.glaceemr.server.application.services.alertinbox.UserGroupService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -45,11 +46,13 @@ public class UserGroupController{
 		    @ApiResponse(code = 200, message = "Successful retrieval of User group details"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<UserGroup> userGroupList()
+	public EMRResponseBean userGroupList()
 	{
 		List<UserGroup> grpDetails;
 		grpDetails=userGroupService.getUserGroup();
-		return grpDetails;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(grpDetails);
+		return emrResponseBean;
 	}
 
 
@@ -66,11 +69,13 @@ public class UserGroupController{
 		    @ApiResponse(code = 404, message = "when group id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<UserGroup> userGroupListById(@ApiParam(name="groupId", value="group id for particular user group") @RequestParam(value="groupid", required=true) String groupid)
+	public EMRResponseBean userGroupListById(@ApiParam(name="groupId", value="group id for particular user group") @RequestParam(value="groupid", required=true) String groupid)
 	{
 		List<UserGroup> grpDetails;
 		grpDetails=userGroupService.getUserGroupByGroupId(Integer.parseInt(groupid));
-		return grpDetails;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(grpDetails);
+		return emrResponseBean;
 	}
 
 
@@ -87,11 +92,13 @@ public class UserGroupController{
 		    @ApiResponse(code = 404, message = "when group id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<UserGroup> deleteUserGroupByGroupId(
+	public EMRResponseBean deleteUserGroupByGroupId(
 			@ApiParam(name="groupId", value="group id for particular user group") @RequestParam(value="groupid", required=true) String groupId )
 	{
 		List<UserGroup> grpDetails=userGroupService.deleteUserGroupByGroupId(Integer.parseInt(groupId));
-		return grpDetails;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(grpDetails);
+		return emrResponseBean;
 	}
 
 
@@ -111,7 +118,7 @@ public class UserGroupController{
 		    @ApiResponse(code = 404, message = "when group id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<UserGroup> updateUserGroupByGroupId(
+	public EMRResponseBean updateUserGroupByGroupId(
 			@ApiParam(name="groupId", value="group id for particular user group") @RequestParam(value="groupid", required=true) String groupId,
 			@ApiParam(name="groupName", value="user defined group name") @RequestParam(value="groupname", required=true) String groupName,
 			@ApiParam(name="userId", value="user id from employee profile") @RequestParam(value="userid", required=false) String userId,
@@ -129,7 +136,9 @@ public class UserGroupController{
 			userNameList.add(s);
 		}
 		List<UserGroup> grpDetails=userGroupService.updateUserGroupByGroupId(Integer.parseInt(groupId),groupName,userIdList,userNameList);
-		return grpDetails;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(grpDetails);
+		return emrResponseBean;
 			}
 
 
@@ -148,7 +157,7 @@ public class UserGroupController{
 		    @ApiResponse(code = 404, message = "when group id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<UserGroup> insertUserGroup(
+	public EMRResponseBean insertUserGroup(
 			@ApiParam(name="groupName", value="user defined group name") @RequestParam(value="groupname", required=false) String groupName,
 			@ApiParam(name="userId", value="user id from employee profile") @RequestParam(value="userid", required=false) String userId,
 			@ApiParam(name="userName", value="user name from employee profile") @RequestParam(value="username", required=false) String userName )
@@ -165,7 +174,9 @@ public class UserGroupController{
 			userNameList.add(s);
 		}
 		List<UserGroup> grpDetails=userGroupService.insertUserGroup(groupName,userIdList,userNameList);
-		return grpDetails;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(grpDetails);
+		return emrResponseBean;
 			}
 
 
