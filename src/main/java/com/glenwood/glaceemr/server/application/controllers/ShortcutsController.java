@@ -17,7 +17,7 @@ import com.glenwood.glaceemr.server.application.models.SoapElementDatalist;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.shortcuts.ShortcutsService;
-import com.glenwood.glaceemr.server.utils.SessionMap;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -55,7 +55,7 @@ public class ShortcutsController {
 	@ApiOperation(value = "Adding shortcut", notes = "Adding element shortcut to shortcut list")
 	@RequestMapping(value = "/AddShortcut", method = RequestMethod.POST)
 	@ResponseBody
-	public List<SoapElementDatalist> addShort(@RequestParam(value="tabId",required = false, defaultValue="-1") Integer tabId,
+	public EMRResponseBean addShort(@RequestParam(value="tabId",required = false, defaultValue="-1") Integer tabId,
 			   @RequestParam(value="elementId",required = false, defaultValue="") String elementId,
 			   @RequestParam(value="data",required = false, defaultValue="") String data) throws JSONException {
 	
@@ -64,8 +64,10 @@ public class ShortcutsController {
 		List<SoapElementDatalist> shortcutList = shortcutsService.addShortcut(tabId, elementId, data);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Leaf ,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully loaded letter headers details based on header id",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Leaf,request,"Successfully added quick notes shortcut");
 		logger.debug("End of request to Add shortcut");
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(shortcutList);
 		
-		return shortcutList;
+		return respBean;
 
 	}
 	
@@ -81,7 +83,7 @@ public class ShortcutsController {
 	@ApiOperation(value = "Deleting shortcut", notes = "Deleting element shortcut")
 	@RequestMapping(value = "/deleteShortcut", method = RequestMethod.POST)
 	@ResponseBody
-	public List<SoapElementDatalist> deleteShort(@RequestParam(value="shortcutId",required = false, defaultValue="-1") Integer shortcutId,
+	public EMRResponseBean deleteShort(@RequestParam(value="shortcutId",required = false, defaultValue="-1") Integer shortcutId,
 			   @RequestParam(value="tabId",required = false, defaultValue="-1") Integer tabId,
 			   @RequestParam(value="elementId",required = false, defaultValue="") String elementId)
 			   throws JSONException {
@@ -94,7 +96,9 @@ public class ShortcutsController {
 		List<SoapElementDatalist> shortcutList = shortcutsService.fetchShortcuts(tabId, elementId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Leaf,AuditLogConstants.DELETED,1,AuditLogConstants.SUCCESS,"Successfully loaded letter headers details based on header id",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Leaf,request,"Successfully deleted quick notes shortcut");
 		logger.debug("End of request to Delete shortcut");
-		return shortcutList;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(shortcutList);
+		return respBean;
 
 	}
 		

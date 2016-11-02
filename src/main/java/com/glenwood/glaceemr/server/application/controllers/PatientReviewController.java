@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.PatientReviewedDetails;
-import com.glenwood.glaceemr.server.application.services.chart.patientreview.PatientReviewDetailsBean;
 import com.glenwood.glaceemr.server.application.services.chart.patientreview.PatientReviewService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -37,11 +37,13 @@ public class PatientReviewController {
 	@ApiOperation(value = "Get reviewed information", notes = "Get reviewed user information")
 	@RequestMapping(value="/getReviewInfo", method=RequestMethod.POST)
 	@ResponseBody
-	public PatientReviewDetailsBean getReviewInfo(
+	public EMRResponseBean getReviewInfo(
 			@ApiParam(name="chartId",value="chart id") @RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId){
 		
-		logger.debug("Getting review information");		  
-		return patientReviewService.getReviewInfo(chartId);
+		logger.debug("Getting review information");
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(patientReviewService.getReviewInfo(chartId));
+		return respBean;
 	}
 
 	/**
@@ -52,7 +54,7 @@ public class PatientReviewController {
 	@ApiOperation(value = "Save reviewed userid", notes = "Save reviewed userid")
 	@RequestMapping(value="/saveReviewInfo", method=RequestMethod.POST)
 	@ResponseBody
-	public PatientReviewDetailsBean getReviewInfo(
+	public EMRResponseBean getReviewInfo(
 			@ApiParam(name="userId",value="login user id") @RequestParam(value="userId", required=false, defaultValue="-1") Integer userId,
 			@ApiParam(name="patientId",value="patient id") @RequestParam(value="patientId", required=false, defaultValue="-1") Integer patientId,
 			@ApiParam(name="chartId",value="chart id") @RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
@@ -68,6 +70,8 @@ public class PatientReviewController {
 		patientReviewed.setPatientReviewedDetailsEncounterid(encounterId);
 		patientReviewService.saveReviewInfo(patientReviewed);
 		
-		return patientReviewService.getReviewInfo(chartId); 
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(patientReviewService.getReviewInfo(chartId));
+		return respBean; 
 	}
 }

@@ -18,6 +18,7 @@ import com.glenwood.glaceemr.server.application.services.referral.ReferralBean;
 import com.glenwood.glaceemr.server.application.services.referral.ReferralForm;
 import com.glenwood.glaceemr.server.application.services.referral.ReferralListBean;
 import com.glenwood.glaceemr.server.application.services.referral.ReferralService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 
@@ -54,11 +55,13 @@ public class ReferralController {
 	 */
 	@RequestMapping(value = "/listReferral", method = RequestMethod.GET)
 	@ResponseBody
-	public ReferralListBean getReferralList(@RequestParam(value="chartId",required = false) Integer chartId) throws JSONException {
+	public EMRResponseBean getReferralList(@RequestParam(value="chartId",required = false) Integer chartId) throws JSONException {
 		logger.debug("Getting list of referrals:: chartId"+chartId);
 		ReferralListBean result = referralService.getListOfReferrals(chartId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"View Referrals details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referrals details viewed");
-		return result;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(result);
+		return respBean;
 
 	}	
 	
@@ -72,13 +75,15 @@ public class ReferralController {
 	 */
 	@RequestMapping(value = "/GetReferral", method = RequestMethod.GET)
 	@ResponseBody
-	public ReferralBean getReferral(@RequestParam(value="referralId",required = false) Integer referralId,
+	public EMRResponseBean getReferral(@RequestParam(value="referralId",required = false) Integer referralId,
 			   @RequestParam(value="chartId",required = false) Integer chartId,
 			   @RequestParam(value="fromEdit",required = false,defaultValue="false") Boolean fromEdit) throws JSONException {
 		logger.debug("Getting referral:: chartId"+chartId+" referralId"+referralId);
 		ReferralBean result = referralService.getReferral(referralId,chartId,fromEdit);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"View Referral details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral details viewed");
-		return result;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(result);
+		return respBean;
 
 	}
 
@@ -88,7 +93,7 @@ public class ReferralController {
 	 * @throws JSONException
 	 */
 	@RequestMapping(value = "/SaveReferralForm", method = RequestMethod.POST)
-	public String saveReferral(@RequestBody ReferralForm formBean) throws JSONException {
+	public EMRResponseBean saveReferral(@RequestBody ReferralForm formBean) throws JSONException {
 
 		logger.debug("Saving referral");
 		String result = referralService.saveReferral(formBean);
@@ -97,6 +102,8 @@ public class ReferralController {
 			auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.UPDATE,1,AuditLogConstants.SUCCESS,"Update Referral Details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral details updated");
 		else
 			auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Add Referral Details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral details added");
-		return result;
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(result);
+		return respBean;
 	}
 }
