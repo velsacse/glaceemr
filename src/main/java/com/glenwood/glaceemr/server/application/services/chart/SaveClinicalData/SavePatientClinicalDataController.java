@@ -17,7 +17,7 @@ import com.wordnik.swagger.annotations.Api;
 @Api(value = "Save Clinical Data", description = "Save Clinical Data", consumes="application/json")
 @RestController
 @Transactional
-@RequestMapping(value="/SavePatientClinicalData.Action")
+@RequestMapping(value="/user/SavePatientClinicalData.Action")
 public class SavePatientClinicalDataController {
 	
 	
