@@ -41,9 +41,12 @@ public class AdmissionController {
 	 */
 	@RequestMapping(value="/saveAdmission",method=RequestMethod.POST)
 	@ResponseBody
-	public String createAdmission(@RequestBody AdmissionBean dataJson) throws Exception{
+	public EMRResponseBean createAdmission(@RequestBody AdmissionBean dataJson) throws Exception{
 		dataJson = getAdmissionBeanData(dataJson);
-		return admissionService.saveAdmission(dataJson);
+		String data= admissionService.saveAdmission(dataJson);
+		EMRResponseBean dataToSave=new EMRResponseBean();
+		dataToSave.setData(data);
+		return dataToSave;
 	}
 	
 	/**
@@ -54,8 +57,11 @@ public class AdmissionController {
 	 */
 	@RequestMapping(value="/getAdmission",method=RequestMethod.GET)
 	@ResponseBody
-	public Admission getAdmission(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
-		return admissionService.getAdmission(patientId);
+	public EMRResponseBean getAdmission(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
+		Admission admission= admissionService.getAdmission(patientId);
+	    EMRResponseBean emrResponseBean=new EMRResponseBean();
+	    emrResponseBean.setData(admission);
+	    return emrResponseBean;
 	}
 	
 	
@@ -69,11 +75,15 @@ public class AdmissionController {
 	 */
 	@RequestMapping(value="/dischargePatient",method=RequestMethod.GET)
 	@ResponseBody
-	public String dischargePatient(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId,
-			 					   @RequestParam(value="loginId",required=false, defaultValue="") Integer loginId,						 
-			 					   @RequestParam(value="userId",required=false, defaultValue="") Integer userId) throws Exception{
-		return admissionService.dischargePatient(patientId,loginId,userId);
-	}
+	public EMRResponseBean dischargePatient(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId,
+			   @RequestParam(value="loginId",required=false, defaultValue="") Integer loginId,						 
+			   @RequestParam(value="userId",required=false, defaultValue="") Integer userId) throws Exception{
+       String discharge= admissionService.dischargePatient(patientId,loginId,userId);
+       EMRResponseBean dischargePatient=new EMRResponseBean();
+       dischargePatient.setData(discharge);
+       return dischargePatient;
+    }
+
 	
 	/**
 	 * To Get selected past Admission details
@@ -125,10 +135,13 @@ public class AdmissionController {
 	 */
 	@RequestMapping(value="/getLeafDetails",method=RequestMethod.GET)
 	@ResponseBody
-	public List<Admission> getLeafDetails(@RequestParam(value="encounterId",required=false, defaultValue="") Integer encounterId,
-										  @RequestParam(value="userId",required=false, defaultValue="") Integer userId) throws Exception{
-		return admissionService.getLeafDetails(encounterId,userId);
-	}
+	public EMRResponseBean getLeafDetails(@RequestParam(value="encounterId",required=false, defaultValue="") Integer encounterId,
+			  @RequestParam(value="userId",required=false, defaultValue="") Integer userId) throws Exception{
+        List<Admission> leafDetails=admissionService.getLeafDetails(encounterId,userId);
+        EMRResponseBean getLeafDetails=new EMRResponseBean();
+        getLeafDetails.setData(leafDetails);
+        return getLeafDetails;
+      }
 	
 	/**
 	 * To Get encounter list corresponding to Episode
@@ -138,9 +151,12 @@ public class AdmissionController {
 	 */
 	@RequestMapping(value="/getAdmissionEncounterDetails",method=RequestMethod.GET)
 	@ResponseBody
-	public String getAdmissionEncDetails(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
-		return admissionService.getAdmissionEncDetails(admssEpisode);
-	}
+		public EMRResponseBean getAdmissionEncDetails(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
+			String encDetails=admissionService.getAdmissionEncDetails(admssEpisode);
+			EMRResponseBean getAdmissionEncDetails=new EMRResponseBean();
+			getAdmissionEncDetails.setData(encDetails);
+			return getAdmissionEncDetails;
+			}
 	
 	/**
 	 * Creating clinical note
@@ -150,9 +166,12 @@ public class AdmissionController {
 	 */
 	@RequestMapping(value="/openLeaf",method=RequestMethod.POST)
 	@ResponseBody
-	public Encounter openAdmissionLeaf(@RequestBody AdmissionBean dataJson) throws Exception{
+	public EMRResponseBean openAdmissionLeaf(@RequestBody AdmissionBean dataJson) throws Exception{
 		dataJson = getAdmissionBeanData(dataJson);
-		return admissionService.openAdmissionLeaf(dataJson);
+		Encounter leaf=admissionService.openAdmissionLeaf(dataJson);
+		EMRResponseBean openAdmissionLeaf=new EMRResponseBean();
+		openAdmissionLeaf.setData(leaf);
+		return openAdmissionLeaf;
 	}
 	
 	/**
@@ -163,8 +182,11 @@ public class AdmissionController {
 	 */
 	@RequestMapping(value="/AdmissionLeafs",method=RequestMethod.GET)
 	@ResponseBody
-	public AdmissionLeafBean getAdmissionLeafs(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
-		return admissionService.getAdmissionLeafs(admssEpisode);
+	public EMRResponseBean getAdmissionLeafs(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
+		AdmissionLeafBean leafs=admissionService.getAdmissionLeafs(admssEpisode);
+		EMRResponseBean getAdmissionLeafs=new EMRResponseBean();
+		getAdmissionLeafs.setData(leafs);
+		return getAdmissionLeafs;
 	}
 	
 	/**
@@ -175,8 +197,11 @@ public class AdmissionController {
 	 */
 	@RequestMapping(value="/getRooms",method=RequestMethod.GET)
 	@ResponseBody
-	public List<AdmissionRoom> getRooms(@RequestParam(value="blockId",required=false, defaultValue="-1") Integer blockId) throws Exception{
-		return admissionService.getRooms(blockId);
+	public EMRResponseBean getRooms(@RequestParam(value="blockId",required=false, defaultValue="-1") Integer blockId) throws Exception{
+		List<AdmissionRoom> room=admissionService.getRooms(blockId);
+		EMRResponseBean getRooms=new EMRResponseBean();
+		getRooms.setData(room);
+		return getRooms;
 	}	
 	
 	/**
