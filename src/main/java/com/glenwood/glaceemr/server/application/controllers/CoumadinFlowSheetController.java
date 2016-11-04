@@ -25,6 +25,7 @@ import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet
 import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.LabDetailsBean;
 import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.LogInfoBean;
 import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.RecentINRBean;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 
 @Api(value = "CoumadinFlowSheet", description = "CoumadinFlowSheet", consumes = "application/json")
@@ -47,14 +48,17 @@ public class CoumadinFlowSheetController {
 	 */
 	@RequestMapping(value = "/getEpisodes", method = RequestMethod.GET)
 	@ResponseBody
-	public List<PatientEpisode> getEpisodes(
+	public EMRResponseBean getEpisodes(
 			@RequestParam(value = "patientId", required = true) Integer patientId,
 			@RequestParam(value = "episodeId", required = false, defaultValue = "-1") Integer episodeId,
 			@RequestParam(value = "type", required = false, defaultValue = "-1") Integer type)
 			throws Exception {
-		List<PatientEpisode> episodedata = coumadinflowsheetService
-				.getEpisodes(patientId, episodeId, type);
-		return episodedata;
+//		List<PatientEpisode> episodedata = coumadinflowsheetService.getEpisodes(patientId, episodeId, type);
+		
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(coumadinflowsheetService.getEpisodes(patientId, episodeId, type));
+        return emrResponseBean;
+		
 	}
 
 	/**
@@ -135,13 +139,15 @@ public class CoumadinFlowSheetController {
 	 */
 	@RequestMapping(value = "/getLogInfo", method = RequestMethod.GET)
 	@ResponseBody
-	public List<LogInfoBean> getLogInfo(
+	public EMRResponseBean getLogInfo(
 			@RequestParam(value = "chartId", required = true) Integer chartId,
 			@RequestParam(value = "episodeId", required = true) Integer episodeId)
 			throws Exception {
-		List<LogInfoBean> logInfo = coumadinflowsheetService.getLogInfo(
-				chartId, episodeId);
-		return logInfo;
+//		List<LogInfoBean> logInfo = coumadinflowsheetService.getLogInfo(chartId, episodeId);
+		
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(coumadinflowsheetService.getLogInfo(chartId, episodeId));
+        return emrResponseBean;
 	}
 	/**
 	 * Method to get PTINR values
@@ -151,15 +157,16 @@ public class CoumadinFlowSheetController {
 	 */
 	@RequestMapping(value = "/getPTINR", method = RequestMethod.GET)
 	@ResponseBody
-	public List<LabDetailsBean> getPTINR(
+	public EMRResponseBean getPTINR(
 			@RequestParam(value = "chartId", required = false,defaultValue = "-1") Integer chartId,
 			@RequestParam(value = "date", required = false,defaultValue = "-1") String date)
 			throws Exception {
 		SimpleDateFormat originalFormat = new SimpleDateFormat("MM/dd/yyyy");
 		java.util.Date date1 = originalFormat.parse(date);
-		List<LabDetailsBean> ptINR = coumadinflowsheetService.getPTINR(chartId,
-				date1);
-		return ptINR;
+//		List<LabDetailsBean> ptINR = coumadinflowsheetService.getPTINR(chartId,date1);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(coumadinflowsheetService.getPTINR(chartId,date1));
+        return emrResponseBean;
 	}
 	/**
 	 * Method to get RecentINR details
@@ -171,14 +178,15 @@ public class CoumadinFlowSheetController {
 	
 	@RequestMapping(value = "/getRecentINR", method = RequestMethod.GET)
 	@ResponseBody
-	public List<RecentINRBean> getRecentINR(
+	public EMRResponseBean getRecentINR(
 			@RequestParam(value = "episodeId", required = false, defaultValue = "-1") Integer episodeId,
 			@RequestParam(value = "chartId", required = false,defaultValue = "-1") Integer chartId,
 			@RequestParam(value = "patientId", required = false,defaultValue = "-1") Integer patientId)
 			throws Exception {
-		List<RecentINRBean> recentINR = coumadinflowsheetService.getRecentINR(
-				episodeId, chartId, patientId);
-		return recentINR;
+//		List<RecentINRBean> recentINR = coumadinflowsheetService.getRecentINR(episodeId, chartId, patientId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(coumadinflowsheetService.getRecentINR(episodeId, chartId, patientId));
+        return emrResponseBean;
 	}
 	/**
 	 * Method to get indication details
@@ -187,12 +195,13 @@ public class CoumadinFlowSheetController {
 	 */
 	@RequestMapping(value = "/getIndication", method = RequestMethod.GET)
 	@ResponseBody
-	public List<WarfarinIndication> getIndication(
+	public EMRResponseBean getIndication(
 			@RequestParam(value = "episodeId", required = true) Integer episodeId)
 			throws Exception {
-		List<WarfarinIndication> indications = coumadinflowsheetService
-				.getIndication(episodeId);
-		return indications;
+//		List<WarfarinIndication> indications = coumadinflowsheetService.getIndication(episodeId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(coumadinflowsheetService.getIndication(episodeId));
+        return emrResponseBean;
 	}
 	/**
 	 * Method to check for configurations
