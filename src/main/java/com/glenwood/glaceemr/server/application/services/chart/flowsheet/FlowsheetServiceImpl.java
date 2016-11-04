@@ -417,7 +417,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					if(rstList.size()>0)
 						startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
 				}catch(Exception e){
-					
+					e.printStackTrace();
 				}
 			}else if(flowsheetType==3){
 				//Meaningful Use Measures
@@ -478,7 +478,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		try{
 			namesData=em.createQuery(cq).getResultList();
 		}catch(Exception e){
-
+			e.printStackTrace();
 		}
 
 		//Query 2
@@ -504,7 +504,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		try{
 			namesData1=em.createQuery(cq1).getResultList();
 		}catch(Exception e){
-
+			e.printStackTrace();
 		}
 		namesData.addAll(namesData1);
 		namesData=orderByType(namesData);
@@ -538,7 +538,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		try{
 			namesData=em.createQuery(cq).getResultList();
 		}catch(Exception e){
-
+			e.printStackTrace();
 		}
 		return namesData;
 	}
@@ -1017,6 +1017,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					testIds=MoreObjects.firstNonNull(groupIdTestIdMap.get(Optional.fromNullable(flowSheetRuleObj.getElement_id()).or((long) -1).toString()),"-1").toString();
 				}catch(Exception e){
 					testIds="-1";
+					e.printStackTrace();
 				}
 				if(Optional.fromNullable(flowSheetRuleObj.getElement_type()).or(-1).toString().equals("3") && testIds.contains("@@@@"+Optional.fromNullable(flowSheetDataObj.getLabTestId()).or("-2").toString()+"###")){
 					isElementRuleExists = true;
@@ -1274,6 +1275,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					paramIds=MoreObjects.firstNonNull(groupIdParamIdMap.get(Optional.fromNullable(flowSheetRuleObj.getElement_id()).or((long) -1).toString()),"-1").toString();
 				}catch(Exception e){
 					paramIds="-1";
+					e.printStackTrace();
 				}
 				if(Optional.fromNullable(flowSheetRuleObj.getElement_type()).or(-1)==2 && (paramIds.contains("@@@@"+Optional.fromNullable(flowSheetDataObj.getParamId()).or("-2").toString()+"###"))){
 					isElementRuleExists = true;
@@ -1453,7 +1455,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		try{
 			confData=em.createQuery(cq).getResultList();
 		}catch(Exception e){
-
+			e.printStackTrace();
 		}
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat sdfFinal = new SimpleDateFormat("MM/dd/yyyy 01:mm:ss");
@@ -1610,7 +1612,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		try{
 			confData1=em.createQuery(cq1).getResultList();
 		}catch(Exception e){
-
+			e.printStackTrace();
 		}
 		for(int i=0;i<confData1.size();i++){
 			HmrBean bean=confData1.get(i);
@@ -2907,6 +2909,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 							value=f.format(Double.parseDouble(lbs));
 						}catch(Exception e){
 							value=lbs;
+							e.printStackTrace();
 						}
 					}
 					if (clinicalElements.getClinicalElementsName().equalsIgnoreCase("Height")){
@@ -2916,6 +2919,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 							value=f.format(Double.parseDouble(Feet));
 						}catch(Exception e){
 							value=Feet;
+							e.printStackTrace();
 						}
 					}
 					beanTemp.setPatientValue(value);
@@ -2959,6 +2963,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						value=f.format(Double.parseDouble(lbs));
 					}catch(Exception e){
 						value=lbs;
+						e.printStackTrace();
 					}
 				}
 				if (clinicalElements.getClinicalElementsName().equalsIgnoreCase("Height")){
@@ -2968,6 +2973,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						value=f.format(Double.parseDouble(Feet));
 					}catch(Exception e){
 						value=Feet;
+						e.printStackTrace();
 					}
 				}
 				beanTemp.setPatientValue(value);
@@ -3020,7 +3026,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						if(rstList.size()>0)
 							startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
 					}catch(Exception e){
-						
+						e.printStackTrace();
 					}
 				}else if(flowsheetType==3){
 					//Meaningful Use Measures
@@ -3646,6 +3652,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			}
 		}catch(Exception e){
 			message="Saving failed.";
+			e.printStackTrace();
 		}
 		flowsheetConfiguredDetails=getFlowsheetsStandardGroupDetails(isStandardLab);
 		flowsheetConfiguredDetails.setMessageAfterSave(message);
@@ -3913,7 +3920,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		try{
 			confData=em.createQuery(cq).getResultList();
 		}catch(Exception e){
-
+			e.printStackTrace();
 		}
 		//Order by sortby
 		confData=orderBySortBy(confData);
@@ -3941,7 +3948,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		try{
 			referencesData=em.createQuery(cqReferences).getResultList();
 		}catch(Exception e){
-
+			e.printStackTrace();
 		}
 		//Order by references
 		referencesData=orderByReferences(referencesData);
@@ -3969,7 +3976,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		try{
 			cptData=em.createQuery(cqCpt).getResultList();
 		}catch(Exception e){
-
+			e.printStackTrace();
 		}
 		//Order by Cpt
 		cptData=orderByReferences(cptData);
@@ -4164,7 +4171,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		try{
 			confData1=em.createQuery(cq1).getResultList();
 		}catch(Exception e){
-
+			e.printStackTrace();
 		}
 		if(confData1!=null){
 			if(confData1.size()>0){
@@ -4194,7 +4201,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				try{
 					confData=em.createQuery(cq).getResultList();
 				}catch(Exception e){
-
+					e.printStackTrace();
 				}
 				return confData;
 			}else{
@@ -4254,7 +4261,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					if(rstList.size()>0)
 						startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
 				}catch(Exception e){
-					
+					e.printStackTrace();
 				}
 			}else if(flowsheetType==3){
 				//Meaningful Use Measures
