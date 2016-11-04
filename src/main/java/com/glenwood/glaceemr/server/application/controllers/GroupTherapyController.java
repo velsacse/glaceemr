@@ -19,6 +19,7 @@ import com.glenwood.glaceemr.server.application.services.GroupTherapy.AddNewGrou
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyGroupBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyLogBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyPatientsBean;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.Api;
 
@@ -47,9 +48,11 @@ public class GroupTherapyController {
 	@RequestMapping(value ="/ListDefaultValues", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public Map<String, Object> getDefaultValues()throws Exception{
+	public EMRResponseBean getDefaultValues()throws Exception{
 		Map<String, Object> lists=addNewGroupService.listDefaults();
-		return lists;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(lists);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -60,12 +63,14 @@ public class GroupTherapyController {
 	@RequestMapping(value ="/saveNewGroup",  method=RequestMethod.POST) 
 	@ResponseBody
 	
-	public void saveNewGroup(@RequestBody TherapyGroupBean data)throws Exception{
+	public EMRResponseBean saveNewGroup(@RequestBody TherapyGroupBean data)throws Exception{
 		data = getTherapyGroupBean(data);
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(data);
 		logger.debug("In saveNewGroup - new group is going to save");
 		addNewGroupService.saveNewGroup(data);
 		logger.debug("In saveNewGroup - new group saved");
-		
+		return emrResponseBean;
 	}
 	
 	/**
@@ -77,9 +82,11 @@ public class GroupTherapyController {
 	@RequestMapping(value ="/ListGroupData", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public List getGroupData(@RequestParam(value="groupId",required=false,defaultValue="-1")String groupId)throws Exception{
+	public EMRResponseBean getGroupData(@RequestParam(value="groupId",required=false,defaultValue="-1")String groupId)throws Exception{
 		List<TherapyGroup> lists=addNewGroupService.listGroupData(groupId);
-		return lists;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(lists);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -105,11 +112,13 @@ public class GroupTherapyController {
 	@RequestMapping(value ="/createTherapySession", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public List<TherapySession> createTherapy(@RequestParam(value="dataToSave",required=false,defaultValue="-1")String dataToSave)throws Exception{
+	public EMRResponseBean createTherapy(@RequestParam(value="dataToSave",required=false,defaultValue="-1")String dataToSave)throws Exception{
 		logger.debug("In createTherapySession - creating therapy session");
 		List<TherapySession> therapy=addNewGroupService.createTherapySession(dataToSave);
 		logger.debug("In createTherapySession - therapy session created");
-		return therapy;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(therapy);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -121,9 +130,11 @@ public class GroupTherapyController {
 	@RequestMapping(value ="/listPatientDataByGroup", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public Map<String, Object> listPatientDataByGroup(@RequestParam(value="groupId",required=false,defaultValue="-1")String groupId)throws Exception{
+	public EMRResponseBean listPatientDataByGroup(@RequestParam(value="groupId",required=false,defaultValue="-1")String groupId)throws Exception{
 		Map<String, Object> lists=addNewGroupService.getPatientData(groupId);
-		return lists;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(lists);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -135,10 +146,12 @@ public class GroupTherapyController {
 	@RequestMapping(value ="/therapyLog", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public List<TherapyLogBean> therapyLog(@RequestParam(value="dataToSearch",required=false,defaultValue="-1")String dataToSave)throws Exception{
+	public EMRResponseBean therapyLog(@RequestParam(value="dataToSearch",required=false,defaultValue="-1")String dataToSave)throws Exception{
 		
 		List<TherapyLogBean> therapy=addNewGroupService.therapySearchLog(dataToSave);
-		return therapy;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(therapy);
+		return emrResponseBean;
 	}
 	
 	/**
@@ -150,10 +163,12 @@ public class GroupTherapyController {
 	@RequestMapping(value ="/listTherapyPatients", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public List<TherapyPatientsBean> listTherapyPatients(@RequestParam(value="dataToSearch",required=false,defaultValue="-1")String dataToSave)throws Exception{
+	public EMRResponseBean listTherapyPatients(@RequestParam(value="dataToSearch",required=false,defaultValue="-1")String dataToSave)throws Exception{
 		
 		List<TherapyPatientsBean> therapy=addNewGroupService.getTherapyPatients(dataToSave);
-		return therapy;
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(therapy);
+		return emrResponseBean;
 	}
 	
 	/**
