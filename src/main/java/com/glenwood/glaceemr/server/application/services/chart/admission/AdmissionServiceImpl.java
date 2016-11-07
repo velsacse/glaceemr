@@ -28,16 +28,19 @@ import com.glenwood.glaceemr.server.application.models.Admission_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.H496;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
+import com.glenwood.glaceemr.server.application.models.PatientAdmission;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientEpisode;
 import com.glenwood.glaceemr.server.application.repositories.AdmissionRepository;
 import com.glenwood.glaceemr.server.application.repositories.AdmissionRoomRepository;
+import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
 import com.glenwood.glaceemr.server.application.repositories.H496Repository;
 import com.glenwood.glaceemr.server.application.repositories.LeafGroupRepository;
 import com.glenwood.glaceemr.server.application.repositories.LeafLibraryRepository;
 import com.glenwood.glaceemr.server.application.repositories.LeafPatientRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientAdmissionRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientAllergyRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientEpisodeRepository;
 import com.glenwood.glaceemr.server.application.services.chart.CNMSettings.CNMSettingsServiceImpl;
@@ -84,6 +87,9 @@ public class AdmissionServiceImpl implements AdmissionService {
 	@PersistenceContext
 	EntityManager entityManager;
 	
+	@Autowired
+	PatientAdmissionRepository patientAdmissionRepository;
+	
 	/**
 	 * To create/update Admission
 	 */
@@ -95,13 +101,10 @@ public class AdmissionServiceImpl implements AdmissionService {
 		Admission newadmssObj = null;
 
 		try{
+			Integer admissionId;
+			String returnEpisode="-1";
 			admssObj = getAdmission(admission.getPatientId());
-			boolean exists = false;
-			if(admssObj !=null){
-				admissionRepository.delete(admssObj);
-				exists = true;
-			}
-			if(exists || admssObj == null){
+			if(admssObj == null){
 				newadmssObj = new Admission();
 				SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 				Date parsed=null;
@@ -124,47 +127,94 @@ public class AdmissionServiceImpl implements AdmissionService {
 				newadmssObj.setAdmissionNotes(admission.getNotes());
 
 
-				if(admssObj != null){
-					newadmssObj.setAdmissionEpisode(admssObj.getAdmissionEpisode());
-				}else{
-					//open a admission type episode for the patient
-					PatientEpisode patAdmsEpisode=new PatientEpisode();
-					patAdmsEpisode.setPatientEpisodePatientid(admission.getPatientId());
-					patAdmsEpisode.setPatientEpisodeName("Admission");
-					patAdmsEpisode.setPatientEpisodeType(140); // 140 is the admission episode_type list id 
-					patAdmsEpisode.setPatientEpisodeStartDate(admssDate);
-					Timestamp patEpisodeCreatedtmp=new Timestamp(new Date().getTime());
-					patAdmsEpisode.setPatientEpisodeCreatedDate(patEpisodeCreatedtmp);
-					patAdmsEpisode.setPatientEpisodeCreatedBy(admission.getLoginId());
-					patAdmsEpisode.setPatientEpisodeStatus(0);
-					patAdmsEpisode.setPatientEpisodeIsactive(true);
-					PatientEpisode patientEpisode=patientEpisodeRepository.save(patAdmsEpisode);
-					newadmssObj.setAdmissionEpisode(patientEpisode.getPatientEpisodeId());
+				//open a admission type episode for the patient
+				PatientEpisode patAdmsEpisode=new PatientEpisode();
+				patAdmsEpisode.setPatientEpisodePatientid(admission.getPatientId());
+				patAdmsEpisode.setPatientEpisodeName("Admission");
+				patAdmsEpisode.setPatientEpisodeType(140); // 140 is the admission episode_type list id 
+				patAdmsEpisode.setPatientEpisodeStartDate(admssDate);
+				Timestamp patEpisodeCreatedtmp=new Timestamp(new Date().getTime());
+				patAdmsEpisode.setPatientEpisodeCreatedDate(patEpisodeCreatedtmp);
+				patAdmsEpisode.setPatientEpisodeCreatedBy(admission.getLoginId());
+				patAdmsEpisode.setPatientEpisodeStatus(0);
+				patAdmsEpisode.setPatientEpisodeIsactive(true);
+				PatientEpisode patientEpisode=patientEpisodeRepository.save(patAdmsEpisode);
+				newadmssObj.setAdmissionEpisode(patientEpisode.getPatientEpisodeId());
+				
+				admissionRepository.save(newadmssObj);
+				admissionId= newadmssObj.getAdmissionId();
+				try{
+					returnEpisode= patientEpisode.getPatientEpisodeId().toString();
+				}catch(Exception e){
+					
 				}
-				JSONArray selectedDxObj=new JSONArray(admission.getSelectedDx());
+			}
+			else{				
+				SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+				Date parsed=null;
 
-				for(int i=0;i<selectedDxObj.length();i++){
-					Method targetMethodFordx;
-					Method targetMethodFordxDesc;
-					try {
+				try {
+					parsed = format.parse(admission.getAdmissionDate());
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 
-						if(!((JSONObject)selectedDxObj.get(i)).getString("dx").equalsIgnoreCase("null")){
+				java.sql.Date admssDate = new java.sql.Date(parsed.getTime());
+				admssObj.setAdmissionId(admission.getAdmissionId());
+				admssObj.setAdmissionAdmittedDate(admssDate);				
+				admssObj.setAdmissionTime(admission.getAdmissionTime());
+				admssObj.setAdmissionDoctorId(admission.getAdmssProvider());
+				admssObj.setAdmissionPosId(admission.getPos());
+				admssObj.setAdmissionPatientId(admission.getPatientId());
+				admssObj.setAdmissionStatus(1);
+				admssObj.setAdmissionRoom(admission.getRoomNo());
+				admssObj.setAdmissionBlock(admission.getBlockNo());
+				admssObj.setAdmissionNotes(admission.getNotes());				
+				admissionRepository.save(admssObj);
+				
+				admissionId= admission.getAdmissionId();
+				try{
+					returnEpisode= admission.getAdmissionEpisode().toString();
+				}catch(Exception e){
+					
+				}
+			}
+			
+			List<PatientAdmission> existList= getPatientAdmission(admissionId,1);
+			if(existList != null && existList.size()>0)
+				deletePatientAdmission(existList);
+			
+			JSONArray admissionArr= null;
+			try{
+				admissionArr= new JSONArray(admission.getSelectedDx());
+			}catch(Exception e){
+				admissionArr= null;
+			}
+			if(admissionArr != null){
+				for(int i=0; i<admissionArr.length(); i++){
 
-							targetMethodFordx = newadmssObj.getClass().getMethod("setAdmissionDx" + (i+1),String.class);
-							targetMethodFordxDesc = newadmssObj.getClass().getMethod("setAdmissionDx" + (i+1)+"desc",String.class);
+					try{
+						JSONObject dxJson= admissionArr.getJSONObject(i);
+						if(dxJson != null){
+							String dx= dxJson.getString("dx");
+							String desc= dxJson.getString("value");
+							String codesystem= dxJson.getString("codesystem");
 
-							targetMethodFordx.invoke(newadmssObj,((JSONObject)selectedDxObj.get(i)).getString("dx"));
-							targetMethodFordxDesc.invoke(newadmssObj,((JSONObject)selectedDxObj.get(i)).getString("value"));
+							PatientAdmission patAdmission= new PatientAdmission();
+							patAdmission.setPatientAdmissionAdmissionId(admissionId);
+							patAdmission.setPatientAdmissionDxCode(dx);
+							patAdmission.setPatientAdmissionDxDescription(desc);
+							patAdmission.setPatientAdmissionDxCodingSystem(codesystem);
+							patAdmission.setPatientAdmissionDxType(1);
+							patientAdmissionRepository.save(patAdmission);
 						}
+					}catch(Exception e){
 
-					} catch (Exception e) {
-						e.printStackTrace();
 					}
 				}
-
-				admissionRepository.save(newadmssObj);
 			}
-			return new JSONObject().put("patientEpisode",newadmssObj.getAdmissionEpisode().toString()).toString();
+			
+			return new JSONObject().put("patientEpisode", returnEpisode).toString();
 
 		}catch(Exception e){
 			e.printStackTrace();
@@ -444,5 +494,90 @@ public class AdmissionServiceImpl implements AdmissionService {
 	@Override
 	public Admission getPastAdmission(Integer admissionId) {
 		return admissionRepository.findOne(AdmissionSpecification.byPastAdmissionId(admissionId));
+	}
+
+	/**
+	 * Save discharge details- Diagnosis at admission and Diagnosis at discharge
+	 */
+	@Override
+	public void saveDishcargeDetails(AdmissionBean dataJson) throws JSONException {
+		
+		List<PatientAdmission> existList= getPatientAdmission(dataJson.getAdmissionId(),2);
+		if(existList != null && existList.size()>0)
+			deletePatientAdmission(existList);
+		
+		/*JSONArray admissionArr= null;
+		try{
+			admissionArr= new JSONArray(dataJson.getSelectedDx());
+		}catch(Exception e){
+			admissionArr= null;
+		}
+		if(admissionArr != null){
+			for(int i=0; i<admissionArr.length(); i++){
+
+				try{
+					JSONObject dxJson= admissionArr.getJSONObject(i);
+					if(dxJson != null){
+						String dx= dxJson.getString("dx");
+						String desc= dxJson.getString("value");
+						String codesystem= dxJson.getString("codesystem");
+
+						PatientAdmission patAdmission= new PatientAdmission();
+						patAdmission.setPatientAdmissionAdmissionId(dataJson.getAdmissionId());
+						patAdmission.setPatientAdmissionDxCode(dx);
+						patAdmission.setPatientAdmissionDxDescription(desc);
+						patAdmission.setPatientAdmissionDxCodingSystem(codesystem);
+						patAdmission.setPatientAdmissionDxType(1);
+						patientAdmissionRepository.save(patAdmission);
+					}
+				}catch(Exception e){
+
+				}
+			}
+		}*/
+		
+		JSONArray dischargeArr= null;
+		try{
+			dischargeArr= new JSONArray(dataJson.getDischargeDx());
+		}catch(Exception e){
+			dischargeArr= null;
+		}
+		if(dischargeArr != null){
+			for(int i=0; i<dischargeArr.length(); i++){
+
+				try{
+					JSONObject dxJson= dischargeArr.getJSONObject(i);
+					if(dxJson != null){
+						String dx= dxJson.getString("dx");
+						String desc= dxJson.getString("value");
+						String codesystem= dxJson.getString("codesystem");
+
+						PatientAdmission patAdmission= new PatientAdmission();
+						patAdmission.setPatientAdmissionAdmissionId(dataJson.getAdmissionId());
+						patAdmission.setPatientAdmissionDxCode(dx);
+						patAdmission.setPatientAdmissionDxDescription(desc);
+						patAdmission.setPatientAdmissionDxCodingSystem(codesystem);
+						patAdmission.setPatientAdmissionDxType(2);
+						patientAdmissionRepository.save(patAdmission);
+					}
+				}catch(Exception e){
+
+				}
+			}
+		}
+		dischargePatient(dataJson.getPatientId(),dataJson.getLoginId(),dataJson.getUserId());
+		
+	}
+	
+	private List<PatientAdmission> getPatientAdmission(Integer admissionId){
+		return patientAdmissionRepository.findAll(AdmissionSpecification.byPatientAdmissionId(admissionId));
+	}
+	
+	private List<PatientAdmission> getPatientAdmission(Integer admissionId, Integer type){
+		return patientAdmissionRepository.findAll(AdmissionSpecification.byPatientAdmissionId(admissionId, type));
+	}
+	
+	private void deletePatientAdmission(List<PatientAdmission> admission){
+		patientAdmissionRepository.delete(admission);
 	}
 }

@@ -2,7 +2,7 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
-import org.json.JSONObject;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -224,5 +224,13 @@ public class AdmissionController {
 		return dataJson;
 	}
 	
-	
+	@RequestMapping(value="/SaveDischargeDetails", method=RequestMethod.POST)
+	@ResponseBody
+	public EMRResponseBean saveDischargeDetails(@RequestBody AdmissionBean dataJson) throws JSONException{
+		
+		admissionService.saveDishcargeDetails(dataJson);
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData("success");
+		return respBean;
+	}
 }

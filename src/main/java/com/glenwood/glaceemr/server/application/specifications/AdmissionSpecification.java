@@ -9,12 +9,15 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.Admission;
 import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
 import com.glenwood.glaceemr.server.application.models.AdmissionRoom_;
 import com.glenwood.glaceemr.server.application.models.Admission_;
+import com.glenwood.glaceemr.server.application.models.ClinicalElements;
+import com.glenwood.glaceemr.server.application.models.ClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.ConsultFaxTracking;
 import com.glenwood.glaceemr.server.application.models.ConsultFaxTracking_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
@@ -33,12 +36,17 @@ import com.glenwood.glaceemr.server.application.models.LeafLibrary;
 import com.glenwood.glaceemr.server.application.models.LeafLibrary_;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.LeafPatient_;
+import com.glenwood.glaceemr.server.application.models.PatientAdmission;
+import com.glenwood.glaceemr.server.application.models.PatientAdmission_;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies_;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientEpisode;
 import com.glenwood.glaceemr.server.application.models.PatientEpisode_;
 import com.glenwood.glaceemr.server.application.models.ProviderLeafMapping;
 import com.glenwood.glaceemr.server.application.models.ProviderLeafMapping_;
+import com.glenwood.glaceemr.server.application.models.VitalsParameter;
 
 public class AdmissionSpecification {
 
@@ -61,6 +69,7 @@ public class AdmissionSpecification {
 				root.fetch(Admission_.posTable,JoinType.INNER);
 				root.fetch(Admission_.admissionBlockTable,JoinType.LEFT);
 				root.fetch(Admission_.admissionRoomTable,JoinType.LEFT);
+				root.fetch(Admission_.patientAdmission,JoinType.LEFT);
 				Predicate patPred=cb.equal(root.get(Admission_.admissionPatientId),patientId);
 				Predicate admissionActive=cb.equal(root.get(Admission_.admissionStatus),1);
 				return cb.and(patPred,admissionActive);
@@ -92,6 +101,7 @@ public class AdmissionSpecification {
 				root.fetch(Admission_.posTable,JoinType.INNER);
 				root.fetch(Admission_.admissionBlockTable,JoinType.LEFT);
 				root.fetch(Admission_.admissionRoomTable,JoinType.LEFT);
+				root.fetch(Admission_.patientAdmission,JoinType.LEFT);
 				Predicate patPred=cb.equal(root.get(Admission_.admissionPatientId),patientId);
 				Predicate admissionActive=cb.equal(root.get(Admission_.admissionStatus),2);
 				query.where(patPred,admissionActive).orderBy(cb.desc(root.get(Admission_.admissionId)));
@@ -343,6 +353,7 @@ public class AdmissionSpecification {
 				root.fetch(Admission_.posTable,JoinType.INNER);
 				root.fetch(Admission_.admissionBlockTable,JoinType.LEFT);
 				root.fetch(Admission_.admissionRoomTable,JoinType.LEFT);
+				root.fetch(Admission_.patientAdmission,JoinType.LEFT);
 				Predicate episodePred= cb.equal(root.get(Admission_.admissionId), admissionId);
 				Predicate statusPred= cb.equal(root.get(Admission_.admissionStatus), 2);
 				query.where(episodePred,statusPred).orderBy(cb.desc(root.get(Admission_.admissionId)));
@@ -371,7 +382,33 @@ public class AdmissionSpecification {
 		};
 	}
 */
+	public static Specification<PatientAdmission> byPatientAdmissionId(final Integer admissionId){
+		return new Specification<PatientAdmission>() {
 
+			@Override
+			public Predicate toPredicate(Root<PatientAdmission> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				
+				Predicate pred= cb.equal(root.get(PatientAdmission_.patientAdmissionAdmissionId), admissionId);
+				return pred;
+			}
+			
+		};
+	}
 	
-	
+	public static Specification<PatientAdmission> byPatientAdmissionId(final Integer admissionId, final Integer type){
+		return new Specification<PatientAdmission>() {
+
+			@Override
+			public Predicate toPredicate(Root<PatientAdmission> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				
+				Predicate admPred= cb.equal(root.get(PatientAdmission_.patientAdmissionAdmissionId), admissionId);
+				Predicate typePred= cb.equal(root.get(PatientAdmission_.patientAdmissionDxType), type);
+				Predicate pred= cb.and(admPred,typePred);
+				return pred;
+			}
+			
+		};
+	}
 }

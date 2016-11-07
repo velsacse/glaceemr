@@ -2,6 +2,8 @@ package com.glenwood.glaceemr.server.application.services.chart.admission;
 
 import java.util.List;
 
+import org.json.JSONException;
+
 import com.glenwood.glaceemr.server.application.models.Admission;
 import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
 import com.glenwood.glaceemr.server.application.models.Encounter;
@@ -29,5 +31,7 @@ public interface AdmissionService  {
 	Admission getAdmissionPast(Integer patientId);
 
 	List<String> getPastAdmissionDates(Integer patientId);
+
+	void saveDishcargeDetails(AdmissionBean dataJson) throws JSONException;
 	
 }

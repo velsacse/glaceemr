@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.services.chart.admission;
 
 public class AdmissionBean {
 	
+	Integer admissionId;
 	Integer patientId;
 	Integer chartId;
 	String admissionDate;
@@ -9,6 +10,7 @@ public class AdmissionBean {
 	Integer admssProvider;
 	Integer pos;
 	String selectedDx;
+	String dischargeDx;	
 	Integer userId;
 	Integer loginId;
 	Integer admissionEpisode;
@@ -16,6 +18,12 @@ public class AdmissionBean {
 	Integer blockNo;
 	String notes;
 	
+	public Integer getAdmissionId() {
+		return admissionId;
+	}
+	public void setAdmissionId(Integer admissionId) {
+		this.admissionId = admissionId;
+	}
 	public Integer getAdmissionEpisode() {
 		return admissionEpisode;
 	}
@@ -69,6 +77,12 @@ public class AdmissionBean {
 	}
 	public void setSelectedDx(String selectedDx) {
 		this.selectedDx = selectedDx;
+	}
+	public String getDischargeDx() {
+		return dischargeDx;
+	}
+	public void setDischargeDx(String dischargeDx) {
+		this.dischargeDx = dischargeDx;
 	}
 	public Integer getRoomNo() {
 		return roomNo;

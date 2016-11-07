@@ -219,6 +219,18 @@ public class Admission implements Serializable{
 	@JoinColumn(name = "admission_patient_id", referencedColumnName = "patient_registration_id", insertable = false, updatable = false)
 	private PatientRegistration  patientRegistration;
 	
+	@OneToMany(mappedBy="admission")
+	@JsonManagedReference
+	List<PatientAdmission> patientAdmission;
+	
+	public List<PatientAdmission> getPatientAdmission() {
+		return patientAdmission;
+	}
+
+	public void setPatientAdmission(List<PatientAdmission> patientAdmission) {
+		this.patientAdmission = patientAdmission;
+	}
+
 	public PatientRegistration getPatientRegistration() {
 		return patientRegistration;
 	}
