@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -39,10 +40,12 @@ public class EmployeeController {
 		    @ApiResponse(code = 404, message = "when group id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public List<EmployeeProfile> getEmployeeDetailsByGroupId(@ApiParam(name="groupid", value="particular user group id" ) @RequestParam(value="groupid", required=false, defaultValue="all") String groupId, @ApiParam(name="sortType" ,value="sorting type i.e asc or desc") @RequestParam(value="sortby", required=false, defaultValue="desc") String sortType)
+	public EMRResponseBean getEmployeeDetailsByGroupId(@ApiParam(name="groupid", value="particular user group id" ) @RequestParam(value="groupid", required=false, defaultValue="all") String groupId, @ApiParam(name="sortType" ,value="sorting type i.e asc or desc") @RequestParam(value="sortby", required=false, defaultValue="desc") String sortType)
 	{
 		List<EmployeeProfile> grpDetails=employeeService.getEmployeeDetails(groupId,sortType);
-		return grpDetails;
+		EMRResponseBean grpDetail=new EMRResponseBean();
+		grpDetail.setData(grpDetails);
+		return grpDetail;
 	}
 	
 }
