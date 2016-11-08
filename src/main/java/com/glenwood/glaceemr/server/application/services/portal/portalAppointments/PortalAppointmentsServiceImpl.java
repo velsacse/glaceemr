@@ -60,6 +60,7 @@ import com.glenwood.glaceemr.server.application.repositories.H810Respository;
 import com.glenwood.glaceemr.server.application.repositories.PortalApptRequestDetailRepository;
 import com.glenwood.glaceemr.server.application.repositories.PortalApptRequestRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchDateTemplateRepository;
+import com.glenwood.glaceemr.server.application.repositories.SchedulerAppointmentParameterRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerLockRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerTemplateDetailRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerTemplateRepository;
@@ -103,6 +104,9 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 
 	@Autowired
 	SchedulerTemplateTimeMappingRepository schedulerTemplateTimeMappingRepository;
+	
+	@Autowired
+	SchedulerAppointmentParameterRepository schedulerAppointmentParameterRepository;
 
 	@Autowired
 	H113Repository h113Repository;
@@ -524,7 +528,7 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		schApptBean.setSchApptLocation(schedulerApptBookingBean.getSchApptLocation());
 		schApptBean.setSchApptResource(schedulerApptBookingBean.getSchApptResource());
 		schApptBean.setSchApptStatus(schedulerApptBookingBean.getSchApptStatus());
-		schApptBean.setSchApptReason(schedulerApptBookingBean.getSchApptReason());
+		schApptBean.setSchApptReason(-2);
 		schApptBean.setSchApptType(schedulerApptBookingBean.getSchApptType());
 		schApptBean.setSchApptNextconsId(schedulerApptBookingBean.getSchApptNextconsId());
 		schApptBean.setSchApptComments(schedulerApptBookingBean.getSchApptComments());
@@ -536,6 +540,15 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		schApptBean.setSchApptStatusgrpId(schedulerApptBookingBean.getSchApptStatusgrpId());
 		
 		SchedulerAppointment schAppt=schedulerAppointmentRepository.saveAndFlush(schApptBean);
+		
+		SchedulerAppointmentParameter schApptParam=new SchedulerAppointmentParameter();
+		schApptParam.setSchApptParameterApptId(schAppt.getSchApptId());
+		schApptParam.setSchApptParameterIsactive(true);
+		schApptParam.setSchApptParameterOn(new Timestamp(schAppt.getSchApptDate().getTime()));
+		schApptParam.setSchApptParameterType(1);
+		schApptParam.setSchApptParameterValueId(schedulerApptBookingBean.getSchApptReason());
+		schApptParam.setSchApptParameterId(getNewSchApptParameterId());
+		schedulerAppointmentParameterRepository.saveAndFlush(schApptParam);
 				
 		
 		/*Creating an alert for the booked appointment*/
@@ -585,6 +598,16 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		return schAppt;
 	}
 	
+public Integer getNewSchApptParameterId() {
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<SchedulerAppointmentParameter> root = cq.from(SchedulerAppointmentParameter.class);
+		cq.select(builder.max(root.get(SchedulerAppointmentParameter_.schApptParameterId)));
+		Integer apptParamID=(Integer) em.createQuery(cq).getSingleResult();
+		
+		return apptParamID+1;
+	}
 	
 public Integer getNewSchApptId() {
 		
