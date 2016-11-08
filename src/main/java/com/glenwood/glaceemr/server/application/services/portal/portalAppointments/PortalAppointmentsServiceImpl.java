@@ -140,7 +140,8 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		Join<SchedulerAppointment, PatientRegistration> joinPatientRegistration=root.join("patRegPatientId",JoinType.LEFT);
 		Join<SchedulerAppointment, H113> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
 		Join<SchedulerAppointment, H113> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
-		Join<SchedulerAppointment, H113> joinH113Reason=root.join("h113ApptReason",JoinType.LEFT);
+		Join<SchedulerAppointment, SchedulerAppointmentParameter> joinSchApptParam=root.join("schApptParam",JoinType.LEFT);
+		Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, H113> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerResource> joinSchResLoc=root.join("schResLoc",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerResource> joinSchResProvider=root.join("schResProvider",JoinType.LEFT);
 		Join<SchedulerAppointment, H076> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);
@@ -157,6 +158,10 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 				builder.equal(joinH113Type.get(H113_.h113010), new Boolean(true)),
 		};
 		joinH113Type.on(predicateType);
+		Predicate[] predicateParam = new Predicate[] {
+				builder.equal(joinSchApptParam.get(SchedulerAppointmentParameter_.schApptParameterIsactive), new Boolean(true)),
+		};
+		joinSchApptParam.on(predicateParam);
 		Predicate[] predicateReason = new Predicate[] {
 				builder.equal(joinH113Reason.get(H113_.h113002), new Integer(402)),
 				builder.equal(joinH113Reason.get(H113_.h113008), new Integer(1)),

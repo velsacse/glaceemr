@@ -171,7 +171,7 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 				
 				if(practiceDetails.get(p).getInitialSettingsOptionValue()!=null)
 				for(int s=0;s<configFields.getStatesList().size();s++){
-					if(configFields.getStatesList().get(s).getBillingConfigTableConfigId()==Integer.parseInt(practiceDetails.get(p).getInitialSettingsOptionValue()))
+					if(configFields.getStatesList().get(s).getBillingConfigTableConfigId().equals(Integer.parseInt(practiceDetails.get(p).getInitialSettingsOptionValue())))
 						sessionMap.setPracticeState(configFields.getStatesList().get(s).getBillingConfigTableLookupDesc());
 				}
 				loginDetails.setPracticeState(sessionMap.getPracticeState());

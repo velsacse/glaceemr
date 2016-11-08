@@ -75,7 +75,10 @@ public class PortalLoginController {
 	{
 		
 	    EMRResponseBean emrResponseBean = new EMRResponseBean();
-	   
+	    emrResponseBean.setIsAuthorizationPresent(true);
+	    emrResponseBean.setSuccess(true);
+	    emrResponseBean.setCanUserAccess(false);
+	    emrResponseBean.setData("Validated successfully!");
 	    if(request.isRequestedSessionIdValid())
 	    	emrResponseBean.setLogin(true);
 	    else

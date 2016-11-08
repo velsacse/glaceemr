@@ -1029,7 +1029,7 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 		String patientMaritialStatus="--";
 
 		for(int i=0;i<settingFields.getAvailabeMaritalStatusOptions().size();i++){
-			if(patientReg.getPatientRegistrationMaritalstatus()==(int)settingFields.getAvailabeMaritalStatusOptions().get(i).getBlookIntid())
+			if(patientReg.getPatientRegistrationMaritalstatus().equals((int)settingFields.getAvailabeMaritalStatusOptions().get(i).getBlookIntid()))
 				patientMaritialStatus=settingFields.getAvailabeMaritalStatusOptions().get(i).getBlookName();
 		}
 
@@ -1038,7 +1038,7 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 		String race="--";
 
 		for(int i=0;i<settingFields.getAvailabeRaceOptions().size();i++){
-			if(Integer.parseInt(patientReg.getPatientRegistrationRace())==settingFields.getAvailabeRaceOptions().get(i).getBlookIntid())
+			if(settingFields.getAvailabeRaceOptions().get(i).getBlookIntid().equals(Integer.parseInt(patientReg.getPatientRegistrationRace())))
 				race=settingFields.getAvailabeRaceOptions().get(i).getBlookName();
 		}
 
@@ -1046,7 +1046,7 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 		String patientEthnicity="--";
 
 		for(int i=0;i<settingFields.getAvailabeEthnicityOptions().size();i++){
-			if(patientReg.getPatientRegistrationEthnicity()==(short)settingFields.getAvailabeEthnicityOptions().get(i).getBlookIntid())
+			if(patientReg.getPatientRegistrationEthnicity().equals((short)settingFields.getAvailabeEthnicityOptions().get(i).getBlookIntid()))
 				patientEthnicity=settingFields.getAvailabeRaceOptions().get(i).getBlookName();
 		}
 
@@ -1054,7 +1054,7 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 		String patientLanguage="--";
 
 		for(int i=0;i<settingFields.getAvailabelanguageOptions().size();i++){
-			if(Integer.parseInt(patientReg.getPatientRegistrationPreferredLan())==settingFields.getAvailabelanguageOptions().get(i).getBlookIntid())
+			if(settingFields.getAvailabelanguageOptions().get(i).getBlookIntid().equals(Integer.parseInt(patientReg.getPatientRegistrationPreferredLan())))
 				patientLanguage=settingFields.getAvailabelanguageOptions().get(i).getBlookName();
 		}
 
