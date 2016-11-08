@@ -22,6 +22,7 @@ import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxSe
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertCountBean;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -86,7 +87,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of alerts"),
 		    @ApiResponse(code = 404, message = "when user id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<Map<String, List<Map<String, List<Object>>>>> getalerts(
+	public EMRResponseBean getalerts(
 			@ApiParam(name="userid",value="login user id") @RequestParam(value="userid", required=false, defaultValue="true") String userId, 
 			@ApiParam(name="categoryids",value="list of category id") @RequestParam(value="categoryids", required=false, defaultValue="-1") String categoryIds, 
 			@ApiParam(name="pageno",value="no of page") @RequestParam(value="pageno", required=false, defaultValue="0") int pageno, 
@@ -108,10 +109,11 @@ public class AlertInboxController {
 		}
 
 		alertsList=alertInboxService.getAlerts(userId,categoryIdList,pageno,pagesize);
-
+		EMRResponseBean alertsLists=new EMRResponseBean();
+		alertsLists.setData(alertsList);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 
-		return alertsList;
+		return alertsLists;
 	}
 
 
@@ -127,12 +129,14 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of alert count"),
 		    @ApiResponse(code = 404, message = "when user id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertCountBean> getAlertCount(
+	public EMRResponseBean getAlertCount(
 			@ApiParam(name="userid",value="login user id") @RequestParam(value="userid", required=false, defaultValue="") String userId){
 		logger.debug("Getting alert counts");
 		List<AlertCountBean> shortcutInfoBeans=alertInboxService.getAlertCount(userId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-		return shortcutInfoBeans;
+		EMRResponseBean shortcutInfoBean=new EMRResponseBean();
+		shortcutInfoBean.setData(shortcutInfoBeans);
+		return shortcutInfoBean;
 	}
 
 	/**
@@ -150,16 +154,17 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of alerts"),
 		    @ApiResponse(code = 404, message = "when user id or category id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertInboxBean> alertsByCategory(
+	public EMRResponseBean alertsByCategory(
 			@ApiParam(name="userid",value="login user id") @RequestParam(value="userid", required=false, defaultValue="") String userId, 
 			@ApiParam(name="categoryid",value="category id") @RequestParam(value="categoryid", required=false, defaultValue="-1") String categoryId, 
 			@ApiParam(name="pageno",value="no of the page") @RequestParam(value="pageno", required=false, defaultValue="1") int pageno, 
 			@ApiParam(name="pagesize",value="size ofthe page") @RequestParam(value="pagesize", required=false, defaultValue="10") int pagesize){
 		logger.debug("Getting alerts by category id "+categoryId);
-
 		List<AlertInboxBean> alertInboxBeans=alertInboxService.getAlertsByCategory(userId,categoryId,pageno,pagesize);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-		return alertInboxBeans;
+		EMRResponseBean alertInboxBean=new EMRResponseBean();
+		alertInboxBean.setData(alertInboxBeans);
+		return alertInboxBean;
 	}
 
 
@@ -176,7 +181,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user id or alert id  does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> highlight(
+	public EMRResponseBean highlight(
 			@ApiParam(name="alertid",value="list of alert id") @RequestParam(value="alertid",required=true) String alertids, 
 			@ApiParam(name="userid",value="login user id") @RequestParam(value="userid",required=true) Integer userId){
 
@@ -190,7 +195,9 @@ public class AlertInboxController {
 		}
 		List<AlertEvent> alertEvent=alertInboxService.hightlightAlert(alertIdList,userId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-		return alertEvent;
+		EMRResponseBean alertEvents=new EMRResponseBean();
+		alertEvents.setData(alertEvent);
+		return alertEvents;
 	}
 
 
@@ -207,7 +214,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user id or alert id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> unHighlight(
+	public EMRResponseBean unHighlight(
 			@ApiParam(name="alertid",value="list of alert id") @RequestParam(value="alertid",required=true) String alertids,
 			@ApiParam(name="userid",value="login user id") @RequestParam(value="userid",required=true) Integer userId){
 
@@ -221,8 +228,9 @@ public class AlertInboxController {
 		}
 		List<AlertEvent> alertEvent=alertInboxService.unHightlightAlert(alertIdList,userId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-
-		return alertEvent;
+		EMRResponseBean alertEvents=new EMRResponseBean();
+		alertEvents.setData(alertEvent);
+		return alertEvents;
 	}
 
 
@@ -239,7 +247,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user id or alert id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> markRead(
+	public EMRResponseBean markRead(
 			@ApiParam(name="alertid",value="list of alert id") @RequestParam(value="alertid",required=true) String alertids, 
 			@ApiParam(name="userid",value="login user id") @RequestParam(value="userid",required=true) Integer userId){
 
@@ -254,8 +262,9 @@ public class AlertInboxController {
 		List<AlertEvent> alertEvent=alertInboxService.markReadAlert(alertIdList,userId);
 
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-
-		return alertEvent;
+		EMRResponseBean alertEvents=new EMRResponseBean();
+		alertEvents.setData(alertEvent);
+		return alertEvents;
 	}
 
 
@@ -272,7 +281,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user id or alert id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> markUnRead(
+	public EMRResponseBean markUnRead(
 			@ApiParam(name="alertid",value="list of alert id") @RequestParam(value="alertid",required=true) String alertids, 
 			@ApiParam(name="userid",value="login user id") @RequestParam(value="userid",required=false) Integer userId){
 
@@ -285,10 +294,11 @@ public class AlertInboxController {
 			alertIdList.add(Integer.parseInt(s));
 		}
 		List<AlertEvent> alertEvent=alertInboxService.markUnReadAlert(alertIdList,userId);
-
+		EMRResponseBean alertEvents=new EMRResponseBean();
+		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 
-		return alertEvent;
+		return alertEvents;
 	}
 
 
@@ -304,7 +314,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of categories"),
 		    @ApiResponse(code = 404, message = "when category id  does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertCategory> getCategories(
+	public EMRResponseBean getCategories(
 			@ApiParam(name="categoryid",value="list of category id") @RequestParam(value="categoryid",required=true) String categoryIds){
 
 		logger.debug("Getting the categories with id "+categoryIds);
@@ -316,10 +326,11 @@ public class AlertInboxController {
 			categoryIdList.add(Integer.parseInt(s));
 		}
 		List<AlertCategory> alertEvent=alertInboxService.getCategories(categoryIdList);
-
+		EMRResponseBean alertEvents=new EMRResponseBean();
+		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 
-		return alertEvent;
+		return alertEvents;
 	}
 
 
@@ -335,7 +346,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user id or alert id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> forwardAlerts(
+	public EMRResponseBean forwardAlerts(
 			@ApiParam(name="userid",value="logged in user id") @RequestParam(value="userid",required=true) String userId, 
 			@ApiParam(name="alertid",value="alert id") @RequestParam(value="alertid",required=true) String alertIds, 
 			@ApiParam(name="categoryid",value="category id") @RequestParam(value="categoryid",required=true) String categoryId, 
@@ -352,10 +363,11 @@ public class AlertInboxController {
 			alertIdList.add(Integer.parseInt(s));
 		}
 		List<AlertEvent> alertEvent=alertInboxService.forwardAlerts(alertIdList,categoryId, message, userId, forwardTo, ishighpriority);
-
+		EMRResponseBean alertEvents=new EMRResponseBean();
+		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 
-		return alertEvent;
+		return alertEvents;
 	}
 
 
@@ -372,7 +384,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user id or alert id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> deleteAlerts(
+	public EMRResponseBean deleteAlerts(
 			@ApiParam(name="alertid",value="alert id") @RequestParam(value="alertid",required=true) String alertids,
 			@ApiParam(name="userid",value="logged in user id") @RequestParam(value="userid",required=true) Integer userId){
 
@@ -385,9 +397,11 @@ public class AlertInboxController {
 			alertIdList.add(Integer.parseInt(s));
 		}
 		List<AlertEvent> alertEvent=alertInboxService.deleteAlert(alertIdList,userId);
+		EMRResponseBean alertEvents=new EMRResponseBean();
+		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 
-		return alertEvent;
+		return alertEvents;
 	}
 
 
@@ -404,7 +418,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user id or alert id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> deleteByEncounterId(
+	public EMRResponseBean deleteByEncounterId(
 			@ApiParam(name="encounterid",value="encounter id") @RequestParam(value="encounterid",required=true) String encounterIds,
 			@ApiParam(name="userid",value="logged in user id") @RequestParam(value="userid",required=true) Integer userId){
 
@@ -417,9 +431,11 @@ public class AlertInboxController {
 			encounterIdList.add(Integer.parseInt(s));
 		}
 		List<AlertEvent> alertEvent=alertInboxService.deleteAlertByEncounter(encounterIdList,userId);
+		EMRResponseBean alertEvents=new EMRResponseBean();
+		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 
-		return alertEvent;
+		return alertEvents;
 	}
 
 
@@ -435,7 +451,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user id or alert id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> byEncounterId(
+	public EMRResponseBean byEncounterId(
 			@ApiParam(name="encounterid",value="encounter id") @RequestParam(value="encounterid",required=true) String encounterId){
 
 		List<Integer> encounterIdList=new ArrayList<Integer>();
@@ -445,9 +461,11 @@ public class AlertInboxController {
 			encounterIdList.add(Integer.parseInt(s));
 		}
 		List<AlertEvent> alertEvent=alertInboxService.alertByEncounter(encounterIdList);
+		EMRResponseBean alertEvents=new EMRResponseBean();
+		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 
-		return alertEvent;
+		return alertEvents;
 	}
 
 
@@ -467,7 +485,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user id or alert id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> createAlerts(
+	public EMRResponseBean createAlerts(
 			@ApiParam(name="fromid",value="logged in user id") @RequestParam(value="fromid",required=true) String fromid,
 			@ApiParam(name="toid",value="to id") @RequestParam(value="toid",required=true) String toid,
 			@ApiParam(name="status",value="alert status") @RequestParam(value="status",required=true, defaultValue="1") String status,
@@ -487,7 +505,9 @@ public class AlertInboxController {
 		}
 		logger.debug("Creating the alert with id "+fromid);	
 		List<AlertEvent> alertEvent=alertInboxService.composeAlert(Integer.parseInt(fromid),toIdList,Integer.parseInt(status),Integer.parseInt(categoryid),Integer.parseInt(refid),Integer.parseInt(patientid),Integer.parseInt(encounterid),msg,Integer.parseInt(chartid),Integer.parseInt(roomid),Integer.parseInt(parentid));
-		return alertEvent;
+		EMRResponseBean alertEvents=new EMRResponseBean();
+		alertEvents.setData(alertEvent);
+		return alertEvents;
 	}
 	
 	@ApiOperation(value = "getConversation", notes = "get internal communication message conversion")
@@ -497,11 +517,13 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user alert id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> getConversation(
+	public EMRResponseBean getConversation(
 			@ApiParam(name="alertid",value="alert id") @RequestParam(value="alertid",required=true) String alertid){
 		
 		List<AlertEvent> alerts=alertInboxService.getConversion(alertid);
-		return alerts;
+		EMRResponseBean alert=new EMRResponseBean();
+		alert.setData(alerts);
+		return alert;
 	}
 	
 	@ApiOperation(value = "forwardIcmAlert", notes = "forward internal communication message")
@@ -511,7 +533,7 @@ public class AlertInboxController {
 		    @ApiResponse(code = 200, message = "Successful retrieval of modified alerts"),
 		    @ApiResponse(code = 404, message = "when user alert id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
-	public List<AlertEvent> forwardIcmAlert(
+	public EMRResponseBean forwardIcmAlert(
 			@ApiParam(name="alertid",value="alert id") @RequestParam(value="alertid",required=true) Integer alertid,
 			@ApiParam(name="userid",value="logged in user id") @RequestParam(value="userid",required=true) Integer userId,
 			@ApiParam(name="categoryid",value="category id") @RequestParam(value="categoryid",required=true, defaultValue="37" ) Integer categoryid,
@@ -522,6 +544,8 @@ public class AlertInboxController {
 			@ApiParam(name="parentalertid",value="parent alertid") @RequestParam(value="parentalertid",required=true, defaultValue="-1" ) Integer parentalertid){
 	
 		List<AlertEvent> alerts=alertInboxService.forwardIcmAlert(alertid,userId,encounterid,patientid,categoryid,forwardto,message,parentalertid);
-		return alerts;
+		EMRResponseBean alert=new EMRResponseBean();
+		alert.setData(alerts);
+		return alert;
 	}
 }

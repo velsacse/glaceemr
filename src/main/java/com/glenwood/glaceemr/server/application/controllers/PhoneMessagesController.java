@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
 import com.glenwood.glaceemr.server.application.services.phonemessages.PhoneMessagesService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -38,13 +39,13 @@ public class PhoneMessagesController {
 	@ApiOperation(value = "Get phone messages", notes = "To get the list of phone messages based on the patient id.")
 	@RequestMapping(value = "/getPhoneEncounters", method = RequestMethod.GET)
 	@ResponseBody
-	public List<Encounter> getPhoneEncounters(@RequestParam(value="patientid", required=true, defaultValue="") String patientId,
+	public EMRResponseBean getPhoneEncounters(@RequestParam(value="patientid", required=true, defaultValue="") String patientId,
 			@RequestParam(value="startdate", required=false, defaultValue="-1") String startDate,
 			@RequestParam(value="enddate", required=false, defaultValue="-1") String endDate){
-		
 			List<Encounter> encounterList=phoneMessageService.getPhoneEncounters(patientId, startDate, endDate);
-			
-		return encounterList;
+			EMRResponseBean encounter=new EMRResponseBean();
+			encounter.setData(encounterList);  
+		return encounter;
 	}
 	
 	/**
@@ -60,7 +61,7 @@ public class PhoneMessagesController {
 	@ApiOperation(value = "Create phone message encounter", notes = "To create phone message encounter.")
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	@ResponseBody
-	public Encounter create(
+	public EMRResponseBean create(
 			@RequestParam(value="patientid", required=false, defaultValue="") String patientId,
 			@RequestParam(value="chartid", required=true, defaultValue="-1") String chartId,
 			@RequestParam(value="severity", required=false, defaultValue="-1") String severity,
@@ -70,8 +71,9 @@ public class PhoneMessagesController {
 		
 			Short encounterType=2;
 			Encounter encounterList=phoneMessageService.createEncounter(chartId, severity, encounterType, serviceDr, comments, createdBy);
-			
-		return encounterList;
+			EMRResponseBean encounter=new EMRResponseBean();
+			encounter.setData(encounterList);
+		return encounter;
 	}
 	
 	/**
@@ -82,11 +84,13 @@ public class PhoneMessagesController {
 	@ApiOperation(value = "Get particular encounter details", notes = "To get the particular encounter details based on the encounter id")	
 	@RequestMapping(value = "/getEncounterDetails", method = RequestMethod.GET)
 	@ResponseBody
-	public Encounter getEncounterDetails(
+	public EMRResponseBean getEncounterDetails(
 			@RequestParam(value="encounterid", required=true, defaultValue="1") String encounterId){
 		
 			Encounter encounter=phoneMessageService.getEncounterDetails(encounterId);
-		return encounter;
+			EMRResponseBean encounters=new EMRResponseBean();
+			encounters.setData(encounter);
+			return encounters;
 	}
 	
 	/**
@@ -101,16 +105,16 @@ public class PhoneMessagesController {
 	@ApiOperation(value = "Update encounter details", notes = "To update the particular encounter details")
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
 	@ResponseBody
-	public Encounter update(
+	public EMRResponseBean update(
 			@RequestParam(value="encounterid", required=false, defaultValue="1") String encounterId,
 			@RequestParam(value="response", required=true, defaultValue="-1") String response,
 			@RequestParam(value="status", required=false, defaultValue="-1") String status,
 			@RequestParam(value="modifiedby", required=true, defaultValue="-1") String modifiedBy,
 			@RequestParam(value="servicedr", required=false, defaultValue="-1") String serviceDr){
-		
 			Encounter encounter=phoneMessageService.update(encounterId, response, status, modifiedBy, serviceDr);
-			
-		return encounter;
+			EMRResponseBean encounters=new EMRResponseBean();
+			encounters.setData(encounter);
+		return encounters;
 	}
 	
 	/**
@@ -125,7 +129,7 @@ public class PhoneMessagesController {
 	@ApiOperation(value = "Send reply to a phone message", notes = "To send reply to a phone message encounter.")
 	@RequestMapping(value = "/sendreply", method = RequestMethod.POST)
 	@ResponseBody
-	public Encounter sendReply(
+	public EMRResponseBean sendReply(
 			@RequestParam(value="encounterid", required=false, defaultValue="1") String encounterId,
 			@RequestParam(value="replymsg", required=true, defaultValue="-1") String replyMessage,
 			@RequestParam(value="status", required=false, defaultValue="-1") String status,
@@ -133,7 +137,8 @@ public class PhoneMessagesController {
 			@RequestParam(value="severity", required=false, defaultValue="-1") String severity){
 		
 			Encounter encounter=phoneMessageService.sendReply(encounterId, replyMessage, status, modifiedBy, severity);
-			
-		return encounter;
+			EMRResponseBean encounters=new EMRResponseBean();
+			encounters.setData(encounter);
+		return encounters;
 	}
 }
