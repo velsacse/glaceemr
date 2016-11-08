@@ -31,6 +31,7 @@ import com.glenwood.glaceemr.server.application.services.investigation.OrderLogG
 import com.glenwood.glaceemr.server.application.services.investigation.OrderSetData;
 import com.glenwood.glaceemr.server.application.services.investigation.Orders;
 import com.glenwood.glaceemr.server.application.services.investigation.SaveLabDetails;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -72,10 +73,12 @@ public class InvestigationSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/OrderSet",method = RequestMethod.GET)
-	public List<OrderSetData> getOrderSetList() throws Exception {
+	public EMRResponseBean getOrderSetList() throws Exception {
 		logger.debug("in getting order set data");
-		List<OrderSetData> orderSetData = investigationService.findOrderSetData();
-		return orderSetData;
+//		List<OrderSetData> orderSetData = investigationService.findOrderSetData();
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findOrderSetData());
+		return emrResponseBean;
 	}
 	
 	/**
@@ -86,11 +89,13 @@ public class InvestigationSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/ListOfResults",method = RequestMethod.GET)
-	public List<LabEntries> getResultsList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId,
+	public EMRResponseBean getResultsList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId,
 			@RequestParam(value="chartId", required=false, defaultValue="") Integer chartId) throws Exception {
 		logger.debug("in getting pending orders in investigations");
-		List<LabEntries> labInfo = investigationService.findResultsLabs(chartId);
-		return labInfo;
+//		List<LabEntries> labInfo = investigationService.findResultsLabs(chartId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findResultsLabs(chartId));
+        return emrResponseBean;
 	}
 	
 	/**
@@ -100,11 +105,13 @@ public class InvestigationSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/PendingOrders",method = RequestMethod.GET)
-	public List<LabEntries> getPendingOrdersList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId,
+	public EMRResponseBean getPendingOrdersList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId,
 			@RequestParam(value="chartId", required=false, defaultValue="") Integer chartId) throws Exception {
 		logger.debug("in getting pending orders in investigations");
-		List<LabEntries> labInfo = investigationService.findPendingOrders(encounterId, chartId);
-		return labInfo;
+//		List<LabEntries> labInfo = investigationService.findPendingOrders(encounterId, chartId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findPendingOrders(encounterId, chartId));
+        return emrResponseBean;
 	}
 
 	/**
@@ -112,7 +119,7 @@ public class InvestigationSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/updateTestStatus",method = RequestMethod.PUT)
-	public List<LabEntries> updateTestStatus(@RequestParam(value="saveObject", required=false, defaultValue="") String saveObject) throws Exception {
+	public EMRResponseBean updateTestStatus(@RequestParam(value="saveObject", required=false, defaultValue="") String saveObject) throws Exception {
 		logger.debug("in updating test status");
 		saveObject = URLDecoder.decode(saveObject, "UTF-8");
 		String testDetailIds = saveObject.split("#@@#")[0];
@@ -125,13 +132,17 @@ public class InvestigationSummaryController {
 				AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,
 				"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,
 				AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-		List<LabEntries> labs = null;
+//		List<LabEntries> labs = null;
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		if( encounterId.split("@##@")[1].equalsIgnoreCase("Pending")) {
-			labs = getPendingOrdersList(Integer.parseInt(currentEnId), Integer.parseInt(chartId));
+//			labs = getPendingOrdersList(Integer.parseInt(currentEnId), Integer.parseInt(chartId));
+			emrResponseBean.setData(investigationService.findPendingOrders(Integer.parseInt(currentEnId), Integer.parseInt(chartId)));
 		} else if( encounterId.split("@##@")[1].equalsIgnoreCase("Todays")) {
-			labs = getTodaysOrdersList(Integer.parseInt(currentEnId));
+//			labs = getTodaysOrdersList(Integer.parseInt(currentEnId));
+			emrResponseBean.setData(investigationService.findTodaysOrders(Integer.parseInt(currentEnId)));
 		}
-		return labs;
+		emrResponseBean.setLogin(true);
+		return emrResponseBean;
 	}
 	/**
 	 * Method to get body site information
@@ -142,12 +153,14 @@ public class InvestigationSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/BodySite",method = RequestMethod.GET)
-	public Page<BodySite> getBodySiteData(@RequestParam(value="searchStr", required=false, defaultValue="") String searchStr,
+	public EMRResponseBean getBodySiteData(@RequestParam(value="searchStr", required=false, defaultValue="") String searchStr,
 			@RequestParam(value="limit", required=false, defaultValue="") Integer limit,
 			@RequestParam(value="offset", required=false, defaultValue="") Integer offset) throws Exception {
 		logger.debug("in getting body site details");
-		Page<BodySite> siteInfo = investigationService.findBodySiteData(searchStr, limit, offset);
-		return siteInfo;
+//		Page<BodySite> siteInfo = investigationService.findBodySiteData(searchStr, limit, offset);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findBodySiteData(searchStr, limit, offset));
+        return emrResponseBean;
 	}
 	
 	/**
@@ -156,12 +169,14 @@ public class InvestigationSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/LotInfo",method = RequestMethod.GET)
-	public List<VaccineOrderDetails> getLotNumberData(@RequestParam(value="vaccineId", required=false, defaultValue="") Integer vaccineId, 
+	public EMRResponseBean getLotNumberData(@RequestParam(value="vaccineId", required=false, defaultValue="") Integer vaccineId, 
 			@RequestParam(value="onLoad", required=false, defaultValue="") String onLoad) throws Exception {
 		logger.debug("in getting lot number details");
 		vaccineId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + vaccineId)).or("-1"));
-		List<VaccineOrderDetails> lotDeatils = investigationService.findLotDetails(vaccineId,onLoad);
-		return lotDeatils;
+//		List<VaccineOrderDetails> lotDeatils = investigationService.findLotDetails(vaccineId,onLoad);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findLotDetails(vaccineId,onLoad));
+        return emrResponseBean;
 	}
 	
 	/**
@@ -170,10 +185,12 @@ public class InvestigationSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/FrequentOrders",method = RequestMethod.GET)
-	public List<FrequentOrders> getFrequentOrdersList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId) throws Exception {
+	public EMRResponseBean getFrequentOrdersList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId) throws Exception {
 		logger.debug("in getting frequent orders list");
-		List<FrequentOrders> frequentOrders = investigationService.findFrequentOrders(encounterId);
-		return frequentOrders;
+//		List<FrequentOrders> frequentOrders = investigationService.findFrequentOrders(encounterId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findFrequentOrders(encounterId));
+        return emrResponseBean;
 	}
 		
 	/**
@@ -200,11 +217,14 @@ public class InvestigationSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/TestDetails",method = RequestMethod.GET)
-	public Orders getCompleteTestDetails(@RequestParam(value="testDetailId", required=false, defaultValue="") Integer testDetailId,
+	public EMRResponseBean getCompleteTestDetails(@RequestParam(value="testDetailId", required=false, defaultValue="") Integer testDetailId,
 			@RequestParam(value="testId", required=false, defaultValue="") Integer testId, @RequestParam(value="groupId", required=false, defaultValue="") String groupId) throws Exception {
 		logger.debug("in getting complete test details");
-		Orders labInfo = investigationService.findCompleteTestDetails(testDetailId, testId, groupId);
-		return labInfo;
+//		Orders labInfo = investigationService.findCompleteTestDetails(testDetailId, testId, groupId);
+		
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findCompleteTestDetails(testDetailId, testId, groupId));
+        return emrResponseBean;
 	}
 	
 	/**
@@ -214,10 +234,12 @@ public class InvestigationSummaryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/TodaysOrders",method = RequestMethod.GET)
-	public List<LabEntries> getTodaysOrdersList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId) throws Exception {
+	public EMRResponseBean getTodaysOrdersList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId) throws Exception {
 		logger.debug("in getting todays orders in investigations");
-		List<LabEntries> labInfo = investigationService.findTodaysOrders(encounterId);
-		return labInfo;
+//		List<LabEntries> labInfo = investigationService.findTodaysOrders(encounterId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findTodaysOrders(encounterId));
+        return emrResponseBean;
 	}
 	
 	/**
@@ -257,20 +279,24 @@ public class InvestigationSummaryController {
 	
 	@ApiOperation(value = "Get the complete details for a patient", notes = "Get the complete details for a patient")
 	@RequestMapping(value = "/OrdersHistoryByChart",method = RequestMethod.GET)
-	public LS_Bean getLabDetailsByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
+	public EMRResponseBean getLabDetailsByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
 		logger.debug("Get the complete details for a patient");
-		LS_Bean labInfo = investigationService.findPatientLabDataByChart(chartId);
+//		LS_Bean labInfo = investigationService.findPatientLabDataByChart(chartId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Investigations,AuditLogConstants.Investigations,
 				1,AuditLogConstants.SUCCESS,"Successfully loaded data for patient having chart id="+chartId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Investigations,request,
 				"Successfully loaded data for patient having chart id="+chartId);
-		return labInfo;
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findPatientLabDataByChart(chartId));
+        return emrResponseBean;
 	}
 	
 	@ApiOperation(value = "Get the complete details for a patient", notes = "Get the complete details for a patient")
 	@RequestMapping(value = "/OrdersLogByChart",method = RequestMethod.GET)
-	public OrderLogGroups getOrderLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
-		OrderLogGroups labInfo = investigationService.findOrdersSummary(chartId);
-		return labInfo;
+	public EMRResponseBean getOrderLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
+//		OrderLogGroups labInfo = investigationService.findOrdersSummary(chartId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findOrdersSummary(chartId));
+        return emrResponseBean;
 	}
 	
 	@ApiOperation(value = "Get the complete reviewed lab list for a patient", notes = "Get the complete reviewed lab list for a patient")
@@ -279,9 +305,11 @@ public class InvestigationSummaryController {
             @ApiResponse(code = 500, message = "Internal server error")})
 	@ApiParam(name="chartId", value="id for each patient chart")
 	@RequestMapping(value = "/ReviewedLogByChart",method = RequestMethod.GET)
-	public OrderLogGroups getReviewedLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
-		OrderLogGroups labInfo = investigationService.findReviewedSummary(chartId);
-		return labInfo;
+	public EMRResponseBean getReviewedLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
+//		OrderLogGroups labInfo = investigationService.findReviewedSummary(chartId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findReviewedSummary(chartId));
+        return emrResponseBean;
 	}
 	
 	@ApiOperation(value = "Get the complete pending orders for a patient", notes = "Get the complete pending orders for a patient")
@@ -290,42 +318,50 @@ public class InvestigationSummaryController {
             @ApiResponse(code = 500, message = "Internal server error")})
 	@ApiParam(name="chartId", value="id for each patient chart")
 	@RequestMapping(value = "/PendingLogByChart",method = RequestMethod.GET)
-	public OrderLogGroups getPendingLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
-		OrderLogGroups labInfo = investigationService.findPendingSummary(chartId);
-		return labInfo;
+	public EMRResponseBean getPendingLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
+//		OrderLogGroups labInfo = investigationService.findPendingSummary(chartId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findPendingSummary(chartId));
+        return emrResponseBean;
 	}
 	
 	@ApiOperation(value = "Get the complete parameter details for a patient in between the selected dates", notes = "Get the complete parameter details for a patient in between the selected dates")
 	@RequestMapping(value = "/ParamDataByDate",method = RequestMethod.GET)
-	public LS_Bean getLabDetailsByDate(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
+	public EMRResponseBean getLabDetailsByDate(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
 			@RequestParam(value="fromDate", required=false, defaultValue="") String fromDate,
 			@RequestParam(value="toDate", required=false, defaultValue="") String toDate) throws Exception {
 		logger.debug("Get the complete details for a patient");
-		LS_Bean labInfo = investigationService.getResultsByDate(chartId, fromDate, toDate);
-		return labInfo;
+//		LS_Bean labInfo = investigationService.getResultsByDate(chartId, fromDate, toDate);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.getResultsByDate(chartId, fromDate, toDate));
+        return emrResponseBean;
 	}
 	
 	@ApiOperation(value = "Get the complete details based on category", notes = "Get the complete details based on category")
 	@RequestMapping(value = "/OrdersHistoryByCategory",method = RequestMethod.GET)
-	public LS_Bean getLabDetailsByCategory(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
+	public EMRResponseBean getLabDetailsByCategory(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
 			@RequestParam(value="categoryId", required=false, defaultValue="-1") Integer catetoryId) throws Exception {
 		logger.debug("Get the complete details for a patient");
-		LS_Bean labInfo = investigationService.findPatientLabDataByCategory(chartId,catetoryId);
+//		LS_Bean labInfo = investigationService.findPatientLabDataByCategory(chartId,catetoryId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Investigations,AuditLogConstants.Investigations,
 				1,AuditLogConstants.SUCCESS,"Successfully loaded data for patient having chart id="+chartId+" and category id="+catetoryId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Investigations,request,
 				"Successfully loaded data for patient having chart id="+chartId+" and category id="+catetoryId);
-		return labInfo;
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findPatientLabDataByCategory(chartId,catetoryId));
+        return emrResponseBean;
 	}
 	
 	@ApiOperation(value = "Get the complete details based on test", notes = "Get the complete details based on test")
 	@RequestMapping(value = "/OrdersHistoryByTest",method = RequestMethod.GET)
-	public LS_Bean getLabDetailsByTest(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
+	public EMRResponseBean getLabDetailsByTest(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
 			@RequestParam(value="testId", required=false, defaultValue="-1") Integer testId) throws Exception {
 		logger.debug("Get the complete details for a patient");
-		LS_Bean labInfo = investigationService.findPatientLabDataByTest(chartId, testId);
+//		LS_Bean labInfo = investigationService.findPatientLabDataByTest(chartId, testId);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Investigations,AuditLogConstants.Investigations,
 				1,AuditLogConstants.SUCCESS,"Successfully loaded data for patient having chart id="+chartId+" and test id="+testId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Investigations,request,
 				"Successfully loaded data for patient having chart id="+chartId+" and test id="+testId);
-		return labInfo;
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findPatientLabDataByTest(chartId, testId));
+        return emrResponseBean;
 	}
 }
