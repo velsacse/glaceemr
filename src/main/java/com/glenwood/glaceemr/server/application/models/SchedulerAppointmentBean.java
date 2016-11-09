@@ -9,7 +9,7 @@ public class SchedulerAppointmentBean {
 			String apptEndTime, Date apptDate, Integer patientId,
 			String patientAccNo, String patientName, String homePhone,
 			String homeExtn, String workPhone, String workExtn, Integer resourceId,
-			String apptStatus, Integer apptStatusId, String apptType,
+			String apptStatus, Integer apptStatusId,String apptStatusColor, String apptType,
 			Integer apptTypeId, String apptLocation, Integer apptLocationId,
 			String apptReason, Integer apptReasonId, String refPhysician,
 			Integer refPhysicianId, String refPhoneNumber, String refFaxNumber, 
@@ -30,6 +30,7 @@ public class SchedulerAppointmentBean {
 		this.resourceId = resourceId;
 		this.apptStatus = apptStatus;
 		this.apptStatusId = apptStatusId;
+		this.apptStatusColor = apptStatusColor;
 		this.apptType = apptType;
 		this.apptTypeId = apptTypeId;
 		this.apptLocation = apptLocation;
@@ -59,6 +60,7 @@ public class SchedulerAppointmentBean {
 	private Integer resourceId;
 	private String apptStatus;
 	private Integer apptStatusId;
+	private String apptStatusColor;
 	private String apptType;
 	private Integer apptTypeId;
 	private String apptLocation;
@@ -235,5 +237,17 @@ public class SchedulerAppointmentBean {
 	}
 	public void setWorkflowStatusDate(Date workflowStatusDate) {
 		this.workflowStatusDate = workflowStatusDate;
+	}
+	public Integer getWorkflowStatusId() {		
+		return workflowStatusId;		
+	}		
+	public void setWorkflowStatusId(Integer workflowStatusId) {		
+		this.workflowStatusId = workflowStatusId;		
+	}		
+	public String getApptStatusColor() {		
+		return apptStatusColor;		
+	}		
+	public void setApptStatusColor(String apptStatusColor) {		
+		this.apptStatusColor = apptStatusColor;		
 	}
 }

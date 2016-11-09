@@ -135,6 +135,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 					root.get(SchedulerAppointment_.schApptResource),
 					joinH113Status.get(H113_.h113004),
 					root.get(SchedulerAppointment_.schApptStatus),
+					joinH113Status.get(H113_.h113005),
 					joinH113Type.get(H113_.h113004),
 					root.get(SchedulerAppointment_.schApptType),
 					joinSchResLoc.get(SchedulerResource_.schResourceName),
