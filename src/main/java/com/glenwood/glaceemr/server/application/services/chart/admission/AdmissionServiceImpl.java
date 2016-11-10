@@ -214,7 +214,7 @@ public class AdmissionServiceImpl implements AdmissionService {
 				}
 			}
 			
-			return new JSONObject().put("patientEpisode", returnEpisode).toString();
+			return new JSONObject().put("patientEpisode", returnEpisode+"#~#"+admissionId).toString();
 
 		}catch(Exception e){
 			e.printStackTrace();
