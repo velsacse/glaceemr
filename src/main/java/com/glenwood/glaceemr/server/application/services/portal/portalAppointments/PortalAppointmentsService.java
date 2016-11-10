@@ -42,7 +42,7 @@ public interface PortalAppointmentsService {
 
 	AlertEvent createPortalAppointmentRequest(ApptRequestBean apptRequestBean) throws ParseException;
 
-	List<SchedulerAppointment> getBookedSlots(int resourceId, Date apptDate);
+	List<SchedulerAppointment> getBookedSlots(int resourceId, Date apptDate) throws JsonProcessingException;
 
 	List<SchedulerLock> getLockedSlots(int resourceId, Date apptDate);
 

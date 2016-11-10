@@ -267,7 +267,7 @@ public class PatientRegistration implements Serializable {
 	private Integer patientRegistrationCurVisitNo;
 
 	@Column(name="patient_registration_referredby")
-	private String patientRegistrationReferredby;
+	private Long patientRegistrationReferredby;
 
 	@Column(name="patient_registration_customfield1")
 	private String patientRegistrationCustomfield1;
@@ -1264,12 +1264,12 @@ public class PatientRegistration implements Serializable {
 		this.patientRegistrationCurVisitNo = patientRegistrationCurVisitNo;
 	}
 
-	public String getPatientRegistrationReferredby() {
+	public Long getPatientRegistrationReferredby() {
 		return patientRegistrationReferredby;
 	}
 
 	public void setPatientRegistrationReferredby(
-			String patientRegistrationReferredby) {
+			Long patientRegistrationReferredby) {
 		this.patientRegistrationReferredby = patientRegistrationReferredby;
 	}
 

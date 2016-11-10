@@ -21,6 +21,7 @@ import javax.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertCategory_;
@@ -496,11 +497,126 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 	}
 
 	@Override
-	public List<SchedulerAppointment> getBookedSlots(int resourceId, Date apptDate) {
+	public List<SchedulerAppointment> getBookedSlots(int resourceId, Date apptDate) throws JsonProcessingException {
 		
-		List<SchedulerAppointment> bookedApptList=schedulerAppointmentRepository.findAll(PortalAppointmentsSpecification.getBookedSlots(resourceId, apptDate));
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<SchedulerAppointment> root = cq.from(SchedulerAppointment.class);
+		Join<SchedulerAppointment, PatientRegistration> joinPatientRegistration=root.join("patRegPatientId",JoinType.LEFT);
+		Join<SchedulerAppointment, H113> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
+		Join<SchedulerAppointment, H113> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
+		Join<SchedulerAppointment, SchedulerAppointmentParameter> joinSchApptParam=root.join("schApptParam",JoinType.LEFT);
+		Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, H113> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
+		Join<SchedulerAppointment, SchedulerResource> joinSchResLoc=root.join("schResLoc",JoinType.LEFT);
+		Join<SchedulerAppointment, SchedulerResource> joinSchResProvider=root.join("schResProvider",JoinType.LEFT);
+		Join<SchedulerAppointment, H076> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);
+		Join<SchedulerAppointment, Workflow> joinWorkflow=root.join("workflowPatientId",JoinType.LEFT);
+		Join<Join<SchedulerAppointment, Workflow>, AlertCategory> joinWorkflowStatusName=joinWorkflow.join("alertCategoryName",JoinType.LEFT);
 		
-		return bookedApptList;
+		Predicate[] predicateStatus = new Predicate[] {
+				builder.equal(joinH113Status.get(H113_.h113002), new Integer(1)),
+				builder.equal(joinH113Status.get(H113_.h113010), new Boolean(true)),
+		};
+		joinH113Status.on(predicateStatus);
+		Predicate[] predicateType = new Predicate[] {
+				builder.equal(joinH113Type.get(H113_.h113002), new Integer(2)),
+				builder.equal(joinH113Type.get(H113_.h113010), new Boolean(true)),
+		};
+		joinH113Type.on(predicateType);
+		Predicate[] predicateParam = new Predicate[] {
+				builder.equal(joinSchApptParam.get(SchedulerAppointmentParameter_.schApptParameterIsactive), new Boolean(true)),
+		};
+		joinSchApptParam.on(predicateParam);
+		Predicate[] predicateReason = new Predicate[] {
+				builder.equal(joinH113Reason.get(H113_.h113002), new Integer(402)),
+				builder.equal(joinH113Reason.get(H113_.h113008), new Integer(1)),
+				builder.equal(joinH113Reason.get(H113_.h113010), new Boolean(true)),
+		};
+		joinH113Reason.on(predicateReason);
+		Predicate[] predicateLocation = new Predicate[] {
+				builder.equal(joinSchResLoc.get(SchedulerResource_.schResourceIsdoctor), new Integer(0)),
+				builder.equal(joinSchResLoc.get(SchedulerResource_.schResourceLocalserver), new Boolean(true)),
+		};
+		joinSchResLoc.on(predicateLocation);
+		Predicate[] predicateProvider = new Predicate[] {
+				builder.notEqual(joinSchResProvider.get(SchedulerResource_.schResourceIsdoctor), new Integer(0)),
+				builder.equal(joinSchResProvider.get(SchedulerResource_.schResourceLocalserver), new Boolean(true)),
+		};
+		joinSchResProvider.on(predicateProvider);
+		Predicate[] predicateWorkflow = new Predicate[] {
+				builder.equal(joinWorkflow.get(Workflow_.workflowIsactive), new Boolean(true)),
+		};
+		joinWorkflow.on(predicateWorkflow);
+		
+		DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+		Date today = new Date();
+		System.out.println(dateFormat.format(today));
+		try {
+			today = dateFormat.parse(dateFormat.format(today));
+		} catch (ParseException e) {
+
+			e.printStackTrace();
+		}
+				
+		Predicate apptDatePredicate=builder.equal(root.get(SchedulerAppointment_.schApptDate), apptDate );
+		Predicate apptProviderPredicate=builder.equal(joinSchResProvider.get(SchedulerResource_.schResourceId), resourceId);		
+		
+		cq.select(builder.construct(PortalSchedulerAppointmentBean.class,
+				root.get(SchedulerAppointment_.schApptId),
+				builder.function("to_char", String.class, root.get(SchedulerAppointment_.schApptStarttime),builder.literal("MM/dd/yyyy HH12:MI AM")),
+				builder.function("to_char", String.class, root.get(SchedulerAppointment_.schApptEndtime),builder.literal("MM/dd/yyyy HH12:MI AM")),
+				root.get(SchedulerAppointment_.schApptDate),
+				root.get(SchedulerAppointment_.schApptInterval),
+				root.get(SchedulerAppointment_.schApptPatientId),
+				joinPatientRegistration.get(PatientRegistration_.patientRegistrationAccountno),
+				root.get(SchedulerAppointment_.schApptPatientname),
+				root.get(SchedulerAppointment_.schApptHomephone),
+				builder.coalesce(root.get(SchedulerAppointment_.schApptHomeextn),builder.literal("-")),
+				root.get(SchedulerAppointment_.schApptWorkphone),
+				builder.coalesce(root.get(SchedulerAppointment_.schApptWorkextn),builder.literal("-")),
+				root.get(SchedulerAppointment_.schApptResource),
+				joinH113Status.get(H113_.h113004),
+				root.get(SchedulerAppointment_.schApptStatus),
+				joinH113Type.get(H113_.h113004),
+				root.get(SchedulerAppointment_.schApptType),
+				joinSchResLoc.get(SchedulerResource_.schResourceName),
+				root.get(SchedulerAppointment_.schApptLocation),
+				joinSchResProvider.get(SchedulerResource_.schResourceFullname),
+				joinSchResProvider.get(SchedulerResource_.schResourceDoctorId),
+				joinH113Reason.get(H113_.h113004),
+				root.get(SchedulerAppointment_.schApptReason),
+				root.get(SchedulerAppointment_.schApptComments),
+				joinSchRefDrId.get(H076_.h076020),
+				root.get(SchedulerAppointment_.schApptReferringdoctorId),
+				joinSchRefDrId.get(H076_.h076010),
+				joinSchRefDrId.get(H076_.h076011),
+				joinWorkflow.get(Workflow_.workflowStatus),
+				joinWorkflowStatusName.get(AlertCategory_.alertCategoryDisplayName),
+				joinWorkflow.get(Workflow_.workflowStarttime)
+				)).where(builder.and(apptDatePredicate,apptProviderPredicate)).orderBy(builder.asc(root.get(SchedulerAppointment_.schApptStarttime)));
+
+		Query query=em.createQuery(cq);
+				
+		List<PortalSchedulerAppointmentBean> schedulerAppointments=query.getResultList();
+				
+		List<SchedulerAppointment> bookedSots=new ArrayList<SchedulerAppointment>();
+		for(int i=0;i<schedulerAppointments.size();i++){
+			
+			SchedulerAppointment appt=new SchedulerAppointment();
+			appt.setSchApptComments(schedulerAppointments.get(i).getApptComments());
+			appt.setSchApptDate(new java.sql.Date(schedulerAppointments.get(i).getApptDate().getTime()));
+			appt.setSchApptEndtime(new Timestamp(new Date(schedulerAppointments.get(i).getApptEndTime()).getTime()));
+			appt.setSchApptId(schedulerAppointments.get(i).getApptId());
+			appt.setSchApptInterval(schedulerAppointments.get(i).getApptInterval());
+			appt.setSchApptLocation(schedulerAppointments.get(i).getApptLocationId());
+			appt.setSchApptReason(schedulerAppointments.get(i).getApptReasonId());
+			appt.setSchApptResource(schedulerAppointments.get(i).getApptProviderId());
+			appt.setSchApptStarttime(new Timestamp(new Date(schedulerAppointments.get(i).getApptStartTime()).getTime()));
+			appt.setSchApptStatus(schedulerAppointments.get(i).getApptStatusId());
+			bookedSots.add(appt);
+		}
+				
+		return bookedSots;
 	}
 
 	@Override

@@ -36,21 +36,9 @@ public class PharmDetails implements java.io.Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@OneToMany(mappedBy="pharm")
-	@JsonBackReference
-	java.util.List<SSMessageInbox> ssmessageinbox;
-	
 	
 	public Integer getPharmDetailsId() {
 		return pharmDetailsId;
-	}
-
-	public java.util.List<SSMessageInbox> getSsmessageinbox() {
-		return ssmessageinbox;
-	}
-
-	public void setSsmessageinbox(java.util.List<SSMessageInbox> ssmessageinbox) {
-		this.ssmessageinbox = ssmessageinbox;
 	}
 
 	public void setPharmDetailsId(Integer pharmDetailsId) {
