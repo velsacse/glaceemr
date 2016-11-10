@@ -33,6 +33,20 @@ public class DoctorSign implements Serializable{
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
+	@JoinColumn(name = "loginid", referencedColumnName = "login_users_id", insertable = false, updatable = false)
+	public LoginUsers empLoginName;
+	
+	
+	public LoginUsers getEmpLoginID() {
+		return empLoginName;
+	}
+
+	public void setEmpLoginID(LoginUsers empLoginName) {
+		this.empLoginName = empLoginName;
+	}
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
 	@JoinColumn(name = "loginid", referencedColumnName = "emp_profile_loginid", insertable = false, updatable = false)
 	public EmployeeProfile empLoginId;
 	

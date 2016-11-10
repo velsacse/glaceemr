@@ -10,12 +10,18 @@ public class FaxFolderBean {
 	long unreadTrash;
 	long outboxFax;
 	long sentFax;
-	int faxFolderId;
-	String outFaxFileName;
+	long MytotalInbox;
+	long MyunreadInbox;
+	long MytotalSaved;
+	long MyunreadSaved;
+	long MytotalTrash;
+	long MyunreadTrash;
+	long MyoutboxFax;
+	long MysentFax;
 	
-	public FaxFolderBean(long totalInbox, long unreadInbox, long totalSaved,
-			long unreadSaved, long totalTrash, long unreadTrash,
-			long outboxFax, long sentFax, int faxFolderId, String outFaxFileName) {
+	public FaxFolderBean(long totalInbox, long unreadInbox, long totalSaved, long unreadSaved, long totalTrash,
+			long unreadTrash, long outboxFax, long sentFax, long mytotalInbox, long myunreadInbox, long mytotalSaved,
+			long myunreadSaved, long mytotalTrash, long myunreadTrash, long myoutboxFax, long mysentFax) {
 		super();
 		this.totalInbox = totalInbox;
 		this.unreadInbox = unreadInbox;
@@ -25,87 +31,145 @@ public class FaxFolderBean {
 		this.unreadTrash = unreadTrash;
 		this.outboxFax = outboxFax;
 		this.sentFax = sentFax;
-		this.faxFolderId = faxFolderId;
-		this.outFaxFileName = outFaxFileName;
+		MytotalInbox = mytotalInbox;
+		MyunreadInbox = myunreadInbox;
+		MytotalSaved = mytotalSaved;
+		MyunreadSaved = myunreadSaved;
+		MytotalTrash = mytotalTrash;
+		MyunreadTrash = myunreadTrash;
+		MyoutboxFax = myoutboxFax;
+		MysentFax = mysentFax;
 	}
 	
-	public String getOutFaxFileName() {
-		return outFaxFileName;
-	}
-
-	public void setOutFaxFileName(String outFaxFileName) {
-		this.outFaxFileName = outFaxFileName;
-	}
-
-	public FaxFolderBean(String outFaxFileName) {
-		super();
-		this.outFaxFileName = outFaxFileName;
-	}
-
 	public FaxFolderBean() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public long getTotalInbox() {
 		return totalInbox;
 	}
-	
+
 	public void setTotalInbox(long totalInbox) {
 		this.totalInbox = totalInbox;
 	}
-	
+
 	public long getUnreadInbox() {
 		return unreadInbox;
 	}
+
 	public void setUnreadInbox(long unreadInbox) {
 		this.unreadInbox = unreadInbox;
 	}
-	
+
 	public long getTotalSaved() {
 		return totalSaved;
 	}
-	
+
 	public void setTotalSaved(long totalSaved) {
 		this.totalSaved = totalSaved;
 	}
-	
+
 	public long getUnreadSaved() {
 		return unreadSaved;
 	}
-	
+
 	public void setUnreadSaved(long unreadSaved) {
 		this.unreadSaved = unreadSaved;
 	}
+
 	public long getTotalTrash() {
 		return totalTrash;
 	}
-	
+
 	public void setTotalTrash(long totalTrash) {
 		this.totalTrash = totalTrash;
 	}
-	
+
 	public long getUnreadTrash() {
 		return unreadTrash;
 	}
-	
+
 	public void setUnreadTrash(long unreadTrash) {
 		this.unreadTrash = unreadTrash;
 	}
-	
+
 	public long getOutboxFax() {
 		return outboxFax;
 	}
-	
+
 	public void setOutboxFax(long outboxFax) {
 		this.outboxFax = outboxFax;
 	}
-	
+
 	public long getSentFax() {
 		return sentFax;
 	}
-	
+
 	public void setSentFax(long sentFax) {
 		this.sentFax = sentFax;
 	}
-	
-}
+
+	public long getMytotalInbox() {
+		return MytotalInbox;
+	}
+
+	public void setMytotalInbox(long mytotalInbox) {
+		MytotalInbox = mytotalInbox;
+	}
+
+	public long getMyunreadInbox() {
+		return MyunreadInbox;
+	}
+
+	public void setMyunreadInbox(long myunreadInbox) {
+		MyunreadInbox = myunreadInbox;
+	}
+
+	public long getMytotalSaved() {
+		return MytotalSaved;
+	}
+
+	public void setMytotalSaved(long mytotalSaved) {
+		MytotalSaved = mytotalSaved;
+	}
+
+	public long getMyunreadSaved() {
+		return MyunreadSaved;
+	}
+
+	public void setMyunreadSaved(long myunreadSaved) {
+		MyunreadSaved = myunreadSaved;
+	}
+
+	public long getMytotalTrash() {
+		return MytotalTrash;
+	}
+
+	public void setMytotalTrash(long mytotalTrash) {
+		MytotalTrash = mytotalTrash;
+	}
+
+	public long getMyunreadTrash() {
+		return MyunreadTrash;
+	}
+
+	public void setMyunreadTrash(long myunreadTrash) {
+		MyunreadTrash = myunreadTrash;
+	}
+
+	public long getMyoutboxFax() {
+		return MyoutboxFax;
+	}
+
+	public void setMyoutboxFax(long myoutboxFax) {
+		MyoutboxFax = myoutboxFax;
+	}
+
+	public long getMysentFax() {
+		return MysentFax;
+	}
+
+	public void setMysentFax(long mysentFax) {
+		MysentFax = mysentFax;
+	}
+
+}	
