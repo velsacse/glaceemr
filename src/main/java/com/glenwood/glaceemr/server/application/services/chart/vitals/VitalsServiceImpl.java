@@ -111,7 +111,7 @@ public class VitalsServiceImpl implements VitalsService {
 
 	public void getPatientDetails(Integer patientId){
 		try{
-		List<PatientRegistration> patRegistration=patientRegRepository.findAll(PatientRegistrationSpecification.getPatientPersonalDetails(patientId));
+		List<PatientRegistration> patRegistration=patientRegRepository.findAll(PatientRegistrationSpecification.PatientId(patientId+""));
 		for (PatientRegistration patientRegistration : patRegistration) {
 			patientSex=patientRegistration.getPatientRegistrationSex().shortValue();
 			patDOB=patientRegistration.getPatientRegistrationDob();
