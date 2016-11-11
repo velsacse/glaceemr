@@ -1,42 +1,39 @@
 package com.glenwood.glaceemr.server.application.services.fax;
 
 import java.util.Date;
-public class FaxInboxBean {
 
+public class FaxInboxBean {
 	int faxId;
-	String transStationId;
+	Date receiveDate;
+	String  senderName;
+	String recepientName;
+	String faxFileName;
 	int folderId;
 	String faxSubject;
 	int faxTypeId;
 	int statusId;
 	int forwardTo;
-	int receiveDate;
+	int modifiedBy;
 	Date modifiedDate;
-	public Date getModifiedDate() {
-		return modifiedDate;
-	}
-	public void setModifiedDate(Date modifiedDate) {
-		this.modifiedDate = modifiedDate;
-	}
-	int recepientName;
 	String h491020Faxnotes;
-
-
-	public FaxInboxBean(int faxId, String transStationId, int folderId,
-			String faxSubject, int faxTypeId, int statusId, int forwardTo,
-			int receiveDate, Date modifiedDate, int recepientName,
+	public FaxInboxBean(int faxId, Date receiveDate, String senderName,
+			String recepientName, String faxFileName,
+			int folderId, String faxSubject, int faxTypeId, int statusId,
+			int forwardTo, int modifiedBy, Date modifiedDate,
 			String h491020Faxnotes) {
 		super();
 		this.faxId = faxId;
-		this.transStationId = transStationId;
+		this.receiveDate = receiveDate;
+		this.senderName = senderName;
+		this.recepientName = recepientName;
+		this.faxFileName = faxFileName;
 		this.folderId = folderId;
 		this.faxSubject = faxSubject;
 		this.faxTypeId = faxTypeId;
 		this.statusId = statusId;
 		this.forwardTo = forwardTo;
-		this.receiveDate = receiveDate;
+		this.modifiedBy = modifiedBy;
 		this.modifiedDate = modifiedDate;
-		this.recepientName = recepientName;
 		this.h491020Faxnotes = h491020Faxnotes;
 	}
 	public int getFaxId() {
@@ -45,11 +42,30 @@ public class FaxInboxBean {
 	public void setFaxId(int faxId) {
 		this.faxId = faxId;
 	}
-	public String getTransStationId() {
-		return transStationId;
+	public Date getReceiveDate() {
+		return receiveDate;
 	}
-	public void setTransStationId(String transStationId) {
-		this.transStationId = transStationId;
+	public void setReceiveDate(Date receiveDate) {
+		this.receiveDate = receiveDate;
+	}
+	public String getSenderName() {
+		return senderName;
+	}
+	public void setSenderName(String senderName) {
+		this.senderName = senderName;
+	}
+
+	public String getRecepientName() {
+		return recepientName;
+	}
+	public void setRecepientName(String recepientName) {
+		this.recepientName = recepientName;
+	}
+	public String getFaxFileName() {
+		return faxFileName;
+	}
+	public void setFaxFileName(String faxFileName) {
+		this.faxFileName = faxFileName;
 	}
 	public int getFolderId() {
 		return folderId;
@@ -81,18 +97,17 @@ public class FaxInboxBean {
 	public void setForwardTo(int forwardTo) {
 		this.forwardTo = forwardTo;
 	}
-	public int getReceiveDate() {
-		return receiveDate;
+	public int getModifiedBy() {
+		return modifiedBy;
 	}
-	public void setReceiveDate(int receiveDate) {
-		this.receiveDate = receiveDate;
+	public void setModifiedBy(int modifiedBy) {
+		this.modifiedBy = modifiedBy;
 	}
-
-	public int getRecepientName() {
-		return recepientName;
+	public Date getModifiedDate() {
+		return modifiedDate;
 	}
-	public void setRecepientName(int recepientName) {
-		this.recepientName = recepientName;
+	public void setModifiedDate(Date modifiedDate) {
+		this.modifiedDate = modifiedDate;
 	}
 	public String getH491020Faxnotes() {
 		return h491020Faxnotes;
@@ -102,4 +117,3 @@ public class FaxInboxBean {
 	}
 
 }
-

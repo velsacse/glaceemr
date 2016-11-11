@@ -18,7 +18,7 @@ public class LoginUsers {
 	@Id
 	@Column(name="login_users_id")
 	private Integer loginUsersId;
-
+                                                           
 	@Column(name="login_users_username")
 	private String loginUsersUsername;
 

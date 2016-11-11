@@ -9,7 +9,9 @@ public class FaxOutboxBean {
 	String faxFileName;
 	int folderId;
 	Date scheduleTime;
+	Date actualDespatchtime;
 	int statusId;
+	String recipientNumber;
 	String recipientName;
 	int forwardedToUserId;
 	int createdBy;
@@ -18,21 +20,23 @@ public class FaxOutboxBean {
 	int modifiedByUserId;
 	String senderName;
 	String outboxThumbnail;
-	String recipientNumber;
 	String faxAttachments;
+	String retrynotes;
 	public FaxOutboxBean(int faxId, String faxSubject, String faxFileName,
-			int folderId, Date scheduleTime, int statusId,
-			String recipientName, int forwardedToUserId, int createdBy,
-			Date createdDate, String billingCode, int modifiedByUserId,
-			String senderName, String outboxThumbnail, String recipientNumber,
-			String faxAttachments) {
+			int folderId, Date scheduleTime, Date actualDespatchtime,
+			int statusId, String recipientNumber, String recipientName,
+			int forwardedToUserId, int createdBy, Date createdDate,
+			String billingCode, int modifiedByUserId, String senderName,
+			String outboxThumbnail, String faxAttachments, String retrynotes) {
 		super();
 		this.faxId = faxId;
 		this.faxSubject = faxSubject;
 		this.faxFileName = faxFileName;
 		this.folderId = folderId;
 		this.scheduleTime = scheduleTime;
+		this.actualDespatchtime = actualDespatchtime;
 		this.statusId = statusId;
+		this.recipientNumber = recipientNumber;
 		this.recipientName = recipientName;
 		this.forwardedToUserId = forwardedToUserId;
 		this.createdBy = createdBy;
@@ -41,8 +45,8 @@ public class FaxOutboxBean {
 		this.modifiedByUserId = modifiedByUserId;
 		this.senderName = senderName;
 		this.outboxThumbnail = outboxThumbnail;
-		this.recipientNumber = recipientNumber;
 		this.faxAttachments = faxAttachments;
+		this.retrynotes = retrynotes;
 	}
 	public int getFaxId() {
 		return faxId;
@@ -68,17 +72,29 @@ public class FaxOutboxBean {
 	public void setFolderId(int folderId) {
 		this.folderId = folderId;
 	}
-	public Date getScheduleTime() {
+	public Date getscheduleTime() {
 		return scheduleTime;
 	}
-	public void setScheduleTime(Date scheduleTime) {
+	public void setscheduleTime(Date scheduleTime) {
 		this.scheduleTime = scheduleTime;
+	}
+	public Date getActualDespatchtime() {
+		return actualDespatchtime;
+	}
+	public void setActualDespatchtime(Date actualDespatchtime) {
+		this.actualDespatchtime = actualDespatchtime;
 	}
 	public int getStatusId() {
 		return statusId;
 	}
 	public void setStatusId(int statusId) {
 		this.statusId = statusId;
+	}
+	public String getRecipientNumber() {
+		return recipientNumber;
+	}
+	public void setRecipientNumber(String recipientNumber) {
+		this.recipientNumber = recipientNumber;
 	}
 	public String getRecipientName() {
 		return recipientName;
@@ -128,17 +144,16 @@ public class FaxOutboxBean {
 	public void setOutboxThumbnail(String outboxThumbnail) {
 		this.outboxThumbnail = outboxThumbnail;
 	}
-	public String getRecipientNumber() {
-		return recipientNumber;
-	}
-	public void setRecipientNumber(String recipientNumber) {
-		this.recipientNumber = recipientNumber;
-	}
 	public String getFaxAttachments() {
 		return faxAttachments;
 	}
 	public void setFaxAttachments(String faxAttachments) {
 		this.faxAttachments = faxAttachments;
 	}
-
+	public String getRetrynotes() {
+		return retrynotes;
+	}
+	public void setRetrynotes(String retrynotes) {
+		this.retrynotes = retrynotes;
+	}
 }
