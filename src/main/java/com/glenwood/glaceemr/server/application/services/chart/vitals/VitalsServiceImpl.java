@@ -85,26 +85,39 @@ public class VitalsServiceImpl implements VitalsService {
 
 	@Override
 	public DischargeVitalBean setVitals(Integer patientId,Integer encounterId,Integer groupId,Boolean isDischargeVitals,Integer admssEpisode,String clientId,Integer fromPrint)throws Exception{
-		this.fromPrint=fromPrint;
-		getPatientDetails(patientId);
-		clinicalDataBean.clientId=clientId;
-		getActiveVitalsGroup(patientId,groupId);
-		for (VitalGroup vitalGroup : vitalGroupList) {
-			getGroupVitals(patientId,encounterId,vitalGroup.getVitalGroupId());
+		try{
+			this.fromPrint=fromPrint;
+			getPatientDetails(patientId);
+			clinicalDataBean.clientId=clientId;
+			getActiveVitalsGroup(patientId,groupId);
+			for (VitalGroup vitalGroup : vitalGroupList) {
+				getGroupVitals(patientId,encounterId,vitalGroup.getVitalGroupId());
+			}
+			setClinicalDataBean(patientId,encounterId,isDischargeVitals,admssEpisode);
+			return prepareJsonfromBeans(patientId,encounterId,admssEpisode,patientSex,ageinDay);
 		}
-		setClinicalDataBean(patientId,encounterId,isDischargeVitals,admssEpisode);
-		return prepareJsonfromBeans(patientId,encounterId,admssEpisode,patientSex,ageinDay);
+		catch(Exception e){
+			System.out.println("ERROR:: while getting vitals :: patientId>"+patientId+" encounterId>"+encounterId+" groupId>"+groupId+" isDischargeVitals>"+isDischargeVitals+" admssEpisode>"+admssEpisode+" clientId>"+clientId+" fromPrint>"+fromPrint);
+			e.printStackTrace();
+			return null;
+		}
 		
 
 	}
 
 	@Override
 	public List<VitalGroup> getActiveVitalsGroup(Integer patientId,Integer groupId)throws Exception {
+		try{
 		patientId = Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 		getPatientDetails(patientId);
 		vitalGroupList=vitalGroupRepository.findAll(Specifications.where(VitalsSpecification.getVitalActiveGrps(patientId,groupId,patientSex)));
 		vitalDataBean.setVitalGroupData(vitalGroupList);
 		return vitalGroupList;
+		}catch(Exception e){
+			System.out.println("ERROR:: while getting vital groups:: groupId>"+groupId+" patientId>"+patientId);
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 
@@ -119,7 +132,8 @@ public class VitalsServiceImpl implements VitalsService {
 		SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
 		ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date() )));
 		}catch(Exception e){
-			
+			System.out.println("ERROR:: while getting patient information for "+patientId);
+			e.printStackTrace();
 		}
 		
 	}
@@ -127,7 +141,7 @@ public class VitalsServiceImpl implements VitalsService {
 
 	@Override
 	public List<VitalsParameter> getGroupVitals(Integer patientId,Integer encounterId, Integer groupId) throws Exception {
-
+		try{
 		List<VitalsParameter> vitalsList=vitalParameterRepository.findAll(VitalsSpecification.getVitalElements(patientSex,groupId));
 		for (VitalsParameter vitalsParameter : vitalsList) {
 			gwids.add(vitalsParameter.getVitalsParameterGwId());
@@ -135,12 +149,21 @@ public class VitalsServiceImpl implements VitalsService {
 		gwids.add("-1");
 		vitalDataBean.setVitalElementBean(vitalsList,groupId);
 		return vitalsList;
-
+		}catch(Exception e){
+			System.out.println("ERROR:: while getting vital group elements:: patientId>"+patientId+" encounterId>"+encounterId+" groupId>"+groupId);
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 
 	private void setClinicalDataBean(Integer patientId,Integer encounterId,Boolean isDischargeVitals,Integer admssEpisode) {
+		try{
 		clinicalElementsService.setVitalsClinicalData("02002%",patientId,encounterId,isDischargeVitals,admssEpisode,patientSex, ageinDay);
+		}catch(Exception e){
+			System.out.println("ERROR:: while setting clinical data bean for vitals:: patientId>"+patientId+" encounterId>"+encounterId+" isDischargeVitals>"+isDischargeVitals+" admissionEpisode>"+admssEpisode);
+			e.printStackTrace();
+		}
 	}
 
 
@@ -148,6 +171,7 @@ public class VitalsServiceImpl implements VitalsService {
 
 
 	private DischargeVitalBean prepareJsonfromBeans(Integer patientId, Integer encounterId,Integer admssEpisode,short patientSex,int patientAge) throws Exception {
+		try{
 		List<CustomVitalGroup> vitalData=new ArrayList<CustomVitalGroup>();
 		int groupId = -1;
 		LinkedHashMap<Integer,VitalGroupBean> vitalGroupHashMap = vitalDataBean.getVitals();
@@ -323,6 +347,11 @@ public class VitalsServiceImpl implements VitalsService {
 		dischargeVitalBean.setVitalData(framePatientData(patientId,encounterId,admssEpisode));
 		dischargeVitalBean.setVitals(vitalData);
 		return dischargeVitalBean;
+		}catch(Exception e){
+			System.out.println("ERROR:: while creating vital json from bean :: patientId>"+patientId+" encounterId>"+encounterId+" admssEpisode>"+admssEpisode+" patientgeneder>"+patientSex+" patient age>"+patientAge);
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 
