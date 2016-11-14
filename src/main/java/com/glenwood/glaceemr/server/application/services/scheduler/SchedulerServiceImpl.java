@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.services.scheduler;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -83,7 +84,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 			Join<SchedulerAppointment, H113> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
 			Join<SchedulerAppointment, H113> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
 			Join<SchedulerAppointment, SchedulerAppointmentParameter> joinSchApptParam=root.join("schApptParam",JoinType.LEFT);
-			Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, H113> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
+			//Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, H113> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
 			Join<SchedulerAppointment, SchedulerResource> joinSchResLoc=root.join("schResLoc",JoinType.LEFT);
 			Join<SchedulerAppointment, H076> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);
 			Join<SchedulerAppointment, Workflow> joinWorkflow=root.join("workflowPatientId",JoinType.LEFT);
@@ -102,13 +103,13 @@ public class SchedulerServiceImpl implements SchedulerService{
 			Predicate[] predicateParam = new Predicate[] {
 					builder.equal(joinSchApptParam.get(SchedulerAppointmentParameter_.schApptParameterIsactive), new Boolean(true)),
 			};
-			joinSchApptParam.on(predicateParam);
+			joinSchApptParam.on(predicateParam);/*
 			Predicate[] predicateReason = new Predicate[] {
 					builder.equal(joinH113Reason.get(H113_.h113002), new Integer(402)),
 					builder.equal(joinH113Reason.get(H113_.h113008), new Integer(1)),
 					builder.equal(joinH113Reason.get(H113_.h113010), new Boolean(true)),
 			};
-			joinH113Reason.on(predicateReason);
+			joinH113Reason.on(predicateReason);*/
 			Predicate[] predicateLocation = new Predicate[] {
 					builder.equal(joinSchResLoc.get(SchedulerResource_.schResourceIsdoctor), new Integer(0)),
 					builder.equal(joinSchResLoc.get(SchedulerResource_.schResourceLocalserver), new Boolean(true)),
@@ -119,7 +120,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 			};
 			joinWorkflow.on(predicateWorkflow);
 			
-			
+			//cq.distinct(true);
 			cq.select(builder.construct(SchedulerAppointmentBean.class,
 					root.get(SchedulerAppointment_.schApptId),
 					builder.function("to_char", String.class, root.get(SchedulerAppointment_.schApptStarttime),builder.literal("HH12:MI:SS AM")),
@@ -140,7 +141,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 					root.get(SchedulerAppointment_.schApptType),
 					joinSchResLoc.get(SchedulerResource_.schResourceName),
 					root.get(SchedulerAppointment_.schApptLocation),
-					joinH113Reason.get(H113_.h113004),
+					builder.function("getapptpara", String.class,builder.literal(1),root.get(SchedulerAppointment_.schApptId)),
 					root.get(SchedulerAppointment_.schApptReason),
 					joinSchRefDrId.get(H076_.h076020),
 					root.get(SchedulerAppointment_.schApptReferringdoctorId),
@@ -153,7 +154,6 @@ public class SchedulerServiceImpl implements SchedulerService{
 					)).where(builder.and(builder.equal(root.get(SchedulerAppointment_.schApptDate),apptDate),
 							builder.equal(root.get(SchedulerAppointment_.schApptResource), Integer.parseInt(resourceId))
 							)).orderBy(builder.asc(root.get(SchedulerAppointment_.schApptStarttime)));
-
 			Query query=em.createQuery(cq);
 			
 			List<SchedulerAppointmentBean> schedulerAppointments=query.getResultList();
