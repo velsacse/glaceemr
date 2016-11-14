@@ -11,7 +11,7 @@ public class SchedulerAppointmentBean {
 			String homeExtn, String workPhone, String workExtn, Integer resourceId,
 			String apptStatus, Integer apptStatusId,String apptStatusColor, String apptType,
 			Integer apptTypeId, String apptLocation, Integer apptLocationId,
-			String apptReason, Integer apptReasonId, String refPhysician,
+			String apptReason,Integer apptReasonId, String refPhysician,
 			Integer refPhysicianId, String refPhoneNumber, String refFaxNumber, 
 			Integer workflowStatusId, String workflowStatusName,
 			Date workflowStatusDate) {
