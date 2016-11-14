@@ -43,7 +43,6 @@ public class AuditTrailSaveServiceImpl implements AuditTrailSaveService {
 
 	@PersistenceContext
 	private EntityManager entityManager;
-	Timestamp findCurrentTimeStamp = findCurrentTimeStamp();
 
 	public Timestamp findCurrentTimeStamp() {
 
@@ -83,7 +82,7 @@ public class AuditTrailSaveServiceImpl implements AuditTrailSaveService {
 		eventLog.setServerIp(getServerIPAddress());
 		String Server_Hostname = httpServletRequest.getRemoteHost();
 		eventLog.setServerHostname(Server_Hostname);
-		Timestamp logOn = findCurrentTimeStamp;
+		Timestamp logOn = findCurrentTimeStamp();
 		eventLog.setLogOn(logOn);
 		eventLog.setBackUpData("");
 		String dataCheckSum = calculateChecksum(User_Id, Parent_id, logOn, LogModuleType.getValue(), LogActionType.getValue(), Log_Outcome.getValue(), ClientIP, httpServletRequest.getSession(false).getId(), relevantIds, Description);
@@ -151,7 +150,7 @@ public class AuditTrailSaveServiceImpl implements AuditTrailSaveService {
 
 		String Server_Hostname = httpServletRequest.getRemoteHost();
 		eventLog.setServerHostname(Server_Hostname);
-		Timestamp logOn = findCurrentTimeStamp;
+		Timestamp logOn = findCurrentTimeStamp();
 		eventLog.setLogOn(logOn);
 		eventLog.setBackUpData("");
 		String dataCheckSum = calculateChecksum(User_Id, Parent_id, logOn, LogModuleType.getValue(), LogActionType.getValue(), Log_Outcome.getValue(), ClientIP, httpServletRequest.getSession(false).getId(), relevantIds, Description);
@@ -195,7 +194,7 @@ public class AuditTrailSaveServiceImpl implements AuditTrailSaveService {
 		eventLog.setServerIp(getServerIPAddress());
 		String Server_Hostname = httpServletRequest.getRemoteHost();
 		eventLog.setServerHostname(Server_Hostname);
-		Timestamp logOn = findCurrentTimeStamp;
+		Timestamp logOn = findCurrentTimeStamp();
 		eventLog.setLogOn(logOn);
 		eventLog.setBackUpData("");
 		String dataCheckSum = calculateChecksum(User_Id, Parent_id, logOn, LogModuleType.getValue(), LogActionType.getValue(), Log_Outcome.getValue(), ClientIP, httpServletRequest.getSession(false).getId(), relevantIds, Description);
