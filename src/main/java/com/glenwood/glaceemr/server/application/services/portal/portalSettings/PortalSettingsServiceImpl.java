@@ -2,7 +2,6 @@ package com.glenwood.glaceemr.server.application.services.portal.portalSettings;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +14,6 @@ import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.BillingConfigTable;
 import com.glenwood.glaceemr.server.application.models.Billinglookup;
 import com.glenwood.glaceemr.server.application.models.ClinicalIntakeFormBean;
-import com.glenwood.glaceemr.server.application.models.ClinicalQuestionsGroup;
 import com.glenwood.glaceemr.server.application.models.DemographicmodifyStatus;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EncryptedPatientDetails;
@@ -24,14 +22,15 @@ import com.glenwood.glaceemr.server.application.models.H807;
 import com.glenwood.glaceemr.server.application.models.H809;
 import com.glenwood.glaceemr.server.application.models.H810;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
-import com.glenwood.glaceemr.server.application.models.PatientClinicalElementsQuestions;
+import com.glenwood.glaceemr.server.application.models.InsCompAddr;
+import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
+import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistrationBean;
-import com.glenwood.glaceemr.server.application.models.PortalConfigBean;
+import com.glenwood.glaceemr.server.application.models.PortalNotificationAlertsBean;
 import com.glenwood.glaceemr.server.application.models.PortalPatientPaymentsSummary;
 import com.glenwood.glaceemr.server.application.models.PortalSchedulerAppointmentBean;
 import com.glenwood.glaceemr.server.application.models.PosTable;
-import com.glenwood.glaceemr.server.application.models.SchedulerAppointment;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
 import com.glenwood.glaceemr.server.application.repositories.BillingConfigTableRepository;
 import com.glenwood.glaceemr.server.application.repositories.BillinglookupRepository;
@@ -41,7 +40,10 @@ import com.glenwood.glaceemr.server.application.repositories.H807Repository;
 import com.glenwood.glaceemr.server.application.repositories.H809Repository;
 import com.glenwood.glaceemr.server.application.repositories.H810Respository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
+import com.glenwood.glaceemr.server.application.repositories.InsCompAddrRepository;
+import com.glenwood.glaceemr.server.application.repositories.InsCompanyRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsQuestionsRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalMenuConfigRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PosTableRepository;
 import com.glenwood.glaceemr.server.application.services.portal.portalAppointments.PortalAppointmentsService;
@@ -50,7 +52,7 @@ import com.glenwood.glaceemr.server.application.services.portal.portalForms.Port
 import com.glenwood.glaceemr.server.application.services.portal.portalMedicalSummary.PortalMedicalSummaryService;
 import com.glenwood.glaceemr.server.application.services.portal.portalPayments.PortalPaymentsService;
 import com.glenwood.glaceemr.server.application.services.portalLogin.PortalLoginService;
-import com.glenwood.glaceemr.server.application.specifications.PortalFormsSpecification;
+import com.glenwood.glaceemr.server.application.specifications.InsuranceSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalLoginSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalSettingsSpecification;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -94,6 +96,15 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 
 	@Autowired
 	InitialSettingsRepository initialSettingsRepository;
+	
+	@Autowired
+	PatientPortalMenuConfigRepository patientPortalMenuConfigRepository;
+	
+	@Autowired
+	InsCompanyRepository insCompanyRepository;
+	
+	@Autowired
+	InsCompAddrRepository insCompAddrRepository;
 
 	@Autowired
 	PortalLoginService portalLoginService;
@@ -115,6 +126,15 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 
 	@Autowired
 	ObjectMapper objectMapper;
+	
+
+	@Override
+	public List<PatientPortalMenuConfig> getPortalMenuConfig(boolean isActiveMenuItemList) {
+		
+		List<PatientPortalMenuConfig> portalMenuItemList=patientPortalMenuConfigRepository.findAll(PortalSettingsSpecification.getPortalMenuConfig(isActiveMenuItemList));
+		
+		return portalMenuItemList;
+	}
 
 	@Override
 	public PatientProfileSettingsFields getPatientProfileSettingsFieldsList() {
@@ -412,9 +432,9 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 	}
 
 	@Override
-	public PortalConfigBean getPortalConfigDetails(int patientId, int chartId) throws ParseException, JsonProcessingException {
+	public PortalNotificationAlertsBean getPortalConfigDetails(int patientId, int chartId) throws ParseException, JsonProcessingException {
 
-		PortalConfigBean configBean=new PortalConfigBean();
+		PortalNotificationAlertsBean configBean=new PortalNotificationAlertsBean();
 		configBean.setPatientId(patientId);
 		configBean.setChartId(chartId);
 		
@@ -484,7 +504,15 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 		return configBean;
 	}
 
-
-
+	@Override
+	public InsuranceFilterBean getInsuranceListList(InsuranceFilterBean insFilterBean) {
+		
+		List<InsCompAddr> insList=insCompAddrRepository.findAll(InsuranceSpecification.getInsurancesBy(insFilterBean));
+		insFilterBean.setInsuranceList(insList);
+		
+		insFilterBean.setTotalInsurancesCount(insCompAddrRepository.count(InsuranceSpecification.getInsurancesBy(insFilterBean)));
+				
+		return insFilterBean;
+	}
 
 }

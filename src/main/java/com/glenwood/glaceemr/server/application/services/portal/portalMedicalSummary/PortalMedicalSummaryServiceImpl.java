@@ -31,7 +31,8 @@ import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.H809;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
-import com.glenwood.glaceemr.server.application.models.PortalSessionBean;
+import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
+import com.glenwood.glaceemr.server.application.models.PortalConfigurationBean;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
@@ -50,6 +51,7 @@ import com.glenwood.glaceemr.server.application.repositories.H809Repository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientAllergiesRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalMenuConfigRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PlanTypeRepository;
 import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
@@ -120,51 +122,54 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 	
 
 	@Override
-	public PortalSessionBean getSessionMap() throws JsonProcessingException {
+	public PortalConfigurationBean getSessionMap(String username) throws JsonProcessingException {
 							
+		PortalConfigurationBean configurationBean=new PortalConfigurationBean();
 		
 		List<InitialSettings> practiceDetails=portalSettingsService.getPracticeDetails();
 		
 		PortalBillingConfigFields configFields=portalSettingsService.getPortalBillingConfigFields();
 		
-		PortalSessionBean loginDetails=new PortalSessionBean();
-		loginDetails.setSessionID(sessionMap.getPortalSessionID());
-		loginDetails.setUsername(sessionMap.getPortalUser());
-		loginDetails.setTennantDB(sessionMap.getPortalDBName());
-		loginDetails.setUserID(sessionMap.getPortalUserID());
-		loginDetails.setGlaceApacheUrl(sessionMap.getGlaceApacheUrl());
-		loginDetails.setGlaceSpringContext(sessionMap.getGlaceSpringContext());
-		loginDetails.setGlaceTomcatContext(sessionMap.getGlaceTomcatContext());
-		loginDetails.setGlaceTomcatUrl(sessionMap.getGlaceTomcatUrl());
-		loginDetails.setPortalLoginUrl(sessionMap.getPortalLoginUrl());
-		loginDetails.setPortalLoginContext(sessionMap.getPortalLoginContext());
-		loginDetails.setLoggedIn(true);		
+		List<PatientPortalMenuConfig> portalMenuItemList=portalSettingsService.getPortalMenuConfig(true);
+				
+		configurationBean.setSessionID(sessionMap.getPortalSessionID());
+		configurationBean.setUsername(sessionMap.getPortalUser());
+		configurationBean.setTennantDB(sessionMap.getPortalDBName());
+		configurationBean.setUserID(sessionMap.getPortalUserID());
+		configurationBean.setGlaceApacheUrl(sessionMap.getGlaceApacheUrl());
+		configurationBean.setGlaceSpringContext(sessionMap.getGlaceSpringContext());
+		configurationBean.setGlaceTomcatContext(sessionMap.getGlaceTomcatContext());
+		configurationBean.setGlaceTomcatUrl(sessionMap.getGlaceTomcatUrl());
+		configurationBean.setPortalLoginUrl(sessionMap.getPortalLoginUrl());
+		configurationBean.setPortalLoginContext(sessionMap.getPortalLoginContext());
+		configurationBean.setPortalMenuItemList(portalMenuItemList);
+		configurationBean.setLoggedIn(true);		
 		
 		for(int p=0;p<practiceDetails.size();p++){
 			
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("Address")){
 				sessionMap.setPracticeAddress(practiceDetails.get(p).getInitialSettingsOptionValue());
-				loginDetails.setPracticeAddress(sessionMap.getPracticeAddress());
+				configurationBean.setPracticeAddress(sessionMap.getPracticeAddress());
 			}
 				
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("Doctor Message")){
 				sessionMap.setPracticeDoctorMessage(practiceDetails.get(p).getInitialSettingsOptionValue());
-				loginDetails.setPracticeDoctorMessage(sessionMap.getPracticeDoctorMessage());
+				configurationBean.setPracticeDoctorMessage(sessionMap.getPracticeDoctorMessage());
 			}
 				
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("city")){
 				sessionMap.setPracticeCity(practiceDetails.get(p).getInitialSettingsOptionValue());
-				loginDetails.setPracticeCity(sessionMap.getPracticeCity());
+				configurationBean.setPracticeCity(sessionMap.getPracticeCity());
 			}
 					
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("Web Address")){
 				sessionMap.setPracticeWebAddress(practiceDetails.get(p).getInitialSettingsOptionValue());
-				loginDetails.setPracticeWebAddress(sessionMap.getPracticeWebAddress());
+				configurationBean.setPracticeWebAddress(sessionMap.getPracticeWebAddress());
 			}
 						
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("Fax Number")){
 				sessionMap.setPracticeFax(practiceDetails.get(p).getInitialSettingsOptionValue());
-				loginDetails.setPracticeFax(sessionMap.getPracticeFax());
+				configurationBean.setPracticeFax(sessionMap.getPracticeFax());
 			}
 							
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("state")){
@@ -174,47 +179,51 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 					if(configFields.getStatesList().get(s).getBillingConfigTableConfigId().equals(Integer.parseInt(practiceDetails.get(p).getInitialSettingsOptionValue())))
 						sessionMap.setPracticeState(configFields.getStatesList().get(s).getBillingConfigTableLookupDesc());
 				}
-				loginDetails.setPracticeState(sessionMap.getPracticeState());
+				configurationBean.setPracticeState(sessionMap.getPracticeState());
 			}
 				
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("zipCode")){
 				sessionMap.setPracticeZipcode(practiceDetails.get(p).getInitialSettingsOptionValue());
-				loginDetails.setPracticeZipcode(sessionMap.getPracticeZipcode());
+				configurationBean.setPracticeZipcode(sessionMap.getPracticeZipcode());
 			}
 					
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("Practice Name")){
 				sessionMap.setPracticeName(practiceDetails.get(p).getInitialSettingsOptionValue());
-				loginDetails.setPracticeName(sessionMap.getPracticeName());
+				configurationBean.setPracticeName(sessionMap.getPracticeName());
 			}
 							
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("email Address")){
 				sessionMap.setPracticeEmail(practiceDetails.get(p).getInitialSettingsOptionValue());
-				loginDetails.setPracticeEmail(sessionMap.getPracticeEmail());
+				configurationBean.setPracticeEmail(sessionMap.getPracticeEmail());
 			}
 								
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("Phone No")){
 				sessionMap.setPracticePhone(practiceDetails.get(p).getInitialSettingsOptionValue());
-				loginDetails.setPracticePhone(sessionMap.getPracticePhone());
+				configurationBean.setPracticePhone(sessionMap.getPracticePhone());
 			}
 									
 			if(practiceDetails.get(p).getInitialSettingsOptionName().equalsIgnoreCase("Shared Folder Path")){
 				sessionMap.setPracticeSharedFolderPath(practiceDetails.get(p).getInitialSettingsOptionValue());
-				loginDetails.setPracticeSharedFolderPath(sessionMap.getPracticeSharedFolderPath());
+				configurationBean.setPracticeSharedFolderPath(sessionMap.getPracticeSharedFolderPath());
 			}
 		}
 		
 		SharedFolderUtil.sharedFolderPath=sessionMap.getPracticeSharedFolderPath()+"/";
 
-		return loginDetails;
+		return configurationBean;
 	}
 
 
 
 	@Override
-	public List<H809> getPatientDetailsByUsername(String username) {
-
+	public List<H809> getPatientDetailsByUsername(String username) throws JsonProcessingException {
+		
+		System.out.println("username:::***************************************:::"+username);
+		
 		List<H809> patientPersonalDetails= h809Repository.findAll(PatientRegistrationSpecification.getPatientDetailsByUsername(username));
-
+		
+		System.out.println("patientPersonalDetailsSize::::*********************************************:::"+patientPersonalDetails.size());
+		
 		return patientPersonalDetails;
 
 	}

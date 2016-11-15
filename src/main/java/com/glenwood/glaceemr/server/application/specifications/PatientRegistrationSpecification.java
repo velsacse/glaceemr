@@ -123,10 +123,7 @@ public class PatientRegistrationSpecification {
 			@Override
 			public Predicate toPredicate(Root<H809> root,
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
-				
-				Join<H809, Chart> h809PatRegJoin=root.join(H809_.chartH809Table,JoinType.INNER);
-				Join<Chart, PatientRegistration> patRegChartJoin=h809PatRegJoin.join(Chart_.patientRegistrationTable,JoinType.INNER);
-				
+								
 			    Predicate personalDetailsPredicate=cb.equal(cb.upper(root.get(H809_.h809004)),username.toUpperCase());
 				
 			    root.fetch(H809_.chartH809Table,JoinType.INNER).fetch(Chart_.patientRegistrationTable);

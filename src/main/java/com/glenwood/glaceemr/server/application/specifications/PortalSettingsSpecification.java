@@ -18,10 +18,30 @@ import com.glenwood.glaceemr.server.application.models.H810;
 import com.glenwood.glaceemr.server.application.models.H810_;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InitialSettings_;
+import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
+import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig_;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.PosTable_;
 
 public class PortalSettingsSpecification {
+	
+	/**
+	 * @return list of available Language options  
+	 */	
+	public static Specification<PatientPortalMenuConfig> getPortalMenuConfig(boolean isActiveMenuItemList)
+	   {
+		   return new Specification<PatientPortalMenuConfig>() {
+
+			@Override
+			public Predicate toPredicate(Root<PatientPortalMenuConfig> root,
+					CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				
+				Predicate practicePredicate=cq.where(cb.equal(root.get(PatientPortalMenuConfig_.patientPortalMenuConfigIsactive), true)).getRestriction();
+				return practicePredicate;
+			}
+			   
+		};
+	   }
 
 	
 	/**
