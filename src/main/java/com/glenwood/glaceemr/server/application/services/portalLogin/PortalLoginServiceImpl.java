@@ -254,7 +254,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 "<br><br>"+
 "<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Welcome and thank you for creating your Patient Portal account! To complete the account creation process click on the below link.</label>"+
 "<br><br>"+
-"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='color:#1773cf' href='https://patientportal.glaceemr.com/glaceportal_login/UserRegistration?requestFor=AccountActivation&userId="+patientDetails.getPatientRegistrationId()+"&practiceId="+"glace"+"'>Click here to activate your Patient Portal account</a></label>"+
+"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='color:#1773cf' href='https://patientportal.glaceemr.com/glaceportal_login/UserRegistration?requestFor=AccountActivation&userId="+patientDetails.getPatientRegistrationId()+"&practiceId="+practiceId+"'>Click here to activate your Patient Portal account</a></label>"+
 "<br><br>"+
 "<label style='width:100%;padding:10px 5px;'>Thanks and Regards,</label>"+
 "<br>"+

@@ -7,7 +7,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EncryptedPatientDetails;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
-import com.glenwood.glaceemr.server.application.models.PortalConfigBean;
+import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
+import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
+import com.glenwood.glaceemr.server.application.models.PortalNotificationAlertsBean;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistrationBean;
 import com.glenwood.glaceemr.server.application.models.PosTable;
@@ -31,6 +33,10 @@ public interface PortalSettingsService {
 	
 	InitialSettings getPracticeDetailsItem(String optionName);
 
-	PortalConfigBean getPortalConfigDetails(int patientId, int chartId) throws ParseException, JsonProcessingException;
+	PortalNotificationAlertsBean getPortalConfigDetails(int patientId, int chartId) throws ParseException, JsonProcessingException;
+	
+	List<PatientPortalMenuConfig> getPortalMenuConfig(boolean isActiveMenuItemList);
+
+	InsuranceFilterBean getInsuranceListList(InsuranceFilterBean insFilterBean);
 	
 }

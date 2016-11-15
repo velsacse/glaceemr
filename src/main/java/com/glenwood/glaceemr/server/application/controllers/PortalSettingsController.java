@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
 import com.glenwood.glaceemr.server.application.models.PatientRegistrationBean;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalSettingsService;
@@ -287,4 +288,36 @@ public class PortalSettingsController {
 			return responseBean;
 		}
 	}
+	
+	
+	/**
+	 * @return EMRResponseBean with insurance list
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/InsuranceList", method = RequestMethod.POST)
+    @ApiOperation(value = "Returns list of filtered insurances", notes = "Returns list of filtered insurances", response = User.class)
+	@ApiResponses(value= {
+		    @ApiResponse(code = 200, message = "Insurance list retrieval successful"),
+		    @ApiResponse(code = 404, message = "Insurance list retrieval failure"),
+		    @ApiResponse(code = 500, message = "Internal server error")})
+	@ResponseBody
+	public EMRResponseBean getInsuranceList(@RequestBody InsuranceFilterBean insFilterBean)throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.getInsuranceListList(insFilterBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving pharmacy list!");
+			return responseBean;
+		}		
+	}
+	
+	
 }

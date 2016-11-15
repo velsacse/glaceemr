@@ -43,15 +43,16 @@ public class PortalMedicalSummaryController {
 		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getSessionMap() throws Exception{
-
+	public EMRResponseBean getSessionMap(@ApiParam(name="dbname", value="patient's username whose details are to be retrieved") @RequestParam(value="dbname", required=false, defaultValue="") String dbname,
+			@ApiParam(name="username", value="patient's username whose details are to be retrieved") @RequestParam(value="username", required=false, defaultValue="") String username) throws Exception{
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
 
 		try {
 			responseBean.setSuccess(true);
-			responseBean.setData(portalMedicalSummaryService.getSessionMap());
+			responseBean.setData(portalMedicalSummaryService.getSessionMap(username));
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();

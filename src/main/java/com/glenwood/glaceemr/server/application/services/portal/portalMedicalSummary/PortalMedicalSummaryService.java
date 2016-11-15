@@ -5,7 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.H809;
-import com.glenwood.glaceemr.server.application.models.PortalSessionBean;
+import com.glenwood.glaceemr.server.application.models.PortalConfigurationBean;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
@@ -19,7 +19,7 @@ public interface PortalMedicalSummaryService {
 	 * @return SessionMap
 	 * @throws JsonProcessingException 
 	 */
-	public PortalSessionBean getSessionMap() throws JsonProcessingException;
+	public PortalConfigurationBean getSessionMap(String username) throws JsonProcessingException;
 	
 	/**
 	 * Chart Id list of a patient.
@@ -69,8 +69,9 @@ public interface PortalMedicalSummaryService {
 	 * details of a patient.
 	 * @param username		: username of the required patient.
 	 * @return list of details of a patient.
+	 * @throws JsonProcessingException 
 	 */
-	public List<H809> getPatientDetailsByUsername(String username);
+	public List<H809> getPatientDetailsByUsername(String username) throws JsonProcessingException;
 	
 	/**
 	 * details of a patient.
