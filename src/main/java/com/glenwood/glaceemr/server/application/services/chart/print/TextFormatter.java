@@ -468,6 +468,34 @@ public class TextFormatter {
 			return "";
 		}
 	}
-	
+
+	public int getAgeInYear(Date date) {
+
+		int daysInMon[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // Days in month
+		int days, month, year;
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		year = cal.get(Calendar.YEAR);
+		month = cal.get(Calendar.MONTH) + 1;
+		days = cal.get(Calendar.DAY_OF_MONTH);
+
+		Date d = new Date();
+
+		days = daysInMon[month - 1] - days + 1;
+
+		/* Calculating the num of year, month and date */
+		days = days + d.getDate();
+		month = (12 - month) + d.getMonth();
+		year = (d.getYear() + 1900) - year - 1;
+
+		if (month >= 12) {
+			year = year + 1;
+			month = month - 12;
+		}
+
+		return year;
+
+	}
 }
 

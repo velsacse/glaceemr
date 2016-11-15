@@ -13,6 +13,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,6 +29,7 @@ import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PatientVitals;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.models.UnitsOfMeasure;
@@ -41,6 +47,7 @@ import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.ClinicalElementsService;
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.PatientElementBean;
 import com.glenwood.glaceemr.server.application.services.chart.dischargeVitals.DischargeVitalBean;
+import com.glenwood.glaceemr.server.application.services.chart.print.TextFormatter;
 import com.glenwood.glaceemr.server.application.specifications.DischargeVitalSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.VitalsSpecification;
@@ -68,6 +75,10 @@ public class VitalsServiceImpl implements VitalsService {
 	ClinicalDataBean clinicalDataBean;
 	@Autowired
 	PatientVitalsRepository patientVitalsRepository;
+	@Autowired
+	TextFormatter textFormat;
+	@Autowired
+	EntityManager em;
 
 
 	List<String> gwids=new ArrayList<String>();
@@ -77,6 +88,7 @@ public class VitalsServiceImpl implements VitalsService {
 	Short patientSex=0;
 	Date patDOB=null;
 	Integer ageinDay=0;
+	Integer ageinYears=0;
 	Integer fromPrint=0;
 	
 	private Logger logger = Logger.getLogger(VitalsServiceImpl.class);
@@ -97,7 +109,6 @@ public class VitalsServiceImpl implements VitalsService {
 			return prepareJsonfromBeans(patientId,encounterId,admssEpisode,patientSex,ageinDay);
 		}
 		catch(Exception e){
-			System.out.println("ERROR:: while getting vitals :: patientId>"+patientId+" encounterId>"+encounterId+" groupId>"+groupId+" isDischargeVitals>"+isDischargeVitals+" admssEpisode>"+admssEpisode+" clientId>"+clientId+" fromPrint>"+fromPrint);
 			e.printStackTrace();
 			return null;
 		}
@@ -114,7 +125,6 @@ public class VitalsServiceImpl implements VitalsService {
 		vitalDataBean.setVitalGroupData(vitalGroupList);
 		return vitalGroupList;
 		}catch(Exception e){
-			System.out.println("ERROR:: while getting vital groups:: groupId>"+groupId+" patientId>"+patientId);
 			e.printStackTrace();
 			return null;
 		}
@@ -124,15 +134,40 @@ public class VitalsServiceImpl implements VitalsService {
 
 	public void getPatientDetails(Integer patientId){
 		try{
-		List<PatientRegistration> patRegistration=patientRegRepository.findAll(PatientRegistrationSpecification.PatientId(patientId+""));
-		for (PatientRegistration patientRegistration : patRegistration) {
-			patientSex=patientRegistration.getPatientRegistrationSex().shortValue();
-			patDOB=patientRegistration.getPatientRegistrationDob();
-		}
-		SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
-		ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date() )));
+			/*List<PatientRegistration> patRegistration=patientRegRepository.findAll(PatientRegistrationSpecification.getPatientPersonalDetails(patientId));
+			for (PatientRegistration patientRegistration : patRegistration) {
+				patientSex=patientRegistration.getPatientRegistrationSex().shortValue();
+				patDOB=patientRegistration.getPatientRegistrationDob();
+			}
+			
+					SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
+			ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date() )));
+			*/
+
+			CriteriaBuilder builder= em.getCriteriaBuilder();
+			CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
+			Root<PatientRegistration> root= query.from(PatientRegistration.class); 
+
+			query.multiselect(root.get(PatientRegistration_.patientRegistrationDob), 
+					root.get(PatientRegistration_.patientRegistrationSex)/*,
+					builder.function("age", String.class, root.get(PatientRegistration_.patientRegistrationDob))*/);
+			query.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId));
+			List<Object[]> list= em.createQuery(query).getResultList();
+
+			if(list!= null && list.size()>0){
+				patDOB= (Date)list.get(0)[0];
+				try{
+					patientSex= Short.parseShort(list.get(0)[1]+"");
+				}catch(Exception e){
+					patientSex= -1;
+				}
+				ageinYears= getAgeInYears(patDOB);
+				 
+				SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
+				ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date())));				
+			}
+
 		}catch(Exception e){
-			System.out.println("ERROR:: while getting patient information for "+patientId);
 			e.printStackTrace();
 		}
 		
@@ -150,7 +185,6 @@ public class VitalsServiceImpl implements VitalsService {
 		vitalDataBean.setVitalElementBean(vitalsList,groupId);
 		return vitalsList;
 		}catch(Exception e){
-			System.out.println("ERROR:: while getting vital group elements:: patientId>"+patientId+" encounterId>"+encounterId+" groupId>"+groupId);
 			e.printStackTrace();
 			return null;
 		}
@@ -161,7 +195,6 @@ public class VitalsServiceImpl implements VitalsService {
 		try{
 		clinicalElementsService.setVitalsClinicalData("02002%",patientId,encounterId,isDischargeVitals,admssEpisode,patientSex, ageinDay);
 		}catch(Exception e){
-			System.out.println("ERROR:: while setting clinical data bean for vitals:: patientId>"+patientId+" encounterId>"+encounterId+" isDischargeVitals>"+isDischargeVitals+" admissionEpisode>"+admssEpisode);
 			e.printStackTrace();
 		}
 	}
@@ -348,7 +381,6 @@ public class VitalsServiceImpl implements VitalsService {
 		dischargeVitalBean.setVitals(vitalData);
 		return dischargeVitalBean;
 		}catch(Exception e){
-			System.out.println("ERROR:: while creating vital json from bean :: patientId>"+patientId+" encounterId>"+encounterId+" admssEpisode>"+admssEpisode+" patientgeneder>"+patientSex+" patient age>"+patientAge);
 			e.printStackTrace();
 			return null;
 		}
@@ -1030,7 +1062,24 @@ public class VitalsServiceImpl implements VitalsService {
 		return isActive;
 	}
 
-	
+	/**
+	 * Get years from ageString
+	 * @param ageString
+	 * @return
+	 * 
+	 * Example: 32 years 8 mons 21 days
+	 * 			return 32
+	 */
+	private Integer getAgeInYears(Date dob) {
+
+		try {
+			String dobString= new SimpleDateFormat("yyyy-MM-dd").format(dob);
+			Date dobDate= new SimpleDateFormat(dobString).parse("MM/dd/yyyy");
+			return textFormat.getAgeInYear(dobDate);
+		} catch (Exception e) {
+			return 0;
+		}
+	}	
 
 
 }
