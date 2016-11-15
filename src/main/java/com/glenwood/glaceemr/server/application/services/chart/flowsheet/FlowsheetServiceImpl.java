@@ -11,8 +11,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -34,12 +36,14 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
 import com.glenwood.glaceemr.server.application.models.CoreClassHierarchy;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.Flowsheet;
 import com.glenwood.glaceemr.server.application.models.FlowsheetClinicalParam;
 import com.glenwood.glaceemr.server.application.models.FlowsheetClinicalParam_;
@@ -47,10 +51,15 @@ import com.glenwood.glaceemr.server.application.models.FlowsheetDrug;
 import com.glenwood.glaceemr.server.application.models.FlowsheetDx;
 import com.glenwood.glaceemr.server.application.models.FlowsheetLab;
 import com.glenwood.glaceemr.server.application.models.FlowsheetParam;
+import com.glenwood.glaceemr.server.application.models.FlowsheetParam_;
 import com.glenwood.glaceemr.server.application.models.FlowsheetType;
 import com.glenwood.glaceemr.server.application.models.FlowsheetType_;
 import com.glenwood.glaceemr.server.application.models.Flowsheet_;
 import com.glenwood.glaceemr.server.application.models.H068;
+import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest;
+import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest_;
+import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping;
+import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping_;
 import com.glenwood.glaceemr.server.application.models.HmrCategories;
 import com.glenwood.glaceemr.server.application.models.HmrCategories_;
 import com.glenwood.glaceemr.server.application.models.HmrCategoryUrl;
@@ -67,23 +76,36 @@ import com.glenwood.glaceemr.server.application.models.HmrTests;
 import com.glenwood.glaceemr.server.application.models.HmrTests_;
 import com.glenwood.glaceemr.server.application.models.LabDescpParameters;
 import com.glenwood.glaceemr.server.application.models.LabDescription;
+import com.glenwood.glaceemr.server.application.models.LabDescription_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
+import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
+import com.glenwood.glaceemr.server.application.models.LabEntries_;
+import com.glenwood.glaceemr.server.application.models.LabParameterCode;
+import com.glenwood.glaceemr.server.application.models.LabParameterCode_;
 import com.glenwood.glaceemr.server.application.models.LabParameters;
+import com.glenwood.glaceemr.server.application.models.LabParameters_;
 import com.glenwood.glaceemr.server.application.models.LabStandardCode;
+import com.glenwood.glaceemr.server.application.models.LabStandardCode_;
 import com.glenwood.glaceemr.server.application.models.LabStandardGroup;
 import com.glenwood.glaceemr.server.application.models.LabStandardGroup_;
 import com.glenwood.glaceemr.server.application.models.MedStatus;
+import com.glenwood.glaceemr.server.application.models.OverrideAlertsBean;
 import com.glenwood.glaceemr.server.application.models.Overridealerts;
+import com.glenwood.glaceemr.server.application.models.Overridealerts_;
 import com.glenwood.glaceemr.server.application.models.ParamStandardCode;
+import com.glenwood.glaceemr.server.application.models.ParamStandardCode_;
 import com.glenwood.glaceemr.server.application.models.ParamStandardGroup;
 import com.glenwood.glaceemr.server.application.models.ParamStandardGroup_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.Prescription;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.ProblemList_;
 import com.glenwood.glaceemr.server.application.models.VaccineReport;
+import com.glenwood.glaceemr.server.application.models.VaccineReport_;
 import com.glenwood.glaceemr.server.application.models.VitalsParameter;
 import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsOptionsRepository;
@@ -118,6 +140,8 @@ import com.glenwood.glaceemr.server.application.repositories.PatientRegistration
 import com.glenwood.glaceemr.server.application.repositories.PrescriptionRepository;
 import com.glenwood.glaceemr.server.application.repositories.VaccineReportRepository;
 import com.glenwood.glaceemr.server.application.repositories.VitalsParameterRepository;
+import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionServiceBean;
+import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionServiceImpl;
 import com.glenwood.glaceemr.server.application.specifications.ChartSpecification;
 import com.glenwood.glaceemr.server.application.specifications.ClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
@@ -127,7 +151,6 @@ import com.glenwood.glaceemr.server.application.specifications.InitialSettingsSp
 import com.glenwood.glaceemr.server.application.specifications.InvestigationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.OverridealertsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PatientClinicalElementsSpecification;
-import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PrescripitonSpecification;
 import com.glenwood.glaceemr.server.application.specifications.VaccineReportSpecification;
 import com.glenwood.glaceemr.server.application.specifications.VitalsSpecification;
@@ -266,15 +289,15 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	 */
 	@Override
 	public List<Flowsheet> getFlowsheetPatientData(Integer flowsheetType) {
-		logger.debug("Request to get the flowsheet list based on type:Inside service Impl");
+		//logger.debug("Request to get the flowsheet list based on type:Inside service Impl");
 		List<Flowsheet> listofFlowsheet=flowsheetRepository.findAll(FlowsheetSpecification.flowsheetList(flowsheetType));
-		logger.debug("Request to get the flowsheet list based on type:Obtained data from DB");
+		//logger.debug("Request to get the flowsheet list based on type:Obtained data from DB");
 		return listofFlowsheet;
 	}
 
 	@Override
 	public FS_Management getFlowsheetsManagementDetails(Integer loadFromFlowsheet,Integer flowsheetId,Integer flowsheetTypeId){
-		logger.debug("Request to get the flowsheet basic details for configuration:Inside service Impl");
+		//logger.debug("Request to get the flowsheet basic details for configuration:Inside service Impl");
 		FS_Management flowsheetManagement=new FS_Management();
 		flowsheetManagement.setFlowsheetType(flowsheetTypeRepository.findAll(FlowsheetSpecification.flowsheetTypeIsactive(true)));
 		flowsheetManagement.setVitalsParameter(vitalsParameterRepository.findAll(VitalsSpecification.vitalParametersIsActiveDistinct(true)));
@@ -286,7 +309,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			flowsheetManagement.setFlowsheetId(flowsheetId);
 			flowsheetManagement.setFlowsheetTypeId(flowsheetTypeId);
 		}
-		logger.debug("Request to get the flowsheet basic details for configuration:Obtained data from DB");
+		//logger.debug("Request to get the flowsheet basic details for configuration:Obtained data from DB");
 		return flowsheetManagement;
 	}
 
@@ -364,7 +387,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 	@Override
 	public FlowsheetBean getFlowsheetData(Integer flowsheetTypeParam,Integer flowsheetId, Integer patientId,Integer encounterId) throws Exception {
-		logger.debug("Request to get the complete flowsheet details based on flowsheet id and patient Id:Inside service Impl");
+		//logger.debug("Request to get the complete flowsheet details based on flowsheet id and patient Id:Inside service Impl");
 		FlowsheetBean fBean=new FlowsheetBean();
 		if(flowsheetTypeParam==-1)
 			fBean.setFlowsheetList(getFlowsheetNames(patientId));
@@ -377,6 +400,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		if(flowsheetId!=-1){
 			fBean.setFlowsheetId(flowsheetId);
 			Flowsheet flowsheet=flowsheetRepository.findOne(Specifications.where(FlowsheetSpecification.flowsheetId(flowsheetId)).and(FlowsheetSpecification.flowsheetIsactive(true)));
+			//Flowsheet flowsheet=getFlowsheetType(flowsheetId);
 			int flowsheetType=Optional.fromNullable(flowsheet.getFlowsheetType()).or(-1);
 			fBean.setFlowsheetType(flowsheetType);
 			fBean.setFlowsheetName(Optional.fromNullable(Strings.emptyToNull(flowsheet.getFlowsheetName())).or("").toString());
@@ -392,10 +416,15 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			}
 			fBean.setDxData(icdmRepository.findAll(Specifications.where(IcdmSpecification.icdmCodesIn(flowsheetIds))));
 			String startDate = "";
+			int patgender=-1;
+			patgender=MoreObjects.firstNonNull(getPatientGender(patientId),-1);
 			if((flowsheetType==1)|| (flowsheetType==5)){
 				//Preventive Management
-				PatientRegistration patientReg=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
-				startDate = MoreObjects.firstNonNull(patientReg.getPatientRegistrationDob(), "").toString();
+				//PatientRegistration patientReg=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+				//startDate = MoreObjects.firstNonNull(patientReg.getPatientRegistrationDob(), "").toString();
+				startDate=getpatientDOb(patientId).toString();
+				
+				
 			} else if(flowsheetType==2){
 				//Disease Management
 				List<FlowsheetDx> flowsheetDxList=flowsheetDxRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetDxCodeBasedOnFlowsheetTypeId(2, flowsheetType)));
@@ -428,14 +457,14 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				if(rstList!=null)
 					startDate = Optional.fromNullable(rstList).or("").toString();
 			}
-			fBean.setLabData(formLabData(flowsheetId, startDate, patientId,encounterId));
-			fBean.setParamData(formLabParameters(flowsheetId, startDate, patientId,encounterId));
+			fBean.setLabData(formLabData(flowsheetId, startDate, patientId,encounterId,patgender));
+			fBean.setParamData(formLabParameters(flowsheetId, startDate, patientId,encounterId,patgender));
 			fBean.setParamDateArr(paramPerformedDate);
-			fBean.setDrugData(formDrugData(patientId,flowsheetId, startDate,encounterId));
+			fBean.setDrugData(formDrugData(patientId,flowsheetId, startDate,encounterId,patgender));
 			//			fBean.setNotesData(formNotesData(flowsheetId));
-			fBean.setClinicalVitalsData(formClinicalElementsData(flowsheetId, startDate, patientId,encounterId));
+			fBean.setClinicalVitalsData(formClinicalElementsData(flowsheetId, startDate, patientId,encounterId,patgender));
 			fBean.setVitalDateArr(clinicalVitalParamDate);
-			fBean.setClinicalPlanData(formClinicalData(flowsheetId, startDate, patientId,encounterId));
+			fBean.setClinicalPlanData(formClinicalData(flowsheetId, startDate, patientId,encounterId,patgender));
 
 			/*if(!startDate.equals("")){
 				String[] splitDate = startDate.split("-");
@@ -443,9 +472,37 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				fBean.setOnSetDate(onSetFormatDate);
 			}*/
 		}
-		logger.debug("Request to get the complete flowsheet details based on flowsheet id and patient Id:Obtained data from DB");
+		//logger.debug("Request to get the complete flowsheet details based on flowsheet id and patient Id:Obtained data from DB");
 		return fBean;
 	}
+
+	private Flowsheet getFlowsheetType(Integer flowsheetId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * Method to get the PatientDoB
+	 * @param patientId
+	 * @return
+	 */
+	private Date getpatientDOb(Integer patientId) {
+
+		Date dobDt = new Date();
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Date> cq = builder.createQuery(Date.class);
+		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
+		cq.select(root.get(PatientRegistration_.patientRegistrationDob));
+		cq.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId));
+		try{
+			dobDt= em.createQuery(cq).getSingleResult();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return dobDt;
+	}
+
 
 	/**
 	 * Method to get the list of flowhseet based on patient Id
@@ -547,7 +604,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	 * Method to get the list of lab group ids's configured for the flowsheet
 	 * @return List<Integer>
 	 */
-/*	public List<Integer> getFlowsheetLabGroupId(Integer flowsheetId, Integer patientId){
+	/*	public List<Integer> getFlowsheetLabGroupId(Integer flowsheetId, Integer patientId){
 		List<Integer> groupIds=new ArrayList<Integer>();
 		groupIds.add(-2);
 		List<Integer> gender=new ArrayList<Integer>();
@@ -563,12 +620,12 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}*/
 	public List<Integer> getFlowsheetLabGroupId(Integer flowsheetId, Integer patientId){
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-    
+
 		List<Integer> groupIds=new ArrayList<Integer>();
 		groupIds.add(-2);
 		try{
-		String query= "select lab_standard_group_id from lab_standard_group inner join flowsheet_lab on flowsheet_lab_standard_groupid=lab_standard_group_id  where flowsheet_lab_mapid ="+flowsheetId+" and lab_standard_group_gender=5 or lab_standard_group_gender in(select patient_registration_sex from patient_registration where patient_registration_id="+patientId+")";
-		groupIds.addAll( em.createNativeQuery(query).getResultList() );
+			String query= "select lab_standard_group_id from lab_standard_group inner join flowsheet_lab on flowsheet_lab_standard_groupid=lab_standard_group_id  where flowsheet_lab_mapid ="+flowsheetId+" and lab_standard_group_gender=5 or lab_standard_group_gender in(select patient_registration_sex from patient_registration where patient_registration_id="+patientId+")";
+			groupIds.addAll( em.createNativeQuery(query).getResultList() );
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -584,13 +641,38 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		groupIds.add(-2);
 		List<Integer> gender=new ArrayList<Integer>();
 		gender.add(5);
-		List<FlowsheetParam> flowsheetParamGroupId=new ArrayList<FlowsheetParam>();
-		flowsheetParamGroupId=flowsheetParamRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetParamGenderAndIsActive(gender,patientId)).and(FlowsheetSpecification.flowsheetParamMapId(flowsheetId)));
-		for(int i=0;i<flowsheetParamGroupId.size();i++){
+//		List<FlowsheetParam> flowsheetParamGroupId=new ArrayList<FlowsheetParam>();
+		//flowsheetParamGroupId=flowsheetParamRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetParamGenderAndIsActive(gender,patientId)).and(FlowsheetSpecification.flowsheetParamMapId(flowsheetId)));
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object>  cq = builder.createQuery();
+		Root<FlowsheetParam> rootFlowsheetParam = cq.from(FlowsheetParam.class);
+				
+		
+		Subquery<Integer> subquery = cq.subquery(Integer.class);
+		Root<PatientRegistration> subqueryFrom = subquery.from(PatientRegistration.class);
+		Expression<Integer> subQExp=subqueryFrom.get(PatientRegistration_.patientRegistrationSex);
+		subquery.select(subQExp);
+		subquery.where(builder.equal(subqueryFrom.get(PatientRegistration_.patientRegistrationId), patientId));
+		
+		Join<FlowsheetParam,ParamStandardGroup> join=rootFlowsheetParam.join("paramStandardGroupTable", JoinType.INNER);
+		Predicate FlowsheetParamGenderIsActive = builder.and(builder.or(join.get(ParamStandardGroup_.paramStandardGroupGender).in(gender),builder.in(join.get(ParamStandardGroup_.paramStandardGroupGender)).value(subquery)),builder.equal(join.get(ParamStandardGroup_.paramStandardGroupIsactive),true));
+		Predicate flowsheetParamMapId = builder.equal(rootFlowsheetParam.get(FlowsheetParam_.flowsheetParamMapid),flowsheetId);
+		cq.select(rootFlowsheetParam.get(FlowsheetParam_.flowsheetParamStandardGroupid)).where(FlowsheetParamGenderIsActive,flowsheetParamMapId);
+		cq.distinct(true);
+		List<Object> obj=em.createQuery(cq).getResultList();
+		
+		for(int i=0;i<obj.size();i++){
+			int groupid=(int) obj.get(i);
+			groupIds.add(groupid);
+		}
+		
+		/*for(int i=0;i<flowsheetParamGroupId.size();i++){
 			if(i==0)
 				groupIds.clear();
 			groupIds.add(flowsheetParamGroupId.get(i).getFlowsheetParamStandardGroupid());
-		}
+		}*/
+		
 		return groupIds;
 	}
 
@@ -601,7 +683,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	 */
 	public String[][] getFlowsheetLabCode(List<Integer> groupIds,JSONObject groupIdTestIdMap) throws Exception{
 		List<LabStandardCode> labCodes=new ArrayList<LabStandardCode>();
-		labCodes=labStandardCodeRepository.findAll(FlowsheetSpecification.labStandardCodeGroupIds(groupIds));
+		labCodes=  getlabStandardGroups(groupIds);
+		//labStandardCodeRepository.findAll(FlowsheetSpecification.labStandardCodeGroupIds(groupIds));
 		String[][] standardCode=new String[labCodes.size()][2];
 		for(int i=0;i<labCodes.size();i++){
 			if(labCodes.get(i).getLabStandardCodeGroupCodesystem().contentEquals(FlowsheetServiceImpl.GlenwoodSystemsOID)){
@@ -628,14 +711,67 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return standardCode;
 	}
 
+	private List<LabStandardCode> getlabStandardGroups(List<Integer> groupIds) {
+		CriteriaBuilder cb1=em.getCriteriaBuilder();
+		CriteriaQuery<LabStandardCode> cq1 = cb1.createQuery(LabStandardCode.class);
+		List<LabStandardCode> stndcode= new ArrayList<LabStandardCode>();
+		Root<LabStandardCode> root1 = cq1.from(LabStandardCode.class);
+		@SuppressWarnings("rawtypes")
+		Selection[] selectionsforVR=new Selection[]{
+			root1.get(LabStandardCode_.labStandardCodeGroupId),
+			root1.get(LabStandardCode_.labStandardCodeGroupCode),
+			root1.get(LabStandardCode_.labStandardCodeGroupGwid),
+			root1.get(LabStandardCode_.labStandardCodeGroupCodesystem),
+
+		};
+		cq1.select(cb1.construct(LabStandardCode.class,selectionsforVR));
+		Predicate[] restrictionsforVR=new Predicate[]{
+				cb1.and(root1.get(LabStandardCode_.labStandardCodeGroupId).in(groupIds)),
+		};
+		cq1.where (restrictionsforVR);
+		try{
+			stndcode= em.createQuery(cq1).getResultList();	
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return stndcode;
+
+	}
+
 	/**
 	 * Method to get the list of standard test codes of the params which have been configured
 	 * @return String[][]. In the array first column is code and second is codesystem 
 	 * @throws Exception 
 	 */
 	public String[][] getFlowsheetParamCode(List<Integer> groupIds,JSONObject groupIdParamIdMap) throws Exception{
+		
+//		labCodes=paramStandardCodeRepository.findAll(FlowsheetSpecification.paramStandardCodeGroupIds(groupIds));
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object>  cq = builder.createQuery();
+		Root<ParamStandardCode> rootParamStandardCode = cq.from(ParamStandardCode.class);
+		
+		Predicate paramStandardCodeGroupId = rootParamStandardCode.get(ParamStandardCode_.paramStandardCodeGroupId).in(groupIds);
+		
+		cq.multiselect(builder.construct(ParamStandardCode.class, rootParamStandardCode.get(ParamStandardCode_.paramStandardCodeId),
+				rootParamStandardCode.get(ParamStandardCode_.paramStandardCodeGroupId),
+				rootParamStandardCode.get(ParamStandardCode_.paramStandardCodeGroupCode),
+				rootParamStandardCode.get(ParamStandardCode_.paramStandardCodeGroupGwid),
+				rootParamStandardCode.get(ParamStandardCode_.paramStandardCodeGroupCodesystem))).where(paramStandardCodeGroupId);
+		
+		List<Object> obj=em.createQuery(cq).getResultList();
 		List<ParamStandardCode> labCodes=new ArrayList<ParamStandardCode>();
-		labCodes=paramStandardCodeRepository.findAll(FlowsheetSpecification.paramStandardCodeGroupIds(groupIds));
+		for(int i=0;i<obj.size();i++){
+			ParamStandardCode paramCodeData = (ParamStandardCode) obj.get(i);
+			ParamStandardCode ParamStandardCodeBean = new ParamStandardCode(paramCodeData.getParamStandardCodeId(),
+					paramCodeData.getParamStandardCodeGroupId(),
+					paramCodeData.getParamStandardCodeGroupCode(),
+					paramCodeData.getParamStandardCodeGroupGwid(),
+					paramCodeData.getParamStandardCodeGroupCodesystem());
+			labCodes.add(ParamStandardCodeBean);
+		}
+		
 		String[][] standardCode=new String[labCodes.size()][2];
 		for(int i=0;i<labCodes.size();i++){
 			if(labCodes.get(i).getParamStandardCodeGroupCodesystem().contentEquals(FlowsheetServiceImpl.GlenwoodSystemsOID)){
@@ -662,249 +798,651 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return standardCode;
 	}
 
-	public ArrayList<FS_LabBean> formLabData(int flowsheetId,String startDate, Integer patientId,Integer encounterId) throws Exception{
-		// getting list of codes and there code system
+	public ArrayList<FS_LabBean> formLabData(int flowsheetId,String startDate, Integer patientId,Integer encounterId,Integer patgender) throws Exception{
+	
+		//System.out.println("<<<<<<<<<<<FORM LABDATA STARTSS HERE ________________________>>>>>>"+System.currentTimeMillis());
+		long starttime=System.currentTimeMillis();
+		
 		List<Integer> groupIds=getFlowsheetLabGroupId(flowsheetId,patientId);
+		//System.out.println("groupIds is :::::::"+groupIds);
 		JSONObject groupIdTestIdMap=new JSONObject();
 		String[][] codes= getFlowsheetLabCode(groupIds,groupIdTestIdMap);
-
-		//getting the list of testIds for the above codes
-		List<LabDescription> labsList=getLabTestIds(codes,groupIdTestIdMap);
-		Integer[] testIds=new Integer[labsList.size()];
-		for(int k=0;k<labsList.size();k++){
-			testIds[k]=Optional.fromNullable(labsList.get(k).getLabDescriptionTestid()).or(-1);
+		List<FS_GroupIdTest> testIdandGroupIds=new ArrayList<>();
+		ArrayList<Integer>testIds=new ArrayList<Integer>();
+		
+		String testIdString = "";
+		ArrayList<String> testDetailIdsTemp;
+		try{
+			testIdandGroupIds=getTestIdsandGroupIds(groupIds);
+			//System.out.println("testIdandGroupIds"+testIdandGroupIds);
+		}catch(Exception e){
+			e.printStackTrace();
 		}
-		if(testIds.length==0){
-			testIds=new Integer[1];
-			testIds[0]=-2;
+		if(testIdandGroupIds.size()>0)
+			for (int i=0;i<testIdandGroupIds.size();i++){
+				testIds.add(testIdandGroupIds.get(i).getTestId());
+				testIdString += testIdandGroupIds.get(i).getTestId()+",";
+			}
+		if(testIds.size()==0){
+			testIds.add(-2);
 		}
-		//getting the chart id
-		Integer chartId=-1;
-		List<Chart> charts=chartRepository.findAll(Specifications.where(ChartSpecification.patientId(patientId)));
-		chartId=charts.get(0).getChartId();
-
-		Encounter encounterEntity=null;
-		//getting the encounter details
-		if(encounterId!=-1){
-			encounterEntity=encounterEntityRepository.findOne(EncounterEntitySpecification.EncounterById(encounterId));
+		if(!testIdString.equals(""))
+			testIdString = testIdString.substring(0, testIdString.length()-1);
+		//if(testIds.size()>0){
+		ArrayList<FS_LabBean>labdata = getLabsData(patientId, flowsheetId, encounterId,testIds,groupIds);
+		//System.out.println("labdata"+labdata);
+		//ArrayList<FS_LabBean>labEntries = new ArrayList<FS_LabBean>();
+		for(int i=0;i<labdata.size();i++){
+			int grupId = -1;
+			
+			try {
+				for( int j = 0 ; j < testIdandGroupIds.size() ; j++ ) {
+					if(testIdandGroupIds.get(j).getTestId() == Integer.parseInt(labdata.get(i).getLabTestId())) {
+						grupId = testIdandGroupIds.get(j).getGroupId();
+					}
+				}
+			} catch(Exception e){ 
+				e.printStackTrace();
+			}
+			
+			labdata.get(i).setGroupId( grupId );
+			
 		}
 
+		Map<Integer, FS_LabBean> latestGrupLabData = new HashMap<>();
+		Collections.sort(labdata);
+		for(FS_GroupIdTest testIdandGroupId : testIdandGroupIds) {
+			if(!latestGrupLabData.containsKey(testIdandGroupId.getGroupId()) || 
+					latestGrupLabData.get(testIdandGroupId.getGroupId())== null ){
+				//System.out.println(testIdandGroupId.getGroupId());
+				latestGrupLabData.put(testIdandGroupId.getGroupId(), getLatestLabBean(testIdandGroupId, labdata));
+			} else if( latestGrupLabData.get(testIdandGroupId.getGroupId())!= null ) {
+				FS_LabBean bean = getLatestLabBean(testIdandGroupId, labdata);
+				if( bean!= null && bean.compareTo(latestGrupLabData.get(testIdandGroupId.getGroupId())) > 1 ) {
+					latestGrupLabData.put(testIdandGroupId.getGroupId(), bean);
+				}
+			}
+		}
+		ArrayList<FS_LabBean> retData  = new ArrayList<>();
+		ArrayList<Integer> performedOrdersGrupId = new ArrayList<>();
+		latestGrupLabData.values();
+
+		for(Integer key : latestGrupLabData.keySet()) {
+			if(latestGrupLabData.get(key) == null) {
+				performedOrdersGrupId.add(key);
+			}
+		}
+		Integer chartId= getChartId(patientId);
+		//List<Chart> charts=chartRepository.findAll(Specifications.where(ChartSpecification.patientId(patientId)));
+		//chartId=charts.get(0).getChartId();
+
+
+		//PatientRegistration patients=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+		//Integer gender=getPatientGender(patientId);
 		List<LabStandardGroup> perfOrders=labStandardGroupRepository.findAll(Specifications.where(FlowsheetSpecification.labStandardGroupIdIsActive(groupIds)));
-		ArrayList<FS_LabBean> arr_lab = new ArrayList<FS_LabBean> ();
-		Iterator<LabStandardGroup> itr_lab = perfOrders.iterator();
-		LabStandardGroup hsh_lab = new LabStandardGroup();
-		FS_LabBean labBean = null;
-		String labName = "";
-		String prevLabName = "";
-		while(itr_lab.hasNext()){
-			hsh_lab = itr_lab.next();
-			ArrayList<FS_LabBean> arr_labTemp=new ArrayList<FS_LabBean>();
-			String testIdsTemp="";
-			ArrayList<Integer> testDetailIdsTemp=new ArrayList<Integer>();
-			ArrayList<String> completeTestDetailidsTemp=new ArrayList<String>();
-			if(!prevLabName.equalsIgnoreCase(hsh_lab.getLabStandardGroupName())){
-				arr_labTemp=new ArrayList<FS_LabBean>();
-				testDetailIdsTemp=new ArrayList<Integer>();
-				completeTestDetailidsTemp=new ArrayList<String>();
-				String[] testIdTemp=groupIdTestIdMap.get(hsh_lab.getLabStandardGroupId()+"").toString().split("@@@@");
-				Integer[] testIdsGroup=new Integer[testIdTemp.length-1];
-				Integer[] testIdArray=new Integer[testIdTemp.length];
-				for(int l=1;l<testIdTemp.length;l++){
-					Integer testId = Integer.parseInt(testIdTemp[l].split("###")[0]);
-					testIdsGroup[l-1]=testId;
-					if(testIdsTemp.trim().length()==0){
-						testIdsTemp=testId+"";
-					}else{
-						testIdsTemp+=","+testId;
-					}
-					testIdArray[l-1]=testId;
-				}
-				if(testIdsGroup.length==0){
-					testIdsGroup=new Integer[1];
-					testIdsGroup[0]=-2;
-				}
-				testDetailIdsTemp.addAll(getTestDetailIds(chartId,testIdArray));
-				completeTestDetailidsTemp.addAll(setCompletedDetaildId(chartId,testIdArray));
-				//getting list of performed labs having test id and chart id and not vaccines
-				List<LabEntries> perfOrdersInt=labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.getOrderDetailsExceptVaccines(testIdsGroup, chartId, 2, 7,encounterId,encounterEntity)));
-				//Removing vaccine test id's
-				List<LabDescription> onlylabIds=labDescriptionRepository.findAll(Specifications.where(InvestigationSpecification.testIdsLabDescription(testIdsGroup)).and(InvestigationSpecification.groupIdNot(36)));
-				if(onlylabIds.size()>0){
-					String[] groupId=new String[1];
-					groupId[0]=hsh_lab.getLabStandardGroupId()+"";
+		Integer[] testIdArr = new Integer[testIds.size()];
 
-					//getting list of override alerts having group id
-					List<Overridealerts> overridealertsInt=overridealertsRepository.findAll(OverridealertsSpecification.overrideAlerts(groupId, 3, patientId, flowsheetId,encounterId,encounterEntity));
-					for(int k=0;k<overridealertsInt.size();k++){
-						LabEntries tempLabEntries=new LabEntries();
-						tempLabEntries.setLabEntriesTestId(Integer.parseInt(Optional.fromNullable(overridealertsInt.get(k).getOverridealertsFlowsheetElementId()).or("-1")));
-						String notes="Reason to Override: "+Optional.fromNullable(overridealertsInt.get(k).getReason()).or("-");
-						tempLabEntries.setLabEntriesOrdOn((Timestamp)overridealertsInt.get(k).getOverriddenOn());
-						tempLabEntries.setLabEntriesPerfOn((Timestamp)overridealertsInt.get(k).getOverriddenOn());
-						tempLabEntries.setLabEntriesTestStatus(8);
-						tempLabEntries.setLabEntriesResultNotes(notes);
-						perfOrdersInt.add(tempLabEntries);
-					}
-				}
-				//Order Labs by Date
-				perfOrdersInt=orderByDate(perfOrdersInt, true);
+		//testIdArr = null;
 
-				//getting list of vaccines which have been entered both manually
-				List<VaccineReport> perfVaccinesInt=vaccineReportRepository.findAll(Specifications.where(VaccineReportSpecification.getOrderDetailsOnlyVaccines(testIdsGroup,chartId,encounterId,encounterEntity)));
-				//getting list of vaccines which have been entered via investigation
-				List<LabEntries> perfVaccinesIntInv=labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.getOrderDetailsVaccines(testIdsGroup, chartId, 2, 7,encounterId,encounterEntity)));
-				if(perfVaccinesIntInv.size()>0){
-					String[] groupId=new String[1];
-					groupId[0]=hsh_lab.getLabStandardGroupId()+"";
-					for(int k=0;k<perfVaccinesIntInv.size();k++){
-						VaccineReport tempLabEntries=new VaccineReport();
-						tempLabEntries.setVaccineReportVaccineId(Optional.fromNullable(perfVaccinesIntInv.get(k).getLabEntriesTestId()).or(-1));
-						tempLabEntries.setVaccineReportGivenDate((Timestamp)perfVaccinesIntInv.get(k).getLabEntriesPerfOn());
-						tempLabEntries.setVaccineReportComments(Optional.fromNullable(perfVaccinesIntInv.get(k).getLabEntriesResultNotes()).or("-"));
-						perfVaccinesInt.add(tempLabEntries);
-					}
-				}
-				//Only vaccine test id's
-				List<LabDescription> onlyvaccIds=labDescriptionRepository.findAll(Specifications.where(InvestigationSpecification.testIdsLabDescription(testIdsGroup)).and(InvestigationSpecification.groupId(36)));
-				if(onlyvaccIds.size()>0){
-					String[] groupId=new String[1];
-					groupId[0]=hsh_lab.getLabStandardGroupId()+"";
+		for ( int i = 0 ; i < perfOrders.size() ; i++ ) {
+			if(performedOrdersGrupId.contains(perfOrders.get(i).getLabStandardGroupId())) {
+				FS_LabBean labBean= new FS_LabBean();
+				LabStandardGroup hsh_lab = new LabStandardGroup();
+				//set values
+				String labName="";
+				labName = Optional.fromNullable(perfOrders.get(i).getLabStandardGroupName()).or("");
+				labBean.setLabName(labName);
+				labBean.setGroupId(perfOrders.get(i).getLabStandardGroupId());
+				String ordOn="";
+				String prfOnSort="1900-05-13 16:40:35";
+				String perOn="Never Performed";
+				String status="";
+				String notes=" ";
+				labBean.setOrderedOn(ordOn);
+				labBean.setPerformdatesort(prfOnSort);
+				labBean.setPerformedOn(perOn);
+				labBean.setStatus(status);
+				labBean.setResultNotes(notes);
+				//labBean.setCompletedDetaildId(testIds);
+				labBean.setGender(patgender+"");
+				labBean.setIslab("1");
+				Integer[] getgrouptests=getGroupTestIds(testIdandGroupIds,perfOrders.get(i).getLabStandardGroupId());
+				labBean.setLabTestId(convertListtoString(getgrouptests));
+				labBean.settestDetailId(getTestDetailIds(chartId,getgrouptests));
 
-					//getting list of override alerts having test id
-					List<Overridealerts> overridealertsInt=overridealertsRepository.findAll(OverridealertsSpecification.overrideAlerts(groupId, 3, patientId, flowsheetId,encounterId,encounterEntity));
-					for(int k=0;k<overridealertsInt.size();k++){
-						VaccineReport tempLabEntries=new VaccineReport();
-						tempLabEntries.setVaccineReportVaccineId(Integer.parseInt(Optional.fromNullable(overridealertsInt.get(k).getOverridealertsFlowsheetElementId()).or("-1")));
-						String notes="Reason to Override: "+Optional.fromNullable(overridealertsInt.get(k).getReason()).or("-");
-						tempLabEntries.setVaccineReportGivenDate((Timestamp)overridealertsInt.get(k).getOverriddenOn());
-						tempLabEntries.setVaccineReportComments(notes);
-						perfVaccinesInt.add(tempLabEntries);
-					}
-				}
-				//Order Vaccines by Date
-				perfVaccinesInt=orderByDateVaccines(perfVaccinesInt, true);
+				testDetailIdsTemp = setCompletedDetaildId(chartId,getgrouptests);
+				labBean.setCompletedDetaildId(testDetailIdsTemp);
+				retData.add(labBean);
 
-				if(perfOrdersInt.size()>0){
-					for(int k=0;k<perfOrdersInt.size();k++){
-						labBean = new FS_LabBean();
-						labName = Optional.fromNullable(hsh_lab.getLabStandardGroupName()).or("");
-						labBean.setLabName(labName);
-						labBean.setGroupId(hsh_lab.getLabStandardGroupId());
-						String ordOn="";
-						String prfOnSort="1900-05-13 16:40:35";
-						String perOn="Never Performed";
-						String status="";
-						String notes=" ";
-						if(perfOrdersInt.size()>0){
-							ordOn=MoreObjects.firstNonNull(perfOrdersInt.get(k).getLabEntriesOrdOn(),"").toString();
-							prfOnSort=MoreObjects.firstNonNull(perfOrdersInt.get(k).getLabEntriesOrdOn(),"1900-05-13 16:40:35").toString();
-							perOn=MoreObjects.firstNonNull(perfOrdersInt.get(k).getLabEntriesPerfOn(),"Never Performed").toString();
-							status=MoreObjects.firstNonNull(perfOrdersInt.get(k).getLabEntriesTestStatus(),"").toString();
-							notes=Optional.fromNullable(perfOrdersInt.get(k).getLabEntriesResultNotes()).or("");
-						}
-						if(!ordOn.trim().contentEquals("")){
-							DateFormat parser = new SimpleDateFormat("yyyy-MM-dd"); 
-							Date date = (Date) parser.parse(ordOn);
-							DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy"); 
-							ordOn=formatter.format(date);
-						}
-						labBean.setOrderedOn(ordOn);
-						labBean.setPerformdatesort(prfOnSort);
-						if(!perOn.trim().contentEquals("Never Performed")){
-							DateFormat parser = new SimpleDateFormat("yyyy-MM-dd"); 
-							Date date = (Date) parser.parse(perOn);
-							DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-							perOn=formatter.format(date);
-						}
-						labBean.setPerformedOn(perOn);
-						labBean.setStatus(status);
-						labBean.setResultNotes(notes);
-						arr_labTemp.add(labBean);
-					} 
-				}else if(perfVaccinesInt.size()>0){
-					for(int k=0;k<perfVaccinesInt.size();k++){
-						labBean = new FS_LabBean();
-						labName = Optional.fromNullable(hsh_lab.getLabStandardGroupName()).or("");
-						labBean.setLabName(labName);
-						labBean.setGroupId(hsh_lab.getLabStandardGroupId());
-						String ordOn="";
-						String prfOnSort="1900-05-13 16:40:35";
-						String perOn="Never Performed";
-						if(perfVaccinesInt.size()>0){
-							ordOn=MoreObjects.firstNonNull(perfVaccinesInt.get(k).getVaccineReportGivenDate(),"").toString();
-							prfOnSort=MoreObjects.firstNonNull(perfVaccinesInt.get(k).getVaccineReportGivenDate(),"1900-05-13 16:40:35").toString();
-							perOn=MoreObjects.firstNonNull(perfVaccinesInt.get(k).getVaccineReportGivenDate(),"Never Performed").toString();
-						}
-						if(!ordOn.trim().contentEquals("")){
-							DateFormat parser = new SimpleDateFormat("yyyy-MM-dd"); 
-							Date date = (Date) parser.parse(ordOn);
-							DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy"); 
-							ordOn=formatter.format(date);
-						}
-						labBean.setOrderedOn(ordOn);
-						labBean.setPerformdatesort(prfOnSort);
-						if(!perOn.trim().contentEquals("Never Performed")){
-							DateFormat parser = new SimpleDateFormat("yyyy-MM-dd"); 
-							Date date = (Date) parser.parse(perOn);
-							DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-							perOn=formatter.format(date);
-						}
-						labBean.setPerformedOn(perOn);
-						labBean.setStatus("3");
-						labBean.setResultNotes(Optional.fromNullable(perfVaccinesInt.get(k).getVaccineReportComments()).or(""));
-						arr_labTemp.add(labBean);
-					}
-				}else{
-					labBean = new FS_LabBean();
-					labName = Optional.fromNullable(hsh_lab.getLabStandardGroupName()).or("");
-					labBean.setLabName(labName);
-					labBean.setGroupId(hsh_lab.getLabStandardGroupId());
-					String ordOn="";
-					String prfOnSort="1900-05-13 16:40:35";
-					String perOn="Never Performed";
-					String status="";
-					String notes=" ";
-					labBean.setOrderedOn(ordOn);
-					labBean.setPerformdatesort(prfOnSort);
-					labBean.setPerformedOn(perOn);
-					labBean.setStatus(status);
-					labBean.setResultNotes(notes);
-					arr_labTemp.add(labBean);
+			} else {
+				FS_LabBean labBean = latestGrupLabData.get(perfOrders.get(i).getLabStandardGroupId());
+				if(labBean == null) {
+					continue;
 				}
+				LabStandardGroup hsh_lab = new LabStandardGroup();
+				//set values
+				String labName="";
+				labName = Optional.fromNullable(perfOrders.get(i).getLabStandardGroupName()).or("");
+				labBean.setLabName(labName);
+				labBean.setGender(patgender+"");
+				Integer[] getgrouptests=getGroupTestIds(testIdandGroupIds,perfOrders.get(i).getLabStandardGroupId());
+				labBean.setLabTestId(convertListtoString(getgrouptests));
+				labBean.settestDetailId(getTestDetailIds(chartId,getgrouptests));
+				testDetailIdsTemp = setCompletedDetaildId(chartId,getgrouptests);
+				labBean.setCompletedDetaildId(testDetailIdsTemp);
+				retData.add(labBean);
+
 			}
-			for(int h=0;h<arr_labTemp.size();h++){
-				arr_labTemp.get(h).setLabTestId(testIdsTemp);
-				arr_labTemp.get(h).settestDetailId(testDetailIdsTemp);
-				arr_labTemp.get(h).setCompletedDetaildId(completeTestDetailidsTemp);
-			}
-			arr_lab.addAll(arr_labTemp);
-			prevLabName = hsh_lab.getLabStandardGroupName(); 
-		} 
-		arr_lab=orderByName(arr_lab);
+		}
+
 		if(groupIds.size()>0)
-			arr_lab = checkFlowSheetRulesForLabData(patientId,chartId, groupIds, arr_lab, startDate,groupIdTestIdMap);
-		return arr_lab;
+			retData = checkFlowSheetRulesForLabData(patientId,chartId, groupIds, retData, startDate,groupIdTestIdMap,patgender);
+		/*if(groupIds.size()>0)
+			//retData = checkFlowSheetRulesForLabData(patientId,chartId, groupIds, arr_lab, startDate,groupsIdTestIdMap);
+		 */
+		//System.out.println("<<<<<<<<<<<FORMLABDATA ends here ________________________>>>>>>");
+		//System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
+		return retData;
+	}
+
+	private String  convertListtoString(Integer[] testIds){
+		String testIdString="";
+		for (int i=0;i<testIds.length;i++){
+			testIdString += testIds[i]+",";
+		}
+		testIdString = testIdString.substring(0, testIdString.length()-1);
+		return testIdString;
+	}
+
+	private Integer[] getGroupTestIds(List<FS_GroupIdTest> testIdandGroupIds, Integer groupIds){
+		ArrayList<Integer> testIds= new ArrayList<Integer>();
+		for(FS_GroupIdTest fsgroup:testIdandGroupIds){
+			if(groupIds==fsgroup.getGroupId()){
+				testIds.add(fsgroup.getTestId());
+			}
+		}
+		Integer[] testIdArray = new Integer[testIds.size()];
+		testIdArray=testIds.toArray(testIdArray);
+		return testIdArray;
+	}
+
+
+	private Integer getChartId(Integer patientId) {
+
+		Integer chartId = -1;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Chart> root = cq.from(Chart.class);
+		cq.select(root.get(Chart_.chartId));
+		cq.where(builder.equal(root.get(Chart_.chartPatientid), patientId));
+		chartId = (Integer)em.createQuery(cq).getSingleResult();
+		return chartId;
+
+	}
+
+	private Integer getPatientGender(Integer patientId) {
+		Integer gender = -1;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
+		cq.select(root.get(PatientRegistration_.patientRegistrationSex));
+		cq.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId));
+		try{
+		gender = (Integer)em.createQuery(cq).getSingleResult();
+		}catch(Exception e){
+          gender=-1;
+		}
+		return gender;
+	}
+
+
+
+	private FS_LabBean getLatestLabBean(FS_GroupIdTest testIdandGroupId,
+			ArrayList<FS_LabBean> labData) {
+
+		for(int i = 0 ; i < labData.size(); i++) {
+			FS_LabBean data = labData.get(i);
+			if( Integer.parseInt( data.getLabTestId() ) == testIdandGroupId.getTestId()){
+				data.setGroupId(testIdandGroupId.getGroupId());
+				labData.remove(i--);
+				return data;
+			} 
+		}
+		return null;
+	}
+
+	//Toget the testIds and Groupids 
+	private List<FS_GroupIdTest> getTestIdsandGroupIds(List<Integer> groupIds) {
+		//Query1
+		List<FS_GroupIdTest> getTestIdsTemp1=new ArrayList<FS_GroupIdTest>() ;
+		List<FS_GroupIdTest> getTestIdsTemp2=new ArrayList<FS_GroupIdTest>() ;
+		List<FS_GroupIdTest> getTestIdsTemp3=new ArrayList<FS_GroupIdTest>() ;
+		List<FS_GroupIdTest> getTestIdsTemp4=new ArrayList<FS_GroupIdTest>() ;
+
+
+		CriteriaBuilder builder=em.getCriteriaBuilder() ;
+		CriteriaQuery<FS_GroupIdTest> cq=builder.createQuery(FS_GroupIdTest.class);
+		Root <LabStandardCode> root =cq.from(LabStandardCode.class);
+
+		Join<LabStandardCode, LabDescription> codedesc=root.join(LabStandardCode_.labDescriptionTable,JoinType.INNER);
+		/*codedesc.on(builder.equal(codedesc.get(LabDescription_.labDescriptionTestid),
+				root.get(LabStandardCode_.labStandardCodeGroupGwid)));*/
+
+		Selection[] selections=new Selection[]{
+				root.get(LabStandardCode_.labStandardCodeGroupId).alias("groupId"),
+				codedesc.get(LabDescription_.labDescriptionTestid).alias("testId"),
+		};
+		cq.distinct(true);
+		//cq.select(builder.construct(FS_GroupIdTest.class,selections));
+		cq.multiselect(selections);
+		Predicate[] restrictions = new Predicate[] {
+				builder.equal(root.get(LabStandardCode_.labStandardCodeGroupCodesystem),GlenwoodSystemsOID),
+				builder.and(root.get(LabStandardCode_.labStandardCodeGroupId).in(groupIds)),
+
+		};
+		cq.where(restrictions);
+		try{
+			//List<Object> lists = em.createQuery(cq).getResultList();
+
+			getTestIdsTemp1= em.createQuery(cq).getResultList();
+			/*for(int i = 0 ; i < getTestIdsTemp1.size(); i++) {
+				System.out.print(getTestIdsTemp1.get(i).getTestId()+",");
+			}
+			System.out.println("------------------------");
+
+			System.out.println(getTestIdsTemp1.toString());*/
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		//Query2 getting Loinc 
+		CriteriaBuilder loinc=em.getCriteriaBuilder() ;
+		CriteriaQuery<FS_GroupIdTest> cq1=loinc.createQuery(FS_GroupIdTest.class);
+		Root <LabStandardCode> rootloinc =cq1.from(LabStandardCode.class);
+		Join<LabStandardCode, LabDescription> loinccodedesc=rootloinc.join(LabStandardCode_.labDescriptionTable,JoinType.INNER);
+		//loinccodedesc.on(loinc.equal(loinccodedesc.get(LabDescription_.labDescriptionLoinc),rootloinc.get(LabStandardCode_.labStandardCodeGroupCodesystem)));
+		@SuppressWarnings("rawtypes")
+		Selection[] selectionsloinc=new Selection[]{
+			rootloinc.get(LabStandardCode_.labStandardCodeGroupId),
+			codedesc.get(LabDescription_.labDescriptionTestid),
+		};
+		cq1.distinct(true);
+		cq1.select(builder.construct(FS_GroupIdTest.class,selectionsloinc));
+		Predicate[] restrictionsloinc = new Predicate[] {
+				loinc.equal(rootloinc.get(LabStandardCode_.labStandardCodeGroupCodesystem),LoincOID),
+				loinc.and(rootloinc.get(LabStandardCode_.labStandardCodeGroupId).in(groupIds)),
+
+		};
+		cq1.where(restrictionsloinc);
+		getTestIdsTemp2=(em.createQuery(cq1).getResultList());
+		/*for(int i = 0 ; i < getTestIdsTemp2.size(); i++) {
+			System.out.print(getTestIdsTemp2.get(i).getTestId()+",");
+		}
+		System.out.println("------------------------");*/
+
+		//Query to get loinc  from externally 
+
+		CriteriaBuilder loinchl7=em.getCriteriaBuilder() ;
+		CriteriaQuery<FS_GroupIdTest>cq2=loinchl7.createQuery(FS_GroupIdTest.class);
+		Root<LabStandardCode> rootloinchl7=cq2.from(LabStandardCode.class);
+
+		Join<LabStandardCode, Hl7ExternalTest> hl7testroot =
+				rootloinchl7.join(LabStandardCode_.hl7ExternalTestTable,JoinType.INNER);
+		//hl7testroot.on(loinchl7.equal(hl7testroot.get(Hl7ExternalTest_.hl7ExternalTestCode),rootloinchl7.get(LabStandardCode_.labStandardCodeGroupCode)));
+		Join<Hl7ExternalTest, Hl7ExternalTestmapping>hl7testdesc  =
+				hl7testroot.join(Hl7ExternalTest_.hl7ExternalTestmappingTable,JoinType.INNER);
+		//hl7testdesc.on(loinchl7.equal(hl7testdesc.get(Hl7ExternalTestmapping_.hl7ExternalTestmappingExternaltestid),hl7testroot.get(Hl7ExternalTest_.hl7ExternalTestId)));	
+		Join<Hl7ExternalTestmapping,  LabDescription> hl7desc = 
+				hl7testdesc.join(Hl7ExternalTestmapping_.labDescription,JoinType.INNER);
+		//hl7desc.on(loinchl7.equal(hl7desc.get(LabDescription_.labDescriptionTestid),hl7testdesc.get(Hl7ExternalTestmapping_.hl7ExternalTestmappingLocaltestid)));
+		Selection[] selectionshl7=new Selection[]{
+				rootloinchl7.get(LabStandardCode_.labStandardCodeGroupId),
+				hl7desc.get(LabDescription_.labDescriptionTestid),
+		};
+		cq2.distinct(true);
+		cq2.select(builder.construct(FS_GroupIdTest.class,selectionshl7));
+		Predicate[] restrictionshl7 = new Predicate[] {
+				loinchl7.equal(rootloinc.get(LabStandardCode_.labStandardCodeGroupCodesystem),LoincOID),
+				loinchl7.and(rootloinc.get(LabStandardCode_.labStandardCodeGroupId).in(groupIds)),
+				loinchl7.equal(hl7testroot.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid),51),
+
+		};
+		cq2.where(restrictionshl7);
+
+		getTestIdsTemp3=(em.createQuery(cq2).getResultList());
+		/*for(int i = 0 ; i < getTestIdsTemp3.size(); i++) {
+			System.out.println(getTestIdsTemp3.get(i).getTestId());
+		}
+*/
+		//Query for snowmed codes 
+
+		CriteriaBuilder snowmedhl7=em.getCriteriaBuilder() ;
+		CriteriaQuery<FS_GroupIdTest>cq3=snowmedhl7.createQuery(FS_GroupIdTest.class);
+		Root<LabStandardCode> rootsnowmedhl7=cq3.from(LabStandardCode.class);
+
+		Join<LabStandardCode, Hl7ExternalTest> hl7testsmd =
+				rootsnowmedhl7.join(LabStandardCode_.hl7ExternalTestTable,JoinType.INNER);
+		//hl7testsmd.on(snowmedhl7.equal(hl7testsmd.get(Hl7ExternalTest_.hl7ExternalTestCode),rootsnowmedhl7.get(LabStandardCode_.labStandardCodeGroupCode)));
+		Join<Hl7ExternalTest, Hl7ExternalTestmapping>hl7testdesmd  =
+				hl7testsmd.join(Hl7ExternalTest_.hl7ExternalTestmappingTable,JoinType.INNER);
+		//hl7testdesmd.on(snowmedhl7.equal(hl7testdesmd.get(Hl7ExternalTestmapping_.hl7ExternalTestmappingExternaltestid),hl7testsmd.get(Hl7ExternalTest_.hl7ExternalTestId)));	
+		Join<Hl7ExternalTestmapping,  LabDescription> hl7descmd = 
+				hl7testdesmd.join(Hl7ExternalTestmapping_.labDescription,JoinType.INNER);
+		//hl7descmd.on(snowmedhl7.equal(hl7descmd.get(LabDescription_.labDescriptionTestid),hl7testdesmd.get(Hl7ExternalTestmapping_.hl7ExternalTestmappingLocaltestid)));
+		Selection[] selectionsmd=new Selection[]{
+				rootsnowmedhl7.get(LabStandardCode_.labStandardCodeGroupId),
+				hl7descmd.get(LabDescription_.labDescriptionTestid),
+		};
+		cq3.distinct(true);
+		cq3.select(builder.construct(FS_GroupIdTest.class,selectionsmd));
+		Predicate[] restrictionsmd = new Predicate[] {
+				snowmedhl7.equal(rootloinc.get(LabStandardCode_.labStandardCodeGroupCodesystem),SnomedOID),
+				snowmedhl7.and(rootloinc.get(LabStandardCode_.labStandardCodeGroupId).in(groupIds)),
+				snowmedhl7.equal(hl7testsmd.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid),54),
+
+		};
+		cq3.where(restrictionsmd);
+
+		getTestIdsTemp4.addAll(em.createQuery(cq3).getResultList());
+		/*for(int i = 0 ; i < getTestIdsTemp4.size(); i++) {
+			System.out.print(getTestIdsTemp4.get(i).getTestId()+",");
+		}
+		System.out.println("------------------------");*/
+
+		getTestIdsTemp4.addAll(getTestIdsTemp1);
+		getTestIdsTemp4.addAll(getTestIdsTemp2);
+		getTestIdsTemp4.addAll(getTestIdsTemp3);
+
+		return getTestIdsTemp4;
+
+
+	}
+
+
+
+	private  Integer getLabChartId(Integer patientId) {
+		Integer chartId = -1;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Chart> root = cq.from(Chart.class);
+		cq.select(root.get(Chart_.chartId));
+		cq.where(builder.equal(root.get(Chart_.chartPatientid),patientId ));
+		chartId = (Integer)em.createQuery(cq).getSingleResult();
+		return chartId;
+	}
+	private  Short getEncounterStatusforLab(Integer encounterId) {
+		Short encounterStatus = -1;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Encounter> root = cq.from(Encounter.class);
+		cq.select(root.get(Encounter_.encounterStatus));
+		cq.where(builder.equal(root.get(Encounter_.encounterId), encounterId));
+		encounterStatus = (Short) em.createQuery(cq).getSingleResult();
+		return encounterStatus;
+	}
+
+	private Date getencounterDateforLab(Integer encounterId) {
+		Date date = new Date();
+		Timestamp timeStamp = new Timestamp(date.getTime());
+		//orderedOn = timeStamp.toStringString();
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Encounter> root = cq.from(Encounter.class);
+		cq.select(root.get(Encounter_.encounterDate));
+		cq.where(builder.equal(root.get(Encounter_.encounterId),encounterId));
+		Timestamp encounterDate = (Timestamp) em.createQuery(cq).getSingleResult();
+		return encounterDate;
+	}
+
+
+	private ArrayList<FS_LabBean> getLabsData (int patientId, int flowSheetId, int encounterId,List<Integer>testIds,List<Integer>groupIds) throws Exception{
+
+		Integer chartId = -1;
+		Date encounterDate=null;
+		Short encounterStatus=0;
+		chartId=getLabChartId(patientId);
+		if(encounterId!=-1){
+			encounterStatus=getEncounterStatusforLab(encounterId);
+			encounterDate=getencounterDateforLab(encounterId);
+		}
+
+		List<FS_LabBean> fsLabBeanList1 = new ArrayList<>();
+		List<FS_LabBean> fsLabBeanList2 = new ArrayList<>();
+		List<FS_LabBean> fsLabBeanList3= new ArrayList<>();
+
+		//LabEntries table
+		CriteriaBuilder cb=em.getCriteriaBuilder();
+		CriteriaQuery<FS_LabBean> cq = cb.createQuery(FS_LabBean.class);
+		Root<LabEntries> root = cq.from(LabEntries.class);
+
+		Selection[] selections=new Selection[]{
+				root.get(LabEntries_.labEntriesPerfOn),
+				root.get(LabEntries_.labEntriesTestdetailId),
+				root.get(LabEntries_.labEntriesTestId),
+				root.get(LabEntries_.labEntriesTestDesc),// taking this as name change here
+				root.get(LabEntries_.labEntriesOrdOn),
+				root.get(LabEntries_.labEntriesPerfOn),
+				root.get(LabEntries_.labEntriesResultNotes),
+				root.get(LabEntries_.labEntriesTestStatus)
+		};
+		//cq.distinct(true);
+		cq.select(cb.construct(FS_LabBean.class,selections));
+		if(encounterId!=-1 && encounterStatus==3){
+
+			Predicate[] restrictions = new Predicate[] {
+					cb.and(root.get(LabEntries_.labEntriesTestId).in(testIds),
+
+							cb.equal(root.get(LabEntries_.labEntriesChartid),chartId),
+
+							cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus), 2),		
+							cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),7)),
+							cb.lessThanOrEqualTo(root.get(LabEntries_.labEntriesOrdOn), encounterDate)
+
+			};
+			cq.where(restrictions);
+		} else {
+			Predicate[] restrictions = new Predicate[] {
+					cb.and(root.get(LabEntries_.labEntriesTestId).in(testIds),
+
+							cb.equal(root.get(LabEntries_.labEntriesChartid),chartId),
+
+							cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus), 2),		
+							cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),7))
+
+			};
+			cq.where(restrictions);
+		}
+
+		try{
+			//System.out.println("---------------------------------------______-------------------------------");
+			fsLabBeanList1= em.createQuery(cq).getResultList();
+			//System.out.println("---------------------------------------______-------------------------------");
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		//vaccinereport table 
+		CriteriaBuilder cb1=em.getCriteriaBuilder();
+		CriteriaQuery<FS_LabBean> cq1 = cb.createQuery(FS_LabBean.class);
+		Root<VaccineReport> root1 = cq1.from(VaccineReport.class);
+		Join<VaccineReport, LabDescription> vaccineJoin =root1.join(VaccineReport_.labDescriptionTable,JoinType.INNER);
+		Selection[] selectionsforVR=new Selection[]{
+				root1.get(VaccineReport_.vaccineReportGivenDate),
+				root1.get(VaccineReport_.vaccineReportVaccineId),
+				root1.get(VaccineReport_.vaccineReportComments),
+				vaccineJoin.get(LabDescription_.labDescriptionTestDesc),
+		};
+		cq1.select(cb.construct(FS_LabBean.class,selectionsforVR));
+		Predicate[] restrictionsforVR=new Predicate[]{
+				cb1.and(root1.get(VaccineReport_.vaccineReportVaccineId).in(testIds)),
+				cb1.equal(root1.get(VaccineReport_.vaccineReportChartId), chartId),
+				//cb1.equal(root1.get(VaccineReport_.vaccineReportIsemr), 2),
+
+
+		};
+		cq1.where (restrictionsforVR);
+		try{
+			//System.out.println("---------------------------------------______-------------------------------");
+			fsLabBeanList2= em.createQuery(cq1).getResultList();
+			//System.out.println("---------------------------------------______-------------------------------");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+		CriteriaBuilder cb2=em.getCriteriaBuilder();
+		CriteriaQuery<FS_LabBean> cq2 = cb.createQuery(FS_LabBean.class);
+		Root<Overridealerts> root2 = cq2.from(Overridealerts.class);
+		Selection[] selectoverridealerts=new Selection[]{
+				root2.get(Overridealerts_.overriddenOn),
+				root2.get(Overridealerts_.reason),
+				root2.get(Overridealerts_.overridealertsFlowsheetElementId),
+
+		};
+		cq2.select(cb.construct(FS_LabBean.class,selectoverridealerts));
+		//below predicates are not used why
+		List<String> groupds= new ArrayList<>();
+		for(Integer id : groupIds) {
+			groupds.add(id+"");
+		}
+		Predicate[] restrictionsforoveralerts=new Predicate[]{
+				cb2.equal(root2.get(Overridealerts_.overridealertsFlowsheetElementType),3),
+				cb2.equal(root2.get(Overridealerts_.overridealertsFlowsheetMapId),flowSheetId),
+				cb2.and(root2.get(Overridealerts_.overridealertsFlowsheetElementId).in(groupds)),
+				cb2.equal(root2.get(Overridealerts_.patientid),patientId),
+		};
+		cq2.where(restrictionsforoveralerts);
+
+		try{
+			//System.out.println("---------------------------------------______-------------------------------");
+			fsLabBeanList3 = em.createQuery(cq2).getResultList();
+			//System.out.println("---------------------------------------______-------------------------------");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+		ArrayList<FS_LabBean> result = new ArrayList<>();
+		result.addAll(fsLabBeanList1);
+		result.addAll(fsLabBeanList2);
+		result.addAll(fsLabBeanList3);
+
+		/*for( int i = 0 ; i < result.size() ; i++) {
+			System.out.print(result.get(i).getLabTestId()+",");
+			if(i == fsLabBeanList1.size() || i == fsLabBeanList1.size()+fsLabBeanList2.size()+fsLabBeanList1.size()
+					|| i == fsLabBeanList1.size()+fsLabBeanList2.size()) {
+				System.out.println();
+			}
+		}*/
+
+		return result;
+	}
+
+
+
+
+	private List<Integer> getPatientGendersOnChartId(Integer chartId) {
+		// TODO Auto-generated method stub
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+
+		List<Integer> genders=new ArrayList<Integer>();
+		try{
+			String query= "SELECT patient_registration. patient_registration_sex "+
+					"FROM   patient_registration "
+					+ "inner join chart "
+					+ "ON patient_registration.patient_registration_id = "
+					+ " chart.chart_patientid "
+					+ "WHERE  chart.chart_id = "+chartId;
+			genders.addAll( em.createNativeQuery(query).getResultList() );
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return genders;
+
 	}
 
 	private ArrayList<Integer> getTestDetailIds(int chartId,Integer[] testId){
 		ArrayList<Integer> testdetailsIdArr=new ArrayList<Integer>();
 		if(testId.length>0){
-			List<LabEntries> orderLabs=labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.testIdsWithOrder(testId)).and(InvestigationSpecification.chartId(chartId)).and(InvestigationSpecification.statusEqual(1)));
+			//List<LabEntries> orderLabs=labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.testIdsWithOrder(testId)).and(InvestigationSpecification.chartId(chartId)).and(InvestigationSpecification.statusEqual(1)));
+			List<LabEntries>orderLabs=getLabEntriesorderStatus(chartId,testId);
 			for(int k=0;k<orderLabs.size();k++)
 				testdetailsIdArr.add(orderLabs.get(k).getLabEntriesTestdetailId());
 		}
 		return testdetailsIdArr;
 	}
 
+	private List<LabEntries> getLabEntriesorderStatus(int chartId,Integer[] testId){
+			List<LabEntries>values=new ArrayList<LabEntries>();
+	CriteriaBuilder cb=em.getCriteriaBuilder();
+	CriteriaQuery<LabEntries> cq=cb.createQuery(LabEntries.class);
+	Root<LabEntries>root=cq.from(LabEntries.class);
+	
+	Selection[] selections=new Selection[]{
+			root.get(LabEntries_.labEntriesTestdetailId),
+			
+	};
+	cq.select(cb.construct(LabEntries.class,selections));
+	Predicate[] predications=new Predicate[]{
+	root.get(LabEntries_.labEntriesTestId).in((Object[])testId),
+	cb.equal(root.get(LabEntries_.labEntriesChartid),chartId),
+	cb.equal(root.get(LabEntries_.labEntriesTestStatus),1),
+	};
+	cq.where (predications);
+	cq.orderBy(cb.asc(root.get(LabEntries_.labEntriesTestDesc)),cb.desc(cb.coalesce(root.get(LabEntries_.labEntriesPerfOn),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))));
+
+
+	try{
+		values= em.createQuery(cq).getResultList();	
+
+	}catch(Exception e){
+		e.printStackTrace();
+	}	
+		
+		
+		
+		return values;
+	}
+
 	private ArrayList<String> setCompletedDetaildId(int chartId,Integer[] testId){
 		ArrayList<String> testdetailsIdArr=new ArrayList<String>();
 		if(testId.length>0){
-			List<LabEntries> orderLabs=labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.testIdsWithOrder(testId)).and(InvestigationSpecification.chartId(chartId)).and(InvestigationSpecification.statusNotEqual(2)).and(InvestigationSpecification.statusNotEqual(7)).and(InvestigationSpecification.statusGreaterThan(2)));
+			//List<LabEntries> orderLabs=labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.testIdsWithOrder(testId)).and(InvestigationSpecification.chartId(chartId)).and(InvestigationSpecification.statusNotEqual(2)).and(InvestigationSpecification.statusNotEqual(7)).and(InvestigationSpecification.statusGreaterThan(2)));
+			List<LabEntries>orderLabs=getLabEntriesdetailId(chartId,testId);
+			
 			for(int k=0;k<orderLabs.size();k++){
 				testdetailsIdArr.add(orderLabs.get(k).getLabEntriesTestdetailId()+"@#@"+orderLabs.get(k).getLabEntriesTestStatus());
 			}
 		}
 		return testdetailsIdArr;
+	}
+
+	private List<LabEntries> getLabEntriesdetailId(int chartId, Integer[] testId) {
+		List<LabEntries>values=new ArrayList<LabEntries>();
+		CriteriaBuilder cb=em.getCriteriaBuilder();
+		CriteriaQuery<LabEntries> cq=cb.createQuery(LabEntries.class);
+		Root<LabEntries>root=cq.from(LabEntries.class);
+		
+		Selection[] selections=new Selection[]{
+				root.get(LabEntries_.labEntriesTestdetailId),
+				root.get(LabEntries_.labEntriesTestStatus),
+		};
+		cq.select(cb.construct(LabEntries.class,selections));
+		Predicate[] predications=new Predicate[]{
+		root.get(LabEntries_.labEntriesTestId).in((Object[])testId),
+		cb.equal(root.get(LabEntries_.labEntriesChartid),chartId),
+		cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),2),
+		cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),7),
+		 cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus),2),
+		};
+		cq.where (predications);
+		cq.orderBy(cb.asc(root.get(LabEntries_.labEntriesTestDesc)),cb.desc(cb.coalesce(root.get(LabEntries_.labEntriesPerfOn),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))));
+
+
+		try{
+			values= em.createQuery(cq).getResultList();	
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return values;
 	}
 
 	public List<LabEntries> orderByDate(List<LabEntries> confData,final boolean descending){
@@ -996,13 +1534,14 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return confData;
 	}
 
-	public ArrayList<FS_LabBean> checkFlowSheetRulesForLabData(int patientId,int chartId, List<Integer> groupIds,ArrayList<FS_LabBean> flowSheetData, String startDate,JSONObject groupIdTestIdMap) throws Exception{
+	public ArrayList<FS_LabBean> checkFlowSheetRulesForLabData(int patientId,int chartId, List<Integer> groupIds,ArrayList<FS_LabBean> flowSheetData, String startDate,JSONObject groupIdTestIdMap,Integer patgender) throws Exception{
 		String currentDate = getCurrentDate();
 		List<String> newGroupIds=Lists.transform(groupIds, Functions.toStringFunction());
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,newGroupIds, startDate,3);
 		String today = getTodayDate();
-		PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
-		String gender = Optional.fromNullable(genderPat.getPatientRegistrationSex()).or(-1).toString();
+		//PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+		//Integer  gender1 = gender
+		String gender=patgender.toString();
 		ArrayList<FS_LabBean> tempFlowSheetData = new ArrayList<FS_LabBean>();
 		for(int flowSheetDataCounter = 0 ; flowSheetDataCounter < flowSheetData.size() ; flowSheetDataCounter++){
 			FS_LabBean flowSheetDataObj = flowSheetData.get(flowSheetDataCounter);
@@ -1017,7 +1556,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					testIds=MoreObjects.firstNonNull(groupIdTestIdMap.get(Optional.fromNullable(flowSheetRuleObj.getElement_id()).or((long) -1).toString()),"-1").toString();
 				}catch(Exception e){
 					testIds="-1";
-					e.printStackTrace();
 				}
 				if(Optional.fromNullable(flowSheetRuleObj.getElement_type()).or(-1).toString().equals("3") && testIds.contains("@@@@"+Optional.fromNullable(flowSheetDataObj.getLabTestId()).or("-2").toString()+"###")){
 					isElementRuleExists = true;
@@ -1115,7 +1653,9 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return tempFlowSheetData;
 	}
 
-	public ArrayList<FS_LabParameterBean> formLabParameters (int flowsheetId, String startDate,Integer patientId,Integer encounterId) throws Exception {
+	public ArrayList<FS_LabParameterBean> formLabParameters (int flowsheetId, String startDate,Integer patientId,Integer encounterId,Integer patgender) throws Exception {
+		//System.out.println("\n  ::::::::::::::::::: in formLabParameters section ::::::::::::::::::"+System.currentTimeMillis());
+		//long starttime=System.currentTimeMillis();
 		paramPerformedDate = new ArrayList<String> ();
 		// getting list of codes and there code system
 		List<Integer> groupIds=getFlowsheetParamGroupId(flowsheetId,patientId);
@@ -1123,28 +1663,27 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		String[][] codes= getFlowsheetParamCode(groupIds,groupIdParamIdMap);
 
 		//getting the list of paramIds for the above codes
-		List<LabParameters> paramsList=getParamIds(codes,groupIdParamIdMap);
+		List<Integer> paramsList=getParamIds(codes,groupIdParamIdMap);
 		Integer[] paramIds=new Integer[paramsList.size()];
 		for(int k=0;k<paramsList.size();k++){
-			paramIds[k]=Optional.fromNullable(paramsList.get(k).getLabParametersId()).or(-1);
+			paramIds[k]=Optional.fromNullable(paramsList.get(k)).or(-1);
 		}
 		if(paramIds.length==0){
 			paramIds=new Integer[1];
 			paramIds[0]=-2;
 		}
 		//getting the chart id
-		Integer chartId=-1;
-		List<Chart> charts=chartRepository.findAll(Specifications.where(ChartSpecification.patientId(patientId)));
-		chartId=charts.get(0).getChartId();
+	    Integer chartId= getChartId(patientId);
 
-		Encounter encounterEntity=null;
+		/*Encounter encounterEntity=null;
 		//getting the encounter details
 		if(encounterId!=-1){
 			encounterEntity=encounterEntityRepository.findOne(EncounterEntitySpecification.EncounterById(encounterId));
-		}
+		}*/
 
 		//getting list of performed parameters having param id and chart id
 		List<ParamStandardGroup> perfOrders=paramStandardGroupRepository.findAll(Specifications.where(FlowsheetSpecification.paramStandardGroupIdIsActive(groupIds)));
+		
 		ArrayList<FS_LabParameterBean> arr_param = new ArrayList<FS_LabParameterBean> ();
 		Iterator<ParamStandardGroup> itr_param = perfOrders.iterator();
 		ParamStandardGroup hsh_param = new ParamStandardGroup();
@@ -1173,14 +1712,117 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					paramIdsGroup[0]=-2;
 				}
 				//getting list of params having param id and chart id
-				List<LabEntriesParameter> perfParamsInt=labEntriesParameterRepository.findAll(Specifications.where(InvestigationSpecification.getParamDetails(paramIdsGroup, chartId,encounterId,encounterEntity)));
-				List<LabParameters> paramIdsArray=labParametersRepository.findAll(Specifications.where(InvestigationSpecification.paramIdsLabParameter(paramIdsGroup)));
+//				List<LabEntriesParameter> perfParamsInt=labEntriesParameterRepository.findAll(Specifications.where(InvestigationSpecification.getParamDetails(paramIdsGroup, chartId,encounterId,encounterEntity)));
+				
+				CriteriaBuilder cb = em.getCriteriaBuilder();
+				CriteriaQuery<Object> cq1 = cb.createQuery();
+				Root<LabEntriesParameter> rootLabEntriesParameter = cq1.from(LabEntriesParameter.class);
+				
+				Join<LabEntriesParameter,LabParameters> join= rootLabEntriesParameter.join("labParametersTable", JoinType.LEFT);
+				
+				Predicate paramMapId=rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterMapid).in((Object[])paramIdsGroup);
+				Predicate isActivePred=cb.equal(join.get(LabParameters_.labParametersIsactive),true);
+				Predicate entriesIsActivePred=cb.equal(cb.coalesce(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterIsactive), true),true);
+				Predicate chartIdPred=cb.equal(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterChartid), chartId);
+				Predicate paramDetails = null;
+				if((encounterId!=-1)&&(getEncounterStatusforLab(encounterId)==3)){
+					Predicate encounterDatePred=cb.lessThanOrEqualTo(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterDate), getencounterDateforLab(encounterId));
+					paramDetails = cb.and(paramMapId,isActivePred,entriesIsActivePred,chartIdPred,encounterDatePred);
+				}else{
+					paramDetails = cb.and(paramMapId,isActivePred,entriesIsActivePred,chartIdPred);
+				}
+				
+				cq1.multiselect(cb.construct(LabParametersData.class, rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterMapid),
+						 rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterValue),
+						 rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterDate),
+						 join.get(LabParameters_.labParametersUnits))).where(paramDetails);
+				
+				cq1.orderBy(cb.desc(cb.coalesce(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterDate),cb.function("to_timestamp",Timestamp.class,cb.literal("1900-05-13 16:40:35"),cb.literal("YYYY-MM-DD HH24:MI:SS")))),
+						cb.desc(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterId)));
+				
+				List<Object> obj=  new ArrayList<Object>();
+				
+				try{
+					obj=em.createQuery(cq1).getResultList();
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				
+			//	System.out.println(" LabParametersData obj>>>>>>>>>>>>>>>>>>>>>>>>>"+obj.size());
+				
+				List<LabEntriesParameter> labParameters=new ArrayList<LabEntriesParameter>();
+				for(int i=0;i<obj.size();i++){
+					LabEntriesParameter templabEntriesParameter = new LabEntriesParameter();
+					LabParametersData labParametersData = (LabParametersData) obj.get(i);
+					templabEntriesParameter.setLabEntriesParameterMapid(labParametersData.getLabEntriesParameterMapid());
+					templabEntriesParameter.setLabEntriesParameterValue(labParametersData.getLabEntriesParameterValue());
+					templabEntriesParameter.setLabEntriesParameterDate((Timestamp) labParametersData.getLabEntriesParameterDate());
+					LabParameters tempLabParam=new LabParameters();
+					tempLabParam.setLabParametersUnits(labParametersData.getLabParametersUnits());
+					templabEntriesParameter.setLabParametersTable(tempLabParam);
+					labParameters.add(templabEntriesParameter);
+				}
+				
+				//System.out.println("LabParametersData>>>>>>>>>>>>"+labParameters);
+				
+//				List<LabParameters> paramIdsArray=labParametersRepository.findAll(Specifications.where(InvestigationSpecification.paramIdsLabParameter(paramIdsGroup)));
+				CriteriaBuilder cb1 = em.getCriteriaBuilder();
+				CriteriaQuery<Object> cq = cb1.createQuery();
+				Root<LabParameters> rootLabParameters = cq.from(LabParameters.class);
+				Predicate testIds = rootLabParameters.get(LabParameters_.labParametersId).in((Object[])paramIdsGroup);
+				cq.select(rootLabParameters.get(LabParameters_.labParametersId)).where(testIds);
+				List<Object> paramIdList=  em.createQuery(cq).getResultList();
+				//System.out.println("paramIdList size>>>>>>>>>>>>>>>"+paramIdList.size());
+				List<Integer> paramIdsArray = new ArrayList<Integer>();
+				for(int i=0;i<paramIdList.size();i++){
+						int paramId=(int) paramIdList.get(i);
+						paramIdsArray.add(paramId);
+				}
+				//System.out.println("paramIdsArray:::::::::::::"+paramIdsArray.size()+":::::::::::::"+paramIdsArray);
+				
 				if(paramIdsArray.size()>0){
 					String[] groupId=new String[1];
 					groupId[0]=hsh_param.getParamStandardGroupId()+"";
 
 					//getting list of override alerts having group id
-					List<Overridealerts> overridealertsInt=overridealertsRepository.findAll(OverridealertsSpecification.overrideAlerts(groupId, 2, patientId, flowsheetId,encounterId,encounterEntity));
+					
+//					overridealertsRepository.findAll(OverridealertsSpecification.overrideAlerts(groupId, 2, patientId, flowsheetId,encounterId,encounterEntity));
+					//System.out.println("groupId::::::::[0]:::::::"+groupId[0]);	
+					CriteriaBuilder cb2 = em.getCriteriaBuilder();
+					CriteriaQuery<Object> cq2 = cb1.createQuery();
+					Root<Overridealerts> rootOverridealerts = cq2.from(Overridealerts.class);
+					Predicate elementType=cb2.equal(rootOverridealerts.get(Overridealerts_.overridealertsFlowsheetElementType),2);
+					Predicate fsId=cb2.equal(rootOverridealerts.get(Overridealerts_.overridealertsFlowsheetMapId),flowsheetId);
+					//System.out.println("fsId::::::::::::::::::::"+fsId);
+					Predicate elementId=rootOverridealerts.get(Overridealerts_.overridealertsFlowsheetElementId).in((Object[])groupId);
+					Predicate patientIdPred = cb2.equal(rootOverridealerts.get(Overridealerts_.patientid),patientId);
+					Predicate overrideAlerts=null;
+					if((encounterId!=-1)&&getEncounterStatusforLab(encounterId)==3){
+							Predicate encounterDatePred=cb2.lessThanOrEqualTo(rootOverridealerts.get(Overridealerts_.overriddenOn), getencounterDateforLab(encounterId));
+							overrideAlerts=cb2.and(elementType,fsId,elementId,patientIdPred,encounterDatePred);
+					}else{
+							overrideAlerts=cb2.and(elementType,fsId,elementId,patientIdPred);
+					}
+									
+					cq2.multiselect(cb.construct(OverrideAlertsBean.class,
+							rootOverridealerts.get(Overridealerts_.overridealertsFlowsheetElementId),
+							rootOverridealerts.get(Overridealerts_.reason),
+							rootOverridealerts.get(Overridealerts_.overriddenOn))).where(overrideAlerts);
+							
+					List<Object> alertsObj=  em.createQuery(cq2).getResultList();
+					
+					//System.out.println("obj>>>>>>>>>>>Overridealerts >>>>>>>>>>>>>>"+alertsObj);
+					
+					List<OverrideAlertsBean> overridealertsInt=new ArrayList<OverrideAlertsBean>();
+					for(int i=0;i<alertsObj.size();i++){
+						OverrideAlertsBean overridealertsData = (OverrideAlertsBean) alertsObj.get(i);
+						OverrideAlertsBean overridealertsDataBean = new OverrideAlertsBean(overridealertsData.getOverridealertsFlowsheetElementId(),
+								overridealertsData.getReason(),
+								overridealertsData.getOverriddenOn());
+						overridealertsInt.add(overridealertsDataBean);
+					}
+					//System.out.println("Overridealerts??????????? "+overridealertsInt);
+					
 					for(int k=0;k<overridealertsInt.size();k++){
 						LabEntriesParameter tempLabEntriesParam=new LabEntriesParameter();
 						tempLabEntriesParam.setLabEntriesParameterMapid(Integer.parseInt(Optional.fromNullable(overridealertsInt.get(k).getOverridealertsFlowsheetElementId()).or("-1").toString()));
@@ -1190,23 +1832,23 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						LabParameters param=new LabParameters();
 						param.setLabParametersUnits("");
 						tempLabEntriesParam.setLabParametersTable(param);
-						perfParamsInt.add(tempLabEntriesParam);
+						labParameters.add(tempLabEntriesParam);
 					}
 				}
 				//Order Labs by Date
-				perfParamsInt=orderByDateParam(perfParamsInt, true);
-				if(perfParamsInt.size()>0){
-					for(int k=0;k<perfParamsInt.size();k++){
+				labParameters=orderByDateParam(labParameters, true);
+				if(labParameters.size()>0){
+					for(int k=0;k<labParameters.size();k++){
 						paramBean = new FS_LabParameterBean();
 						paramName = Optional.fromNullable(hsh_param.getParamStandardGroupName()).or("");
 						paramBean.setParamName(paramName);
 						paramBean.setGroupId(hsh_param.getParamStandardGroupId());
-						String paramId=MoreObjects.firstNonNull(perfParamsInt.get(k).getLabEntriesParameterMapid(),"").toString();
+						String paramId=MoreObjects.firstNonNull(labParameters.get(k).getLabEntriesParameterMapid(),"").toString();
 						paramBean.setParamId(paramId);
 						paramBean.setRecentlyPerf(true);
 						String perOn="Never Performed";
-						paramBean.setParamValue(perfParamsInt.get(k).getLabEntriesParameterValue());
-						perOn=MoreObjects.firstNonNull(perfParamsInt.get(k).getLabEntriesParameterDate(),"Never Performed").toString();
+						paramBean.setParamValue(labParameters.get(k).getLabEntriesParameterValue());
+						perOn=MoreObjects.firstNonNull(labParameters.get(k).getLabEntriesParameterDate(),"Never Performed").toString();
 						if(!perOn.trim().contentEquals("Never Performed")){
 							DateFormat parser = new SimpleDateFormat("yyyy-MM-dd"); 
 							Date date = (Date) parser.parse(perOn);
@@ -1217,9 +1859,9 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						if(!paramPerformedDate.contains(perOn))
 							paramPerformedDate.add(perOn);
 						String units="";
-						units=Optional.fromNullable(perfParamsInt.get(k).getLabEntriesParameterValue()).or("");
+						units=Optional.fromNullable(labParameters.get(k).getLabEntriesParameterValue()).or("");
 						if(!units.contentEquals("")){
-							units=perfParamsInt.get(k).getLabParametersTable().getLabParametersUnits();
+							units=labParameters.get(k).getLabParametersTable().getLabParametersUnits();
 						}
 						paramBean.setUnits(units);
 						arr_paramTemp.add(paramBean);
@@ -1250,17 +1892,19 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		Collections.reverse(paramPerformedDate);
 		paramPerformedDate = limitthecount(paramPerformedDate,11);
 		if(groupIds.size()>0)
-			arr_param = checkFlowSheetRulesLabParametersData(patientId,chartId, groupIds, arr_param, startDate,groupIdParamIdMap);
+			arr_param = checkFlowSheetRulesLabParametersData(patientId,chartId, groupIds, arr_param, startDate,groupIdParamIdMap,patgender);
+	//	System.out.println(":::::::::::::::::::::Final data:::::::::::::::::::::::"+paramBean);
+		//System.out.println("Final time taken:::::for paramsection:::"+(System.currentTimeMillis()-starttime));
 		return arr_param;
 	}
 
-	public ArrayList<FS_LabParameterBean> checkFlowSheetRulesLabParametersData(int patientId, int chartId, List<Integer> groupIds,ArrayList<FS_LabParameterBean> flowSheetData, String startDate,JSONObject groupIdParamIdMap) throws Exception{
+	public ArrayList<FS_LabParameterBean> checkFlowSheetRulesLabParametersData(int patientId, int chartId, List<Integer> groupIds,ArrayList<FS_LabParameterBean> flowSheetData, String startDate,JSONObject groupIdParamIdMap,Integer patgender) throws Exception{
 		String currentDate = getCurrentDate();
 		List<String> newGroupIds=Lists.transform(groupIds, Functions.toStringFunction());
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,newGroupIds, startDate,2);
 		String today = getTodayDate();
-		PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
-		String gender = Optional.fromNullable(genderPat.getPatientRegistrationSex()).or(-1).toString();
+		//PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+		String gender = patgender.toString();
 		ArrayList<FS_LabParameterBean> tempFlowSheetData = new ArrayList<FS_LabParameterBean>();
 		for(int flowSheetDataCounter = 0 ; flowSheetDataCounter < flowSheetData.size() ; flowSheetDataCounter++){
 			FS_LabParameterBean flowSheetDataObj = flowSheetData.get(flowSheetDataCounter);
@@ -1275,7 +1919,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					paramIds=MoreObjects.firstNonNull(groupIdParamIdMap.get(Optional.fromNullable(flowSheetRuleObj.getElement_id()).or((long) -1).toString()),"-1").toString();
 				}catch(Exception e){
 					paramIds="-1";
-					e.printStackTrace();
 				}
 				if(Optional.fromNullable(flowSheetRuleObj.getElement_type()).or(-1)==2 && (paramIds.contains("@@@@"+Optional.fromNullable(flowSheetDataObj.getParamId()).or("-2").toString()+"###"))){
 					isElementRuleExists = true;
@@ -1386,7 +2029,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		Query query = em.createNativeQuery("SELECT to_char(now(),'MM/dd/yyyy HH:MI:ss am')");
 		return query.getSingleResult().toString(); 
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public List<HmrBean> getFlowSheetRuleQueryPatientBased(Integer patientId,List<String> groupIds, String startDate,Integer flowsheetElementType) throws java.text.ParseException{
 		//Query 1
@@ -1975,12 +2618,12 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}	
 
 	@SuppressWarnings("rawtypes")
-	public List<LabParameters> getParamIds(String[][] codes,JSONObject groupIdParamIdMap)
+	public List<Integer> getParamIds(String[][] codes,JSONObject groupIdParamIdMap)
 			throws Exception {
 		List<Integer> glenwoodCodes=new ArrayList<Integer>();
 		List<String> loincCodes=new ArrayList<String>();
-		List<LabParameters> tempParams=new ArrayList<LabParameters>();
-		List<LabParameters> params=new ArrayList<LabParameters>();
+		List<Integer> tempParams=new ArrayList<Integer>();
+		List<Integer> params=new ArrayList<Integer>();
 		for(int i=0;i<codes.length;i++){
 			if(codes[i][1].contentEquals(FlowsheetServiceImpl.GlenwoodSystemsOID))
 				glenwoodCodes.add(Integer.parseInt(codes[i][0]));
@@ -1988,38 +2631,81 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				loincCodes.add(codes[i][0]);
 		}
 		if(glenwoodCodes.size()!=0){
-			params=labParametersRepository.findAll(Specifications.where(InvestigationSpecification.paramIdsLabParameter(glenwoodCodes.toArray(new Integer[0]))));
+//			params=labParametersRepository.findAll(Specifications.where(InvestigationSpecification.paramIdsLabParameter(glenwoodCodes.toArray(new Integer[0]))));
+			
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<LabParameters> rootLabParameters = cq.from(LabParameters.class);
+			
+			Predicate testIds = rootLabParameters.get(LabParameters_.labParametersId).in((Object[])glenwoodCodes.toArray(new Integer[0]));
+			cq.select(rootLabParameters.get(LabParameters_.labParametersId)).where(testIds);
+			
+			List<Object> obj=em.createQuery(cq).getResultList();
+			for(int i=0;i<obj.size();i++){
+				//System.out.println("in for loop start gwcode");
+				int paramid=(int) obj.get(i);
+				params.add(paramid);
+				//System.out.println("in for loop end gwcode");
+			}
+			//System.out.println("Initial set of params >>>>>>>>>>>"+params);
 		}
 		if(loincCodes.size()!=0){
-			for(int y=0;y<loincCodes.size();y++){
-				List<String> tempLoinc=new ArrayList<String>();
-				tempLoinc.add(loincCodes.get(y));
-				tempParams=labParametersRepository.findAll(Specifications.where(InvestigationSpecification.loincCodeParams(tempLoinc)));
+			//System.out.println("loincCodes::::::::::::::"+loincCodes);
+			
+			
+//				List<String> tempLoinc=new ArrayList<String>();
+//				tempLoinc.add(loincCodes.get(y));
+				//System.out.println("tempLoinc:::::::::::::"+loincCodes);
+				CriteriaBuilder builder = em.getCriteriaBuilder();
+				CriteriaQuery<Object> cq = builder.createQuery();
+				Root<LabParameters> rootLabParameters = cq.from(LabParameters.class);
+				
+				Join<LabParameters,LabParameterCode> join=rootLabParameters.join("labParameterCodeTable",JoinType.INNER);
+				cq.distinct(true);
+				Predicate loincCode = builder.and(join.get(LabParameterCode_.labParameterCodeValue).in(loincCodes),builder.equal(join.get(LabParameterCode_.labParameterCodeSystem),"LOINC"));
+				cq.select(rootLabParameters.get(LabParameters_.labParametersId)).where(loincCode);
+				
+				List<Object> obj=em.createQuery(cq).getResultList();
+				//System.out.println("size of obj ::::::::"+obj.size());
+				for(int i=0;i<obj.size();i++){
+					//System.out.println("in for loop start loincCodes");
+					int paramid=(int) obj.get(i);
+					tempParams.add(paramid);
+					//System.out.println("in for loop end loincCodes");
+				}
+				
+//				tempParams=labParametersRepository.findAll(Specifications.where(InvestigationSpecification.loincCodeParams(tempLoinc)));
 				params.addAll(tempParams);
-				String tempValue=loincCodes.get(y)+"###"+FlowsheetServiceImpl.LoincOID;
-				for(int k=0;k<groupIdParamIdMap.length();k++){
-					Iterator itr = groupIdParamIdMap.keys();
-					while( itr.hasNext() ) {
-						String key = (String)itr.next();
-						if (groupIdParamIdMap.get(key).toString().contains("@@@@"+tempValue+"@@@@")){
-							if(tempParams.size()>0)
-								groupIdParamIdMap.put(key, groupIdParamIdMap.get(key).toString().replace("@@@@"+tempValue+"@@@@","@@@@"+tempParams.get(0).getLabParametersId()+"###"+FlowsheetServiceImpl.GlenwoodSystemsOID+"@@@@"));
-							else
-								groupIdParamIdMap.put(key, groupIdParamIdMap.get(key).toString().replace("@@@@"+tempValue+"@@@@","@@@@"));
-							for(int p=1;p<tempParams.size();p++){
-								groupIdParamIdMap.put(key, groupIdParamIdMap.get(key).toString()+(tempParams.get(p).getLabParametersId()+"###"+FlowsheetServiceImpl.GlenwoodSystemsOID+"@@@@"));
+				//System.out.println("params after addall >>>>>>"+params+">>>>> tempParams>>>>>"+tempParams);
+				for(int y=0;y<loincCodes.size();y++){
+					String tempValue=loincCodes.get(y)+"###"+FlowsheetServiceImpl.LoincOID;
+					for(int k=0;k<groupIdParamIdMap.length();k++){
+						Iterator itr = groupIdParamIdMap.keys();
+						while( itr.hasNext() ) {
+							String key = (String)itr.next();
+							if (groupIdParamIdMap.get(key).toString().contains("@@@@"+tempValue+"@@@@")){
+								if(tempParams.size()>0)
+									groupIdParamIdMap.put(key, groupIdParamIdMap.get(key).toString().replace("@@@@"+tempValue+"@@@@","@@@@"+tempParams.get(0)+"###"+FlowsheetServiceImpl.GlenwoodSystemsOID+"@@@@"));
+								else
+									groupIdParamIdMap.put(key, groupIdParamIdMap.get(key).toString().replace("@@@@"+tempValue+"@@@@","@@@@"));
+								for(int p=1;p<tempParams.size();p++){
+									groupIdParamIdMap.put(key, groupIdParamIdMap.get(key).toString()+(tempParams.get(p)+"###"+FlowsheetServiceImpl.GlenwoodSystemsOID+"@@@@"));
+								}
 							}
 						}
 					}
 				}
-			}
 		}
+		//System.out.println("params>>> at last >>>>>>>>>>"+params);
 		return params;
 	}
 
-	public ArrayList<FS_ClinicalElementBean> formClinicalElementsData(Integer flowsheetId,String startDate,Integer patientId,Integer encounterId) throws Exception{
+	public ArrayList<FS_ClinicalElementBean> formClinicalElementsData(Integer flowsheetId,String startDate,Integer patientId,Integer encounterId,Integer patgender) throws Exception{
+		//System.out.println("Clinical Elments Section starts here :::::::::"+System.currentTimeMillis()	);
+		//long starttime=System.currentTimeMillis();
 		clinicalVitalParamDate = new ArrayList<String> ();
-		List<FlowsheetClinicalParam> flowsheetClinicalParam=flowsheetClinicalParamRepository.findAll(FlowsheetSpecification.flowsheetClinicalParam(FlowsheetServiceImpl.LOAD_VITALS_DATA, flowsheetId));
+		List<FlowsheetClinicalParam> flowsheetClinicalParam= new ArrayList<FlowsheetClinicalParam>();
+		flowsheetClinicalParam=getDetails(FlowsheetServiceImpl.LOAD_VITALS_DATA, flowsheetId);
 		ArrayList<FS_ClinicalElementBean> arr_clinical = new ArrayList<FS_ClinicalElementBean> ();
 		Iterator<FlowsheetClinicalParam> itr_clinical_elements = flowsheetClinicalParam.iterator();
 		FlowsheetClinicalParam hsh_notes = new FlowsheetClinicalParam();
@@ -2028,8 +2714,10 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		String prevGwId = "";
 		Encounter encounterEntity=null;
 		//getting the encounter details
+		Date encounterDate=null;
 		if(encounterId!=-1){
 			encounterEntity=encounterEntityRepository.findOne(EncounterEntitySpecification.EncounterById(encounterId));
+			//encounterDate=getencounterDateforLab(encounterId);
 		}
 		List<String> gwidsComplete=new ArrayList<String>();
 		while(itr_clinical_elements.hasNext()){
@@ -2224,7 +2912,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		Collections.reverse(clinicalVitalParamDate);
 		clinicalVitalParamDate=limitthecount(clinicalVitalParamDate,11);
 		if(gwidsComplete.size()>0)
-			arr_clinical = checkFlowSheetRulesClinicalElementsData(patientId,flowsheetId,gwidsComplete, arr_clinical, startDate);
+			arr_clinical = checkFlowSheetRulesClinicalElementsData(patientId,flowsheetId,gwidsComplete, arr_clinical, startDate,patgender);
+		
+		//System.out.println("Clinical Elments Section ends here :::::::::");
+        //System.out.println("Final time taken::for drug::::::"+(System.currentTimeMillis()-starttime));
+
 		return arr_clinical;
 	}
 	private ArrayList<FS_ClinicalElementBean> conversion(ArrayList<FS_ClinicalElementBean> arr_clinical){
@@ -2261,12 +2953,12 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return confData;
 	}
 
-	public ArrayList<FS_ClinicalElementBean> checkFlowSheetRulesClinicalElementsData(Integer patientId, Integer flowSheetId,List<String> gwidsComplete,ArrayList<FS_ClinicalElementBean> flowSheetData, String startDate) throws Exception{
+	public ArrayList<FS_ClinicalElementBean> checkFlowSheetRulesClinicalElementsData(Integer patientId, Integer flowSheetId,List<String> gwidsComplete,ArrayList<FS_ClinicalElementBean> flowSheetData, String startDate,Integer patgender) throws Exception{
 		String currentDate = getCurrentDate();
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,gwidsComplete, startDate,1);
 		String today = getTodayDate();
-		PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
-		String gender = Optional.fromNullable(genderPat.getPatientRegistrationSex()).or(-1).toString();
+		//PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+		String gender = patgender.toString();
 		ArrayList<FS_ClinicalElementBean> tempFlowSheetData = new ArrayList<FS_ClinicalElementBean>();
 		for(int flowSheetDataCounter = 0 ; flowSheetDataCounter < flowSheetData.size() ; flowSheetDataCounter++){
 			FS_ClinicalElementBean flowSheetDataObj = flowSheetData.get(flowSheetDataCounter);
@@ -2371,8 +3063,24 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return tempFlowSheetData;
 	}
 
-	public ArrayList<FS_ClinicalElementBean> formClinicalData (Integer flowsheetId,String startDate,Integer patientId,Integer encounterId) throws Exception{
-		List<FlowsheetClinicalParam> flowsheetClinicalParam=flowsheetClinicalParamRepository.findAll(FlowsheetSpecification.flowsheetClinicalParam(FlowsheetServiceImpl.LOAD_CLINICAL_ELEMENTS_DATA, flowsheetId));
+	/**
+	 * used for getting clinicalelements data 
+	 * @param flowsheetId
+	 * @param startDate
+	 * @param patientId
+	 * @param encounterId
+	 * @return
+	 * @throws Exception
+	 */
+
+
+	public ArrayList<FS_ClinicalElementBean> formClinicalData (Integer flowsheetId,String startDate,Integer patientId,Integer encounterId,Integer patgender) throws Exception{
+		//System.out.println("Clinical Exceptvital Section starts here :::::::::"+System.currentTimeMillis());
+		long starttime=System.currentTimeMillis();
+		
+		List<FlowsheetClinicalParam>flowsheetClinicalParam= new ArrayList<FlowsheetClinicalParam>();
+		flowsheetClinicalParam=getDetails(FlowsheetServiceImpl.LOAD_CLINICAL_ELEMENTS_DATA, flowsheetId);
+		//List<FlowsheetClinicalParam> flowsheetClinicalParam=flowsheetClinicalParamRepository.findAll(FlowsheetSpecification.flowsheetClinicalParam(FlowsheetServiceImpl.LOAD_CLINICAL_ELEMENTS_DATA, flowsheetId));
 		ArrayList<FS_ClinicalElementBean> arr_clinical = new ArrayList<FS_ClinicalElementBean> ();
 		Iterator<FlowsheetClinicalParam> itr_clinical = flowsheetClinicalParam.iterator();
 		FlowsheetClinicalParam hsh_notes = new FlowsheetClinicalParam();
@@ -2383,6 +3091,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		//getting the encounter details
 		if(encounterId!=-1){
 			encounterEntity=encounterEntityRepository.findOne(EncounterEntitySpecification.EncounterById(encounterId));
+			//encounterEntity= getRequiredEncounterDetails(encounterId);
 		}
 		List<String> gwidsComplete=new ArrayList<String>();
 		while(itr_clinical.hasNext()){
@@ -2392,6 +3101,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				gwids.add(hsh_notes.getFlowsheetClinicalParamMapElementgwid());
 				gwidsComplete.add(hsh_notes.getFlowsheetClinicalParamMapElementgwid());
 				List<PatientClinicalElements> patientClinicalElements=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getElemPatientDataLessThanEncounter(patientId, encounterId, gwids));
+				//List<PatientClinicalElements> patientClinicalElements=getListOfPatientClinicalElements(patientId,encounterId,gwids);
 				for(int g=0;g<patientClinicalElements.size();g++){
 					ClinicalElements clinicalElementsInner=Optional.fromNullable(clinicalElementsRepository.findOne(PatientClinicalElementsSpecification.getClinicalElement(patientClinicalElements.get(g).getPatientClinicalElementsGwid()))).or(new ClinicalElements());
 					patientClinicalElements.get(g).setClinicalElement(clinicalElementsInner);
@@ -2528,10 +3238,114 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		}
 		arr_clinical=conversion(arr_clinical);
 		if(gwidsComplete.size()>0)
-			arr_clinical = checkFlowSheetRulesForClinicalData(patientId, flowsheetId,gwidsComplete, arr_clinical, startDate);
+			arr_clinical = checkFlowSheetRulesForClinicalData(patientId, flowsheetId,gwidsComplete, arr_clinical, startDate,patgender);
+		//System.out.println("Clinical Elments Section ends here :::::::::");
+       // System.out.println("Final time taken::for drug:forfinal vitall:::::"+(System.currentTimeMillis()-starttime));
+
+		
 		return arr_clinical;
 	}
-	public ArrayList<FS_ClinicalElementBean> checkFlowSheetRulesForClinicalData(Integer patientId, Integer flowSheetId,List<String> gwidsComplete,ArrayList<FS_ClinicalElementBean> flowSheetData, String startDate) throws Exception{
+	/*private List<Encounter> getRequiredEncounterDetails(Integer encounterId) {
+		List<Encounter> stndcode= new ArrayList<Encounter>();
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<Encounter> cq = cb.createQuery(Encounter.class);
+		Root<FlowsheetClinicalParam> root = cq.from(FlowsheetClinicalParam.class);
+		Selection[] selectionsforVR=new Selection[]{
+				root.get(Encounter_.encounterId),
+				root.get(Encounter_.encounterChartid),
+				root.get(Encounter_.encounterStatus),
+				root.get(Encounter_.encounterDate),
+		};
+		cq1.select(cb1.construct(FlowsheetClinicalParam.class,selectionsforVR));
+
+
+
+		// TODO Auto-generated method stub
+		return null;
+	}*/
+
+	private List<PatientClinicalElements> getListOfPatientClinicalElements(
+			Integer patientId, Integer encounterId, List<String> gwids) {
+		CriteriaBuilder cb1=em.getCriteriaBuilder();
+		CriteriaQuery<PatientClinicalElements> cq1 = cb1.createQuery(PatientClinicalElements.class);
+		List<PatientClinicalElements> stndcode= new ArrayList<PatientClinicalElements>();
+		Root<PatientClinicalElements> root1 = cq1.from(PatientClinicalElements.class);
+		Join<PatientClinicalElements,ClinicalElements> paramJoin=root1.join(PatientClinicalElements_.clinicalElement,JoinType.INNER);
+
+		@SuppressWarnings("rawtypes")
+		Selection[] selectionsforVR=new Selection[]{
+			root1.get(PatientClinicalElements_.patientClinicalElementsId),
+			root1.get(PatientClinicalElements_.patientClinicalElementsPatientid),
+			root1.get(PatientClinicalElements_.patientClinicalElementsChartid),
+			root1.get(PatientClinicalElements_.patientClinicalElementsEncounterid),
+			root1.get(PatientClinicalElements_.patientClinicalElementsGwid),
+			root1.get(PatientClinicalElements_.patientClinicalElementsValue),
+		};
+		cq1.select(cb1.construct(PatientClinicalElements.class,selectionsforVR));
+		Predicate encounterPred=null;
+		if(encounterId!=-1)
+			encounterPred=cb1.lessThanOrEqualTo(root1.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
+		Predicate patientPred=cb1.equal(root1.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
+		Predicate elementPred=root1.get(PatientClinicalElements_.patientClinicalElementsGwid).in(gwids);
+		Predicate finalPred=null;
+		if(encounterId!=-1)
+			finalPred= cb1.and(encounterPred,patientPred,elementPred);
+		else
+			finalPred= cb1.and(patientPred,elementPred);
+		cq1.where(finalPred);
+		// TODO Auto-generated method stub
+		try{
+			stndcode= em.createQuery(cq1).getResultList();	
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return stndcode;
+
+
+	}
+
+	/**
+	 * Method to get the clinical flowsheetvalues
+	 * @param lOAD_CLINICAL_ELEMENTS_DATA2
+	 * @param flowsheetId
+	 * @return
+	 */
+	private List<FlowsheetClinicalParam> getDetails(int lOAD_CLINICAL_ELEMENTS_DATA2, Integer flowsheetId) {
+		CriteriaBuilder cb1=em.getCriteriaBuilder();
+		CriteriaQuery<FlowsheetClinicalParam> cq1 = cb1.createQuery(FlowsheetClinicalParam.class);
+		List<FlowsheetClinicalParam> stndcode= new ArrayList<FlowsheetClinicalParam>();
+		Root<FlowsheetClinicalParam> root1 = cq1.from(FlowsheetClinicalParam.class);
+
+
+		@SuppressWarnings("rawtypes")
+		Selection[] selectionsforVR=new Selection[]{
+			root1.get(FlowsheetClinicalParam_.flowsheetClinicalParamId),
+			root1.get(FlowsheetClinicalParam_.flowsheetClinicalParamMapid),
+			root1.get(FlowsheetClinicalParam_.flowsheetClinicalParamMapElementgwid),
+			root1.get(FlowsheetClinicalParam_.flowsheetClinicalParamMapElementtype),
+			root1.get(FlowsheetClinicalParam_.flowsheetClinicalParamSortorder),
+
+
+		};
+		cq1.select(cb1.construct(FlowsheetClinicalParam.class,selectionsforVR));
+		Predicate[] restrictionsforVR=new Predicate[]{
+				cb1.equal(root1.get(FlowsheetClinicalParam_.flowsheetClinicalParamMapElementtype) ,lOAD_CLINICAL_ELEMENTS_DATA2),
+				cb1.equal(root1.get(FlowsheetClinicalParam_.flowsheetClinicalParamMapid),flowsheetId),
+		};
+		cq1.where (restrictionsforVR);
+		try{
+			stndcode= em.createQuery(cq1).getResultList();	
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return stndcode;
+
+	}
+
+
+	public ArrayList<FS_ClinicalElementBean> checkFlowSheetRulesForClinicalData(Integer patientId, Integer flowSheetId,List<String> gwidsComplete,ArrayList<FS_ClinicalElementBean> flowSheetData, String startDate,Integer patgender) throws Exception{
 		String currentDate = getCurrentDate();
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,gwidsComplete, startDate,4);
 		String today = getTodayDate();
@@ -2645,109 +3459,128 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return tempFlowSheetData;
 	}
 
-	public ArrayList<FS_DrugBean> formDrugData (Integer patientId,Integer flowsheetId, String startDate,Integer encounterId) throws Exception{
-		List<FlowsheetDrug> flowsheetDrugList=flowsheetDrugRepository.findAll(FlowsheetSpecification.flowsheetDrugsMapId(flowsheetId));
-		ArrayList<FS_DrugBean> arr_drugs = new ArrayList<FS_DrugBean> ();
-		Iterator<FlowsheetDrug> itr_drugs = flowsheetDrugList.iterator();
-		FlowsheetDrug hsh_notes = new FlowsheetDrug();
-		FS_DrugBean drugBean = null;
-		String performedDate = "";
-		String classId = "";
-		Encounter encounterEntity=null;
-		//getting the encounter details
-		if(encounterId!=-1){
-			encounterEntity=encounterEntityRepository.findOne(EncounterEntitySpecification.EncounterById(encounterId));
-		}
-		List<String> classIdsComplete=new ArrayList<String>();
-		while(itr_drugs.hasNext()){
-			hsh_notes = itr_drugs.next();
-			if(hsh_notes.getFlowsheetDrugClassId()!=null)
-			{
-				
-			if(!classId.equalsIgnoreCase(hsh_notes.getFlowsheetDrugClassId())){
-				List<String> classIds=new ArrayList<String>();
-				classIds.add(hsh_notes.getFlowsheetDrugClassId());
-				classIdsComplete.add(hsh_notes.getFlowsheetDrugClassId());
-				FlowsheetDrug flowsheetDrug=flowsheetDrugRepository.findOne(Specifications.where(FlowsheetSpecification.flowsheetDrugsClass(hsh_notes.getFlowsheetDrugClassId())).and(FlowsheetSpecification.flowsheetDrugsMapId(flowsheetId)));
-				List<Prescription> prescriptionElements=prescriptionRepository.findAll(PrescripitonSpecification.getactivemedwithclassIdpresc(patientId,hsh_notes.getFlowsheetDrugClassId(),encounterId,encounterEntity));
-				String[] classIdOverride=new String[1];
-				classIdOverride[0]=hsh_notes.getFlowsheetDrugClassId();
+	public ArrayList<FS_DrugBean> formDrugData (Integer patientId,Integer flowsheetId, String startDate,Integer encounterId,Integer patgender) throws Exception{
+		 //System.out.println("Coming into Drug Data ::::::::::::::::::::::::"+System.currentTimeMillis());
+			//long starttime=System.currentTimeMillis();
+		 List<FlowsheetDrug> flowsheetDrugList=flowsheetDrugRepository.findAll(FlowsheetSpecification.flowsheetDrugsMapId(flowsheetId));
+	         ArrayList<FS_DrugBean> arr_drugs = new ArrayList<FS_DrugBean> ();
+	         Iterator<FlowsheetDrug> itr_drugs = flowsheetDrugList.iterator();
+	         FlowsheetDrug hsh_notes = new FlowsheetDrug();
+	         FS_DrugBean drugBean = null;
+	         String performedDate = "";
+	         String classId = "";
+	         Encounter encounterEntity=null;
+	         //getting the encounter details
+	         if(encounterId!=-1){
+	             encounterEntity=encounterEntityRepository.findOne(EncounterEntitySpecification.EncounterById(encounterId));
+	         }
+	         List<String> classIdsComplete=new ArrayList<String>();
+	         PrescriptionServiceImpl serviceimpl=new PrescriptionServiceImpl();
+	         while(itr_drugs.hasNext()){
+	             hsh_notes = itr_drugs.next();
+	             if(!classId.equalsIgnoreCase(hsh_notes.getFlowsheetDrugClassId())){
+	                 List<String> classIds=new ArrayList<String>();
+	                 classIds.add(hsh_notes.getFlowsheetDrugClassId());
+	                 classIdsComplete.add(hsh_notes.getFlowsheetDrugClassId());
+	                 FlowsheetDrug flowsheetDrug=flowsheetDrugRepository.findOne(Specifications.where(FlowsheetSpecification.flowsheetDrugsClass(hsh_notes.getFlowsheetDrugClassId())).and(FlowsheetSpecification.flowsheetDrugsMapId(flowsheetId)));
+	                 //List<Prescription> prescriptionElements=prescriptionRepository.findAll(PrescripitonSpecification.getactivemedwithclassIdpresc(patientId,hsh_notes.getFlowsheetDrugClassId(),encounterId,encounterEntity));
 
-				//getting list of override alerts having class id
-				List<Overridealerts> overridealertsInt=overridealertsRepository.findAll(OverridealertsSpecification.overrideAlerts(classIdOverride, 5, patientId, flowsheetId,encounterId,encounterEntity));
-				for(int k=0;k<overridealertsInt.size();k++){
-					Prescription tempPrescription=new Prescription();
-					CoreClassHierarchy core=new CoreClassHierarchy();
-					core.setDisplayName(flowsheetDrug.getFlowsheetDrugClassName());
-					tempPrescription.setDocPrescBrandName("");
-					String notes="Reason to Override: "+Optional.fromNullable(overridealertsInt.get(k).getReason()).or("-");
-					tempPrescription.setDocPrescComments(notes);
-					tempPrescription.setDocPrescOrderedDate((Timestamp)overridealertsInt.get(k).getOverriddenOn());
-					prescriptionElements.add(tempPrescription);
-				}
-				//Order Labs by Date
-				prescriptionElements=orderByDateDrug(prescriptionElements, true);
+	                 List<PrescriptionServiceBean> prescriptionObject=serviceimpl.getMedDetailsWithClass(em,patientId,hsh_notes.getFlowsheetDrugClassId(),encounterId,encounterEntity);
+	                 String[] classIdOverride=new String[1];
+	                 classIdOverride[0]=hsh_notes.getFlowsheetDrugClassId();
 
-				if(prescriptionElements.size()>0){
-					for(int k=0;k<prescriptionElements.size();k++){
-						drugBean = new FS_DrugBean();
-						performedDate=MoreObjects.firstNonNull(prescriptionElements.get(k).getDocPrescOrderedDate(),"Never Prescribed").toString();
-						if(!performedDate.trim().contentEquals("Never Prescribed")){
-							DateFormat parser = new SimpleDateFormat("yyyy-MM-dd"); 
-							Date date = (Date) parser.parse(performedDate);
-							DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-							performedDate=formatter.format(date);
-						}
-						drugBean.setStatusOn(performedDate);
-						String className = Optional.fromNullable(flowsheetDrug.getFlowsheetDrugClassName()).or("");
-						drugBean.setGenericDrugName(className);
-						drugBean.setGenericDrugId(hsh_notes.getFlowsheetDrugClassId());
-						if(Optional.fromNullable(prescriptionElements.get(k).getDocPrescComments()).or("").startsWith("Reason to Override: ")){
-							drugBean.setStatus(Optional.fromNullable(prescriptionElements.get(k).getDocPrescComments()).or(""));
-							drugBean.setDrugName(prescriptionElements.get(k).getDocPrescBrandName());
-						}else{
-							String name="";
-							if(prescriptionElements.get(k).getDocPrescRxName()!=null)
-								name=prescriptionElements.get(k).getDocPrescRxName();
-							else if(prescriptionElements.get(k).getDocPrescDosageWithUnit()!=null)
-								name+=prescriptionElements.get(k).getDocPrescDosageWithUnit();
-							else if(prescriptionElements.get(k).getDocPrescForm()!=null)
-								name+=prescriptionElements.get(k).getDocPrescForm();
-							drugBean.setDrugName(name);
-							MedStatus medStatus=medStatusRepository.findOne(PrescripitonSpecification.medStatus(prescriptionElements.get(k).getDocPrescStatus()));
-							drugBean.setStatus(Optional.fromNullable(medStatus.getMedStatusName()).or(""));
-						}
-						arr_drugs.add(drugBean);
-					}
-				}else{
-					drugBean = new FS_DrugBean();
-					performedDate="Never Prescribed";
-					drugBean.setStatusOn(performedDate);
-					if( flowsheetDrug != null ) {
-						String className = Optional.fromNullable(flowsheetDrug.getFlowsheetDrugClassName()).or("");
-						drugBean.setGenericDrugName(className);
-					} else {
-						drugBean.setGenericDrugName("");
-					}
-					drugBean.setGenericDrugId(hsh_notes.getFlowsheetDrugClassId());
-					drugBean.setStatus("");
-					drugBean.setDrugName("");
-					arr_drugs.add(drugBean);
-				}
-				classId = hsh_notes.getFlowsheetDrugClassId();
-			}}
-	}
-		if(classIdsComplete.size()>0)
-			arr_drugs = checkFlowSheetRulesForDrugData(patientId,flowsheetId,classIdsComplete, arr_drugs, startDate);
-		return arr_drugs;
-	}
+	                 //getting list of override alerts having class id
+	                 List<Overridealerts> overridealertsInt=overridealertsRepository.findAll(OverridealertsSpecification.overrideAlerts(classIdOverride, 5, patientId, flowsheetId,encounterId,encounterEntity));
+	                 for(int k=0;k<overridealertsInt.size();k++){
+	                     PrescriptionServiceBean tempPrescription=new PrescriptionServiceBean();
+	                     CoreClassHierarchy core=new CoreClassHierarchy();
+	                     core.setDisplayName(flowsheetDrug.getFlowsheetDrugClassName());
+	                     tempPrescription.setBrandName("");
+	                     String notes="Reason to Override: "+Optional.fromNullable(overridealertsInt.get(k).getReason()).or("-");
+	                     tempPrescription.setComments(notes);
+	                     tempPrescription.setOrderedDate((Timestamp)overridealertsInt.get(k).getOverriddenOn());
+	                     prescriptionObject.add(tempPrescription);
+	                 }
+	                 //Order Labs by Date
+	                 prescriptionObject=orderByDateDrug1(prescriptionObject, true);
 
-	public ArrayList<FS_DrugBean> checkFlowSheetRulesForDrugData(Integer patientId, Integer flowSheetId,List<String> classIdsComplete,ArrayList<FS_DrugBean> flowSheetData, String startDate) throws Exception{ 
+	                 if(prescriptionObject.size()>0){
+	                     for(int k=0;k<prescriptionObject.size();k++){
+	                         drugBean = new FS_DrugBean();
+	                         performedDate=MoreObjects.firstNonNull(prescriptionObject.get(k).getOrderedDate(),"Never Prescribed").toString();
+	                         if(!performedDate.trim().contentEquals("Never Prescribed")){
+	                             DateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+	                             Date date = (Date) parser.parse(performedDate);
+	                             DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+	                             performedDate=formatter.format(date);
+	                         }
+	                         drugBean.setStatusOn(performedDate);
+	                         String className = Optional.fromNullable(flowsheetDrug.getFlowsheetDrugClassName()).or("");
+	                         drugBean.setGenericDrugName(className);
+	                         drugBean.setGenericDrugId(hsh_notes.getFlowsheetDrugClassId());
+	                         if(Optional.fromNullable(prescriptionObject.get(k).getComments()).or("").startsWith("Reason to Override: ")){
+	                             drugBean.setStatus(Optional.fromNullable(prescriptionObject.get(k).getComments()).or(""));
+	                             drugBean.setDrugName(prescriptionObject.get(k).getBrandName());
+	                         }else{
+	                             String name="";
+	                             if(prescriptionObject.get(k).getBrandName()!=null)
+	                                 name=prescriptionObject.get(k).getBrandName();
+	                             else if(prescriptionObject.get(k).getUnit()!=null)
+	                                 name+=prescriptionObject.get(k).getDose();
+	                             else if(prescriptionObject.get(k).getForm()!=null)
+	                                 name+=prescriptionObject.get(k).getForm();
+	                             drugBean.setDrugName(name);
+	                             MedStatus medStatus=medStatusRepository.findOne(PrescripitonSpecification.medStatus(prescriptionObject.get(k).getStatus()));
+	                             drugBean.setStatus(Optional.fromNullable(medStatus.getMedStatusName()).or(""));
+	                         }
+	                         arr_drugs.add(drugBean);
+	                     }
+	                 }else{
+	                     drugBean = new FS_DrugBean();
+	                     performedDate="Never Prescribed";
+	                     drugBean.setStatusOn(performedDate);
+	                     if( flowsheetDrug != null ) {
+	                         String className = Optional.fromNullable(flowsheetDrug.getFlowsheetDrugClassName()).or("");
+	                         drugBean.setGenericDrugName(className);
+	                     } else {
+	                         drugBean.setGenericDrugName("");
+	                     }
+	                     drugBean.setGenericDrugId(hsh_notes.getFlowsheetDrugClassId());
+	                     drugBean.setStatus("");
+	                     drugBean.setDrugName("");
+	                     arr_drugs.add(drugBean);
+	                 }
+	                 classId = hsh_notes.getFlowsheetDrugClassId();
+	             }
+	         }
+	         if(classIdsComplete.size()>0)
+	             arr_drugs = checkFlowSheetRulesForDrugData(patientId,flowsheetId,classIdsComplete, arr_drugs, startDate,patgender);
+	        // System.out.println("EndDrug::::::::"+(System.currentTimeMillis()-starttime));
+	         //System.out.println("Final time taken::for drug::::::"+(System.currentTimeMillis()-starttime));
+	         return arr_drugs;
+	}	
+	public List<PrescriptionServiceBean> orderByDateDrug1(List<PrescriptionServiceBean> confData,final boolean descending){
+        if (confData.size() > 0) {
+            Collections.sort(confData, new Comparator<PrescriptionServiceBean>() {
+                @Override
+                public int compare(final PrescriptionServiceBean object1, final PrescriptionServiceBean object2) {
+                    String empty="1900-05-13 16:40:35";
+                    Timestamp object1TimeStamp=(Timestamp) Optional.fromNullable(object1.getOrderedDate()).or(Timestamp.valueOf(empty));
+                    Timestamp object2TimeStamp=(Timestamp) Optional.fromNullable(object2.getOrderedDate()).or(Timestamp.valueOf(empty));
+                    return (descending ? -1 : 1) * object1TimeStamp.compareTo(object2TimeStamp);
+                }
+            } );
+        }
+        return confData;
+    }
+	
+
+	public ArrayList<FS_DrugBean> checkFlowSheetRulesForDrugData(Integer patientId, Integer flowSheetId,List<String> classIdsComplete,ArrayList<FS_DrugBean> flowSheetData, String startDate,Integer patgender) throws Exception{ 
 		String currentDate = getCurrentDate();
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,classIdsComplete, startDate,5);
 		String today = getTodayDate();
-		PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
-		String gender = MoreObjects.firstNonNull(genderPat.getPatientRegistrationSex(),-1).toString();
+		//PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+		String gender = patgender.toString();
 		ArrayList<FS_DrugBean> tempFlowSheetData = new ArrayList<FS_DrugBean>();
 		for(int flowSheetDataCounter = 0 ; flowSheetDataCounter < flowSheetData.size() ; flowSheetDataCounter++){
 			FS_DrugBean flowSheetDataObj = flowSheetData.get(flowSheetDataCounter);
@@ -2909,7 +3742,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 							value=f.format(Double.parseDouble(lbs));
 						}catch(Exception e){
 							value=lbs;
-							e.printStackTrace();
 						}
 					}
 					if (clinicalElements.getClinicalElementsName().equalsIgnoreCase("Height")){
@@ -2919,7 +3751,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 							value=f.format(Double.parseDouble(Feet));
 						}catch(Exception e){
 							value=Feet;
-							e.printStackTrace();
 						}
 					}
 					beanTemp.setPatientValue(value);
@@ -2963,7 +3794,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						value=f.format(Double.parseDouble(lbs));
 					}catch(Exception e){
 						value=lbs;
-						e.printStackTrace();
 					}
 				}
 				if (clinicalElements.getClinicalElementsName().equalsIgnoreCase("Height")){
@@ -2973,7 +3803,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						value=f.format(Double.parseDouble(Feet));
 					}catch(Exception e){
 						value=Feet;
-						e.printStackTrace();
 					}
 				}
 				beanTemp.setPatientValue(value);
@@ -3003,8 +3832,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				String startDate = "";
 				if(flowsheetType==1){
 					//Preventive Management
-					PatientRegistration patientReg=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
-					startDate = MoreObjects.firstNonNull(patientReg.getPatientRegistrationDob(), "").toString();
+					//PatientRegistration patientReg=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+					startDate = getpatientDOb(patientId).toString();
 				} else if(flowsheetType==2){
 					//Disease Management
 					List<FlowsheetDx> flowsheetDxList=flowsheetDxRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetDxCodeBasedOnFlowsheetTypeId(2, flowsheetType)));
@@ -3026,7 +3855,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						if(rstList.size()>0)
 							startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
 					}catch(Exception e){
-						e.printStackTrace();
+
 					}
 				}else if(flowsheetType==3){
 					//Meaningful Use Measures
@@ -3047,6 +3876,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		}
 		return fBeanList;
 	}
+	
 
 	public ArrayList<FS_LabBean> formDataRecommendedLabsParams(int flowsheetId,String startDate, Integer patientId) throws Exception {
 		// getting list of codes and there code system
@@ -3055,10 +3885,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		String[][] codes= getFlowsheetParamCode(groupIds,groupIdParamIdMap);
 
 		//getting the list of paramIds for the above codes
-		List<LabParameters> paramsList=getParamIds(codes,groupIdParamIdMap);
+		List<Integer> paramsList=getParamIds(codes,groupIdParamIdMap);
 		Integer[] paramIds=new Integer[paramsList.size()];
 		for(int k=0;k<paramsList.size();k++){
-			paramIds[k]=Optional.fromNullable(paramsList.get(k).getLabParametersId()).or(-1);
+			//paramIds[k]=Optional.fromNullable(paramsList.get(k).getLabParametersId()).or(-1);
+			paramIds[k]=Optional.fromNullable(paramsList.get(k)).or(-1);
 		}
 		if(paramIds.length==0){
 			paramIds=new Integer[1];
@@ -3070,8 +3901,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		chartId=charts.get(0).getChartId();
 
 		//getting the patient gender
-		PatientRegistration patients=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
-		Integer gender=patients.getPatientRegistrationSex();
+		//PatientRegistration patients=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+		Integer gender=getPatientGender(patientId);
 
 		//getting list of performed parameters having param id and chart id
 		List<ParamStandardGroup> perfOrders=paramStandardGroupRepository.findAll(Specifications.where(FlowsheetSpecification.paramStandardGroupIdIsActive(groupIds)));
@@ -3197,8 +4028,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		chartId=charts.get(0).getChartId();
 
 		//getting the patient gender
-		PatientRegistration patients=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
-		Integer gender=patients.getPatientRegistrationSex();
+		//PatientRegistration patients=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+		Integer gender=getPatientGender(patientId);
 
 		List<LabStandardGroup> perfOrders=labStandardGroupRepository.findAll(Specifications.where(FlowsheetSpecification.labStandardGroupIdIsActive(groupIds)));
 		ArrayList<FS_LabBean> arr_lab = new ArrayList<FS_LabBean> ();
@@ -3490,14 +4321,16 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			for(int i=0;i<labGroupList.size();i++){
 				Integer groupId=Optional.fromNullable(labGroupList.get(i).getLabStandardGroupId()).or(-1);
 				if(groupId!=-1){
-					labGroupList.get(i).setLabStandardCodeTable(labStandardCodeRepository.findAll(FlowsheetSpecification.labStandardCodeGroupId(groupId)));
+					//labStandardCodeRepository.findAll(FlowsheetSpecification.labStandardCodeGroupId(groupId));
+					//labGroupList.get(i).setLabStandardCodeTable(labStandardCodeRepository.findAll(FlowsheetSpecification.labStandardCodeGroupId(groupId)));
+					labGroupList.get(i).setLabStandardCodeTable(getlabStandardGroupcodes(groupId));
 				}
 				if(labGroupList.get(i).getLabStandardCodeTable().size()>0){
 					for(int j=0;j<labGroupList.get(i).getLabStandardCodeTable().size();j++){
 						LabStandardCode temp=labGroupList.get(i).getLabStandardCodeTable().get(j);
 						if(temp.getLabStandardCodeGroupCodesystem().contentEquals(FlowsheetServiceImpl.GlenwoodSystemsOID)&&
 								temp.getLabStandardCodeGroupGwid()!=null){
-								temp.setLabDescriptionTable(labDescriptionRepository.findOne(InvestigationSpecification.labByTestId(temp.getLabStandardCodeGroupGwid())));
+							temp.setLabDescriptionTable(labDescriptionRepository.findOne(InvestigationSpecification.labByTestId(temp.getLabStandardCodeGroupGwid())));
 						}
 					}
 				}
@@ -3516,7 +4349,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						ParamStandardCode temp=paramGroupList.get(i).getParamStandardCodeTable().get(j);
 						if(temp.getParamStandardCodeGroupCodesystem().contentEquals(FlowsheetServiceImpl.GlenwoodSystemsOID)&&
 								temp.getParamStandardCodeGroupGwid()!=null){
-								temp.setLabParametersTable(labParametersRepository.findOne(InvestigationSpecification.getParamDetails(temp.getParamStandardCodeGroupGwid())));
+							temp.setLabParametersTable(labParametersRepository.findOne(InvestigationSpecification.getParamDetails(temp.getParamStandardCodeGroupGwid())));
 						}
 					}
 				}
@@ -3525,6 +4358,33 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			flowsheetConfiguredDetails.setParamStandardGroup(paramGroupList);
 		}
 		return flowsheetConfiguredDetails;
+	}
+
+	private List<LabStandardCode> getlabStandardGroupcodes(Integer groupId) {
+		CriteriaBuilder cb1=em.getCriteriaBuilder();
+		CriteriaQuery<LabStandardCode> cq1 = cb1.createQuery(LabStandardCode.class);
+		List<LabStandardCode> stndcode= new ArrayList<LabStandardCode>();
+		Root<LabStandardCode> root1 = cq1.from(LabStandardCode.class);
+		@SuppressWarnings("rawtypes")
+		Selection[] selectionsforVR=new Selection[]{
+			root1.get(LabStandardCode_.labStandardCodeGroupId),
+			root1.get(LabStandardCode_.labStandardCodeGroupCode),
+			root1.get(LabStandardCode_.labStandardCodeGroupGwid),
+			root1.get(LabStandardCode_.labStandardCodeGroupCodesystem),
+
+		};
+		cq1.select(cb1.construct(LabStandardCode.class,selectionsforVR));
+		Predicate[] restrictionsforVR=new Predicate[]{
+				cb1.and(root1.get(LabStandardCode_.labStandardCodeGroupId).in(groupId)),
+		};
+		cq1.where (restrictionsforVR);
+		try{
+			stndcode= em.createQuery(cq1).getResultList();	
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return stndcode;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -3586,7 +4446,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 										newStandardCodes.add(newStandardCodesTemp);
 									}
 								}
-								labStandardCodeRepository.delete(labStandardCodeRepository.findAll(FlowsheetSpecification.labStandardCodeGroupId(groupId)));
+								
+								labStandardCodeRepository.delete(DeletelabStandardCodeGroupId(groupId));
 								labStandardCodeRepository.save(newStandardCodes);
 							}
 							message="Saved successfully.";
@@ -3652,7 +4513,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			}
 		}catch(Exception e){
 			message="Saving failed.";
-			e.printStackTrace();
 		}
 		flowsheetConfiguredDetails=getFlowsheetsStandardGroupDetails(isStandardLab);
 		flowsheetConfiguredDetails.setMessageAfterSave(message);
@@ -3660,6 +4520,34 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		flowsheetConfiguredDetails.setCurrentGroupNameAfterSave(groupName);
 		return flowsheetConfiguredDetails;
 	}
+	private List<LabStandardCode> DeletelabStandardCodeGroupId(Integer groupId) {
+		// TODO Auto-generated method stub
+		CriteriaBuilder cb1=em.getCriteriaBuilder();
+		CriteriaQuery<LabStandardCode> cq1 = cb1.createQuery(LabStandardCode.class);
+		List<LabStandardCode> stndcode= new ArrayList<LabStandardCode>();
+		Root<LabStandardCode> root1 = cq1.from(LabStandardCode.class);
+		@SuppressWarnings("rawtypes")
+		Selection[] selectionsforVR=new Selection[]{
+			root1.get(LabStandardCode_.labStandardCodeGroupId),
+			root1.get(LabStandardCode_.labStandardCodeGroupCode),
+			root1.get(LabStandardCode_.labStandardCodeGroupGwid),
+			root1.get(LabStandardCode_.labStandardCodeGroupCodesystem),
+
+		};
+		cq1.select(cb1.construct(LabStandardCode.class,selectionsforVR));
+		Predicate[] restrictionsforVR=new Predicate[]{
+				cb1.and(root1.get(LabStandardCode_.labStandardCodeGroupId).in(groupId)),
+		};
+		cq1.where (restrictionsforVR);
+		try{
+			stndcode= em.createQuery(cq1).getResultList();	
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return stndcode;
+	}
+
 	public List<LabStandardGroup> orderByLabGroupName(List<LabStandardGroup> confData){
 		if (confData.size() > 0) {
 			Collections.sort(confData, new Comparator<LabStandardGroup>() {
@@ -4211,9 +5099,9 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			return confData1;
 		}
 	}
-	
+
 	public FlowsheetBean getFlowsheetDataSOAP(Integer flowsheetTypeParam,Integer flowsheetId, Integer patientId,Integer encounterId) throws Exception{
-		logger.debug("Request to get the flowsheet details for labs and params section for a particular flowsheet for a patient.:: inside service Impl");
+		//logger.debug("Request to get the flowsheet details for labs and params section for a particular flowsheet for a patient.:: inside service Impl");
 		FlowsheetBean fBean=new FlowsheetBean();
 		if(encounterId!=-1)
 			fBean.setChartBased(false);
@@ -4236,10 +5124,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				flowsheetIds[0]="-2";
 			}
 			String startDate = "";
+			int patgender=getPatientGender(patientId);
 			if((flowsheetType==1)|| (flowsheetType==5)){
 				//Preventive Management
-				PatientRegistration patientReg=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
-				startDate = MoreObjects.firstNonNull(patientReg.getPatientRegistrationDob(), "").toString();
+				//PatientRegistration patientReg=patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
+				startDate = getpatientDOb(patientId).toString();
 			} else if(flowsheetType==2){
 				//Disease Management
 				List<FlowsheetDx> flowsheetDxList=flowsheetDxRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetDxCodeBasedOnFlowsheetTypeId(2, flowsheetType)));
@@ -4261,7 +5150,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					if(rstList.size()>0)
 						startDate = Optional.fromNullable(rstList.get(0)).or("").toString();
 				}catch(Exception e){
-					e.printStackTrace();
+                    e.printStackTrace();
 				}
 			}else if(flowsheetType==3){
 				//Meaningful Use Measures
@@ -4272,14 +5161,14 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				if(rstList!=null)
 					startDate = Optional.fromNullable(rstList).or("").toString();
 			}
-			fBean.setLabData(formLabData(flowsheetId, startDate, patientId,encounterId));
-			fBean.setParamData(formLabParameters(flowsheetId, startDate, patientId,encounterId));
+			fBean.setLabData(formLabData(flowsheetId, startDate, patientId,encounterId,patgender));
+			fBean.setParamData(formLabParameters(flowsheetId, startDate, patientId,encounterId,patgender));
 			fBean.setParamDateArr(paramPerformedDate);
-			fBean.setClinicalVitalsData(formClinicalElementsData(flowsheetId, startDate, patientId,encounterId));
+			fBean.setClinicalVitalsData(formClinicalElementsData(flowsheetId, startDate, patientId,encounterId,patgender));
 			fBean.setVitalDateArr(clinicalVitalParamDate);
-			fBean.setClinicalPlanData(formClinicalData(flowsheetId, startDate, patientId,encounterId));
+			fBean.setClinicalPlanData(formClinicalData(flowsheetId, startDate, patientId,encounterId,patgender));
 		}
-		logger.debug("Request to get the flowsheet details for labs and params section for a particular flowsheet for a patient.:: outside service Impl");
+		//logger.debug("Request to get the flowsheet details for labs and params section for a particular flowsheet for a patient.:: outside service Impl");
 		return fBean;
 	}
 }

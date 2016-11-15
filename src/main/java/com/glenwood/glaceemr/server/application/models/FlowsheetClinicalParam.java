@@ -73,4 +73,23 @@ public class FlowsheetClinicalParam {
 			Integer flowsheetClinicalParamSortorder) {
 		this.flowsheetClinicalParamSortorder = flowsheetClinicalParamSortorder;
 	}
+	
+	
+	public  FlowsheetClinicalParam()
+	{
+		super();
+	}
+	
+	public FlowsheetClinicalParam(Integer flowsheetClinicalParamId,
+			Integer flowsheetClinicalParamMapid,String flowsheetClinicalParamMapElementgwid,
+			Integer flowsheetClinicalParamMapElementtype,Integer flowsheetClinicalParamSortorder){
+		this.flowsheetClinicalParamId=flowsheetClinicalParamId;
+		this.flowsheetClinicalParamMapid=flowsheetClinicalParamMapid;
+		this.flowsheetClinicalParamMapElementgwid=flowsheetClinicalParamMapElementgwid;
+		this.flowsheetClinicalParamMapElementtype=flowsheetClinicalParamMapElementtype;
+		this.flowsheetClinicalParamSortorder=flowsheetClinicalParamSortorder;
+	}
+	
+	
+	
 }

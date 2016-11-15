@@ -1,9 +1,19 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "hl7_external_test")
@@ -46,6 +56,11 @@ public class Hl7ExternalTest {
 	@Column(name="hl7_external_test_specimen_soource", length=50, columnDefinition="String default ''")
 	private String hl7ExternalTestSpecimenSoource;
 
+	@JsonIgnore
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="hl7ExternalTestTable")
+	public List<Hl7ExternalTestmapping> hl7ExternalTestmappingTable;
+	
+	
 	public Long getHl7ExternalTestId() {
 		return hl7ExternalTestId;
 	}

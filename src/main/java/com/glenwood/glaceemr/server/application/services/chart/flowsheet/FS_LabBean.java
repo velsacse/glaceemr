@@ -1,10 +1,18 @@
 package com.glenwood.glaceemr.server.application.services.chart.flowsheet;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
-public class FS_LabBean {
+import com.glenwood.glaceemr.server.application.models.LabDescription_;
+import com.glenwood.glaceemr.server.application.models.LabEntries_;
+import com.glenwood.glaceemr.server.application.models.VaccineReport_;
+
+public class FS_LabBean implements Comparable<FS_LabBean>{
+	
 	private String islab;
 	private String labTestId;
 	private String labName;
@@ -21,6 +29,51 @@ public class FS_LabBean {
 	private String performdatesort;
 	private Integer groupId;
 	
+	public FS_LabBean() {
+		super();
+	}
+	
+	public FS_LabBean(Date performedOn, int labEntriesTestdetailId, int labEntriesTestId, 
+			String labEntriesTestDesc, Date labEntriesOrdOn, Date labEntriesPerfOn, 
+			String labEntriesResultNotes, int labEntriesTestStatus) {
+		this.labTestId = labEntriesTestId+"";
+		this.labName = labEntriesTestDesc;
+		this.orderedOn = new SimpleDateFormat("MM/dd/yyyy").format(labEntriesOrdOn);
+		this.performedOn = new SimpleDateFormat("MM/dd/yyyy").format(performedOn);
+		this.testDetailId = labEntriesTestdetailId+"";
+		this.status = labEntriesTestStatus+"";
+		this.resultNotes = labEntriesResultNotes;
+		this.performdatesort= new SimpleDateFormat("MM/dd/yyyy").format(labEntriesOrdOn);
+		
+		
+	}
+	
+	public FS_LabBean(Date performedOn, int labEntriesTestId,
+			String labEntriesResultNotes, String labEntriesTestDesc) {
+		this.labTestId = labEntriesTestId+"";
+		this.labName = labEntriesTestDesc;
+		this.orderedOn = new SimpleDateFormat("MM/dd-yyyy").format(performedOn);
+		this.performedOn = new SimpleDateFormat("MM/dd/yyyy").format(performedOn);
+		this.status = "3";
+		this.resultNotes = labEntriesResultNotes;
+
+	}
+	
+	public FS_LabBean(Date performedOn, String labEntriesResultNotes, String  labEntriesTestId) {
+		this.labTestId=labEntriesTestId;
+		this.labName = "";		
+		this.orderedOn = new SimpleDateFormat("MM/dd/yyyy").format(performedOn);
+		this.performedOn = new SimpleDateFormat("MM/dd/yyyy").format(performedOn);
+		this.status = "8";
+		this.resultNotes = labEntriesResultNotes;
+
+
+
+
+		
+		
+	}
+	
 	public String gettestDetailId() {
 		return testDetailId;
 	}
@@ -34,14 +87,14 @@ public class FS_LabBean {
 		return completedIdStatus;
 	}
 
-	public void settestDetailId(ArrayList<Integer> testIdCollection) {
+	public void settestDetailId(ArrayList<Integer> testDetailIdsTemp) {
 		try{
 			StringBuilder testDetailIdstr = new StringBuilder();
-			for(int counter=0;counter<testIdCollection.size();counter++){
-				if(counter == (testIdCollection.size()-1))
-					testDetailIdstr.append(testIdCollection.get(counter).toString());
+			for(int counter=0;counter<testDetailIdsTemp.size();counter++){
+				if(counter == (testDetailIdsTemp.size()-1))
+					testDetailIdstr.append(testDetailIdsTemp.get(counter).toString());
 				else
-					testDetailIdstr.append(testIdCollection.get(counter).toString()+",");
+					testDetailIdstr.append(testDetailIdsTemp.get(counter).toString()+",");
 			}
 			this.testDetailId =testDetailIdstr.toString() ;
 		}
@@ -51,17 +104,17 @@ public class FS_LabBean {
 		}
 	}
 
-	public void setCompletedDetaildId(ArrayList<String> testIdAry) {
+	public void setCompletedDetaildId(List<String> testIds) {
 		try{
 			StringBuilder completedDetailIdstr = new StringBuilder();
 			List<Integer> CompStatus = new ArrayList<Integer>();
- 			for(int counter=0;counter<testIdAry.size();counter++){
-				if(counter == (testIdAry.size()-1)){
-					completedDetailIdstr.append(testIdAry.get(counter).toString().split("@#@")[0]);
-					CompStatus.add(Integer.parseInt(testIdAry.get(counter).toString().split("@#@")[1]));
+ 			for(int counter=0;counter<testIds.size();counter++){
+				if(counter == (testIds.size()-1)){
+					completedDetailIdstr.append(testIds.get(counter).toString().split("@#@")[0]);
+					CompStatus.add(Integer.parseInt(testIds.get(counter).toString().split("@#@")[1]));
 				}else{
-					completedDetailIdstr.append(testIdAry.get(counter).toString().split("@#@")[0]+"_");
-					CompStatus.add(Integer.parseInt(testIdAry.get(counter).toString().split("@#@")[1]));
+					completedDetailIdstr.append(testIds.get(counter).toString().split("@#@")[0]+"_");
+					CompStatus.add(Integer.parseInt(testIds.get(counter).toString().split("@#@")[1]));
 				}
 			}
 			this.completedDetaildId =completedDetailIdstr.toString();
@@ -182,5 +235,19 @@ public class FS_LabBean {
 
 	public void setIslab(String islab) {
 		this.islab = islab;
+	}
+
+	@Override
+	public int compareTo(FS_LabBean o) {
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+    	try {
+			Date date1 = sdf.parse(performedOn);
+			Date date2 = sdf.parse(o.getPerformedOn());
+			return date2.compareTo(date1);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 }

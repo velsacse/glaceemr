@@ -1366,4 +1366,19 @@ public class LabEntries {
 		this.fileDetails = fileDetails;
 	}
 	
+	
+	public LabEntries(){
+		super();
+	}
+	
+	
+	public LabEntries(Integer labEntriesTestdetailId,Integer labEntriesTestStatus){
+		this.labEntriesTestdetailId=labEntriesTestdetailId;
+		this.labEntriesTestStatus=labEntriesTestStatus;
+	}
+	
+	public LabEntries(Integer labEntriesTestdetailId){
+		this.labEntriesTestdetailId=labEntriesTestdetailId;
+	}
+	
 }

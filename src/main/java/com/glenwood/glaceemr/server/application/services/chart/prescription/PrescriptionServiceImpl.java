@@ -12,6 +12,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.json.JSONException;
@@ -22,16 +25,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
+import com.glenwood.glaceemr.server.application.models.CoreClassGendrug;
+import com.glenwood.glaceemr.server.application.models.CoreClassGendrug_;
+import com.glenwood.glaceemr.server.application.models.CoreClassHierarchy;
+import com.glenwood.glaceemr.server.application.models.CoreClassHierarchy_;
+import com.glenwood.glaceemr.server.application.models.CoreGenproduct;
+import com.glenwood.glaceemr.server.application.models.CoreGenproduct_;
 import com.glenwood.glaceemr.server.application.models.CurrentMedication;
 import com.glenwood.glaceemr.server.application.models.DrugSchedule;
 import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.H113;
 import com.glenwood.glaceemr.server.application.models.H802;
 import com.glenwood.glaceemr.server.application.models.H802_;
 import com.glenwood.glaceemr.server.application.models.H810;
+import com.glenwood.glaceemr.server.application.models.MedStatus;
+import com.glenwood.glaceemr.server.application.models.MedStatus_;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlan;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
+import com.glenwood.glaceemr.server.application.models.NdcPkgProduct;
+import com.glenwood.glaceemr.server.application.models.NdcPkgProduct_;
 import com.glenwood.glaceemr.server.application.models.PharmacyFilterBean;
 import com.glenwood.glaceemr.server.application.models.PharmacyMapping;
 import com.glenwood.glaceemr.server.application.models.PharmacyMapping_;
@@ -563,6 +577,83 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		
 		return encounterRepository.findAll(PrescripitonSpecification.getRefillRequestHistory(3, getEncounterReasonId("Refills", 2), chartId));		
 	}
+	
+	
+	public List<PrescriptionServiceBean> getMedDetailsWithClass(EntityManager em1,Integer patientId,
+            String flowsheetDrugClassId, Integer encounterId,
+            Encounter encounterEntity) {
+        CriteriaBuilder builder1 = em1.getCriteriaBuilder();
+        CriteriaQuery<Object> cq1 = builder1.createQuery();
+        Root<Prescription> root1 = cq1.from(Prescription.class);
+        // TODO Auto-generated method stub
+           Join<Prescription,Encounter> currjoin1=root1.join(Prescription_.encounter,JoinType.INNER);
+           Join<Prescription,MedStatus> currjoin=root1.join(Prescription_.medstatus,JoinType.INNER);
+           currjoin1.join(Encounter_.chart, JoinType.INNER);
+           Join<Prescription, NdcPkgProduct> pkgjoin=root1.join(Prescription_.ndcPkgProduct,JoinType.INNER);
+           Join<NdcPkgProduct, CoreGenproduct> corejoin=pkgjoin.join(NdcPkgProduct_.coregenproduct,JoinType.INNER);
+           Join<CoreGenproduct, CoreClassGendrug> classjoin=corejoin.join(CoreGenproduct_.coreclassgendrug,JoinType.INNER);
+           Join<CoreClassGendrug, CoreClassHierarchy> hierarchyjon=classjoin.join(CoreClassGendrug_.coreClassHierarchyTable,JoinType.INNER);
+           String likePattern = getLikePattern("active");
+           Predicate patientId1=builder1.equal(root1.get(Prescription_.docPrescPatientId), patientId);
+           Predicate isactive=builder1.equal(root1.get(Prescription_.docPrescIsActive),true);
+           Predicate ismedsup=builder1.equal(root1.get(Prescription_.docPrescIsMedSup),false);
+           Predicate medstatus=builder1.like(builder1.lower(currjoin.get(MedStatus_.medStatusGroup)),likePattern);
+           Predicate classIdPres=hierarchyjon.get(CoreClassHierarchy_.parentClassId).in(flowsheetDrugClassId);
+           /*root1.fetch(Prescription_.medstatus,JoinType.INNER);
+           root1.fetch(Prescription_.encounter,JoinType.INNER);*/
+           if((encounterId!=-1)&&(encounterEntity.getEncounterStatus()==3)){
+               Predicate encounterDatePred=builder1.lessThanOrEqualTo(root1.get(Prescription_.docPrescOrderedDate), encounterEntity.getEncounterDate());
+               cq1.where(builder1.and(patientId1, isactive,medstatus,ismedsup,classIdPres,encounterDatePred));
+           }else{
+               cq1.where(builder1.and(patientId1, isactive,medstatus,ismedsup,classIdPres));
+           }
+           //System.out.println("medstatus"+medstatus+"patientId1"+patientId+"isactive"+isactive+"classIdPres"+flowsheetDrugClassId+"medstatus"+likePattern);
+           cq1.multiselect(builder1.construct(PrescriptionServiceBean.class,
+                   root1.get(Prescription_.rxname),
+                   root1.get(Prescription_.docPrescOrderedDate),
+                   root1.get(Prescription_.docPrescStatus),
+                   root1.get(Prescription_.docPrescEncounterId),
+                   root1.get(Prescription_.rxform),
+                   root1.get(Prescription_.rxstrength),
+                   root1.get(Prescription_.docPrescComments) ));
+          // System.out.println("cq.................."+cq1);
+       List<Object> pre=em1.createQuery(cq1).getResultList();
+       List<PrescriptionServiceBean> pre1=new ArrayList<PrescriptionServiceBean>();
+       for(int i1=0;i1<pre.size();i1++){
+           PrescriptionServiceBean inner=(PrescriptionServiceBean)pre.get(i1);
+           String brandname=inner.getBrandName();
+          // System.out.println("brandname???????????????????????????"+brandname);
+           Date ordereddate = inner.getOrderedDate();
+           Integer status=inner.getStatus();
+           Integer encounterid=inner.getEncounterId();
+           String form=inner.getForm();
+           String strength=inner.getDose();
+           String comments=inner.getComments();
+           PrescriptionServiceBean inner1=new PrescriptionServiceBean(brandname, ordereddate, status, encounterid,form,strength,comments);
+           inner1.setBrandName(brandname);
+           inner1.setEncounterId(encounterid);
+           inner1.setStatus(status);
+           inner1.setOrderedDate(ordereddate);
+           inner1.setComments(comments);
+           inner1.setDose(strength);
+           inner1.setForm(form);
+           pre1.add(inner1);
+
+       }
+
+       return pre1;
+    }
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 }
 

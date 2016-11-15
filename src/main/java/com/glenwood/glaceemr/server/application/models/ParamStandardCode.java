@@ -34,12 +34,30 @@ public class ParamStandardCode {
 
 	@Column(name="param_standard_code_group_codesystem", length=100)
 	private String paramStandardCodeGroupCodesystem;
-
+    
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="param_standard_code_group_gwid",referencedColumnName="lab_parameters_id",insertable=false,updatable=false)
 	@JsonManagedReference
 	LabParameters labParametersTable;
 	
+	public ParamStandardCode(){
+		super();
+	}
+	
+	
+	public ParamStandardCode(Integer paramStandardCodeId,
+			Integer paramStandardCodeGroupId,
+			String paramStandardCodeGroupCode,
+			Integer paramStandardCodeGroupGwid,
+			String paramStandardCodeGroupCodesystem) {
+	
+		this.paramStandardCodeId=paramStandardCodeId;
+		this.paramStandardCodeGroupId=paramStandardCodeGroupId;
+		this.paramStandardCodeGroupCode=paramStandardCodeGroupCode;
+		this.paramStandardCodeGroupGwid=paramStandardCodeGroupGwid;
+		this.paramStandardCodeGroupCodesystem=paramStandardCodeGroupCodesystem;
+	}
+
 	public Integer getParamStandardCodeId() {
 		return paramStandardCodeId;
 	}
