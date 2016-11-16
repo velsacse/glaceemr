@@ -78,7 +78,10 @@ public class AuditTrailSaveServiceImpl implements AuditTrailSaveService {
 		}
 
 		eventLog.setRawData(Raw_Data);
-		eventLog.setSessionId(httpServletRequest.getSession(false).getId());
+		if(httpServletRequest.getSession()!=null)
+			eventLog.setSessionId(httpServletRequest.getSession(false).getId());
+		else
+			eventLog.setSessionId("");
 		eventLog.setServerIp(getServerIPAddress());
 		String Server_Hostname = httpServletRequest.getRemoteHost();
 		eventLog.setServerHostname(Server_Hostname);

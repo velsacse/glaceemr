@@ -10,7 +10,7 @@ public interface AuditTrailEnumConstants {
 				21, "GlaceMessaging"), GLACEMESSAGING_EMAIL(22, "GlaceMessaging/Email"), QUALITY_REPORTING(23, "QualityReporting"), CDS(24, "CDS"), LABINTERFACE(25, "LabInterface"), FINANCE_CLEARINGHOUSE(25, "Finance/Clearinghouse"), CHART(26,
 				"Chart"), PRESCRIPTIONS(27, "Prescriptions"), IMMUNIZATION(28, "Immunization"), FINANCE_ELIGIBILITY(29, "Finance/Eligibility"), OPENPROBLEM(30, "OpenProblem"), DASHBOARD(31, "Dashboard"), CONSENTFORM(32, "ConsentForm"), SCHEDULER(33,
 				"Scheduler"), INVESTIGATION(34, "Investigation"), REFERRAL(35, "Referral"), FLOWSHEET(36, "Flowsheet"), INVENTORY(37, "Inventory"), ENCOUNTER(38, "Encounter"), MESSAGE(39, "Message"), DME(40, "DME"), DIRECT(41, "Direct"), GLACEMESSAGING_LETTER(
-				42, "GlaceMessaging/Letter"), ASSESSMENT(43, "Assessment"), AMENDMENT(44, "Amendment"), ALLERGY(45, "Allergy"), PATIENT_EDUCATION(46, "PatientEducation"), TEMPLATE(47, "Template"), LoginAndLogOut(48, "Login/LogOut");
+				42, "GlaceMessaging/Letter"), ASSESSMENT(43, "Assessment"), AMENDMENT(44, "Amendment"), ALLERGY(45, "Allergy"), PATIENT_EDUCATION(46, "PatientEducation"), TEMPLATE(47, "Template"), LoginAndLogOut(48, "Login/LogOut"), ALERTS(49, "Alerts");
 		// semicolon needed when fields / methods follow
 
 		public final int Value;
