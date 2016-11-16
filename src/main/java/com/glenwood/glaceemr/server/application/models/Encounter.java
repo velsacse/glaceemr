@@ -686,6 +686,22 @@ public class Encounter implements Serializable {
 	@JoinColumn(name="encounter_pos", referencedColumnName="pos_table_relation_id", insertable=false, updatable=false)
 	PosTable posTable;
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="encounter_reason", referencedColumnName="h113003", insertable=false, updatable=false)
+	H113 h113;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="encounter_reason", referencedColumnName="h479001", insertable=false, updatable=false)
+	H479 h479;
+	
+	@ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.ALL,optional = false)
+	@JsonManagedReference
+	@JoinColumn(name="encounter_patient_episodeid", referencedColumnName="patient_episode_id", insertable=false,updatable=false)
+	PatientEpisode patientEpisode;
+	
+	
 	public PosTable getPosTable() {
 		return posTable;
 	}

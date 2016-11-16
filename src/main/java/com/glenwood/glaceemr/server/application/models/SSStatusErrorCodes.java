@@ -1,21 +1,11 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
-
-import java.sql.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
-
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "ss_status_error_codes")
@@ -59,4 +49,15 @@ public class SSStatusErrorCodes implements Serializable {
 
 	@Column(name="ss_status_error_codes_name")
 	private String ssStatusErrorCodesName;
+	
+	@Column(name="ss_status_error_codes_description")
+	private String ssStatusErrorCodesDescription;
+
+	public String getSsStatusErrorCodesDescription() {
+		return ssStatusErrorCodesDescription;
+	}
+
+	public void setSsStatusErrorCodesDescription(String ssStatusErrorCodesDescription) {
+		this.ssStatusErrorCodesDescription = ssStatusErrorCodesDescription;
+	}
 }

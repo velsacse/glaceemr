@@ -1,9 +1,5 @@
 package com.glenwood.glaceemr.server.application.models;
 
-import java.sql.Timestamp;
-
-import java.sql.Date;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,13 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "drug_relation_map")
@@ -52,7 +42,7 @@ public class DrugRelationMap {
 	private Integer drugRelationMapSchedule2Id;
 
 	@Column(name="drug_relation_map_qty")
-	private Integer drugRelationMapQty;
+	private String drugRelationMapQty;
 
 	@Column(name="drug_relation_map_refills_id")
 	private Integer drugRelationMapRefillsId;
@@ -189,12 +179,12 @@ public class DrugRelationMap {
 	}
 
 
-	public Integer getDrugRelationMapQty() {
+	public String getDrugRelationMapQty() {
 		return drugRelationMapQty;
 	}
 
 
-	public void setDrugRelationMapQty(Integer drugRelationMapQty) {
+	public void setDrugRelationMapQty(String drugRelationMapQty) {
 		this.drugRelationMapQty = drugRelationMapQty;
 	}
 

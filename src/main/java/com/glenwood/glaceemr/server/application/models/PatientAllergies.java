@@ -11,6 +11,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -88,7 +92,8 @@ public class PatientAllergies {
 	public String patAllergCodeSystem;
 
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
-	@JoinColumn(name="patallerg_createdby", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
+	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula= @JoinFormula(value="patallerg_createdby::integer" , referencedColumnName="emp_profile_empid"))})
+	@JsonManagedReference
 	EmployeeProfile empProfileAllgCreatedByTable;
 	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
@@ -100,7 +105,8 @@ public class PatientAllergies {
 	EmployeeProfile empProfileAllgInactiveByTable;
 	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
-	@JoinColumn(name="patallerg_modifiedby", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
+	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula= @JoinFormula(value="patallerg_modifiedby::integer" , referencedColumnName="emp_profile_empid"))})
+	@JsonManagedReference
 	EmployeeProfile empProfileAllgModifiedByTable;
 	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)

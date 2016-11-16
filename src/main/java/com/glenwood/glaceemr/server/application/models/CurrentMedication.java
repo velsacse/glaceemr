@@ -572,5 +572,19 @@ public class CurrentMedication {
 		this.currentMedicationRxnormCode = currentMedicationRxnormCode;
 	}
 
-
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="current_medication_leaf_id",referencedColumnName="leaf_patient_id",insertable=false,updatable=false)
+	@JsonManagedReference
+	LeafPatient leafPatient;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="current_medication_modified_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
+	@JsonManagedReference
+	EmployeeProfile empProfileModifiedBy;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="current_medication_order_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
+	@JsonManagedReference
+	EmployeeProfile empProfileOrderBy;
+	
 }

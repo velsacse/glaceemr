@@ -1,9 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
-
-import java.sql.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,13 +11,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "ss_outbox")
@@ -79,11 +71,11 @@ public class SSOutbox implements Serializable{
 		this.ssOutboxPatientId = ssOutboxPatientId;
 	}
 
-	public String getSsOutboxPrescriptionId() {
+	public Integer getSsOutboxPrescriptionId() {
 		return ssOutboxPrescriptionId;
 	}
 
-	public void setSsOutboxPrescriptionId(String ssOutboxPrescriptionId) {
+	public void setSsOutboxPrescriptionId(Integer ssOutboxPrescriptionId) {
 		this.ssOutboxPrescriptionId = ssOutboxPrescriptionId;
 	}
 
@@ -163,7 +155,7 @@ public class SSOutbox implements Serializable{
 	private Integer ssOutboxPatientId;
 
 	@Column(name="ss_outbox_prescription_id")
-	private String ssOutboxPrescriptionId;
+	private Integer ssOutboxPrescriptionId;
 
 	@Column(name="ss_outbox_sent_date_time")
 	private String ssOutboxSentDateTime;
@@ -190,25 +182,40 @@ public class SSOutbox implements Serializable{
 	@JoinColumn(name="ss_outbox_status_or_error_code",referencedColumnName="ss_status_error_codes_name",insertable=false,updatable=false)
 	@JsonManagedReference
 	SSStatusErrorCodes ssstatuserrorcodes;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="ss_outbox_prescription_id",referencedColumnName="doc_presc_id",insertable=false,updatable=false)
+	@JsonBackReference
+	Prescription prescription;
 
-//	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
-//	@JoinColumn(name="ss_outbox_message_status",referencedColumnName="ss_status_error_codes_type_id",insertable=false,updatable=false)
-//	@JsonManagedReference
-//	SsStatusErrorCodes errorcodes;
-//	
-//	public SsStatusErrorCodes getErrorcodes() {
-//		return errorcodes;
-//	}
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="ss_outbox_from_id",referencedColumnName="spi_locationid",insertable=false,updatable=false)
+	@JsonManagedReference
+	LocationDetails locationDetails;
+	
+	
+	public LocationDetails getLocationDetails() {
+		return locationDetails;
+	}
 
-//	public void setErrorcodes(SsStatusErrorCodes errorcodes) {
-//		this.errorcodes = errorcodes;
-//	}
-//
-//	public SsStatusErrorCodes getSsstatuserrorcodes() {
-//		return ssstatuserrorcodes;
-//	}
+	public void setLocationDetails(LocationDetails locationDetails) {
+		this.locationDetails = locationDetails;
+	}
+
+	public Prescription getPrescription() {
+		return prescription;
+	}
+
+	public void setPrescription(Prescription prescription) {
+		this.prescription = prescription;
+	}
+
+	public SSStatusErrorCodes getSsstatuserrorcodes() {
+		return ssstatuserrorcodes;
+	}
 
 	public void setSsstatuserrorcodes(SSStatusErrorCodes ssstatuserrorcodes) {
 		this.ssstatuserrorcodes = ssstatuserrorcodes;
 	}
+	
 }

@@ -1,6 +1,5 @@
 package com.glenwood.glaceemr.server.application.models;
 
-
 import java.sql.Timestamp;
 
 import java.sql.Date;
@@ -10,6 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -17,6 +18,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -166,5 +168,18 @@ public class PatientEpisode {
 		this.patientEpisodeIsactive = patientEpisodeIsactive;
 	}
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name = "patient_episode_type", referencedColumnName = "episode_type_list_id", insertable = false, updatable = false)
+	EpisodeTypeList episodeTypeList;
+
+
+	public EpisodeTypeList getEpisodeTypeList() {
+		return episodeTypeList;
+	}
+
+	public void setEpisodeTypeList(EpisodeTypeList episodeTypeList) {
+		this.episodeTypeList = episodeTypeList;
+	}
 	
 }

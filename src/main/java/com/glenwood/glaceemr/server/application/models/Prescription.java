@@ -280,14 +280,14 @@ public class Prescription implements Serializable{
 		this.docPrescLastModifiedBy = docPrescLastModifiedBy;
 	}
 
-/*	public Timestamp getDocPrescLastModifiedDate() {
+	public Timestamp getDocPrescLastModifiedDate() {
 		return docPrescLastModifiedDate;
 	}
 
 	public void setDocPrescLastModifiedDate(Timestamp docPrescLastModifiedDate) {
 		this.docPrescLastModifiedDate = docPrescLastModifiedDate;
 	}
-*/
+
 	public String getDocPrescIntake() {
 		return docPrescIntake;
 	}
@@ -649,13 +649,13 @@ public class Prescription implements Serializable{
 		this.docPrescMedQuitReason = docPrescMedQuitReason;
 	}
 
-	/*public Timestamp getDocPrescInactivatedOn() {
+	public Timestamp getDocPrescInactivatedOn() {
 		return docPrescInactivatedOn;
 	}
 
 	public void setDocPrescInactivatedOn(Timestamp docPrescInactivatedOn) {
 		this.docPrescInactivatedOn = docPrescInactivatedOn;
-	}*/
+	}
 
 	public Integer getDocPrescInactivatedBy() {
 		return docPrescInactivatedBy;
@@ -745,9 +745,9 @@ public class Prescription implements Serializable{
 		this.docPrescBaseDoseUnits = docPrescBaseDoseUnits;
 	}
 
-	/*@Column(name="doc_presc_stop_date")
+	@Column(name="doc_presc_stop_date")
 	private Date docPrescStopDate;
-*/
+
 	@Column(name="doc_presc_is_chronic")
 	private Boolean docPrescIsChronic;
 
@@ -764,9 +764,9 @@ public class Prescription implements Serializable{
 	@Column(name="doc_presc_last_modified_by")
 	private Integer docPrescLastModifiedBy;
 
-	/*@JsonSerialize(using = JsonTimestampSerializer.class)
+	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="doc_presc_last_modified_date")
-	private Timestamp docPrescLastModifiedDate;*/
+	private Timestamp docPrescLastModifiedDate;
 
 	@Column(name="doc_presc_intake")
 	private String docPrescIntake;
@@ -828,9 +828,9 @@ public class Prescription implements Serializable{
 	@Column(name="doc_presc_lot_number")
 	private String docPrescLotNumber;
 
-	/*@JsonSerialize(using = JsonTimestampSerializer.class)
+	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="doc_presc_expire_date")
-	private Timestamp docPrescExpireDate;*/
+	private Timestamp docPrescExpireDate;
 
 	@Column(name="doc_presc_days")
 	private String noofdays;
@@ -904,9 +904,9 @@ public class Prescription implements Serializable{
 	@Column(name="doc_presc_med_quit_reason")
 	private String docPrescMedQuitReason;
 
-	/*@JsonSerialize(using = JsonTimestampSerializer.class)
+	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="doc_presc_inactivated_on")
-	private Timestamp docPrescInactivatedOn;*/
+	private Timestamp docPrescInactivatedOn;
 
 	@Column(name="doc_presc_inactivated_by")
 	private Integer docPrescInactivatedBy;
@@ -950,5 +950,43 @@ public class Prescription implements Serializable{
 
 	public void setDocPrescPrintTime(String docPrescPrintTime) {
 		this.docPrescPrintTime = docPrescPrintTime;
+	}
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="doc_presc_last_modified_by",referencedColumnName="emp_profile_empid",insertable=false, updatable=false)
+	@JsonManagedReference
+	EmployeeProfile empProfileModify;
+	
+	@OneToMany(mappedBy="prescription", fetch=FetchType.LAZY)
+	@JsonManagedReference
+	List<SSOutbox> ssOutbox;
+
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="doc_presc_inactivated_by",referencedColumnName="emp_profile_empid",insertable=false, updatable=false)
+	@JsonManagedReference
+	EmployeeProfile empProfileInActive;
+	
+	public EmployeeProfile getEmpProfileInActive() {
+		return empProfileInActive;
+	}
+
+	public void setEmpProfileInActive(EmployeeProfile empProfileInActive) {
+		this.empProfileInActive = empProfileInActive;
+	}
+
+	public EmployeeProfile getEmpProfileModify() {
+		return empProfileModify;
+	}
+
+	public void setEmpProfileModify(EmployeeProfile empProfileModify) {
+		this.empProfileModify = empProfileModify;
+	}
+
+	public List<SSOutbox> getSsOutbox() {
+		return ssOutbox;
+	}
+
+	public void setSsOutbox(List<SSOutbox> ssOutbox) {
+		this.ssOutbox = ssOutbox;
 	}
 }

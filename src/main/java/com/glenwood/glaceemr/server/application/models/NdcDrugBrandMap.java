@@ -1,37 +1,50 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
-
-import java.sql.Date;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "ndc_drug_brand_map")
 public class NdcDrugBrandMap implements Serializable{
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Column(name="ndc_code")
 	private String ndcCode;
 
 	@Column(name="maindrugcode")
 	private Integer maindrugcode;
+
+	@Column(name="image_filename")
+	private String imageFilename;
+	
+	public String getImageFilename() {
+		return imageFilename;
+	}
+
+	public void setImageFilename(String imageFilename) {
+		this.imageFilename = imageFilename;
+	}
 
 	public String getNdcCode() {
 		return ndcCode;
@@ -249,6 +262,36 @@ public class NdcDrugBrandMap implements Serializable{
 			Prescriberspecificdrug prescriberspecificdrug) {
 		this.prescriberspecificdrug = prescriberspecificdrug;
 	}
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="med_sup_detail_map_id",referencedColumnName="med_sup_details_id",insertable=false,updatable=false)
+	@JsonManagedReference
+	MedSupDetails medSupDetails;
+	
+	@OneToMany(mappedBy="ndcDrugBrandMap")
+	@JsonManagedReference
+	List<Rxnorm> rxnorms;
+	
+	@OneToMany(mappedBy="ndcDrugBrandMap")
+	@JsonBackReference
+	List<DrugCombination> drugCombinations; 
+
+	public List<Rxnorm> getRxnorms() {
+		return rxnorms;
+	}
+
+	public void setRxnorms(List<Rxnorm> rxnorms) {
+		this.rxnorms = rxnorms;
+	}
+
+	public MedSupDetails getMedSupDetails() {
+		return medSupDetails;
+	}
+
+	public void setMedSupDetails(MedSupDetails medSupDetails) {
+		this.medSupDetails = medSupDetails;
+	}
+	
 	
 	
 }

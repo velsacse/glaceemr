@@ -3,8 +3,6 @@ package com.glenwood.glaceemr.server.application.models;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-import java.sql.Date;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,10 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -305,6 +299,19 @@ public class LocationDetails implements Serializable {
 	@JoinColumn(name="prescriber_id",referencedColumnName="doctorid",insertable=false,updatable=false)
 	@JsonBackReference
 	PrescriberDetails prescriberdetails;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="prescriber_id",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
+	@JsonManagedReference
+	EmployeeProfile empProfileLoc;
+
+	public EmployeeProfile getEmpProfileLoc() {
+		return empProfileLoc;
+	}
+
+	public void setEmpProfileLoc(EmployeeProfile empProfileLoc) {
+		this.empProfileLoc = empProfileLoc;
+	}
 
 	public PrescriberDetails getPrescriberdetails() {
 		return prescriberdetails;
