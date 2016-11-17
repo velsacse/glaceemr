@@ -130,9 +130,15 @@ public class CurrentMedicationController {
 		}
 		List<MedicationDetailBean> medDetails=currentMedicationService.getMedDetails(locEncounterId,patientId);
 		Encounter transitionSummaryCare=currentMedicationService.getTransitionSummaryCare(locEncounterId);
-		boolean summaryOfCare=transitionSummaryCare.getSummaryOfCare();
-		boolean transitionOfCare=transitionSummaryCare.getTransitionOfCare();
-		boolean noMedicationFlag=chartDetails.getNomedication();
+		Boolean summaryOfCare=false;
+		Boolean transitionOfCare=false;
+		if(transitionSummaryCare!=null){
+			summaryOfCare=transitionSummaryCare.getSummaryOfCare();
+			transitionOfCare=transitionSummaryCare.getTransitionOfCare();
+		}
+		Boolean noMedicationFlag=false;
+		if(chartDetails!=null)
+			noMedicationFlag=chartDetails.getNomedication();
 		CurrentMedDataBean bean=new CurrentMedDataBean(transitionOfCare,summaryOfCare,noMedicationFlag,medDetails);
 		EMRResponseBean dataBean = new EMRResponseBean();
 		dataBean.setData(bean);

@@ -183,9 +183,11 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		List<PharmacyMapping> mapPharmacy=pharmacyMappingRepository.findAll(CurrentMedicationSpecification.getMapPharmacy(patientId));
 		int pharmacyId;
 		String pharm=chartPharmacy.getChartPharmacy();
-		int idx=pharm.indexOf("^");
-		if(chartPharmacy.getChartPharmacy()!=null)
+		
+		if(chartPharmacy.getChartPharmacy()!=null){
+			int idx=pharm.indexOf("^");
 			pharmacyId=Integer.parseInt(pharm.substring(0, idx));
+		}
 		else if(patPharmacy.getPatientRegistrationPharmacyId()!=null)
 			pharmacyId=patPharmacy.getPatientRegistrationPharmacyId();
 		else if(mapPharmacy.get(0).getPharmacyMappingPharmacyid()!=null)
@@ -477,7 +479,10 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		
 		chartPatJoin.on(builder.equal(chartPatJoin.get(PatientRegistration_.patientRegistrationId),patientId));
 		prescOutboxJoin.on(builder.notEqual(prescOutboxJoin.get(SSOutbox_.ssOutboxActualSentTime), "null"));
-		prescOutboxJoin.on(prescOutboxJoin.get(SSOutbox_.ssOutboxId).in(maxList));
+		if(!maxList.isEmpty())
+			prescOutboxJoin.on(prescOutboxJoin.get(SSOutbox_.ssOutboxId).in(maxList));
+		else
+			prescOutboxJoin.on(prescOutboxJoin.get(SSOutbox_.ssOutboxId).in(new Integer(0)));
 		Predicate isActive=builder.equal(root.get(Prescription_.docPrescIsActive),true);
 		Predicate isMedSup=builder.equal(root.get(Prescription_.docPrescIsMedSup),false);
 		Predicate medStatus=builder.like(builder.lower(prescStatusJoin.get(MedStatus_.medStatusGroup)),"active");
