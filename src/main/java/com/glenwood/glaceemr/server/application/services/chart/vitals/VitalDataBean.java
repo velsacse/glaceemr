@@ -46,8 +46,7 @@ public class VitalDataBean{
 	
 	public void setVitalElementBean(List<VitalsParameter> vitalsList,int groupId) {
 		LinkedHashMap<String, VitalElementBean> vitalElementHashMap = new LinkedHashMap<String, VitalElementBean>(); 
-		for (VitalsParameter vitalsParameter : vitalsList) {
-			//System.out.println("setting bean for gwid"+vitalsParameter.getVitalsParameterGwId());
+		for (VitalsParameter vitalsParameter : vitalsList) {			
 			VitalElementBean vitalElementBean = new VitalElementBean();
 			vitalElementBean.setVitalGWId(HUtil.Nz(vitalsParameter.getVitalsParameterGwId(),""));
 			vitalElementBean.setVitalName(HUtil.Nz(vitalsParameter.getVitalsParameterName(),""));
@@ -60,8 +59,7 @@ public class VitalDataBean{
 			vitalElementBean.setUnitsOfMeasureCode(HUtil.Nz(vitalsParameter.getUnitsOfMeasureTable().getUnitsOfMeasureCode(),""));
 			vitalElementHashMap.put(HUtil.Nz(vitalsParameter.getVitalsParameterGwId(),"-1"),vitalElementBean);
 		}
-		
-		//System.out.println("setting elemnts for gorup "+groupId);
+				
 		VitalBean.get(groupId).setVitalElements(vitalElementHashMap);
 	}
 

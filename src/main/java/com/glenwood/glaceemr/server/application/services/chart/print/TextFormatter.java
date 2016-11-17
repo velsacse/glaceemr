@@ -469,6 +469,7 @@ public class TextFormatter {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public int getAgeInYear(Date date) {
 
 		int daysInMon[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // Days in month
@@ -496,6 +497,46 @@ public class TextFormatter {
 
 		return year;
 
+	}
+	
+	/**
+	 * Convert date to other format
+	 * @param date
+	 * @param SOURCE_FORMAT
+	 * @param TARGET_FORMAT
+	 * @return
+	 */
+	public Date convertDate(Date date, final String SOURCE_FORMAT, final String TARGET_FORMAT){
+		
+		try{
+			SimpleDateFormat sdf= new SimpleDateFormat(SOURCE_FORMAT);						
+			date= sdf.parse(sdf.format(date));
+			sdf.applyPattern(TARGET_FORMAT);			
+			return sdf.parse(sdf.format(date));
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * Convert date string to other format string
+	 * @param date
+	 * @param SOURCE_FORMAT
+	 * @param TARGET_FORMAT
+	 * @return
+	 */
+	public String convertDate(final String date, final String SOURCE_FORMAT, final String TARGET_FORMAT){
+		
+		try{
+			SimpleDateFormat sdf= new SimpleDateFormat(SOURCE_FORMAT);						
+			Date dobDate= sdf.parse(date);
+			sdf.applyPattern(TARGET_FORMAT);			
+			return sdf.format(dobDate);
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
 	}
 }
 
