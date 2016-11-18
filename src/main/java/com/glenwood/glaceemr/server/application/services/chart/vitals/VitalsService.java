@@ -14,4 +14,8 @@ public interface VitalsService  {
 	
 	public DischargeVitalBean setVitals(Integer patientId,Integer encounterId, Integer groupId,Boolean isDischargeVitals,Integer admssEpisode ,String clientId, Integer fromPrint) throws Exception;
 
+	public CustomVitalGroup setVitals(Integer patientId,Integer encounterId, Integer groupId,Boolean isDischargeVitals,Integer admssEpisode ,String clientId) throws Exception;
+	
+	public String getNotes(Integer patientId, Integer encounterId, String gwId);
+
 }

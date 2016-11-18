@@ -1,10 +1,10 @@
 package com.glenwood.glaceemr.server.application.services.chart.vitals;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+/*@Component
+@Scope(value="request",proxyMode = ScopedProxyMode.TARGET_CLASS)*/
 public class CustomVitalGroup {
 
 	Integer age;

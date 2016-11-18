@@ -18,9 +18,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
@@ -28,10 +25,11 @@ import org.springframework.stereotype.Service;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PatientVitals;
-import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.models.UnitsOfMeasure;
 import com.glenwood.glaceemr.server.application.models.VitalGroup;
 import com.glenwood.glaceemr.server.application.models.VitalsParameter;
@@ -49,7 +47,6 @@ import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.
 import com.glenwood.glaceemr.server.application.services.chart.dischargeVitals.DischargeVitalBean;
 import com.glenwood.glaceemr.server.application.services.chart.print.TextFormatter;
 import com.glenwood.glaceemr.server.application.specifications.DischargeVitalSpecification;
-import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.VitalsSpecification;
 import com.glenwood.glaceemr.server.utils.DateUtil;
 import com.glenwood.glaceemr.server.utils.HUtil;
@@ -79,8 +76,7 @@ public class VitalsServiceImpl implements VitalsService {
 	TextFormatter textFormat;
 	@Autowired
 	EntityManager em;
-
-
+	
 	List<String> gwids=new ArrayList<String>();
 	List<VitalGroup> vitalGroupList=null;
 	String currentheightvalue="";
@@ -91,10 +87,6 @@ public class VitalsServiceImpl implements VitalsService {
 	Integer ageinYears=0;
 	Integer fromPrint=0;
 	
-	private Logger logger = Logger.getLogger(VitalsServiceImpl.class);
-
-
-
 	@Override
 	public DischargeVitalBean setVitals(Integer patientId,Integer encounterId,Integer groupId,Boolean isDischargeVitals,Integer admssEpisode,String clientId,Integer fromPrint)throws Exception{
 		try{
@@ -112,18 +104,22 @@ public class VitalsServiceImpl implements VitalsService {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 
 	}
 
 	@Override
 	public List<VitalGroup> getActiveVitalsGroup(Integer patientId,Integer groupId)throws Exception {
 		try{
-		patientId = Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
-		getPatientDetails(patientId);
-		vitalGroupList=vitalGroupRepository.findAll(Specifications.where(VitalsSpecification.getVitalActiveGrps(patientId,groupId,patientSex)));
-		vitalDataBean.setVitalGroupData(vitalGroupList);
-		return vitalGroupList;
+			patientId = Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
+			getPatientDetails(patientId);
+			vitalGroupList =vitalGroupRepository.findAll(Specifications.where(VitalsSpecification.getVitalActiveGrps(patientId,groupId,patientSex)));
+			VitalGroup notesGroup= new VitalGroup();
+			notesGroup.setVitalGroupId(-999);
+			notesGroup.setVitalGroupName("Comments");
+			vitalGroupList.add(notesGroup);
+			vitalDataBean.setVitalGroupData(vitalGroupList);
+			return vitalGroupList;
 		}catch(Exception e){
 			e.printStackTrace();
 			return null;
@@ -161,18 +157,18 @@ public class VitalsServiceImpl implements VitalsService {
 				}catch(Exception e){
 					patientSex= -1;
 				}
-				ageinYears= getAgeInYears(patDOB);
-				 
+				ageinYears= textFormat.getAgeInYear(textFormat.convertDate(patDOB, "yyyy-MM-dd", "MM/dd/yyyy"));
+				
 				SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
-				ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date())));				
+				ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date())));
 			}
 
 		}catch(Exception e){
+			System.out.println("Exception while getting patient details for vitals");
 			e.printStackTrace();
 		}
 		
 	}
-
 
 	@Override
 	public List<VitalsParameter> getGroupVitals(Integer patientId,Integer encounterId, Integer groupId) throws Exception {
@@ -193,7 +189,7 @@ public class VitalsServiceImpl implements VitalsService {
 
 	private void setClinicalDataBean(Integer patientId,Integer encounterId,Boolean isDischargeVitals,Integer admssEpisode) {
 		try{
-		clinicalElementsService.setVitalsClinicalData("02002%",patientId,encounterId,isDischargeVitals,admssEpisode,patientSex, ageinDay);
+			clinicalElementsService.setVitalsClinicalData("02002%",patientId,encounterId,isDischargeVitals,admssEpisode,patientSex, ageinDay);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -205,181 +201,174 @@ public class VitalsServiceImpl implements VitalsService {
 
 	private DischargeVitalBean prepareJsonfromBeans(Integer patientId, Integer encounterId,Integer admssEpisode,short patientSex,int patientAge) throws Exception {
 		try{
-		List<CustomVitalGroup> vitalData=new ArrayList<CustomVitalGroup>();
-		int groupId = -1;
-		LinkedHashMap<Integer,VitalGroupBean> vitalGroupHashMap = vitalDataBean.getVitals();
-		Set<Entry<Integer,VitalGroupBean>> GroupHashMap = vitalGroupHashMap.entrySet();
-		JSONArray vitalGroupDataArray = new JSONArray();
-		String isOrthoNotesActive = "";
-		String isRepeatpulNotesActive = "";
-		for(Entry<Integer,VitalGroupBean> currentGroup:GroupHashMap){
-			CustomVitalGroup vitalGrpInfo=new CustomVitalGroup();
-			groupId   = currentGroup.getKey();
-			VitalGroupBean vitalGroupBean = currentGroup.getValue();
-			String elementGWId = "0000000000000000000";
-			LinkedHashMap<String,VitalElementBean>  vitalHashMap = vitalGroupBean.getVitalElements();
-			Set<Entry<String, VitalElementBean>> ElementHashMap =  vitalHashMap.entrySet();
-			if(!vitalGroupBean.getGroupName().equals("Others")){
-				if(ElementHashMap.size()!=0){
-					vitalGrpInfo.setVitalGroupName(vitalGroupBean.getGroupName());
-					vitalGrpInfo.setAge(patientAge/365);
-					vitalGrpInfo.setSex(patientSex);
-					vitalGrpInfo.setGroupId(groupId);
-					for(Entry<String,VitalElementBean> currentElement:ElementHashMap){
-						VitalElementBean  elementBean = currentElement.getValue();
-						String vitalName = HUtil.ValidateSpecialQuote(elementBean.getVitalName());
-						String elementId = currentElement.getKey();
-						elementGWId = elementBean.getVitalGWId();
+			List<CustomVitalGroup> vitalData=new ArrayList<CustomVitalGroup>();
+			int groupId = -1;
+			LinkedHashMap<Integer,VitalGroupBean> vitalGroupHashMap = vitalDataBean.getVitals();
+			Set<Entry<Integer,VitalGroupBean>> GroupHashMap = vitalGroupHashMap.entrySet();
+			String isOrthoNotesActive = "";
+			String isRepeatpulNotesActive = "";
+			for(Entry<Integer,VitalGroupBean> currentGroup:GroupHashMap){
+				CustomVitalGroup vitalGrpInfo=new CustomVitalGroup();
+				groupId   = currentGroup.getKey();
+				VitalGroupBean vitalGroupBean = currentGroup.getValue();
+				String elementGWId = "0000000000000000000";
+				LinkedHashMap<String,VitalElementBean>  vitalHashMap = vitalGroupBean.getVitalElements();
+				Set<Entry<String, VitalElementBean>> ElementHashMap =  vitalHashMap.entrySet();
+				if(!vitalGroupBean.getGroupName().equals("Others")){
+					if(ElementHashMap.size()!=0){
+						vitalGrpInfo.setVitalGroupName(vitalGroupBean.getGroupName());
+						vitalGrpInfo.setAge(patientAge/365);
+						vitalGrpInfo.setSex(patientSex);
+						vitalGrpInfo.setGroupId(groupId);
+						for(Entry<String,VitalElementBean> currentElement:ElementHashMap){
+							VitalElementBean  elementBean = currentElement.getValue();
+							String vitalName = HUtil.ValidateSpecialQuote(elementBean.getVitalName());
+							String elementId = currentElement.getKey();
+							elementGWId = elementBean.getVitalGWId();
 
 
 
-						ClinicalElementBean ceBean = clinicalDataBean.getClinicalElements(elementGWId);
-						PatientElementBean patientElementBean=clinicalDataBean.getPatientElements(elementGWId);
-						String vitaltype = "";
-						if(vitalName.contains("BP")){
-							vitaltype = "BP";
-						}else if(vitalName.equals("Height")){
-							vitaltype = "height";
-						}else if(vitalName.equals("Weight")){
-							vitaltype = "weight";
-						}else if(vitalName.equals("BMI")){
-							vitaltype = "BMI";
-						}else if(vitalName.equals("BSA")){
-							vitaltype = "BSA";
-						}else if(vitalName.contains("Pulse")){
-							vitaltype = "pulse";
-						}else if(vitalName.contains("Temperature")){
-							vitaltype = "temperature";
-						}else if(vitalName.equals("Head circumference")){
-							vitaltype = "Headcircumference";
-						}else if(vitalName.equals("Last Phy-V")){
-							vitaltype = "Last Phy-V";
-						}else if(vitalName.equals("Neck circumference")){
-							vitaltype = "Neckcircumference";
-						}else if(elementBean.getVitalName().equals("Weight change")){
-							vitaltype = "WeightChanges";
-						}else if(vitalName.contains("Others")){
-							vitaltype = "others";
-						}
-						vitalGrpInfo.setVitalType(vitaltype);
-						if(vitaltype.equalsIgnoreCase("BP")){
-							if(vitalName.contains("Systolic") || vitalName.contains("systolic")){
-								ClinicalTextMapping clinElement=null;
-								//String elementAssociatGWId=(clinElement=clinicalElementsService.getClinicalTextMapping(elementGWId))!=null?clinElement.getClinicalTextMappingAssociatedElement()+"":"";
-								String elementAssociatGWId = ceBean.getClinicalTextMappings().size()>0 ?ceBean.getClinicalTextMappings().get(0).getClinicalTextMappingAssociatedElement()+"":"";
-								//System.out.println("elementAssociatGWId"+elementAssociatGWId);
-								VitalElementBean vitalAssociatedBean = null;
-								for(Entry<String,VitalElementBean> currentAssociateElement:ElementHashMap){
-									if(currentAssociateElement.getKey().equals(elementAssociatGWId)){
-										vitalAssociatedBean = currentAssociateElement.getValue();
+							ClinicalElementBean ceBean = clinicalDataBean.getClinicalElements(elementGWId);
+							PatientElementBean patientElementBean=clinicalDataBean.getPatientElements(elementGWId);
+							String vitaltype = "";
+							if(vitalName.contains("BP")){
+								vitaltype = "BP";
+							}else if(vitalName.equals("Height")){
+								vitaltype = "height";
+							}else if(vitalName.equals("Weight")){
+								vitaltype = "weight";
+							}else if(vitalName.equals("BMI")){
+								vitaltype = "BMI";
+							}else if(vitalName.equals("BSA")){
+								vitaltype = "BSA";
+							}else if(vitalName.contains("Pulse")){
+								vitaltype = "pulse";
+							}else if(vitalName.contains("Temperature")){
+								vitaltype = "temperature";
+							}else if(vitalName.equals("Head circumference")){
+								vitaltype = "Headcircumference";
+							}else if(vitalName.equals("Last Phy-V")){
+								vitaltype = "Last Phy-V";
+							}else if(vitalName.equals("Neck circumference")){
+								vitaltype = "Neckcircumference";
+							}else if(elementBean.getVitalName().equals("Weight change")){
+								vitaltype = "WeightChanges";
+							}else if(vitalName.contains("Others")){
+								vitaltype = "others";
+							}
+							vitalGrpInfo.setVitalType(vitaltype);
+							if(vitaltype.equalsIgnoreCase("BP")){
+								if(vitalName.contains("Systolic") || vitalName.contains("systolic")){
+									String elementAssociatGWId = ceBean.getClinicalTextMappings().size()>0 ?ceBean.getClinicalTextMappings().get(0).getClinicalTextMappingAssociatedElement()+"":"";
+									VitalElementBean vitalAssociatedBean = null;
+									for(Entry<String,VitalElementBean> currentAssociateElement:ElementHashMap){
+										if(currentAssociateElement.getKey().equals(elementAssociatGWId)){
+											vitalAssociatedBean = currentAssociateElement.getValue();
+										}
+									}
+									ClinicalElementBean ceAssociateBean            = clinicalDataBean.getClinicalElements(elementAssociatGWId);
+									PatientElementBean patientAssociateElementBean = clinicalDataBean.getPatientElements(elementAssociatGWId);
+									String groupName ="";
+									if(vitalAssociatedBean!=null && (elementBean.getVitalGender() == patientSex || elementBean.getVitalGender() == 0)){
+										if(vitalName.contains("Systolic")){
+											groupName = vitalName.substring(0, vitalName.indexOf("Systolic"))+"BP";
+										}else if(vitalName.contains("systolic")){
+											groupName = vitalName.substring(0, vitalName.indexOf("systolic"))+"BP";
+										}
+										if(ceBean!=null && ceAssociateBean!=null ){
+											ElementDetails elementDet = prepareElement(clinicalDataBean,elementBean,patientElementBean,elementId,elementGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);	
+
+											for(int i=0;i<elementDet.associatedElements.size();i++){
+												elementDet.associatedElements.get(i).elementName=groupName;
+											}
+
+											vitalGrpInfo.unitgroupdetails.add(elementDet);
+
+											ElementDetails associate = prepareElement(clinicalDataBean, vitalAssociatedBean,patientAssociateElementBean,elementAssociatGWId,elementAssociatGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);
+
+
+											for (AssociatedElementDetails assoElement : associate.getAssociatedElements()) {
+												elementDet.getAssociatedElements().add(assoElement);
+											}
+
+											//vitalGrpInfo.unitgroupdetails.add(associate);
+										}
 									}
 								}
-								ClinicalElementBean ceAssociateBean            = clinicalDataBean.getClinicalElements(elementAssociatGWId);
-								PatientElementBean patientAssociateElementBean = clinicalDataBean.getPatientElements(elementAssociatGWId);
-								String groupName ="";
-								//System.out.println("vitalAssociatedBean"+vitalAssociatedBean);
-								if(vitalAssociatedBean!=null && (elementBean.getVitalGender() == patientSex || elementBean.getVitalGender() == 0)){
-									if(vitalName.contains("Systolic")){
-										groupName = vitalName.substring(0, vitalName.indexOf("Systolic"))+"BP";
-									}else if(vitalName.contains("systolic")){
-										groupName = vitalName.substring(0, vitalName.indexOf("systolic"))+"BP";
-									}
-									if(ceBean!=null && ceAssociateBean!=null ){
-										//System.out.println("going for group bp");
-										ElementDetails elementDet = prepareElement(clinicalDataBean,elementBean,patientElementBean,elementId,elementGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);	
-
-										for(int i=0;i<elementDet.associatedElements.size();i++){
-											elementDet.associatedElements.get(i).elementName=groupName;
-										}
-
+							}
+							else{
+								if(ceBean!=null){
+									if(elementBean.getVitalGender() == patientSex || elementBean.getVitalGender() == 0){
+										ElementDetails elementDet = prepareElement(clinicalDataBean,elementBean,patientElementBean,elementId,elementGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);
 										vitalGrpInfo.unitgroupdetails.add(elementDet);
 
-										ElementDetails associate = prepareElement(clinicalDataBean, vitalAssociatedBean,patientAssociateElementBean,elementAssociatGWId,elementAssociatGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);
-
-
-										for (AssociatedElementDetails assoElement : associate.getAssociatedElements()) {
-											elementDet.getAssociatedElements().add(assoElement);
-										}
-
-										//vitalGrpInfo.unitgroupdetails.add(associate);
 									}
 								}
 							}
 						}
-						else{
+						if(isOrthoNotesActive.equalsIgnoreCase(""))
+							isOrthoNotesActive = clinicalElementsService.isClinicalElemActive("0000200200100201000")+"";
+						String elementValue="";
+						if(vitalGroupBean.getGroupName().contains("BP / Respiratory") && isOrthoNotesActive.equalsIgnoreCase("true")){
+							ElementDetails elemDetails=new ElementDetails();
+							PatientElementBean patientElementBeanBPNotes=clinicalDataBean.getPatientElements("0000200200100201000");
+							if(patientElementBeanBPNotes!=null)
+								elementValue=HUtil.Nz(patientElementBeanBPNotes.getPatientClinicalElementText(),"");
+							elemDetails.associatedElements.add(getAssoElement("","","Repeat BP","","",0,"","",2,"0000200200100201000",elementValue,"",0,""));
+							vitalGrpInfo.unitgroupdetails.add(elemDetails);
+						}
+						if(isRepeatpulNotesActive.equalsIgnoreCase(""))
+							isRepeatpulNotesActive = clinicalElementsService.isClinicalElemActive("0000200200100236000")+"";
+						elementValue="";
+						if(vitalGroupBean.getGroupName().contains("Pulse / Temperature") && isRepeatpulNotesActive.equalsIgnoreCase("true")){
+							PatientElementBean patientElementBeanPulseNotes=clinicalDataBean.getPatientElements("0000200200100236000");
+							if(patientElementBeanPulseNotes!=null)
+								elementValue=HUtil.Nz(patientElementBeanPulseNotes.getPatientClinicalElementText(),"");
+
+						}
+
+					}
+				}else{
+					if(ElementHashMap.size()!=0){
+
+						vitalGrpInfo.setVitalGroupName(vitalGroupBean.getGroupName());
+						vitalGrpInfo.setAge(patientAge);
+						vitalGrpInfo.setSex(patientSex);
+						vitalGrpInfo.setGroupId(groupId);
+						for(Entry<String,VitalElementBean> currentElement:ElementHashMap){
+							VitalElementBean  elementBean = currentElement.getValue();
+							String elementId = currentElement.getKey();
+							elementGWId = elementBean.getVitalGWId();
+							ClinicalElementBean ceBean = clinicalDataBean.getClinicalElements(elementGWId);
+							PatientElementBean patientElementBean=clinicalDataBean.getPatientElements(elementGWId);
+							String vitaltype = "others";
 							if(ceBean!=null){
 								if(elementBean.getVitalGender() == patientSex || elementBean.getVitalGender() == 0){
-									JSONObject oh = new JSONObject();
 									ElementDetails elementDet = prepareElement(clinicalDataBean,elementBean,patientElementBean,elementId,elementGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);
 									vitalGrpInfo.unitgroupdetails.add(elementDet);
-
 								}
 							}
-						}
-					}
-					if(isOrthoNotesActive.equalsIgnoreCase(""))
-						isOrthoNotesActive = clinicalElementsService.isClinicalElemActive("0000200200100201000")+"";
-					String elementValue="";
-					if(vitalGroupBean.getGroupName().contains("BP / Respiratory") && isOrthoNotesActive.equalsIgnoreCase("true")){
-						ElementDetails elemDetails=new ElementDetails();
-						PatientElementBean patientElementBeanBPNotes=clinicalDataBean.getPatientElements("0000200200100201000");
-						if(patientElementBeanBPNotes!=null)
-							elementValue=HUtil.Nz(patientElementBeanBPNotes.getPatientClinicalElementText(),"");
-						elemDetails.associatedElements.add(getAssoElement("","","Repeat BP","","",0,"","",2,"0000200200100201000",elementValue,"",0,""));
-						vitalGrpInfo.unitgroupdetails.add(elemDetails);
-					}
-					if(isRepeatpulNotesActive.equalsIgnoreCase(""))
-						isRepeatpulNotesActive = clinicalElementsService.isClinicalElemActive("0000200200100236000")+"";
-					elementValue="";
-					if(vitalGroupBean.getGroupName().contains("Pulse / Temperature") && isRepeatpulNotesActive.equalsIgnoreCase("true")){
-						PatientElementBean patientElementBeanPulseNotes=clinicalDataBean.getPatientElements("0000200200100236000");
-						if(patientElementBeanPulseNotes!=null)
-							elementValue=HUtil.Nz(patientElementBeanPulseNotes.getPatientClinicalElementText(),"");
 
-					}
-
-				}
-			}else{
-				if(ElementHashMap.size()!=0){
-
-					vitalGrpInfo.setVitalGroupName(vitalGroupBean.getGroupName());
-					vitalGrpInfo.setAge(patientAge);
-					vitalGrpInfo.setSex(patientSex);
-					vitalGrpInfo.setGroupId(groupId);
-					for(Entry<String,VitalElementBean> currentElement:ElementHashMap){
-						VitalElementBean  elementBean = currentElement.getValue();
-						String elementId = currentElement.getKey();
-						elementGWId = elementBean.getVitalGWId();
-						ClinicalElementBean ceBean = clinicalDataBean.getClinicalElements(elementGWId);
-						PatientElementBean patientElementBean=clinicalDataBean.getPatientElements(elementGWId);
-						String vitaltype = "others";
-						if(ceBean!=null){
-							if(elementBean.getVitalGender() == patientSex || elementBean.getVitalGender() == 0){
-								ElementDetails elementDet = prepareElement(clinicalDataBean,elementBean,patientElementBean,elementId,elementGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);
-								vitalGrpInfo.unitgroupdetails.add(elementDet);
-							}
 						}
 
 					}
-
 				}
+
+				vitalData.add(vitalGrpInfo);
 			}
-			
-			vitalData.add(vitalGrpInfo);
-		}
 
-		boolean notes = clinicalElementsService.isClinicalElemActive("0000200200100198000");
-		String elementValue="";
-		if(notes){
-			PatientElementBean patientElementBeanVitalNotes=clinicalDataBean.getPatientElements("0000200200100198000");
-			if(patientElementBeanVitalNotes!=null)
-				elementValue=HUtil.Nz(patientElementBeanVitalNotes.getPatientClinicalElementText(),"");
-		}
+			/*boolean notes = clinicalElementsService.isClinicalElemActive("0000200200100198000");
+			String elementValue="";
+			if(notes){
+				PatientElementBean patientElementBeanVitalNotes=clinicalDataBean.getPatientElements("0000200200100198000");
+				if(patientElementBeanVitalNotes!=null)
+					elementValue=HUtil.Nz(patientElementBeanVitalNotes.getPatientClinicalElementText(),"");
+			}*/
 
-		DischargeVitalBean dischargeVitalBean = new DischargeVitalBean();
-		dischargeVitalBean.setVitalData(framePatientData(patientId,encounterId,admssEpisode));
-		dischargeVitalBean.setVitals(vitalData);
-		return dischargeVitalBean;
+			DischargeVitalBean dischargeVitalBean = new DischargeVitalBean();
+			dischargeVitalBean.setVitalData(framePatientData(patientId,encounterId,admssEpisode));
+			dischargeVitalBean.setVitals(vitalData);
+			return dischargeVitalBean;
 		}catch(Exception e){
 			e.printStackTrace();
 			return null;
@@ -566,19 +555,16 @@ public class VitalsServiceImpl implements VitalsService {
 			
 		}
 		
-		//System.out.println("sizeeeee"+vitalData.size());
 		return vitalData;
 	}
 
 	public ElementDetails prepareElement(ClinicalDataBean clinicalDataBean, VitalElementBean elementBean,PatientElementBean patientElementBean, String elementId, String elementGWId, String vitaltype, int elementtype,int patientId,int encounterId)throws Exception{
 
-		StringBuffer elementsXML = new StringBuffer("");
-
 		//String unit=getUnitName(elementBean.getVitalUnit())!=null?getUnitName((elementBean.getVitalUnit())).getUnitsOfMeasureCode():"";
 		String unit=elementBean.getUnitsOfMeasureCode();
-		unit=unit.equalsIgnoreCase("N/A")?"":unit;
+		unit=(unit == null || unit.equalsIgnoreCase("N/A"))?"":unit;
 		String vitalName = HUtil.ValidateSpecialQuote(elementBean.getVitalName());
-		int elementIdInteger;
+//		int elementIdInteger;
 
 		ElementDetails elemDetails=new ElementDetails();
 
@@ -805,8 +791,6 @@ public class VitalsServiceImpl implements VitalsService {
 
 			case ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_TEXT:
 				ClinicalElementBean ceBean = clinicalDataBean.getClinicalElements(elementGWId);
-				ClinicalTextMapping clinElement=null;
-				//String isdate=(clinElement=clinicalElementsService.getClinicalTextMapping(elementGWId))!=null?clinElement.getClinicalTextMappingIsdate()+"":"";
 				String isdate = ceBean.getClinicalTextMappings().size()>0?ceBean.getClinicalTextMappings().get(0).getClinicalTextMappingIsdate()+"":"";
 				
 						if(isdate.equals("t")){
@@ -858,7 +842,6 @@ public class VitalsServiceImpl implements VitalsService {
 						String optionName=HUtil.Nz(optionRecord.getClinicalElementsOptionsName(),"");
 
 						String optionValue=HUtil.Nz(optionRecord.getClinicalElementsOptionsValue(),"");
-						String retain=HUtil.Nz(optionRecord.getClinicalElementsOptionsRetaincase(),"f");
 						PatientElementBean patientOptionBean=clinicalDataBean.getPatientElements(elementGWId);
 
 						if(elemDetails.associatedElements.size()==0){
@@ -917,16 +900,14 @@ public class VitalsServiceImpl implements VitalsService {
 				break;
 			case ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_MULTIPLEOPTION:
 
-				elementIdInteger = -1;
-				elementIdInteger++;
+//				elementIdInteger = -1;
+//				elementIdInteger++;
 				try{
 					List<ClinicalElementsOptions> option=clinicalElementsService.getClinicalElementOptions(elementGWId);
 					int j=0;
 					for(;j<option.size();j++){
 						ClinicalElementsOptions optionRecord=option.get(j);
-						String optionName=HUtil.Nz(optionRecord.getClinicalElementsOptionsName(),"");
 						String optionValue=HUtil.Nz(optionRecord.getClinicalElementsOptionsValue(),"");
-						String retain=HUtil.Nz(optionRecord.getClinicalElementsOptionsRetaincase(),"f");
 						PatientElementBean patientOptionBean=clinicalDataBean.getPatientElements(elementGWId+"_"+optionValue);
 						if(patientOptionBean!=null){
 							String elementValue=HUtil.Nz(patientOptionBean.getPatientClinicalElementOption(),"");
@@ -939,7 +920,7 @@ public class VitalsServiceImpl implements VitalsService {
 						}else{
 							elemDetails.associatedElements.add(getAssoElement(vitaltype,"",vitalName,"",elementBean.getVitalCondition(),elementBean.getVitalConditionType(),"","",ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_MULTIPLEOPTION,elementGWId,"","",-1,""));	
 						}
-						elementIdInteger++;
+//						elementIdInteger++;
 					}
 
 				}catch(Exception e){
@@ -950,8 +931,6 @@ public class VitalsServiceImpl implements VitalsService {
 
 			}
 		}
-		//System.out.println(elementBean.getVitalName());
-		//System.out.println(elemDetails.getAssociatedElements().size());
 		return elemDetails;
 
 
@@ -1005,10 +984,10 @@ public class VitalsServiceImpl implements VitalsService {
 
 	private String getLastPhysical(int patientId) throws Exception{
 		String lastPhy="";
-		StringBuffer qry = new StringBuffer();
+		/*StringBuffer qry = new StringBuffer();
 		Date serviceDos=null;
 		List<ServiceDetail> serviceDetail=null;
-		/*if((serviceDetail=serviceDetailRepository.findAll(VitalsSpecification.getServiceDetDOS(patientId))).size()>0){
+		if((serviceDetail=serviceDetailRepository.findAll(VitalsSpecification.getServiceDetDOS(patientId))).size()>0){
 			serviceDos=serviceDetail.get(0).getServiceDetailDos();
 			SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
 			lastPhy= mdyFormat.format(serviceDos);
@@ -1017,9 +996,7 @@ public class VitalsServiceImpl implements VitalsService {
 	}
 
 	public List<DetailOptions> constructJSON(String elementGWId,ClinicalDataBean dataBean,VitalElementBean elementBean)throws Exception{
-		StringBuffer elementsXML = new StringBuffer();
-		int elementIdInteger=0;
-		JSONArray cc = new JSONArray();
+//		int elementIdInteger=0;
 		List<DetailOptions> detOptions=new ArrayList<DetailOptions>();
 		if(clinicalElementsService.isClinicalElemActive(elementGWId)){
 			String elementValue = null;
@@ -1037,7 +1014,7 @@ public class VitalsServiceImpl implements VitalsService {
 					detOptions.add(getDetailOption(optionName, optionValue, "1"));
 				}else{
 					detOptions.add(getDetailOption(optionName, optionValue, ""));
-					elementIdInteger++;
+//					elementIdInteger++;
 				}
 			}
 		}
@@ -1062,24 +1039,196 @@ public class VitalsServiceImpl implements VitalsService {
 		return isActive;
 	}
 
-	/**
-	 * Get years from ageString
-	 * @param ageString
-	 * @return
-	 * 
-	 * Example: 32 years 8 mons 21 days
-	 * 			return 32
-	 */
-	private Integer getAgeInYears(Date dob) {
+	@Override
+	public String getNotes(Integer patientId, Integer encounterId, String gwId) {
+		CriteriaBuilder builder= em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq= builder.createQuery();
+		Root<PatientClinicalElements> root= cq.from(PatientClinicalElements.class);
+		cq.select(root.get(PatientClinicalElements_.patientClinicalElementsValue)).
+			where(builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid), patientId),
+				  builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId),
+				  builder.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid), gwId));
+		
+		List <Object> resultList= em.createQuery(cq).getResultList();
+		String notes= "";
+		if(resultList.size()>0)
+			notes= resultList.get(0).toString();
+		return notes;
+	}
 
-		try {
-			String dobString= new SimpleDateFormat("yyyy-MM-dd").format(dob);
-			Date dobDate= new SimpleDateFormat(dobString).parse("MM/dd/yyyy");
-			return textFormat.getAgeInYear(dobDate);
-		} catch (Exception e) {
-			return 0;
+	@Override
+	public CustomVitalGroup setVitals(Integer patientId,Integer encounterId,Integer groupId,Boolean isDischargeVitals,Integer admssEpisode,String clientId)throws Exception{
+		CustomVitalGroup vitalGrpInfo =new CustomVitalGroup();
+		getPatientDetails(patientId);
+		clinicalDataBean.clientId=clientId;
+		getActiveVitalsGroup(patientId,groupId);
+		for (VitalGroup vitalGroup : vitalGroupList) {
+			getGroupVitals(patientId,encounterId,vitalGroup.getVitalGroupId());
 		}
-	}	
+		setClinicalDataBean(patientId,encounterId,isDischargeVitals,admssEpisode);
+		return prepareJsonfromBeans(vitalGrpInfo,patientId,encounterId,patientSex,ageinYears);
+	}
+	
+	private CustomVitalGroup prepareJsonfromBeans(CustomVitalGroup vitalGrpInfo,Integer patientId, Integer encounterId,short patientSex,int patientAge) throws Exception {
+		int groupId = -1;
+		LinkedHashMap<Integer,VitalGroupBean> vitalGroupHashMap = vitalDataBean.getVitals();
+		Set<Entry<Integer,VitalGroupBean>> GroupHashMap = vitalGroupHashMap.entrySet();
+		for(Entry<Integer,VitalGroupBean> currentGroup:GroupHashMap){
 
+			groupId   = currentGroup.getKey();
+			VitalGroupBean vitalGroupBean = currentGroup.getValue();
+			String elementGWId = "0000000000000000000";
+			LinkedHashMap<String,VitalElementBean>  vitalHashMap = vitalGroupBean.getVitalElements();
+			Set<Entry<String, VitalElementBean>> ElementHashMap =  vitalHashMap.entrySet();
+			if(!vitalGroupBean.getGroupName().equals("Others")){
+				if(ElementHashMap.size()!=0){
+					vitalGrpInfo.setVitalGroupName(vitalGroupBean.getGroupName());
+					vitalGrpInfo.setAge(patientAge);
+					vitalGrpInfo.setSex(patientSex);
+					vitalGrpInfo.setGroupId(groupId);
+					for(Entry<String,VitalElementBean> currentElement:ElementHashMap){
+						VitalElementBean  elementBean = currentElement.getValue();
+						String vitalName = HUtil.ValidateSpecialQuote(elementBean.getVitalName());
+						String elementId = currentElement.getKey();
+						elementGWId = elementBean.getVitalGWId();
+
+
+
+						ClinicalElementBean ceBean = clinicalDataBean.getClinicalElements(elementGWId);
+						PatientElementBean patientElementBean=clinicalDataBean.getPatientElements(elementGWId);
+						String vitaltype = "";
+						if(vitalName.contains("BP")){
+							vitaltype = "BP";
+						}else if(vitalName.equals("Height")){
+							vitaltype = "height";
+						}else if(vitalName.equals("Weight")){
+							vitaltype = "weight";
+						}else if(vitalName.equals("BMI")){
+							vitaltype = "BMI";
+						}else if(vitalName.equals("BSA")){
+							vitaltype = "BSA";
+						}else if(vitalName.contains("Pulse")){
+							vitaltype = "pulse";
+						}else if(vitalName.contains("Temperature")){
+							vitaltype = "temperature";
+						}else if(vitalName.equals("Head circumference")){
+							vitaltype = "Headcircumference";
+						}else if(vitalName.equals("Last Phy-V")){
+							vitaltype = "Last Phy-V";
+						}else if(vitalName.equals("Neck circumference")){
+							vitaltype = "Neckcircumference";
+						}else if(elementBean.getVitalName().equals("Weight change")){
+							vitaltype = "WeightChanges";
+						}else if(vitalName.contains("Others")){
+							vitaltype = "others";
+						}
+						vitalGrpInfo.setVitalType(vitaltype);
+						if(vitaltype.equalsIgnoreCase("BP")){
+							if(vitalName.contains("Systolic") || vitalName.contains("systolic")){
+								ClinicalTextMapping clinElement=null;
+								String elementAssociatGWId=(clinElement=clinicalElementsService.getClinicalTextMapping(elementGWId))!=null?clinElement.getClinicalTextMappingAssociatedElement()+"":"";
+								VitalElementBean vitalAssociatedBean = null;
+								for(Entry<String,VitalElementBean> currentAssociateElement:ElementHashMap){
+									if(currentAssociateElement.getKey().equals(elementAssociatGWId)){
+										vitalAssociatedBean = currentAssociateElement.getValue();
+									}
+								}
+								ClinicalElementBean ceAssociateBean            = clinicalDataBean.getClinicalElements(elementAssociatGWId);
+								PatientElementBean patientAssociateElementBean = clinicalDataBean.getPatientElements(elementAssociatGWId);
+								String groupName ="";
+								if(vitalAssociatedBean!=null && (elementBean.getVitalGender() == patientSex || elementBean.getVitalGender() == 0)){
+									if(vitalName.contains("Systolic")){
+										groupName = vitalName.substring(0, vitalName.indexOf("Systolic"))+"BP";
+									}else if(vitalName.contains("systolic")){
+										groupName = vitalName.substring(0, vitalName.indexOf("systolic"))+"BP";
+									}
+									if(ceBean!=null && ceAssociateBean!=null ){
+										ElementDetails elementDet = prepareElement(clinicalDataBean,elementBean,patientElementBean,elementId,elementGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);	
+
+										for(int i=0;i<elementDet.associatedElements.size();i++){
+											elementDet.associatedElements.get(i).elementName=groupName;
+										}
+
+										vitalGrpInfo.unitgroupdetails.add(elementDet);
+
+										ElementDetails associate = prepareElement(clinicalDataBean, vitalAssociatedBean,patientAssociateElementBean,elementAssociatGWId,elementAssociatGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);
+
+
+										for (AssociatedElementDetails assoElement : associate.getAssociatedElements()) {
+											elementDet.getAssociatedElements().add(assoElement);
+										}
+
+										//vitalGrpInfo.unitgroupdetails.add(associate);
+									}
+								}
+							}
+						}
+						else{
+							if(ceBean!=null){
+								if(elementBean.getVitalGender() == patientSex || elementBean.getVitalGender() == 0){
+									ElementDetails elementDet = prepareElement(clinicalDataBean,elementBean,patientElementBean,elementId,elementGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);
+									vitalGrpInfo.unitgroupdetails.add(elementDet);
+
+								}
+							}
+						}
+					}
+					boolean isOrthoNotesActive = clinicalElementsService.isClinicalElemActive("0000200200100201000");
+					String elementValue="";
+					if(isOrthoNotesActive && vitalGroupBean.getGroupName().contains("BP / Respiratory")){
+						ElementDetails elemDetails=new ElementDetails();
+						PatientElementBean patientElementBeanBPNotes=clinicalDataBean.getPatientElements("0000200200100201000");
+						if(patientElementBeanBPNotes!=null)
+							elementValue=HUtil.Nz(patientElementBeanBPNotes.getPatientClinicalElementText(),"");
+						elemDetails.associatedElements.add(getAssoElement("","","Repeat BP","","",0,"","",2,"0000200200100201000",elementValue,"",0,""));
+						vitalGrpInfo.unitgroupdetails.add(elemDetails);
+					}
+					boolean isRepeatpulNotesActive = clinicalElementsService.isClinicalElemActive("0000200200100236000");
+					elementValue="";
+					if(isRepeatpulNotesActive && vitalGroupBean.getGroupName().contains("Pulse / Temperature")){
+						PatientElementBean patientElementBeanPulseNotes=clinicalDataBean.getPatientElements("0000200200100236000");
+						if(patientElementBeanPulseNotes!=null)
+							elementValue=HUtil.Nz(patientElementBeanPulseNotes.getPatientClinicalElementText(),"");
+
+					}
+
+				}
+			}else{
+				if(ElementHashMap.size()!=0){
+
+					vitalGrpInfo.setVitalGroupName(vitalGroupBean.getGroupName());
+					vitalGrpInfo.setAge(patientAge);
+					vitalGrpInfo.setSex(patientSex);
+					vitalGrpInfo.setGroupId(groupId);
+					for(Entry<String,VitalElementBean> currentElement:ElementHashMap){
+						VitalElementBean  elementBean = currentElement.getValue();
+						String elementId = currentElement.getKey();
+						elementGWId = elementBean.getVitalGWId();
+						ClinicalElementBean ceBean = clinicalDataBean.getClinicalElements(elementGWId);
+						PatientElementBean patientElementBean=clinicalDataBean.getPatientElements(elementGWId);
+						String vitaltype = "others";
+						if(ceBean!=null){
+							if(elementBean.getVitalGender() == patientSex || elementBean.getVitalGender() == 0){
+								ElementDetails elementDet = prepareElement(clinicalDataBean,elementBean,patientElementBean,elementId,elementGWId,vitaltype,ceBean.getClinicalElementDataType(),patientId,encounterId);
+								vitalGrpInfo.unitgroupdetails.add(elementDet);
+							}
+						}
+
+					}
+
+				}
+			}
+		}
+
+		/*boolean notes = clinicalElementsService.isClinicalElemActive("0000200200100198000");
+		String elementValue="";
+		if(notes){
+			PatientElementBean patientElementBeanVitalNotes=clinicalDataBean.getPatientElements("0000200200100198000");
+			if(patientElementBeanVitalNotes!=null)
+				elementValue=HUtil.Nz(patientElementBeanVitalNotes.getPatientClinicalElementText(),"");
+		}*/
+
+		return vitalGrpInfo;
+	}
 
 }

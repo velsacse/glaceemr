@@ -1,7 +1,5 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,9 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.glenwood.glaceemr.server.application.models.VitalGroup;
-import com.glenwood.glaceemr.server.application.services.chart.dischargeVitals.DischargeVitalBean;
-import com.glenwood.glaceemr.server.application.services.chart.vitals.CustomVitalGroup;
 import com.glenwood.glaceemr.server.application.services.chart.vitals.VitalsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
@@ -29,16 +24,17 @@ public class VitalsController {
 	@Autowired
 	VitalsService vitalService;
 	
+	@Autowired
+	EMRResponseBean emrResponseBean;
+	
 	@RequestMapping(value="/VitalGroups",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getVitalGroups(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="groupId") Integer groupId) throws Exception{
 		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 		groupId=Integer.parseInt(Optional.fromNullable(groupId+"").or("-1"));
-		List<VitalGroup> groupDetails = vitalService.getActiveVitalsGroup(patientId,groupId);
-		EMRResponseBean vitalGroups= new EMRResponseBean();
-		vitalGroups.setData(groupDetails);
-		return vitalGroups;
+		emrResponseBean.setData(vitalService.getActiveVitalsGroup(patientId,groupId));
+		return emrResponseBean;
 	}
 	
 	
@@ -48,9 +44,9 @@ public class VitalsController {
 									@RequestParam(value="chartId") Integer chartId,
 									@RequestParam(value="encounterId") Integer encounterId,
 									@RequestParam(value="groupId") Integer groupId,
-									@RequestParam(value="dischargeVitals") Boolean isDischargeVitals,
-									@RequestParam(value="admssEpisode") Integer admssEpisode,
-									@RequestParam(value="clientId") String clientId) throws Exception{
+									@RequestParam(value="dischargeVitals", defaultValue="false", required=false) Boolean isDischargeVitals,
+									@RequestParam(value="admssEpisode", defaultValue="-1", required=false) Integer admssEpisode,
+									@RequestParam(value="clientId", defaultValue="000", required=false) String clientId) throws Exception{
 		
 		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 		chartId=Integer.parseInt(Optional.fromNullable(chartId+"").or("-1"));
@@ -58,10 +54,8 @@ public class VitalsController {
 		groupId=Integer.parseInt(Optional.fromNullable(groupId+"").or("-1"));
 		isDischargeVitals=Boolean.parseBoolean(Optional.fromNullable(isDischargeVitals+"").or("false"));
 		admssEpisode=Integer.parseInt(Optional.fromNullable(admssEpisode+"").or("-1"));
-		DischargeVitalBean vitalData = vitalService.setVitals(patientId,encounterId,groupId,isDischargeVitals,admssEpisode,clientId,0);
-		EMRResponseBean dischargeBean= new EMRResponseBean();
-		dischargeBean.setData(vitalData);
-		return dischargeBean;
+		emrResponseBean.setData(vitalService.setVitals(patientId,encounterId,groupId,isDischargeVitals,admssEpisode,clientId));
+		return emrResponseBean;
 	}
 	
 	@RequestMapping(value="/VitalGroups/VitalPrint",method=RequestMethod.GET)
@@ -80,10 +74,23 @@ public class VitalsController {
 		groupId=Integer.parseInt(Optional.fromNullable(groupId+"").or("-1"));
 		isDischargeVitals=Boolean.parseBoolean(Optional.fromNullable(isDischargeVitals+"").or("false"));
 		admssEpisode=Integer.parseInt(Optional.fromNullable(admssEpisode+"").or("-1"));
-		DischargeVitalBean PrintDetails = vitalService.setVitals(patientId,encounterId,groupId,isDischargeVitals,admssEpisode,clientId,1);
-		EMRResponseBean vitalPrint= new EMRResponseBean();
-		vitalPrint.setData(PrintDetails);
-		return vitalPrint;
+		emrResponseBean.setData(vitalService.setVitals(patientId,encounterId,groupId,isDischargeVitals,admssEpisode,clientId,1));
+		return emrResponseBean;
 	}
+	
+	
+	@RequestMapping(value="/FetchNotes", method=RequestMethod.GET)
+	public EMRResponseBean getVitalNotes(@RequestParam(value="patientId") Integer patientId,
+								@RequestParam(value="encounterId") Integer encounterId,
+								@RequestParam(value="gwId") String gwId) {
+		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
+		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
+		gwId=Optional.fromNullable(gwId+"").or("");
+		emrResponseBean.setData(vitalService.getNotes(patientId,encounterId,gwId));
+		return emrResponseBean;
+		
+		
+	}
+	
 	
 }
