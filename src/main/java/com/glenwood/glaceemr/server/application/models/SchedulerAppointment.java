@@ -127,12 +127,12 @@ public class SchedulerAppointment {
 	@JsonManagedReference
 	@JoinColumn(name="sch_appt_type",referencedColumnName="h113003",insertable=false,updatable=false)
 	H113 h113ApptType;
-	/*
+	
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="sch_appt_reason",referencedColumnName="h113003",insertable=false,updatable=false)
-	H113 h113ApptReason;*/
+	H113 h113ApptReason;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -415,14 +415,14 @@ public class SchedulerAppointment {
 		this.h113ApptType = h113ApptType;
 	}
 
-/*	public H113 getH113ApptReason() {
+	public H113 getH113ApptReason() {
 		return h113ApptReason;
 	}
 
 	public void setH113ApptReason(H113 h113ApptReason) {
 		this.h113ApptReason = h113ApptReason;
 	}
-*/
+
 	public SchedulerAppointmentParameter getSchApptParam() {
 		return schApptParam;
 	}

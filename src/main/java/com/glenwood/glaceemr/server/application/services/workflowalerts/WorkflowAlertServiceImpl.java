@@ -229,8 +229,6 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 		};
 
 
-		List<WorkflowBean> workflowBeans=new ArrayList<WorkflowBean>();
-
 		cq.select(builder.construct(WorkflowBean.class
 				,root.get(Workflow_.workflowId)
 				,root.get(Workflow_.workflowPatientid)
@@ -374,99 +372,23 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 
 			String timeBuffer="";
 
-			/*if(diffDays==0){
-				if(diffHours==0){
-					if(diffMinutes==0){
-						timeBuffer=diffSeconds+" secs";
-					}
-					else{
-						if(diffSeconds==0)
-							timeBuffer=diffMinutes+" mins ";
-						else if(diffMinutes==1)
-							timeBuffer=diffMinutes+" min ";
-						else
-							timeBuffer=diffMinutes+" mins ";
-//						timeBuffer=diffMinutes+" mins "+diffSeconds+" secs";
-					}
-				}
-				else{
-					if(diffMinutes==0)
-						timeBuffer=diffHours+" hrs ";
-					else if(diffHours==1)
-						timeBuffer=diffHours+" hr "+diffMinutes+" mins ";
-					else
-						timeBuffer=diffHours+" hrs "+diffMinutes+" mins ";
-				}
-			}
-			else{
-				if(diffHours==0)
-					timeBuffer=diffDays+" days ";
-				else if(diffDays==1)
-					timeBuffer=diffDays+" day "+diffHours+" hrs ";
-				else
-					timeBuffer=diffDays+" days "+diffHours+" hrs ";
-			}*/
-
 			String totalWaitingTime= " ("+getTotalTime(wfb.getWorkflowPatientid(),wfb.getCurrentmilliseconds())+")";
+			
 
-			if(diffDays==0){
-				if(diffHours==0){
-					if(diffMinutes==0){
-						timeBuffer="00"+":"+"01"+totalWaitingTime;			//When time less than a minute
-					}
-					else{
-						if(diffMinutes<10)
-							timeBuffer="00"+":"+"0"+diffMinutes+totalWaitingTime;			//When time less than 10 minute Ex: To show 9 min as 09 min
-						else
-							timeBuffer="00"+":"+diffMinutes+totalWaitingTime;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-					}
-				}
-				else{
-					if(diffHours<10){								//When hours less than 9
-						if(diffMinutes<10)
-							timeBuffer="0"+diffHours+":"+"0"+diffMinutes+totalWaitingTime;			//When time less than 10 minute Ex: To show 9 min as 09 min
-						else
-							timeBuffer="0"+diffHours+":"+diffMinutes+totalWaitingTime;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-					}
-					else{
-						if(diffMinutes<10)
-							timeBuffer=diffHours+":"+"0"+diffMinutes+totalWaitingTime;			//When time less than 10 minute Ex: To show 9 min as 09 min
-						else
-							timeBuffer=diffHours+":"+diffMinutes+totalWaitingTime;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-					}
-				}
+			if(diffDays>0){
+				timeBuffer=diffDays+(diffDays==1?" day":" days");
 			}
-			else{
-				diffHours+=(diffDays*24);					//If there is more than a day
-				if(diffHours==0){
-					if(diffMinutes==0){
-						timeBuffer="00"+":"+"01"+totalWaitingTime;			//When time less than a minute
-					}
-					else{
-						if(diffMinutes<10)
-							timeBuffer="00"+":"+"0"+diffMinutes+totalWaitingTime;			//When time less than 10 minute Ex: To show 9 min as 09 min
-						else
-							timeBuffer="00"+":"+diffMinutes+totalWaitingTime;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-					}
-				}
-				else{
-					if(diffHours<10){
-						if(diffMinutes<10)
-							timeBuffer="0"+diffHours+":"+"0"+diffMinutes+totalWaitingTime;			//When time less than 10 minute Ex: To show 9 min as 09 min
-						else
-							timeBuffer="0"+diffHours+":"+diffMinutes+totalWaitingTime;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-					}
-					else{
-						if(diffMinutes<10)
-							timeBuffer=diffHours+":"+"0"+diffMinutes+totalWaitingTime;			//When time less than 10 minute Ex: To show 9 min as 09 min
-						else
-							timeBuffer=diffHours+":"+diffMinutes+totalWaitingTime;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-					}
-				}
+			else if(diffHours>0){
+				timeBuffer=diffHours+(diffHours==1?" hr":" hrs");
+			}
+			else if(diffMinutes>0){
+				timeBuffer=diffMinutes+(diffMinutes==1?" min":" mins");
+			}
+			else if(diffSeconds>0){
+				timeBuffer=diffSeconds+(diffSeconds==1?" sec":" secs");
 			}
 
-
-			createdDateTime=timeBuffer;		
+			createdDateTime=timeBuffer+totalWaitingTime;		
 			wfb.setTimeDifference(createdDateTime);			
 			int toId=wfb.getWorkflowToid();
 			if((toId==-99)||(toId==-1)||(toId==-2)||(toId==-3)||(toId==-4)||(toId==-5)||(toId==-6)||(toId==-7)||(toId==-10)||(toId==-11)||(toId==-15)||(toId==-25))
@@ -512,8 +434,7 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 			workFlowAlertRepository.saveAndFlush(alert);
 		}
 		
-		//To used to inactive more than one alerts for a patient
-		
+		//Used to inactive more than one alerts for a patient
 		Map<Integer,Integer> alertsMap=new HashMap<Integer,Integer>();
 		List<Integer> patientIds=new ArrayList<Integer>();
 		List<Workflow> activeAlerts=workFlowAlertRepository.findAll(WorkflowAlertSpecification.getActiveAlerts());
@@ -572,62 +493,19 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 		long diffHours = diff / (60 * 60 * 1000) % 24;
 		long diffDays = diff / (24 * 60 * 60 * 1000);
 
-
-		if(diffDays==0){
-			if(diffHours==0){
-				if(diffMinutes==0){
-					timeBuffer="00"+":"+"01";			//When time less than a minute
-				}
-				else{
-					if(diffMinutes<10)
-						timeBuffer="00"+":"+"0"+diffMinutes;			//When time less than 10 minute Ex: To show 9 min as 09 min
-					else
-						timeBuffer="00"+":"+diffMinutes;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-				}
-			}
-			else{
-				if(diffHours<10){								//When hours less than 9
-					if(diffMinutes<10)
-						timeBuffer="0"+diffHours+":"+"0"+diffMinutes;			//When time less than 10 minute Ex: To show 9 min as 09 min
-					else
-						timeBuffer="0"+diffHours+":"+diffMinutes;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-				}
-				else{
-					if(diffMinutes<10)
-						timeBuffer=diffHours+":"+"0"+diffMinutes;			//When time less than 10 minute Ex: To show 9 min as 09 min
-					else
-						timeBuffer=diffHours+":"+diffMinutes;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-				}
-			}
+		if(diffDays>0){
+			timeBuffer=diffDays+(diffDays==1?" day":" days");
 		}
-		else{
-			diffHours+=(diffDays*24);					//If there is more than a day
-			if(diffHours==0){
-				if(diffMinutes==0){
-					timeBuffer="00"+":"+"01";			//When time less than a minute
-				}
-				else{
-					if(diffMinutes<10)
-						timeBuffer="00"+":"+"0"+diffMinutes;			//When time less than 10 minute Ex: To show 9 min as 09 min
-					else
-						timeBuffer="00"+":"+diffMinutes;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-				}
-			}
-			else{
-				if(diffHours<10){
-					if(diffMinutes<10)
-						timeBuffer="0"+diffHours+":"+"0"+diffMinutes;			//When time less than 10 minute Ex: To show 9 min as 09 min
-					else
-						timeBuffer="0"+diffHours+":"+diffMinutes;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-				}
-				else{
-					if(diffMinutes<10)
-						timeBuffer=diffHours+":"+"0"+diffMinutes;			//When time less than 10 minute Ex: To show 9 min as 09 min
-					else
-						timeBuffer=diffHours+":"+diffMinutes;			//When time equal or greater than 10 minute Ex: To show 10 min as 10 min
-				}
-			}
+		else if(diffHours>0){
+			timeBuffer=diffHours+(diffHours==1?" hr":" hrs");
 		}
+		else if(diffMinutes>0){
+			timeBuffer=diffMinutes+(diffMinutes==1?" min":" mins");
+		}
+		else if(diffSeconds>0){
+			timeBuffer=diffSeconds+(diffSeconds==1?" sec":" secs");
+		}
+		
 		return timeBuffer;
 	}
 
