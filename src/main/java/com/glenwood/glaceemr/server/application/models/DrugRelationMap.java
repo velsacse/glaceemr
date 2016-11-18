@@ -42,7 +42,7 @@ public class DrugRelationMap {
 	private Integer drugRelationMapSchedule2Id;
 
 	@Column(name="drug_relation_map_qty")
-	private String drugRelationMapQty;
+	private Integer drugRelationMapQty;
 
 	@Column(name="drug_relation_map_refills_id")
 	private Integer drugRelationMapRefillsId;
@@ -179,12 +179,12 @@ public class DrugRelationMap {
 	}
 
 
-	public String getDrugRelationMapQty() {
+	public Integer getDrugRelationMapQty() {
 		return drugRelationMapQty;
 	}
 
 
-	public void setDrugRelationMapQty(String drugRelationMapQty) {
+	public void setDrugRelationMapQty(Integer drugRelationMapQty) {
 		this.drugRelationMapQty = drugRelationMapQty;
 	}
 

@@ -13,7 +13,7 @@ public class SearchBean {
 	 String form ;
 	 Integer Relation; 
 	 Integer medid;
-	 String qty; 
+	 Integer qty; 
 	 Integer refill;
 	 String intake; 
 	 String days;
@@ -27,7 +27,7 @@ public class SearchBean {
 	 String rxnormcode;
 	 Long totrec;
 	 
-	 public SearchBean(String rxName, Integer cs_schedule, String drugname, String ndccode, String dosagename , String units , String route , String sch1, String form , Integer Relation, Integer medid, String qty, Integer refill, String intake, String days, String drugtype, String drugstatus, String qtyunits, String external_source_info, String category, Boolean presctype, String imagename, String rxnormcode){
+	 public SearchBean(String rxName, Integer cs_schedule, String drugname, String ndccode, String dosagename , String units , String route , String sch1, String form , Integer Relation, Integer medid, Integer qty, Integer refill, String intake, String days, String drugtype, String drugstatus, String qtyunits, String external_source_info, String category, Boolean presctype, String imagename, String rxnormcode){
 		
 		 this.rxName=rxName;
 		 this.cs_schedule=cs_schedule;
@@ -142,11 +142,11 @@ public class SearchBean {
 		this.medid = medid;
 	}
 
-	public String getQty() {
+	public Integer getQty() {
 		return qty;
 	}
 
-	public void setQty(String qty) {
+	public void setQty(Integer qty) {
 		this.qty = qty;
 	}
 

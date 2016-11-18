@@ -765,7 +765,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				drugFormJoin.get(DrugForm_.drugFormName),
 				builder.greatest(ndcDrugRelJoin.get(DrugRelationMap_.drugRelationMapCode)),
 				builder.greatest(root.get(DrugCombination_.drugCombinationSpecificId)),
-				builder.coalesce(ndcDrugRelJoin.get(DrugRelationMap_.drugRelationMapQty),""),
+				ndcDrugRelJoin.get(DrugRelationMap_.drugRelationMapQty),
 				builder.coalesce(ndcDrugRelJoin.get(DrugRelationMap_.drugRelationMapRefillsId),0),
 				builder.coalesce(ndcDrugRelJoin.get(DrugRelationMap_.drugRelationMapTake),""),
 				builder.coalesce(ndcDrugRelJoin.get(DrugRelationMap_.drugRelationMapDays),""),
