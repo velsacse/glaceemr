@@ -19,6 +19,7 @@ import com.glenwood.glaceemr.server.application.models.TesttableAdrs;
 import com.glenwood.glaceemr.server.application.models.Testtableenctr;
 import com.glenwood.glaceemr.server.application.models.TesttablePtn;
 import com.glenwood.glaceemr.server.application.services.patient.PatientService;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
 
 
@@ -32,6 +33,9 @@ public class TestPatientController {
 	PatientService patientInfoService;
 	
 	@Autowired
+	EMRResponseBean responseBean;
+	
+	@Autowired
 	ObjectMapper objectmapper;
 	private Logger logger = Logger.getLogger(TestPatientController.class);
 	
@@ -42,14 +46,25 @@ public class TestPatientController {
 	 */
 	@RequestMapping(value = "/ByLastName", method = RequestMethod.GET)
     @ResponseBody
-	public Iterable<TesttablePtn> getPatientsByLastname(@RequestParam(value="lastName", required=false, defaultValue="") String lastName) throws Exception{
-		
+	public EMRResponseBean getPatientsByLastname(@RequestParam(value="lastName", required=false, defaultValue="") String lastName) throws Exception{
 		
 		logger.debug("in patient controller log ");
-		Iterable<TesttablePtn> patients=patientInfoService.findPatientByLastName(lastName);
 		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
 		
-		return patients;
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(patientInfoService.findPatientByLastName(lastName));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Data retrieval failure");
+			return responseBean;
+		}
+				
 	}
 	
 	
@@ -60,8 +75,23 @@ public class TestPatientController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/ByLastNameAndDob",method = RequestMethod.GET)
-	public Iterable<TesttablePtn> getPatientsBylastNameAndDob(@RequestParam(value="lastName", required=false, defaultValue="") String lastName,@RequestParam(value="dob", required=false, defaultValue="") String dob) throws Exception{
-		return patientInfoService.findPatientByLastNameAndDob(lastName, dob);
+	public EMRResponseBean getPatientsBylastNameAndDob(@RequestParam(value="lastName", required=false, defaultValue="") String lastName,@RequestParam(value="dob", required=false, defaultValue="") String dob) throws Exception{
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(patientInfoService.findPatientByLastNameAndDob(lastName, dob));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Data retrieval failure");
+			return responseBean;
+		}
+		
 	}
 	
 	
@@ -71,8 +101,23 @@ public class TestPatientController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/ByInsuranceName",method = RequestMethod.GET)
-	public Iterable<TesttablePtn> getPatientsByInsuranceName(@RequestParam(value="insuranceName", required=false, defaultValue="") String insuranceName) throws Exception{
-		return patientInfoService.findPatientByinsuranceName(insuranceName);
+	public EMRResponseBean getPatientsByInsuranceName(@RequestParam(value="insuranceName", required=false, defaultValue="") String insuranceName) throws Exception{
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(patientInfoService.findPatientByinsuranceName(insuranceName));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Data retrieval failure");
+			return responseBean;
+		}
+		
 	}
 
 	/**
@@ -82,85 +127,205 @@ public class TestPatientController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/ByLastNameHavingInsuranceByName",method = RequestMethod.GET)
-	public Iterable<TesttablePtn> getPatientsByLastNameHavingInsuranceByName(@RequestParam(value="lastName", required=false, defaultValue="") String lastName,@RequestParam(value="insuranceName", required=false, defaultValue="") String insuranceName) throws Exception{
-		Iterable<TesttablePtn> patients=patientInfoService.findPatintByLastNameHavingInsuranceByName(lastName, insuranceName);
-		return patients;
+	public EMRResponseBean getPatientsByLastNameHavingInsuranceByName(@RequestParam(value="lastName", required=false, defaultValue="") String lastName,@RequestParam(value="insuranceName", required=false, defaultValue="") String insuranceName) throws Exception{		
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(patientInfoService.findPatintByLastNameHavingInsuranceByName(lastName, insuranceName));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Data retrieval failure");
+			return responseBean;
+		}
+		
 	}
 
 	@RequestMapping(value = "/AllEncountersByPatientId",method = RequestMethod.GET)
-	public Iterable<Testtableenctr> getAllEncountersbyPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
-		Iterable<Testtableenctr> encounter=patientInfoService.findEncounterByPatientId(patientId);
-		return encounter;
+	public EMRResponseBean getAllEncountersbyPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{		
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(patientInfoService.findEncounterByPatientId(patientId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Data retrieval failure");
+			return responseBean;
+		}
+		
 	}
 	
 	@RequestMapping(value = "/AllInsuranceByPatientId",method = RequestMethod.GET)
-	public Iterable<TesttablePtn> getAllInsurancebyPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
-		Iterable<TesttablePtn> insurance=patientInfoService.findInsuranceByPatientId(patientId);
-		return insurance;
+	public EMRResponseBean getAllInsurancebyPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(patientInfoService.findInsuranceByPatientId(patientId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Data retrieval failure");
+			return responseBean;
+		}
+		
 	}
 	
 	
 	@RequestMapping(value = "/LatestEncountersbyPatientID",method = RequestMethod.GET)
-	public List<Map<String, Object>>  getLatestEncounterDateAndPatientNameByPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
-		List<Map<String, Object>> encounter=patientInfoService.findLatestEncounterDateAndPatientNameByPatientId(patientId);
-		return encounter;
+	public EMRResponseBean  getLatestEncounterDateAndPatientNameByPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{		
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(patientInfoService.findLatestEncounterDateAndPatientNameByPatientId(patientId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Data retrieval failure");
+			return responseBean;
+		}
+		
 	}
 	
 	
 
 	@RequestMapping(value = "/EncountersbyPatientIDs",method = RequestMethod.GET)
-	public Iterable<Testtableenctr>  getEncountersbyPatientID(@RequestParam(value="patientId", required=false, defaultValue="") String patientId) throws Exception{
-		JSONArray array=new JSONArray(patientId);
-		List<Integer> patientIdList = new ArrayList<Integer>();
-		for(int i=0;i<array.length();i++)
-			patientIdList.add((Integer)array.get(i));
-		Iterable<Testtableenctr> encounter=patientInfoService.findEncountersbyPatientID(patientIdList);
-		return encounter;
+	public EMRResponseBean  getEncountersbyPatientID(@RequestParam(value="patientId", required=false, defaultValue="") String patientId) throws Exception{
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			responseBean.setSuccess(true);
+			JSONArray array=new JSONArray(patientId);
+			List<Integer> patientIdList = new ArrayList<Integer>();
+			for(int i=0;i<array.length();i++)
+				patientIdList.add((Integer)array.get(i));
+			responseBean.setData(patientInfoService.findEncountersbyPatientID(patientIdList));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Data retrieval failure");
+			return responseBean;
+		}
+		
 	}
 	
 	@RequestMapping(value = "/LatestEncountersbyPatientIDs",method = RequestMethod.GET)
-	public List<Iterable<Object>>  getLatestEncountersbyPatientID(@RequestParam(value="patientId", required=false, defaultValue="") String patientId) throws Exception{
-		JSONArray array=new JSONArray(patientId);
-		List<Integer> patientIdList = new ArrayList<Integer>();
-		for(int i=0;i<array.length();i++)
-			patientIdList.add((Integer)array.get(i));
-		List<Iterable<Object>>encounter=patientInfoService.findLatestEncountersbyPatientIDs(patientIdList);
-		return encounter;
+	public EMRResponseBean  getLatestEncountersbyPatientID(@RequestParam(value="patientId", required=false, defaultValue="") String patientId) throws Exception{
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		try {
+			responseBean.setSuccess(true);
+			JSONArray array=new JSONArray(patientId);
+			List<Integer> patientIdList = new ArrayList<Integer>();
+			for(int i=0;i<array.length();i++)
+				patientIdList.add((Integer)array.get(i));
+			responseBean.setData(patientInfoService.findLatestEncountersbyPatientIDs(patientIdList));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Data retrieval failure");
+			return responseBean;
+		}
+		
 	}
 
 	
 	 
 		@RequestMapping(value = "/ByPatientId",method = RequestMethod.GET)
-		public Iterable<TesttablePtn> getPatientsByPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
-			return patientInfoService.findPatientByPatientId(patientId);
+		public EMRResponseBean getPatientsByPatientId(@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception{
+			
+			responseBean.setCanUserAccess(true);
+			responseBean.setIsAuthorizationPresent(true);
+			responseBean.setLogin(true);
+			
+			try {
+				responseBean.setSuccess(true);
+				responseBean.setData(patientInfoService.findPatientByPatientId(patientId));
+				return responseBean;
+			} catch (Exception e) {
+				e.printStackTrace();
+				responseBean.setSuccess(false);
+				responseBean.setData("Data retrieval failure");
+				return responseBean;
+			}
+			
 		}
 		
 		 
 		 @RequestMapping(value="/updateByPatient" ,method = RequestMethod.POST)
 		 @ResponseBody
-		    public TesttablePtn updateByPatient(@RequestParam(value="patient")String patient) {
-			 TesttablePtn updatepatient;
-			 System.out.println("In update By patientId>>"+patient);
+		    public EMRResponseBean updateByPatient(@RequestParam(value="patient")String patient) {
+			
+			responseBean.setCanUserAccess(true);
+			responseBean.setIsAuthorizationPresent(true);
+			responseBean.setLogin(true);
+			
 			try {
+				responseBean.setSuccess(true);
+				TesttablePtn updatepatient;
+				System.out.println("In update By patientId>>"+patient);
 				updatepatient = objectmapper.readValue(patient, TesttablePtn.class);
-
-			 return patientInfoService.updateByPatient(updatepatient);
-			 
+				responseBean.setData(patientInfoService.updateByPatient(updatepatient));
+				return responseBean;
 			} catch (Exception e) {
 				e.printStackTrace();
-				return null;
-			} 
+				responseBean.setSuccess(false);
+				responseBean.setData("Data retrieval failure");
+				return responseBean;
+			}
 				
 		    }
 		 
 
 		 @RequestMapping(value="/updateByAddress" ,method = RequestMethod.GET)
 		 @ResponseBody
-		    public Iterable<TesttableAdrs> updateByaddress(@RequestParam(value="address", required=false, defaultValue="") String address) throws Exception{
+		    public EMRResponseBean updateByaddress(@RequestParam(value="address", required=false, defaultValue="") String address) throws Exception{
 			
-			 System.out.println("In update By address>>"+address);
-
-			 return patientInfoService.updateByAddress(address);
+			 	System.out.println("In update By address>>"+address);
+			
+			 	responseBean.setCanUserAccess(true);
+				responseBean.setIsAuthorizationPresent(true);
+				responseBean.setLogin(true);
+				
+				try {
+					responseBean.setSuccess(true);
+					responseBean.setData(patientInfoService.updateByAddress(address));
+					return responseBean;
+				} catch (Exception e) {
+					e.printStackTrace();
+					responseBean.setSuccess(false);
+					responseBean.setData("Data retrieval failure");
+					return responseBean;
+				}
+			 
 		    }
 		 
 		 
@@ -205,41 +370,52 @@ public class TestPatientController {
 			 
 			 @RequestMapping(value="/deleteByPatient" ,method = RequestMethod.POST)
 			 @ResponseBody
-			    public String deleteByPatient(@RequestParam(value="patient")String patient) {
-				 TesttablePtn updatepatient;
-				 System.out.println("In delete By patient>>"+patient);
+			    public EMRResponseBean deleteByPatient(@RequestParam(value="patient")String patient) {
+				
+				responseBean.setCanUserAccess(true);
+				responseBean.setIsAuthorizationPresent(true);
+				responseBean.setLogin(true);
+				
 				try {
+					responseBean.setSuccess(true);
+					TesttablePtn updatepatient;
+					System.out.println("In delete By patient>>"+patient);
 					updatepatient = objectmapper.readValue(patient, TesttablePtn.class);
-
-				 patientInfoService.deleteByPatient(updatepatient);
-				 
-				 System.out.println(" Afte Executing delete By patient>>"+patient);
-				 return "success";
-				 
+					patientInfoService.deleteByPatient(updatepatient);
+					System.out.println(" Afte Executing delete By patient>>"+patient);
+					responseBean.setData("success");
+					return responseBean;
 				} catch (Exception e) {
 					e.printStackTrace();
-					return "failure";
-					
-				} 
+					responseBean.setSuccess(false);
+					responseBean.setData("failure");
+					return responseBean;
+				}
 					
 			    }
 			 
 			 
 			 @RequestMapping(value="/insertByPatient" ,method = RequestMethod.POST)
 			 @ResponseBody
-			    public TesttablePtn insertByPatient(@RequestParam(value="patient")String patient) {
-				 TesttablePtn updatepatient;
-				 System.out.println("In insert By patient>>"+patient);
+			    public EMRResponseBean insertByPatient(@RequestParam(value="patient")String patient) {
+				
+				responseBean.setCanUserAccess(true);
+				responseBean.setIsAuthorizationPresent(true);
+				responseBean.setLogin(true);
+				
 				try {
+					responseBean.setSuccess(true);
+					TesttablePtn updatepatient;
+					System.out.println("In insert By patient>>"+patient);
 					updatepatient = objectmapper.readValue(patient, TesttablePtn.class);
-
-				 return patientInfoService.insertByPatient(updatepatient);
-				 
+					responseBean.setData(patientInfoService.insertByPatient(updatepatient));
+					return responseBean;
 				} catch (Exception e) {
 					e.printStackTrace();
-					return null;
-				} 
-					
+					responseBean.setSuccess(false);
+					responseBean.setData("Data retrieval failure");
+					return responseBean;
+				}
 			    }
 			 
 	
