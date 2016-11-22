@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -755,6 +756,15 @@ public class Encounter implements Serializable {
 			List<PatientClinicalElements> patientClinicalElements) {
 		this.patientClinicalElements = patientClinicalElements;
 	}
-	
+	 
+	public Encounter(){
+		super();
+	}
+	public Encounter(Long encounter_service_doctor,Date encounterDate,Integer encounterPos){
+		Timestamp timeStamp = new Timestamp(encounterDate.getTime());
+		this.encounter_service_doctor=encounter_service_doctor;
+		this.encounterDate=timeStamp;
+		this.encounterPos=encounterPos;
+	}
 
 }

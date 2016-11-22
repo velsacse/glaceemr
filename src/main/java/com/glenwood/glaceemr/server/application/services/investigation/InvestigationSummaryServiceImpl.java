@@ -85,6 +85,7 @@ import com.glenwood.glaceemr.server.application.models.LabParameters;
 import com.glenwood.glaceemr.server.application.models.LabcompanyDetails;
 import com.glenwood.glaceemr.server.application.models.LabcompanyDetails_;
 import com.glenwood.glaceemr.server.application.models.LoginUsers;
+import com.glenwood.glaceemr.server.application.models.LoginUsers_;
 import com.glenwood.glaceemr.server.application.models.OrdersetCategorylist;
 import com.glenwood.glaceemr.server.application.models.OrdersetList;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
@@ -1914,8 +1915,13 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	public void  savelab(String requesttosave,Integer encounterIdParam,Integer patientIdParam,Integer chartIdParam,
 			Integer userIdParam,String fullDataParam,String isforwardParam,String forwardto,
 			String ishighpriorityParam,String testidParam) throws Exception{
-		EmployeeProfile empProfile=empProfileRepository.findOne(EmployeeSpecification.getUserDetailsByUserId(userIdParam));
-		LoginUsers login=loginUsersRepository.findOne(LoginSpecfication.byUserId(empProfile.getEmpProfileLoginid()));
+		Integer emploginId=-1;
+		Integer logindefId=-1;
+		emploginId=getEmpLoginId(userIdParam);
+		if(emploginId!=-1)
+		//EmployeeProfile empProfile=empProfileRepository.findOne(EmployeeSpecification.getUserDetailsByUserId(userIdParam));
+		//LoginUsers login=loginUsersRepository.findOne(LoginSpecfication.byUserId(emploginId));
+		logindefId=getUserIdfordefDoctor(emploginId);
 		encounterId = encounterIdParam;
 		patientId   = patientIdParam;
 		chartId     = chartIdParam;
@@ -1932,7 +1938,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
         } catch (Exception e) {
             e.printStackTrace();
 	}*/
-		defaultDoctor = Optional.fromNullable(login.getLoginUsersDefaultDoctor()).or(-1);
+		defaultDoctor = Optional.fromNullable(logindefId).or(-1);
 		isforward=isforwardParam;
 		toId=Integer.parseInt(Optional.fromNullable(forwardto).or("-1"));
 		ishighpriority = Optional.fromNullable(ishighpriorityParam).or("false");
@@ -1946,12 +1952,50 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		}
 	}
 
+	private Integer getUserIdfordefDoctor(Integer emploginId) {
+		Integer logindefdoctor=-1;
+		CriteriaBuilder cb=em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq=cb.createQuery();
+		Root<LoginUsers> root=cq.from(LoginUsers.class);
+		cq.select(root.get(LoginUsers_.loginUsersDefaultDoctor));
+		cq.where(cb.equal(root.get(LoginUsers_.loginUsersId), emploginId));
+	
+		try{
+			logindefdoctor=(Integer) em.createQuery(cq).getSingleResult();
+		}catch(Exception e){
+			e.printStackTrace();
+			logindefdoctor=-1;
+		}
+	      return logindefdoctor;
+		}
+
+	private Integer getEmpLoginId(Integer userIdParam) {
+		Integer loginId=-1;
+		CriteriaBuilder cb=em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq=cb.createQuery();
+		Root<EmployeeProfile> root=cq.from(EmployeeProfile.class);
+		cq.select(root.get(EmployeeProfile_.empProfileLoginid));
+		cq.where(cb.equal(root.get(EmployeeProfile_.empProfileEmpid), userIdParam)).getRestriction();
+	
+		try{
+			loginId=(Integer) em.createQuery(cq).getSingleResult();
+		}catch(Exception e){
+			e.printStackTrace();
+			loginId=-1;
+		}
+	      return loginId;
+		}
+	
+
 	public void saveInvestigation() throws Exception{ 
 		setResourceBundle();
 		String[] labRecord = fullData.split("!@@!"); 
 		String[] testdetidarray=new String[labRecord.length];
 		int len=0;
-		List<Encounter> encounterList=encounterEntityRepository.findAll(EncounterEntitySpecification.EncounterById(encounterId));
+		List<Encounter> encounterList=new ArrayList<Encounter>();
+		encounterList=getEncounterList(encounterId);
+				
+		//List<Encounter> encounterList=encounterEntityRepository.findAll(EncounterEntitySpecification.EncounterById(encounterId));
 		String dateString=HUtil.currentDate();
 		Integer posInteger=1;
 		if(encounterList.size()>0){
@@ -2003,9 +2047,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				boolean isreviewed=true;
 				for(int m=0;m<temptestidarray.length;m++)
 				{
-					LabEntries labEntriesList=labEntriesRepository.findOne(InvestigationSpecification.testdetailIds(Integer.parseInt(Optional.fromNullable(temptestidarray[m]).or("-1").toString())));
+					Integer labEntriesList=getLabEntriesTestStatusfortemp(Integer.parseInt(Optional.fromNullable(temptestidarray[m]).or("-1").toString()));
+					//LabEntries labEntriesList=labEntriesRepository.findOne(InvestigationSpecification.testdetailIds(Integer.parseInt(Optional.fromNullable(temptestidarray[m]).or("-1").toString())));
 					if(labEntriesList!=null){
-						int teststatus=Optional.fromNullable(labEntriesList.getLabEntriesTestStatus()).or(-1);
+						int teststatus=Optional.fromNullable(labEntriesList).or(-1);
 						if(teststatus<=3)
 							isreviewed=false;
 					}
@@ -2021,6 +2066,42 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			}
 		}
 	}    
+
+	private Integer getLabEntriesTestStatusfortemp(int parseInt) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<LabEntries> root=cq.from(LabEntries.class);
+		cq.select(root.get(LabEntries_.labEntriesTestStatus));
+		cq.where(builder.equal(root.get(LabEntries_.labEntriesTestdetailId), parseInt));
+		Integer unmappedResult=-1;
+		List<Object> list=em.createQuery(cq).getResultList();
+		if(list.size()>0)
+			unmappedResult= Integer.parseInt(MoreObjects.firstNonNull(list.get(0),"-1").toString());
+		return unmappedResult;
+	}
+
+	private List<Encounter> getEncounterList(int encounterId2) {
+		List<Encounter> encounterResults=new ArrayList<Encounter>();
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Encounter> cq = builder.createQuery(Encounter.class);
+		Root<Encounter> root=cq.from(Encounter.class);
+		Selection[] selections=new Selection[]{
+				root.get(Encounter_.encounter_service_doctor),
+				root.get(Encounter_.encounterDate),
+				root.get(Encounter_.encounterPos),
+				
+			};
+			cq.select(builder.construct(Encounter.class,selections));
+			Predicate[] restrictions = new Predicate[] {
+					builder.equal(root.get(Encounter_.encounterId), encounterId2),
+					
+			};
+			cq.where(restrictions);
+		
+		 encounterResults= em.createQuery(cq).getResultList();
+		
+		return encounterResults;
+	}
 
 	@SuppressWarnings("unused")
 	public String moveDataToDataBase(String[] dataStr) throws Exception{
@@ -2058,10 +2139,14 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			labencounterdate=edate;
 		} else {
 			logger.debug("Save an existing order.");
-			List<LabEntries> labEntriesList=labEntriesRepository.findAll(InvestigationSpecification.testdetailIds(Integer.parseInt(Optional.fromNullable(dataStr[dataValueMap("int_lab_testdetailid")]).or("-1").toString())));
-			int encount=Integer.parseInt(MoreObjects.firstNonNull(labEntriesList.get(0).getLabEntriesEncounterId(),-1).toString());
+			Integer labentriesEncounterIdforLab=getLabEntriesEncounterforExist(Integer.parseInt(Optional.fromNullable(dataStr[dataValueMap("int_lab_testdetailid")]).or("-1").toString()));
+			//List<LabEntries> labEntriesList=labEntriesRepository.findAll(InvestigationSpecification.testdetailIds(Integer.parseInt(Optional.fromNullable(dataStr[dataValueMap("int_lab_testdetailid")]).or("-1").toString())));
+			int encount=Integer.parseInt(MoreObjects.firstNonNull(labentriesEncounterIdforLab,-1).toString());
 			labEncounterId=encount;
-			List<Encounter> encounterList=encounterEntityRepository.findAll(EncounterEntitySpecification.EncounterById(labEncounterId));
+			
+			List<Encounter> encounterList=new ArrayList<Encounter>();
+			encounterList=getEncounterList(encounterId);
+			//List<Encounter> encounterList=encounterEntityRepository.findAll(EncounterEntitySpecification.EncounterById(labEncounterId));
 			String dateString=HUtil.currentDate();
 			if(encounterList.size()>0){
 				dateString=MoreObjects.firstNonNull(encounterList.get(0).getEncounterDate(), HUtil.currentDate()).toString();
@@ -2072,7 +2157,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			}
 			labencounterdate=dateString;
 		}
-		List<Encounter> encounterListOuter=encounterEntityRepository.findAll(EncounterEntitySpecification.EncounterById(labEncounterId));
+		
+		List<Encounter> encounterListOuter=new ArrayList<Encounter>();
+		encounterListOuter=getEncounterList(encounterId);
+		//List<Encounter> encounterListOuter=encounterEntityRepository.findAll(EncounterEntitySpecification.EncounterById(labEncounterId));
 		servicedoctor=defaultDoctor;
 		if(encounterListOuter.size()>0)
 			servicedoctor = Integer.parseInt(MoreObjects.firstNonNull(encounterListOuter.get(0).getEncounterServiceDoctor(),defaultDoctor).toString());
@@ -2532,6 +2620,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		if(initialSettingSub.size()>0)
 			supGroupId=Optional.fromNullable(initialSettingSub.get(0).getInitialSettingsOptionValue()).or("");
 		LabEntries labStatus=labEntriesRepository.findOne(InvestigationSpecification.testdetailIds(Integer.parseInt(Optional.fromNullable(dataStr[dataValueMap("int_lab_testdetailid")]).or("-1").toString())));
+		//LabEntries labStatus=getLabStatus(Integer.parseInt(Optional.fromNullable(dataStr[dataValueMap("int_lab_testdetailid")]).or("-1").toString()));
 		int tmp_lab_or_vac_status= -1;
 		if(labStatus!=null){
 			tmp_lab_or_vac_status=Optional.fromNullable(labStatus.getLabEntriesTestStatus()).or(-1);
@@ -2767,11 +2856,13 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		if(dataStr[dataValueMap("int_lab_persumeimmunityifo")]!=null)
 			persumeimmunityinfo = dataStr[dataValueMap("int_lab_persumeimmunityifo")];
 		SavePatientVISinformation(Integer.parseInt(saveid),visPatientInfo);
-		List<Chart> chart=chartRepository.findAll(ChartSpecification.findByChartId(chartId));
+		//List<Chart> chart=chartRepository.findAll(ChartSpecification.findByChartId(chartId));
 		int tmpPatientId = -1;
-		if( chart.size() > 0 ) {
+		
+		/*if( chart.size() > 0 ) {
 			tmpPatientId = chart.get(0).getChartPatientid();
-		}
+		}*/
+		tmpPatientId=getPatientIdinChart(chartId);
 		SavePatientImmunityinformation(labEncounterId,tmpPatientId,chartId,persumeimmunityinfo);
 		SaveParameters(chartId, Integer.parseInt(saveid), paramString);
 		if(dataStr[dataValueMap("int_lab_testdetailid")].equals("-1")){
@@ -2972,6 +3063,43 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		return saveid;
 
 	}
+private int getPatientIdinChart(int chartId2) {
+
+		Integer chartId = -1;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Chart> root = cq.from(Chart.class);
+		cq.select(root.get(Chart_.chartPatientid));
+		cq.where(builder.equal(root.get(Chart_.chartId), chartId2));
+		try{
+		chartId = (Integer)em.createQuery(cq).getSingleResult();
+		}catch(Exception e){
+			e.printStackTrace();
+			chartId=-1;
+		}
+		return chartId;
+
+	}
+
+
+/**
+ * 
+ * @param parseInt
+ * @return
+ */
+	private Integer getLabEntriesEncounterforExist(int parseInt) {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<LabEntries> root=cq.from(LabEntries.class);
+			cq.select(root.get(LabEntries_.labEntriesEncounterId));
+			cq.where(builder.equal(root.get(LabEntries_.labEntriesTestdetailId), parseInt));
+			Integer unmappedResult=-1;
+			List<Object> list=em.createQuery(cq).getResultList();
+			if(list.size()>0)
+				unmappedResult= Integer.parseInt(MoreObjects.firstNonNull(list.get(0),"-1").toString());
+			return unmappedResult;
+		}
+
 
 	/**
 	 * Method to put lab alert in inbox page

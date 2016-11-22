@@ -104,6 +104,7 @@ import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.Prescription;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.ProblemList_;
+import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails_;
 import com.glenwood.glaceemr.server.application.models.VaccineReport;
 import com.glenwood.glaceemr.server.application.models.VaccineReport_;
 import com.glenwood.glaceemr.server.application.models.VitalsParameter;
@@ -389,6 +390,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	public FlowsheetBean getFlowsheetData(Integer flowsheetTypeParam,Integer flowsheetId, Integer patientId,Integer encounterId) throws Exception {
 		//logger.debug("Request to get the complete flowsheet details based on flowsheet id and patient Id:Inside service Impl");
 		FlowsheetBean fBean=new FlowsheetBean();
+		Integer chartId=-1;
+		Integer count=0;
 		if(flowsheetTypeParam==-1)
 			fBean.setFlowsheetList(getFlowsheetNames(patientId));
 		else
@@ -396,7 +399,20 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		if(encounterId!=-1)
 			fBean.setChartBased(false);
 		else
+		{
+			chartId=getChartId(patientId);
+			
+			if(chartId!=-1){
+				count=getCount(chartId);
+				if(count>0){
+				encounterId=getlatestEncounterId(chartId);
+				}else{
+					encounterId=-1;
+				}
+			}
+		
 			fBean.setChartBased(true);
+		}
 		if(flowsheetId!=-1){
 			fBean.setFlowsheetId(flowsheetId);
 			Flowsheet flowsheet=flowsheetRepository.findOne(Specifications.where(FlowsheetSpecification.flowsheetId(flowsheetId)).and(FlowsheetSpecification.flowsheetIsactive(true)));
@@ -476,11 +492,29 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return fBean;
 	}
 
-	private Flowsheet getFlowsheetType(Integer flowsheetId) {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * Need to get count of entries 
+	 * @param chartId
+	 * @return
+	 */
+	
+	private Integer getCount(Integer chartId) {
+		int count=0;
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq= cb.createQuery();
+		Root<Encounter>root=cq.from(Encounter.class);
+		cq.select(cb.count(root.get(Encounter_.encounterId)));
+		cq.where(cb.equal(root.get(Encounter_.encounterChartid), chartId));
+		try{
+			count=  Integer.parseInt("" + em.createQuery(cq).getSingleResult());
+		}catch(Exception e){
+			e.printStackTrace();
+			count=0;
+		}
+		
+	
+		return count;
 	}
-
 	/**
 	 * Method to get the PatientDoB
 	 * @param patientId
@@ -800,11 +834,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 	public ArrayList<FS_LabBean> formLabData(int flowsheetId,String startDate, Integer patientId,Integer encounterId,Integer patgender) throws Exception{
 	
-		//System.out.println("<<<<<<<<<<<FORM LABDATA STARTSS HERE ________________________>>>>>>"+System.currentTimeMillis());
-		long starttime=System.currentTimeMillis();
 		
 		List<Integer> groupIds=getFlowsheetLabGroupId(flowsheetId,patientId);
-		//System.out.println("groupIds is :::::::"+groupIds);
 		JSONObject groupIdTestIdMap=new JSONObject();
 		String[][] codes= getFlowsheetLabCode(groupIds,groupIdTestIdMap);
 		List<FS_GroupIdTest> testIdandGroupIds=new ArrayList<>();
@@ -814,7 +845,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		ArrayList<String> testDetailIdsTemp;
 		try{
 			testIdandGroupIds=getTestIdsandGroupIds(groupIds);
-			//System.out.println("testIdandGroupIds"+testIdandGroupIds);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -830,7 +860,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			testIdString = testIdString.substring(0, testIdString.length()-1);
 		//if(testIds.size()>0){
 		ArrayList<FS_LabBean>labdata = getLabsData(patientId, flowsheetId, encounterId,testIds,groupIds);
-		//System.out.println("labdata"+labdata);
 		//ArrayList<FS_LabBean>labEntries = new ArrayList<FS_LabBean>();
 		for(int i=0;i<labdata.size();i++){
 			int grupId = -1;
@@ -854,7 +883,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		for(FS_GroupIdTest testIdandGroupId : testIdandGroupIds) {
 			if(!latestGrupLabData.containsKey(testIdandGroupId.getGroupId()) || 
 					latestGrupLabData.get(testIdandGroupId.getGroupId())== null ){
-				//System.out.println(testIdandGroupId.getGroupId());
 				latestGrupLabData.put(testIdandGroupId.getGroupId(), getLatestLabBean(testIdandGroupId, labdata));
 			} else if( latestGrupLabData.get(testIdandGroupId.getGroupId())!= null ) {
 				FS_LabBean bean = getLatestLabBean(testIdandGroupId, labdata);
@@ -940,8 +968,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		/*if(groupIds.size()>0)
 			//retData = checkFlowSheetRulesForLabData(patientId,chartId, groupIds, arr_lab, startDate,groupsIdTestIdMap);
 		 */
-		//System.out.println("<<<<<<<<<<<FORMLABDATA ends here ________________________>>>>>>");
-		//System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
 		return retData;
 	}
 
@@ -975,7 +1001,12 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		Root<Chart> root = cq.from(Chart.class);
 		cq.select(root.get(Chart_.chartId));
 		cq.where(builder.equal(root.get(Chart_.chartPatientid), patientId));
+		try{
 		chartId = (Integer)em.createQuery(cq).getSingleResult();
+		}catch(Exception e){
+			e.printStackTrace();
+			chartId=-1;
+		}
 		return chartId;
 
 	}
@@ -1045,12 +1076,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			//List<Object> lists = em.createQuery(cq).getResultList();
 
 			getTestIdsTemp1= em.createQuery(cq).getResultList();
-			/*for(int i = 0 ; i < getTestIdsTemp1.size(); i++) {
-				System.out.print(getTestIdsTemp1.get(i).getTestId()+",");
-			}
-			System.out.println("------------------------");
-
-			System.out.println(getTestIdsTemp1.toString());*/
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -1074,11 +1099,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		};
 		cq1.where(restrictionsloinc);
 		getTestIdsTemp2=(em.createQuery(cq1).getResultList());
-		/*for(int i = 0 ; i < getTestIdsTemp2.size(); i++) {
-			System.out.print(getTestIdsTemp2.get(i).getTestId()+",");
-		}
-		System.out.println("------------------------");*/
-
+	
 		//Query to get loinc  from externally 
 
 		CriteriaBuilder loinchl7=em.getCriteriaBuilder() ;
@@ -1109,10 +1130,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		cq2.where(restrictionshl7);
 
 		getTestIdsTemp3=(em.createQuery(cq2).getResultList());
-		/*for(int i = 0 ; i < getTestIdsTemp3.size(); i++) {
-			System.out.println(getTestIdsTemp3.get(i).getTestId());
-		}
-*/
+		
 		//Query for snowmed codes 
 
 		CriteriaBuilder snowmedhl7=em.getCriteriaBuilder() ;
@@ -1143,10 +1161,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		cq3.where(restrictionsmd);
 
 		getTestIdsTemp4.addAll(em.createQuery(cq3).getResultList());
-		/*for(int i = 0 ; i < getTestIdsTemp4.size(); i++) {
-			System.out.print(getTestIdsTemp4.get(i).getTestId()+",");
-		}
-		System.out.println("------------------------");*/
+		
 
 		getTestIdsTemp4.addAll(getTestIdsTemp1);
 		getTestIdsTemp4.addAll(getTestIdsTemp2);
@@ -1253,9 +1268,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		}
 
 		try{
-			//System.out.println("---------------------------------------______-------------------------------");
 			fsLabBeanList1= em.createQuery(cq).getResultList();
-			//System.out.println("---------------------------------------______-------------------------------");
 
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1281,9 +1294,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		};
 		cq1.where (restrictionsforVR);
 		try{
-			//System.out.println("---------------------------------------______-------------------------------");
 			fsLabBeanList2= em.createQuery(cq1).getResultList();
-			//System.out.println("---------------------------------------______-------------------------------");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -1312,9 +1323,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		cq2.where(restrictionsforoveralerts);
 
 		try{
-			//System.out.println("---------------------------------------______-------------------------------");
 			fsLabBeanList3 = em.createQuery(cq2).getResultList();
-			//System.out.println("---------------------------------------______-------------------------------");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -1324,14 +1333,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		result.addAll(fsLabBeanList2);
 		result.addAll(fsLabBeanList3);
 
-		/*for( int i = 0 ; i < result.size() ; i++) {
-			System.out.print(result.get(i).getLabTestId()+",");
-			if(i == fsLabBeanList1.size() || i == fsLabBeanList1.size()+fsLabBeanList2.size()+fsLabBeanList1.size()
-					|| i == fsLabBeanList1.size()+fsLabBeanList2.size()) {
-				System.out.println();
-			}
-		}*/
-
+		
 		return result;
 	}
 
@@ -1726,9 +1728,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				Predicate chartIdPred=cb.equal(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterChartid), chartId);
 				Predicate paramDetails = null;
 				if((encounterId!=-1)&&(getEncounterStatusforLab(encounterId)==3)){
+					
 					Predicate encounterDatePred=cb.lessThanOrEqualTo(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterDate), getencounterDateforLab(encounterId));
 					paramDetails = cb.and(paramMapId,isActivePred,entriesIsActivePred,chartIdPred,encounterDatePred);
 				}else{
+				
 					paramDetails = cb.and(paramMapId,isActivePred,entriesIsActivePred,chartIdPred);
 				}
 				
@@ -1748,7 +1752,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					e.printStackTrace();
 				}
 				
-			//	System.out.println(" LabParametersData obj>>>>>>>>>>>>>>>>>>>>>>>>>"+obj.size());
 				
 				List<LabEntriesParameter> labParameters=new ArrayList<LabEntriesParameter>();
 				for(int i=0;i<obj.size();i++){
@@ -1763,7 +1766,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					labParameters.add(templabEntriesParameter);
 				}
 				
-				//System.out.println("LabParametersData>>>>>>>>>>>>"+labParameters);
 				
 //				List<LabParameters> paramIdsArray=labParametersRepository.findAll(Specifications.where(InvestigationSpecification.paramIdsLabParameter(paramIdsGroup)));
 				CriteriaBuilder cb1 = em.getCriteriaBuilder();
@@ -1772,13 +1774,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				Predicate testIds = rootLabParameters.get(LabParameters_.labParametersId).in((Object[])paramIdsGroup);
 				cq.select(rootLabParameters.get(LabParameters_.labParametersId)).where(testIds);
 				List<Object> paramIdList=  em.createQuery(cq).getResultList();
-				//System.out.println("paramIdList size>>>>>>>>>>>>>>>"+paramIdList.size());
 				List<Integer> paramIdsArray = new ArrayList<Integer>();
 				for(int i=0;i<paramIdList.size();i++){
 						int paramId=(int) paramIdList.get(i);
 						paramIdsArray.add(paramId);
 				}
-				//System.out.println("paramIdsArray:::::::::::::"+paramIdsArray.size()+":::::::::::::"+paramIdsArray);
 				
 				if(paramIdsArray.size()>0){
 					String[] groupId=new String[1];
@@ -1787,13 +1787,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					//getting list of override alerts having group id
 					
 //					overridealertsRepository.findAll(OverridealertsSpecification.overrideAlerts(groupId, 2, patientId, flowsheetId,encounterId,encounterEntity));
-					//System.out.println("groupId::::::::[0]:::::::"+groupId[0]);	
 					CriteriaBuilder cb2 = em.getCriteriaBuilder();
 					CriteriaQuery<Object> cq2 = cb1.createQuery();
 					Root<Overridealerts> rootOverridealerts = cq2.from(Overridealerts.class);
 					Predicate elementType=cb2.equal(rootOverridealerts.get(Overridealerts_.overridealertsFlowsheetElementType),2);
 					Predicate fsId=cb2.equal(rootOverridealerts.get(Overridealerts_.overridealertsFlowsheetMapId),flowsheetId);
-					//System.out.println("fsId::::::::::::::::::::"+fsId);
 					Predicate elementId=rootOverridealerts.get(Overridealerts_.overridealertsFlowsheetElementId).in((Object[])groupId);
 					Predicate patientIdPred = cb2.equal(rootOverridealerts.get(Overridealerts_.patientid),patientId);
 					Predicate overrideAlerts=null;
@@ -1811,7 +1809,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 							
 					List<Object> alertsObj=  em.createQuery(cq2).getResultList();
 					
-					//System.out.println("obj>>>>>>>>>>>Overridealerts >>>>>>>>>>>>>>"+alertsObj);
 					
 					List<OverrideAlertsBean> overridealertsInt=new ArrayList<OverrideAlertsBean>();
 					for(int i=0;i<alertsObj.size();i++){
@@ -1821,7 +1818,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 								overridealertsData.getOverriddenOn());
 						overridealertsInt.add(overridealertsDataBean);
 					}
-					//System.out.println("Overridealerts??????????? "+overridealertsInt);
 					
 					for(int k=0;k<overridealertsInt.size();k++){
 						LabEntriesParameter tempLabEntriesParam=new LabEntriesParameter();
@@ -1893,8 +1889,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		paramPerformedDate = limitthecount(paramPerformedDate,11);
 		if(groupIds.size()>0)
 			arr_param = checkFlowSheetRulesLabParametersData(patientId,chartId, groupIds, arr_param, startDate,groupIdParamIdMap,patgender);
-	//	System.out.println(":::::::::::::::::::::Final data:::::::::::::::::::::::"+paramBean);
-		//System.out.println("Final time taken:::::for paramsection:::"+(System.currentTimeMillis()-starttime));
 		return arr_param;
 	}
 
@@ -2642,15 +2636,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			
 			List<Object> obj=em.createQuery(cq).getResultList();
 			for(int i=0;i<obj.size();i++){
-				//System.out.println("in for loop start gwcode");
 				int paramid=(int) obj.get(i);
 				params.add(paramid);
-				//System.out.println("in for loop end gwcode");
 			}
-			//System.out.println("Initial set of params >>>>>>>>>>>"+params);
 		}
 		if(loincCodes.size()!=0){
-			//System.out.println("loincCodes::::::::::::::"+loincCodes);
 			
 			
 //				List<String> tempLoinc=new ArrayList<String>();
@@ -2668,7 +2658,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				List<Object> obj=em.createQuery(cq).getResultList();
 				//System.out.println("size of obj ::::::::"+obj.size());
 				for(int i=0;i<obj.size();i++){
-					//System.out.println("in for loop start loincCodes");
 					int paramid=(int) obj.get(i);
 					tempParams.add(paramid);
 					//System.out.println("in for loop end loincCodes");
@@ -3485,7 +3474,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	                 FlowsheetDrug flowsheetDrug=flowsheetDrugRepository.findOne(Specifications.where(FlowsheetSpecification.flowsheetDrugsClass(hsh_notes.getFlowsheetDrugClassId())).and(FlowsheetSpecification.flowsheetDrugsMapId(flowsheetId)));
 	                 //List<Prescription> prescriptionElements=prescriptionRepository.findAll(PrescripitonSpecification.getactivemedwithclassIdpresc(patientId,hsh_notes.getFlowsheetDrugClassId(),encounterId,encounterEntity));
 
-	                 List<PrescriptionServiceBean> prescriptionObject=serviceimpl.getMedDetailsWithClass(em,patientId,hsh_notes.getFlowsheetDrugClassId(),encounterId,encounterEntity);
+	                 List<PrescriptionServiceBean> prescriptionObject=new ArrayList<PrescriptionServiceBean>();
+	                 prescriptionObject=serviceimpl.getMedDetailsWithClass(em,patientId,hsh_notes.getFlowsheetDrugClassId(),encounterId,encounterEntity);
 	                 String[] classIdOverride=new String[1];
 	                 classIdOverride[0]=hsh_notes.getFlowsheetDrugClassId();
 
@@ -5103,10 +5093,24 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	public FlowsheetBean getFlowsheetDataSOAP(Integer flowsheetTypeParam,Integer flowsheetId, Integer patientId,Integer encounterId) throws Exception{
 		//logger.debug("Request to get the flowsheet details for labs and params section for a particular flowsheet for a patient.:: inside service Impl");
 		FlowsheetBean fBean=new FlowsheetBean();
+		Integer chartId=-1;
+		Integer count=0;
 		if(encounterId!=-1)
 			fBean.setChartBased(false);
-		else
+		else		{
+			chartId=getChartId(patientId);
+			
+			if(chartId!=-1){
+				count=getCount(chartId);
+				if(count>0){
+				encounterId=getlatestEncounterId(chartId);
+				}else{
+					encounterId=-1;
+				}
+			}
+		
 			fBean.setChartBased(true);
+		}
 		if(flowsheetId!=-1){
 			fBean.setFlowsheetId(flowsheetId);
 			Flowsheet flowsheet=flowsheetRepository.findOne(Specifications.where(FlowsheetSpecification.flowsheetId(flowsheetId)).and(FlowsheetSpecification.flowsheetIsactive(true)));
@@ -5171,4 +5175,29 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		//logger.debug("Request to get the flowsheet details for labs and params section for a particular flowsheet for a patient.:: outside service Impl");
 		return fBean;
 	}
+
+	private Integer getlatestEncounterId(Integer chartId) {
+	Integer encId=-1;
+	CriteriaBuilder cb=em.getCriteriaBuilder();
+	CriteriaQuery<Object> cq=cb.createQuery();
+	Root<Encounter> root=cq.from(Encounter.class);
+	cq.select(root.get(Encounter_.encounterId));
+	cq.where(cb.equal(root.get(Encounter_.encounterChartid),chartId));
+	cq.orderBy(cb.desc((root.get(Encounter_.encounterId))));
+	try{
+		encId=em.createQuery(cq).getFirstResult();
+	}catch(Exception e){
+		e.printStackTrace();
+		encId=-1;
+	}
+      return encId;
+	}
 }
+
+
+
+
+
+
+
+
