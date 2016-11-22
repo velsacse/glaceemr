@@ -37,7 +37,7 @@ public class ActivityLog {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="activity_log_entryid_seq")
-	@SequenceGenerator(name =" activity_log_entryid_seq", sequenceName="activity_log_entryid_seq", allocationSize=1)
+	@SequenceGenerator(name ="activity_log_entryid_seq", sequenceName="activity_log_entryid_seq", allocationSize=1)
 	@Column(name="entryid")
 	private Integer entryid;
 
