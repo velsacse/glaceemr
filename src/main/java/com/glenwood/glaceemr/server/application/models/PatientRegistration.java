@@ -601,9 +601,21 @@ public class PatientRegistration implements Serializable {
 	@JsonManagedReference
 	@JoinColumn(name="patient_registration_guarantorid", referencedColumnName="guarantor_key", insertable=false, updatable=false)
 	private Guarantor guaranatorDetails;
-		
+	
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="patientRegistration",fetch=FetchType.LAZY)
+	@JsonBackReference
+	List<AlertEvent> alertEvent;	
+	
 	public H076 getReferringPhyTable() {
 		return referringPhyTable;
+	}
+
+	public List<AlertEvent> getAlertEvent() {
+		return alertEvent;
+	}
+
+	public void setAlertEvent(List<AlertEvent> alertEvent) {
+		this.alertEvent = alertEvent;
 	}
 
 	public void setReferringPhyTable(H076 referringPhyTable) {

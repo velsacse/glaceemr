@@ -522,7 +522,18 @@ public class EmployeeProfile implements Serializable {
 	@JsonManagedReference
 	List<PrescriberDetails> prescriberDetails;
 	
-		
+	@OneToMany(mappedBy="empProfile")
+	@JsonManagedReference
+	private List<AlertMonitor> alertMonitor;
+	
+	public List<AlertMonitor> getAlertMonitor() {
+		return alertMonitor;
+	}
+
+	public void setAlertMonitor(List<AlertMonitor> alertMonitor) {
+		this.alertMonitor = alertMonitor;
+	}
+
 	public List<PrescriberDetails> getPrescriberDetails() {
 		return prescriberDetails;
 	}

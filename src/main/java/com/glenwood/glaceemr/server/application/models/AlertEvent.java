@@ -114,7 +114,6 @@ public class AlertEvent {
 	@JoinColumn(name="alert_event_room_id",referencedColumnName="h479001",insertable=false,updatable=false)
 	Room roomTable;
 	
-
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="alert_event_chart_id",referencedColumnName="chart_id",insertable=false,updatable=false)
@@ -155,7 +154,11 @@ public class AlertEvent {
 	@JoinColumn(name="alert_event_ref_id", referencedColumnName="portal_message_alertid", insertable=false, updatable=false)
 	private PortalMessage portalMessage;
 
-
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="alert_event_patient_id", referencedColumnName="patient_registration_id", insertable=false, updatable=false)
+	private PatientRegistration patientRegistration;
+	
 	public Integer getAlertEventId() {
 		return alertEventId;
 	}

@@ -229,6 +229,11 @@ public class Encounter implements Serializable {
 	@JoinColumn(name="encounter_ref_doctor",referencedColumnName="h076001",insertable=false,updatable=false)
 	H076 referringTable;
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="encounter_room",referencedColumnName="h479001",insertable=false,updatable=false)
+    Room room;
+	
 	public H076 getReferringTable() {
 		return referringTable;
 	}
