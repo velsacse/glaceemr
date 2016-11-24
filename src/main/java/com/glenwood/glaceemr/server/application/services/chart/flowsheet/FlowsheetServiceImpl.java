@@ -1656,8 +1656,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}
 
 	public ArrayList<FS_LabParameterBean> formLabParameters (int flowsheetId, String startDate,Integer patientId,Integer encounterId,Integer patgender) throws Exception {
-		//System.out.println("\n  ::::::::::::::::::: in formLabParameters section ::::::::::::::::::"+System.currentTimeMillis());
-		//long starttime=System.currentTimeMillis();
 		paramPerformedDate = new ArrayList<String> ();
 		// getting list of codes and there code system
 		List<Integer> groupIds=getFlowsheetParamGroupId(flowsheetId,patientId);
@@ -1721,15 +1719,15 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				Root<LabEntriesParameter> rootLabEntriesParameter = cq1.from(LabEntriesParameter.class);
 				
 				Join<LabEntriesParameter,LabParameters> join= rootLabEntriesParameter.join("labParametersTable", JoinType.LEFT);
-				
+				Expression<Date> endDateExpr=cb.function("date", Date.class, rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterDate));
 				Predicate paramMapId=rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterMapid).in((Object[])paramIdsGroup);
 				Predicate isActivePred=cb.equal(join.get(LabParameters_.labParametersIsactive),true);
 				Predicate entriesIsActivePred=cb.equal(cb.coalesce(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterIsactive), true),true);
 				Predicate chartIdPred=cb.equal(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterChartid), chartId);
 				Predicate paramDetails = null;
 				if((encounterId!=-1)&&(getEncounterStatusforLab(encounterId)==3)){
-					
-					Predicate encounterDatePred=cb.lessThanOrEqualTo(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterDate), getencounterDateforLab(encounterId));
+					Predicate encounterDatePred=cb.lessThanOrEqualTo(endDateExpr, getencounterDateforLab(encounterId));
+					//Predicate encounterDatePred=cb.lessThanOrEqualTo(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterDate), getencounterDateforLab(encounterId));
 					paramDetails = cb.and(paramMapId,isActivePred,entriesIsActivePred,chartIdPred,encounterDatePred);
 				}else{
 				
@@ -2645,7 +2643,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			
 //				List<String> tempLoinc=new ArrayList<String>();
 //				tempLoinc.add(loincCodes.get(y));
-				//System.out.println("tempLoinc:::::::::::::"+loincCodes);
 				CriteriaBuilder builder = em.getCriteriaBuilder();
 				CriteriaQuery<Object> cq = builder.createQuery();
 				Root<LabParameters> rootLabParameters = cq.from(LabParameters.class);
@@ -2656,16 +2653,13 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				cq.select(rootLabParameters.get(LabParameters_.labParametersId)).where(loincCode);
 				
 				List<Object> obj=em.createQuery(cq).getResultList();
-				//System.out.println("size of obj ::::::::"+obj.size());
 				for(int i=0;i<obj.size();i++){
 					int paramid=(int) obj.get(i);
 					tempParams.add(paramid);
-					//System.out.println("in for loop end loincCodes");
 				}
 				
 //				tempParams=labParametersRepository.findAll(Specifications.where(InvestigationSpecification.loincCodeParams(tempLoinc)));
 				params.addAll(tempParams);
-				//System.out.println("params after addall >>>>>>"+params+">>>>> tempParams>>>>>"+tempParams);
 				for(int y=0;y<loincCodes.size();y++){
 					String tempValue=loincCodes.get(y)+"###"+FlowsheetServiceImpl.LoincOID;
 					for(int k=0;k<groupIdParamIdMap.length();k++){
@@ -2685,13 +2679,10 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 					}
 				}
 		}
-		//System.out.println("params>>> at last >>>>>>>>>>"+params);
 		return params;
 	}
 
 	public ArrayList<FS_ClinicalElementBean> formClinicalElementsData(Integer flowsheetId,String startDate,Integer patientId,Integer encounterId,Integer patgender) throws Exception{
-		//System.out.println("Clinical Elments Section starts here :::::::::"+System.currentTimeMillis()	);
-		//long starttime=System.currentTimeMillis();
 		clinicalVitalParamDate = new ArrayList<String> ();
 		List<FlowsheetClinicalParam> flowsheetClinicalParam= new ArrayList<FlowsheetClinicalParam>();
 		flowsheetClinicalParam=getDetails(FlowsheetServiceImpl.LOAD_VITALS_DATA, flowsheetId);
@@ -2903,8 +2894,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		if(gwidsComplete.size()>0)
 			arr_clinical = checkFlowSheetRulesClinicalElementsData(patientId,flowsheetId,gwidsComplete, arr_clinical, startDate,patgender);
 		
-		//System.out.println("Clinical Elments Section ends here :::::::::");
-        //System.out.println("Final time taken::for drug::::::"+(System.currentTimeMillis()-starttime));
 
 		return arr_clinical;
 	}
@@ -3064,8 +3053,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 
 	public ArrayList<FS_ClinicalElementBean> formClinicalData (Integer flowsheetId,String startDate,Integer patientId,Integer encounterId,Integer patgender) throws Exception{
-		//System.out.println("Clinical Exceptvital Section starts here :::::::::"+System.currentTimeMillis());
-		long starttime=System.currentTimeMillis();
 		
 		List<FlowsheetClinicalParam>flowsheetClinicalParam= new ArrayList<FlowsheetClinicalParam>();
 		flowsheetClinicalParam=getDetails(FlowsheetServiceImpl.LOAD_CLINICAL_ELEMENTS_DATA, flowsheetId);
@@ -3228,8 +3215,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		arr_clinical=conversion(arr_clinical);
 		if(gwidsComplete.size()>0)
 			arr_clinical = checkFlowSheetRulesForClinicalData(patientId, flowsheetId,gwidsComplete, arr_clinical, startDate,patgender);
-		//System.out.println("Clinical Elments Section ends here :::::::::");
-       // System.out.println("Final time taken::for drug:forfinal vitall:::::"+(System.currentTimeMillis()-starttime));
 
 		
 		return arr_clinical;
@@ -3449,8 +3434,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}
 
 	public ArrayList<FS_DrugBean> formDrugData (Integer patientId,Integer flowsheetId, String startDate,Integer encounterId,Integer patgender) throws Exception{
-		 //System.out.println("Coming into Drug Data ::::::::::::::::::::::::"+System.currentTimeMillis());
-			//long starttime=System.currentTimeMillis();
 		 List<FlowsheetDrug> flowsheetDrugList=flowsheetDrugRepository.findAll(FlowsheetSpecification.flowsheetDrugsMapId(flowsheetId));
 	         ArrayList<FS_DrugBean> arr_drugs = new ArrayList<FS_DrugBean> ();
 	         Iterator<FlowsheetDrug> itr_drugs = flowsheetDrugList.iterator();
@@ -3545,8 +3528,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	         }
 	         if(classIdsComplete.size()>0)
 	             arr_drugs = checkFlowSheetRulesForDrugData(patientId,flowsheetId,classIdsComplete, arr_drugs, startDate,patgender);
-	        // System.out.println("EndDrug::::::::"+(System.currentTimeMillis()-starttime));
-	         //System.out.println("Final time taken::for drug::::::"+(System.currentTimeMillis()-starttime));
+	        
 	         return arr_drugs;
 	}	
 	public List<PrescriptionServiceBean> orderByDateDrug1(List<PrescriptionServiceBean> confData,final boolean descending){
@@ -5185,7 +5167,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	cq.where(cb.equal(root.get(Encounter_.encounterChartid),chartId));
 	cq.orderBy(cb.desc((root.get(Encounter_.encounterId))));
 	try{
-		encId=em.createQuery(cq).getFirstResult();
+		encId=(Integer) em.createQuery(cq).setMaxResults(1).getSingleResult();
 	}catch(Exception e){
 		e.printStackTrace();
 		encId=-1;

@@ -185,6 +185,16 @@ public class Encounter implements Serializable {
 	@Column(name="encounter_isportal")
 	private Integer encounterIsportal;
 	
+	
+	public Encounter(){
+		super();
+	}
+	public Encounter(Long encounter_service_doctor,Date encounterDate,Integer encounterPos){
+		Timestamp timeStamp = new Timestamp(encounterDate.getTime());
+		this.encounter_service_doctor=encounter_service_doctor;
+		this.encounterDate=timeStamp;
+		this.encounterPos=encounterPos;
+	}
 	public Long getEncounter_service_doctor() {
 		return encounter_service_doctor;
 	}
@@ -757,14 +767,6 @@ public class Encounter implements Serializable {
 		this.patientClinicalElements = patientClinicalElements;
 	}
 	 
-	public Encounter(){
-		super();
-	}
-	public Encounter(Long encounter_service_doctor,Date encounterDate,Integer encounterPos){
-		Timestamp timeStamp = new Timestamp(encounterDate.getTime());
-		this.encounter_service_doctor=encounter_service_doctor;
-		this.encounterDate=timeStamp;
-		this.encounterPos=encounterPos;
-	}
+
 
 }
