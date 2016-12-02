@@ -1,6 +1,6 @@
 package com.glenwood.glaceemr.server.application.services.scheduler;
 
-import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -76,7 +76,11 @@ public class SchedulerServiceImpl implements SchedulerService{
 	@Override
 	public List<SchedulerAppointmentBean> getAppointments(Date apptDate, String resourceId) {
 		
-		
+		    List<Long> list = new ArrayList<Long>();
+		    list.add((long)6);
+		    list.add((long)12);
+		    list.add((long)45);
+		    list.add((long)33);
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Object> cq = builder.createQuery();
 			Root<SchedulerAppointment> root = cq.from(SchedulerAppointment.class);
@@ -152,7 +156,8 @@ public class SchedulerServiceImpl implements SchedulerService{
 //					builder.function("date", Date.class, joinWorkflow.get(Workflow_.workflowStarttime))
 					joinWorkflow.get(Workflow_.workflowStarttime)
 					)).where(builder.and(builder.equal(root.get(SchedulerAppointment_.schApptDate),apptDate),
-							builder.equal(root.get(SchedulerAppointment_.schApptResource), Integer.parseInt(resourceId))
+							builder.equal(root.get(SchedulerAppointment_.schApptResource), Integer.parseInt(resourceId)),
+							builder.not(root.get(SchedulerAppointment_.h113ApptStatus).in(list))
 							)).orderBy(builder.asc(root.get(SchedulerAppointment_.schApptStarttime)));
 			Query query=em.createQuery(cq);
 			
