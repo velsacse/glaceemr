@@ -202,7 +202,7 @@ public class PrescriberDetails implements Serializable{
 		this.locationDetails = locationDetails;
 	}
 
-	@OneToMany(fetch=FetchType.EAGER,cascade=CascadeType.ALL,mappedBy="prescriberdetails")
+	@OneToMany(fetch=FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="prescriberdetails")
 	@JsonManagedReference
 	List<LocationDetails> locationDetails;
 	
