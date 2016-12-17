@@ -3,12 +3,26 @@ package com.glenwood.glaceemr.server.application.services.chart.print.generichea
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Fetch;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.BillingConfigTable;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
+import com.glenwood.glaceemr.server.application.models.H076;
+import com.glenwood.glaceemr.server.application.models.H077;
+import com.glenwood.glaceemr.server.application.models.H077_;
 import com.glenwood.glaceemr.server.application.models.LetterHeaderEmp;
+import com.glenwood.glaceemr.server.application.models.LetterHeaderEmp_;
 import com.glenwood.glaceemr.server.application.models.LetterHeaderPos;
 import com.glenwood.glaceemr.server.application.models.PlaceOfService;
 import com.glenwood.glaceemr.server.application.models.PosTable;
@@ -53,6 +67,9 @@ public class LetterHeaderServiceImpl implements LetterHeaderService{
 	
 	@Autowired
 	LetterHeaderPosRepository letterHeaderPosRepository;
+	
+	@Autowired
+	EntityManager em;
 	
 	@Override
 	public List<GenericLetterHeader> getLetterHeaderList() {
@@ -198,8 +215,41 @@ public class LetterHeaderServiceImpl implements LetterHeaderService{
 	}
 
 	@Override
-	public List<LetterHeaderEmp> fetchLetterHeaderEmpList(Integer headerId, Integer variantId) {
-		return letterHeaderEmpRepository.findAll(LetterHeaderSpecification.fetchEmpDetails(headerId, variantId));
+	public List<EmployeeDataBean> fetchLetterHeaderEmpList(Integer headerId, Integer variantId) {
+//		return letterHeaderEmpRepository.findAll(LetterHeaderSpecification.fetchEmpDetails(headerId, variantId));
+		return fetLetterHeaderEmpDetails(headerId, variantId);
+	}
+
+	private List<EmployeeDataBean> fetLetterHeaderEmpDetails(Integer headerId,
+			Integer variantId) {
+		
+		CriteriaBuilder builder= em.getCriteriaBuilder();
+		CriteriaQuery<EmployeeDataBean> query= builder.createQuery(EmployeeDataBean.class);
+		Root<LetterHeaderEmp> root= query.from(LetterHeaderEmp.class);
+		Join<LetterHeaderEmp, EmployeeProfile> empJoin= root.join(LetterHeaderEmp_.empProfile, JoinType.LEFT);
+		Join<EmployeeProfile, H077> specialtyJoin= empJoin.join(EmployeeProfile_.specialityTable, JoinType.LEFT);
+		
+		Predicate pred= builder.equal(root.get(LetterHeaderEmp_.letterHeaderEmpMapId),headerId);
+		Predicate varPred= builder.equal(root.get(LetterHeaderEmp_.letterHeaderEmpVariant),variantId);
+		
+		query.select(builder.construct(EmployeeDataBean.class, 
+										empJoin.get(EmployeeProfile_.empProfileEmpid),
+										 empJoin.get(EmployeeProfile_.empProfileLoginid),
+										  empJoin.get(EmployeeProfile_.empProfileLname),
+										   empJoin.get(EmployeeProfile_.empProfileFname),
+										    empJoin.get(EmployeeProfile_.empProfileMi),
+										     empJoin.get(EmployeeProfile_.empProfileCredentials),
+										      empJoin.get(EmployeeProfile_.empProfileAddress),
+										       empJoin.get(EmployeeProfile_.empProfileState),
+										        empJoin.get(EmployeeProfile_.empProfileCity),
+										         empJoin.get(EmployeeProfile_.empProfileZip),										          
+										          empJoin.get(EmployeeProfile_.empProfilePhoneno),
+										           empJoin.get(EmployeeProfile_.empProfileMailid),
+										            specialtyJoin.get(H077_.h077002)));
+		query.where(pred,varPred);
+		query.orderBy(builder.asc(root.get(LetterHeaderEmp_.letterHeaderEmpOrder)));
+		
+		return em.createQuery(query).getResultList();
 	}
 
 	@Override

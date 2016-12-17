@@ -10,13 +10,54 @@ public class EmployeeDataBean {
 	Integer empId;
 	Integer empLoginId;
 	String empFullname;
+	String empLastName;
+	String empFirstName;
+	String empMiddleName;
+	String empCredentials;
 	String empAddress;
 	String empState;
 	String empCity;
 	String empZip;
 	String empPhNum;
 	String empMailId;
+	String empSpecialty;
 	
+	public EmployeeDataBean(Integer empId, Integer empLoginId,
+			String empLastName, String empFirstName, String empMiddleName,
+			String empCredentials, String empAddress, String empState,
+			String empCity, String empZip, String empPhNum, String empMailId) {
+		this.empId = empId;
+		this.empLoginId = empLoginId;
+		this.empLastName = empLastName;
+		this.empFirstName = empFirstName;
+		this.empMiddleName = empMiddleName;
+		this.empCredentials = empCredentials;
+		this.empAddress = empAddress;
+		this.empState = empState;
+		this.empCity = empCity;
+		this.empZip = empZip;
+		this.empPhNum = empPhNum;
+		this.empMailId = empMailId;
+	}
+	public EmployeeDataBean(Integer empId, Integer empLoginId,
+			String empLastName, String empFirstName, String empMiddleName,
+			String empCredentials, String empAddress, String empState,
+			String empCity, String empZip, String empPhNum, 
+			String empMailId, String empSpecialty) {
+		this.empId = empId;
+		this.empLoginId = empLoginId;
+		this.empLastName = empLastName;
+		this.empFirstName = empFirstName;
+		this.empMiddleName = empMiddleName;
+		this.empCredentials = empCredentials;
+		this.empAddress = empAddress;
+		this.empState = empState;
+		this.empCity = empCity;
+		this.empZip = empZip;
+		this.empPhNum = empPhNum;
+		this.empMailId = empMailId;
+		this.empSpecialty = empSpecialty;
+	}
 	public EmployeeDataBean(Integer empId, Integer empLoginId,
 			String empFullname, String empAddress, String empState,
 			String empCity, String empZip, String empPhNum,String empMailId) {
@@ -47,6 +88,30 @@ public class EmployeeDataBean {
 	}
 	public void setEmpFullname(String empFullname) {
 		this.empFullname = empFullname;
+	}
+	public String getEmpLastName() {
+		return empLastName;
+	}
+	public void setEmpLastName(String empLastName) {
+		this.empLastName = empLastName;
+	}
+	public String getEmpFirstName() {
+		return empFirstName;
+	}
+	public void setEmpFirstName(String empFirstName) {
+		this.empFirstName = empFirstName;
+	}
+	public String getEmpMiddleName() {
+		return empMiddleName;
+	}
+	public void setEmpMiddleName(String empMiddleName) {
+		this.empMiddleName = empMiddleName;
+	}
+	public String getEmpCredentials() {
+		return empCredentials;
+	}
+	public void setEmpCredentials(String empCredentials) {
+		this.empCredentials = empCredentials;
 	}
 	public String getEmpAddress() {
 		return empAddress;
@@ -84,5 +149,4 @@ public class EmployeeDataBean {
 	public void setEmpMailId(String empMailId) {
 		this.empMailId = empMailId;
 	}
-		
 }

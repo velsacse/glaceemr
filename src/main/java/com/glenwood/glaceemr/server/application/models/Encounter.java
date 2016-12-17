@@ -766,7 +766,12 @@ public class Encounter implements Serializable {
 			List<PatientClinicalElements> patientClinicalElements) {
 		this.patientClinicalElements = patientClinicalElements;
 	}
-	 
-
-
+	
+	public Encounter(Integer encounterId, String encounterDate, Integer encounterPos, Long encounterRefDoctor, Long encounterServiceDoctor){
+		this.medicationAttestationStatus= encounterDate;
+		this.encounterId= encounterId;
+		this.encounterPos= encounterPos;
+		this.encounterRefDoctor= encounterRefDoctor;
+		this.encounter_service_doctor= encounterServiceDoctor;
+	}
 }

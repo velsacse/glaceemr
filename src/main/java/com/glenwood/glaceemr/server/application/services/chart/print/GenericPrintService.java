@@ -42,6 +42,8 @@ public interface GenericPrintService {
 	public List<LeafLibrary> getStyleTemplatesList(Integer styleId);
 	public LeafLibrary getLeafLibrary(int templateId);
 	public List<LeafLibrary> getLeafLibraryStyle(Integer styleId);
+	EmployeeDataBean parseEmployeeDetail1(EmployeeDataBean emp)
+			throws Exception;
 	
 	
 }

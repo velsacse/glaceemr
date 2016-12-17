@@ -10,6 +10,7 @@ public class PosDataBean {
 	private Integer posRelationId;
 	private Integer posPlaceId;
 	private String posName;
+	private String posComments;
 	private String posAddress;
 	private String posState;
 	private String posCity;
@@ -18,6 +19,21 @@ public class PosDataBean {
 	private String posFaxNum;
 	private String posType;
 	
+	public PosDataBean(Integer posRelationId, Integer posPlaceId,
+			String posName, String posComments, String posAddress, String posState, String posCity, String posZip, String posPhNum, String posFaxNum, String posType) {
+		this.posRelationId = posRelationId;
+		this.posPlaceId = posPlaceId;
+		this.posName = posName;
+		this.posAddress = posAddress;
+		this.posState = posState;
+		this.posCity = posCity;
+		this.posZip = posZip;
+		this.posPhNum = posPhNum;
+		this.posFaxNum = posFaxNum;
+		this.posType = posType;
+		this.posComments = posComments;
+	}
+
 	public PosDataBean(Integer posRelationId, Integer posPlaceId,
 			String posName, String posAddress, String posState, String posCity, String posZip, String posPhNum, String posFaxNum, String posType) {
 		this.posRelationId = posRelationId;
@@ -31,7 +47,7 @@ public class PosDataBean {
 		this.posFaxNum = posFaxNum;
 		this.posType = posType;
 	}
-
+	
 	public Integer getPosRelationId() {
 		return posRelationId;
 	}
@@ -54,6 +70,14 @@ public class PosDataBean {
 
 	public void setPosName(String posName) {
 		this.posName = posName;
+	}
+
+	public String getPosComments() {
+		return posComments;
+	}
+
+	public void setPosComments(String posComments) {
+		this.posComments = posComments;
 	}
 
 	public String getPosAddress() {

@@ -462,6 +462,8 @@ public class TextFormatter {
 				String[] arr= 	input.split("-");
 				if(arr.length == 3)
 					input = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+			}else if(input.trim().length()==10){
+				input = "("+ input.substring(0, 3) + ") " + input.substring(3, 6) + "-" + input.substring(6, 10);
 			}
 			return input;
 		}catch(Exception e){
