@@ -12,7 +12,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
@@ -29,8 +28,6 @@ import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.FileName_;
 import com.glenwood.glaceemr.server.application.models.FormsTemplate;
 import com.glenwood.glaceemr.server.application.models.FormsTemplate_;
-import com.glenwood.glaceemr.server.application.models.InitialSettings;
-import com.glenwood.glaceemr.server.application.models.InitialSettings_;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsCategory;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsCategory_;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsNotes;
@@ -102,7 +99,6 @@ public class DocumentsSpecification {
 				for(int i=0;i<list.length;i++){
 					fileDetailsIdl.add(Integer.parseInt(list[i]));	
 				}
-				System.out.println("fileDetailsIdl::::::::"+fileDetailsIdl);
 				Predicate predicate= root.get(FileDetails_.filedetailsId).in(fileDetailsIdl);
 				return predicate;
 			}

@@ -377,42 +377,5 @@ public class DocumentsController {
 		result.setData(getSavedForms);
 		return result;
 	}
-	
-	@ApiOperation(value="getting forms")
-	@RequestMapping(value="/getForms",method=RequestMethod.GET)
-	@ResponseBody
-	@ApiResponses(value={
-			@ApiResponse(code = 200, message = ""),
-			@ApiResponse(code = 404, message = ""),
-			@ApiResponse(code = 500, message = "Internal server error")})
-	public EMRResponseBean getforms(
-			@ApiParam(name="templateId",value="templateId")@RequestParam(value="templateId",required=true,defaultValue="-1")String templateId,
-			@ApiParam(name="patientId",value="patient id")@RequestParam(value="patientId",required=true,defaultValue="-1")String patientId){
-		String getForms=documentsService.getForms(templateId,patientId);
-		EMRResponseBean result=new EMRResponseBean();
-		result.setData(getForms);
-		return result;
-	}
-	
-	@ApiOperation(value="to save signature")
-	@RequestMapping(value="/toSaveSignature",method=RequestMethod.POST)
-	@ResponseBody
-	@ApiResponses(value={
-			@ApiResponse(code = 200, message = ""),
-			@ApiResponse(code = 404, message = ""),
-			@ApiResponse(code = 500, message = "Internal server error")})
-	public EMRResponseBean toSaveSignature(@RequestBody String HtmlString,
-			@RequestParam(value="patientId",required=true,defaultValue="-1")String patientId,
-			@RequestParam(value="imageId",required=false,defaultValue="-1")String imageId,
-			@RequestParam(value="chartId",required=false,defaultValue="-1")String chartId,
-			@RequestParam(value="imgBase64Data",required=false,defaultValue="-1")String imgBase64Data,
-			@ApiParam(name="imageURL",value="imageURL")@RequestParam(value="imageURL",required=false,defaultValue="-1")String imageURL,
-			@ApiParam(name="templateId",value="templateId")@RequestParam(value="templateId",required=false,defaultValue="-1")String templateId
-			){
-		String saveSign=documentsService.saveSignature(HtmlString,patientId,imageId,chartId,imgBase64Data,imageURL,templateId);
-		EMRResponseBean result=new EMRResponseBean();
-		result.setData(saveSign);
-		return result;
-	}
 
 }

@@ -24,6 +24,4 @@ public interface DocumentsService {
 	FileDetails alertByCategory(String alertId,int patientId);
 	List<FormsTemplate> getConsentForms();
 	List<Object> getSavedForms(String patientId);
-	String getForms(String templateId,String patientId);
-	String saveSignature(String htmlString,String patientId, String imageId, String chartId,String imgBase64Data, String imageURL, String templateId);
-}
+	}
