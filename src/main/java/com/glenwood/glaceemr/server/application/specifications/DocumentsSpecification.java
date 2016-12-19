@@ -12,21 +12,33 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.AlertEvent_;
 import com.glenwood.glaceemr.server.application.models.AlertPatientDocMapping;
 import com.glenwood.glaceemr.server.application.models.AlertPatientDocMapping_;
+import com.glenwood.glaceemr.server.application.models.DoctorSign;
+import com.glenwood.glaceemr.server.application.models.DoctorSign_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileDetails_;
 import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.FileName_;
+import com.glenwood.glaceemr.server.application.models.FormsTemplate;
+import com.glenwood.glaceemr.server.application.models.FormsTemplate_;
+import com.glenwood.glaceemr.server.application.models.InitialSettings;
+import com.glenwood.glaceemr.server.application.models.InitialSettings_;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsCategory;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsCategory_;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsNotes;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsNotes_;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
+import com.glenwood.glaceemr.server.application.models.PatientSignature;
+import com.glenwood.glaceemr.server.application.models.PatientSignature_;
 /**
  * Specification for Patient Documents
  * @author Soundarya
@@ -90,6 +102,7 @@ public class DocumentsSpecification {
 				for(int i=0;i<list.length;i++){
 					fileDetailsIdl.add(Integer.parseInt(list[i]));	
 				}
+				System.out.println("fileDetailsIdl::::::::"+fileDetailsIdl);
 				Predicate predicate= root.get(FileDetails_.filedetailsId).in(fileDetailsIdl);
 				return predicate;
 			}
@@ -321,6 +334,94 @@ public class DocumentsSpecification {
 				query.where(cb.equal(root.get(PatientDocumentsCategory_.patientDocCategoryId), docCategoryid));
 				return query.getRestriction();
 			}
+		};
+	}
+
+	public static Specification<FormsTemplate> getConsentFormDetails() {
+		return new Specification<FormsTemplate>() {
+
+			@Override
+			public Predicate toPredicate(Root<FormsTemplate> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate type=cb.equal(root.get(FormsTemplate_.formsTemplateType), 2);
+				Predicate isActive=cb.equal(root.get(FormsTemplate_.formsTemplateIsactive), true);
+				query.where(cb.and(type,isActive));
+				return query.getRestriction();
+			}
+			
+		};
+	}
+
+	public static Specification<FormsTemplate> templateDetails(final String templateId) {
+	return new Specification<FormsTemplate>()	{
+
+		@Override
+		public Predicate toPredicate(Root<FormsTemplate> root,
+				CriteriaQuery<?> query, CriteriaBuilder cb) {
+			Predicate predicate=cb.equal(root.get(FormsTemplate_.formsTemplateId), templateId);
+			query.where(predicate);
+			return query.getRestriction();
+		}
+		
+	};
+		
+	}
+
+	public static Specification<PatientRegistration> getprincipalDrId(
+			final String patientId) {
+		return new Specification<PatientRegistration>() {
+
+			@Override
+			public Predicate toPredicate(Root<PatientRegistration> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate predicate=cb.equal(root.get(PatientRegistration_.patientRegistrationId), patientId);
+				query.where(predicate);
+				return query.getRestriction();
+			}
+		};
+	}
+
+	public static Specification<EmployeeProfile> getloginUserId(
+			final int principalDrId) {
+		return new Specification<EmployeeProfile>() {
+
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate predicate=cb.equal(root.get(EmployeeProfile_.empProfileEmpid),principalDrId);
+				query.where(predicate);
+				return query.getRestriction();
+			}
+			
+		};
+	}
+
+	public static Specification<DoctorSign> getphysicianSignImg(final int loginUserId) {
+		return new Specification<DoctorSign>() {
+
+			@Override
+			public Predicate toPredicate(Root<DoctorSign> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate predicate=cb.equal(root.get(DoctorSign_.loginid), loginUserId);
+				query.where(predicate);
+				return query.getRestriction();
+			}
+			
+		};
+	}
+
+	public static Specification<PatientSignature> getpatientSignId(
+			final String physicianSignImg) {
+		return new Specification<PatientSignature>() {
+
+			@Override
+			public Predicate toPredicate(Root<PatientSignature> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate predicate=cb.equal(root.get(PatientSignature_.signaturefilename), physicianSignImg);
+				query.where(predicate);
+				return query.getRestriction();
+			}
+			
 		};
 	}
 

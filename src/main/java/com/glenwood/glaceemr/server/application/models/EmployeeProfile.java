@@ -166,6 +166,10 @@ public class EmployeeProfile implements Serializable {
 	@JsonBackReference
 	List<Admission> admission;
 	
+	@OneToMany(mappedBy="h478001")
+	@JsonManagedReference
+	List<H478> h478;
+	
 	public Integer getEmpProfileEmpid() {
 		return empProfileEmpid;
 	}

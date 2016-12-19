@@ -592,6 +592,11 @@ public class PatientRegistration implements Serializable {
 	@OneToMany(mappedBy="patientRegistration")
 	@JsonBackReference
 	List<Admission> admission;
+	
+	@OneToMany(mappedBy="patientregistration")
+	@JsonBackReference
+	List<PatientSignature> patientSignature;
+	
 
 	@OneToMany(mappedBy="patientRegistration")
 	private List<Hl7ResultInbox> hl7ResultInbox;
@@ -601,6 +606,12 @@ public class PatientRegistration implements Serializable {
 	@JsonManagedReference
 	@JoinColumn(name="patient_registration_guarantorid", referencedColumnName="guarantor_key", insertable=false, updatable=false)
 	private Guarantor guaranatorDetails;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JsonManagedReference
+	@JoinColumn(name="patient_registration_pharmacy_id", referencedColumnName="pharm_details_id",insertable=false, updatable=false)
+	private PharmDetails pharmDetails;
 	
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="patientRegistration",fetch=FetchType.LAZY)
 	@JsonBackReference

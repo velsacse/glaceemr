@@ -5,6 +5,7 @@ import java.util.List;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileName;
+import com.glenwood.glaceemr.server.application.models.FormsTemplate;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsNotes;
 
 public interface DocumentsService {
@@ -21,4 +22,8 @@ public interface DocumentsService {
 	List<FileDetails> reviewGroupOfDocs(String fileDetailsId,int categoryId,int patientId,int userId);
 	List<FileName> reviewDocuments(int fileNameId,int userId);
 	FileDetails alertByCategory(String alertId,int patientId);
+	List<FormsTemplate> getConsentForms();
+	List<Object> getSavedForms(String patientId);
+	String getForms(String templateId,String patientId);
+	String saveSignature(String htmlString,String patientId, String imageId, String chartId,String imgBase64Data, String imageURL, String templateId);
 }

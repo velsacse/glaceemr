@@ -113,7 +113,13 @@ public class PatientAllergies {
 	@JoinColumn(name="patallerg_typeid", referencedColumnName="allergtype_id", insertable=false, updatable=false)
 	AllergiesType allergiesType;
 	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="patallerg_encounterid",referencedColumnName="encounter_id" ,insertable=false,updatable=false)
+	Encounter encounter;
 	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="patallerg_chartid",referencedColumnName="chart_id",insertable=false,updatable=false)
+	Chart chart;
 	
 	public AllergiesType getAllergiesType() {
 		return allergiesType;

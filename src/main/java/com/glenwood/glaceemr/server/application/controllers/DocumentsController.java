@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,7 @@ import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.AlertPatientDocMapping;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileName;
+import com.glenwood.glaceemr.server.application.models.FormsTemplate;
 import com.glenwood.glaceemr.server.application.models.PatientDocumentsNotes;
 import com.glenwood.glaceemr.server.application.services.Documents.DocumentsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
@@ -334,6 +336,83 @@ public class DocumentsController {
 		result.setData(alertEvent);
 		return result;
 	}
-
+	
+	
+	//CONSENT FORMS
+	/**
+	 * To get list of consent forms
+	 * @return 
+	 */
+	@ApiOperation(value = "getting consent forms")
+	@RequestMapping(value = "/getConsentForms", method = RequestMethod.GET)
+	@ResponseBody
+	@ApiResponses(value= {
+			@ApiResponse(code = 200, message = ""),
+			@ApiResponse(code = 404, message = ""),
+			@ApiResponse(code = 500, message = "Internal server error")})
+	public EMRResponseBean getConsentForms(){
+		List<FormsTemplate> formTemplate=documentsService.getConsentForms();
+		EMRResponseBean result=new EMRResponseBean();
+		result.setData(formTemplate);
+		return result;
+		
+	}
+	
+	/**
+	 * To get list of saved consent forms
+	 * @param patientId
+	 * @return
+	 */
+	@ApiOperation(value = "getting saved forms")
+	@RequestMapping(value = "/getSavedForms", method = RequestMethod.GET)
+	@ResponseBody
+	@ApiResponses(value= {
+			@ApiResponse(code = 200, message = ""),
+			@ApiResponse(code = 404, message = ""),
+			@ApiResponse(code = 500, message = "Internal server error")})
+	public EMRResponseBean getSavedForms(
+			@ApiParam(name="patientId",value="patient id")@RequestParam(value="patientId",required=true,defaultValue="-1")String patientId){
+		List<Object> getSavedForms=documentsService.getSavedForms(patientId);
+		EMRResponseBean result=new EMRResponseBean();
+		result.setData(getSavedForms);
+		return result;
+	}
+	
+	@ApiOperation(value="getting forms")
+	@RequestMapping(value="/getForms",method=RequestMethod.GET)
+	@ResponseBody
+	@ApiResponses(value={
+			@ApiResponse(code = 200, message = ""),
+			@ApiResponse(code = 404, message = ""),
+			@ApiResponse(code = 500, message = "Internal server error")})
+	public EMRResponseBean getforms(
+			@ApiParam(name="templateId",value="templateId")@RequestParam(value="templateId",required=true,defaultValue="-1")String templateId,
+			@ApiParam(name="patientId",value="patient id")@RequestParam(value="patientId",required=true,defaultValue="-1")String patientId){
+		String getForms=documentsService.getForms(templateId,patientId);
+		EMRResponseBean result=new EMRResponseBean();
+		result.setData(getForms);
+		return result;
+	}
+	
+	@ApiOperation(value="to save signature")
+	@RequestMapping(value="/toSaveSignature",method=RequestMethod.POST)
+	@ResponseBody
+	@ApiResponses(value={
+			@ApiResponse(code = 200, message = ""),
+			@ApiResponse(code = 404, message = ""),
+			@ApiResponse(code = 500, message = "Internal server error")})
+	public EMRResponseBean toSaveSignature(@RequestBody String HtmlString,
+			@RequestParam(value="patientId",required=true,defaultValue="-1")String patientId,
+			@RequestParam(value="imageId",required=false,defaultValue="-1")String imageId,
+			@RequestParam(value="chartId",required=false,defaultValue="-1")String chartId,
+			@RequestParam(value="imgBase64Data",required=false,defaultValue="-1")String imgBase64Data,
+			@ApiParam(name="imageURL",value="imageURL")@RequestParam(value="imageURL",required=false,defaultValue="-1")String imageURL,
+			@ApiParam(name="templateId",value="templateId")@RequestParam(value="templateId",required=false,defaultValue="-1")String templateId
+			){
+		String saveSign=documentsService.saveSignature(HtmlString,patientId,imageId,chartId,imgBase64Data,imageURL,templateId);
+		EMRResponseBean result=new EMRResponseBean();
+		result.setData(saveSign);
+		return result;
+	}
 
 }
