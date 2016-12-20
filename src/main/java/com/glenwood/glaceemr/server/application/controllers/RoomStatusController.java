@@ -10,10 +10,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.glenwood.glaceemr.server.application.models.Encounter;
-import com.glenwood.glaceemr.server.application.services.roomStatus.OrderedBean;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.PosTable;
+import com.glenwood.glaceemr.server.application.models.Room;
+import com.glenwood.glaceemr.server.application.services.roomStatus.ActivitiesData;
+import com.glenwood.glaceemr.server.application.services.roomStatus.OrderedData;
+import com.glenwood.glaceemr.server.application.services.roomStatus.PosRooms;
 import com.glenwood.glaceemr.server.application.services.roomStatus.RoomInfoBean;
-import com.glenwood.glaceemr.server.application.services.roomStatus.RoomStatusBean;
 import com.glenwood.glaceemr.server.application.services.roomStatus.RoomStatusService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.wordnik.swagger.annotations.Api;
@@ -35,10 +38,10 @@ public class RoomStatusController {
 	@ApiOperation(value="to get Locations",notes="Get the locations")
 	@RequestMapping(value="/getLocations",method=RequestMethod.GET)
 	@ResponseBody 
-	public EMRResponseBean getLocations() throws Exception{
-		JSONObject loc = roomStatusService.getPos();
+	public EMRResponseBean getLocations(@RequestParam(value="pos",required=false)Integer pos) throws Exception{
+		List<PosTable> loc = roomStatusService.getPos(pos);
 		EMRResponseBean locations = new EMRResponseBean();
-		locations.setData(loc.toString().replace("\"", ""));
+		locations.setData(loc);
 		return locations;
 	}
 	
@@ -52,17 +55,23 @@ public class RoomStatusController {
 	@ApiOperation(value="to get room information",notes="Get the room information ")
 	@RequestMapping(value="/getRoomInformation",method=RequestMethod.GET)
 	@ResponseBody 
-	public EMRResponseBean getPosDetails(@RequestParam(value="patientId",required=false)Integer patientId,@RequestParam(value="encounterId",required=false)Integer encounterId) throws Exception{
-		JSONObject locations = roomStatusService.getPos();
-		JSONObject providers = roomStatusService.getproviders();
-		List<RoomStatusBean> roomStatus = roomStatusService.getRoomStatus();
-		List<OrderedBean> ordered = roomStatusService.getOrdered(patientId);
-		JSONObject roomDetail = roomStatusService.getRoomName();
-		JSONObject activities = roomStatusService.getActivities(patientId,encounterId);
-		RoomInfoBean roomInfo = new RoomInfoBean(locations.toString().replace("\"", ""),providers.toString().replace("\"", ""),roomStatus,ordered,roomDetail.toString().replace("\"", ""),activities.toString().replace("\"", ""));
-		EMRResponseBean res = new EMRResponseBean();
-		res.setData(roomInfo);
-		return res;
+	public EMRResponseBean getPosDetails(@RequestParam(value="pos",required=false)Integer pos) throws Exception{
+	    List<OrderedData> ordered=null;
+		List<ActivitiesData> activities=null; 
+		List<PosTable> locations = roomStatusService.getPos(pos);
+		List<EmployeeProfile> providers = roomStatusService.getproviders();
+		List<PosRooms> roomStatus = roomStatusService.getRoomStatus();
+		String patientId="";
+		for(int i=0;i<roomStatus.size();i++){
+				patientId=roomStatus.get(i).getPatId().toString();
+				activities = roomStatusService.getActivities(patientId);
+				ordered = roomStatusService.getOrdered(patientId);
+			}
+		List<Room> roomDetail = roomStatusService.getRoomName();
+		RoomInfoBean roomInfo = new RoomInfoBean(locations,providers,roomStatus,ordered,roomDetail,activities);
+		EMRResponseBean roomInformation = new EMRResponseBean();
+		roomInformation.setData(roomInfo);
+		return roomInformation;
 	}
 	
 	/**
@@ -75,7 +84,7 @@ public class RoomStatusController {
 	@RequestMapping(value="/getTodaysPatientsdata",method=RequestMethod.GET)
 	@ResponseBody 
 	public EMRResponseBean getTodaysPatientsData(@RequestParam(value="pos",required=false)Integer pos) throws Exception{
-		List<RoomStatusBean> patientsData = roomStatusService.getTodaysPatientsData(pos);
+		List<PosRooms> patientsData = roomStatusService.getTodaysPatientsData(pos);
 		EMRResponseBean patientData = new EMRResponseBean();
 		patientData.setData(patientsData);
 		return patientData;
@@ -92,29 +101,11 @@ public class RoomStatusController {
 	@ApiOperation(value="to update room numbers",notes="update the room numbers")
 	@RequestMapping(value="/updateRoomNo",method=RequestMethod.GET)
 	@ResponseBody 
-	public EMRResponseBean updateRoomNo(@RequestParam(value="pos",required=false)Integer pos,@RequestParam(value="addPatientId",required=false)Integer addPatientId,@RequestParam(value="roomtoAdd",required=false)Short roomtoAdd) throws Exception{
-		List<Encounter> encounterList = roomStatusService.updateRoomNo(pos,addPatientId,roomtoAdd);
+	public EMRResponseBean updateRoomNo(@RequestParam(value="pos",required=false)Integer pos,@RequestParam(value="addPatientId",required=false)String addPatientId,@RequestParam(value="roomtoAdd",required=false)Short roomtoAdd) throws Exception{
+		JSONObject encounterList = roomStatusService.updateRoomNo(pos,addPatientId,roomtoAdd);
 		EMRResponseBean roomNos = new EMRResponseBean();
-		roomNos.setData(encounterList);
+		roomNos.setData(encounterList.toString());
 		return roomNos;
-    }
-	
-	/**
-	 * to swap patients within rooms
-	 * @param oldRoom
-	 * @param newRoom
-	 * @param pos
-	 * @return List<Encounter>
-	 * @throws Exception
-	 */
-	@ApiOperation(value="to transfer patients",notes="to transfer the patients between rooms")
-	@RequestMapping(value="/transferPatients",method=RequestMethod.GET)
-	@ResponseBody 
-	public EMRResponseBean updateTransferRooms(@RequestParam(value="toSwap",required=false)Short oldRoom,@RequestParam(value="withRoom",required=false)Short newRoom,@RequestParam(value="pos",required=false)Integer pos) throws Exception{
-		List<Encounter> encounterList = roomStatusService.updateTransferRooms(oldRoom,newRoom,pos);
-		EMRResponseBean transferPatient = new EMRResponseBean();
-		transferPatient.setData(encounterList);
-	    return transferPatient;
     }
 	
 	/**
@@ -125,13 +116,30 @@ public class RoomStatusController {
 	 * @return List<Encounter>
 	 * @throws Exception
 	 */
+	@ApiOperation(value="to transfer patients",notes="to transfer the patients between rooms")
+	@RequestMapping(value="/transferPatients",method=RequestMethod.GET)
+	@ResponseBody 
+	public EMRResponseBean updateTransferRooms(@RequestParam(value="toswap",required=false)Short toswap,@RequestParam(value="withroom",required=false)Short withroom,@RequestParam(value="pos",required=false)Integer pos) throws Exception{
+		JSONObject transferPat=roomStatusService.updateTransferRooms(toswap,withroom,pos);
+		EMRResponseBean transferPatient = new EMRResponseBean();
+		transferPatient.setData(transferPat.toString());
+	    return transferPatient;
+    }
+	
+	/**
+	 * to swap patients within rooms
+	 * @param oldRoom
+	 * @param newRoom
+	 * @param pos
+	 * @throws Exception
+	 */
 	@ApiOperation(value="to swap rooms",notes="to swap patients within rooms")
 	@RequestMapping(value="/swapPatients",method=RequestMethod.GET)
 	@ResponseBody 
-	public EMRResponseBean updateSwappatients(@RequestParam(value="toSwap",required=false)Short oldRoom,@RequestParam(value="withRoom",required=false)Short newRoom,@RequestParam(value="pos",required=false)Integer pos) throws Exception{
-		List<Encounter> toswapPatients = roomStatusService.updateSwapPatients(oldRoom,newRoom,pos);
+	public EMRResponseBean updateSwappatients(@RequestParam(value="toswap",required=false)Short toswap,@RequestParam(value="withroom",required=false)Short withroom,@RequestParam(value="pos",required=false)Integer pos) throws Exception{
+		JSONObject swapPatients = roomStatusService.updateSwapPatients(toswap,withroom,pos);
 		EMRResponseBean swapPatient = new EMRResponseBean();
-		swapPatient.setData(toswapPatients);
+		swapPatient.setData(swapPatients.toString());
 		return swapPatient;
     }
               

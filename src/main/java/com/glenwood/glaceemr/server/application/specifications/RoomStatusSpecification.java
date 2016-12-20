@@ -9,8 +9,6 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.glenwood.glaceemr.server.application.models.ActivityLog;
-import com.glenwood.glaceemr.server.application.models.ActivityLog_;
 import com.glenwood.glaceemr.server.application.models.AlertMonitor;
 import com.glenwood.glaceemr.server.application.models.AlertMonitor_;
 import com.glenwood.glaceemr.server.application.models.Chart;
@@ -110,11 +108,11 @@ public class RoomStatusSpecification {
 	 * @param addPatientId
 	 * @return chartId
 	 */
-	public static Specification<Chart> getChartId(final Integer PatientId) {
+	public static Specification<Chart> getChartId(final String patientId) {
 		return new Specification<Chart>(){
 			@Override
 			public Predicate toPredicate(Root<Chart> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate chartId=cb.equal(root.get(Chart_.chartPatientid),PatientId);
+				Predicate chartId=cb.equal(root.get(Chart_.chartPatientid),patientId);
 				return chartId;
 			}
 		};
@@ -126,11 +124,11 @@ public class RoomStatusSpecification {
 	 * @param pos
 	 * @return selChartid
 	 */
-	public static Specification<Encounter> getchartIds(final Short oldRoom,final Integer pos) {
+	public static Specification<Encounter> getchartIds(final Short toswap,final Integer pos) {
 		return new Specification<Encounter>(){
 			@Override
 			public Predicate toPredicate(Root<Encounter> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate selchartId=cb.and(cb.equal(root.get(Encounter_.encounterRoom),oldRoom),
+				Predicate selchartId=cb.and(cb.equal(root.get(Encounter_.encounterRoom),toswap),
 											cb.equal(root.get(Encounter_.encounterPos),pos),
 											cb.notEqual(root.get(Encounter_.encounterRoom),-1),
 											cb.equal(root.get(Encounter_.encounterType),1),
@@ -144,21 +142,22 @@ public class RoomStatusSpecification {
     
 	/**
 	 * to transfer patients
+	 * @param pos 
+	 * @param idList 
 	 * @param toswap
-	 * @param withroom
 	 * @param pos
+	 * @param withroom
 	 * @return List<Encounter>
 	 */
-	public static Specification<Encounter> UpdateTransferRoom(final Short oldRoom,final Short newRoom,final Integer pos) {
+	public static Specification<Encounter> UpdateTransferRoom(final java.util.List<Integer> idList, final Integer pos) {
 		return new Specification<Encounter>(){
 			@Override
 			public Predicate toPredicate(Root<Encounter> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate updateEnc=cb.and(cb.notEqual(root.get(Encounter_.encounterRoom),-1),
-										   cb.equal(root.get(Encounter_.encounterRoom),oldRoom),
-										   cb.equal(root.get(Encounter_.encounterPos),pos),
-										   cb.equal(root.get(Encounter_.encounterStatus),1),
-										   cb.equal(root.get(Encounter_.encounterType),1),
-										   cb.equal(root.get(Encounter_.encounterRoomIsactive),true));
+				Predicate updateEnc=cb.and(cb.equal(root.get(Encounter_.encounterPos),pos),
+						   cb.equal(root.get(Encounter_.encounterStatus),1),
+						   cb.equal(root.get(Encounter_.encounterType),1),
+						   cb.equal(root.get(Encounter_.encounterRoomIsactive),true));
+							root.get(Encounter_.encounterChartid).in(idList);
 				return updateEnc;			
 			}
 		};
@@ -170,10 +169,10 @@ public class RoomStatusSpecification {
 	 * @param pos
 	 * @return selChartId
 	 */
-	public static Specification<Encounter> chartidswithroom(final Short newRoom,final Integer pos) {
+	public static Specification<Encounter> chartidswithroom(final Short withroom,final Integer pos) {
 			return new Specification<Encounter>(){
 				public Predicate toPredicate(Root<Encounter> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate selchartId=cb.and(cb.equal(root.get(Encounter_.encounterRoom),newRoom),
+				Predicate selchartId=cb.and(cb.equal(root.get(Encounter_.encounterRoom),withroom),
 											cb.equal(root.get(Encounter_.encounterPos),pos),
 											cb.notEqual(root.get(Encounter_.encounterRoom),-1),
 											cb.equal(root.get(Encounter_.encounterType),1),
@@ -182,18 +181,12 @@ public class RoomStatusSpecification {
 			}
 		};
 	}
-
-	public static Specification<ActivityLog> getActivities(final Integer patientId,final Integer encounterId) {
-			return new Specification<ActivityLog>() {
-				public Predicate toPredicate(Root<ActivityLog> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-					Predicate activities=cb.and(cb.equal(root.get(ActivityLog_.patientid),patientId),
-												cb.equal(root.get(ActivityLog_.encounterid),encounterId),
-												cb.equal(root.get(ActivityLog_.status),false));		
-					return activities;
-			}
-		};
-	}
-
+    
+	/**
+	 * to get userName
+	 * @param userId
+	 * @return
+	 */
 	public static Specification<EmployeeProfile> getUserName(final Integer userId) {
 		return new Specification<EmployeeProfile>() {
 			public Predicate toPredicate(Root<EmployeeProfile> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
@@ -202,7 +195,12 @@ public class RoomStatusSpecification {
 			}	
 		};
 	}
-
+	
+	/**
+	 * to get rxName
+	 * @param entityid
+	 * @return
+	 */
 	public static Specification<Prescription> getRxName(final Integer entityid) {
 		return new Specification<Prescription>() {
 			public Predicate toPredicate(Root<Prescription> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
@@ -211,7 +209,12 @@ public class RoomStatusSpecification {
 			}
 		};
 	}
-
+	
+	/**
+	 * to get curMedRxName
+	 * @param entityid
+	 * @return
+	 */
 	public static Specification<CurrentMedication> getCurMedRxName(final Integer entityid) {
 		return new Specification<CurrentMedication>() {
 			public Predicate toPredicate(Root<CurrentMedication> root,CriteriaQuery<?> query,CriteriaBuilder cb) {
@@ -220,7 +223,12 @@ public class RoomStatusSpecification {
 			}
 		};
 	}
-
+	
+	/**
+	 * to get labEntriesTestDesc
+	 * @param entityid
+	 * @return
+	 */
 	public static Specification<LabEntries> getLabEntriesTestDesc(final Integer entityid) {
 		return new Specification<LabEntries>() {
 			public Predicate toPredicate(Root<LabEntries> root,CriteriaQuery<?> query,CriteriaBuilder cb) {
@@ -230,6 +238,11 @@ public class RoomStatusSpecification {
 		};
 	}
 
+	/**
+	 * to get leafPatientlibraryid
+	 * @param entityid
+	 * @return
+	 */
 	public static Specification<LeafPatient> getLeafPatLibId(final Integer entityid) {
 		return new Specification<LeafPatient>() {
 			public Predicate toPredicate(Root<LeafPatient> root,CriteriaQuery<?> query,CriteriaBuilder cb) {
@@ -239,6 +252,11 @@ public class RoomStatusSpecification {
 		};
 	}
 
+	/**
+	 * to get leafPatientLibraryName
+	 * @param leafPatId
+	 * @return
+	 */
 	public static Specification<LeafLibrary> getLeafLibName(final Integer leafPatId) {
 		return new Specification<LeafLibrary>() {
 			public Predicate toPredicate(Root<LeafLibrary> root,CriteriaQuery<?> query,CriteriaBuilder cb) {
@@ -247,7 +265,12 @@ public class RoomStatusSpecification {
 			}
 		};
 	}
-
+    
+	/**
+	 * to get encounterChartId
+	 * @param chartId
+	 * @return
+	 */
 	public static Specification<Encounter> getEncId(final Integer chartId) {
 		return new Specification<Encounter>() {
 			public Predicate toPredicate(Root<Encounter> root,CriteriaQuery<?> query,CriteriaBuilder cb) {
@@ -255,6 +278,26 @@ public class RoomStatusSpecification {
 											  cb.equal(root.get(Encounter_.encounterType),1),
 											  cb.equal(root.get(Encounter_.encounterStatus),1));
 				return restrictions;
+			}
+		};
+	}
+
+	/**
+	 * to get encounter chartid for switching patients between rooms
+	 * @param toswap
+	 * @param pos
+	 * @return
+	 */
+	public static Specification<Encounter> getEncChartId(final Short toswap,final Integer pos) {
+		return new Specification<Encounter>() {
+			public Predicate toPredicate(Root<Encounter> root,CriteriaQuery<?> query,CriteriaBuilder cb) {
+				Predicate updateEnc=cb.and(cb.notEqual(root.get(Encounter_.encounterRoom),-1),
+						   cb.equal(root.get(Encounter_.encounterRoom),toswap),
+						   cb.equal(root.get(Encounter_.encounterPos),pos),
+						   cb.equal(root.get(Encounter_.encounterStatus),1),
+						   cb.equal(root.get(Encounter_.encounterType),1),
+						   cb.equal(root.get(Encounter_.encounterRoomIsactive),true));
+				return updateEnc;			
 			}
 		};
 	}

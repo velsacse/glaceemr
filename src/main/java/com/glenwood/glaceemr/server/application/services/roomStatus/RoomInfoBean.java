@@ -2,15 +2,19 @@ package com.glenwood.glaceemr.server.application.services.roomStatus;
 
 import java.util.List;
 
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.PosTable;
+import com.glenwood.glaceemr.server.application.models.Room;
+
 public class RoomInfoBean {
-	private String locations;
-	private String providers;
-	private List<RoomStatusBean> roomStatus;
-	private List<OrderedBean> ordered;
-	private String roomDetail;
-	private String activities;
+	private List<PosTable> locations;
+	private List<EmployeeProfile> providers;
+	private List<PosRooms> roomStatus;
+	private List<OrderedData> ordered;
+	private List<Room> roomDetail;
+	private List<ActivitiesData> activities;
 	
-	public RoomInfoBean(String locations, String providers,List<RoomStatusBean> roomStatus, List<OrderedBean> ordered,String roomDetail, String activities) {
+	public RoomInfoBean(List<PosTable> locations, List<EmployeeProfile> providers,List<PosRooms> roomStatus, List<OrderedData> ordered,List<Room> roomDetail, List<ActivitiesData> activities) {
 		super();
 		this.locations=locations;
 		this.providers=providers;
@@ -20,51 +24,51 @@ public class RoomInfoBean {
 		this.activities=activities;
 	}
 
-	public String getLocations() {
+	public List<PosTable> getLocations() {
 		return locations;
 	}
 
-	public void setLocations(String locations) {
+	public void setLocations(List<PosTable> locations) {
 		this.locations = locations;
 	}
 
-	public String getProviders() {
+	public List<EmployeeProfile> getProviders() {
 		return providers;
 	}
 
-	public void setProviders(String providers) {
+	public void setProviders(List<EmployeeProfile> providers) {
 		this.providers = providers;
 	}
 
-	public List<RoomStatusBean> getRoomStatus() {
+	public List<PosRooms> getRoomStatus() {
 		return roomStatus;
 	}
 
-	public void setRoomStatus(List<RoomStatusBean> roomStatus) {
+	public void setRoomStatus(List<PosRooms> roomStatus) {
 		this.roomStatus = roomStatus;
 	}
 
-	public List<OrderedBean> getOrdered() {
+	public List<OrderedData> getOrdered() {
 		return ordered;
 	}
 
-	public void setOrdered(List<OrderedBean> ordered) {
+	public void setOrdered(List<OrderedData> ordered) {
 		this.ordered = ordered;
 	}
 
-	public String getRoomDetail() {
+	public List<Room> getRoomDetail() {
 		return roomDetail;
 	}
 
-	public void setRoomDetail(String roomDetail) {
+	public void setRoomDetail(List<Room> roomDetail) {
 		this.roomDetail = roomDetail;
 	}
 
-	public String getActivities() {
+	public List<ActivitiesData> getActivities() {
 		return activities;
 	}
 
-	public void setActivities(String activities) {
+	public void setActivities(List<ActivitiesData> activities) {
 		this.activities = activities;
 	}
 

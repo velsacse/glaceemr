@@ -4,35 +4,38 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.PosTable;
+import com.glenwood.glaceemr.server.application.models.Room;
 
 public interface RoomStatusService {
    
 	/**
-    * to get pos
-	* @param pos 
-    * @return list of pos
-    */
-	JSONObject getPos();
+	 * to get pos
+	 * @param pos 
+	 * @param pos 
+	 * @return list of pos
+	 */
+	List<PosTable> getPos(Integer pos);
 	
 	/**
 	 * to get providers
 	 * @return list of providers
 	 */
-	JSONObject getproviders();
+	List<EmployeeProfile> getproviders();
 	
 	/**
 	 * to get patientsData
 	 * @param pos
 	 * @return list of patientsData
 	 */
-	List<RoomStatusBean> getTodaysPatientsData(Integer pos);
+	List<PosRooms> getTodaysPatientsData(Integer pos);
 	
 	/**
 	 * to get roomName
 	 * @return list of rooms
 	 */
-	JSONObject getRoomName();
+	List<Room> getRoomName();
 	
 	/**
 	 * to updateRoomNo
@@ -41,13 +44,13 @@ public interface RoomStatusService {
 	 * @param roomtoAdd
 	 * @return list of encounter details
 	 */
-	List<Encounter> updateRoomNo(Integer pos, Integer addPatientId,Short roomtoAdd);
+	JSONObject updateRoomNo(Integer pos, String addPatientId,Short roomtoAdd);
 	
 	/**
 	 * to get RoomStatus
 	 * @return list of room status
 	 */
-	List<RoomStatusBean> getRoomStatus();
+	List<PosRooms> getRoomStatus();
 	
 	/**
 	 * to transfer patients 
@@ -56,7 +59,7 @@ public interface RoomStatusService {
 	 * @param pos
 	 * @return
 	 */
-	List<Encounter> updateTransferRooms(Short oldRoom, Short newRoom,Integer pos);
+	JSONObject updateTransferRooms(Short toswap, Short withroom,Integer pos);
 	
 	/**
 	 * to swap patients between rooms
@@ -65,14 +68,14 @@ public interface RoomStatusService {
 	 * @param pos
 	 * @return list of encounter details after swapping patients
 	 */
-	List<Encounter> updateSwapPatients(Short oldRoom,Short newRoom,Integer pos);
+	JSONObject updateSwapPatients(Short toswap,Short withroom,Integer pos);
 	
 	/**
 	 * to get ordered information
 	 * @param patientId
 	 * @return patientId
 	 */
-	List<OrderedBean> getOrdered(Integer patientId);
+	List<OrderedData> getOrdered(String patientId);
 	
 	/**
 	 * to get activities information
@@ -80,7 +83,7 @@ public interface RoomStatusService {
 	 * @param encounterId
 	 * @return activities
 	 */
-	JSONObject getActivities(Integer patientId, Integer encounterId);
+	List<ActivitiesData> getActivities(String patientId);
 	
 
 }

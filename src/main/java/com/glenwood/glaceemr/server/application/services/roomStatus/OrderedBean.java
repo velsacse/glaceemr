@@ -1,6 +1,5 @@
 package com.glenwood.glaceemr.server.application.services.roomStatus;
 
-
 public class OrderedBean {
 	private String orderon;
 	private String labname;
@@ -29,7 +28,7 @@ public class OrderedBean {
 		this.labgroupname = labgroupname;
 
 	}
-
+	
 	public String getOrderon() {
 		return orderon;
 	}
