@@ -56,7 +56,10 @@ public class VitalDataBean{
 			vitalElementBean.setVitalIsvitalLastVisit(Boolean.parseBoolean(HUtil.Nz(vitalsParameter.getVitalsParameterPreloadFromLastVisit(),"")));
 			vitalElementBean.setVitalConditionType(Integer.parseInt(HUtil.Nz(vitalsParameter.getVitalsParameterCondition().getVitalsParameterConditionType(),"")));
 			vitalElementBean.setVitalCondition(HUtil.Nz(vitalsParameter.getVitalsParameterCondition().getVitalsParameterConditionCondition(),""));
-			vitalElementBean.setUnitsOfMeasureCode(HUtil.Nz(vitalsParameter.getUnitsOfMeasureTable().getUnitsOfMeasureCode(),""));
+			if(vitalsParameter.getUnitsOfMeasureTable()!=null && vitalsParameter.getUnitsOfMeasureTable().getUnitsOfMeasureCode() != null)
+				vitalElementBean.setUnitsOfMeasureCode(vitalsParameter.getUnitsOfMeasureTable().getUnitsOfMeasureCode());
+			else
+				vitalElementBean.setUnitsOfMeasureCode("N/A");
 			vitalElementHashMap.put(HUtil.Nz(vitalsParameter.getVitalsParameterGwId(),"-1"),vitalElementBean);
 		}
 				

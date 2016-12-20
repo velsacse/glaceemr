@@ -32,6 +32,14 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @Table(name = "encounter")
 public class Encounter implements Serializable {
 
+	public Encounter(Integer encounterId, String encounterDate, Integer encounterPos, Long encounterRefDoctor, Long encounterServiceDoctor){
+		this.medicationAttestationStatus= encounterDate;
+		this.encounterId= encounterId;
+		this.encounterPos= encounterPos;
+		this.encounterRefDoctor= encounterRefDoctor;
+		this.encounter_service_doctor= encounterServiceDoctor;
+	}
+	
 	/**
 	 * 
 	 */
@@ -767,11 +775,4 @@ public class Encounter implements Serializable {
 		this.patientClinicalElements = patientClinicalElements;
 	}
 	
-	public Encounter(Integer encounterId, String encounterDate, Integer encounterPos, Long encounterRefDoctor, Long encounterServiceDoctor){
-		this.medicationAttestationStatus= encounterDate;
-		this.encounterId= encounterId;
-		this.encounterPos= encounterPos;
-		this.encounterRefDoctor= encounterRefDoctor;
-		this.encounter_service_doctor= encounterServiceDoctor;
-	}
 }

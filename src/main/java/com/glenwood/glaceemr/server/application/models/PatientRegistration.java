@@ -31,6 +31,31 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @Entity
 @Table(name = "patient_registration")
 public class PatientRegistration implements Serializable {
+
+	public PatientRegistration(String patientRegistrationLastName, String patientRegistrationMidInitial, String patientRegistrationFirstName, String patientRegistrationAccountno, String patientRegistrationDob, Integer patientRegistrationSex, String patientRegistrationAddress1, String patientRegistrationAddress2, String patientRegistrationCity, String patientRegistrationState, String patientRegistrationZip, String patientRegistrationPhoneNo, String patientRegistrationWorkNo, Integer patientRegistrationPosId, Integer patientRegistrationReferingPhysician, Integer patientRegistrationPrincipalDoctor, String patientRegistrationCellno, Integer patientRegistrationEthnicity, String patientRegistrationRace, String patientRegistrationPreferredLan){
+		super();
+		this.patientRegistrationLastName=  patientRegistrationLastName;
+		this.patientRegistrationMidInitial= patientRegistrationMidInitial; 
+		this.patientRegistrationFirstName= patientRegistrationFirstName; 
+		this.patientRegistrationAccountno= patientRegistrationAccountno; 
+		this.patientRegistrationSpoketo= patientRegistrationDob; 
+		this.patientRegistrationSex= patientRegistrationSex; 
+		this.patientRegistrationAddress1= patientRegistrationAddress1; 
+		this.patientRegistrationAddress2= patientRegistrationAddress2;
+		this.patientRegistrationCity= patientRegistrationCity ;
+		this.patientRegistrationState= patientRegistrationState; 
+		this.patientRegistrationZip= patientRegistrationZip; 
+		this.patientRegistrationPhoneNo= patientRegistrationPhoneNo; 
+		this.patientRegistrationWorkNo= patientRegistrationWorkNo; 
+		this.patientRegistrationPosId= patientRegistrationPosId; 
+		this.patientRegistrationReferingPhysician= patientRegistrationReferingPhysician; 
+		this.patientRegistrationPrincipalDoctor= patientRegistrationPrincipalDoctor; 										
+		this.patientRegistrationCellno= patientRegistrationCellno; 
+		this.patientRegistrationEthnicity= patientRegistrationEthnicity; 
+		this.patientRegistrationRace= patientRegistrationRace; 
+		this.patientRegistrationPreferredLan= patientRegistrationPreferredLan;
+	}
+	
 	@Id
 	@Column(name="patient_registration_id")
 	private Integer patientRegistrationId;
@@ -2288,29 +2313,5 @@ public class PatientRegistration implements Serializable {
 
 	public PatientRegistration(){
 		
-	}
-	
-	public PatientRegistration(String patientRegistrationLastName, String patientRegistrationMidInitial, String patientRegistrationFirstName, String patientRegistrationAccountno, String patientRegistrationDob, Integer patientRegistrationSex, String patientRegistrationAddress1, String patientRegistrationAddress2, String patientRegistrationCity, String patientRegistrationState, String patientRegistrationZip, String patientRegistrationPhoneNo, String patientRegistrationWorkNo, Integer patientRegistrationPosId, Integer patientRegistrationReferingPhysician, Integer patientRegistrationPrincipalDoctor, String patientRegistrationCellno, Integer patientRegistrationEthnicity, String patientRegistrationRace, String patientRegistrationPreferredLan){
-		super();
-		this.patientRegistrationLastName=  patientRegistrationLastName;
-		this.patientRegistrationMidInitial= patientRegistrationMidInitial; 
-		this.patientRegistrationFirstName= patientRegistrationFirstName; 
-		this.patientRegistrationAccountno= patientRegistrationAccountno; 
-		this.patientRegistrationSpoketo= patientRegistrationDob; 
-		this.patientRegistrationSex= patientRegistrationSex; 
-		this.patientRegistrationAddress1= patientRegistrationAddress1; 
-		this.patientRegistrationAddress2= patientRegistrationAddress2;
-		this.patientRegistrationCity= patientRegistrationCity ;
-		this.patientRegistrationState= patientRegistrationState; 
-		this.patientRegistrationZip= patientRegistrationZip; 
-		this.patientRegistrationPhoneNo= patientRegistrationPhoneNo; 
-		this.patientRegistrationWorkNo= patientRegistrationWorkNo; 
-		this.patientRegistrationPosId= patientRegistrationPosId; 
-		this.patientRegistrationReferingPhysician= patientRegistrationReferingPhysician; 
-		this.patientRegistrationPrincipalDoctor= patientRegistrationPrincipalDoctor; 										
-		this.patientRegistrationCellno= patientRegistrationCellno; 
-		this.patientRegistrationEthnicity= patientRegistrationEthnicity; 
-		this.patientRegistrationRace= patientRegistrationRace; 
-		this.patientRegistrationPreferredLan= patientRegistrationPreferredLan;
 	}
 }

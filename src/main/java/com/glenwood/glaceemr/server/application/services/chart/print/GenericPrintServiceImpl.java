@@ -815,11 +815,11 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 						String insCity = isNull(insCompAddr.getInsCompAddrCity());
 						String insState = isNull(insCompAddr.getInsCompAddrState());
 						String insZip = isNull(insCompAddr.getInsCompAddrZip());
-						String insCompId = null;
+						Integer insCompId = null;
 						String insCompName = null;						
 						InsCompany insComp = insCompAddr.getInsCompany();
 						if (insComp != null) {
-							insCompId = insComp.getInsCompanyId()+"";
+							insCompId = insComp.getInsCompanyId();
 							insCompName = insComp.getInsCompanyName();
 						}
 

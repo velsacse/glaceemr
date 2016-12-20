@@ -11,7 +11,7 @@ public class InsuranceDataBean {
 	
 	private Integer insType;
 	
-	private String insCompId;
+	private Integer insCompId;
 	
 	private String insCompName;
 	
@@ -23,7 +23,7 @@ public class InsuranceDataBean {
 	
 	private String insZip;
 
-	public InsuranceDataBean(String insId, Integer insType, String insCompId,
+	public InsuranceDataBean(String insId, Integer insType, Integer insCompId,
 			String insCompName, String insAddress, String insCity,
 			String insState, String insZip) {
 		this.insId = insId;
@@ -48,11 +48,11 @@ public class InsuranceDataBean {
 		this.insType = insType;
 	}
 
-	public String getInsCompId() {
+	public Integer getInsCompId() {
 		return insCompId;
 	}
 
-	public void setInsCompId(String insCompId) {
+	public void setInsCompId(Integer insCompId) {
 		this.insCompId = insCompId;
 	}
 

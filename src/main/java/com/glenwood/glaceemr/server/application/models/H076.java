@@ -9,6 +9,18 @@ import javax.persistence.Table;
 @Table(name = "h076")
 public class H076 {
 
+	public H076(){
+		
+	}
+	
+	public H076(Integer h076001, String h076003, String h076004, String h076005, String h076021){
+		this.h076001= h076001;
+		this.h076003= h076003;
+		this.h076004= h076004;
+		this.h076005= h076005;
+		this.h076021= h076021;
+	}
+	
 	@Id
 	@Column(name="h076001")
 	private Integer h076001;
@@ -307,15 +319,4 @@ public class H076 {
 		this.directEmailAddress = directEmailAddress;
 	}
 	
-	public H076(){
-		
-	}
-	
-	public H076(Integer h076001, String h076003, String h076004, String h076005, String h076021){
-		this.h076001= h076001;
-		this.h076003= h076003;
-		this.h076004= h076004;
-		this.h076005= h076005;
-		this.h076021= h076021;
-	}
 }
