@@ -82,6 +82,9 @@ public class ClinicalElementTemplateMapping {
 	@JoinColumn(name = "clinical_element_template_mapping_gwid", referencedColumnName = "surgical_history_element_details_gwid", insertable = false, updatable = false)
 	private SurgicalHistoryElementDetails surgicalHistoryElementDetails;
 	
+	@ManyToOne(fetch=FetchType.LAZY,optional=false)
+	@JoinColumn(name = "clinical_element_template_mapping_gwid", referencedColumnName = "hpi_symptom_gwid", insertable = false, updatable = false)
+	private HpiSymptom hpiSymptom;
 	
 	
 	public FamilyHistoryElement getFamilyHistoryElement() {
@@ -208,6 +211,38 @@ public class ClinicalElementTemplateMapping {
 	public void setClinicalElementTemplateMappingTimestamp(
 			Timestamp clinicalElementTemplateMappingTimestamp) {
 		this.clinicalElementTemplateMappingTimestamp = clinicalElementTemplateMappingTimestamp;
+	}
+
+	public ClinicalElements getClinicalElement() {
+		return clinicalElement;
+	}
+
+	public void setClinicalElement(ClinicalElements clinicalElement) {
+		this.clinicalElement = clinicalElement;
+	}
+
+	public PeElementDetailOption getPeElementDetailOption() {
+		return peElementDetailOption;
+	}
+
+	public void setPeElementDetailOption(PeElementDetailOption peElementDetailOption) {
+		this.peElementDetailOption = peElementDetailOption;
+	}
+
+	public PeElement getPeElement() {
+		return peElement;
+	}
+
+	public void setPeElement(PeElement peElement) {
+		this.peElement = peElement;
+	}
+
+	public HpiSymptom getHpiSymptom() {
+		return hpiSymptom;
+	}
+
+	public void setHpiSymptom(HpiSymptom hpiSymptom) {
+		this.hpiSymptom = hpiSymptom;
 	}
 	
 	

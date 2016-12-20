@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -16,7 +18,12 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "patient_clinical_elements")
-public class PatientClinicalElements {
+public class PatientClinicalElements implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="patient_clinical_elements_patient_clinical_elements_id_seq")
@@ -68,6 +75,16 @@ public class PatientClinicalElements {
 	@JsonManagedReference
 	@JoinColumn(name="patient_clinical_elements_gwid", referencedColumnName="plan_instruction_gwid", insertable=false, updatable=false)
 	private PlanInstruction planInstruction;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="patient_clinical_elements_gwid",referencedColumnName="hpi_symptom_gwid",insertable = false, updatable = false)
+	private HpiSymptom hpiSymptom;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="patient_clinical_elements_gwid",referencedColumnName="hpi_element_gwid",insertable = false, updatable = false)
+	private HpiElement hpiElement;
 	
 /*	@ManyToOne(fetch=FetchType.LAZY,optional=false)
 	@NotFound(action=NotFoundAction.IGNORE)
@@ -235,6 +252,22 @@ public class PatientClinicalElements {
 
 	public void setPlanInstruction(PlanInstruction planInstruction) {
 		this.planInstruction = planInstruction;
+	}
+
+	public HpiSymptom getHpiSymptom() {
+		return hpiSymptom;
+	}
+
+	public void setHpiSymptom(HpiSymptom hpiSymptom) {
+		this.hpiSymptom = hpiSymptom;
+	}
+
+	public HpiElement getHpiElement() {
+		return hpiElement;
+	}
+
+	public void setHpiElement(HpiElement hpiElement) {
+		this.hpiElement = hpiElement;
 	}
 	
 }

@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.specifications;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -19,6 +20,8 @@ import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
+import com.glenwood.glaceemr.server.application.models.HpiSymptom;
+import com.glenwood.glaceemr.server.application.models.HpiSymptom_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory;
@@ -33,9 +36,6 @@ import com.glenwood.glaceemr.server.application.models.VitalsParameter_;
 
 
 public class PatientClinicalElementsSpecification {
-
-
-
 
 	/**
 	 *
@@ -751,14 +751,12 @@ public class PatientClinicalElementsSpecification {
 
 			@Override
 			public Predicate toPredicate(Root<PatientClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				
 				root.fetch(PatientClinicalElements_.encounter,JoinType.INNER);
 				Join<PatientClinicalElements,Encounter> paramJoin=root.join(PatientClinicalElements_.encounter,JoinType.INNER);
 				Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
 				Predicate elementPred=root.get(PatientClinicalElements_.patientClinicalElementsGwid).in(gwids);
 				query.orderBy(cb.desc(paramJoin.get(Encounter_.encounterDate)));
 				return cb.and(patientPred,elementPred);
-
 			}
 
 		};
@@ -794,6 +792,53 @@ public class PatientClinicalElementsSpecification {
 
 			}
 
+		};
+	}
+
+	/**
+	 * Get PatientClinicalElements data for given HPI symptomId and encounterId
+	 * @param symptomId
+	 * @param encounterId
+	 * @return
+	 */
+	public static Specification<PatientClinicalElements> getByHpiSymptomidEncId(final String symptomId, final Integer encounterId) {
+		
+		return new Specification<PatientClinicalElements>(){
+
+			@Override
+			public Predicate toPredicate(Root<PatientClinicalElements> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Join<PatientClinicalElements, HpiSymptom> file=root.join(PatientClinicalElements_.hpiSymptom,JoinType.INNER);
+				Predicate symptomGwidPred=(cb.equal(file.get(HpiSymptom_.hpiSymptomId),symptomId));
+				Predicate encPred=root.get(PatientClinicalElements_.patientClinicalElementsEncounterid).in(encounterId);
+				query.where(cb.and(symptomGwidPred,encPred));
+				return query.getRestriction();
+			}
+		};
+	}
+
+	/**
+	 * Get PatientClinicalElements data for given patientId,encounterId and gwid's
+	 * @return
+	 */
+	public static Specification<PatientClinicalElements> getByPatEncGwId(final Integer patientId, final Integer encounterId, final String collectBufferData2) {
+		return new Specification<PatientClinicalElements>(){
+
+			@Override
+			public Predicate toPredicate(Root<PatientClinicalElements> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				String split[] = collectBufferData2.split(",");
+				List<String> data = new ArrayList<String>();
+				for(int i=0;i<split.length;i++)
+				{
+					data.add(split[i]);
+				}
+				query.where(cb.and(cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId),
+									cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId),
+									root.get(PatientClinicalElements_.patientClinicalElementsGwid).in(data)));
+				return query.getRestriction();
+			}
+			
 		};
 	}
 }
