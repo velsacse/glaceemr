@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -106,6 +105,12 @@ public class ClinicalElements implements Serializable{
 	@OneToMany(mappedBy="clinicalElements")
 	List<ClinicalTextMapping> clinicalTextMappings;
 	
+	@OneToMany(mappedBy="clinicalElements")
+	List<FocalShortcutElements> focalShortcutElements;
+	
+	@OneToMany(mappedBy="clinicalElements")
+	List<HpiSymptom> hpiSymptom;
+	
 	/*
 	 * DO NOT MAKE THESE BIDIRECTIONAL RELATIONSHIPS IN CLINCIAL ELEMNETS EAGER
 	 * 
@@ -114,6 +119,50 @@ public class ClinicalElements implements Serializable{
 	
 	public List<ClinicalElementTemplateMapping> getClinicalElementTemplateMapping() {
 		return clinicalElementTemplateMapping;
+	}
+
+	public List<PatientClinicalHistory> getPatientClinicalHistory() {
+		return patientClinicalHistory;
+	}
+
+	public void setPatientClinicalHistory(
+			List<PatientClinicalHistory> patientClinicalHistory) {
+		this.patientClinicalHistory = patientClinicalHistory;
+	}
+
+	public List<PatientClinicalElements> getPatientClinicalElements() {
+		return patientClinicalElements;
+	}
+
+	public void setPatientClinicalElements(
+			List<PatientClinicalElements> patientClinicalElements) {
+		this.patientClinicalElements = patientClinicalElements;
+	}
+
+	public List<ClinicalElementsOptions> getClinicalElementsOptions() {
+		return clinicalElementsOptions;
+	}
+
+	public void setClinicalElementsOptions(
+			List<ClinicalElementsOptions> clinicalElementsOptions) {
+		this.clinicalElementsOptions = clinicalElementsOptions;
+	}
+
+	public List<PatientVitals> getPatientVitals() {
+		return patientVitals;
+	}
+
+	public void setPatientVitals(List<PatientVitals> patientVitals) {
+		this.patientVitals = patientVitals;
+	}
+
+	public List<FocalShortcutElements> getFocalShortcutElements() {
+		return focalShortcutElements;
+	}
+
+	public void setFocalShortcutElements(
+			List<FocalShortcutElements> focalShortcutElements) {
+		this.focalShortcutElements = focalShortcutElements;
 	}
 
 	public List<ClinicalTextMapping> getClinicalTextMappings() {
@@ -274,6 +323,14 @@ public class ClinicalElements implements Serializable{
 
 	public void setClinicalElementsIsselect(Integer clinicalElementsIsselect) {
 		this.clinicalElementsIsselect = clinicalElementsIsselect;
+	}
+
+	public List<HpiSymptom> getHpiSymptom() {
+		return hpiSymptom;
+	}
+
+	public void setHpiSymptom(List<HpiSymptom> hpiSymptom) {
+		this.hpiSymptom = hpiSymptom;
 	}
 	
 	

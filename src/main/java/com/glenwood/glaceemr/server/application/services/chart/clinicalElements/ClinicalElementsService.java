@@ -5,6 +5,7 @@ import java.util.List;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
+import com.glenwood.glaceemr.server.application.services.chart.HPI.ClinicalElementsOptionBean;
 
 public interface ClinicalElementsService {
 	
@@ -18,5 +19,11 @@ public interface ClinicalElementsService {
 	public void deleteNotesData(Integer patientId, Integer encounterId,Integer tabId, Integer templateId);
 	public void insertDataForImport(Integer patientId,Integer encounterId,Integer prevEncounterId, Integer tabId, Integer templateId,List<String> mappedGwids);
 	public List<ClinicalElements> setHistoryClinicalDataBean(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String gwidPattern);
+	public List<ClinicalElementsOptionBean> getSymptomClinicalElementOptions(
+			String elementGWId, Integer patientId, Integer encounterId,
+			int patientGender, int ageinDay, boolean isAgeBased, int i);
+	public List<ClinicalElementsOptionBean> getSymptomElementOptionAfterUnion(
+			String elementGWId, Integer patientId, Integer encounterId,
+			int patientGender, int ageinDay, boolean isAgeBased, int flag);
 
 }

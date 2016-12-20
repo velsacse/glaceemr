@@ -6,19 +6,31 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMapping;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
+import com.glenwood.glaceemr.server.application.models.ClinicalElementsCondition;
+import com.glenwood.glaceemr.server.application.models.ClinicalElementsCondition_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
+import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions_;
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.EncounterPlan;
 import com.glenwood.glaceemr.server.application.models.LeafLibrary;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementTemplateMappingRepository;
@@ -33,6 +45,7 @@ import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElem
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalHistoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientVitalsRepository;
+import com.glenwood.glaceemr.server.application.services.chart.HPI.ClinicalElementsOptionBean;
 import com.glenwood.glaceemr.server.application.specifications.ClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
@@ -86,6 +99,9 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 	
 	@Autowired
 	PatientVitalsRepository patientVitalsRepository;
+	
+	@PersistenceContext
+	EntityManager em;
 
 
 	Short patientSex=0;
@@ -339,5 +355,100 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 				patientClinicalElementsRepository.save(patElem);
 			}
 		}
+	}
+
+	@Override
+	public List<ClinicalElementsOptionBean> getSymptomClinicalElementOptions(
+			String elementGWId, Integer patientId, Integer encounterId,
+			int patientGender, int ageinDay, boolean isAgeBased, int flag) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<ClinicalElementsOptions> root = cq.from(ClinicalElementsOptions.class);
+		Join<ClinicalElementsOptions,PatientClinicalElements> gwIdJoin = root.join(ClinicalElementsOptions_.patientClinicalElements,JoinType.LEFT);
+		Predicate patientClinicalGWId = builder.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsGwid),elementGWId);
+		Predicate patientIdPred = builder.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
+		Predicate encId = builder.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
+		gwIdJoin.on(patientClinicalGWId,patientIdPred,encId);
+		Join<ClinicalElementsOptions,ClinicalElementsCondition> rootJoin = root.join(ClinicalElementsOptions_.clinicalElementsConditions,JoinType.LEFT);
+		Predicate clinicalElemOptionGwid = builder.like(root.get(ClinicalElementsOptions_.clinicalElementsOptionsGwid), elementGWId);
+		Predicate clinicalElemOptionActive= builder.equal(root.get(ClinicalElementsOptions_.clinicalElementsOptionsActive), true);
+		Predicate clinicalElemOptionGender= root.get(ClinicalElementsOptions_.clinicalElementsOptionsGender).in("0",patientGender);
+		Predicate optionalcondition;
+		cq.select(builder.construct(ClinicalElementsOptionBean.class,
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsId),
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsOrderBy),
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsGwid),
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsName),
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsRetaincase),
+				gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsValue)));
+		
+		
+		if(flag == 1)
+		{
+			optionalcondition = builder.and(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsValue).isNotNull(),clinicalElemOptionGwid,clinicalElemOptionActive,clinicalElemOptionGender);
+		}
+		else
+		{
+			optionalcondition = builder.and(clinicalElemOptionGwid,clinicalElemOptionActive,clinicalElemOptionGender);
+		}
+		
+		if(ageinDay != -1){
+			Predicate ageInDayCondition;
+			Predicate p1 = builder.and(rootJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage).isNull(),rootJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage).isNull());
+			Predicate p2 = builder.and(builder.lessThan(rootJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageinDay),builder.greaterThanOrEqualTo(rootJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage), ageinDay));
+			ageInDayCondition = builder.or(p1,p2);
+			cq.where(optionalcondition,ageInDayCondition);
+		}
+		else
+		{
+			cq.where(optionalcondition);
+		}
+		
+		List<Object> hpinotes=em.createQuery(cq).getResultList();
+		List<ClinicalElementsOptionBean> clinicalElemOptBean = new ArrayList<ClinicalElementsOptionBean>();
+			for(int i=0; i<hpinotes.size();i++)
+			{
+				ClinicalElementsOptionBean clinicalElemOpt = (ClinicalElementsOptionBean) hpinotes.get(i);              
+				clinicalElemOptBean.add(clinicalElemOpt);
+			}
+			
+		return clinicalElemOptBean;
+	}
+
+	@Override
+	public List<ClinicalElementsOptionBean> getSymptomElementOptionAfterUnion(
+			String elementGWId, Integer patientId, Integer encounterId,
+			int patientGender, int ageinDay, boolean isAgeBased, int flag) {
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = cb.createQuery();
+		Root<ClinicalElementsOptions> root = cq.from(ClinicalElementsOptions.class);
+		Join<ClinicalElementsOptions,PatientClinicalElements> gwIdJoin = root.join(ClinicalElementsOptions_.patientClinicalElements,JoinType.INNER);
+		Predicate patientClinicalGWId = cb.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsGwid),elementGWId);
+		Predicate patientIdPred = cb.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
+		Predicate encId = cb.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
+		gwIdJoin.on(patientClinicalGWId,patientIdPred,encId);
+		Predicate clinicalElemOptionGwid = cb.like(root.get(ClinicalElementsOptions_.clinicalElementsOptionsGwid), elementGWId);
+		Predicate clinicalElemOptionActive= cb.equal(root.get(ClinicalElementsOptions_.clinicalElementsOptionsActive), true);
+		Predicate clinicalElemOptionGender= root.get(ClinicalElementsOptions_.clinicalElementsOptionsGender).in("0",patientGender);
+		cq.where(clinicalElemOptionGwid,clinicalElemOptionActive,clinicalElemOptionGender);
+		cq.orderBy(cb.asc(root.get(ClinicalElementsOptions_.clinicalElementsOptionsOrderBy)),cb.asc(root.get(ClinicalElementsOptions_.clinicalElementsOptionsValue)));
+		cq.select(cb.construct(ClinicalElementsOptionBean.class,
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsId),
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsOrderBy),
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsGwid),
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsName),
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsRetaincase),
+				gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsValue)));
+		List<Object> hpinotes=em.createQuery(cq).getResultList();
+		List<ClinicalElementsOptionBean> gsBean = new ArrayList<ClinicalElementsOptionBean>();
+			for(int i=0; i<hpinotes.size();i++)
+			{
+				ClinicalElementsOptionBean gs = (ClinicalElementsOptionBean) hpinotes.get(i);              
+				gsBean.add(gs);
+			}
+			
+		return gsBean;
 	}
 }
