@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -61,9 +62,9 @@ public class RoomStatusController {
 		List<PosTable> locations = roomStatusService.getPos(pos);
 		List<EmployeeProfile> providers = roomStatusService.getproviders();
 		List<PosRooms> roomStatus = roomStatusService.getRoomStatus();
-		String patientId="";
+		List<String> patientId=new ArrayList<String>();
 		for(int i=0;i<roomStatus.size();i++){
-				patientId=roomStatus.get(i).getPatId().toString();
+				patientId.add(roomStatus.get(i).getPatId().toString());
 				activities = roomStatusService.getActivities(patientId);
 				ordered = roomStatusService.getOrdered(patientId);
 			}
@@ -101,7 +102,7 @@ public class RoomStatusController {
 	@ApiOperation(value="to update room numbers",notes="update the room numbers")
 	@RequestMapping(value="/updateRoomNo",method=RequestMethod.GET)
 	@ResponseBody 
-	public EMRResponseBean updateRoomNo(@RequestParam(value="pos",required=false)Integer pos,@RequestParam(value="addPatientId",required=false)String addPatientId,@RequestParam(value="roomtoAdd",required=false)Short roomtoAdd) throws Exception{
+	public EMRResponseBean updateRoomNo(@RequestParam(value="pos",required=false)Integer pos,@RequestParam(value="addPatientId",required=false) String addPatientId,@RequestParam(value="roomtoAdd",required=false)Short roomtoAdd) throws Exception{
 		JSONObject encounterList = roomStatusService.updateRoomNo(pos,addPatientId,roomtoAdd);
 		EMRResponseBean roomNos = new EMRResponseBean();
 		roomNos.setData(encounterList.toString());

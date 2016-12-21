@@ -334,69 +334,78 @@ public class RoomStatusServiceImpl implements  RoomStatusService {
 	 * @return orderedLabVaccines,orderedLabDetails
 	 */
 	@Override
-	public List<OrderedData> getOrdered(String patientId) {
-		List<OrderedBean> ordLab = new ArrayList<OrderedBean>();
-		List<Integer> encIdList = getEncId(patientId);
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<LabEntries> root = cq.from(LabEntries.class);
-		Join<LabEntries,EmployeeProfile> empJoin = root.join(LabEntries_.empProfile,JoinType.LEFT);
-		Join<LabEntries,Encounter> enclabJoin = root.join(LabEntries_.encounter,JoinType.LEFT);
-		Join<LabEntries,LabGroups> labJoin = root.join(LabEntries_.labGroups,JoinType.INNER);
-		cq.select(builder.construct(OrderedBean.class,builder.function("to_char",String.class,root.get(LabEntries_.labEntriesOrdOn),builder.literal("mm/dd/yyyy")),
-				root.get(LabEntries_.labEntriesTestDesc),
-				root.get(LabEntries_.labEntriesTestStatus),
-				builder.coalesce(empJoin.get(EmployeeProfile_.empProfileFullname),""),
-				root.get(LabEntries_.labEntriesResultNotes),
-				root.get(LabEntries_.labEntriesLoinc),
-				root.get(LabEntries_.labEntriesCpt),
-				root.get(LabEntries_.labEntriesTestdetailId),
-				root.get(LabEntries_.labEntriesTestId),
-				root.get(LabEntries_.labEntriesGroupid),
-			    labJoin.get(LabGroups_.labGroupsDesc)));
-		cq.where(builder.and(builder.not(root.get(LabEntries_.labEntriesTestStatus).in(7)),
-				builder.not(labJoin.get(LabGroups_.labGroupsId).in(36,5)),
-				enclabJoin.get(Encounter_.encounterId).in(getEncId(patientId))));
-		cq.orderBy(builder.desc(root.get(LabEntries_.labEntriesOrdOn)));
-		List<Object> LabList = em.createQuery(cq).getResultList();
-		for(int i=0;i<LabList.size();i++){
-			OrderedBean orderedLabDet = (OrderedBean) LabList.get(i);
-			ordLab.add(orderedLabDet);
-		}
-		List<OrderedBean> ordVac = new ArrayList<OrderedBean>();
-       	CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Object> criteriaQuery = cb.createQuery();
-		Root<LabEntries> CriteriaRoot = criteriaQuery.from(LabEntries.class);
-		Join<LabEntries,EmployeeProfile> labEmpJoin = CriteriaRoot.join(LabEntries_.empProfile,JoinType.LEFT);
-		Join<LabEntries,Encounter> labEncJoin = CriteriaRoot.join(LabEntries_.encounter,JoinType.LEFT);
-		Join<LabEntries,LabGroups> LabGroupJoin = CriteriaRoot.join(LabEntries_.labGroups,JoinType.INNER);
-		criteriaQuery.select(builder.construct(OrderedBean.class,cb.function("to_char",String.class,
-				CriteriaRoot.get(LabEntries_.labEntriesOrdOn),cb.literal("mm/dd/yyyy")),
-				CriteriaRoot.get(LabEntries_.labEntriesTestDesc),
-				CriteriaRoot.get(LabEntries_.labEntriesTestStatus),
-				cb.coalesce(labEmpJoin.get(EmployeeProfile_.empProfileFullname),""),
-				CriteriaRoot.get(LabEntries_.labEntriesResultNotes),
-				CriteriaRoot.get(LabEntries_.labEntriesLoinc),
-				CriteriaRoot.get(LabEntries_.labEntriesCpt),
-				CriteriaRoot.get(LabEntries_.labEntriesTestdetailId),
-				CriteriaRoot.get(LabEntries_.labEntriesTestId),
-				CriteriaRoot.get(LabEntries_.labEntriesGroupid),
-				LabGroupJoin.get(LabGroups_.labGroupsDesc)));
-		criteriaQuery.where(cb.and(cb.not(CriteriaRoot.get(LabEntries_.labEntriesTestStatus).in(7)),
-				CriteriaRoot.get(LabEntries_.labEntriesGroupid).in(36,5)),
-				labEncJoin.get(Encounter_.encounterId).in(encIdList));
-		criteriaQuery.orderBy(cb.desc(CriteriaRoot.get(LabEntries_.labEntriesOrdOn)));
-		List<Object> vacList = em.createQuery(criteriaQuery).getResultList();
-		for(int i=0;i<vacList.size();i++){
-			OrderedBean ordVacDet = (OrderedBean) vacList.get(i);
-			ordVac.add(ordVacDet);
-		}
+	public List<OrderedData> getOrdered(List<String> patientId) {
 		List<OrderedData> orderedList = new ArrayList<OrderedData>();
-			OrderedData ordered = new OrderedData();
+		for(int j=0;j<patientId.size();j++){
+			OrderedData ordered=new OrderedData();
+			List<Integer> encIdList=new ArrayList<Integer>();
+				encIdList=getEncId(patientId.get(j));
+				ordered.setPatientId(patientId.get(j));
+			/**
+			 * to get ordered lab details
+			 */
+			List<OrderedBean> ordLab=new ArrayList<OrderedBean>();
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<LabEntries> root = cq.from(LabEntries.class);
+			Join<LabEntries,EmployeeProfile> empJoin = root.join(LabEntries_.empProfile,JoinType.LEFT);
+			Join<LabEntries,Encounter> enclabJoin = root.join(LabEntries_.encounter,JoinType.LEFT);
+			Join<LabEntries,LabGroups> labJoin = root.join(LabEntries_.labGroups,JoinType.INNER);
+			cq.select(builder.construct(OrderedBean.class,builder.function("to_char",String.class,root.get(LabEntries_.labEntriesOrdOn),builder.literal("mm/dd/yyyy")),
+					root.get(LabEntries_.labEntriesTestDesc),
+					root.get(LabEntries_.labEntriesTestStatus),
+					builder.coalesce(empJoin.get(EmployeeProfile_.empProfileFullname),""),
+					root.get(LabEntries_.labEntriesResultNotes),
+					root.get(LabEntries_.labEntriesLoinc),
+					root.get(LabEntries_.labEntriesCpt),
+					root.get(LabEntries_.labEntriesTestdetailId),
+					root.get(LabEntries_.labEntriesTestId),
+					root.get(LabEntries_.labEntriesGroupid),
+				    labJoin.get(LabGroups_.labGroupsDesc)));
+			cq.where(builder.and(builder.not(root.get(LabEntries_.labEntriesTestStatus).in(7)),
+					builder.not(labJoin.get(LabGroups_.labGroupsId).in(36,5)),
+					enclabJoin.get(Encounter_.encounterId).in(encIdList)));
+			cq.orderBy(builder.desc(root.get(LabEntries_.labEntriesOrdOn)));
+			List<Object> LabList = em.createQuery(cq).getResultList();
+			for(int i=0;i<LabList.size();i++){
+				OrderedBean orderedLabDet=(OrderedBean) LabList.get(i);
+				ordLab.add(orderedLabDet);
+			}
+            /**
+             * to get orderedvaccine Details	
+             */
+			List<OrderedBean> ordVac=new ArrayList<OrderedBean>();
+	       	CriteriaBuilder cb=em.getCriteriaBuilder();
+			CriteriaQuery<Object> criteriaQuery=cb.createQuery();
+			Root<LabEntries> CriteriaRoot = criteriaQuery.from(LabEntries.class);
+			Join<LabEntries,EmployeeProfile> labEmpJoin = CriteriaRoot.join(LabEntries_.empProfile,JoinType.LEFT);
+			Join<LabEntries,Encounter> labEncJoin = CriteriaRoot.join(LabEntries_.encounter,JoinType.LEFT);
+			Join<LabEntries,LabGroups> LabGroupJoin = CriteriaRoot.join(LabEntries_.labGroups,JoinType.INNER);
+			criteriaQuery.select(builder.construct(OrderedBean.class,cb.function("to_char",String.class,
+					CriteriaRoot.get(LabEntries_.labEntriesOrdOn),cb.literal("mm/dd/yyyy")),
+					CriteriaRoot.get(LabEntries_.labEntriesTestDesc),
+					CriteriaRoot.get(LabEntries_.labEntriesTestStatus),
+					cb.coalesce(labEmpJoin.get(EmployeeProfile_.empProfileFullname),""),
+					CriteriaRoot.get(LabEntries_.labEntriesResultNotes),
+					CriteriaRoot.get(LabEntries_.labEntriesLoinc),
+					CriteriaRoot.get(LabEntries_.labEntriesCpt),
+					CriteriaRoot.get(LabEntries_.labEntriesTestdetailId),
+					CriteriaRoot.get(LabEntries_.labEntriesTestId),
+					CriteriaRoot.get(LabEntries_.labEntriesGroupid),
+					LabGroupJoin.get(LabGroups_.labGroupsDesc)));
+			criteriaQuery.where(cb.and(cb.not(CriteriaRoot.get(LabEntries_.labEntriesTestStatus).in(7)),
+					CriteriaRoot.get(LabEntries_.labEntriesGroupid).in(36,5)),
+					labEncJoin.get(Encounter_.encounterId).in(encIdList));
+			criteriaQuery.orderBy(cb.desc(CriteriaRoot.get(LabEntries_.labEntriesOrdOn)));
+			List<Object> vacList = em.createQuery(criteriaQuery).getResultList();
+			for(int i=0;i<vacList.size();i++){
+				OrderedBean ordVacDet=(OrderedBean)vacList.get(i);
+				ordVac.add(ordVacDet);
+			}
 			ordered.setOrderedLabs(ordLab);
 			ordered.setOrderdVaccine(ordVac);
-			ordered.setPatientId(patientId);
 			orderedList.add(ordered);
+		}
 		return orderedList;
 	}
 	
@@ -407,127 +416,130 @@ public class RoomStatusServiceImpl implements  RoomStatusService {
 	 */
 
 	@Override
-	public List<ActivitiesData> getActivities(String patientId) {
-		List<Integer> encIdList = getEncId(patientId);
-		ActivityBean userData = null;
-		ActivityBean entityData = null;
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<ActivityLog> root = cq.from(ActivityLog.class);
-		cq.select(builder.construct(ActivityBean.class,root.get(ActivityLog_.moduleid),
-				root.get(ActivityLog_.entityid),
-				builder.function("to_char",String.class,root.get(ActivityLog_.time),builder.literal("yyyy-MM-dd HH:mm:ss")),
-				root.get(ActivityLog_.userid)));
-		cq.where(builder.and(builder.equal(root.get(ActivityLog_.patientid),patientId),builder.equal(root.get(ActivityLog_.status),false),root.get(ActivityLog_.encounterid).in(encIdList)));
-		 List<Object> resultSet = em.createQuery(cq).getResultList();
-	  	 List<ActivityBean> activities = new ArrayList<ActivityBean>();
-          for(int i=0;i<resultSet.size();i++){
-              ActivityBean ac = (ActivityBean) resultSet.get(i);
-              activities.add(ac);
-          }
-			List<Integer> entities = new ArrayList<Integer>();
-			List<Integer> userids = new ArrayList<Integer>();
-			for(int i=0;i<activities.size();i++){
-				ActivityBean actJSON = (ActivityBean) resultSet.get(i);
-				String module = actJSON.getModuleid().toString();
-				int entityId = Integer.parseInt(actJSON.getEntityid().toString());
-				int userid = Integer.parseInt(actJSON.getUserid().toString());
-        		String userName = "";
-        		String entityValue = "";
-		        userData = new ActivityBean(userName,userid);
-		        entityData = new ActivityBean(entityId, entityValue);
-				if(!userids.contains(userid)){
-					userids.add(userid);
-					CriteriaBuilder builderemp = em.getCriteriaBuilder();
-					CriteriaQuery<Object> query = builder.createQuery();
-					Root<EmployeeProfile> empRoot = query.from(EmployeeProfile.class);
-					query.select(empRoot.get(EmployeeProfile_.empProfileFullname));
-					query.where(builderemp.equal(empRoot.get(EmployeeProfile_.empProfileEmpid),userid));
-                 List<Object> result = em.createQuery(query).getResultList();
-                 if(!result.isEmpty()){
-                	userName=result.get(i).toString();
-                	userData.setUserid(userid);
-                	userData.setUserName(userName);
-				}
-			}
-          if(!entities.contains(entityId)){
-              entities.add(entityId);
-              	/**
-				 * To get drug name for prescription
-				 **/
-				if(Integer.parseInt(module)==3){
-					Prescription prescription = new Prescription();
-					prescription = prescriptionRepository.findOne(RoomStatusSpecification.getRxName(entityId));
-					String rxname = "";
-					if(prescription!=null){
-						rxname = Optional.fromNullable(prescription.getRxname()).or(" ");
-					}
-					CurrentMedication currentMedication = new CurrentMedication();
-					currentMedication = currentMedicationRepository.findOne(RoomStatusSpecification.getCurMedRxName(entityId));
-					String curMedRxName="";
-					if(currentMedication!=null){
-						curMedRxName = Optional.fromNullable(currentMedication.getCurrentMedicationRxName()).or("");
-					}
-					List<String> medName = new ArrayList<String>();
-					medName.add(rxname);
-					medName.add(curMedRxName);
-					if(entityId!=-1){
-						entityValue = medName.toString();
-						entityData.setEntityid(entityId);;
-						entityData.setEntityValue(entityValue);;
-					}
-				}
-    
-				/**
-				 *To get test name for investigation
-				 **/
-				if(Integer.parseInt(module)==2){ 
-					LabEntries labEntries = new LabEntries();
-					labEntries = labEntriesRepository.findOne(RoomStatusSpecification.getLabEntriesTestDesc(entityId));
-					String labEntriesTestDesc = "";
-					if(labEntries!=null){
-						labEntriesTestDesc = Optional.fromNullable(labEntries.getLabEntriesTestDesc()).or("");
-					}
-					if(entityId!=-1){
-						entityValue = labEntriesTestDesc;
-						entityData.setEntityid(entityId);;
-						entityData.setEntityValue(entityValue);;
-					}
-				}
-				/**
-				 * To get the template Name
-				 **/
-				if(Integer.parseInt(module)==4){ 
-					LeafPatient leafPatient = new LeafPatient();
-					leafPatient = leafPatientRepository.findOne(RoomStatusSpecification.getLeafPatLibId(entityId));
-					Integer leafPatId = null;
-					if(leafPatient!=null){
-						leafPatId = Optional.fromNullable(leafPatient.getLeafPatientLeafLibraryId()).or(-1);
-					}
-					LeafLibrary leafLibrary = new LeafLibrary();
-					leafLibrary = leafLibraryRepository.findOne(RoomStatusSpecification.getLeafLibName(leafPatId));
-					String leafLibraryName = "";
-					if(leafLibrary!=null){
-						leafLibraryName = Optional.fromNullable(leafLibrary.getLeafLibraryName()).or("");
-					}
-					if(entityId!=-1){
-						entityValue = leafLibraryName;
-						entityData.setEntityid(entityId);;
-						entityData.setEntityValue(entityValue);;
-					}
-				}
-			}  
-		}
+	public List<ActivitiesData> getActivities(List<String> patientId) {
 		List<ActivitiesData> activitiesList = new ArrayList<ActivitiesData>();
-		        ActivitiesData act = new ActivitiesData();
-		        act.setactivityJson(activities);
-		        act.setPatientId(patientId);
-		        act.setUserData(userData);
-		        act.setEntityData(entityData);
-		        activitiesList.add(act);
+		for(int j=0;j<patientId.size();j++){
+			List<Integer> encIdList = new ArrayList<Integer>();
+			ActivitiesData act = new ActivitiesData();
+			encIdList = getEncId(patientId.get(j));
+			act.setPatientId(patientId.get(j));
+			ActivityBean userData = null;
+			ActivityBean entityData = null;
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<ActivityLog> root = cq.from(ActivityLog.class);
+			cq.select(builder.construct(ActivityBean.class,root.get(ActivityLog_.moduleid),
+					root.get(ActivityLog_.entityid),
+					builder.function("to_char",String.class,root.get(ActivityLog_.time),builder.literal("yyyy-MM-dd HH:mm:ss")),
+					root.get(ActivityLog_.userid)));
+			cq.where(builder.and(root.get(ActivityLog_.patientid).in(patientId),builder.equal(root.get(ActivityLog_.status),false),root.get(ActivityLog_.encounterid).in(encIdList)));
+			 List<Object> resultSet = em.createQuery(cq).getResultList();
+		  	 List<ActivityBean> activities = new ArrayList<ActivityBean>();
+	          for(int i=0;i<resultSet.size();i++){
+	              ActivityBean ac = (ActivityBean) resultSet.get(i);
+	              activities.add(ac);
+	          }
+				List<Integer> entities = new ArrayList<Integer>();
+				List<Integer> userids = new ArrayList<Integer>();
+				for(int i=0;i<activities.size();i++){
+					ActivityBean actJSON = (ActivityBean) resultSet.get(i);
+					String module = actJSON.getModuleid().toString();
+					int entityId = Integer.parseInt(actJSON.getEntityid().toString());
+					int userid = Integer.parseInt(actJSON.getUserid().toString());
+	        		String userName = "";
+	        		String entityValue = "";
+			        userData = new ActivityBean(userName,userid);
+			        entityData = new ActivityBean(entityId, entityValue);
+					if(!userids.contains(userid)){
+						userids.add(userid);
+						CriteriaBuilder builderemp = em.getCriteriaBuilder();
+						CriteriaQuery<Object> query = builder.createQuery();
+						Root<EmployeeProfile> empRoot = query.from(EmployeeProfile.class);
+						query.select(empRoot.get(EmployeeProfile_.empProfileFullname));
+						query.where(builderemp.equal(empRoot.get(EmployeeProfile_.empProfileEmpid),userid));
+	                 List<Object> result = em.createQuery(query).getResultList();
+	                 if(!result.isEmpty()){
+	                	userName=result.get(i).toString();
+	                	userData.setUserid(userid);
+	                	userData.setUserName(userName);
+					}
+				}
+	          if(!entities.contains(entityId)){
+	              entities.add(entityId);
+	              	/**
+					 * To get drug name for prescription
+					 **/
+					if(Integer.parseInt(module)==3){
+						Prescription prescription = new Prescription();
+						prescription = prescriptionRepository.findOne(RoomStatusSpecification.getRxName(entityId));
+						String rxname = "";
+						if(prescription!=null){
+							rxname = Optional.fromNullable(prescription.getRxname()).or(" ");
+						}
+						CurrentMedication currentMedication = new CurrentMedication();
+						currentMedication = currentMedicationRepository.findOne(RoomStatusSpecification.getCurMedRxName(entityId));
+						String curMedRxName="";
+						if(currentMedication!=null){
+							curMedRxName = Optional.fromNullable(currentMedication.getCurrentMedicationRxName()).or("");
+						}
+						List<String> medName = new ArrayList<String>();
+						medName.add(rxname);
+						medName.add(curMedRxName);
+						if(entityId!=-1){
+							entityValue = medName.toString();
+							entityData.setEntityid(entityId);;
+							entityData.setEntityValue(entityValue);;
+						}
+					}
+	    
+					/**
+					 *To get test name for investigation
+					 **/
+					if(Integer.parseInt(module)==2){ 
+						LabEntries labEntries = new LabEntries();
+						labEntries = labEntriesRepository.findOne(RoomStatusSpecification.getLabEntriesTestDesc(entityId));
+						String labEntriesTestDesc = "";
+						if(labEntries!=null){
+							labEntriesTestDesc = Optional.fromNullable(labEntries.getLabEntriesTestDesc()).or("");
+						}
+						if(entityId!=-1){
+							entityValue = labEntriesTestDesc;
+							entityData.setEntityid(entityId);;
+							entityData.setEntityValue(entityValue);;
+						}
+					}
+					/**
+					 * To get the template Name
+					 **/
+					if(Integer.parseInt(module)==4){ 
+						LeafPatient leafPatient = new LeafPatient();
+						leafPatient = leafPatientRepository.findOne(RoomStatusSpecification.getLeafPatLibId(entityId));
+						Integer leafPatId = null;
+						if(leafPatient!=null){
+							leafPatId = Optional.fromNullable(leafPatient.getLeafPatientLeafLibraryId()).or(-1);
+						}
+						LeafLibrary leafLibrary = new LeafLibrary();
+						leafLibrary = leafLibraryRepository.findOne(RoomStatusSpecification.getLeafLibName(leafPatId));
+						String leafLibraryName = "";
+						if(leafLibrary!=null){
+							leafLibraryName = Optional.fromNullable(leafLibrary.getLeafLibraryName()).or("");
+						}
+						if(entityId!=-1){
+							entityValue = leafLibraryName;
+							entityData.setEntityid(entityId);;
+							entityData.setEntityValue(entityValue);;
+						}
+					}
+				}  
+			}
+			     	act.setactivityJson(activities);
+			        act.setUserData(userData);
+			        act.setEntityData(entityData);
+			        activitiesList.add(act);
+		}
 		return activitiesList;
 	}
-	
+			
 }
 	
 	

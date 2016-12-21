@@ -44,7 +44,7 @@ public interface RoomStatusService {
 	 * @param roomtoAdd
 	 * @return list of encounter details
 	 */
-	JSONObject updateRoomNo(Integer pos, String addPatientId,Short roomtoAdd);
+	JSONObject updateRoomNo(Integer pos, String addPatientId, Short roomtoAdd);
 	
 	/**
 	 * to get RoomStatus
@@ -75,7 +75,7 @@ public interface RoomStatusService {
 	 * @param patientId
 	 * @return patientId
 	 */
-	List<OrderedData> getOrdered(String patientId);
+	List<OrderedData> getOrdered(List<String> patientId);
 	
 	/**
 	 * to get activities information
@@ -83,7 +83,7 @@ public interface RoomStatusService {
 	 * @param encounterId
 	 * @return activities
 	 */
-	List<ActivitiesData> getActivities(String patientId);
+	List<ActivitiesData> getActivities(List<String> patientId);
 	
 
 }
