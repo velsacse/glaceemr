@@ -62,11 +62,11 @@ public class RoomStatusController {
 		List<PosTable> locations = roomStatusService.getPos(pos);
 		List<EmployeeProfile> providers = roomStatusService.getproviders();
 		List<PosRooms> roomStatus = roomStatusService.getRoomStatus();
-		List<String> patientId=new ArrayList<String>();
+		List<String> patientIdList=new ArrayList<String>();
 		for(int i=0;i<roomStatus.size();i++){
-				patientId.add(roomStatus.get(i).getPatId().toString());
-				activities = roomStatusService.getActivities(patientId);
-				ordered = roomStatusService.getOrdered(patientId);
+				patientIdList.add(roomStatus.get(i).getPatId().toString());
+				activities = roomStatusService.getActivities(patientIdList);
+				ordered = roomStatusService.getOrdered(patientIdList);
 			}
 		List<Room> roomDetail = roomStatusService.getRoomName();
 		RoomInfoBean roomInfo = new RoomInfoBean(locations,providers,roomStatus,ordered,roomDetail,activities);

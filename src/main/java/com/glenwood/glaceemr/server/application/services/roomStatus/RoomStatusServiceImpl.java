@@ -334,13 +334,13 @@ public class RoomStatusServiceImpl implements  RoomStatusService {
 	 * @return orderedLabVaccines,orderedLabDetails
 	 */
 	@Override
-	public List<OrderedData> getOrdered(List<String> patientId) {
+	public List<OrderedData> getOrdered(List<String> patientIdList) {
 		List<OrderedData> orderedList = new ArrayList<OrderedData>();
-		for(int j=0;j<patientId.size();j++){
+		for(int j=0;j<patientIdList.size();j++){
 			OrderedData ordered=new OrderedData();
 			List<Integer> encIdList=new ArrayList<Integer>();
-				encIdList=getEncId(patientId.get(j));
-				ordered.setPatientId(patientId.get(j));
+				encIdList=getEncId(patientIdList.get(j));
+				ordered.setPatientId(patientIdList.get(j));
 			/**
 			 * to get ordered lab details
 			 */
@@ -416,13 +416,13 @@ public class RoomStatusServiceImpl implements  RoomStatusService {
 	 */
 
 	@Override
-	public List<ActivitiesData> getActivities(List<String> patientId) {
+	public List<ActivitiesData> getActivities(List<String> patientIdList) {
 		List<ActivitiesData> activitiesList = new ArrayList<ActivitiesData>();
-		for(int j=0;j<patientId.size();j++){
+		for(int j=0;j<patientIdList.size();j++){
 			List<Integer> encIdList = new ArrayList<Integer>();
 			ActivitiesData act = new ActivitiesData();
-			encIdList = getEncId(patientId.get(j));
-			act.setPatientId(patientId.get(j));
+			encIdList = getEncId(patientIdList.get(j));
+			act.setPatientId(patientIdList.get(j));
 			ActivityBean userData = null;
 			ActivityBean entityData = null;
 			CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -432,7 +432,7 @@ public class RoomStatusServiceImpl implements  RoomStatusService {
 					root.get(ActivityLog_.entityid),
 					builder.function("to_char",String.class,root.get(ActivityLog_.time),builder.literal("yyyy-MM-dd HH:mm:ss")),
 					root.get(ActivityLog_.userid)));
-			cq.where(builder.and(root.get(ActivityLog_.patientid).in(patientId),builder.equal(root.get(ActivityLog_.status),false),root.get(ActivityLog_.encounterid).in(encIdList)));
+			cq.where(builder.and(root.get(ActivityLog_.patientid).in(patientIdList),builder.equal(root.get(ActivityLog_.status),false),root.get(ActivityLog_.encounterid).in(encIdList)));
 			 List<Object> resultSet = em.createQuery(cq).getResultList();
 		  	 List<ActivityBean> activities = new ArrayList<ActivityBean>();
 	          for(int i=0;i<resultSet.size();i++){
@@ -539,7 +539,7 @@ public class RoomStatusServiceImpl implements  RoomStatusService {
 		}
 		return activitiesList;
 	}
-			
+	
 }
 	
 	

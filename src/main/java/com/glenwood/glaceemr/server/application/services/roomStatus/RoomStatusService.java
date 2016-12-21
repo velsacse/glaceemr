@@ -75,7 +75,7 @@ public interface RoomStatusService {
 	 * @param patientId
 	 * @return patientId
 	 */
-	List<OrderedData> getOrdered(List<String> patientId);
+	List<OrderedData> getOrdered(List<String> patientIdList);
 	
 	/**
 	 * to get activities information
@@ -83,7 +83,7 @@ public interface RoomStatusService {
 	 * @param encounterId
 	 * @return activities
 	 */
-	List<ActivitiesData> getActivities(List<String> patientId);
+	List<ActivitiesData> getActivities(List<String> patientIdList);
 	
 
 }
