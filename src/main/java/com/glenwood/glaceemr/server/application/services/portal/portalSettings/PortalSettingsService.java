@@ -8,6 +8,7 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EncryptedPatientDetails;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
+import com.glenwood.glaceemr.server.application.models.PatientPortalFeatureConfig;
 import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
 import com.glenwood.glaceemr.server.application.models.PortalNotificationAlertsBean;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
@@ -36,6 +37,8 @@ public interface PortalSettingsService {
 	PortalNotificationAlertsBean getPortalConfigDetails(int patientId, int chartId) throws ParseException, JsonProcessingException;
 	
 	List<PatientPortalMenuConfig> getPortalMenuConfig(boolean isActiveMenuItemList);
+
+	List<PatientPortalFeatureConfig> getPortalFeatureConfig(boolean isActiveFeatureItemList);
 
 	InsuranceFilterBean getInsuranceListList(InsuranceFilterBean insFilterBean);
 	

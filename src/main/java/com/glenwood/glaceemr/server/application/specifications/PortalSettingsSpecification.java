@@ -18,6 +18,8 @@ import com.glenwood.glaceemr.server.application.models.H810;
 import com.glenwood.glaceemr.server.application.models.H810_;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InitialSettings_;
+import com.glenwood.glaceemr.server.application.models.PatientPortalFeatureConfig;
+import com.glenwood.glaceemr.server.application.models.PatientPortalFeatureConfig_;
 import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
 import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig_;
 import com.glenwood.glaceemr.server.application.models.PosTable;
@@ -28,7 +30,7 @@ public class PortalSettingsSpecification {
 	/**
 	 * @return list of available Language options  
 	 */	
-	public static Specification<PatientPortalMenuConfig> getPortalMenuConfig(boolean isActiveMenuItemList)
+	public static Specification<PatientPortalMenuConfig> getPortalMenuConfig(final boolean isActiveMenuItemList)
 	   {
 		   return new Specification<PatientPortalMenuConfig>() {
 
@@ -36,8 +38,26 @@ public class PortalSettingsSpecification {
 			public Predicate toPredicate(Root<PatientPortalMenuConfig> root,
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				
-				Predicate practicePredicate=cq.where(cb.equal(root.get(PatientPortalMenuConfig_.patientPortalMenuConfigIsactive), true)).getRestriction();
-				return practicePredicate;
+				Predicate menuPredicate=cq.where(cb.equal(root.get(PatientPortalMenuConfig_.patientPortalMenuConfigIsactive), true)).getRestriction();
+				return menuPredicate;
+			}
+			   
+		};
+	   }
+	
+	/**
+	 * @return list of available Language options  
+	 */	
+	public static Specification<PatientPortalFeatureConfig> getPortalFeatureConfig(final boolean isActiveFeatureItemList)
+	   {
+		   return new Specification<PatientPortalFeatureConfig>() {
+
+			@Override
+			public Predicate toPredicate(Root<PatientPortalFeatureConfig> root,
+					CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				
+				Predicate featurePredicate=cq.where(cb.equal(root.get(PatientPortalFeatureConfig_.patientPortalFeatureConfigIsactive), isActiveFeatureItemList)).getRestriction();
+				return featurePredicate;
 			}
 			   
 		};

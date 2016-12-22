@@ -28,6 +28,7 @@ public class PortalConfigurationBean {
 	String glaceTomcatContext;
 	String glaceSpringUrl;
 	List<PatientPortalMenuConfig> portalMenuItemList;
+	List<PatientPortalFeatureConfig> portalFeatureItemList;
 	List<H809> loggedInUserDetailsList;
 	
 	public String getUsername() {
@@ -180,6 +181,12 @@ public class PortalConfigurationBean {
 	}
 	public void setLoggedInUserDetailsList(List<H809> loggedInUserDetailsList) {
 		this.loggedInUserDetailsList = loggedInUserDetailsList;
+	}
+	public List<PatientPortalFeatureConfig> getPortalFeatureItemList() {
+		return portalFeatureItemList;
+	}
+	public void setPortalFeatureItemList(List<PatientPortalFeatureConfig> portalFeatureItemList) {
+		this.portalFeatureItemList = portalFeatureItemList;
 	}
 	
 }

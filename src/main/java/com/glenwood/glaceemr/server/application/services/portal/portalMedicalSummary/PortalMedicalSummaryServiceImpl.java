@@ -38,6 +38,7 @@ import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientEncounterType;
 import com.glenwood.glaceemr.server.application.models.PatientEncounterType_;
+import com.glenwood.glaceemr.server.application.models.PatientPortalFeatureConfig;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PlanInstruction;
 import com.glenwood.glaceemr.server.application.models.PortalMedicalSummaryBean;
@@ -131,6 +132,8 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 		PortalBillingConfigFields configFields=portalSettingsService.getPortalBillingConfigFields();
 		
 		List<PatientPortalMenuConfig> portalMenuItemList=portalSettingsService.getPortalMenuConfig(true);
+		
+		List<PatientPortalFeatureConfig> portalFeatureConfigList=portalSettingsService.getPortalFeatureConfig(true);
 				
 		configurationBean.setSessionID(sessionMap.getPortalSessionID());
 		configurationBean.setUsername(sessionMap.getPortalUser());
@@ -143,6 +146,7 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 		configurationBean.setPortalLoginUrl(sessionMap.getPortalLoginUrl());
 		configurationBean.setPortalLoginContext(sessionMap.getPortalLoginContext());
 		configurationBean.setPortalMenuItemList(portalMenuItemList);
+		configurationBean.setPortalFeatureItemList(portalFeatureConfigList);
 		configurationBean.setLoggedIn(true);		
 		
 		for(int p=0;p<practiceDetails.size();p++){

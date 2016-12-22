@@ -24,6 +24,7 @@ import com.glenwood.glaceemr.server.application.models.H810;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr;
 import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
+import com.glenwood.glaceemr.server.application.models.PatientPortalFeatureConfig;
 import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistrationBean;
@@ -43,6 +44,7 @@ import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepo
 import com.glenwood.glaceemr.server.application.repositories.InsCompAddrRepository;
 import com.glenwood.glaceemr.server.application.repositories.InsCompanyRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsQuestionsRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalFeatureConfigRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientPortalMenuConfigRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PosTableRepository;
@@ -99,6 +101,9 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 	
 	@Autowired
 	PatientPortalMenuConfigRepository patientPortalMenuConfigRepository;
+
+	@Autowired
+	PatientPortalFeatureConfigRepository patientPortalFeatureConfigRepository;
 	
 	@Autowired
 	InsCompanyRepository insCompanyRepository;
@@ -134,6 +139,14 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 		List<PatientPortalMenuConfig> portalMenuItemList=patientPortalMenuConfigRepository.findAll(PortalSettingsSpecification.getPortalMenuConfig(isActiveMenuItemList));
 		
 		return portalMenuItemList;
+	}
+
+	@Override
+	public List<PatientPortalFeatureConfig> getPortalFeatureConfig(boolean isActiveFeatureItemList) {
+		
+		List<PatientPortalFeatureConfig> portalFeatureItemList=patientPortalFeatureConfigRepository.findAll(PortalSettingsSpecification.getPortalFeatureConfig(isActiveFeatureItemList));
+		
+		return portalFeatureItemList;
 	}
 
 	@Override
