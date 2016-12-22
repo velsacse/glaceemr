@@ -474,7 +474,9 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		}
 		
 		address = textFormat.getAddress(patientDetails.getPatientRegistrationAddress1(),patientDetails.getPatientRegistrationAddress2(),patientDetails.getPatientRegistrationCity(),state,patientDetails.getPatientRegistrationZip());
-		H076 refPhyEntity = getReferringPhyDetails((long)patientDetails.getPatientRegistrationReferingPhysician());
+		H076 refPhyEntity = null;
+		if(patientDetails.getPatientRegistrationReferingPhysician() != null)
+			refPhyEntity = getReferringPhyDetails((long)patientDetails.getPatientRegistrationReferingPhysician());	
 		refPhyName = "";
 		if(refPhyEntity != null)
 			refPhyName = textFormat.getFormattedName(refPhyEntity.getH076005(), refPhyEntity.getH076004(), refPhyEntity.getH076003(), refPhyEntity.getH076021());
