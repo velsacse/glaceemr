@@ -1,9 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
-
 import java.sql.Date;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,8 +9,10 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -177,6 +177,32 @@ public class NonServiceDetails {
 	@JsonManagedReference
     Cpt cpt;
 	
+	
+	@OneToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="non_service_detail_id", referencedColumnName="ad_ah_denialid", insertable=false, updatable=false)
+	@JsonManagedReference
+    AdActionhistory adActionHistory;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="non_service_detail_service_id", referencedColumnName="service_detail_id", insertable=false, updatable=false)
+	@JsonBackReference
+    ServiceDetail serviceDetail;
+	
+	
+	/*@OneToMany(mappedBy="patientRegistrationTable")
+	@JsonManagedReference
+	private List<PatientInsDetail> patientInsuranceTable;*/
+	
+	public AdActionhistory getAdActionHistory() {
+		return adActionHistory;
+	}
+
+
+	public void setAdActionHistory(AdActionhistory adActionHistory) {
+		this.adActionHistory = adActionHistory;
+	}
+
+
 	public Cpt getCpt() {
 		return cpt;
 	}

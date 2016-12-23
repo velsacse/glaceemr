@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
 import java.sql.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,9 +10,13 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
@@ -409,31 +414,26 @@ public class ServiceDetail {
 
     @ManyToOne(fetch=FetchType.LAZY)
   	@JsonManagedReference
-//  	@NotFound(action=NotFoundAction.IGNORE)
   	@JoinColumn(name="service_detail_posid", referencedColumnName="pos_table_relation_id"  , insertable=false, updatable=false)
   	private PosTable posTable;
 
     @ManyToOne(fetch=FetchType.LAZY)
   	@JsonManagedReference
-//  	@NotFound(action=NotFoundAction.IGNORE)
   	@JoinColumn(name="service_detail_sdoctorid", referencedColumnName="emp_profile_empid"  , insertable=false, updatable=false)
   	private EmployeeProfile sdoctors;
     
     @ManyToOne(fetch=FetchType.LAZY)
   	@JsonManagedReference
-//  	@NotFound(action=NotFoundAction.IGNORE)
   	@JoinColumn(name="service_detail_bdoctorid", referencedColumnName="emp_profile_empid"  , insertable=false, updatable=false)
   	private EmployeeProfile bdoctors;
     
     @ManyToOne(fetch=FetchType.LAZY)
   	@JsonManagedReference
-//  	@NotFound(action=NotFoundAction.IGNORE)
   	@JoinColumn(name="service_detail_primaryins", referencedColumnName="patient_ins_detail_id" , insertable=false, updatable=false)
   	private PatientInsDetail patientInsDetail;
     
     @ManyToOne(fetch=FetchType.LAZY)
   	@JsonManagedReference
-//  	@NotFound(action=NotFoundAction.IGNORE)
   	@JoinColumn(name="service_detail_secondaryins", referencedColumnName="patient_ins_detail_id" , insertable=false, updatable=false)
   	private PatientInsDetail secInsDetail;
     
@@ -481,8 +481,75 @@ public class ServiceDetail {
     @JsonManagedReference
     @JoinColumn(name="service_detail_submit_status",referencedColumnName="submit_status_code",insertable=false,updatable=false)
     private SubmitStatus submitStatus;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+   	@JsonManagedReference
+   	@JoinColumn(name="service_detail_patientid", referencedColumnName="patient_registration_id" , insertable=false, updatable=false)
+   	private PatientRegistration patientRegistration;
+    
+    
+    @OneToMany(mappedBy="serviceDetail")
+   	@JsonManagedReference
+   	private List<NonServiceDetails> nonService;
+     
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+   	@JsonManagedReference
+  	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula = @JoinFormula(value = "service_detail_ar_status::integer", referencedColumnName = "blook_intid")) })
+   	private Billinglookup bllok;
+    
+    
+    @OneToMany(mappedBy="serviceDetails")
+   	@JsonManagedReference
+   	private List<H172> h172;
 	
-    public SubmitStatus getSubmitStatus() {
+    
+    @OneToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_id", referencedColumnName="service_id" , insertable=false, updatable=false)
+	private ServiceBalances serviceBalances;
+    
+    public PatientRegistration getPatientRegistration() {
+		return patientRegistration;
+	}
+
+
+	public void setPatientRegistration(PatientRegistration patientRegistration) {
+		this.patientRegistration = patientRegistration;
+	}
+
+
+	public List<NonServiceDetails> getNonService() {
+		return nonService;
+	}
+
+
+	public void setNonService(List<NonServiceDetails> nonService) {
+		this.nonService = nonService;
+	}
+
+
+	public Billinglookup getBllok() {
+		return bllok;
+	}
+
+
+	public void setBllok(Billinglookup bllok) {
+		this.bllok = bllok;
+	}
+
+
+	public List<H172> getH172() {
+		return h172;
+	}
+
+
+	public void setH172(List<H172> h172) {
+		this.h172 = h172;
+	}
+
+
+	public SubmitStatus getSubmitStatus() {
 		return submitStatus;
 	}
 
@@ -1665,4 +1732,15 @@ public class ServiceDetail {
 		this.serviceDetailDx20desc = serviceDetailDx20desc;
 	}
 
+
+	public ServiceBalances getServiceBalances() {
+		return serviceBalances;
+	}
+
+
+	public void setServiceBalances(ServiceBalances serviceBalances) {
+		this.serviceBalances = serviceBalances;
+	}
+
+	
 }
