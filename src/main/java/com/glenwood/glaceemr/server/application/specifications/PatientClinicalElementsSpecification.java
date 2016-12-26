@@ -808,10 +808,10 @@ public class PatientClinicalElementsSpecification {
 			@Override
 			public Predicate toPredicate(Root<PatientClinicalElements> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Join<PatientClinicalElements, HpiSymptom> file=root.join(PatientClinicalElements_.hpiSymptom,JoinType.INNER);
-				Predicate symptomGwidPred=(cb.equal(file.get(HpiSymptom_.hpiSymptomId),symptomId));
+				//Join<PatientClinicalElements, HpiSymptom> file=root.join(PatientClinicalElements_.hpiSymptom,JoinType.INNER);
+				//Predicate symptomGwidPred=(cb.equal(file.get(HpiSymptom_.hpiSymptomId),symptomId));
 				Predicate encPred=root.get(PatientClinicalElements_.patientClinicalElementsEncounterid).in(encounterId);
-				query.where(cb.and(symptomGwidPred,encPred));
+				query.where(/*cb.and(symptomGwidPred,*/encPred);
 				return query.getRestriction();
 			}
 		};

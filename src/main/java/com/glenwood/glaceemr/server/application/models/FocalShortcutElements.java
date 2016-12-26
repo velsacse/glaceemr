@@ -47,9 +47,9 @@ public class FocalShortcutElements {
 	@JoinColumn(name="focal_shortcut_elements_mapid",referencedColumnName="focal_shortcut_id",insertable=false,updatable=false)
     FocalShortcut focalShortcut;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	/*@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="focal_shortcut_elements_gwid",referencedColumnName="clinical_elements_gwid",insertable=false,updatable=false)
-    ClinicalElements clinicalElements;
+    ClinicalElements clinicalElements;*/
 	
 
 	public Integer getFocalShortcutElementsId() {
@@ -101,13 +101,13 @@ public class FocalShortcutElements {
 		this.focalShortcut = focalShortcut;
 	}
 
-	public ClinicalElements getClinicalElements() {
+	/*public ClinicalElements getClinicalElements() {
 		return clinicalElements;
 	}
 
 	public void setClinicalElements(ClinicalElements clinicalElements) {
 		this.clinicalElements = clinicalElements;
-	}
+	}*/
 	
 	
 }

@@ -82,9 +82,9 @@ public class ClinicalElementTemplateMapping {
 	@JoinColumn(name = "clinical_element_template_mapping_gwid", referencedColumnName = "surgical_history_element_details_gwid", insertable = false, updatable = false)
 	private SurgicalHistoryElementDetails surgicalHistoryElementDetails;
 	
-	@ManyToOne(fetch=FetchType.LAZY,optional=false)
+	/*@ManyToOne(fetch=FetchType.LAZY,optional=false)
 	@JoinColumn(name = "clinical_element_template_mapping_gwid", referencedColumnName = "hpi_symptom_gwid", insertable = false, updatable = false)
-	private HpiSymptom hpiSymptom;
+	private HpiSymptom hpiSymptom;*/
 	
 	
 	public FamilyHistoryElement getFamilyHistoryElement() {
@@ -237,13 +237,13 @@ public class ClinicalElementTemplateMapping {
 		this.peElement = peElement;
 	}
 
-	public HpiSymptom getHpiSymptom() {
+	/*public HpiSymptom getHpiSymptom() {
 		return hpiSymptom;
 	}
 
 	public void setHpiSymptom(HpiSymptom hpiSymptom) {
 		this.hpiSymptom = hpiSymptom;
-	}
+	}*/
 	
 	
 }

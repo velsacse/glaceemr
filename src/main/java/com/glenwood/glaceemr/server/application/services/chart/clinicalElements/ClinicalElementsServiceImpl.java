@@ -364,11 +364,11 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<ClinicalElementsOptions> root = cq.from(ClinicalElementsOptions.class);
-		Join<ClinicalElementsOptions,PatientClinicalElements> gwIdJoin = root.join(ClinicalElementsOptions_.patientClinicalElements,JoinType.LEFT);
+		/*Join<ClinicalElementsOptions,PatientClinicalElements> gwIdJoin = root.join(ClinicalElementsOptions_.patientClinicalElements,JoinType.LEFT);
 		Predicate patientClinicalGWId = builder.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsGwid),elementGWId);
 		Predicate patientIdPred = builder.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
 		Predicate encId = builder.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
-		gwIdJoin.on(patientClinicalGWId,patientIdPred,encId);
+		gwIdJoin.on(patientClinicalGWId,patientIdPred,encId);*/
 		Join<ClinicalElementsOptions,ClinicalElementsCondition> rootJoin = root.join(ClinicalElementsOptions_.clinicalElementsConditions,JoinType.LEFT);
 		Predicate clinicalElemOptionGwid = builder.like(root.get(ClinicalElementsOptions_.clinicalElementsOptionsGwid), elementGWId);
 		Predicate clinicalElemOptionActive= builder.equal(root.get(ClinicalElementsOptions_.clinicalElementsOptionsActive), true);
@@ -380,20 +380,19 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 				root.get(ClinicalElementsOptions_.clinicalElementsOptionsGwid),
 				root.get(ClinicalElementsOptions_.clinicalElementsOptionsName),
 				root.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),
-				root.get(ClinicalElementsOptions_.clinicalElementsOptionsRetaincase),
-				gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsValue)));
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsRetaincase)
+				//gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsValue)
+				));
 		
 		
-		if(flag == 1)
+		/*if(flag == 1)
 		{
 			optionalcondition = builder.and(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsValue).isNotNull(),clinicalElemOptionGwid,clinicalElemOptionActive,clinicalElemOptionGender);
-		}
-		else
-		{
+		}*/
 			optionalcondition = builder.and(clinicalElemOptionGwid,clinicalElemOptionActive,clinicalElemOptionGender);
-		}
 		
-		if(ageinDay != -1){
+		
+		if(isAgeBased && ageinDay != -1){
 			Predicate ageInDayCondition;
 			Predicate p1 = builder.and(rootJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage).isNull(),rootJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage).isNull());
 			Predicate p2 = builder.and(builder.lessThan(rootJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageinDay),builder.greaterThanOrEqualTo(rootJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage), ageinDay));
@@ -404,7 +403,7 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		{
 			cq.where(optionalcondition);
 		}
-		
+		System.out.println("where problem????");
 		List<Object> hpinotes=em.createQuery(cq).getResultList();
 		List<ClinicalElementsOptionBean> clinicalElemOptBean = new ArrayList<ClinicalElementsOptionBean>();
 			for(int i=0; i<hpinotes.size();i++)
@@ -423,11 +422,11 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = cb.createQuery();
 		Root<ClinicalElementsOptions> root = cq.from(ClinicalElementsOptions.class);
-		Join<ClinicalElementsOptions,PatientClinicalElements> gwIdJoin = root.join(ClinicalElementsOptions_.patientClinicalElements,JoinType.INNER);
+		/*Join<ClinicalElementsOptions,PatientClinicalElements> gwIdJoin = root.join(ClinicalElementsOptions_.patientClinicalElements,JoinType.INNER);
 		Predicate patientClinicalGWId = cb.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsGwid),elementGWId);
 		Predicate patientIdPred = cb.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
 		Predicate encId = cb.equal(gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
-		gwIdJoin.on(patientClinicalGWId,patientIdPred,encId);
+		gwIdJoin.on(patientClinicalGWId,patientIdPred,encId);*/
 		Predicate clinicalElemOptionGwid = cb.like(root.get(ClinicalElementsOptions_.clinicalElementsOptionsGwid), elementGWId);
 		Predicate clinicalElemOptionActive= cb.equal(root.get(ClinicalElementsOptions_.clinicalElementsOptionsActive), true);
 		Predicate clinicalElemOptionGender= root.get(ClinicalElementsOptions_.clinicalElementsOptionsGender).in("0",patientGender);
@@ -439,8 +438,9 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 				root.get(ClinicalElementsOptions_.clinicalElementsOptionsGwid),
 				root.get(ClinicalElementsOptions_.clinicalElementsOptionsName),
 				root.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),
-				root.get(ClinicalElementsOptions_.clinicalElementsOptionsRetaincase),
-				gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsValue)));
+				root.get(ClinicalElementsOptions_.clinicalElementsOptionsRetaincase)
+				//gwIdJoin.get(PatientClinicalElements_.patientClinicalElementsValue)
+				));
 		List<Object> hpinotes=em.createQuery(cq).getResultList();
 		List<ClinicalElementsOptionBean> gsBean = new ArrayList<ClinicalElementsOptionBean>();
 			for(int i=0; i<hpinotes.size();i++)

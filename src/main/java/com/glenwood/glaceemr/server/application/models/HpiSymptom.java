@@ -61,7 +61,7 @@ public class HpiSymptom implements Serializable{
 	@Column(name="hpi_symptom_retaincase")
 	private Boolean hpiSymptomRetaincase;
 	
-	@OneToMany(mappedBy="hpiSymptom")
+	/*@OneToMany(mappedBy="hpiSymptom")
 	List<ClinicalElementTemplateMapping> clinicalElementTemplateMapping;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -76,7 +76,7 @@ public class HpiSymptom implements Serializable{
 	List<PatientClinicalElements> patientClinicalElements;
 	
 	@OneToMany(mappedBy="hpiSymptom")
-	List<HpiSymptomQualifier> hpiSymptomQualifier;
+	List<HpiSymptomQualifier> hpiSymptomQualifier;*/
 	
 	
 	public Integer getHpiSymptomId() {
@@ -167,7 +167,7 @@ public class HpiSymptom implements Serializable{
 		this.hpiSymptomRetaincase = hpiSymptomRetaincase;
 	}
 
-	public List<ClinicalElementTemplateMapping> getClinicalElementTemplateMapping() {
+	/*public List<ClinicalElementTemplateMapping> getClinicalElementTemplateMapping() {
 		return clinicalElementTemplateMapping;
 	}
 
@@ -207,7 +207,7 @@ public class HpiSymptom implements Serializable{
 
 	public void setHpiSymptomQualifier(List<HpiSymptomQualifier> hpiSymptomQualifier) {
 		this.hpiSymptomQualifier = hpiSymptomQualifier;
-	}
+	}*/
 
 	
 }

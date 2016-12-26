@@ -105,11 +105,11 @@ public class ClinicalElements implements Serializable{
 	@OneToMany(mappedBy="clinicalElements")
 	List<ClinicalTextMapping> clinicalTextMappings;
 	
-	@OneToMany(mappedBy="clinicalElements")
+	/*@OneToMany(mappedBy="clinicalElements")
 	List<FocalShortcutElements> focalShortcutElements;
 	
 	@OneToMany(mappedBy="clinicalElements")
-	List<HpiSymptom> hpiSymptom;
+	List<HpiSymptom> hpiSymptom;*/
 	
 	/*
 	 * DO NOT MAKE THESE BIDIRECTIONAL RELATIONSHIPS IN CLINCIAL ELEMNETS EAGER
@@ -156,14 +156,14 @@ public class ClinicalElements implements Serializable{
 		this.patientVitals = patientVitals;
 	}
 
-	public List<FocalShortcutElements> getFocalShortcutElements() {
+	/*public List<FocalShortcutElements> getFocalShortcutElements() {
 		return focalShortcutElements;
 	}
 
 	public void setFocalShortcutElements(
 			List<FocalShortcutElements> focalShortcutElements) {
 		this.focalShortcutElements = focalShortcutElements;
-	}
+	}*/
 
 	public List<ClinicalTextMapping> getClinicalTextMappings() {
 		return clinicalTextMappings;
@@ -325,13 +325,13 @@ public class ClinicalElements implements Serializable{
 		this.clinicalElementsIsselect = clinicalElementsIsselect;
 	}
 
-	public List<HpiSymptom> getHpiSymptom() {
+	/*public List<HpiSymptom> getHpiSymptom() {
 		return hpiSymptom;
 	}
 
 	public void setHpiSymptom(List<HpiSymptom> hpiSymptom) {
 		this.hpiSymptom = hpiSymptom;
-	}
+	}*/
 	
 	
 }

@@ -69,9 +69,9 @@ public class ClinicalElementsOptions {
 	@JoinColumn(name = "clinical_elements_options_gwid", referencedColumnName = "pe_system_deferred_gwid", insertable = false, updatable = false)
 	PeSystem peSystem;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	/*@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "clinical_elements_options_value", referencedColumnName = "patient_clinical_elements_value", insertable = false, updatable = false)
-	PatientClinicalElements patientClinicalElements;
+	PatientClinicalElements patientClinicalElements;*/
 	
 	
 	public Integer getClinicalElementsOptionsId() {
@@ -203,12 +203,12 @@ public class ClinicalElementsOptions {
 		this.peSystem = peSystem;
 	}
 
-	public PatientClinicalElements getPatientClinicalElements() {
+	/*public PatientClinicalElements getPatientClinicalElements() {
 		return patientClinicalElements;
 	}
 
 	public void setPatientClinicalElements(
 			PatientClinicalElements patientClinicalElements) {
 		this.patientClinicalElements = patientClinicalElements;
-	}
+	}*/
 }
