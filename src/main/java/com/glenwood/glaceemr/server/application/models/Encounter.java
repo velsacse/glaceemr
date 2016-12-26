@@ -712,11 +712,6 @@ public class Encounter implements Serializable {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="encounter_reason", referencedColumnName="h113003", insertable=false, updatable=false)
-	H113 h113;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JsonManagedReference
 	@JoinColumn(name="encounter_reason", referencedColumnName="h479001", insertable=false, updatable=false)
 	H479 h479;
 	

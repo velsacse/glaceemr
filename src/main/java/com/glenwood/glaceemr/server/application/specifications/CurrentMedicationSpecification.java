@@ -91,15 +91,12 @@ public class CurrentMedicationSpecification {
 				Join<Chart, PatientRegistration> chartPatJoin=encChartJoin.join(Chart_.patientRegistrationTable,JoinType.INNER);
 				Join<Encounter, PatientEncounterType> encPatTypeJoin=root.join(Encounter_.patientEncounterType,JoinType.INNER);
 				Join<PatientEncounterType, RatePlan> patRateJoin=encPatTypeJoin.join(PatientEncounterType_.ratePlan,JoinType.INNER);
-				Join<Encounter, H113> encH113Join=root.join(Encounter_.h113,JoinType.LEFT);
 				Join<Encounter, H479> encH479Join=root.join(Encounter_.h479,JoinType.LEFT);
 				Join<PatientRegistration, H076> patH076Join=chartPatJoin.join(PatientRegistration_.referringPhyTable,JoinType.LEFT);
 				Join<Encounter, EmployeeProfile> encEmpJoin=root.join(Encounter_.empProfileEmpId,JoinType.LEFT);
 				Join<Encounter, H076> encH076Join=root.join(Encounter_.referringTable,JoinType.LEFT);
 				Join<Encounter, PatientEpisode> encPatEpiJoin=root.join(Encounter_.patientEpisode,JoinType.LEFT);
 				Join<PatientEpisode, EpisodeTypeList> patEpisodeJoin=encPatEpiJoin.join(PatientEpisode_.episodeTypeList,JoinType.LEFT);
-				encH113Join.on(cb.equal(encH113Join.get(H113_.h113002), 402));
-				encH113Join.on(cb.equal(encH113Join.get(H113_.h113008), 1));
 				patH076Join.on(cb.equal(patH076Join.get(H076_.h076016), 1));
 				encH076Join.on(cb.equal(encH076Join.get(H076_.h076016), 1));
 				

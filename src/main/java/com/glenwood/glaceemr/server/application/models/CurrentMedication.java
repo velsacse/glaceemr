@@ -14,6 +14,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonDateSerializer;
@@ -577,11 +580,13 @@ public class CurrentMedication {
 	@JsonManagedReference
 	LeafPatient leafPatient;
 	
+	@NotFound(action=NotFoundAction.IGNORE) 
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="current_medication_modified_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
 	@JsonManagedReference
 	EmployeeProfile empProfileModifiedBy;
 	
+	@NotFound(action=NotFoundAction.IGNORE) 
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="current_medication_order_by",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
 	@JsonManagedReference
