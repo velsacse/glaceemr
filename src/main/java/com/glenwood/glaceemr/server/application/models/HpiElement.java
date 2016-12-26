@@ -53,7 +53,7 @@ public class HpiElement implements Serializable{
 	@Column(name="hpi_element_printtext")
 	private String hpiElementPrinttext;
 	
-	@OneToOne(fetch=FetchType.LAZY)
+	/*@OneToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="hpi_element_gwid",referencedColumnName="clinical_elements_gwid",insertable = false, updatable = false)
 	private ClinicalElements clinicalElements;
@@ -61,7 +61,7 @@ public class HpiElement implements Serializable{
 	
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="hpiElement")
 	@JsonBackReference
-	private List<PatientClinicalElements> patientClinicalElements;
+	private List<PatientClinicalElements> patientClinicalElements;*/
 
 	public Integer getHpiElementId() {
 		return hpiElementId;
@@ -133,7 +133,7 @@ public class HpiElement implements Serializable{
 	}
 
 
-	public ClinicalElements getClinicalElements() {
+	/*public ClinicalElements getClinicalElements() {
 		return clinicalElements;
 	}
 
@@ -151,7 +151,7 @@ public class HpiElement implements Serializable{
 	public void setPatientClinicalElements(
 			List<PatientClinicalElements> patientClinicalElements) {
 		this.patientClinicalElements = patientClinicalElements;
-	}
+	}*/
 
 
 

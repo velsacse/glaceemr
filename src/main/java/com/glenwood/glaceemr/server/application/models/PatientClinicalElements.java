@@ -76,7 +76,7 @@ public class PatientClinicalElements implements Serializable{
 	@JoinColumn(name="patient_clinical_elements_gwid", referencedColumnName="plan_instruction_gwid", insertable=false, updatable=false)
 	private PlanInstruction planInstruction;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	/*@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="patient_clinical_elements_gwid",referencedColumnName="hpi_symptom_gwid",insertable = false, updatable = false)
 	private HpiSymptom hpiSymptom;
@@ -84,7 +84,7 @@ public class PatientClinicalElements implements Serializable{
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="patient_clinical_elements_gwid",referencedColumnName="hpi_element_gwid",insertable = false, updatable = false)
-	private HpiElement hpiElement;
+	private HpiElement hpiElement;*/
 	
 /*	@ManyToOne(fetch=FetchType.LAZY,optional=false)
 	@NotFound(action=NotFoundAction.IGNORE)
@@ -254,7 +254,7 @@ public class PatientClinicalElements implements Serializable{
 		this.planInstruction = planInstruction;
 	}
 
-	public HpiSymptom getHpiSymptom() {
+	/*public HpiSymptom getHpiSymptom() {
 		return hpiSymptom;
 	}
 
@@ -268,6 +268,6 @@ public class PatientClinicalElements implements Serializable{
 
 	public void setHpiElement(HpiElement hpiElement) {
 		this.hpiElement = hpiElement;
-	}
+	}*/
 	
 }

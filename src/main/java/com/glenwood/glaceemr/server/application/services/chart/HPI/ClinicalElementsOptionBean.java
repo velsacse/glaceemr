@@ -2,7 +2,7 @@ package com.glenwood.glaceemr.server.application.services.chart.HPI;
 
 public class ClinicalElementsOptionBean{
 	
-	public ClinicalElementsOptionBean(Integer clinicalelementoptionId,Integer clinicalelementoptionOrderby,String clinicalelementoptionGwid,String clinicalelementoptionName,String clinicalelementoptionValue,Boolean clinicalElementsOptionsRetaincase,String patientClinicalElementOptionsValue){
+	public ClinicalElementsOptionBean(Integer clinicalelementoptionId,Integer clinicalelementoptionOrderby,String clinicalelementoptionGwid,String clinicalelementoptionName,String clinicalelementoptionValue,Boolean clinicalElementsOptionsRetaincase){
 		super();
 			this.clinicalelementoptionId=clinicalelementoptionId;
 			this.clinicalelementoptionOrderby=clinicalelementoptionOrderby;
@@ -10,7 +10,7 @@ public class ClinicalElementsOptionBean{
 			this.clinicalelementoptionName=clinicalelementoptionName;
 			this.clinicalelementoptionValue=clinicalelementoptionValue;
 			this.clinicalElementsOptionsRetaincase=clinicalElementsOptionsRetaincase;
-			this.patientClinicalElementOptionsValue=patientClinicalElementOptionsValue;
+			//this.patientClinicalElementOptionsValue=patientClinicalElementOptionsValue;
 	}
 
 	private Integer clinicalelementoptionId;
@@ -19,7 +19,7 @@ public class ClinicalElementsOptionBean{
 	private String clinicalelementoptionName;
 	private String clinicalelementoptionValue;
 	private Boolean clinicalElementsOptionsRetaincase;
-	private String patientClinicalElementOptionsValue;
+	//private String patientClinicalElementOptionsValue;
 	public Integer getClinicalelementoptionId() {
 		return clinicalelementoptionId;
 	}
@@ -57,13 +57,13 @@ public class ClinicalElementsOptionBean{
 			Boolean clinicalElementsOptionsRetaincase) {
 		this.clinicalElementsOptionsRetaincase = clinicalElementsOptionsRetaincase;
 	}
-	public String getPatientClinicalElementOptionsValue() {
+	/*public String getPatientClinicalElementOptionsValue() {
 		return patientClinicalElementOptionsValue;
 	}
 	public void setPatientClinicalElementOptionsValue(
 			String patientClinicalElementOptionsValue) {
 		this.patientClinicalElementOptionsValue = patientClinicalElementOptionsValue;
-	}
+	}*/
 	
 	
 		

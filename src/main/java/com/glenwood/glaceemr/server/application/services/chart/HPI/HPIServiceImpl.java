@@ -468,25 +468,26 @@ public class HPIServiceImpl implements HPIService{
 					
 					try{
 						List<String> detOpGwids = new ArrayList<String>();
-						
+						List<String> patElemOptionValues = getPatientElemValues(elementGWId,patientId,encounterId);
 						List<ClinicalElementsOptionBean> option=clinicalElementsService.getSymptomClinicalElementOptions(elementGWId,patientId,encounterId,patientGender,ageinDay,isAgeBased,0);
-						List<ClinicalElementsOptionBean> patclinicaldetailOptions=clinicalElementsService.getSymptomElementOptionAfterUnion(elementGWId,patientId,encounterId,patientGender,ageinDay,isAgeBased,0);
-						
-						//remove duplicates from patclinicaldetailOptions
+						if(isAgeBased)
+						{
+							List<ClinicalElementsOptionBean> patclinicaldetailOptions=clinicalElementsService.getSymptomElementOptionAfterUnion(elementGWId,patientId,encounterId,patientGender,ageinDay,isAgeBased,0);
+							//remove duplicates from patclinicaldetailOptions
 
-						for (ClinicalElementsOptionBean detOption : option) {
-							detOpGwids.add(detOption.getClinicalelementoptionGwid());
-						}
-
-						for(int i=0;i<patclinicaldetailOptions.size();i++){
-							if(detOpGwids.contains(patclinicaldetailOptions.get(i).getClinicalelementoptionGwid())){
-								patclinicaldetailOptions.remove(i);
-								i--;
+							for (ClinicalElementsOptionBean detOption : option) {
+								detOpGwids.add(detOption.getClinicalelementoptionGwid());
 							}
-						}	
 
-						option.addAll(patclinicaldetailOptions);
-						
+							for(int i=0;i<patclinicaldetailOptions.size();i++){
+								if(detOpGwids.contains(patclinicaldetailOptions.get(i).getClinicalelementoptionGwid())){
+									patclinicaldetailOptions.remove(i);
+									i--;
+								}
+							}
+							option.addAll(patclinicaldetailOptions);
+						}
+							
 						JSONObject multipleObject = new JSONObject();
 						multipleObject.put("elementName", elementName);
 						multipleObject.put("elementGWId", elementGWId);
@@ -501,8 +502,17 @@ public class HPIServiceImpl implements HPIService{
 								String optionName=HUtil.ValidateSpecialQuote(optionRecord.getClinicalelementoptionName() == null?"":optionRecord.getClinicalelementoptionName());
 								String optionValue=optionRecord.getClinicalelementoptionValue() == null?"":optionRecord.getClinicalelementoptionValue();
 								String retain=optionRecord.getClinicalElementsOptionsRetaincase() == null?"f":optionRecord.getClinicalElementsOptionsRetaincase().toString();
-								String elementValue=optionRecord.getPatientClinicalElementOptionsValue() == null?"":optionRecord.getClinicalelementoptionValue();
-								if(optionValue.equalsIgnoreCase(elementValue)){
+								//String elementValue=optionRecord.getPatientClinicalElementOptionsValue() == null?"":optionRecord.getClinicalelementoptionValue();
+									
+									elementListArray = new JSONArray();
+									JSONObject multipleOptionObject = new JSONObject();
+									multipleOptionObject.put("optionname", optionName);
+									multipleOptionObject.put("optionvalue", optionValue);
+									multipleOptionObject.put("retain", retain);
+									multipleOptionObject.put("value",patElemOptionValues.contains(optionValue)?1:0);
+									multipleObject.append("detailoption",multipleOptionObject);
+									elementListArray.put(multipleObject);
+								/*if(optionValue.equalsIgnoreCase(elementValue)){
 										elementListArray = new JSONArray();
 										JSONObject multipleOptionObject = new JSONObject();
 										multipleOptionObject.put("optionname", optionName);
@@ -520,7 +530,7 @@ public class HPIServiceImpl implements HPIService{
 										multipleOptionObject.put("value",0);
 										multipleObject.append("detailoption",multipleOptionObject);
 										elementListArray.put(multipleObject);
-									}
+									}*/
 								elementId++;
 							}
 						}	
@@ -544,24 +554,27 @@ public class HPIServiceImpl implements HPIService{
 					}
 					try{
 						List<String> detOpGwids = new ArrayList<String>();
+						List<String> patElemOptionValues = getPatientElemValues(elementGWId,patientId,encounterId);
 						List<ClinicalElementsOptionBean> option=clinicalElementsService.getSymptomClinicalElementOptions(elementGWId,patientId,encounterId,patientGender,ageinDay,isAgeBased,0);
-						List<ClinicalElementsOptionBean> patclinicaldetailOptions=clinicalElementsService.getSymptomElementOptionAfterUnion(elementGWId,patientId,encounterId,patientGender,ageinDay,isAgeBased,0);
-
-						//remove duplicates from patclinicaldetailOptions
-
-						for (ClinicalElementsOptionBean detOption : option) {
-							detOpGwids.add(detOption.getClinicalelementoptionGwid());
-						}
-
-						for(int i=0;i<patclinicaldetailOptions.size();i++){
-							if(detOpGwids.contains(patclinicaldetailOptions.get(i).getClinicalelementoptionGwid())){
-								patclinicaldetailOptions.remove(i);
-								i--;
+						if(isAgeBased)
+						{
+							List<ClinicalElementsOptionBean> patclinicaldetailOptions=clinicalElementsService.getSymptomElementOptionAfterUnion(elementGWId,patientId,encounterId,patientGender,ageinDay,isAgeBased,0);
+	
+							//remove duplicates from patclinicaldetailOptions
+	
+							for (ClinicalElementsOptionBean detOption : option) {
+								detOpGwids.add(detOption.getClinicalelementoptionGwid());
 							}
-						}	
-
-						option.addAll(patclinicaldetailOptions);
-
+	
+							for(int i=0;i<patclinicaldetailOptions.size();i++){
+								if(detOpGwids.contains(patclinicaldetailOptions.get(i).getClinicalelementoptionGwid())){
+									patclinicaldetailOptions.remove(i);
+									i--;
+								}
+							}	
+	
+							option.addAll(patclinicaldetailOptions);
+						}
 						if(option.size() > 0){
 							int j=0;
 							for(;j<option.size();j++){
@@ -569,8 +582,17 @@ public class HPIServiceImpl implements HPIService{
 								String optionName=HUtil.ValidateSpecialQuote(optionRecord.getClinicalelementoptionName() == null?"":optionRecord.getClinicalelementoptionName());
 								String optionValue=optionRecord.getClinicalelementoptionValue() == null?"":optionRecord.getClinicalelementoptionValue();
 								String retain=optionRecord.getClinicalElementsOptionsRetaincase() == null?"f":optionRecord.getClinicalElementsOptionsRetaincase().toString();
-								String elementValue=optionRecord.getPatientClinicalElementOptionsValue() == null?"":optionRecord.getPatientClinicalElementOptionsValue();
-								if(optionValue.equalsIgnoreCase(elementValue)){
+								//String elementValue=optionRecord.getPatientClinicalElementOptionsValue() == null?"":optionRecord.getPatientClinicalElementOptionsValue();
+								elementListArray = new JSONArray();
+								
+								JSONObject singleOptionObject = new JSONObject();
+								singleOptionObject.put("optionname", optionName);
+								singleOptionObject.put("optionvalue", optionValue);
+								singleOptionObject.put("retain", retain);
+								singleOptionObject.put("value", patElemOptionValues.contains(optionValue)?1:0);
+								singleObject.append("detailoption",singleOptionObject);
+								elementListArray.put(singleObject);
+								/*if(optionValue.equalsIgnoreCase(elementValue)){
 									elementListArray = new JSONArray();
 									
 									JSONObject singleOptionObject = new JSONObject();
@@ -590,7 +612,7 @@ public class HPIServiceImpl implements HPIService{
 									singleOptionObject.put("value", 0);
 									singleObject.append("detailoption",singleOptionObject);
 									elementListArray.put(singleObject);
-								}
+								}*/
 								elementId++;
 							}
 						}	
@@ -624,6 +646,24 @@ public class HPIServiceImpl implements HPIService{
 			}
 		}
 		return elementListArray;
+	}
+
+	private List<String> getPatientElemValues(String elementGWId,
+			Integer patientId, Integer encounterId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<PatientClinicalElements> root = cq.from(PatientClinicalElements.class);
+		cq.select(root.get(PatientClinicalElements_.patientClinicalElementsValue));
+		cq.where(builder.and(builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsGwid), elementGWId),
+				builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid), patientId),
+				builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId)));
+		List<Object> patElemValuesQuery = em.createQuery(cq).getResultList();
+		List<String> patElemValues = new ArrayList<String>();
+		for(int i=0;i<patElemValuesQuery.size();i++)
+		{
+			patElemValues.add(patElemValuesQuery.get(i).toString());
+		}
+		return patElemValues;
 	}
 
 	/**
@@ -754,19 +794,19 @@ public class HPIServiceImpl implements HPIService{
 				for(Object[] value : hpiElement){
 					HPIElementBean eBean=new HPIElementBean();
 					String elementGWId=value[0] == null?"-1":value[0].toString();
-					int elementDatatype= (int) (value[6] == null?-1:value[6]);
+					//int elementDatatype= (int) (value[6] == null?-1:value[6]);
 					eBean.setElementGWId(elementGWId);
 					eBean.setElementname(value[1] == null?"":value[1].toString());
 					eBean.setElementPrintText(value[2] == null?"":value[2].toString());
-					eBean.setClinicalElementName(value[5] == null?"":value[5].toString());
-					eBean.setClinicalElementDataType(elementDatatype);
-					eBean.setClinicalElementIsActive(Boolean.parseBoolean((value[7] == null?false:value[7]).toString()));
-					eBean.setClinicalElementIsHistory(Boolean.parseBoolean((value[8] == null?false:value[8]).toString()));
-					eBean.setClinicalElementIsEpisode(Boolean.parseBoolean((value[9] == null?false:value[9]).toString()));
-					eBean.setClinicalElementIsSelect((Integer)(value[12] == null?-1:value[12]));
-					eBean.setClinicalElementGender((Integer)(value[11] == null?-1:value[11]));
-					eBean.setClinicalElementTextDimension((value[10] == null?-1:value[10]).toString());
-					eBean.setValue((value[13] == null?-1:value[13]).toString());					
+					//eBean.setClinicalElementName(value[5] == null?"":value[5].toString());
+					//eBean.setClinicalElementDataType(elementDatatype);
+					//eBean.setClinicalElementIsActive(Boolean.parseBoolean((value[7] == null?false:value[7]).toString()));
+					//eBean.setClinicalElementIsHistory(Boolean.parseBoolean((value[8] == null?false:value[8]).toString()));
+					//eBean.setClinicalElementIsEpisode(Boolean.parseBoolean((value[9] == null?false:value[9]).toString()));
+					//eBean.setClinicalElementIsSelect((Integer)(value[12] == null?-1:value[12]));
+					//eBean.setClinicalElementGender((Integer)(value[11] == null?-1:value[11]));
+					//eBean.setClinicalElementTextDimension((value[10] == null?-1:value[10]).toString());
+					//eBean.setValue((value[13] == null?-1:value[13]).toString());					
 					hMapElement.put(elementGWId,eBean);
 				}
 					qBean.setQualifierElements(hMapElement);
@@ -1320,17 +1360,17 @@ public class HPIServiceImpl implements HPIService{
 				for(int i=0;i<symptomList.size();i++){
 					JSONObject symptomDetails=new JSONObject();
 					PatientClinicalElements dataRecord = (symptomList.get(i));
-					int savedSymptomId=Integer.parseInt(HUtil.Nz(dataRecord.getHpiSymptom().getHpiSymptomId().toString(),"-1"));
+					//int savedSymptomId=Integer.parseInt(HUtil.Nz(dataRecord.getHpiSymptom().getHpiSymptomId().toString(),"-1"));
 					int chronicConditionStatus=Integer.parseInt(HUtil.Nz(dataRecord.getPatientClinicalElementsValue().toString(),"-1"));
 
 					HashMap<Integer, SymptomBean> HPISymptoms = new HashMap<Integer, SymptomBean>();
 					if(chronicConditionStatus!=2){
-						HPISymptoms = getNewReadInstanceForSymptomGWT(savedSymptomId,0,patientGender,ageinDay,patientId,encounterId,orderBy,isAgeBased);
+						//HPISymptoms = getNewReadInstanceForSymptomGWT(savedSymptomId,0,patientGender,ageinDay,patientId,encounterId,orderBy,isAgeBased);
 					}else{
-						HPISymptoms = getNewReadInstanceForSymptomGWT(savedSymptomId,1,patientGender,ageinDay,patientId,encounterId,orderBy,isAgeBased);
+						//HPISymptoms = getNewReadInstanceForSymptomGWT(savedSymptomId,1,patientGender,ageinDay,patientId,encounterId,orderBy,isAgeBased);
 					}
 
-					SymptomBean sBean=HPISymptoms.get(savedSymptomId);
+					/*SymptomBean sBean=HPISymptoms.get(savedSymptomId);
 					String savedSymptomGWId=sBean.getSymptomGWId();
 					String savedSymptomName=sBean.getSymptomName();
 					String savedSymptomPrint=sBean.getSymptomPrintText();
@@ -1338,7 +1378,7 @@ public class HPIServiceImpl implements HPIService{
 					symptomDetails.put("symptomid",savedSymptomId );
 					symptomDetails.put("symptomname",savedSymptomName );
 					symptomDetails.put("symptomPrint",savedSymptomPrint );
-					symptomDataDetailsNew.put(i+2,symptomDetails);
+					symptomDataDetailsNew.put(i+2,symptomDetails);*/
 					}
 			}
 			String allSuggestedSymptomsQry= getHPIAllSymptoms(orderBy,searchStr,patientId,encounterId,templateId,isAgeBased,ageinDay,2);
@@ -1388,11 +1428,11 @@ public class HPIServiceImpl implements HPIService{
 	private List<SymptomAndNegativeSymptomList> createNewHPIReadInstance(String clientId,
 			Integer patientId, Integer chartId, Integer encounterId) {
 		List<SymptomAndNegativeSymptomList> symptomAndNegativeSymptomList= new ArrayList<SymptomAndNegativeSymptomList>();
-		List<PatientClinicalElements> symptomList = loadPatientsHPISymptomList(clientId,patientId,encounterId);
-		List<PatientClinicalElements> negativeSymptomList = loadPatientsHPInegativeSymptomList(clientId,patientId,encounterId);
+		//List<PatientClinicalElements> symptomList = loadPatientsHPISymptomList(clientId,patientId,encounterId);
+		//List<PatientClinicalElements> negativeSymptomList = loadPatientsHPInegativeSymptomList(clientId,patientId,encounterId);
 		SymptomAndNegativeSymptomList symptomAndNegativeSymptomBean = new SymptomAndNegativeSymptomList();
-		symptomAndNegativeSymptomBean.setSymptomList(symptomList);
-		symptomAndNegativeSymptomBean.setNegativeSymptomList(negativeSymptomList);
+		//symptomAndNegativeSymptomBean.setSymptomList(symptomList);
+		//symptomAndNegativeSymptomBean.setNegativeSymptomList(negativeSymptomList);
 		symptomAndNegativeSymptomList.add(symptomAndNegativeSymptomBean);
 		return symptomAndNegativeSymptomList;
 	}
@@ -1468,7 +1508,7 @@ public class HPIServiceImpl implements HPIService{
 					size++;
 				}
 				List<Object> partStr = getHpiSymptomGwid(patientId);
-				if(partStr.size()>0)
+				/*if(partStr.size()>0)
 				{
 					List<Object[]> patElem = getPatElemList(patientId,searchStr,partStr,encounterId,orderBy,mode,isAgeBased,ageinDay);
 					for(Object[] values : patElem) {
@@ -1490,7 +1530,7 @@ public class HPIServiceImpl implements HPIService{
 						}
 						size++;
 					}
-				}
+				}*/
 		}
 		List<JSONObject> jsonValues = new ArrayList<JSONObject>();
 		for (int i = 0; i < allDefaultSymptoms.length(); i++)
@@ -1624,8 +1664,8 @@ public class HPIServiceImpl implements HPIService{
 				}
 			}
 			
-			List<Object> partStr = getHpiSymptomGwid(patientId);
-			if(partStr.size()>0)
+			//List<Object> partStr = getHpiSymptomGwid(patientId);
+			/*if(partStr.size()>0)
 			{
 				List<Object[]> patElem = getPatElemList(patientId,searchStr,partStr,encounterId,orderBy, mode, isAgeBased, ageinDay);
 				for(Object[] values : patElem) {
@@ -1646,7 +1686,7 @@ public class HPIServiceImpl implements HPIService{
 					}
 					size++;
 				}
-			}
+			}*/
 			List<JSONObject> jsonValues = new ArrayList<JSONObject>();
 			for (int i = 0; i < allSymptomsArray.length(); i++)
 			{
@@ -1724,18 +1764,18 @@ public class HPIServiceImpl implements HPIService{
 	 * @param ageinDay 
 	 * @return
 	 */
-	private List<Object[]> getPatElemList(Integer patientId, String searchStr, List<Object> partStr, Integer encounterId, int orderBy, int mode, boolean isAgeBased, int ageinDay) {
+	/*private List<Object[]> getPatElemList(Integer patientId, String searchStr, List<Object> partStr, Integer encounterId, int orderBy, int mode, boolean isAgeBased, int ageinDay) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<PatientClinicalElements> root = cq.from(PatientClinicalElements.class);
-		Join<PatientClinicalElements, HpiSymptom> condJoin = root.join(PatientClinicalElements_.hpiSymptom,JoinType.INNER);
-		Join<HpiSymptom, ClinicalElements> leftJoinClinicalElem;
-		Join<ClinicalElements, ClinicalElementsCondition> clinicalCondJoin = null;
+		//Join<PatientClinicalElements, HpiSymptom> condJoin = root.join(PatientClinicalElements_.hpiSymptom,JoinType.INNER);
+		//Join<HpiSymptom, ClinicalElements> leftJoinClinicalElem;
+		//Join<ClinicalElements, ClinicalElementsCondition> clinicalCondJoin = null;
 		if(isAgeBased){
 			if(mode==2)
 			{
-				leftJoinClinicalElem = condJoin.join(HpiSymptom_.clinicalElements,JoinType.LEFT);
-				clinicalCondJoin = leftJoinClinicalElem.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
+				//leftJoinClinicalElem = condJoin.join(HpiSymptom_.clinicalElements,JoinType.LEFT);
+				//clinicalCondJoin = leftJoinClinicalElem.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
 			}
 		}
 		Expression<Integer> inte = builder.<Integer>selectCase().when(builder.equal(builder.locate(builder.upper(condJoin.get(HpiSymptom_.hpiSymptomName)),builder.literal(searchStr.split(" ")[0].toUpperCase())),
@@ -1765,8 +1805,8 @@ public class HPIServiceImpl implements HPIService{
 		
 		if(isAgeBased && mode==2)
 		{
-				Predicate add1 = builder.lessThan(clinicalCondJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageinDay);
-				Predicate add2 = builder.greaterThanOrEqualTo(clinicalCondJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage), ageinDay);
+				//Predicate add1 = builder.lessThan(clinicalCondJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageinDay);
+				//Predicate add2 = builder.greaterThanOrEqualTo(clinicalCondJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage), ageinDay);
 				if(!(searchStr.trim().equals(""))) {
 					Predicate p4 = builder.like(builder.lower(condJoin.get(HpiSymptom_.hpiSymptomName)), getLikePattern(searchStr.replaceAll("'", "''")));
 					String startsWithArr[] = searchStr.split(" "); 
@@ -1815,7 +1855,7 @@ public class HPIServiceImpl implements HPIService{
 		}
 		List<Object[]> obj = em.createQuery(cq).getResultList();
 		return obj;
-	}
+	}*/
 
 
 	public HashMap<Integer, SymptomBean> getNewReadInstanceForSymptomGWT(int symptomId, int isFollowUp,
@@ -1871,19 +1911,19 @@ public class HPIServiceImpl implements HPIService{
 				for(Object[] value : hpiElement){
 					HPIElementBean eBean=new HPIElementBean();
 					String elementGWId=value[0] == null?"-1":value[0].toString();
-					int elementDatatype= (int) (value[6] == null?-1:value[6]);
+					//int elementDatatype= (int) (value[6] == null?-1:value[6]);
 					eBean.setElementGWId(elementGWId);
 					eBean.setElementname(value[1] == null?"":value[1].toString());
 					eBean.setElementPrintText(value[2] == null?"":value[2].toString());
-					eBean.setClinicalElementName(value[5] == null?"":value[5].toString());
-					eBean.setClinicalElementDataType(elementDatatype);
-					eBean.setClinicalElementIsActive(Boolean.parseBoolean((value[7] == null?false:value[7]).toString()));
-					eBean.setClinicalElementIsHistory(Boolean.parseBoolean((value[8] == null?false:value[8]).toString()));
-					eBean.setClinicalElementIsEpisode(Boolean.parseBoolean((value[9] == null?false:value[9]).toString()));
-					eBean.setClinicalElementIsSelect((Integer)(value[12] == null?-1:value[12]));
-					eBean.setClinicalElementGender((Integer)(value[11] == null?-1:value[11]));
-					eBean.setClinicalElementTextDimension((value[10] == null?-1:value[10]).toString());
-					eBean.setValue((value[13] == null?-1:value[13]).toString());					
+					//eBean.setClinicalElementName(value[5] == null?"":value[5].toString());
+					//eBean.setClinicalElementDataType(elementDatatype);
+					//eBean.setClinicalElementIsActive(Boolean.parseBoolean((value[7] == null?false:value[7]).toString()));
+					//eBean.setClinicalElementIsHistory(Boolean.parseBoolean((value[8] == null?false:value[8]).toString()));
+					//eBean.setClinicalElementIsEpisode(Boolean.parseBoolean((value[9] == null?false:value[9]).toString()));
+					//eBean.setClinicalElementIsSelect((Integer)(value[12] == null?-1:value[12]));
+					//eBean.setClinicalElementGender((Integer)(value[11] == null?-1:value[11]));
+					//eBean.setClinicalElementTextDimension((value[10] == null?-1:value[10]).toString());
+					//eBean.setValue((value[13] == null?-1:value[13]).toString());					
 					
 					hMapElement.put(elementGWId,eBean);
 				}
@@ -1904,20 +1944,20 @@ public class HPIServiceImpl implements HPIService{
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 		Root<HpiElement> root = cq.from(HpiElement.class);
-		Join<HpiElement,ClinicalElements> gwIdJoin = root.join(HpiElement_.clinicalElements,JoinType.INNER);
+		/*Join<HpiElement,ClinicalElements> gwIdJoin = root.join(HpiElement_.clinicalElements,JoinType.INNER);
 		Predicate symptomGwidPred=(cb.and(gwIdJoin.get(ClinicalElements_.clinicalElementsGender).in("0",patientGender)));
 		gwIdJoin.on(symptomGwidPred);
 		Join<HpiElement,PatientClinicalElements> gwIdPatientJoin = root.join(HpiElement_.patientClinicalElements,JoinType.LEFT);
 		Predicate patientIdPred=(cb.equal(gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId));
 		Predicate patientEncIdPred=(cb.equal(gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId));
-		gwIdPatientJoin.on(patientIdPred,patientEncIdPred);
-		Join<ClinicalElements,ClinicalElementsCondition> clinicalElementsConditionJoin = gwIdJoin.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);	
+		gwIdPatientJoin.on(patientIdPred,patientEncIdPred);*/
+		//Join<ClinicalElements,ClinicalElementsCondition> clinicalElementsConditionJoin = gwIdJoin.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);	
 		
 		cq.multiselect(root.get(HpiElement_.hpiElementGwid),
 				root.get(HpiElement_.hpiElementName),
 				root.get(HpiElement_.hpiElementPrinttext),
-				root.get(HpiElement_.hpiElementOrderby),
-				gwIdJoin.get(ClinicalElements_.clinicalElementsGwid),
+				root.get(HpiElement_.hpiElementOrderby)
+				/*gwIdJoin.get(ClinicalElements_.clinicalElementsGwid),
 				gwIdJoin.get(ClinicalElements_.clinicalElementsName),
 				gwIdJoin.get(ClinicalElements_.clinicalElementsDatatype),
 				gwIdJoin.get(ClinicalElements_.clinicalElementsIsactive),
@@ -1926,17 +1966,17 @@ public class HPIServiceImpl implements HPIService{
 				gwIdJoin.get(ClinicalElements_.clinicalElementsTextDimension),
 				gwIdJoin.get(ClinicalElements_.clinicalElementsGender),
 				gwIdJoin.get(ClinicalElements_.clinicalElementsIsselect),
-				gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsValue)
+				gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsValue)*/
 				);
 		
 		Predicate qualifierIdPred=(cb.equal(root.get(HpiElement_.hpiElementQualifierid),qualifierId));
 		
-		Predicate andPred1= cb.and(gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsValue).isNull(),clinicalElementsConditionJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage).isNull(),clinicalElementsConditionJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage).isNull());
-		Predicate andPred2= cb.and(cb.lessThan(clinicalElementsConditionJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage), ageinDay),cb.greaterThanOrEqualTo(clinicalElementsConditionJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage), ageinDay));
-		Predicate orPred= cb.or(andPred1,andPred2);
+	//	Predicate andPred1= cb.and(gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsValue).isNull(),clinicalElementsConditionJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage).isNull(),clinicalElementsConditionJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage).isNull());
+	//	Predicate andPred2= cb.and(cb.lessThan(clinicalElementsConditionJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage), ageinDay),cb.greaterThanOrEqualTo(clinicalElementsConditionJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage), ageinDay));
+	//	Predicate orPred= cb.or(andPred1,andPred2);
 		
 		Predicate elemId=cb.and(cb.equal(root.get(HpiElement_.hpiElementIsactive),true));
-		cq.where(qualifierIdPred,orPred,elemId);
+		cq.where(qualifierIdPred/*,orPred*/,elemId);
 		List<Object[]> obj=em.createQuery(cq).getResultList();
 		return obj;
 	}
@@ -1947,20 +1987,20 @@ public class HPIServiceImpl implements HPIService{
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 		Root<HpiElement> root = cq.from(HpiElement.class);
-		Join<HpiElement,ClinicalElements> gwIdJoin = root.join(HpiElement_.clinicalElements,JoinType.INNER);
+		/*Join<HpiElement,ClinicalElements> gwIdJoin = root.join(HpiElement_.clinicalElements,JoinType.INNER);
 		Predicate symptomGwidPred=gwIdJoin.get(ClinicalElements_.clinicalElementsGender).in("0",patientGender);
-		gwIdJoin.on(symptomGwidPred);
+		gwIdJoin.on(symptomGwidPred);*/
 		
-		Join<HpiElement,PatientClinicalElements> gwIdPatientJoin = root.join(HpiElement_.patientClinicalElements,JoinType.LEFT);
+		/*Join<HpiElement,PatientClinicalElements> gwIdPatientJoin = root.join(HpiElement_.patientClinicalElements,JoinType.LEFT);
 		Predicate patientIdPred=(cb.equal(gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId));
 		Predicate patientEncIdPred=(cb.equal(gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId));
-		gwIdPatientJoin.on(patientIdPred,patientEncIdPred);
+		gwIdPatientJoin.on(patientIdPred,patientEncIdPred);*/
 				
 		cq.multiselect(root.get(HpiElement_.hpiElementGwid),
 				root.get(HpiElement_.hpiElementName),
 				root.get(HpiElement_.hpiElementPrinttext),
-				root.get(HpiElement_.hpiElementOrderby),
-				gwIdJoin.get(ClinicalElements_.clinicalElementsGwid),
+				root.get(HpiElement_.hpiElementOrderby)
+				/*gwIdJoin.get(ClinicalElements_.clinicalElementsGwid),
 				gwIdJoin.get(ClinicalElements_.clinicalElementsName),
 				gwIdJoin.get(ClinicalElements_.clinicalElementsDatatype),
 				gwIdJoin.get(ClinicalElements_.clinicalElementsIsactive),
@@ -1969,15 +2009,15 @@ public class HPIServiceImpl implements HPIService{
 				gwIdJoin.get(ClinicalElements_.clinicalElementsTextDimension),
 				gwIdJoin.get(ClinicalElements_.clinicalElementsGender),
 				gwIdJoin.get(ClinicalElements_.clinicalElementsIsselect),
-				gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsValue)
+				gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsValue)*/
 				);
 		
 		Predicate hpiPred=cb.and(cb.equal(root.get(HpiElement_.hpiElementQualifierid),qualifierId),cb.equal(root.get(HpiElement_.hpiElementIsactive), true));
 		
 		if(isAgeBased)
 		{
-			Predicate andPred=(cb.and(hpiPred,gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsValue).isNotNull()));
-			cq.where(hpiPred,andPred);
+			//Predicate andPred=(cb.and(hpiPred,gwIdPatientJoin.get(PatientClinicalElements_.patientClinicalElementsValue).isNotNull()));
+			cq.where(hpiPred/*,andPred*/);
 		}
 		else
 		{
@@ -1998,8 +2038,8 @@ public class HPIServiceImpl implements HPIService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<HpiSymptom> root = cq.from(HpiSymptom.class);
-		Join<HpiSymptom, ClinicalSystem> condJoin = root.join(HpiSymptom_.clinicalSystem,JoinType.INNER);
-		Join<HpiSymptom, PatientClinicalElements> condJoin2 = root.join(HpiSymptom_.patientClinicalElements,JoinType.INNER);
+		//Join<HpiSymptom, ClinicalSystem> condJoin = root.join(HpiSymptom_.clinicalSystem,JoinType.INNER);
+		//Join<HpiSymptom, PatientClinicalElements> condJoin2 = root.join(HpiSymptom_.patientClinicalElements,JoinType.INNER);
 		cq.multiselect(root.get(HpiSymptom_.hpiSymptomId),
 				root.get(HpiSymptom_.hpiSymptomSystemId),
 				root.get(HpiSymptom_.hpiSymptomGwid),
@@ -2008,14 +2048,15 @@ public class HPIServiceImpl implements HPIService{
 				root.get(HpiSymptom_.hpiSymptomComments),
 				root.get(HpiSymptom_.hpiSymptomType),
 				root.get(HpiSymptom_.hpiSymptomPrinttext),
-				root.get(HpiSymptom_.hpiSymptomRetaincase),
-				condJoin.get(ClinicalSystem_.clinicalSystemName));
-		cq.where(builder.and(builder.equal(root.get(HpiSymptom_.hpiSymptomId),savedSymptomId),builder.equal(condJoin2.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId)));
+				root.get(HpiSymptom_.hpiSymptomRetaincase)
+				//condJoin.get(ClinicalSystem_.clinicalSystemName)
+				);
+		cq.where(builder.and(builder.equal(root.get(HpiSymptom_.hpiSymptomId),savedSymptomId)/*,builder.equal(condJoin2.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId)*/));
 		List<Object[]> obj = em.createQuery(cq).getResultList();
 		List<HpiSymptom> hpiSymptom = new ArrayList<HpiSymptom>();
 		for(Object[] values : obj) {
 			HpiSymptom hpiSym = new HpiSymptom();
-			ClinicalSystem clinicalSystem = new ClinicalSystem();
+			//ClinicalSystem clinicalSystem = new ClinicalSystem();
 			Integer symptomId = (Integer) (values[0] == null?-1:values[0]);
 			Integer systemId = (Integer) (values[1] == null?-1:values[1]);
 			String symptomGwid = (String) (values[2] == null?"":values[2]);
@@ -2025,7 +2066,7 @@ public class HPIServiceImpl implements HPIService{
 			Integer symptomType = (Integer) (values[6] == null?-1:values[6]);
 			String symptomPrintText = (String) (values[7] == null?"":values[7]);
 			Boolean retainCase = (Boolean) (values[8] == null?false:values[8]);
-			String clinicalSystemName = (String) (values[9] == null?"":values[9]);
+			//String clinicalSystemName = (String) (values[9] == null?"":values[9]);
 			hpiSym.setHpiSymptomId(symptomId);
 			hpiSym.setHpiSymptomSystemId(systemId);
 			hpiSym.setHpiSymptomGwid(symptomGwid);
@@ -2035,8 +2076,8 @@ public class HPIServiceImpl implements HPIService{
 			hpiSym.setHpiSymptomType(symptomType);
 			hpiSym.setHpiSymptomPrinttext(symptomPrintText);
 			hpiSym.setHpiSymptomRetaincase(retainCase);
-			clinicalSystem.setClinicalSystemName(clinicalSystemName);
-			hpiSym.setClinicalSystem(clinicalSystem);
+			//clinicalSystem.setClinicalSystemName(clinicalSystemName);
+			//hpiSym.setClinicalSystem(clinicalSystem);
 			hpiSymptom.add(hpiSym);
 		}
 		return hpiSymptom;
@@ -2067,7 +2108,7 @@ public class HPIServiceImpl implements HPIService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<HpiSymptom> root = cq.from(HpiSymptom.class);
-		Join<HpiSymptom, ClinicalSystem> condJoin = root.join(HpiSymptom_.clinicalSystem,JoinType.INNER);
+		//Join<HpiSymptom, ClinicalSystem> condJoin = root.join(HpiSymptom_.clinicalSystem,JoinType.INNER);
 		cq.multiselect(root.get(HpiSymptom_.hpiSymptomId),
 				root.get(HpiSymptom_.hpiSymptomGwid),
 				root.get(HpiSymptom_.hpiSymptomName),
@@ -2079,16 +2120,16 @@ public class HPIServiceImpl implements HPIService{
 				root.get(HpiSymptom_.hpiSymptomRetaincase));
 		if(!(startsWith.trim().equals(""))) {
 			if(hpiSymptomIdList.isEmpty()){
-				cq.where(builder.and(builder.equal(condJoin.get(ClinicalSystem_.clinicalSystemIsactive),true),root.get(HpiSymptom_.hpiSymptomId).in(-1)),builder.like(builder.lower(root.get(HpiSymptom_.hpiSymptomName)),getLikePattern(startsWith.replaceAll("'", "''"))));
+				cq.where(builder.and(/*builder.equal(condJoin.get(ClinicalSystem_.clinicalSystemIsactive),true),*/root.get(HpiSymptom_.hpiSymptomId).in(-1)),builder.like(builder.lower(root.get(HpiSymptom_.hpiSymptomName)),getLikePattern(startsWith.replaceAll("'", "''"))));
 			}
 			else
 			{
-				cq.where(builder.and(builder.equal(condJoin.get(ClinicalSystem_.clinicalSystemIsactive),true),root.get(HpiSymptom_.hpiSymptomId).in(hpiSymptomIdList)),builder.like(builder.lower(root.get(HpiSymptom_.hpiSymptomName)),getLikePattern(startsWith.replaceAll("'", "''"))));
+				cq.where(builder.and(/*builder.equal(condJoin.get(ClinicalSystem_.clinicalSystemIsactive),true),*/root.get(HpiSymptom_.hpiSymptomId).in(hpiSymptomIdList)),builder.like(builder.lower(root.get(HpiSymptom_.hpiSymptomName)),getLikePattern(startsWith.replaceAll("'", "''"))));
 			}
 		}
 		else
 		{
-			Predicate p1= builder.equal(condJoin.get(ClinicalSystem_.clinicalSystemIsactive),true);
+			//Predicate p1= builder.equal(condJoin.get(ClinicalSystem_.clinicalSystemIsactive),true);
 			Predicate p2;
 			if(hpiSymptomIdList.isEmpty())
 			{
@@ -2098,7 +2139,7 @@ public class HPIServiceImpl implements HPIService{
 			{
 				p2= root.get(HpiSymptom_.hpiSymptomId).in(hpiSymptomIdList);
 			}
-			cq.where(builder.and(p1,p2));
+			cq.where(builder.and(/*p1,*/p2));
 		}
 		List<Object[]> hpiList = em.createQuery(cq).getResultList();
 		int size = 0;
@@ -2125,7 +2166,7 @@ public class HPIServiceImpl implements HPIService{
 			}
 		}
 		List<Object> partStr = getHpiSymptomGwid(patientId);
-		if(partStr.size()>0)
+		/*if(partStr.size()>0)
 		{
 			List<Object[]> patElem = getpatElemData(patientId,startsWith,partStr,encounterId,hpiSymptomIdList,orderBy);
 			for(Object[] values : patElem) {
@@ -2147,7 +2188,7 @@ public class HPIServiceImpl implements HPIService{
 				}
 				size++;
 			}
-		}
+		}*/
 		
 		List<JSONObject> jsonValues = new ArrayList<JSONObject>();
 		for (int i = 0; i < chronicSymptomsFollowup1.length(); i++)
@@ -2204,7 +2245,7 @@ public class HPIServiceImpl implements HPIService{
 	 * basing on patient Id
 	 * @return
 	 */
-	private List<Object[]> getpatElemData(Integer patientId, String startsWith,
+	/*private List<Object[]> getpatElemData(Integer patientId, String startsWith,
 			List<Object> partStr, Integer encounterId, List<Integer> hpiSymptomIdList, int orderBy) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
@@ -2259,13 +2300,13 @@ public class HPIServiceImpl implements HPIService{
 		List<Object[]> obj = em.createQuery(cq).getResultList();
 		
 		return obj;
-	}
+	}*/
 
 	/**
 	 * Method to get previous encounter id
 	 * @return
 	 */
-	private String getPreviousEncounterId(Integer patientId, Object symptomId,
+	/*private String getPreviousEncounterId(Integer patientId, Object symptomId,
 			Integer encounterId) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
@@ -2278,7 +2319,7 @@ public class HPIServiceImpl implements HPIService{
 		Object prevEncId = em.createQuery(cq).getSingleResult();
 		String prevEncounterId = (prevEncId == null?"-1":prevEncId.toString());
 		return prevEncounterId;
-	}
+	}*/
 
 	/**
 	 * Method to get symptom gwid basing on symptom type for getting all symptoms
@@ -2288,8 +2329,8 @@ public class HPIServiceImpl implements HPIService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
 		Root<HpiSymptom> root = cq.from(HpiSymptom.class);
-		Join<HpiSymptom, PatientClinicalElements> patElemJoin = root.join(HpiSymptom_.patientClinicalElements);
-		patElemJoin.on(builder.equal(patElemJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId));
+		//Join<HpiSymptom, PatientClinicalElements> patElemJoin = root.join(HpiSymptom_.patientClinicalElements);
+		//patElemJoin.on(builder.equal(patElemJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId));
 		cq.select(root.get(HpiSymptom_.hpiSymptomGwid));
 		cq.where(builder.equal(root.get(HpiSymptom_.hpiSymptomType),2));
 		List<Object> obj = em.createQuery(cq).getResultList();
@@ -2354,22 +2395,22 @@ public class HPIServiceImpl implements HPIService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<HpiSymptom> root = cq.from(HpiSymptom.class);
-		Join<HpiSymptom, ClinicalSystem> clinicalJoin = root.join(HpiSymptom_.clinicalSystem,JoinType.INNER);
-		Join<HpiSymptom, PatientClinicalElements> patElemJoin = root.join(HpiSymptom_.patientClinicalElements,JoinType.LEFT);
+		//Join<HpiSymptom, ClinicalSystem> clinicalJoin = root.join(HpiSymptom_.clinicalSystem,JoinType.INNER);
+		//Join<HpiSymptom, PatientClinicalElements> patElemJoin = root.join(HpiSymptom_.patientClinicalElements,JoinType.LEFT);
 		Join<HpiSymptom, ClinicalElements> leftJoinClinicalElem;
 		Join<ClinicalElements, ClinicalElementsCondition> condJoin = null;
 		
-		Predicate joinp1 = builder.equal(patElemJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid), patientId);
-		Predicate joinp2 = builder.lessThan(patElemJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId);
-		patElemJoin.on(builder.and(joinp1,joinp2));
+		//Predicate joinp1 = builder.equal(patElemJoin.get(PatientClinicalElements_.patientClinicalElementsPatientid), patientId);
+		//Predicate joinp2 = builder.lessThan(patElemJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId);
+		//patElemJoin.on(builder.and(joinp1,joinp2));
 		
 		if(mode == 2)
 		{
-			Join<HpiSymptom, ClinicalElements> addOnJoin = root.join(HpiSymptom_.clinicalElements,JoinType.LEFT);
+			//Join<HpiSymptom, ClinicalElements> addOnJoin = root.join(HpiSymptom_.clinicalElements,JoinType.LEFT);
 		} 
 		if(isAgeBased && mode == 2){
-				leftJoinClinicalElem = root.join(HpiSymptom_.clinicalElements,JoinType.LEFT);
-				condJoin = leftJoinClinicalElem.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
+				//leftJoinClinicalElem = root.join(HpiSymptom_.clinicalElements,JoinType.LEFT);
+				//condJoin = leftJoinClinicalElem.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
 		}
 		Expression<Integer> inte = builder.<Integer>selectCase().when(builder.equal(builder.locate(builder.upper(root.get(HpiSymptom_.hpiSymptomName)),builder.literal("")),
 				builder.literal(0)),
@@ -2385,7 +2426,7 @@ public class HPIServiceImpl implements HPIService{
 					inte.alias("limitOrder"));
 		List<Predicate> predList = new ArrayList<Predicate>();
 		Predicate p1 = builder.isTrue(root.get(HpiSymptom_.hpiSymptomIsactive));
-		Predicate p2 = builder.isTrue(clinicalJoin.get(ClinicalSystem_.clinicalSystemIsactive));
+		//Predicate p2 = builder.isTrue(clinicalJoin.get(ClinicalSystem_.clinicalSystemIsactive));
 		Predicate p3;
 		if(hpiSymptomMappingGwid.size() > 0)
 		{
@@ -2395,7 +2436,7 @@ public class HPIServiceImpl implements HPIService{
 		{
 			p3 = builder.not(root.get(HpiSymptom_.hpiSymptomGwid).in(""));
 		}
-		Predicate p7 = builder.or(builder.isNull(patElemJoin.get(PatientClinicalElements_.patientClinicalElementsId)),builder.equal(root.get(HpiSymptom_.hpiSymptomType), 1));
+		Predicate p7 = /*builder.or(builder.isNull(patElemJoin.get(PatientClinicalElements_.patientClinicalElementsId)),*/builder.equal(root.get(HpiSymptom_.hpiSymptomType), 1);
 		
 		if(isAgeBased && mode==2)
 		{
@@ -2411,16 +2452,16 @@ public class HPIServiceImpl implements HPIService{
 						}
 						Predicate predListCond = builder.or(predList.toArray(new Predicate[] {}));
 						Predicate combPred = builder.or(p4,predListCond);
-						cq.where(p1,p2,p3,combPred,p7,add1,add2);
+						cq.where(p1/*,p2*/,p3,combPred,p7,add1,add2);
 					}
 					else
 					{
-						cq.where(p1,p2,p3,p4,p7,add1,add2);
+						cq.where(p1/*,p2*/,p3,p4,p7,add1,add2);
 					}
 				}
 				else
 				{
-					cq.where(p1,p2,p3,p7,add1,add2);
+					cq.where(p1/*,p2*/,p3,p7,add1,add2);
 				}
 		}
 		else
@@ -2435,16 +2476,16 @@ public class HPIServiceImpl implements HPIService{
 					}
 					Predicate predListCond = builder.or(predList.toArray(new Predicate[] {}));
 					Predicate combPred = builder.or(p4,predListCond);
-					cq.where(p1,p2,p3,combPred,p7);
+					cq.where(p1/*,p2*/,p3,combPred,p7);
 				}
 				else
 				{
-					cq.where(p1,p2,p3,p4,p7);
+					cq.where(p1/*,p2*/,p3,p4,p7);
 				}
 			}
 			else
 			{
-				cq.where(p1,p2,p3,p7);
+				cq.where(p1/*,p2*/,p3,p7);
 			}
 		}
 		
@@ -2500,19 +2541,19 @@ public class HPIServiceImpl implements HPIService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<HpiSymptom> root = cq.from(HpiSymptom.class);
-		Join<HpiSymptom, ClinicalElementTemplateMapping> clinicalElementTMJoin = root.join(HpiSymptom_.clinicalElementTemplateMapping,JoinType.INNER);
+		/*Join<HpiSymptom, ClinicalElementTemplateMapping> clinicalElementTMJoin = root.join(HpiSymptom_.clinicalElementTemplateMapping,JoinType.INNER);
 		Predicate p1 = builder.equal(clinicalElementTMJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingTemplateid),templateId);
 		Predicate p2 = builder.equal(clinicalElementTMJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingType), 2);
 		Predicate p3 = builder.equal(clinicalElementTMJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingIsactive), true);
 		Predicate p4 = builder.isNull(clinicalElementTMJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingDefaultValue));
-		clinicalElementTMJoin.on(builder.and(p1,p2,p3,p4));
-		Join<HpiSymptom, ClinicalElements> leftJoinClinicalElem;
-		Join<ClinicalElements, ClinicalElementsCondition> condJoin = null;
+		clinicalElementTMJoin.on(builder.and(p1,p2,p3,p4));*/
+		//Join<HpiSymptom, ClinicalElements> leftJoinClinicalElem;
+		//Join<ClinicalElements, ClinicalElementsCondition> condJoin = null;
 		if(isAgeBased){
 			if(mode==2)
 			{
-				leftJoinClinicalElem = root.join(HpiSymptom_.clinicalElements,JoinType.LEFT);
-				condJoin = leftJoinClinicalElem.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
+				//  leftJoinClinicalElem = root.join(HpiSymptom_.clinicalElements,JoinType.LEFT);
+				//condJoin = leftJoinClinicalElem.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
 			}
 		}
 		
@@ -2524,8 +2565,9 @@ public class HPIServiceImpl implements HPIService{
 				root.get(HpiSymptom_.hpiSymptomPrinttext),
 				root.get(HpiSymptom_.hpiSymptomHitcount),
 				root.get(HpiSymptom_.hpiSymptomRetaincase),
-				builder.literal("-99999").alias("orderBy"),
-				clinicalElementTMJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingOrderby).alias("limitorder"));
+				builder.literal("-99999").alias("orderBy")
+				//clinicalElementTMJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingOrderby).alias("limitorder")
+				);
 		}
 		else
 		{
@@ -2535,15 +2577,15 @@ public class HPIServiceImpl implements HPIService{
 					root.get(HpiSymptom_.hpiSymptomPrinttext),
 					root.get(HpiSymptom_.hpiSymptomHitcount),
 					root.get(HpiSymptom_.hpiSymptomRetaincase),
-					clinicalElementTMJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingOrderby).alias("orderBy"),
+					//clinicalElementTMJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingOrderby).alias("orderBy"),
 					builder.literal("-99999").alias("limitorder"));
 		}
 		if(isAgeBased)
 		{
 			if(mode==2)
 			{
-				Predicate p5 = builder.lessThan(condJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageinDay);
-				Predicate p6 = builder.greaterThanOrEqualTo(condJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage), ageinDay);
+				//Predicate p5 = builder.lessThan(condJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageinDay);
+				//Predicate p6 = builder.greaterThanOrEqualTo(condJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage), ageinDay);
 				Predicate p7;
 				if(patientClinicalElementsGwid.isEmpty()){
 					p7 = builder.and(builder.like(builder.lower(root.get(HpiSymptom_.hpiSymptomName)),getLikePattern(searchStr.split(" ")[0])),
@@ -2554,7 +2596,7 @@ public class HPIServiceImpl implements HPIService{
 					p7 = builder.and(builder.like(builder.lower(root.get(HpiSymptom_.hpiSymptomName)),getLikePattern(searchStr.split(" ")[0])),
 							builder.not(root.get(HpiSymptom_.hpiSymptomGwid).in(patientClinicalElementsGwid)));
 				}
-				cq.where(builder.and(p5,p6,p7));
+				cq.where(/*builder.and(p5,p6,*/p7);
 			}
 			else
 			{
@@ -2583,7 +2625,7 @@ public class HPIServiceImpl implements HPIService{
 						builder.not(root.get(HpiSymptom_.hpiSymptomGwid).in(patientClinicalElementsGwid))));
 			}
 		}
-		cq.orderBy(builder.asc(clinicalElementTMJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingOrderby)));
+		//cq.orderBy(builder.asc(clinicalElementTMJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingOrderby)));
 		List<Object[]> hpiSymptomObjectList = em.createQuery(cq).setMaxResults(10).getResultList();
 		List<HPISymptomBean> hpiSymptomBeanList = new ArrayList<HPISymptomBean>();
 		if(hpiSymptomObjectList.size()>0)
@@ -2597,7 +2639,7 @@ public class HPIServiceImpl implements HPIService{
 				Integer hpiSymptomHitcount = (Integer) (values[4] == null?"-1":values[4]);
 				Boolean hpiSymptomRetaincase = (Boolean) (values[5] == null?"false":values[5]);
 				Integer hpiSymptomOrderBy = (Integer.parseInt((values[6] == null?"-1":values[6]).toString()));
-				String limitOrder = (values[7] == null?"":values[7]).toString();
+			//	String limitOrder = (values[7] == null?"":values[7]).toString();
 				hpiSymptomBean.setHpiSymptomId(hpiSymptomId);
 				hpiSymptomBean.setHpiSymptomGwid(hpiSymptomGwid);
 				hpiSymptomBean.setHpiSymptomPrinttext(hpiSymptomPrinttext);
@@ -2605,7 +2647,7 @@ public class HPIServiceImpl implements HPIService{
 				hpiSymptomBean.setHpiSymptomRetaincase(hpiSymptomRetaincase);
 				hpiSymptomBean.setHpiSymptomOrderby(hpiSymptomOrderBy);
 				hpiSymptomBean.setHpiSymptomName(hpiSymptomName);
-				hpiSymptomBean.setLimitOrder(limitOrder);
+			//	hpiSymptomBean.setLimitOrder(limitOrder);
 				hpiSymptomBeanList.add(hpiSymptomBean);
 			}
 		}
@@ -2629,13 +2671,13 @@ public class HPIServiceImpl implements HPIService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<HpiSymptom> root = cq.from(HpiSymptom.class);
-		Join<HpiSymptom, ClinicalElements> leftJoinClinicalElem;
-		Join<ClinicalElements, ClinicalElementsCondition> condJoin = null;
+		//Join<HpiSymptom, ClinicalElements> leftJoinClinicalElem;
+		//Join<ClinicalElements, ClinicalElementsCondition> condJoin = null;
 		if(isAgeBased){
 			if(mode==2)
 			{
-				leftJoinClinicalElem = root.join(HpiSymptom_.clinicalElements,JoinType.LEFT);
-				condJoin = leftJoinClinicalElem.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
+				//leftJoinClinicalElem = root.join(HpiSymptom_.clinicalElements,JoinType.LEFT);
+				//condJoin = leftJoinClinicalElem.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
 			}
 		}
 		cq.distinct(true);
@@ -2651,8 +2693,8 @@ public class HPIServiceImpl implements HPIService{
 		{
 			if(mode==2)
 			{
-				Predicate p1 = builder.lessThan(condJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageinDay);
-				Predicate p2 = builder.greaterThanOrEqualTo(condJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage), ageinDay);
+				//Predicate p1 = builder.lessThan(condJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageinDay);
+				//Predicate p2 = builder.greaterThanOrEqualTo(condJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage), ageinDay);
 				Predicate p3;
 				if(map.isEmpty())
 				{
@@ -2662,7 +2704,7 @@ public class HPIServiceImpl implements HPIService{
 				{
 					p3 = root.get(HpiSymptom_.hpiSymptomGwid).in(map);
 				}
-				cq.where(builder.and(p1,p2,p3));
+				cq.where(/*builder.and(p1,p2,*/p3);
 			}
 			else
 			{
@@ -2729,11 +2771,11 @@ public class HPIServiceImpl implements HPIService{
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = cb.createQuery(Object.class);
 		Root<PatientClinicalElements> root = cq.from(PatientClinicalElements.class);
-		Join<PatientClinicalElements, HpiSymptom> rootJoin = root.join(PatientClinicalElements_.hpiSymptom,JoinType.INNER);
+		/*Join<PatientClinicalElements, HpiSymptom> rootJoin = root.join(PatientClinicalElements_.hpiSymptom,JoinType.INNER);
 		Predicate p1 = cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
-		rootJoin.on(p1);
+		rootJoin.on(p1);*/
 		cq.select(root.get(PatientClinicalElements_.patientClinicalElementsGwid));
-		cq.where(cb.equal(rootJoin.get(HpiSymptom_.hpiSymptomType),2));
+		//cq.where(cb.equal(rootJoin.get(HpiSymptom_.hpiSymptomType),2));
 		List<Object> obj = em.createQuery(cq).getResultList();
 		for(int i=0;i<obj.size();i++)
 		{
@@ -2764,7 +2806,7 @@ public class HPIServiceImpl implements HPIService{
 	 * used to get patients negative symptom list
 	 * @return
 	 */
-	private List<PatientClinicalElements> loadPatientsHPInegativeSymptomList(
+	/*private List<PatientClinicalElements> loadPatientsHPInegativeSymptomList(
 			String clientId, Integer patientId, Integer encounterId) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
@@ -2795,13 +2837,13 @@ public class HPIServiceImpl implements HPIService{
 			}
 		}
 		return patElem;
-	}
+	}*/
 
 	/**
 	 * used to get patient symptom list
 	 * @return
 	 */
-	private List<PatientClinicalElements> loadPatientsHPISymptomList(String clientId, Integer patientId,
+	/*private List<PatientClinicalElements> loadPatientsHPISymptomList(String clientId, Integer patientId,
 			Integer encounterId) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
@@ -2833,7 +2875,7 @@ public class HPIServiceImpl implements HPIService{
 			}
 		}
 		return patElem;
-	}
+	}*/
 
 	/**
 	 * method to get hpisymptomorderby details basing on symptomorderby is active

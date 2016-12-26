@@ -191,15 +191,15 @@ public class FocalShortcutsServiceImpl implements FocalShortcutsService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<ClinicalElements> root = cq.from(ClinicalElements.class);
-		Join<ClinicalElements, FocalShortcutElements> join1 = root.join(ClinicalElements_.focalShortcutElements,JoinType.INNER);
+		/*Join<ClinicalElements, FocalShortcutElements> join1 = root.join(ClinicalElements_.focalShortcutElements,JoinType.INNER);
 		Predicate p1 = builder.equal(join1.get(FocalShortcutElements_.focalShortcutElementsMapid),focalIndex);
 		Predicate p2 = builder.equal(join1.get(FocalShortcutElements_.focalShortcutElementsIsactive), true);
-		join1.on(builder.and(p1,p2));
+		join1.on(builder.and(p1,p2));*/
 		
 		cq.multiselect(
 				root.get(ClinicalElements_.clinicalElementsDatatype),
 				root.get(ClinicalElements_.clinicalElementsGwid),
-				join1.get(FocalShortcutElements_.focalShortcutElementsValue),
+				//join1.get(FocalShortcutElements_.focalShortcutElementsValue),
 				root.get(ClinicalElements_.clinicalElementsDatatype));
 			
 		List<Object[]> obj = em.createQuery(cq).getResultList();

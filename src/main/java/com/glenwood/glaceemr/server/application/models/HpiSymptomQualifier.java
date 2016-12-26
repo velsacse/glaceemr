@@ -43,9 +43,9 @@ public class HpiSymptomQualifier {
 	@Column(name="hpi_symptom_qualifier_printtext")
 	private String hpiSymptomQualifierPrinttext;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	/*@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "hpi_symptom_qualifier_symptom_id", referencedColumnName = "hpi_symptom_id", insertable = false, updatable = false)
-	HpiSymptom hpiSymptom;
+	HpiSymptom hpiSymptom;*/
 
 	public Integer getHpiSymptomQualifierId() {
 		return hpiSymptomQualifierId;
@@ -111,12 +111,12 @@ public class HpiSymptomQualifier {
 		this.hpiSymptomQualifierPrinttext = hpiSymptomQualifierPrinttext;
 	}
 
-	public HpiSymptom getHpiSymptom() {
+	/*public HpiSymptom getHpiSymptom() {
 		return hpiSymptom;
 	}
 
 	public void setHpiSymptom(HpiSymptom hpiSymptom) {
 		this.hpiSymptom = hpiSymptom;
-	}
+	}*/
 	
 }
