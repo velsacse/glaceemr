@@ -38,4 +38,10 @@ public interface DenialService {
 	
 	public List<PatientInsuranceInfoBean> getPatientInsInfo(Integer patientId,Integer type);
 	public List<ClaimInfoBean> getServicesByClaim(Integer patientId, String type);
+	
+	Integer getDenialReasonId(CommonActionBean commonAction);
+	Integer getBillingReasonId(CommonActionBean commonAction);
+	Integer getDenialTypeId(CommonActionBean commonAction);
+	Integer getDenialCategoryId(CommonActionBean commonAction);
+	Integer getProblemTypeId(CommonActionBean commonAction);
 }
