@@ -2,10 +2,13 @@ package com.glenwood.glaceemr.server.application.services.Denial;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.management.Query;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -59,6 +62,9 @@ import com.glenwood.glaceemr.server.application.repositories.PatientRegistration
 import com.glenwood.glaceemr.server.application.repositories.ProblemReportRepository;
 import com.glenwood.glaceemr.server.application.repositories.ServiceDetailRepository;
 import com.glenwood.glaceemr.server.application.services.chart.insurance.InsuranceDataBean;
+import com.glenwood.glaceemr.server.utils.HUtil;
+
+import java.text.SimpleDateFormat;
 
 @Service
 @Transactional
@@ -704,6 +710,7 @@ public class DenialServiceImpl implements DenialService {
 			problemReportSave(reportAProblemBean);
 			actionDesc = "Action Type:"+reportAProblemBean.getActionDescription();
 			reportAProblemBean.setReference(reportAProblemBean.getModifiedBy().toUpperCase()+"-"+1+"-"+ref+"L");
+			reportAProblemBean.setProblemId(ref);
 			adActionHistorySave(actionDesc, reportAProblemBean);
 			ref=0;
 			return setResponse(1, reportAProblemBean, null);
@@ -833,10 +840,15 @@ public class DenialServiceImpl implements DenialService {
 		adActionHistoryRepository.saveAndFlush(actionHistory);
 	}
 	
-	public void problemReportSave(CommonActionBean commonActionBean)
+	public void problemReportSave(CommonActionBean commonActionBean) throws ParseException
 	{
+		DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+		java.util.Date dateofPosting = (java.util.Date)formatter.parse(commonActionBean.getModifiedDate());
+		SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd");
+		
+		Timestamp currentTime = new Timestamp(dateofPosting.getTime());
 		ProblemReport problemReport = new ProblemReport();
-		ref=getMaxProblemId(commonActionBean.getModifiedBy())+1;
+		ref=Integer.parseInt((HUtil.Nz(getMaxProblemId(commonActionBean.getModifiedBy()),"0")))+1;
 		problemReport.setProblemReportUniqueid(-1);
 		problemReport.setProblemReportPracticeId(1);
 		problemReport.setProblemReportComplexity(1);
@@ -853,18 +865,18 @@ public class DenialServiceImpl implements DenialService {
 		problemReport.setProblemReportProblemstatus(status);
 		problemReport.setProblemReportPriority(1);
 		problemReport.setProblemReportReportedBy(commonActionBean.getModifiedBy());
-		problemReport.setProblemReportReportedOn(null);
+		problemReport.setProblemReportReportedOn(currentTime);
 		problemReport.setProblemReportReportedTo(commonActionBean.getTo());
 		problemReport.setProblemReportLoginUser(commonActionBean.getModifiedBy());
-		//problemReport.setProblemReportLastModified();
+		problemReport.setProblemReportLastModified(currentTime);
 		problemReport.setProblemReportPatientcall(2);
-		problemReport.setProblemReportSubject("");
+		problemReport.setProblemReportSubject(commonActionBean.getSubject());
 		problemReport.setProblemReportPatientid(commonActionBean.getPatientId());
 		problemReport.setProblemReportFilepaths("");
 		problemReport.setProblemReportFilenames("");
 		problemReport.setProblemReportPatientInsId(commonActionBean.getPrimaryInsuranceId());
 		problemReport.setProblemReportProblemDenialrulevalidatorId(-1);
-		problemReport.setProblemReportProblemType(-1);
+		problemReport.setProblemReportProblemType(Integer.parseInt(commonActionBean.getProblemType()));
 		problemReport.setProblemReportProblemTypedesc(commonActionBean.getActionDescription()); 
 		problemReportRepository.saveAndFlush(problemReport);
 	}
@@ -970,5 +982,66 @@ public class DenialServiceImpl implements DenialService {
         
         return (Integer)resultList.get(0);
     }
+
+
+	@Override
+	public Integer getDenialReasonId(CommonActionBean commonAction) {
+		// TODO Auto-generated method stub.
+	String qry="select blook_intid from billinglookup where blook_group=123 and blook_desc ilike '"+HUtil.Nz(commonAction.getDenialReason(),"-1")+"' limit 1";
+		
+      //Query nativeQuery= (Query) em.createNativeQuery(qry);
+      List<Object> result=em.createNativeQuery(qry).getResultList();
+      Integer id=(Integer)result.get(0);
+      commonAction.setDenialReason(""+id);
+	return id;
+	}
+
+
+	@Override
+	public Integer getBillingReasonId(CommonActionBean commonAction) {
+		// TODO Auto-generated method stub
+		
+		String qry="select h062001 as billingreasonId from h062 where h062003 is true  and h062002 ilike '"+HUtil.Nz(commonAction.getBillingReason(),"-1")+"' limit 1";
+		List<Object> result=em.createNativeQuery(qry).getResultList();
+	      Integer id=(Integer)result.get(0);
+	      commonAction.setBillingReason(""+id);
+		return id;
+	}
+
+
+	@Override
+	public Integer getDenialTypeId(CommonActionBean commonAction) {
+		// TODO Auto-generated method stub
+		// no need of another things
+		String qry="select blook_intid from billinglookup where blook_group=121 and blook_desc ilike '"+HUtil.Nz(commonAction.getDenialType(),"-1")+"' limit 1";
+		List<Object> result=em.createNativeQuery(qry).getResultList();
+	      Integer id=(Integer)result.get(0);
+	      commonAction.setDenialType(""+id);
+		return id;
+	}
+
+
+	@Override
+	public Integer getDenialCategoryId(CommonActionBean commonAction) {
+		// TODO Auto-generated method stub
+		
+		String qry="select blook_intid from billinglookup where blook_group=124 and blook_desc ilike '"+HUtil.Nz(commonAction.getDenialCategory(),"-1")+"' limit 1";
+		List<Object> result=em.createNativeQuery(qry).getResultList();
+	      Integer id=(Integer)result.get(0);
+	      commonAction.setDenialCategory(""+id);
+		return id;
+	}
+
+
+	@Override
+	public Integer getProblemTypeId(CommonActionBean commonAction) {
+		// TODO Auto-generated method stub
+		
+		String qry="select problem_type_id from problem_type where problem_type_name ilike '"+HUtil.Nz(commonAction.getProblemType(),"-1")+"' limit 1";
+		List<Object> result=em.createNativeQuery(qry).getResultList();
+	      Integer id=(Integer)result.get(0);
+	      commonAction.setProblemType(""+id);
+		return id;
+	}
 
 }

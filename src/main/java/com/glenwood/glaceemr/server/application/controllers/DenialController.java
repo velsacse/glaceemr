@@ -51,6 +51,11 @@ public class DenialController {
 	public EMRResponseBean actionSaveAndUpdate(@RequestBody CommonActionBean commonActionBean) throws Exception
 	{
 		EMRResponseBean response=new EMRResponseBean();
+		dservice.getDenialReasonId(commonActionBean);
+		dservice.getBillingReasonId(commonActionBean);
+		dservice.getDenialTypeId(commonActionBean);
+		dservice.getDenialCategoryId(commonActionBean);
+		dservice.getProblemTypeId(commonActionBean);
 		switch(commonActionBean.getActionId())
 		{
 			case 9: response.setData(dservice.billToPatAction(commonActionBean));return response;
