@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,6 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -97,6 +100,35 @@ public class DrugRelationMap {
 	@JsonManagedReference
 	DrugSchedule drugSchedule;
 
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="drug_relation_map_dea_schedule",referencedColumnName="dea_schedule_value",insertable=false,updatable=false)
+	@JsonManagedReference
+	DeaSchedule deaSchedule;
+	
+	@OneToMany(mappedBy="drugRelationMap")
+	@JsonManagedReference
+	List<NdcDrugBrandMap> ndcList;
+	
+	
+	public List<NdcDrugBrandMap> getNdcList() {
+		return ndcList;
+	}
+
+
+	public void setNdcList(List<NdcDrugBrandMap> ndcList) {
+		this.ndcList = ndcList;
+	}
+
+
+	public DeaSchedule getDeaSchedule() {
+		return deaSchedule;
+	}
+
+
+	public void setDeaSchedule(DeaSchedule deaSchedule) {
+		this.deaSchedule = deaSchedule;
+	}
 
 
 	public Integer getDrugRelationMapCode() {

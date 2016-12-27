@@ -2,27 +2,11 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
 
-import java.sql.Date;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
-
-import antlr.collections.List;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -567,4 +551,16 @@ public class PharmDetails implements java.io.Serializable{
 
 	@Column(name="pharm_details_specialtytype4")
 	private String pharmDetailsSpecialtytype4;
+	
+	@Column(name="pharm_details_npi")
+	private String pharmDetailsnpi;
+
+
+	public String getPharmDetailsnpi() {
+		return pharmDetailsnpi;
+	}
+
+	public void setPharmDetailsnpi(String pharmDetailsnpi) {
+		this.pharmDetailsnpi = pharmDetailsnpi;
+	}
 }
