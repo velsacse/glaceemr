@@ -448,6 +448,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				for(int j=0;j<flowsheetDxList.size();j++){
 					dxCodes.add(flowsheetDxList.get(j).getFlowsheetDxCode());
 				}
+				if(dxCodes.size()>0){
 				CriteriaBuilder builder = em.getCriteriaBuilder();
 				CriteriaQuery<Object> cq = builder.createQuery();
 				Root<ProblemList> root = cq.from(ProblemList.class);
@@ -464,6 +465,9 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				}catch(Exception e){
 					e.printStackTrace();
 				}
+				}else{
+					startDate="";
+					}
 			}else if(flowsheetType==3){
 				//Meaningful Use Measures
 				CriteriaBuilder builder = em.getCriteriaBuilder();
