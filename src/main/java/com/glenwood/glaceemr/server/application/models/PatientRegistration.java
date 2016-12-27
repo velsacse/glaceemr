@@ -17,6 +17,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
@@ -604,6 +607,17 @@ public class PatientRegistration implements Serializable {
 	@Column(name="patient_registration_studycode")
 	private Integer patientRegistrationStudycode;
 	
+	@Column(name="patient_registration_state_name")
+	private String patientRegistrationStateName;
+	
+	public String getPatientRegistrationStateName() {
+		return patientRegistrationStateName;
+	}
+
+	public void setPatientRegistrationStateName(String patientRegistrationStateName) {
+		this.patientRegistrationStateName = patientRegistrationStateName;
+	}
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="patient_registration_refering_physician",referencedColumnName="H076001",insertable=false,updatable=false)

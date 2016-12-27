@@ -20,5 +20,8 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
             registerFunction("chart_fn",  new StandardSQLFunction("chart_fn", StandardBasicTypes.STRING));
             registerFunction("insert_fn",  new StandardSQLFunction("insert_fn", StandardBasicTypes.STRING));
             registerFunction("getapptpara",  new StandardSQLFunction("getapptpara", StandardBasicTypes.STRING));
+            registerFunction("replace",  new StandardSQLFunction("replace", StandardBasicTypes.STRING));
+            registerFunction("split_part",  new StandardSQLFunction("split_part", StandardBasicTypes.STRING));
+            registerFunction("formatphoneno",  new StandardSQLFunction("formatphoneno", StandardBasicTypes.STRING));
         }
 }

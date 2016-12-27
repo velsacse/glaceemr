@@ -1,9 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
-
-import java.sql.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,13 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "ss_inbox")
@@ -233,6 +228,21 @@ public class SSInbox implements Serializable{
 	@JsonManagedReference
 	SSMedDetails ssmeddetails;
 	
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+//	@JoinColumn(name="ss_inbox_message_type",referencedColumnName="refill_message_type_id",insertable=false,updatable=false)
+	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula = @JoinFormula(value = "ss_inbox_message_type::integer", referencedColumnName = "refill_message_type_id")) })
+	@JsonManagedReference
+	RefillMessageType refillMessageType;
+	
+	public RefillMessageType getRefillMessageType() {
+		return refillMessageType;
+	}
+
+	public void setRefillMessageType(RefillMessageType refillMessageType) {
+		this.refillMessageType = refillMessageType;
+	}
+
 	public SSMedDetails getSsmeddetails() {
 		return ssmeddetails;
 	}

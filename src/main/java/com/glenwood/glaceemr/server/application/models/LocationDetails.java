@@ -295,6 +295,17 @@ public class LocationDetails implements Serializable {
 	@Column(name="npi")
 	private String npi;
 	
+	@Column(name="pos_id")
+	private Integer posId;
+	
+	public Integer getPosId() {
+		return posId;
+	}
+
+	public void setPosId(Integer posId) {
+		this.posId = posId;
+	}
+
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="prescriber_id",referencedColumnName="doctorid",insertable=false,updatable=false)
 	@JsonBackReference

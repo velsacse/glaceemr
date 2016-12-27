@@ -15,6 +15,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
@@ -192,6 +195,21 @@ public class Prescription implements Serializable{
 	NdcPkgProduct ndcPkgProduct;*/
 	
 	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="doc_presc_ndc_code",referencedColumnName="ndc_code",insertable=false, updatable=false)
+	@JsonManagedReference
+	NdcDrugBrandMap ndcdrugbrandmap;
+	
+	
+	
+	public NdcDrugBrandMap getNdcdrugbrandmap() {
+		return ndcdrugbrandmap;
+	}
+
+	public void setNdcdrugbrandmap(NdcDrugBrandMap ndcdrugbrandmap) {
+		this.ndcdrugbrandmap = ndcdrugbrandmap;
+	}
+
 	public EmployeeProfile getEmpprofile() {
 		return empprofile;
 	}
@@ -952,6 +970,7 @@ public class Prescription implements Serializable{
 		this.docPrescPrintTime = docPrescPrintTime;
 	}
 	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="doc_presc_last_modified_by",referencedColumnName="emp_profile_empid",insertable=false, updatable=false)
 	@JsonManagedReference
@@ -961,11 +980,98 @@ public class Prescription implements Serializable{
 	@JsonManagedReference
 	List<SSOutbox> ssOutbox;
 
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="doc_presc_inactivated_by",referencedColumnName="emp_profile_empid",insertable=false, updatable=false)
 	@JsonManagedReference
 	EmployeeProfile empProfileInActive;
 	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="doc_presc_form",referencedColumnName="drug_form_name",insertable=false, updatable=false)
+	@JsonManagedReference
+	DrugForm drugForm;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	//@JoinColumn(name="doc_presc_ss_inbox_id",referencedColumnName="ss_inbox_id",insertable=false, updatable=false)
+	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula= @JoinFormula(value="doc_presc_ss_inbox_id::integer" , referencedColumnName="ss_inbox_id"))})
+	@JsonManagedReference
+	SSInbox ssInbox;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="doc_presc_quantity_units",referencedColumnName="description",insertable=false, updatable=false)
+	@JsonManagedReference
+	PrescriptionUnits prescriptionUnits;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="doc_presc_map_eligibility_desc_id",referencedColumnName="ss_pat_eligibility_desc_id",insertable=false, updatable=false)
+	@JsonManagedReference
+	SsPatEligibilityDesc ssPatEligibilityDesc;
+	
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="doc_presc_ordered_by",referencedColumnName="emp_profile_empid",insertable=false, updatable=false)
+	@JsonManagedReference
+	EmployeeProfile empProfileOrderBy;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="doc_presc_leaf_id",referencedColumnName="leaf_patient_id",insertable=false, updatable=false)
+	@JsonManagedReference
+	LeafPatient leafPatient;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="doc_presc_route_id",referencedColumnName="modified_dose_parent_root_id",insertable=false, updatable=false)
+	@JsonManagedReference
+	ModifiedDose modifiedDose;
+	
+	
+	public ModifiedDose getModifiedDose() {
+		return modifiedDose;
+	}
+
+	public void setModifiedDose(ModifiedDose modifiedDose) {
+		this.modifiedDose = modifiedDose;
+	}
+
+	public LeafPatient getLeafPatient() {
+		return leafPatient;
+	}
+
+	public void setLeafPatient(LeafPatient leafPatient) {
+		this.leafPatient = leafPatient;
+	}
+
+	public EmployeeProfile getEmpProfileOrderBy() {
+		return empProfileOrderBy;
+	}
+
+	public void setEmpProfileOrderBy(EmployeeProfile empProfileOrderBy) {
+		this.empProfileOrderBy = empProfileOrderBy;
+	}
+
+	public SSInbox getSsInbox() {
+		return ssInbox;
+	}
+
+	public SsPatEligibilityDesc getSsPatEligibilityDesc() {
+		return ssPatEligibilityDesc;
+	}
+
+	public void setSsPatEligibilityDesc(SsPatEligibilityDesc ssPatEligibilityDesc) {
+		this.ssPatEligibilityDesc = ssPatEligibilityDesc;
+	}
+
+	public void setSsInbox(SSInbox ssInbox) {
+		this.ssInbox = ssInbox;
+	}
+
+	public PrescriptionUnits getPrescriptionUnits() {
+		return prescriptionUnits;
+	}
+
+	public void setPrescriptionUnits(PrescriptionUnits prescriptionUnits) {
+		this.prescriptionUnits = prescriptionUnits;
+	}
+
 	public EmployeeProfile getEmpProfileInActive() {
 		return empProfileInActive;
 	}
