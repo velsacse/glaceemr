@@ -1542,13 +1542,14 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 	public ArrayList<FS_LabBean> checkFlowSheetRulesForLabData(int patientId,int chartId, List<Integer> groupIds,ArrayList<FS_LabBean> flowSheetData, String startDate,JSONObject groupIdTestIdMap,Integer patgender) throws Exception{
 		String currentDate = getCurrentDate();
+		ArrayList<FS_LabBean> tempFlowSheetData = new ArrayList<FS_LabBean>();
 		List<String> newGroupIds=Lists.transform(groupIds, Functions.toStringFunction());
+		if(startDate!=null& !startDate.equalsIgnoreCase("")){
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,newGroupIds, startDate,3);
 		String today = getTodayDate();
 		//PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
 		//Integer  gender1 = gender
 		String gender=patgender.toString();
-		ArrayList<FS_LabBean> tempFlowSheetData = new ArrayList<FS_LabBean>();
 		for(int flowSheetDataCounter = 0 ; flowSheetDataCounter < flowSheetData.size() ; flowSheetDataCounter++){
 			FS_LabBean flowSheetDataObj = flowSheetData.get(flowSheetDataCounter);
 			boolean isElementRuleExists = false;
@@ -1655,6 +1656,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			} else if(isElementRuleExists == true && isElementGenderRuleSatisfied == true){
 				tempFlowSheetData.add(flowSheetDataObj);
 			}
+		}
 		}
 		return tempFlowSheetData;
 	}
@@ -1896,12 +1898,14 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 	public ArrayList<FS_LabParameterBean> checkFlowSheetRulesLabParametersData(int patientId, int chartId, List<Integer> groupIds,ArrayList<FS_LabParameterBean> flowSheetData, String startDate,JSONObject groupIdParamIdMap,Integer patgender) throws Exception{
 		String currentDate = getCurrentDate();
+		ArrayList<FS_LabParameterBean> tempFlowSheetData = new ArrayList<FS_LabParameterBean>();
 		List<String> newGroupIds=Lists.transform(groupIds, Functions.toStringFunction());
+		if(startDate!=null && !startDate.equalsIgnoreCase("")){
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,newGroupIds, startDate,2);
 		String today = getTodayDate();
 		//PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
 		String gender = patgender.toString();
-		ArrayList<FS_LabParameterBean> tempFlowSheetData = new ArrayList<FS_LabParameterBean>();
+		//ArrayList<FS_LabParameterBean> tempFlowSheetData = new ArrayList<FS_LabParameterBean>();
 		for(int flowSheetDataCounter = 0 ; flowSheetDataCounter < flowSheetData.size() ; flowSheetDataCounter++){
 			FS_LabParameterBean flowSheetDataObj = flowSheetData.get(flowSheetDataCounter);
 			boolean isElementRuleExists = false;
@@ -2012,7 +2016,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				tempFlowSheetData.add(flowSheetDataObj);
 			}
 		}
-
+		}
 		return tempFlowSheetData;
 	}
 
@@ -2937,11 +2941,13 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 	public ArrayList<FS_ClinicalElementBean> checkFlowSheetRulesClinicalElementsData(Integer patientId, Integer flowSheetId,List<String> gwidsComplete,ArrayList<FS_ClinicalElementBean> flowSheetData, String startDate,Integer patgender) throws Exception{
 		String currentDate = getCurrentDate();
+		ArrayList<FS_ClinicalElementBean> tempFlowSheetData = new ArrayList<FS_ClinicalElementBean>();
+		if(startDate!=null && !startDate.equalsIgnoreCase("")){
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,gwidsComplete, startDate,1);
 		String today = getTodayDate();
 		//PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
 		String gender = patgender.toString();
-		ArrayList<FS_ClinicalElementBean> tempFlowSheetData = new ArrayList<FS_ClinicalElementBean>();
+		//ArrayList<FS_ClinicalElementBean> tempFlowSheetData = new ArrayList<FS_ClinicalElementBean>();
 		for(int flowSheetDataCounter = 0 ; flowSheetDataCounter < flowSheetData.size() ; flowSheetDataCounter++){
 			FS_ClinicalElementBean flowSheetDataObj = flowSheetData.get(flowSheetDataCounter);
 			boolean isElementRuleExists = false;
@@ -3042,6 +3048,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				tempFlowSheetData.add(flowSheetDataObj);
 			}
 		}
+		}
 		return tempFlowSheetData;
 	}
 
@@ -3081,7 +3088,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				gwids.add(hsh_notes.getFlowsheetClinicalParamMapElementgwid());
 				gwidsComplete.add(hsh_notes.getFlowsheetClinicalParamMapElementgwid());
 				List<PatientClinicalElements> patientClinicalElements=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getElemPatientDataLessThanEncounter(patientId, encounterId, gwids));
-				//List<PatientClinicalElements> patientClinicalElements=getListOfPatientClinicalElements(patientId,encounterId,gwids);
+				//List<PatientClinicalElements> patientClinicalElements=getElemPatientDataLessThanEncounter(patientId,encounterId,gwids);
 				for(int g=0;g<patientClinicalElements.size();g++){
 					ClinicalElements clinicalElementsInner=Optional.fromNullable(clinicalElementsRepository.findOne(PatientClinicalElementsSpecification.getClinicalElement(patientClinicalElements.get(g).getPatientClinicalElementsGwid()))).or(new ClinicalElements());
 					patientClinicalElements.get(g).setClinicalElement(clinicalElementsInner);
@@ -3242,6 +3249,46 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return null;
 	}*/
 
+	private List<PatientClinicalElements> getElemPatientDataLessThanEncounter(
+			Integer patientId, Integer encounterId, List<String> gwids) {
+		CriteriaBuilder cb1=em.getCriteriaBuilder();
+		CriteriaQuery<PatientClinicalElements> cq1 = cb1.createQuery(PatientClinicalElements.class);
+		List<PatientClinicalElements> stndcode= new ArrayList<PatientClinicalElements>();
+		Root<PatientClinicalElements> root1 = cq1.from(PatientClinicalElements.class);
+		Join<PatientClinicalElements,ClinicalElements> paramJoin=root1.join(PatientClinicalElements_.clinicalElement,JoinType.INNER);
+		
+		Selection[] selectionsforVR=new Selection[]{
+				root1.get(PatientClinicalElements_.patientClinicalElementsId),
+				root1.get(PatientClinicalElements_.patientClinicalElementsPatientid),
+				root1.get(PatientClinicalElements_.patientClinicalElementsChartid),
+				root1.get(PatientClinicalElements_.patientClinicalElementsEncounterid),
+				root1.get(PatientClinicalElements_.patientClinicalElementsGwid),
+				root1.get(PatientClinicalElements_.patientClinicalElementsValue),
+		};
+		cq1.select(cb1.construct(PatientClinicalElements.class,selectionsforVR));
+		if(encounterId!=-1){
+		Predicate[] restrictionsforVR=new Predicate[]{
+				cb1.lessThanOrEqualTo(root1.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId),
+	        cb1.equal(root1.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId),
+		root1.get(PatientClinicalElements_.patientClinicalElementsGwid).in(gwids),
+		};
+		cq1.where(restrictionsforVR);
+		}else{
+			Predicate[] restrictionsforVR=new Predicate[]{
+		    cb1.equal(root1.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId),
+			root1.get(PatientClinicalElements_.patientClinicalElementsGwid).in(gwids),
+			};
+			cq1.where(restrictionsforVR);
+		}
+		try{
+			stndcode= em.createQuery(cq1).getResultList();	
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return stndcode;
+	}
+
+
 	private List<PatientClinicalElements> getListOfPatientClinicalElements(
 			Integer patientId, Integer encounterId, List<String> gwids) {
 		CriteriaBuilder cb1=em.getCriteriaBuilder();
@@ -3325,9 +3372,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 	public ArrayList<FS_ClinicalElementBean> checkFlowSheetRulesForClinicalData(Integer patientId, Integer flowSheetId,List<String> gwidsComplete,ArrayList<FS_ClinicalElementBean> flowSheetData, String startDate,Integer patgender) throws Exception{
 		String currentDate = getCurrentDate();
+		ArrayList<FS_ClinicalElementBean> tempFlowSheetData = new ArrayList<FS_ClinicalElementBean>();
+		if(startDate!=null && !startDate.equalsIgnoreCase("")){
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,gwidsComplete, startDate,4);
 		String today = getTodayDate();
-		ArrayList<FS_ClinicalElementBean> tempFlowSheetData = new ArrayList<FS_ClinicalElementBean>();
+		//ArrayList<FS_ClinicalElementBean> tempFlowSheetData = new ArrayList<FS_ClinicalElementBean>();
 		for(int flowSheetDataCounter = 0 ; flowSheetDataCounter < flowSheetData.size() ; flowSheetDataCounter++){
 			FS_ClinicalElementBean flowSheetDataObj = flowSheetData.get(flowSheetDataCounter);
 			boolean isElementRuleExists = false;
@@ -3433,7 +3482,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			}
 
 		}
-
+		}
 		return tempFlowSheetData;
 	}
 
@@ -3553,11 +3602,13 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 	public ArrayList<FS_DrugBean> checkFlowSheetRulesForDrugData(Integer patientId, Integer flowSheetId,List<String> classIdsComplete,ArrayList<FS_DrugBean> flowSheetData, String startDate,Integer patgender) throws Exception{ 
 		String currentDate = getCurrentDate();
+		ArrayList<FS_DrugBean> tempFlowSheetData = new ArrayList<FS_DrugBean>();
+		if(startDate!=null&&!startDate.equalsIgnoreCase("")){
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,classIdsComplete, startDate,5);
 		String today = getTodayDate();
 		//PatientRegistration genderPat =  patientRegistrationRepository.findOne(Specifications.where(PatientRegistrationSpecification.PatientId(patientId+"")));
 		String gender = patgender.toString();
-		ArrayList<FS_DrugBean> tempFlowSheetData = new ArrayList<FS_DrugBean>();
+		//ArrayList<FS_DrugBean> tempFlowSheetData = new ArrayList<FS_DrugBean>();
 		for(int flowSheetDataCounter = 0 ; flowSheetDataCounter < flowSheetData.size() ; flowSheetDataCounter++){
 			FS_DrugBean flowSheetDataObj = flowSheetData.get(flowSheetDataCounter);
 			boolean isElementRuleExists = false;
@@ -3661,7 +3712,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			}
 
 		}
-
+		}
 		return tempFlowSheetData;
 	}
 
@@ -4187,9 +4238,11 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 	public ArrayList<FS_LabBean> checkFlowSheetRulesRecommendedLabs(Integer patientId, Integer chartId, List<Integer> groupIds,ArrayList<FS_LabBean> flowSheetData, String startDate) throws Exception{
 		List<String> newGroupIds=Lists.transform(groupIds, Functions.toStringFunction());
+		ArrayList<FS_LabBean> tempFlowSheetData = new ArrayList<FS_LabBean>();
+		if(startDate!=null && !startDate.equalsIgnoreCase("")){
 		List<HmrBean> flowSheetRule = getFlowSheetRuleQueryPatientBased(patientId,newGroupIds, startDate,3);
 		String today = getTodayDate();
-		ArrayList<FS_LabBean> tempFlowSheetData = new ArrayList<FS_LabBean>();
+		//ArrayList<FS_LabBean> tempFlowSheetData = new ArrayList<FS_LabBean>();
 		for(int flowSheetDataCounter = 0 ; flowSheetDataCounter < flowSheetData.size() ; flowSheetDataCounter++){
 			FS_LabBean flowSheetDataObj = flowSheetData.get(flowSheetDataCounter);
 			boolean isElementRuleExists = false;
@@ -4285,6 +4338,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			} else if(isElementRuleExists == true && isElementGenderRuleSatisfied == true){
 				tempFlowSheetData.add(flowSheetDataObj);
 			}				
+		}
 		}
 		return tempFlowSheetData;
 	}
@@ -5179,7 +5233,6 @@ public class FlowsheetServiceImpl implements FlowsheetService{
       return encId;
 	}
 }
-
 
 
 

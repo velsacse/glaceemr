@@ -264,14 +264,15 @@ public class FS_LabBean implements Comparable<FS_LabBean>{
         
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
         try {
-            
-            Date date1 = sdf.parse(performedOn);
-            Date date2 = sdf.parse(o.getPerformedOn());
-            return date2.compareTo(date1);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        	
+        	if(!"".equalsIgnoreCase(o.getPerformedOn()) && !"".equalsIgnoreCase(performedOn)) {
+        		Date date1 = sdf.parse(performedOn);
+        		Date date2 = sdf.parse(o.getPerformedOn());
+        		return date2.compareTo(date1);
+        	    }
+        	} catch (ParseException e) {
+        		//e.printStackTrace();
         }
         return 0;
     }
 }
-
