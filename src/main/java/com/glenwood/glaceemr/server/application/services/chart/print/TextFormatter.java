@@ -287,59 +287,58 @@ public class TextFormatter {
 		return result.toString();
 	}
 	
-	public String getAge(String dob) {
-		return dob.toString();
-	}
-
-	
-	
-
 	/**
 	 * Calculate Age from Date of Birth
 	 * @param date
 	 * @return
 	 */
 	@SuppressWarnings("deprecation")
-	public String getAge(Date date) {
-		String outputString = "";
-
-		int daysInMon[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // Days in month
-		int days, month, year;
-
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		year = cal.get(Calendar.YEAR);
-		month = cal.get(Calendar.MONTH) + 1;
-		days = cal.get(Calendar.DAY_OF_MONTH);
-
+	public String getAge(String dob) {
+		
 		Date d = new Date();
-
-		days = daysInMon[month - 1] - days + 1;
-
-		/* Calculating the num of year, month and date */
-		days = days + d.getDate();
-		month = (12 - month) + d.getMonth();
-		year = (d.getYear() + 1900) - year - 1;
-
-		if (month >= 12) {
-			year = year + 1;
-			month = month - 12;
+		String[] temp = dob.split("/");
+		int curr_month = d.getMonth()+1;
+		int curr_year = d.getYear()+1900;
+		int curr_day=d.getDate();
+		int d_month= Integer.parseInt(temp[0]);
+		int d_day= Integer.parseInt(temp[1]);
+		int d_year= Integer.parseInt(temp[2]);
+		int resYear=0, resMonth=0, resDay=0;
+		String ageMessage="";
+		if(curr_month>= d_month)
+		{
+			resYear=curr_year-d_year;
+			resMonth=curr_month-d_month;
 		}
-
-		if (year > 0 && month > 0) {
-			outputString = year + " y " + month + " m";
-		} else if (year > 0) {
-			outputString = year + " y";
-		} else if (month > 0 && days > 0) {
-			outputString = month + " m " + days + " d";
-		} else if (month > 0) {
-			outputString = month + " m";
-		} else {
-			outputString = days + " d";
+		else
+		{
+			resYear=curr_year-d_year-1;
+			resMonth=12-d_month+curr_month;	
 		}
-
-		return outputString;
-
+		if(curr_day > d_day)
+			resDay=curr_day-d_day;
+		else{
+			if(curr_month==1 || curr_month==2 || curr_month == 4 || curr_month == 6 || curr_month == 8 || curr_month==9 || curr_month==11)
+			 resDay= curr_day-d_day +31;
+			else if(curr_month== 5 || curr_month==7 || curr_month==10 || curr_month==12 )
+				resDay= curr_day-d_day +30;
+			else if(curr_month== 3)
+				resDay= curr_day-d_day +28;
+			else 
+				resDay= curr_day-d_day +30;
+		}
+		if(resYear ==0){
+			if(resMonth == 0){
+				ageMessage = resDay+" d";
+			}
+			else{
+				ageMessage = resMonth+" m"+((resDay==0)?"":(" "+resDay+" d"));
+			}
+		}else{
+			ageMessage =resYear+" y"+((resMonth==0)? "" :(" "+resMonth+" m"));
+		}
+		System.out.println("ageMessage::"+ageMessage);
+		return ageMessage;
 	}
 
 	/**
