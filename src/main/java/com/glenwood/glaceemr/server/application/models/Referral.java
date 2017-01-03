@@ -17,6 +17,16 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @Table(name = "h413")
 public class Referral {
 
+	public Referral(){
+		
+	}
+	public Referral(Integer h413001, String h413006, String h413007, String h413037, Integer criticalStatus){
+		this.h413001= h413001;
+		this.h413006= h413006;
+		this.h413007= h413007;
+		this.h413037= h413037;
+		this.criticalStatus= criticalStatus;
+	}
 	@Id	
 	@Column(name="h413001")
 	private Integer h413001;

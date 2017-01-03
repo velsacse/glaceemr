@@ -1,6 +1,5 @@
 package com.glenwood.glaceemr.server.application.services.chart.print;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -438,7 +437,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	private PatientDataBean parsePatientDetails(PatientRegistration patientDetails, Encounter encounter, List<InsuranceDataBean> insuranceBean) throws Exception {
 		String patientName = textFormat.getFormattedName(patientDetails.getPatientRegistrationFirstName(), patientDetails.getPatientRegistrationMidInitial(), patientDetails.getPatientRegistrationLastName(), "");
 		String temp= patientDetails.getPatientRegistrationSpoketo();
-		String age = textFormat.getAge(new SimpleDateFormat("MM/dd/yyyy").parse(temp));
+		String age = textFormat.getAge(temp);
 		String dos = null;
 		String gender = patientDetails.getPatientRegistrationSex().toString();
 		String accountId = patientDetails.getPatientRegistrationAccountno();

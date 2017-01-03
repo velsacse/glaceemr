@@ -31,6 +31,7 @@ import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.Referral;
+import com.glenwood.glaceemr.server.application.models.Referral_;
 import com.glenwood.glaceemr.server.application.repositories.AlertInboxRepository;
 import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
@@ -109,31 +110,38 @@ public class ReferralServiceImpl implements ReferralService{
 		Integer encounterId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(encounterID.toString())).or("-1"));
 		Integer chartId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(chartID.toString())).or("-1"));
 		
-		List<Referral> result = null;		
 		dx = dx.trim();
 		
-		if(!dx.trim().isEmpty()){
-			
-			  result= referralRepository.findAll(Specifications
-							.where(ReferralSpecification.findByEncounterId(encounterId))
-							.and(ReferralSpecification.findByChartId(chartId))
-							.and(ReferralSpecification.findByStatusNotEqual(2))
-							.and(ReferralSpecification.getBydxCode(dx))
-							.and(ReferralSpecification.orderById()));
+		CriteriaBuilder builder= em.getCriteriaBuilder();
+		CriteriaQuery<Referral> query= builder.createQuery(Referral.class);
+		Root<Referral> root= query.from(Referral.class);
 		
+		query.select(builder.construct(Referral.class, 
+						root.get(Referral_.h413001),
+						 root.get(Referral_.h413006),
+						  root.get(Referral_.h413007),
+						   root.get(Referral_.h413037),
+						    root.get(Referral_.criticalStatus)));
+		
+		if(!dx.trim().isEmpty()){
+			query.where(builder.equal(root.get(Referral_.h413003), encounterId),
+						 builder.equal(root.get(Referral_.h413002), chartId),
+						   builder.notEqual(root.get(Referral_.h413041), 2),
+							builder.like(builder.upper(root.get(Referral_.h413011)), "%" + dx.toUpperCase() + "%"));
 		}
 		else{
-
-			  result= referralRepository.findAll(Specifications
-							.where(ReferralSpecification.findByEncounterId(encounterId))
-							.and(ReferralSpecification.findByChartId(chartId))
-							.and(ReferralSpecification.findByStatusNotEqual(2))
-							.and(ReferralSpecification.orderById()));
-
+			query.where(builder.equal(root.get(Referral_.h413003), encounterId),
+					 	 builder.equal(root.get(Referral_.h413002), chartId),
+					 	   builder.notEqual(root.get(Referral_.h413041), 2));					 	    
 		}
-		logger.debug("Getting list of referrals");
-		
-		return result;
+		query.orderBy(builder.asc(root.get(Referral_.h413001)));
+		try{
+			logger.debug("Getting list of referrals");
+			return em.createQuery(query).getResultList();
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	/*
