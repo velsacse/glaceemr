@@ -1,4 +1,4 @@
-package com.glenwood.glaceemr.server.application.models.skintests;
+package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
 import java.util.List;

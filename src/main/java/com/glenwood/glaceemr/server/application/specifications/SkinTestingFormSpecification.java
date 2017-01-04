@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.models.CodingSystems;
-import com.glenwood.glaceemr.server.application.models.skintests.ConcentrateGroup_;
+import com.glenwood.glaceemr.server.application.models.ConcentrateGroup_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
@@ -29,17 +29,17 @@ import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.ProblemList_;
 import com.glenwood.glaceemr.server.application.models.SkinTestOrderAllergenCategory;
 import com.glenwood.glaceemr.server.application.models.SkinTestOrderAllergenCategory_;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestConcentration;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestConcentration_;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcut;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcutAllergenDetails;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcutAllergenDetails_;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcutCategoryDetails;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcutCategoryDetails_;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcut_;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrder_;
-import com.glenwood.glaceemr.server.application.models.skintests.ConcentrateGroup;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrder;
+import com.glenwood.glaceemr.server.application.models.SkinTestConcentration;
+import com.glenwood.glaceemr.server.application.models.SkinTestConcentration_;
+import com.glenwood.glaceemr.server.application.models.SkinTestFormShortcut;
+import com.glenwood.glaceemr.server.application.models.SkinTestFormShortcutAllergenDetails;
+import com.glenwood.glaceemr.server.application.models.SkinTestFormShortcutAllergenDetails_;
+import com.glenwood.glaceemr.server.application.models.SkinTestFormShortcutCategoryDetails;
+import com.glenwood.glaceemr.server.application.models.SkinTestFormShortcutCategoryDetails_;
+import com.glenwood.glaceemr.server.application.models.SkinTestFormShortcut_;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrder_;
+import com.glenwood.glaceemr.server.application.models.ConcentrateGroup;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrder;
 
 /**
  * This class represents specifications needed for skin testing form sheets

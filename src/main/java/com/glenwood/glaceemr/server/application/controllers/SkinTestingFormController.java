@@ -1,4 +1,4 @@
-package com.glenwood.glaceemr.server.application.controllers.skintests;
+package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.PosTable;
-import com.glenwood.glaceemr.server.application.models.skintests.ConcentrateGroup;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrder;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrderEntry;
+import com.glenwood.glaceemr.server.application.models.ConcentrateGroup;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrder;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrderEntry;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.DxAndPendingOrdersBean;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestOrderBean;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestOrderDetailsSaveJSON;

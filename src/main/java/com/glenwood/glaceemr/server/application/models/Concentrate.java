@@ -1,4 +1,4 @@
-package com.glenwood.glaceemr.server.application.models.skintests;
+package com.glenwood.glaceemr.server.application.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

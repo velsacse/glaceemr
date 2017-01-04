@@ -1,4 +1,4 @@
-package com.glenwood.glaceemr.server.application.repositories.skintests;
+package com.glenwood.glaceemr.server.application.repositories;
 
 import java.sql.Timestamp;
 
@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcut;
+import com.glenwood.glaceemr.server.application.models.SkinTestFormShortcut;
 
 @Repository
 public interface SkinTestFormShortcutRepository extends JpaRepository<SkinTestFormShortcut, Integer> ,JpaSpecificationExecutor<SkinTestFormShortcut> {

@@ -1,6 +1,6 @@
 package com.glenwood.glaceemr.server.application.services.chart.skintest;
 
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrder;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrder;
 
 public class SkinTestOrderBean {
 	SkinTestOrder skinTestOrder;

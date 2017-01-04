@@ -2,7 +2,7 @@ package com.glenwood.glaceemr.server.application.services.chart.skintest;
 
 import java.util.List;
 
-import com.glenwood.glaceemr.server.application.models.skintests.ConcentrateGroup;
+import com.glenwood.glaceemr.server.application.models.ConcentrateGroup;
 
 public class SkinTestSheetsDTO {
 	

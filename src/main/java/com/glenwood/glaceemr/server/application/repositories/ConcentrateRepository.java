@@ -1,9 +1,9 @@
-package com.glenwood.glaceemr.server.application.repositories.skintests;
+package com.glenwood.glaceemr.server.application.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import com.glenwood.glaceemr.server.application.models.skintests.Concentrate;
+import com.glenwood.glaceemr.server.application.models.Concentrate;
 
 public interface ConcentrateRepository extends JpaRepository<Concentrate, Integer> ,JpaSpecificationExecutor<Concentrate> {
 

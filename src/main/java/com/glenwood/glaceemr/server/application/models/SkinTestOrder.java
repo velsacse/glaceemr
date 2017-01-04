@@ -1,4 +1,4 @@
-package com.glenwood.glaceemr.server.application.models.skintests;
+package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
 import java.sql.Date;
@@ -20,7 +20,7 @@ import javax.persistence.SequenceGenerator;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrderStatus;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrderStatus;
 import com.glenwood.glaceemr.server.utils.JsonDateSerializer;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 

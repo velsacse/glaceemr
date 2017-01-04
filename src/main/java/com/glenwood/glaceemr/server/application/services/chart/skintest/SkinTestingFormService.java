@@ -8,11 +8,10 @@ import org.json.JSONObject;
 
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.PosTable;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestConcentration;
-import com.glenwood.glaceemr.server.application.models.skintests.ConcentrateGroup;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestFormShortcut;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrder;
-import com.glenwood.glaceemr.server.application.models.skintests.SkinTestOrderEntry;
+import com.glenwood.glaceemr.server.application.models.SkinTestConcentration;
+import com.glenwood.glaceemr.server.application.models.ConcentrateGroup;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrder;
+import com.glenwood.glaceemr.server.application.models.SkinTestOrderEntry;
 
 public interface SkinTestingFormService {
 
