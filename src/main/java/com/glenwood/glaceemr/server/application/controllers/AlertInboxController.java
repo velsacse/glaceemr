@@ -396,7 +396,11 @@ public class AlertInboxController {
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
-		List<AlertEvent> alertEvent=alertInboxService.deleteAlert(alertIdList,userId);
+		
+		List<AlertEvent> alertEvent=null;
+		if(userId!=null)
+			alertEvent=alertInboxService.deleteAlert(alertIdList,userId);
+		
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
