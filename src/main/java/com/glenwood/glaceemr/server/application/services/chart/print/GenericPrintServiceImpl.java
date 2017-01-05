@@ -437,7 +437,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	private PatientDataBean parsePatientDetails(PatientRegistration patientDetails, Encounter encounter, List<InsuranceDataBean> insuranceBean) throws Exception {
 		String patientName = textFormat.getFormattedName(patientDetails.getPatientRegistrationFirstName(), patientDetails.getPatientRegistrationMidInitial(), patientDetails.getPatientRegistrationLastName(), "");
 		String temp= patientDetails.getPatientRegistrationSpoketo();
-		String age = textFormat.getAge(temp);
+		String age = getAge(temp);
 		String dos = null;
 		String gender = patientDetails.getPatientRegistrationSex().toString();
 		String accountId = patientDetails.getPatientRegistrationAccountno();
@@ -1140,5 +1140,42 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	public List<LeafLibrary> getLeafLibraryStyle(Integer styleId) {
 		return leafLibraryRepository.findAll(LeafLibrarySpecification.getByPrintStyleId(styleId));
 	}
-	
+
+	/**
+	 * Get Age string
+	 * @param dob
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private String getAge(String dob) {
+		
+		try{
+			List<Object[]> result= em.createNativeQuery("select date_part('years',age( (select current_date),'"+dob+"')) as years,"
+					+ "date_part('months',age( (select current_date),'"+dob+"')) as months,"
+					+ "date_part('days',age( (select current_date),'"+dob+"')) as days").getResultList();
+
+			String age="";
+			if(result != null && result.size()>0){
+				Object[] obj= result.get(0);
+				int y= (int)Double.parseDouble(obj[0].toString());
+				int m= (int)Double.parseDouble(obj[1].toString());
+				int d= (int)Double.parseDouble(obj[2].toString());			
+				if (y > 0 && m > 0) {
+					age= y + " y " + m+ " m";
+				} else if (y > 0) {
+					age= y + " y";
+				} else if (m > 0 && d > 0) {
+					age= m + " m " + d +" d";
+				} else if (m > 0) {
+					age= m + " m";
+				} else {
+					age= d+" d";
+				}
+			}
+			return age;
+		}catch(Exception e){
+			e.printStackTrace();
+			return "";
+		}
+	}
 }
