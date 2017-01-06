@@ -11,6 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import javax.persistence.GeneratedValue;
@@ -32,6 +33,32 @@ public class DrugDetails {
 	@Column(name="drug_details_generic_id")
 	private Integer drugDetailsGenericId;
 
+	@Column(name="drug_details_category_id")
+	private Integer drugDetailsCategoryId;
+
+	@Column(name="drug_details_is_com_used")
+	private Boolean drugDetailsIsComUsed;
+
+	@Column(name="drug_details_last_modified_on")
+	private Date drugDetailsLastModifiedOn;
+
+	@Column(name="drug_details_last_modified_by")
+	private Integer drugDetailsLastModifiedBy;
+
+	@Column(name="drug_details_name")
+	private String drugDetailsName;
+
+	@Column(name="drug_details_desc")
+	private String drugDetailsDesc;
+
+	@Column(name="drug_details_generic_name")
+	private String drugDetailsGenericName;
+	
+	@OneToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="drug_details_id",referencedColumnName="drug_details_rxnorm_map_drug_id",insertable=false,updatable=false)
+	@JsonManagedReference
+	DrugDetailsRxnormMap detailsRxnormMap;
+	
 	public Integer getDrugDetailsId() {
 		return drugDetailsId;
 	}
@@ -111,32 +138,4 @@ public class DrugDetails {
 	public void setDetailsRxnormMap(DrugDetailsRxnormMap detailsRxnormMap) {
 		this.detailsRxnormMap = detailsRxnormMap;
 	}
-
-	@Column(name="drug_details_category_id")
-	private Integer drugDetailsCategoryId;
-
-	@Column(name="drug_details_is_com_used")
-	private Boolean drugDetailsIsComUsed;
-
-	@Column(name="drug_details_last_modified_on")
-	private Date drugDetailsLastModifiedOn;
-
-	@Column(name="drug_details_last_modified_by")
-	private Integer drugDetailsLastModifiedBy;
-
-	@Column(name="drug_details_name")
-	private String drugDetailsName;
-
-	@Column(name="drug_details_desc")
-	private String drugDetailsDesc;
-
-	@Column(name="drug_details_generic_name")
-	private String drugDetailsGenericName;
-	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
-	@JoinColumn(name="drug_details_id",referencedColumnName="drug_details_rxnorm_map_drug_id",insertable=false,updatable=false)
-	@JsonManagedReference
-	DrugDetailsRxnormMap detailsRxnormMap;
-	
-	
 }
