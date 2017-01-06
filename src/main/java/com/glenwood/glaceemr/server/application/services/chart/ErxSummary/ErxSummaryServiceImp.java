@@ -141,7 +141,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		String erxEnabledUser="false";
 		String agent="false";
 		String serviceDr="false";
-		int prescriberId=userId;
+		Integer prescriberId=userId;
 		boolean userFlag=false;
 		userFlag=getUserRegisteredStatus(userId);
 		if(userFlag){
@@ -158,7 +158,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 			}
 		}
 		else{
-			prescriberId=getServiceDoctor(encounterId);
+			prescriberId= (int) getServiceDoctor(encounterId);
 			serviceDr="true";
 		}
 		
@@ -209,15 +209,15 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 	/**
 	 * Getting Patient's service doctor for that particular encounter
 	 */
-	private int getServiceDoctor(int encounterId) {
+	private long getServiceDoctor(int encounterId) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<Encounter> root = cq.from(Encounter.class);
 		cq.select(root.get(Encounter_.encounter_service_doctor)).where(builder.equal(root.get(Encounter_.encounterId),encounterId));
-		int serviceDoctor=-1;
+		long serviceDoctor=-1;
 		Object obj=em.createQuery(cq).getSingleResult();
 		if(obj!=null) 
-			serviceDoctor=(int)obj ;
+			serviceDoctor=(long)obj ;
 		return serviceDoctor;
 	}
 
@@ -264,9 +264,9 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 				builder.selectCase().when(builder.gt(builder.function("char_length", Integer.class, builder.trim(builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress1), ""))),35),builder.substring(builder.trim(builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress1), "")), 1, 35)).otherwise(builder.trim(builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress1), ""))),
 				builder.selectCase().when(builder.gt(builder.function("char_length", Integer.class, builder.trim(builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress2), ""))),35),builder.substring(builder.trim(builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress2), "")), 1, 35)).otherwise(builder.trim(builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress2), ""))),
 				builder.selectCase().when(builder.le(builder.function("char_length", Integer.class, builder.trim(builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress2), ""))),0),builder.trim(builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress2), ""))).otherwise("AD2"),
-				root.get(PatientRegistration_.patientRegistrationCity),
-				root.get(PatientRegistration_.patientRegistrationStateName),
-				builder.trim(builder.function("replace", String.class,root.get(PatientRegistration_.patientRegistrationZip),builder.literal("-"),builder.literal(""))),
+				builder.coalesce(root.get(PatientRegistration_.patientRegistrationCity),""),
+				builder.coalesce(root.get(PatientRegistration_.patientRegistrationStateName),""),
+				builder.coalesce(builder.trim(builder.function("replace", String.class,root.get(PatientRegistration_.patientRegistrationZip),builder.literal("-"),builder.literal(""))),""),
 				root.get(PatientRegistration_.patientRegistrationMailId),
 				builder.trim(builder.function("replace", String.class,root.get(PatientRegistration_.patientRegistrationPhoneNo),builder.literal("-"),builder.literal(""))),
 				builder.trim(builder.function("replace", String.class,root.get(PatientRegistration_.patientRegistrationCellno),builder.literal("-"),builder.literal(""))),
@@ -352,10 +352,10 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 				prescLocJoin.get(LocationDetails_.spiLocationid),
 				locEmpJoin.get(EmployeeProfile_.empProfileEmpid),
 				root.get(PrescriberDetails_.lastName),
-				root.get(PrescriberDetails_.middleName),
-				root.get(PrescriberDetails_.salutation),
+				builder.coalesce(root.get(PrescriberDetails_.middleName),""),
+				builder.coalesce(root.get(PrescriberDetails_.salutation),""),
 				root.get(PrescriberDetails_.firstName),
-				root.get(PrescriberDetails_.suffix),
+				builder.coalesce(root.get(PrescriberDetails_.suffix),""),
 				prescLocJoin.get(LocationDetails_.addressline1),
 				builder.selectCase().when(builder.equal(builder.trim(prescLocJoin.get(LocationDetails_.addressline2)),""),prescLocJoin.get(LocationDetails_.addressline2)).otherwise("AD2"),
 				builder.selectCase().when(builder.notEqual(builder.trim(prescLocJoin.get(LocationDetails_.addressline2)),""),prescLocJoin.get(LocationDetails_.addressline2)).otherwise(""),
@@ -969,14 +969,15 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		if(!result.isEmpty())
 			serviceLevel=(int) result.get(0);
 		
-		int pharmServiceLevel=1;
+		Integer pharmServiceLevel=1;
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Object> query = cb.createQuery();
 		Root<PharmDetails> pharmRoot = query.from(PharmDetails.class);
 		query.select(pharmRoot.get(PharmDetails_.pharmDetailsServiceLevel)).where(cb.equal(pharmRoot.get(PharmDetails_.pharmDetailsId), pharmId));
 		List<Object> pharmList= em.createQuery(query).getResultList();
 		if(!pharmList.isEmpty())
-			pharmServiceLevel=(int) pharmList.get(0);
+			if(pharmList.get(0)!=null)
+				pharmServiceLevel= (Integer) pharmList.get(0);
 		
 		if(controlledSubstanceCount>0)
 		{
@@ -1083,7 +1084,10 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		int count=0;
 		boolean isControlledSubstance=false;
 		String name=MedicationDetails[0].replaceAll("'", "''");
-		String NDC=MedicationDetails[1].replaceAll("'", "''");
+		String NDC="";
+		if(MedicationDetails.length > 1)
+			NDC=MedicationDetails[1].replaceAll("'", "''");
+			
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
