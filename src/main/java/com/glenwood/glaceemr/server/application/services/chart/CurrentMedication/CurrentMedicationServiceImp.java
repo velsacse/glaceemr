@@ -157,10 +157,12 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				root.get(PatientAllergies_.patAllergCodeSystem),
 				root.get(PatientAllergies_.patAllergDrugCategory),
 				root.get(PatientAllergies_.patAllergReactionTo),
-				builder.concat(builder.concat(builder.concat(builder.concat(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileFname), " "), builder.concat(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileLname), " ")), builder.concat(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileMi), " ")), AllerEmpModifyJoin.get(EmployeeProfile_.empProfileCredentials)),
+				builder.function("format_name", String.class, builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileFname), ""),builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileLname),""),
+						builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileMi), ""),builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
 				root.get(PatientAllergies_.patAllergModifiedOn),
 				root.get(PatientAllergies_.patAllergOnsetDate),
-				builder.concat(builder.concat(builder.concat(builder.concat(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileFname), " "), builder.concat(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileLname), " ")), builder.concat(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileMi), " ")), AllerEmpCreateJoin.get(EmployeeProfile_.empProfileCredentials)),
+				builder.function("format_name", String.class, builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileFname), ""),builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileLname),""),
+						builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileMi), ""),builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
 				root.get(PatientAllergies_.patAllergCreatedOn))).where(typeId,status,patChart).orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));
 		List<Object> allergies=em.createQuery(cq).getResultList();
 		List<PatientAllergiesBean> beanList=new ArrayList<PatientAllergiesBean>();

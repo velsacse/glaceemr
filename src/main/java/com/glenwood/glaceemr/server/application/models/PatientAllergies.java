@@ -2,7 +2,6 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -91,44 +90,36 @@ public class PatientAllergies {
 	@Column(name="patallerg_codesystem")
 	public String patAllergCodeSystem;
 
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula= @JoinFormula(value="patallerg_createdby::integer" , referencedColumnName="emp_profile_empid"))})
 	@JsonManagedReference
 	EmployeeProfile empProfileAllgCreatedByTable;
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="patallerg_resolvedby", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
 	EmployeeProfile empProfileAllgResolvedByTable;
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="patallerg_inactiveby", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
 	EmployeeProfile empProfileAllgInactiveByTable;
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula= @JoinFormula(value="patallerg_modifiedby::integer" , referencedColumnName="emp_profile_empid"))})
 	@JsonManagedReference
 	EmployeeProfile empProfileAllgModifiedByTable;
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="patallerg_typeid", referencedColumnName="allergtype_id", insertable=false, updatable=false)
 	AllergiesType allergiesType;
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="patallerg_encounterid",referencedColumnName="encounter_id" ,insertable=false,updatable=false)
 	Encounter encounter;
 	
-	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="patallerg_chartid",referencedColumnName="chart_id",insertable=false,updatable=false)
 	Chart chart;
 	
-	public AllergiesType getAllergiesType() {
-		return allergiesType;
-	}
-
-	public void setAllergiesType(AllergiesType allergiesType) {
-		this.allergiesType = allergiesType;
-	}
-
 	/**
 	 * Getters and Setters
 	 */
@@ -353,6 +344,28 @@ public class PatientAllergies {
 		this.empProfileAllgModifiedByTable = empProfileAllgModifiedByTable;
 	}
 
-	
-	
+	public Encounter getEncounter() {
+		return encounter;
 	}
+
+	public void setEncounter(Encounter encounter) {
+		this.encounter = encounter;
+	}
+
+	public Chart getChart() {
+		return chart;
+	}
+
+	public void setChart(Chart chart) {
+		this.chart = chart;
+	}
+	
+	public AllergiesType getAllergiesType() {
+		return allergiesType;
+	}
+
+	public void setAllergiesType(AllergiesType allergiesType) {
+		this.allergiesType = allergiesType;
+	}
+	
+}
