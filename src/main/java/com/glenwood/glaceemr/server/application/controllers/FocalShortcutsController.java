@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.HUtil;
 import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
  * Controller for FocalShortcuts
@@ -29,6 +31,9 @@ public class FocalShortcutsController {
 	@Autowired
 	FocalShortcutsService FocalShortcutsService;
 
+	@Autowired
+	EMRResponseBean emrResponseBean;
+	
 	private Logger logger = Logger.getLogger(FocalShortcutsController.class);
 
 	/**
@@ -40,7 +45,6 @@ public class FocalShortcutsController {
 	@ResponseBody
 	public EMRResponseBean GetFocalshortcutsAvailable(@RequestParam(value="tabId") String tabId)
 	{
-		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(FocalShortcutsService.getFocalshortcutsAvailable(tabId).toString());
 		return emrResponseBean;
 	}
@@ -98,7 +102,6 @@ public class FocalShortcutsController {
 		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 		chartId=Integer.parseInt(Optional.fromNullable(chartId+"").or("-1"));
 		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
-		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(FocalShortcutsService.getFocalShortcutData(focalIndex,tabId,patientId,chartId,encounterId,templateId).toString());
 		return emrResponseBean;
 	}
@@ -121,7 +124,6 @@ public class FocalShortcutsController {
 		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 		symptomIds=Optional.fromNullable(symptomIds+"").or("-1");
 		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
-		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(FocalShortcutsService.addNewFocalShorctut(tabId,patientId,encounterId,symptomIds).toString());
 		return emrResponseBean;
 	}
@@ -144,7 +146,6 @@ public class FocalShortcutsController {
 		shortcutName=Optional.fromNullable(shortcutName+"").or("-1");
 		focalDescription=Optional.fromNullable(focalDescription+"").or("-1");
 		xmlData=Optional.fromNullable(xmlData+"").or("-1");
-		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(FocalShortcutsService.saveFocalData(tabid,shortcutName,focalDescription,xmlData).toString());
 		return emrResponseBean;
 	}
@@ -163,9 +164,58 @@ public class FocalShortcutsController {
 			@RequestParam(value="focalsearch") String focalsearch){
 		tabId=Optional.fromNullable(tabId).or(-1);
 		focalsearch=Optional.fromNullable(focalsearch+"").or("-1");
-		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(FocalShortcutsService.searchFocalShortcuts(tabId,focalsearch).toString());
 		return emrResponseBean;
 	}
+
+	/**
+	 * Method to search focal shortcuts
+	 * @param key
+	 * @param tabId
+	 * @return
+	 * @throws JSONException 
+	 */
+	@ApiOperation(value="/SearchFocalShortcut")
+	@RequestMapping(value="/SearchFocalShortcut", method= RequestMethod.GET)
+	public EMRResponseBean searchFocalShortcut(
+		@RequestParam(value="key", defaultValue="", required=true) String key,
+		@RequestParam(value="tabId", defaultValue="-1", required=true) Integer tabId) throws JSONException{
+		
+		emrResponseBean.setData(FocalShortcutsService.searchFocalShortcut(key, tabId).toString());		
+		return emrResponseBean;
+	}
 	
+	/**
+	 * Method view selected focal shortcut
+	 * @param focalId
+	 * @return
+	 * @throws JSONException
+	 */
+	@ApiOperation(value="/FetchFocalShortcut")
+	@RequestMapping(value="/FetchFocalShortcut", method= RequestMethod.GET)
+	public EMRResponseBean fetchFocalShortcut(
+		@RequestParam(value="focalId", defaultValue="-1", required=true) Integer focalId) throws JSONException{		
+		
+		emrResponseBean.setData(FocalShortcutsService.fetchFocalShortcut(focalId).toString());		
+		return emrResponseBean;
+	}
+	
+	/**
+	 * Method to get patient encounter data for adding shortcut
+	 * @param patientId
+	 * @param encounterId
+	 * @param gwPattern
+	 * @return
+	 * @throws JSONException
+	 */
+	@ApiOperation(value="/FetchPatientData")
+	@RequestMapping(value="/FetchPatientData", method= RequestMethod.GET)
+	public EMRResponseBean fetchPatientData(
+		@RequestParam(value="patientId", defaultValue="-1", required=true) Integer patientId,
+		@RequestParam(value="encounterId", defaultValue="-1", required=true) Integer encounterId,
+		@RequestParam(value="gwPattern", defaultValue="", required=true) String gwPattern) throws JSONException{		
+		
+		emrResponseBean.setData(FocalShortcutsService.fetchPatientData(patientId, encounterId, gwPattern).toString());		
+		return emrResponseBean;
+	}
 }

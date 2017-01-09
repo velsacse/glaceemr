@@ -1,10 +1,13 @@
 package com.glenwood.glaceemr.server.application.services.chart.clinicalElements;
 
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
@@ -21,9 +24,10 @@ import com.glenwood.glaceemr.server.utils.HUtil;
 
 
 @Component
-@Scope(value="request",proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class ClinicalDataBean {
 
+	@Autowired
+	ElementQueryFactory elementQueryFactory;
 
 	public HashMap <String, ClinicalElementBean> clinicalElements=null;
 	public HashMap <String,PatientElementBean> patientElements=null;
@@ -415,6 +419,79 @@ public class ClinicalDataBean {
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
-	
+
+
+
+	public void createNewPlanReadInstance(String clientId, Integer patientId,
+			Integer chartId, Integer encounterId, int tabType, Integer templateId,
+			Short patientGender, Date patDOB, Integer ageinDay,
+			String leafCreatedDate, Boolean isAgeBased) {
+		
+		loadClinicalElements(patientId,encounterId, "04",templateId,"-1",tabType, patientGender, patDOB, ageinDay, leafCreatedDate, isAgeBased, clientId);
+		loadPatientClinicalElements(encounterId,patientId,false,"-1","04", tabType, chartId, patientGender, patDOB, ageinDay, leafCreatedDate, isAgeBased, clientId);
+		
+	}
+
+
+
+	private void loadPatientClinicalElements(Integer encounterId,
+			Integer patientId, boolean isHistory, String string, String gwidPattern,
+			Integer tabType, Integer chartId, Short patientGender, Date patDOB,
+			Integer ageinDay, String leafCreatedDate, Boolean isAgeBased, String clientId) {
+
+		List<Object[]> list= elementQueryFactory.getPatientClinicalElementandHistory(patientId,encounterId,tabType, clientId, gwidPattern);
+		for(int i=0; i<list.size(); i++){
+			PatientElementBean patElmtBean=new PatientElementBean();
+
+			String clinicalElementGWId=HUtil.Nz(list.get(i)[1],"-1");
+			int clinicalElementDataType=Integer.parseInt(HUtil.Nz(list.get(i)[3],"-1"));
+			patElmtBean.setPatientClinicalElementId(Integer.parseInt(HUtil.Nz(list.get(i)[0],"-1")));
+			String elementData=HUtil.Nz(list.get(i)[2],"-1").trim();
+			if(clinicalElementDataType==ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_NUMBER){
+				patElmtBean.setPatientClinicalElementNumber(Integer.parseInt(elementData));
+			}else if(clinicalElementDataType==ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_TEXT){
+				patElmtBean.setPatientClinicalElementText(elementData.replaceAll("#~#", "\r\n"));
+			}else if(clinicalElementDataType==ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_BOOLEAN){
+				patElmtBean.setPatientClinicalElementBoolean(Boolean.parseBoolean(elementData));
+			}else if(clinicalElementDataType==ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_SINGLEOPTION || clinicalElementDataType==ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_MULTIPLEOPTION){
+				patElmtBean.setPatientClinicalElementOption(Integer.parseInt(elementData));
+				if(clinicalElementDataType==ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_MULTIPLEOPTION){
+					clinicalElementGWId=clinicalElementGWId+"_"+elementData;
+				}
+			}
+			else if(clinicalElementDataType==ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_OCX){
+				patElmtBean.setPatientClinicalElementText(elementData);
+			}
+			System.out.println("this.setPatientElements:: "+clinicalElementGWId);
+			this.setPatientElements(clinicalElementGWId, patElmtBean);
+
+		}
+	}
+
+
+
+	private void loadClinicalElements(Integer patientId, Integer encounterId,
+			String string, Integer templateId, String gwPattern, int tabType,
+			Short patientGender, Date patDOB, Integer ageinDay,
+			String leafCreatedDate, Boolean isAgeBased, String clientId) {
+		
+		Set<ClinicalElementBean> set= new HashSet<ClinicalElementBean>();
+		
+		List<ClinicalElementBean> list= elementQueryFactory.getClinicalElementsFirst(patientGender, gwPattern, patientId, encounterId, templateId, ageinDay, tabType, isAgeBased, leafCreatedDate);
+		set.addAll(list);
+		list.clear();
+		
+		list= elementQueryFactory.getClinicalElementsSecond(patientGender, gwPattern, patientId, encounterId, templateId, ageinDay, tabType, isAgeBased, leafCreatedDate, clientId);
+		set.addAll(list);
+		list.clear();
+		list.addAll(set);
+		
+		Iterator<ClinicalElementBean> iterator= set.iterator();
+		while(iterator.hasNext()){
+			ClinicalElementBean bean= iterator.next();
+			System.out.println("bean.getClinicalElementGWID():: "+bean.getClinicalElementGWID());			
+			this.setClinicalElements(bean.getClinicalElementGWID(), bean);
+		}
+	}
 	
 }

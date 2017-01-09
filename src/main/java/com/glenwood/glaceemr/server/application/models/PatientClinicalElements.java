@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,15 +15,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "patient_clinical_elements")
 public class PatientClinicalElements implements Serializable{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -257,15 +256,15 @@ public class PatientClinicalElements implements Serializable{
 	/*public HpiSymptom getHpiSymptom() {
 		return hpiSymptom;
 	}
-
+	
 	public void setHpiSymptom(HpiSymptom hpiSymptom) {
 		this.hpiSymptom = hpiSymptom;
 	}
-
+	
 	public HpiElement getHpiElement() {
 		return hpiElement;
 	}
-
+	
 	public void setHpiElement(HpiElement hpiElement) {
 		this.hpiElement = hpiElement;
 	}*/

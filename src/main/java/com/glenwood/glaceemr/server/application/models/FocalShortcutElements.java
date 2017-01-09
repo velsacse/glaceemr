@@ -7,12 +7,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -47,10 +49,13 @@ public class FocalShortcutElements {
 	@JoinColumn(name="focal_shortcut_elements_mapid",referencedColumnName="focal_shortcut_id",insertable=false,updatable=false)
     FocalShortcut focalShortcut;
 	
-	/*@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="focal_shortcut_elements_gwid",referencedColumnName="clinical_elements_gwid",insertable=false,updatable=false)
-    ClinicalElements clinicalElements;*/
+    ClinicalElements clinicalElements;
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula = @JoinFormula(value = "substr(focal_shortcut_elements_gwid,6,3)", referencedColumnName = "plan_type_gwid")) })
+    PlanType planType;
 
 	public Integer getFocalShortcutElementsId() {
 		return focalShortcutElementsId;
@@ -101,13 +106,20 @@ public class FocalShortcutElements {
 		this.focalShortcut = focalShortcut;
 	}
 
-	/*public ClinicalElements getClinicalElements() {
+	public ClinicalElements getClinicalElements() {
 		return clinicalElements;
 	}
 
 	public void setClinicalElements(ClinicalElements clinicalElements) {
 		this.clinicalElements = clinicalElements;
-	}*/
-	
+	}
+
+	public PlanType getPlanType() {
+		return planType;
+	}
+
+	public void setPlanType(PlanType planType) {
+		this.planType = planType;
+	}
 	
 }

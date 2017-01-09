@@ -28,6 +28,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
+import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
+import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.FocalShortcut;
 import com.glenwood.glaceemr.server.application.models.FocalShortcutElements;
@@ -37,6 +39,9 @@ import com.glenwood.glaceemr.server.application.models.HpiElement;
 import com.glenwood.glaceemr.server.application.models.HpiSymptom;
 import com.glenwood.glaceemr.server.application.models.HpiSymptomQualifier;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
+import com.glenwood.glaceemr.server.application.models.PlanType;
+import com.glenwood.glaceemr.server.application.models.PlanType_;
 import com.glenwood.glaceemr.server.application.repositories.FocalShortcutElementsRepository;
 import com.glenwood.glaceemr.server.application.repositories.FocalShortcutRepository;
 import com.glenwood.glaceemr.server.application.repositories.HpiElementRepository;
@@ -449,4 +454,225 @@ public class FocalShortcutsServiceImpl implements FocalShortcutsService{
 			return saveJson;	
 		}
 
+	/**
+	 * Search focal shortcuts
+	 * @param key
+	 * @param tabId
+	 * @return
+	 * @throws JSONException 
+	 */
+	@Override
+	public JSONArray searchFocalShortcut(String key, Integer tabId) throws JSONException {
+		CriteriaBuilder builder= em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
+		Root<FocalShortcut> root= query.from(FocalShortcut.class);
+		
+		query.multiselect(root.get(FocalShortcut_.focalShortcutId),
+						   root.get(FocalShortcut_.focalShortcutName));
+		query.where(builder.equal(root.get(FocalShortcut_.focalShortcutIsactive), true),
+					 builder.equal(root.get(FocalShortcut_.focalShortcutTabid), tabId),
+					  builder.like(builder.upper(root.get(FocalShortcut_.focalShortcutName)), key.toUpperCase()+"%"));
+		query.orderBy(builder.asc(root.get(FocalShortcut_.focalShortcutName)));
+		
+		List<Object[]> result= em.createQuery(query).getResultList();
+		JSONArray returnList= new JSONArray();
+		for(int i=0; i<result.size(); i++){
+			Object[] obj= result.get(i);
+			JSONObject returnObj= new JSONObject();			
+			returnObj.put("shrtId", obj[0]);
+			returnObj.put("code", obj[1]);
+			returnList.put(returnObj);
+		}
+		if(returnList.length()==0)
+			returnList.put("No Shortcuts");
+		return returnList;
+	}
+
+	/**
+	 * Get selected focal shortcut
+	 * @param focalId
+	 * @return
+	 * @throws JSONException 
+	 */
+	@Override
+	public JSONArray fetchFocalShortcut(Integer focalId) throws JSONException {
+		
+		CriteriaBuilder builder= em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
+		Root<FocalShortcutElements> root= query.from(FocalShortcutElements.class);
+		Join<FocalShortcutElements, FocalShortcut> shortcutJoin= root.join(FocalShortcutElements_.focalShortcut, JoinType.INNER);
+		Join<FocalShortcutElements, ClinicalElements> clinicalJoin= root.join(FocalShortcutElements_.clinicalElements, JoinType.INNER);
+		Join<FocalShortcutElements, PlanType> planJoin= root.join(FocalShortcutElements_.planType, JoinType.LEFT);
+		Join<ClinicalElements, ClinicalElementsOptions> optionsJoin= clinicalJoin.join(ClinicalElements_.clinicalElementsOptions, JoinType.LEFT);
+//		optionsJoin.on(builder.equal(optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue), root.get(FocalShortcutElements_.focalShortcutElementsValue)));
+		
+		query.multiselect(root.get(FocalShortcutElements_.focalShortcutElementsId),
+						   root.get(FocalShortcutElements_.focalShortcutElementsGwid),
+						   	root.get(FocalShortcutElements_.focalShortcutElementsValue),
+						   	 root.get(FocalShortcutElements_.focalShortcutElementsMapid),
+						   	  builder.coalesce(clinicalJoin.get(ClinicalElements_.clinicalElementsName),""),
+						   	   builder.coalesce(planJoin.get(PlanType_.planTypeName),"NOTES"),
+					 			builder.coalesce(clinicalJoin.get(ClinicalElements_.clinicalElementsDatatype),-1),
+					 			 builder.coalesce(shortcutJoin.get(FocalShortcut_.focalShortcutName),""),
+					 			  builder.coalesce(optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName),""));
+		query.where(builder.equal(root.get(FocalShortcutElements_.focalShortcutElementsIsactive), true),
+					 builder.equal(shortcutJoin.get(FocalShortcut_.focalShortcutId), focalId),
+					  builder.equal(optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue), root.get(FocalShortcutElements_.focalShortcutElementsValue)),
+					   builder.equal(clinicalJoin.get(ClinicalElements_.clinicalElementsDatatype), 4));
+		
+		List<Object[]> result= em.createQuery(query).getResultList();
+		JSONArray returnList= new JSONArray();
+		for(int i=0; i<result.size(); i++){
+			Object[] obj= result.get(i);
+			JSONObject returnObj= new JSONObject();
+			returnObj.put("id", obj[0]);
+			returnObj.put("gwid", obj[1]);
+			returnObj.put("optionvalue", obj[2]);
+			returnObj.put("mapid", obj[3]);
+			returnObj.put("elementname", obj[4]);
+			returnObj.put("systemname", obj[5]);
+			returnObj.put("datatype", obj[6]);
+			returnObj.put("shortcutname", obj[7]);
+			if(Integer.parseInt(obj[6].toString())>=4)
+				returnObj.put("optionname", obj[8].toString());
+			else
+				returnObj.put("optionname", "");
+			returnList.put(returnObj);
+		}
+		
+		JSONArray secondList= fetchFocalShortcut2(focalId);
+		for(int i=0; i<secondList.length(); i++){
+			JSONObject obj= secondList.getJSONObject(i);
+			returnList.put(obj);
+		}
+		
+		return returnList;
+	}
+	
+	/**
+	 * Get selected focal shortcut
+	 * @param focalId
+	 * @return
+	 * @throws JSONException 
+	 */
+	public JSONArray fetchFocalShortcut2(Integer focalId) throws JSONException {
+		
+		CriteriaBuilder builder= em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
+		Root<FocalShortcutElements> root= query.from(FocalShortcutElements.class);
+		Join<FocalShortcutElements, FocalShortcut> shortcutJoin= root.join(FocalShortcutElements_.focalShortcut, JoinType.INNER);
+		Join<FocalShortcutElements, ClinicalElements> clinicalJoin= root.join(FocalShortcutElements_.clinicalElements, JoinType.INNER);
+		Join<FocalShortcutElements, PlanType> planJoin= root.join(FocalShortcutElements_.planType, JoinType.LEFT);
+		Join<ClinicalElements, ClinicalElementsOptions> optionsJoin= clinicalJoin.join(ClinicalElements_.clinicalElementsOptions, JoinType.LEFT);
+//		optionsJoin.on(builder.equal(optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue), root.get(FocalShortcutElements_.focalShortcutElementsValue)));
+		
+		query.multiselect(root.get(FocalShortcutElements_.focalShortcutElementsId),
+						   root.get(FocalShortcutElements_.focalShortcutElementsGwid),
+						   	root.get(FocalShortcutElements_.focalShortcutElementsValue),
+						   	 root.get(FocalShortcutElements_.focalShortcutElementsMapid),
+						   	  builder.coalesce(clinicalJoin.get(ClinicalElements_.clinicalElementsName),""),
+						   	   builder.coalesce(planJoin.get(PlanType_.planTypeName),"NOTES"),
+					 			builder.coalesce(clinicalJoin.get(ClinicalElements_.clinicalElementsDatatype),-1),
+					 			 builder.coalesce(shortcutJoin.get(FocalShortcut_.focalShortcutName),""),
+					 			  builder.coalesce(optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName),""));
+		query.where(builder.equal(root.get(FocalShortcutElements_.focalShortcutElementsIsactive), true),
+					 builder.equal(shortcutJoin.get(FocalShortcut_.focalShortcutId), focalId),
+					   builder.notEqual(clinicalJoin.get(ClinicalElements_.clinicalElementsDatatype), 4));
+		
+		List<Object[]> result= em.createQuery(query).getResultList();
+		JSONArray returnList= new JSONArray();
+		for(int i=0; i<result.size(); i++){
+			Object[] obj= result.get(i);
+			JSONObject returnObj= new JSONObject();
+			returnObj.put("id", obj[0]);
+			returnObj.put("gwid", obj[1]);
+			returnObj.put("optionvalue", obj[2]);
+			returnObj.put("mapid", obj[3]);
+			returnObj.put("elementname", obj[4]);
+			returnObj.put("systemname", obj[5]);
+			returnObj.put("datatype", obj[6]);
+			returnObj.put("shortcutname", obj[7]);
+			if(Integer.parseInt(obj[6].toString())>=4)
+				returnObj.put("optionname", obj[8].toString());
+			else
+				returnObj.put("optionname", "");
+			returnList.put(returnObj);
+		}
+		
+		return returnList;
+	}
+
+	/**
+	 * Method to get patient encounter data
+	 * @param patientId
+	 * @param encounterId
+	 * @param gwPattern
+	 * @return
+	 * @throws JSONException 
+	 */
+	@Override
+	public JSONArray fetchPatientData(Integer patientId, Integer encounterId,
+			String gwPattern) throws JSONException {
+		
+		CriteriaBuilder builder= em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
+		Root<PatientClinicalElements> root= query.from(PatientClinicalElements.class);
+		
+		query.multiselect(root.get(PatientClinicalElements_.patientClinicalElementsGwid),
+						   root.get(PatientClinicalElements_.patientClinicalElementsValue));
+		
+		query.where(builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid), patientId),
+					 builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId),
+					  builder.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid), gwPattern+"%"));
+					  
+		List<Object[]> result= em.createQuery(query).getResultList();
+		JSONArray returnJSON= new JSONArray();
+		List<String> gwidList= new ArrayList<String>();
+		gwidList.add("-1");
+		for(int i=0; i<result.size(); i++){
+			Object[] obj= result.get(i);
+			JSONObject returnObj= new JSONObject();
+			returnObj.put("patient_clinical_elements_gwid", obj[0].toString());
+			returnObj.put("patient_clinical_elements_value", obj[1].toString());
+			returnJSON.put(returnObj);
+			gwidList.add(obj[0].toString());
+		}
+		
+		return getFocalShortcut(gwidList);
+	}
+	
+	public JSONArray getFocalShortcut(List<String> gwidList) throws JSONException{
+		
+		StringBuffer querryBuffer=new StringBuffer();	
+		querryBuffer.append("select clinical_elements_gwid,clinical_elements_name,COALESCE(plan_type_name,'Notes'),clinical_elements_datatype,case clinical_elements_datatype when 4 then (select count(*) from clinical_elements_options where clinical_elements_options_gwid=clinical_elements_gwid) end as value,(select array_to_string(array_agg(clinical_elements_options_name),'~~') from (select clinical_elements_options_name from clinical_elements_options where clinical_elements_options_gwid=clinical_elements_gwid) as clinical_elements_options_name1) as optionname   from clinical_elements left join plan_type on plan_type_gwid=substr(clinical_elements_gwid,6,3)  where clinical_elements_gwid in(");
+		String gwid=gwidList.toString();
+		gwid=gwid.replace("[","");
+		gwid=gwid.replace("]","");
+		String afterSplit[]=gwid.split(", ");
+		gwid="";
+		for(int i=0;i<afterSplit.length-1;i++){
+			gwid=gwid+afterSplit[i]+",";
+		}
+		gwid=gwid+afterSplit[afterSplit.length-1];
+		
+		String collectBufferData ="'"+gwid.replaceAll(",", "','")+"'";
+		querryBuffer.append(collectBufferData+")");
+		querryBuffer.append("order by clinical_elements_gwid");
+		
+		List<Object> list=em.createNativeQuery(querryBuffer.toString()).getResultList();
+		JSONArray returnList= new JSONArray();
+		returnList.put(list);
+		/*for(int i=0; i<list.size(); i++){
+			Object[] obj= list.get(i);
+			JSONObject returnObj= new JSONObject();
+			returnObj.put("clinical_elements_gwid", obj[0].toString());
+			returnObj.put("clinical_elements_name", obj[1].toString());
+			returnObj.put("plan_type_name", obj[2].toString());
+			returnObj.put("clinical_elements_datatype", obj[3].toString());
+			returnObj.put("value", obj[4].toString());
+			returnObj.put("optionname", obj[5].toString());
+			returnList.put(returnObj);
+		}*/
+		return returnList;
+	}
 }

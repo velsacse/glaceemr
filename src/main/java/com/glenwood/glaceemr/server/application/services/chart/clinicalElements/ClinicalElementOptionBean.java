@@ -1,15 +1,23 @@
 package com.glenwood.glaceemr.server.application.services.chart.clinicalElements;
 
-import java.util.LinkedHashMap;
-
 public class ClinicalElementOptionBean{
 	private int clinicalelementoptionId;
 	private int clinicalelementoptionOrderby;
 	private String clinicalelementoptionGwid;
 	private String clinicalelementoptionName;
 	private String clinicalelementoptionValue;
-	
+	private boolean clinicalelementoptionRetainCase;
 
+	public ClinicalElementOptionBean(){
+		
+	}
+	
+	public ClinicalElementOptionBean(String clinicalelementoptionValue, String clinicalelementoptionName, boolean clinicalelementoptionRetainCase){
+		this.clinicalelementoptionValue= clinicalelementoptionValue;
+		this.clinicalelementoptionName= clinicalelementoptionName;
+		this.clinicalelementoptionRetainCase= clinicalelementoptionRetainCase;
+	}
+	
 	public int getClinicalelementoptionId() {
 		return clinicalelementoptionId;
 	}
@@ -49,7 +57,16 @@ public class ClinicalElementOptionBean{
 	public void setClinicalelementoptionValue(String clinicalelementoptionValue) {
 		this.clinicalelementoptionValue = clinicalelementoptionValue;
 	}
-	
+
+	public boolean getClinicalelementoptionRetainCase() {
+		return clinicalelementoptionRetainCase;
+	}
+
+	public void setClinicalelementoptionRetainCase(
+			boolean clinicalelementoptionRetainCase) {
+		this.clinicalelementoptionRetainCase = clinicalelementoptionRetainCase;
+	}
+
 	
 }
 

@@ -2,8 +2,6 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,7 +9,6 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -21,7 +18,19 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @Entity
 @Table(name = "h611")
 public class H611 implements Serializable{
-    @Id
+  
+	private static final long serialVersionUID = 1L;
+
+	public H611(Integer h611001, String h611005, String h611006, String h611015, Integer h611016, String h611CodingSystemid){
+		this.h611001= h611001;
+		this.h611005= h611005;
+		this.h611006= h611006;
+		this.h611015= h611015;
+		this.h611016= h611016;
+		this.h611CodingSystemid= h611CodingSystemid;
+	}
+	
+	@Id
 	@Column(name="h611001")
 	private Integer h611001;
 
@@ -254,6 +263,5 @@ public class H611 implements Serializable{
 	public void setAssessmentDxcodesystem(String assessmentDxcodesystem) {
 		this.assessmentDxcodesystem = assessmentDxcodesystem;
 	}
-	
 	
 }

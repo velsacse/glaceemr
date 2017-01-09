@@ -26,6 +26,9 @@ public class PlanType implements Serializable{
 	@Column(name="plan_type_gwid")
 	private String planTypeGwid;
 	
+	@Column(name="plan_type_orderby")
+	private String planTypeOrderby;
+	
 	@OneToMany(mappedBy="planType", fetch=FetchType.LAZY)
 	@JsonBackReference
 	List<PlanInstruction> planTypeInstructions;
@@ -61,5 +64,14 @@ public class PlanType implements Serializable{
 	public void setPlanTypeInstructions(List<PlanInstruction> planTypeInstructions) {
 		this.planTypeInstructions = planTypeInstructions;
 	}
+
+	public String getPlanTypeOrderby() {
+		return planTypeOrderby;
+	}
+
+	public void setPlanTypeOrderby(String planTypeOrderby) {
+		this.planTypeOrderby = planTypeOrderby;
+	}
+	
 	
 }

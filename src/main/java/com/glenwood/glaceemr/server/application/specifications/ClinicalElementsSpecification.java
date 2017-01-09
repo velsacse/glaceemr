@@ -235,10 +235,9 @@ public class ClinicalElementsSpecification {
 
 		return new Specification<ClinicalElements>(){
 
-			@SuppressWarnings("deprecation")
 			@Override
 			public Predicate toPredicate(Root<ClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Join<ClinicalElements,ClinicalElementTemplateMapping> paramJoin=root.join(ClinicalElements_.clinicalElementTemplateMapping,JoinType.INNER);		
+				Join<ClinicalElements,ClinicalElementTemplateMapping> paramJoin=root.join(ClinicalElements_.clinicalElementTemplateMapping,JoinType.INNER);
 				Predicate tempPredicate = cb.equal(paramJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingTemplateid),templateID);
 				Predicate tabTypePred = cb.equal(paramJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingType),tabType);
 				Predicate genderPred =root.get(ClinicalElements_.clinicalElementsGender).in(0,patientSex);

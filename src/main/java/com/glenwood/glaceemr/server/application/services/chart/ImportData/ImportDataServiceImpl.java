@@ -3,11 +3,13 @@ package com.glenwood.glaceemr.server.application.services.chart.ImportData;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
@@ -15,6 +17,7 @@ import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.
 import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
 
 @Service
+@Transactional
 public class ImportDataServiceImpl implements ImportDataService{
 
 

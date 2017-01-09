@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -21,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Entity
 @Table(name = "plan_instruction")
 public class PlanInstruction implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="plan_instruction_plan_instruction_id_seq")
@@ -43,6 +46,9 @@ public class PlanInstruction implements Serializable{
 	@Column(name="plan_instruction_isactive")
 	private Boolean planInstructionIsactive;
 	
+	@Column(name="plan_instruction_orderby")
+	private Integer planInstructionOrderby;
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="plan_instruction_plantypeid", referencedColumnName="plan_type_id", insertable=false, updatable=false)
@@ -52,6 +58,18 @@ public class PlanInstruction implements Serializable{
 	@JsonBackReference
 	List<PatientClinicalElements> patientPlanClinicalElements;
 
+	@OneToMany(mappedBy="planInstruction", fetch=FetchType.LAZY)
+	List<PlanMapping> planMappings;
+	
+	@OneToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="plan_instruction_gwid", referencedColumnName="clinical_elements_gwid", insertable=false, updatable=false)
+	ClinicalElements clinicalElements; 
+	
+	@OneToMany(mappedBy="planInstruction", fetch=FetchType.LAZY)
+	@JsonManagedReference	
+	List<ClinicalElementTemplateMapping> clinicalElementTemplateMapping;
+	
 	public Integer getPlanInstructionId() {
 		return planInstructionId;
 	}
@@ -116,6 +134,42 @@ public class PlanInstruction implements Serializable{
 			List<PatientClinicalElements> patientPlanClinicalElements) {
 		this.patientPlanClinicalElements = patientPlanClinicalElements;
 	}
-	
-	
+
+	public List<PlanMapping> getPlanMappings() {
+		return planMappings;
+	}
+
+	public void setPlanMappings(List<PlanMapping> planMappings) {
+		this.planMappings = planMappings;
+	}
+
+	public Integer getPlanInstructionOrderby() {
+		return planInstructionOrderby;
+	}
+
+	public void setPlanInstructionOrderby(Integer planInstructionOrderby) {
+		this.planInstructionOrderby = planInstructionOrderby;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	public ClinicalElements getClinicalElements() {
+		return clinicalElements;
+	}
+
+	public void setClinicalElements(ClinicalElements clinicalElements) {
+		this.clinicalElements = clinicalElements;
+	}
+
+	public List<ClinicalElementTemplateMapping> getClinicalElementTemplateMapping() {
+		return clinicalElementTemplateMapping;
+	}
+
+	public void setClinicalElementTemplateMapping(
+			List<ClinicalElementTemplateMapping> clinicalElementTemplateMapping) {
+		this.clinicalElementTemplateMapping = clinicalElementTemplateMapping;
+	}
+
 }

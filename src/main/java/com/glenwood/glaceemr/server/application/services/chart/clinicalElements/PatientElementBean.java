@@ -1,7 +1,5 @@
 package com.glenwood.glaceemr.server.application.services.chart.clinicalElements;
 
-import org.springframework.stereotype.Component;
-
 
 public class PatientElementBean{
 	private long patientClinicalElementId;

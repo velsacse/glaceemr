@@ -14,6 +14,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
@@ -30,9 +31,9 @@ import com.glenwood.glaceemr.server.application.models.EncounterPlan;
 import com.glenwood.glaceemr.server.application.models.LeafLibrary;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
-import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementTemplateMappingRepository;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsOptionsRepository;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsRepository;
@@ -52,7 +53,6 @@ import com.glenwood.glaceemr.server.application.specifications.EncounterSpecific
 import com.glenwood.glaceemr.server.application.specifications.LeafLibrarySpecification;
 import com.glenwood.glaceemr.server.application.specifications.LeafPatientSpecfication;
 import com.glenwood.glaceemr.server.application.specifications.PatientClinicalElementsSpecification;
-import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.glenwood.glaceemr.server.utils.DateUtil;
 import com.glenwood.glaceemr.server.utils.HUtil;
 
@@ -99,11 +99,10 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 	
 	@Autowired
 	PatientVitalsRepository patientVitalsRepository;
-	
+
 	@PersistenceContext
 	EntityManager em;
-
-
+		
 	Short patientSex=0;
 	Date patDOB=new Date();
 	Integer ageinDay=0;
@@ -183,13 +182,40 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 
 
 	public void getPatientDetails(Integer patientId){
-		List<PatientRegistration> patRegistration=patientRegRepository.findAll(PatientRegistrationSpecification.getPatientPersonalDetails(patientId));
+		/*List<PatientRegistration> patRegistration=patientRegRepository.findAll(PatientRegistrationSpecification.getPatientPersonalDetails(patientId));
 		for (PatientRegistration patientRegistration : patRegistration) {
 			patientSex=patientRegistration.getPatientRegistrationSex().shortValue();
 			patDOB=patientRegistration.getPatientRegistrationDob();
 		}
 		SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
-		ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date() )));
+		ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date() )));*/
+		
+		try{
+			
+			CriteriaBuilder builder= em.getCriteriaBuilder();
+			CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
+			Root<PatientRegistration> root= query.from(PatientRegistration.class); 
+
+			query.multiselect(root.get(PatientRegistration_.patientRegistrationDob), 
+								root.get(PatientRegistration_.patientRegistrationSex));
+			query.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId));
+			List<Object[]> list= em.createQuery(query).getResultList();
+
+			if(list!= null && list.size()>0){
+				patDOB= (Date)list.get(0)[0];
+				try{
+					patientSex= Short.parseShort(list.get(0)[1]+"");
+				}catch(Exception e){
+					patientSex= -1;
+				}
+				SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
+				ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date())));
+			}
+
+		}catch(Exception e){
+			System.out.println("Exception while getting patient details for clinical elements");
+			e.printStackTrace();
+		}
 	}
 
 	public List<ClinicalElements> setClinicalDataBean(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String gwidPattern){
@@ -330,16 +356,13 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 			if(isClinicalElemActive("0000400000000000001")){
 				notesGWID="0000400000000000001";
 			}
-			List<EncounterPlan>  encounterPlan=encounterPlanRepository.findAll(EncounterSpecification.getEncounterPlanByEncId(prevEncounterId));
-
-			for (EncounterPlan encPlan : encounterPlan) {
-				if(encPlan.getPlantext()==null){
-					encPlan.setPlantext(encPlan.getPlantext());
-				}else{
-					encPlan.setPlantext("");
-				}
-				encPlan.setEncounterid(encounterId);
-				encounterPlanRepository.saveAndFlush(encPlan);
+			List<EncounterPlan> encounterPlan=encounterPlanRepository.findAll(EncounterSpecification.getEncounterPlanByEncId(prevEncounterId));
+			
+			for(int i=0; i<encounterPlan.size(); i++){
+				EncounterPlan entity= new EncounterPlan();
+				entity.setEncounterid(encounterId);
+				entity.setPlantext(encounterPlan.get(i).getPlantext());
+				encounterPlanRepository.saveAndFlush(entity);
 			}
 
 		}

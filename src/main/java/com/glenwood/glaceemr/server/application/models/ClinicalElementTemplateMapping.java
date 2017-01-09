@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -17,7 +18,9 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "clinical_element_template_mapping")
-public class ClinicalElementTemplateMapping {
+public class ClinicalElementTemplateMapping implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="clinical_element_template_mapping_id")
@@ -86,7 +89,18 @@ public class ClinicalElementTemplateMapping {
 	@JoinColumn(name = "clinical_element_template_mapping_gwid", referencedColumnName = "hpi_symptom_gwid", insertable = false, updatable = false)
 	private HpiSymptom hpiSymptom;*/
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="clinical_element_template_mapping_gwid", referencedColumnName="plan_instruction_gwid", insertable=false, updatable=false)
+	private PlanInstruction planInstruction;
 	
+	public PlanInstruction getPlanInstruction() {
+		return planInstruction;
+	}
+
+	public void setPlanInstruction(PlanInstruction planInstruction) {
+		this.planInstruction = planInstruction;
+	}
+
 	public FamilyHistoryElement getFamilyHistoryElement() {
 		return familyHistoryElement;
 	}

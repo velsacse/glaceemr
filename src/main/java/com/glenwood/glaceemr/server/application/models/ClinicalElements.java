@@ -12,6 +12,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "clinical_elements")
 public class ClinicalElements implements Serializable{
@@ -92,6 +94,7 @@ public class ClinicalElements implements Serializable{
 	
 	
 	@OneToMany(mappedBy="clinicalElement")
+	@JsonManagedReference
 	List<PatientClinicalElements> patientClinicalElements;
 	
 	
@@ -116,6 +119,9 @@ public class ClinicalElements implements Serializable{
 	 * 
 	 * */
 	
+	
+	@OneToMany(mappedBy="clinicalElements")
+	List<FocalShortcutElements> focalShortcutElements;
 	
 	public List<ClinicalElementTemplateMapping> getClinicalElementTemplateMapping() {
 		return clinicalElementTemplateMapping;
@@ -333,5 +339,12 @@ public class ClinicalElements implements Serializable{
 		this.hpiSymptom = hpiSymptom;
 	}*/
 	
-	
+	public List<FocalShortcutElements> getFocalShortcutElements() {
+		return focalShortcutElements;
+	}
+
+	public void setFocalShortcutElements(
+			List<FocalShortcutElements> focalShortcutElements) {
+		this.focalShortcutElements = focalShortcutElements;
+	}
 }

@@ -11,6 +11,7 @@ import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
 
 public class ClinicalElementBean {
 	private String clinicalElementName;
+	private String clinicalElementGWID;
 	private String clinicalElementNotes;
 	private Integer clinicalElementDataType;
 	private String clinicalElementCPT;
@@ -26,8 +27,35 @@ public class ClinicalElementBean {
 	private List<ClinicalTextMapping> clinicalTextMappings;
 	
 	
+	
+	public ClinicalElementBean(String clinicalElementName,
+			String clinicalElementGWID, String clinicalElementNotes,
+			Integer clinicalElementDataType, String clinicalElementCPT,
+			String clinicalElementICD9, String clinicalElementSNOMED,
+			boolean clinicalElementIsActive, boolean clinicalElementIsGlobal,
+			boolean clinicalElementIsHistory, boolean clinicalElementIsEpisode,
+			String clinicalElementTextDimension, Integer clinicalElementGender,
+			Integer clinicalElementIsSelect) {
+		this.clinicalElementName = clinicalElementName;
+		this.clinicalElementGWID = clinicalElementGWID;
+		this.clinicalElementNotes = clinicalElementNotes;
+		this.clinicalElementDataType = clinicalElementDataType;
+		this.clinicalElementCPT = clinicalElementCPT;
+		this.clinicalElementICD9 = clinicalElementICD9;
+		this.clinicalElementSNOMED = clinicalElementSNOMED;
+		this.clinicalElementIsActive = clinicalElementIsActive;
+		this.clinicalElementIsGlobal = clinicalElementIsGlobal;
+		this.clinicalElementIsHistory = clinicalElementIsHistory;
+		this.clinicalElementIsEpisode = clinicalElementIsEpisode;
+		this.clinicalElementTextDimension = clinicalElementTextDimension;
+		this.clinicalElementGender = clinicalElementGender;
+		this.clinicalElementIsSelect = clinicalElementIsSelect;
+	}
+
+
 	public ClinicalElementBean(){
 		clinicalElementName="";
+		clinicalElementGWID="-1";
 		clinicalElementNotes="";
 		clinicalElementDataType=-1;
 		clinicalElementCPT="";
@@ -133,4 +161,11 @@ public class ClinicalElementBean {
 	public void setClinicalElementIsSelect(Integer clinicalElementIsSelect) {
 		this.clinicalElementIsSelect = clinicalElementIsSelect;
 	}
+	public String getClinicalElementGWID() {
+		return clinicalElementGWID;
+	}
+	public void setClinicalElementGWID(String clinicalElementGWID) {
+		this.clinicalElementGWID = clinicalElementGWID;
+	}
+	
 }

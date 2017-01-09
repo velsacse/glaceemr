@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
-import com.glenwood.glaceemr.server.application.controllers.ReferralController;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
@@ -98,7 +97,7 @@ public class ReferralServiceImpl implements ReferralService{
 	@Autowired
 	AlertInboxRepository alertInboxRepository;
 	
-	private Logger logger = Logger.getLogger(ReferralController.class);
+	private Logger logger = Logger.getLogger(ReferralServiceImpl.class);
 	
 	/* 
 	 * Get list of referrals

@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.services.chart.FocalShortcuts;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 public interface FocalShortcutsService {
 
@@ -22,5 +23,13 @@ public interface FocalShortcutsService {
 			String focalDescription, String xmlData);
 
 	JSONArray searchFocalShortcuts(Integer tabId, String focalsearch);
+
+	JSONArray searchFocalShortcut(String key, Integer tabId) throws JSONException;
+
+	JSONArray fetchFocalShortcut(Integer focalId) throws JSONException;
+
+	JSONArray fetchPatientData(Integer patientId, Integer encounterId,
+			String gwPattern) throws JSONException;
+
 
 }
