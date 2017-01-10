@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -21,11 +22,19 @@ import org.xml.sax.InputSource;
 
 import com.glenwood.glaceemr.server.application.models.PatientEpisode;
 import com.glenwood.glaceemr.server.application.models.WarfarinIndication;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.CoumadinFlowSheetService;
 import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.LabDetailsBean;
 import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.LogInfoBean;
 import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.RecentINRBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.wordnik.swagger.annotations.Api;
 
 @Api(value = "CoumadinFlowSheet", description = "CoumadinFlowSheet", consumes = "application/json")
@@ -37,6 +46,14 @@ public class CoumadinFlowSheetController {
 	@Autowired
 	CoumadinFlowSheetService coumadinflowsheetService;
 
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
+	
+	@Autowired
+	SessionMap sessionMap;
 	/**
 	 * Method to retrieve Episode details
 	 * 
@@ -57,7 +74,9 @@ public class CoumadinFlowSheetController {
 		
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(coumadinflowsheetService.getEpisodes(patientId, episodeId, type));
-        return emrResponseBean;
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CoumadinFlowSheet, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully loaded episodes", sessionMap.getUserID(), request.getRemoteAddr(), patientId,"-1", LogUserType.USER_LOGIN, "", "");
+		//auditTrailSaveService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.CoumadinFlowSheet,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded episodes",sessionMap.getUserID(),"127.0.0.1",request.getRemoteAddr(),patientId,-1,-1,AuditLogConstants.CoumadinFlowSheet,request);
+		return emrResponseBean;
 		
 	}
 
@@ -130,6 +149,8 @@ public class CoumadinFlowSheetController {
 			coumadinflowsheetService.saveLog(document, chartId, patientId,
 					userId, episodeId, currentTimestamp);
 		}
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CoumadinFlowSheet, LogActionType.CREATEORUPDATE, 1, Log_Outcome.SUCCESS, "Successfully saved episode details", userId, request.getRemoteAddr(), patientId,"-1", LogUserType.USER_LOGIN, "", "");
+		//auditTrailSaveService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.CoumadinFlowSheet,AuditLogConstants.CREATEORUPDATE,1,AuditLogConstants.SUCCESS,"Successfully saved episode details",userId,"127.0.0.1",request.getRemoteAddr(),patientId,chartId,-1,AuditLogConstants.CoumadinFlowSheet,request);
 	}
 	/**
 	 * Method to get Log informations details
@@ -147,6 +168,9 @@ public class CoumadinFlowSheetController {
 		
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(coumadinflowsheetService.getLogInfo(chartId, episodeId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CoumadinFlowSheet, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully loaded log details", sessionMap.getUserID(), request.getRemoteAddr(), -1,"-1", LogUserType.USER_LOGIN, "", "");
+		//auditTrailSaveService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.CoumadinFlowSheet,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded log details",sessionMap.getUserID(),"127.0.0.1",request.getRemoteAddr(),-1,chartId,-1,AuditLogConstants.CoumadinFlowSheet,request);
+
         return emrResponseBean;
 	}
 	/**
@@ -166,6 +190,9 @@ public class CoumadinFlowSheetController {
 //		List<LabDetailsBean> ptINR = coumadinflowsheetService.getPTINR(chartId,date1);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(coumadinflowsheetService.getPTINR(chartId,date1));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CoumadinFlowSheet, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully loaded PTINR details", sessionMap.getUserID(), request.getRemoteAddr(), -1,"-1", LogUserType.USER_LOGIN, "", "");
+		//auditTrailSaveService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.CoumadinFlowSheet,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded PTINR details",sessionMap.getUserID(),"127.0.0.1",request.getRemoteAddr(),-1,chartId,-1,AuditLogConstants.CoumadinFlowSheet,request);
+
         return emrResponseBean;
 	}
 	/**
@@ -186,6 +213,9 @@ public class CoumadinFlowSheetController {
 //		List<RecentINRBean> recentINR = coumadinflowsheetService.getRecentINR(episodeId, chartId, patientId);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(coumadinflowsheetService.getRecentINR(episodeId, chartId, patientId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CoumadinFlowSheet, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully loaded Recent INR details", sessionMap.getUserID(), request.getRemoteAddr(), -1,"-1", LogUserType.USER_LOGIN, "", "");
+		//auditTrailSaveService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.CoumadinFlowSheet,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded Recent INR details",sessionMap.getUserID(),"127.0.0.1",request.getRemoteAddr(),patientId,chartId,-1,AuditLogConstants.CoumadinFlowSheet,request);
+
         return emrResponseBean;
 	}
 	/**
@@ -201,6 +231,8 @@ public class CoumadinFlowSheetController {
 //		List<WarfarinIndication> indications = coumadinflowsheetService.getIndication(episodeId);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(coumadinflowsheetService.getIndication(episodeId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CoumadinFlowSheet, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully loaded Indication details", sessionMap.getUserID(), request.getRemoteAddr(), -1,"-1", LogUserType.USER_LOGIN, "", "");
+	//	auditTrailSaveService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.CoumadinFlowSheet,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded Indication details",sessionMap.getUserID(),"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.CoumadinFlowSheet,request);
         return emrResponseBean;
 	}
 	/**
@@ -233,6 +265,8 @@ public class CoumadinFlowSheetController {
 		java.util.Date createdDate = originalFormat.parse(date);
 		coumadinflowsheetService.createCoumadinReminders(patientId, episodeId,
 				userId, createdDate);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CoumadinFlowSheet, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Successfully created coumadin remainders", sessionMap.getUserID(), request.getRemoteAddr(), patientId,"-1", LogUserType.USER_LOGIN, "", "");
+		//auditTrailSaveService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.CoumadinFlowSheet,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully created coumadin remainders",userId,"127.0.0.1",request.getRemoteAddr(),patientId,-1,-1,AuditLogConstants.CoumadinFlowSheet,request);
 	}
 
 }
