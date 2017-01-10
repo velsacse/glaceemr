@@ -911,7 +911,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 			int prescId = 0;
 			if(temp.length>2)
 				prescId=Integer.parseInt(MedicationNameArr[i].split("@@@")[2]);
-			String isPrinted="f";
+			String isPrinted="false";
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Object> cq = builder.createQuery();
 			Root<Prescription> root = cq.from(Prescription.class);
@@ -920,7 +920,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 			if(!result.isEmpty())
 				isPrinted=result.get(0).toString();
 			
-			if(checkControlledSubstance(MedicationNameArr[i]) && isPrinted.equalsIgnoreCase("f"))
+			if(checkControlledSubstance(MedicationNameArr[i]) && (isPrinted.equalsIgnoreCase("false")))
 			{
 				controlledSubstanceCount++;
 				Message+=MedicationNameArr[i].split("@@@")[0]+",";
@@ -947,7 +947,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 			int prescId = 0;
 			if(temp.length>2)
 			prescId=Integer.parseInt(MedicationNameArr[i].split("@@@")[2]);
-			String isPrinted="f";
+			String isPrinted="false";
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Object> cq = builder.createQuery();
 			Root<Prescription> root = cq.from(Prescription.class);
@@ -955,7 +955,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 			List<Object> result= em.createQuery(cq).getResultList();
 			if(!result.isEmpty())
 				isPrinted=result.get(0).toString();
-			if(isPrinted.equalsIgnoreCase("t") )
+			if(isPrinted.equalsIgnoreCase("true") )
 				printcount++;
 		}
 		String canSendControlledSubstance="0";
