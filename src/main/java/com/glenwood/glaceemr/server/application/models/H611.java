@@ -21,6 +21,10 @@ public class H611 implements Serializable{
   
 	private static final long serialVersionUID = 1L;
 
+	public H611(){
+		
+	}
+	
 	public H611(Integer h611001, String h611005, String h611006, String h611015, Integer h611016, String h611CodingSystemid){
 		this.h611001= h611001;
 		this.h611005= h611005;

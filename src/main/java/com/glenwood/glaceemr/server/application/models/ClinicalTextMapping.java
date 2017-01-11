@@ -48,10 +48,10 @@ public class ClinicalTextMapping {
 	@JoinColumn(name = "clinical_text_mapping_associated_element", referencedColumnName = "ros_element_gwid", insertable = false, updatable = false)
 	private RosElement rosElement;
 	
-	@NotFound(action=NotFoundAction.IGNORE)
+	/*@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula = @JoinFormula(value = "split_part(clinical_text_mapping_associated_element,'#',1)", referencedColumnName = "patient_clinical_elements_gwid")) })
-	private PatientClinicalElements patientClinicalElements;
+	private PatientClinicalElements patientClinicalElements;*/
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="clinical_text_mapping_textbox_gwid", referencedColumnName = "plan_instruction_gwid", insertable=false, updatable=false)	
@@ -136,14 +136,14 @@ public class ClinicalTextMapping {
 		this.clinicalTextMappingPopupType = clinicalTextMappingPopupType;
 	}
 
-	public PatientClinicalElements getPatientClinicalElements() {
+	/*public PatientClinicalElements getPatientClinicalElements() {
 		return patientClinicalElements;
 	}
 
 	public void setPatientClinicalElements(
 			PatientClinicalElements patientClinicalElements) {
 		this.patientClinicalElements = patientClinicalElements;
-	}
+	}*/
 	public PlanInstruction getPlanInstruction() {
 		return planInstruction;
 	}

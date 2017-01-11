@@ -661,11 +661,11 @@ public class PlanServiceImpl implements PlanService{
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<PlanElementBean> query= builder.createQuery(PlanElementBean.class);
 		Root<ClinicalTextMapping> root= query.from(ClinicalTextMapping.class);
-		Join<ClinicalTextMapping, PatientClinicalElements> textJoin= root.join(ClinicalTextMapping_.patientClinicalElements, JoinType.LEFT);
+//		Join<ClinicalTextMapping, PatientClinicalElements> textJoin= root.join(ClinicalTextMapping_.patientClinicalElements, JoinType.LEFT);
 		Join<ClinicalTextMapping, PlanInstruction> insJoin= root.join(ClinicalTextMapping_.planInstruction, JoinType.INNER);
 		Join<PlanInstruction, PlanMapping> mapJoin= insJoin.join(PlanInstruction_.planMappings, JoinType.LEFT);
 		Join<PlanInstruction, ClinicalElements> elementJoin= insJoin.join(PlanInstruction_.clinicalElements, JoinType.LEFT);		
-		textJoin.on(builder.equal(textJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId));
+//		textJoin.on(builder.equal(textJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId));
 		mapJoin.on(builder.equal(mapJoin.get(PlanMapping_.planMappingCode), dxcode));
 		query.select(builder.construct(PlanElementBean.class,
 					  builder.coalesce(root.get(ClinicalTextMapping_.clinicalTextMappingTextboxGwid),"-1"),
@@ -733,11 +733,11 @@ public class PlanServiceImpl implements PlanService{
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<PlanElementBean> query= builder.createQuery(PlanElementBean.class);
 		Root<ClinicalTextMapping> root= query.from(ClinicalTextMapping.class);
-		Join<ClinicalTextMapping, PatientClinicalElements> textJoin= root.join(ClinicalTextMapping_.patientClinicalElements, JoinType.INNER);
+//		Join<ClinicalTextMapping, PatientClinicalElements> textJoin= root.join(ClinicalTextMapping_.patientClinicalElements, JoinType.INNER);
 		Join<ClinicalTextMapping, PlanInstruction> insJoin= root.join(ClinicalTextMapping_.planInstruction, JoinType.LEFT);
 		Join<PlanInstruction, PlanMapping> mapJoin= insJoin.join(PlanInstruction_.planMappings, JoinType.LEFT);
 		Join<PlanInstruction, ClinicalElements> elementJoin= insJoin.join(PlanInstruction_.clinicalElements, JoinType.LEFT);		
-		textJoin.on(builder.equal(textJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId));
+//		textJoin.on(builder.equal(textJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId));
 			
 		query.select(builder.construct(PlanElementBean.class,
 					  builder.coalesce(root.get(ClinicalTextMapping_.clinicalTextMappingTextboxGwid),"-1"),
