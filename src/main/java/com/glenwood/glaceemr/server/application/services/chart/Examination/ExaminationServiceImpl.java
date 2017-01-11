@@ -126,7 +126,7 @@ public class ExaminationServiceImpl implements ExaminationService{
 
 		//remove duplicates if any 
 		
-		for (int i = 0;i<activePESystems.size()-1;i++) {
+		for (int i = 0;i<activePESystems.size();i++) {
 			
 			if(!sytemIds.contains(activePESystems.get(i).getClinicalSystemId()))
 			{
@@ -144,7 +144,7 @@ public class ExaminationServiceImpl implements ExaminationService{
 
 		List<CustomPESystem> examinationSystems=new ArrayList<CustomPESystem>();
 
-		for (int i=0;i<activePESystems.size()-1;i++) {
+		for (int i=0;i<activePESystems.size();i++) {
 			String resp=isSystemhavingElements(activePESystems.get(i).getClinicalSystemPeGwid(),patientId,encounterId,templateId);
 			
 			if(resp.split("%%")[0].equals("false")){

@@ -726,14 +726,14 @@ public class VitalsServiceImpl implements VitalsService {
 					elementInchesValue=elementValue;
 				}
 				if(elementValue!=""){
-					elemDetails.associatedElements.add(getAssoElement(vitaltype,"headcm",vitalName,"cm",elementBean.getVitalCondition(),elementBean.getVitalConditionType(),"1","",2,elementGWId,elementValue,"",-1,""));
+					elemDetails.associatedElements.add(getAssoElement(vitaltype,"headcm",vitalName,"cm",elementBean.getVitalCondition(),elementBean.getVitalConditionType(),"0","",2,elementGWId,elementValue,"",-1,""));
 					elemDetails.associatedElements.add(getAssoElement(vitaltype,"headinch",vitalName,"inches",elementBean.getVitalCondition(),elementBean.getVitalConditionType(),"0","inches",2,elementGWId,elementInchesValue,"",-1,""));
 				}else{
-					elemDetails.associatedElements.add(getAssoElement(vitaltype,"headcm",vitalName,"cm",elementBean.getVitalCondition(),elementBean.getVitalConditionType(),"1","",2,elementGWId,"","",-1,""));
+					elemDetails.associatedElements.add(getAssoElement(vitaltype,"headcm",vitalName,"cm",elementBean.getVitalCondition(),elementBean.getVitalConditionType(),"0","",2,elementGWId,"","",-1,""));
 					elemDetails.associatedElements.add(getAssoElement(vitaltype,"headinch",vitalName,"inches",elementBean.getVitalCondition(),elementBean.getVitalConditionType(),"0","inches",2,elementGWId,"","",-1,""));
 				}
 			}else{
-				elemDetails.associatedElements.add(getAssoElement(vitaltype,"headcm",vitalName,"cm",elementBean.getVitalCondition(),elementBean.getVitalConditionType(),"1","",2,elementGWId,"","",-1,""));
+				elemDetails.associatedElements.add(getAssoElement(vitaltype,"headcm",vitalName,"cm",elementBean.getVitalCondition(),elementBean.getVitalConditionType(),"0","",2,elementGWId,"","",-1,""));
 				elemDetails.associatedElements.add(getAssoElement(vitaltype,"headinch",vitalName,"inches",elementBean.getVitalCondition(),elementBean.getVitalConditionType(),"0","inches",2,elementGWId,"","",-1,""));
 			}
 		}
