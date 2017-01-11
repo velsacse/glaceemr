@@ -479,7 +479,7 @@ public class FocalShortcutsServiceImpl implements FocalShortcutsService{
 		for(int i=0; i<result.size(); i++){
 			Object[] obj= result.get(i);
 			JSONObject returnObj= new JSONObject();			
-			returnObj.put("shrtId", obj[0]);
+			returnObj.put("shrtid", obj[0]);
 			returnObj.put("code", obj[1]);
 			returnList.put(returnObj);
 		}
@@ -611,7 +611,7 @@ public class FocalShortcutsServiceImpl implements FocalShortcutsService{
 	 * @throws JSONException 
 	 */
 	@Override
-	public JSONArray fetchPatientData(Integer patientId, Integer encounterId,
+	public JSONObject fetchPatientData(Integer patientId, Integer encounterId,
 			String gwPattern) throws JSONException {
 		
 		CriteriaBuilder builder= em.getCriteriaBuilder();
@@ -638,10 +638,10 @@ public class FocalShortcutsServiceImpl implements FocalShortcutsService{
 			gwidList.add(obj[0].toString());
 		}
 		
-		return getFocalShortcut(gwidList);
+		return getFocalShortcut(gwidList, returnJSON);
 	}
 	
-	public JSONArray getFocalShortcut(List<String> gwidList) throws JSONException{
+	public JSONObject getFocalShortcut(List<String> gwidList, JSONArray returnJSON) throws JSONException{
 		
 		StringBuffer querryBuffer=new StringBuffer();	
 		querryBuffer.append("select clinical_elements_gwid,clinical_elements_name,COALESCE(plan_type_name,'Notes'),clinical_elements_datatype,case clinical_elements_datatype when 4 then (select count(*) from clinical_elements_options where clinical_elements_options_gwid=clinical_elements_gwid) end as value,(select array_to_string(array_agg(clinical_elements_options_name),'~~') from (select clinical_elements_options_name from clinical_elements_options where clinical_elements_options_gwid=clinical_elements_gwid) as clinical_elements_options_name1) as optionname   from clinical_elements left join plan_type on plan_type_gwid=substr(clinical_elements_gwid,6,3)  where clinical_elements_gwid in(");
@@ -673,6 +673,9 @@ public class FocalShortcutsServiceImpl implements FocalShortcutsService{
 			returnObj.put("optionname", obj[5].toString());
 			returnList.put(returnObj);
 		}*/
-		return returnList;
+		JSONObject returnObj= new JSONObject();
+		returnObj.put("valueArr", returnList);
+		returnObj.put("elementArr", returnJSON);
+		return returnObj;
 	}
 }
