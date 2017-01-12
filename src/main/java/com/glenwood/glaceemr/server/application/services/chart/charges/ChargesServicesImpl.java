@@ -267,14 +267,30 @@ public class ChargesServicesImpl implements ChargesServices{
 		List<SubmitStatus> submitStatusInfo=submitStatusRepository.findAll();
 		return submitStatusInfo;
 	}
+	
 	@Override
 	public List<Cpt> getAllCptCodesDetails(List<String> cptCodes) {
 		List<Cpt> cptCodeDetails=new ArrayList<Cpt>();
+		List<Cpt> ordredcptCodeDetails=new ArrayList<Cpt>(cptCodes.size());
 		try {
 			cptCodeDetails=cptRepository.findAll(ChargesSpecification.getCptCodeDetails(cptCodes));
+			for(int i=0;i<cptCodes.size();i++){
+				Cpt emptyObj=new Cpt();
+				ordredcptCodeDetails.add(emptyObj);
+			}
+			for(int i=0;i<cptCodeDetails.size();i++){
+				for(int j=0;j<cptCodes.size();j++){
+					if(cptCodeDetails.get(i).getCptCptcode().equalsIgnoreCase(cptCodes.get(j)))	{
+						ordredcptCodeDetails.set(j,cptCodeDetails.get(i));
+					}
+				}
+
+			}
+
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		return cptCodeDetails;
+		return ordredcptCodeDetails;
 	}
 	
 	@Override

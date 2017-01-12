@@ -305,7 +305,7 @@ public class ChargesSpecification {
 						cb.equal(root.get(ServiceDetail_.serviceDetailModifier2), modifier2),
 						cb.equal(root.get(ServiceDetail_.serviceDetailModifier3), modifier3),
 						cb.equal(root.get(ServiceDetail_.serviceDetailModifier4), modifier4),
-						cb.equal(root.get(ServiceDetail_.isblocked), false));
+						cb.equal(cb.coalesce(root.get(ServiceDetail_.isblocked),false), false));
 				return query.where(concatinatedPredicate).getRestriction();
 			}
 		};
