@@ -21,14 +21,13 @@ public class PortalLoginController {
 	
 	@Autowired
 	HttpServletRequest request;
-
-	@Autowired
-	EMRResponseBean responseBean;
 	
 	@RequestMapping(value = "/LoggedIn",method = RequestMethod.GET)
 	public EMRResponseBean logIn() throws Exception 
 	{		
-				
+
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setSuccess(true);
 		responseBean.setCanUserAccess(true);
 		responseBean.setLogin(true);
@@ -41,7 +40,9 @@ public class PortalLoginController {
 	@RequestMapping(value = "/LoggedOut",method = RequestMethod.GET)
 	public EMRResponseBean logOut() throws Exception 
 	{		
-				
+
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setSuccess(true);
 		responseBean.setCanUserAccess(true);
 		responseBean.setLogin(false);

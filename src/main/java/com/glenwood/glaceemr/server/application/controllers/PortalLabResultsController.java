@@ -32,8 +32,6 @@ public class PortalLabResultsController {
 	@Autowired
 	PortalLabResultsService portalLabResultsService;
 
-	@Autowired
-	EMRResponseBean responseBean;
 	/**
 	 * Method to get list of lab results based on patient Id
 	 * 
@@ -43,6 +41,8 @@ public class PortalLabResultsController {
 	public EMRResponseBean getPatientLabResultList()
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -72,6 +72,8 @@ public class PortalLabResultsController {
 			@ApiParam(name = "pageIndex", value = "index of the page") @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
 					throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -102,6 +104,8 @@ public class PortalLabResultsController {
 			@ApiParam(name = "pageIndex", value = "index of the page") @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
 					throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -134,6 +138,8 @@ public class PortalLabResultsController {
 	public EMRResponseBean getLabAttachmentsDetails(@ApiParam(name="patientId", value="patient's id whose lab attchments details are to be retrieved") @RequestParam(value="patientId", required=true, defaultValue="") int patientId,
 			@ApiParam(name="fileDetailEntityId", value="patient's id whose lab attchments details are to be retrieved") @RequestParam(value="fileDetailEntityId", required=true, defaultValue="") int fileDetailEntityId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);

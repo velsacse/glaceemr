@@ -30,9 +30,6 @@ public class PortalFormsController {
 	@Autowired
 	PortalFormsService portalFormsService;
 
-	@Autowired
-	EMRResponseBean responseBean;
-
 	Logger logger = LoggerFactory.getLogger(PortalFormsController.class);
 
 	/**
@@ -57,6 +54,8 @@ public class PortalFormsController {
 			@ApiParam(name = "isXML", value = "forms type") @RequestParam(value = "isXML", required = false, defaultValue = "0") int isXML)
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -96,6 +95,8 @@ public class PortalFormsController {
 			@ApiParam(name = "isXML", value = "forms type") @RequestParam(value = "isXML", required = false, defaultValue = "0") int isXML)
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -137,6 +138,8 @@ public class PortalFormsController {
 			@ApiParam(name = "pageIndex", value = "index of the page") @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -184,6 +187,8 @@ public class PortalFormsController {
 			@ApiParam(name = "pageIndex", value = "index of the page") @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -225,6 +230,8 @@ public class PortalFormsController {
 			@ApiParam(name = "chartId", value = "Patient Chart ID") @RequestParam(value = "chartId", required = false, defaultValue = "0") int chartId)
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -265,6 +272,8 @@ public class PortalFormsController {
 			@ApiParam(name = "fileTemplateId", value = "File Template ID") @RequestParam(value = "fileTemplateId", required = false, defaultValue = "0") int fileTemplateId)
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -303,6 +312,8 @@ public class PortalFormsController {
 			@RequestBody PortalConsentFormDetailsBean consentSaveBean)
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);

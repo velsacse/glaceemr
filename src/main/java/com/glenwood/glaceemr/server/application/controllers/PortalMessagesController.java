@@ -30,8 +30,6 @@ public class PortalMessagesController {
 	@Autowired
 	PortalMessagesService portalMessagesService;
 
-	@Autowired
-	EMRResponseBean responseBean;
 	
 	/**
 	 * @param patientId 		: Required patient's id 
@@ -47,6 +45,8 @@ public class PortalMessagesController {
 	@ResponseBody
 	public EMRResponseBean getMessagesDetailsByPatientId(@ApiParam(name="patientId", value="patient's id whose messages details is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -81,6 +81,8 @@ public class PortalMessagesController {
 			@ApiParam(name="offset", value="messages offset size value") @RequestParam(value="offset", required=false, defaultValue="5") int offset,
 			@ApiParam(name="pageIndex", value="page number of the offset(offset number)") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -114,6 +116,8 @@ public class PortalMessagesController {
 			@ApiParam(name="offset", value="messages offset size value") @RequestParam(value="offset", required=false, defaultValue="5") int offset,
 			@ApiParam(name="pageIndex", value="page number of the offset(offset number)") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -146,6 +150,8 @@ public class PortalMessagesController {
 			@ApiParam(name="offset", value="messages offset size value") @RequestParam(value="offset", required=false, defaultValue="5") int offset,
 			@ApiParam(name="pageIndex", value="page number of the offset(offset number)") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -178,6 +184,8 @@ public class PortalMessagesController {
 			@ApiParam(name="offset", value="messages offset size value") @RequestParam(value="offset", required=false, defaultValue="5") int offset,
 			@ApiParam(name="pageIndex", value="page number of the offset(offset number)") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -210,6 +218,8 @@ public class PortalMessagesController {
 	public EMRResponseBean deletePatientMessage(@ApiParam(name="patientId", value="patient's id whose sent messages list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="messageId", value="id of the message to be deleted") @RequestParam(value="messageId", required=false, defaultValue="-1") int messageId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -242,6 +252,8 @@ public class PortalMessagesController {
 	public EMRResponseBean deletePortalMessageThread(@ApiParam(name="patientId", value="patient's id whose message details is to be retrieved after deletion of message") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="threadId", value="delete portal message by message id") @RequestParam(value="threadId", required=false, defaultValue="-1") int threadId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -274,6 +286,8 @@ public class PortalMessagesController {
 	@ResponseBody
 	public  EMRResponseBean saveNewMessage(@RequestBody PortalMessageBean portalMessageBean) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);

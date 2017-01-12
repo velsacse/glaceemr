@@ -26,9 +26,6 @@ public class PortalMedicalSummaryController {
 
 	@Autowired
 	PortalMedicalSummaryService portalMedicalSummaryService;
-
-	@Autowired
-	EMRResponseBean responseBean;
 	
 	
 	/**
@@ -45,6 +42,8 @@ public class PortalMedicalSummaryController {
 	@ResponseBody
 	public EMRResponseBean getSessionMap(@ApiParam(name="dbname", value="patient's username whose details are to be retrieved") @RequestParam(value="dbname", required=false, defaultValue="") String dbname,
 			@ApiParam(name="username", value="patient's username whose details are to be retrieved") @RequestParam(value="username", required=false, defaultValue="") String username) throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -77,6 +76,8 @@ public class PortalMedicalSummaryController {
 	@ResponseBody
 	public EMRResponseBean getPatientDetailsByUsername(@ApiParam(name="username", value="patient's username whose details are to be retrieved") @RequestParam(value="username", required=false, defaultValue="") String username) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -112,6 +113,8 @@ public class PortalMedicalSummaryController {
 	@ResponseBody
 	public EMRResponseBean getPatientPersonalDetails(@ApiParam(name="patientId", value="patient's id whose personal details are to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -146,6 +149,8 @@ public class PortalMedicalSummaryController {
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -180,6 +185,8 @@ public class PortalMedicalSummaryController {
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -214,6 +221,8 @@ public class PortalMedicalSummaryController {
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -248,6 +257,8 @@ public class PortalMedicalSummaryController {
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -280,6 +291,8 @@ public class PortalMedicalSummaryController {
 	public EMRResponseBean getPortalMedicalSummaryDetails(@ApiParam(name="patientId", value="patient's id whose medical summary details are to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose medical summary details are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);

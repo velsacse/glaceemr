@@ -36,8 +36,6 @@ public class PortalAppointmentsController {
 	@Autowired
 	PortalAppointmentsService portalAppointmentsService;
 	
-	@Autowired
-	EMRResponseBean responseBean;
 	
 	Logger logger=LoggerFactory.getLogger(PortalAppointmentsController.class);
 	
@@ -59,6 +57,8 @@ public class PortalAppointmentsController {
 			@ApiParam(name="appointmentsType", value="type of appointment (Future, Past, Present)") @RequestParam(value="appointmentsType", required=false, defaultValue="present") String appointmentsType,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -102,6 +102,8 @@ public class PortalAppointmentsController {
 			@ApiParam(name="appointmentsType", value="type of appointment (Future, Past, Present)") @RequestParam(value="appointmentsType", required=false, defaultValue="present") String appointmentsType,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -135,6 +137,8 @@ public class PortalAppointmentsController {
 	public EMRResponseBean getPatientAppointmentRequestsList(@ApiParam(name="patientId", value="patient's id whose appointment requests list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -167,6 +171,8 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getAppointmentDetails() throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -200,6 +206,8 @@ public class PortalAppointmentsController {
 	@ResponseBody
 	public EMRResponseBean getBookedSlotsList(@ApiParam(name="resourceId", value="") @RequestParam(value="resourceId", required=false, defaultValue="0") int resourceId,
 			@ApiParam(name="apptDate", value="") @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate) throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -232,6 +240,8 @@ public class PortalAppointmentsController {
 	@ResponseBody
 	public EMRResponseBean getLockedSlotsList(@ApiParam(name="resourceId", value="") @RequestParam(value="resourceId", required=false, defaultValue="0") int resourceId,
 			@ApiParam(name="apptDate", value="") @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate) throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -261,6 +271,8 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getAppointmentBookLocationsList() throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -292,6 +304,8 @@ public class PortalAppointmentsController {
 	@ResponseBody
 	public EMRResponseBean getAppointmentBookCategoriesList() throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -322,6 +336,8 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getApptBookDoctorsList(@ApiParam(name="posId", value="place of service id form where we want the doctors List") @RequestParam(value="posId", required=false, defaultValue="0") int posId) throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -357,6 +373,8 @@ public class PortalAppointmentsController {
 	public EMRResponseBean getApptFreeSlotsByProviderIdAndDate(@ApiParam(name="providerId", value="") @RequestParam(value="providerId", required=false, defaultValue="0") int providerId,
 			@ApiParam(name="apptDate", value="") @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate){
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -389,6 +407,8 @@ public class PortalAppointmentsController {
 	@ResponseBody
 	public  EMRResponseBean createPortalAppointmentRequestAlert(@RequestBody ApptRequestBean apptRequestAlertEventBean) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -418,6 +438,8 @@ public class PortalAppointmentsController {
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public  EMRResponseBean bookAppointment(@RequestBody SchedulerApptBookingBean schedulerApptBookingBean) throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);

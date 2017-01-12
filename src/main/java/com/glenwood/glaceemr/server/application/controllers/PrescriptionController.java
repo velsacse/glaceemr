@@ -302,6 +302,8 @@ public class PrescriptionController {
 	@ResponseBody
 	public EMRResponseBean getPharmacyList(@RequestBody PharmacyFilterBean pharmacyFilterBean)throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -334,7 +336,8 @@ public class PrescriptionController {
 	@ResponseBody
 	public EMRResponseBean getPatientRefillRequestHistory(@ApiParam(name="patientId", value="patient's id whose refill request history is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose refill request history is to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
-		
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -367,6 +370,8 @@ public class PrescriptionController {
 	@ResponseBody
 	public EMRResponseBean getPatientRefillRequestMedications(@ApiParam(name="patientId", value="patient's id whose completed medications list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose completed medications are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -396,6 +401,8 @@ public class PrescriptionController {
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean requestFillFromPortal(@RequestBody PortalRefillRequestBean portalRefillRequestBean)throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
 		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);

@@ -53,9 +53,6 @@ public class PortalPatientRegistrationController {
 	@Autowired
 	EmployeeService employeeService;
 
-	@Autowired
-	EMRResponseBean responseBean;
-
 	Logger logger=LoggerFactory.getLogger(PortalPatientRegistrationController.class);
 
 	/**
@@ -72,6 +69,8 @@ public class PortalPatientRegistrationController {
 	public EMRResponseBean getPatientProfileSettingsFieldsOprions(){
 
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -124,6 +123,8 @@ public class PortalPatientRegistrationController {
 			@ApiParam(name="firstName", value="username to be verified") @RequestParam(value="firstName", required=false, defaultValue="-1") String firstName,
 			@ApiParam(name="lastName", value="username to be verified") @RequestParam(value="lastName", required=false, defaultValue="-1") String lastName){
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -160,6 +161,8 @@ public class PortalPatientRegistrationController {
 	public EMRResponseBean registerNewUser(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
 			@ApiParam(name="dbname", value="username to be verified") @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -195,6 +198,8 @@ public class PortalPatientRegistrationController {
 	public EMRResponseBean registerExistingUser(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
 			@ApiParam(name="dbname", value="username to be verified") @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -230,6 +235,8 @@ public class PortalPatientRegistrationController {
 	public EMRResponseBean requestSignupCredentials(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
 			@ApiParam(name="dbname", value="username to be verified") @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -266,6 +273,8 @@ public class PortalPatientRegistrationController {
 	public EMRResponseBean activateAccount(@ApiParam(name="patientId", value="patient id to activate the account") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
 			@ApiParam(name="practiceId", value="practice id") @RequestParam(value="practiceId", required=false, defaultValue="0") String practiceId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
