@@ -107,7 +107,7 @@ public class PhoneMessagesController {
 	@ResponseBody
 	public EMRResponseBean update(
 			@RequestParam(value="encounterid", required=false, defaultValue="1") String encounterId,
-			@RequestParam(value="response", required=true, defaultValue="-1") String response,
+			@RequestParam(value="response", required=true, defaultValue="") String response,
 			@RequestParam(value="status", required=false, defaultValue="-1") String status,
 			@RequestParam(value="modifiedby", required=true, defaultValue="-1") String modifiedBy,
 			@RequestParam(value="servicedr", required=false, defaultValue="-1") String serviceDr){
