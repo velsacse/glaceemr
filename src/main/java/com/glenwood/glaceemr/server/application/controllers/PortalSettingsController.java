@@ -35,9 +35,6 @@ public class PortalSettingsController {
 	
 	@Autowired
 	EmployeeService employeeService;
-
-	@Autowired
-	EMRResponseBean responseBean;
 	
 	Logger logger=LoggerFactory.getLogger(PortalSettingsController.class);
 	
@@ -53,7 +50,9 @@ public class PortalSettingsController {
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getPatientProfileSettingsFieldsOprions(){
-
+		
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -84,6 +83,8 @@ public class PortalSettingsController {
 	@ResponseBody
 	public EMRResponseBean getPortalBillingConfigFields(){
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -116,6 +117,8 @@ public class PortalSettingsController {
 	public EMRResponseBean getEmployeesList(@ApiParam(name="groupId", value="groupId of the employees") @RequestParam(value="groupId", required=false, defaultValue="") String groupId,
 			@ApiParam(name="sort", value="sort order of the result") @RequestParam(value="sort", required=false, defaultValue="") String sort){
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -146,6 +149,8 @@ public class PortalSettingsController {
 	@ResponseBody
 	public EMRResponseBean getActivePosList(){
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -176,6 +181,8 @@ public class PortalSettingsController {
 	@ResponseBody
 	public EMRResponseBean getProvidersList(){
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -207,6 +214,8 @@ public class PortalSettingsController {
 	@ResponseBody
 	public  EMRResponseBean saveDemographicChanges(@RequestBody PatientRegistrationBean regDetailsBean) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -239,6 +248,8 @@ public class PortalSettingsController {
 	public EMRResponseBean getActiveSessionForOldEMR(@ApiParam(name="patientId", value="gets the session details from old emr") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="groupId of the employees") @RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -273,6 +284,8 @@ public class PortalSettingsController {
 	public EMRResponseBean getPortalConfigDetails(String JSESSIONID, @ApiParam(name="patientId", value="patient's id whose portal config details are to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@ApiParam(name="chartId", value="chart id of a patient, whose portal config details are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -303,6 +316,8 @@ public class PortalSettingsController {
 	@ResponseBody
 	public EMRResponseBean getInsuranceList(@RequestBody InsuranceFilterBean insFilterBean)throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);

@@ -29,9 +29,6 @@ public class PortalPaymentsController {
 	
 	@Autowired
 	PortalPaymentsService portalPaymentsService;
-
-	@Autowired
-	EMRResponseBean responseBean;
 	
 	/**
 	 * @param patientId 		: Required patient's id 
@@ -51,6 +48,8 @@ public class PortalPaymentsController {
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -86,6 +85,8 @@ public class PortalPaymentsController {
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -117,6 +118,8 @@ public class PortalPaymentsController {
 	@ResponseBody
 	public EMRResponseBean getPatientPaymentsDeails(@ApiParam(name="patientId", value="patient's id whose payments summary is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -148,6 +151,8 @@ public class PortalPaymentsController {
 	@ResponseBody
 	public EMRResponseBean getPatientInsDetails(@ApiParam(name="patientId", value="patient's id whose payments summary is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -180,6 +185,8 @@ public class PortalPaymentsController {
 	@ResponseBody
 	public  EMRResponseBean processPaymentTransaction(@RequestBody CreditCardPaymentBean paymentDetailsBean) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -215,6 +222,8 @@ public class PortalPaymentsController {
 			@ApiParam(name="billId", value="bill id of the statement details bean to be retrieved") @RequestParam(value="billId", required=false, defaultValue="") int billId,
 			@ApiParam(name="billType", value="bill type of the statement details bean to be retrieved") @RequestParam(value="billType", required=false, defaultValue="") String billType) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -244,6 +253,8 @@ public class PortalPaymentsController {
 	@ResponseBody
 	public EMRResponseBean getTransFirstConfiguredPosList() throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);

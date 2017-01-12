@@ -28,8 +28,6 @@ public class PortalImmunizationHistoryController {
 	@Autowired
 	PortalImmunizationHistoryService portalImmunizationHistoryService;
 
-	@Autowired
-	EMRResponseBean responseBean;
 
 	/**
 	 * Appointment list of a patient appointments.
@@ -54,6 +52,8 @@ public class PortalImmunizationHistoryController {
 			@ApiParam(name = "pageIndex", value = "index of the page") @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -92,6 +92,8 @@ public class PortalImmunizationHistoryController {
 			@ApiParam(name = "labDescCVX", value = "lab cvx for which VIS files need to be retrieved") @RequestParam(value = "labDescCVX", required = false, defaultValue = "0") String labDescCVX)
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -132,6 +134,8 @@ public class PortalImmunizationHistoryController {
 			@ApiParam(name = "searchKey", value = "type of appointment (Future, Past, Present)") @RequestParam(value = "searchKey", required = false, defaultValue = "present") String searchKey)
 			throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -164,6 +168,8 @@ public class PortalImmunizationHistoryController {
 	@ResponseBody
 	public EMRResponseBean getVaccUpdateReasonList() throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -197,6 +203,8 @@ public class PortalImmunizationHistoryController {
 	public EMRResponseBean bookAppointment(
 			@RequestBody VaccineUpdateBean vaccineUpdateBean) throws Exception {
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);

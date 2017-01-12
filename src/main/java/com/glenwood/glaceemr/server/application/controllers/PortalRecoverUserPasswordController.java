@@ -33,9 +33,6 @@ public class PortalRecoverUserPasswordController {
 	portalRecoverUserPasswordService portalRecoverPasswordService;
 	
 	Logger logger=LoggerFactory.getLogger(PortalRecoverUserPasswordController.class);
-
-	@Autowired
-	EMRResponseBean responseBean;
 	
 	/**
 	 * Appointment Requests list of a patient.
@@ -51,6 +48,8 @@ public class PortalRecoverUserPasswordController {
 	@ResponseBody
 	public EMRResponseBean getPatientAppointmentRequestsList(@RequestBody RecoverPortalPasswordBean recoverPasswordBean) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(false);
@@ -82,6 +81,8 @@ public class PortalRecoverUserPasswordController {
 	@ResponseBody
 	public EMRResponseBean getAuthenticationDetails(@RequestBody RecoverPortalPasswordBean recoverPasswordBean) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(false);

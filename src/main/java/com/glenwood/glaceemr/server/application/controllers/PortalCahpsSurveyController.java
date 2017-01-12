@@ -32,8 +32,6 @@ public class PortalCahpsSurveyController {
 	@Autowired
 	PortalCahpsSurveyService portalCahpsSurveyService;
 
-	@Autowired
-	EMRResponseBean responseBean;
 	
 	Logger logger=LoggerFactory.getLogger(PortalCahpsSurveyController.class);
 	
@@ -53,6 +51,8 @@ public class PortalCahpsSurveyController {
 	@ResponseBody
 	public EMRResponseBean getPatientCahpsQuestionnaire(@ApiParam(name="patientAge", value="patient age to retrieve the corresponding cahps questionnaire") @RequestParam(value="patientAge", required=false, defaultValue="0") int patientAge) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -86,6 +86,8 @@ public class PortalCahpsSurveyController {
 	@ResponseBody
 	public EMRResponseBean saveCahpsSurvey(@RequestBody PatientSurveySaveBean surveySaveBean) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);

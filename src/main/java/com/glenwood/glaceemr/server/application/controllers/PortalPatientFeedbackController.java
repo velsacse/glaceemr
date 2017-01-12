@@ -28,9 +28,6 @@ public class PortalPatientFeedbackController {
 	
 	@Autowired
 	PortalPatientFeedbackService portalPatientFeedbackService;
-
-	@Autowired
-	EMRResponseBean responseBean;
 	
 	Logger logger=LoggerFactory.getLogger(PortalPatientFeedbackController.class);
 	
@@ -49,6 +46,8 @@ public class PortalPatientFeedbackController {
 	@ResponseBody
 	public EMRResponseBean getPatientAppointmentsList() throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -80,6 +79,8 @@ public class PortalPatientFeedbackController {
 	@ResponseBody
 	public EMRResponseBean saveCahpsSurvey(@RequestBody PatientFeedbackSaveBean feedbackSaveBean) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);

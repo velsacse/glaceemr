@@ -27,8 +27,6 @@ public class PortalDocumentsController {
 	@Autowired
 	PortalDocumentsService documentsService;
 	
-	@Autowired
-	EMRResponseBean responseBean;
 	
 	/**
 	 * Shared Documents list of a patient.
@@ -46,6 +44,8 @@ public class PortalDocumentsController {
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -80,6 +80,8 @@ public class PortalDocumentsController {
 			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
 			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -114,6 +116,8 @@ public class PortalDocumentsController {
 	public EMRResponseBean getPatientFileDetails(@ApiParam(name="patientId", value="patient's id whose Visit Summary is to be retrieved") @RequestParam(value="patientId", required=true, defaultValue="") int patientId,
 			@ApiParam(name="fileId", value="patient's id whose Visit Summary is to be retrieved") @RequestParam(value="fileId", required=true, defaultValue="") int fileId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -147,6 +151,8 @@ public class PortalDocumentsController {
 	public EMRResponseBean getPatientFileNameDetails(@ApiParam(name="patientId", value="patient's id whose Visit Summary is to be retrieved") @RequestParam(value="patientId", required=true, defaultValue="") int patientId,
 			@ApiParam(name="fileDetailsId", value="patient's id whose Visit Summary is to be retrieved") @RequestParam(value="fileDetailsId", required=true, defaultValue="") int fileDetailsId) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -180,6 +186,8 @@ public class PortalDocumentsController {
 			@ApiParam(name="encounterId", value="patient's encounter id whose Visit Summary is to be retrieved") @RequestParam(value="encounterId", required=true, defaultValue="") int encounterId,
 			@ApiParam(name="fileName", value="fileName of the cda raw(XML) data") @RequestParam(value="fileName", required=true, defaultValue="") String fileName) throws Exception{
 
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
