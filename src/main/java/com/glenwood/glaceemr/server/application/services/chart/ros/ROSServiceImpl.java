@@ -7,8 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalSystem;
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
@@ -71,7 +73,7 @@ public class ROSServiceImpl implements ROSService {
 
 	@Override
 	public List<ROSSystemBean> getROSElements(String clientId,Integer patientId, Integer chartId,Integer encounterId, Integer templateId, Integer tabId) {
-
+		clearClinicalData();
 		getROSElements(templateId);
 		setClinicalDataBean(patientId,encounterId,templateId,3,clientId);
 		return frameResponseBean(tabId);
@@ -234,5 +236,21 @@ public class ROSServiceImpl implements ROSService {
 		bean.setElementShortcuts(elementShortcuts);
 		
 		return bean;
+	}
+	
+	/**
+	 * Cleaning clinical data bean
+	 */
+	private void clearClinicalData() {
+		try{
+			clinicalDataBean.getPatientElements().clear();
+			clinicalDataBean.getClinicalElements().clear();
+			clinicalDataBean.getPatientEpisodeElements().clear();
+			clinicalDataBean.getPatientHistoryElements().clear();
+			clinicalDataBean.getElementsToDelete().clear();
+			clinicalDataBean.getElementsToSave().clear();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 }

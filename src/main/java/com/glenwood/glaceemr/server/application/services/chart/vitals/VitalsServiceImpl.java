@@ -92,6 +92,7 @@ public class VitalsServiceImpl implements VitalsService {
 		try{
 			this.fromPrint=fromPrint;
 			getPatientDetails(patientId);
+			clearClinicalData();
 			clinicalDataBean.clientId=clientId;
 			getActiveVitalsGroup(patientId,groupId);
 			for (VitalGroup vitalGroup : vitalGroupList) {
@@ -1060,6 +1061,7 @@ public class VitalsServiceImpl implements VitalsService {
 	public CustomVitalGroup setVitals(Integer patientId,Integer encounterId,Integer groupId,Boolean isDischargeVitals,Integer admssEpisode,String clientId)throws Exception{
 		CustomVitalGroup vitalGrpInfo =new CustomVitalGroup();
 		getPatientDetails(patientId);
+		clearClinicalData();
 		clinicalDataBean.clientId=clientId;
 		getActiveVitalsGroup(patientId,groupId);
 		for (VitalGroup vitalGroup : vitalGroupList) {
@@ -1068,7 +1070,7 @@ public class VitalsServiceImpl implements VitalsService {
 		setClinicalDataBean(patientId,encounterId,isDischargeVitals,admssEpisode);
 		return prepareJsonfromBeans(vitalGrpInfo,patientId,encounterId,patientSex,ageinYears);
 	}
-	
+
 	private CustomVitalGroup prepareJsonfromBeans(CustomVitalGroup vitalGrpInfo,Integer patientId, Integer encounterId,short patientSex,int patientAge) throws Exception {
 		int groupId = -1;
 		LinkedHashMap<Integer,VitalGroupBean> vitalGroupHashMap = vitalDataBean.getVitals();
@@ -1231,4 +1233,19 @@ public class VitalsServiceImpl implements VitalsService {
 		return vitalGrpInfo;
 	}
 
+	/**
+	 * Cleaning clinical data bean
+	 */
+	private void clearClinicalData() {
+		try{
+			clinicalDataBean.getPatientElements().clear();
+			clinicalDataBean.getClinicalElements().clear();
+			clinicalDataBean.getPatientEpisodeElements().clear();
+			clinicalDataBean.getPatientHistoryElements().clear();
+			clinicalDataBean.getElementsToDelete().clear();
+			clinicalDataBean.getElementsToSave().clear();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 }

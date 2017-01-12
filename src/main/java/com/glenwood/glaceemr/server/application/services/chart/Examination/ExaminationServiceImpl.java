@@ -273,6 +273,7 @@ public class ExaminationServiceImpl implements ExaminationService{
 
 	@Override
 	public CustomPESystem getSystemActiveElements(String clientId,Integer patientId, Integer chartId,Integer encounterId,Integer templateId,Integer selectedSystemId) {
+		clearClinicalData();
 		clinicalDataBean.clientId=clientId;
 		setClinicalDataBean(patientId,encounterId,templateId,5);
 		ExaminationSystem systemBean=getExaminationBeanForSystem(selectedSystemId, patientId, encounterId, templateId);
@@ -1086,9 +1087,6 @@ public class ExaminationServiceImpl implements ExaminationService{
 		return returnJson.toString();
 	}
 
-
-
-
 	@Override
 	public String deleteQuickNotes(Integer dataListId) {
 		List<SoapElementDatalist> datList=soapElementDatalistRepository.findAll(ClinicalElementsSpecification.getSoapElementDataListById(dataListId));
@@ -1096,10 +1094,20 @@ public class ExaminationServiceImpl implements ExaminationService{
 		return "REMOVED";
 	}
 
-
-
-
-
-
+	/**
+	 * Cleaning clinical data bean
+	 */
+	private void clearClinicalData() {
+		try{
+			clinicalDataBean.getPatientElements().clear();
+			clinicalDataBean.getClinicalElements().clear();
+			clinicalDataBean.getPatientEpisodeElements().clear();
+			clinicalDataBean.getPatientHistoryElements().clear();
+			clinicalDataBean.getElementsToDelete().clear();
+			clinicalDataBean.getElementsToSave().clear();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 
 }
