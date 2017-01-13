@@ -76,8 +76,12 @@ public class InvestigationSummaryController {
 	public EMRResponseBean getOrderSetList() throws Exception {
 		logger.debug("in getting order set data");
 //		List<OrderSetData> orderSetData = investigationService.findOrderSetData();
+		  System.out.println("before request  for orderset "+System.currentTimeMillis());
+	        long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findOrderSetData());
+		System.out.println("After request  for orderset "+System.currentTimeMillis());
+        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
 		return emrResponseBean;
 	}
 	
@@ -92,9 +96,13 @@ public class InvestigationSummaryController {
 	public EMRResponseBean getResultsList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId,
 			@RequestParam(value="chartId", required=false, defaultValue="") Integer chartId) throws Exception {
 		logger.debug("in getting pending orders in investigations");
+		System.out.println("before request  for results "+System.currentTimeMillis());
+        long starttime=System.currentTimeMillis();
 //		List<LabEntries> labInfo = investigationService.findResultsLabs(chartId);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findResultsLabs(chartId));
+		 System.out.println("After request  for pendingresults "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 	
@@ -109,8 +117,12 @@ public class InvestigationSummaryController {
 			@RequestParam(value="chartId", required=false, defaultValue="") Integer chartId) throws Exception {
 		logger.debug("in getting pending orders in investigations");
 //		List<LabEntries> labInfo = investigationService.findPendingOrders(encounterId, chartId);
+		 System.out.println("before request  for pendingorders "+System.currentTimeMillis());
+	        long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findPendingOrders(encounterId, chartId));
+		System.out.println("After request  for pendingorders "+System.currentTimeMillis());
+        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 
@@ -127,19 +139,31 @@ public class InvestigationSummaryController {
 		String currentEnId = saveObject.split("#@@#")[2];
 		String chartId = saveObject.split("#@@#")[3];
 		String testStatus = saveObject.split("#@@#")[4];
+		System.out.println("before request  for performing delete lab "+System.currentTimeMillis());
+		long starttime=System.currentTimeMillis();
 		investigationService.performOrDeleteLab(testDetailIds , encounterId.split("@##@")[0], testStatus);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,
 				AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,
 				"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,
 				AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		 System.out.println("After request  for flowsheet "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
 //		List<LabEntries> labs = null;
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		if( encounterId.split("@##@")[1].equalsIgnoreCase("Pending")) {
 //			labs = getPendingOrdersList(Integer.parseInt(currentEnId), Integer.parseInt(chartId));
+			System.out.println("before request  for findpendingorders "+System.currentTimeMillis());
+			long starttime1=System.currentTimeMillis();
 			emrResponseBean.setData(investigationService.findPendingOrders(Integer.parseInt(currentEnId), Integer.parseInt(chartId)));
+			System.out.println("After request  for findpendingorders "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime1));
 		} else if( encounterId.split("@##@")[1].equalsIgnoreCase("Todays")) {
 //			labs = getTodaysOrdersList(Integer.parseInt(currentEnId));
+			System.out.println("before request  for findtodayorders "+System.currentTimeMillis());
+			long starttime1=System.currentTimeMillis();
 			emrResponseBean.setData(investigationService.findTodaysOrders(Integer.parseInt(currentEnId)));
+			System.out.println("After request  for findtodayorders "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime1));
 		}
 		emrResponseBean.setLogin(true);
 		return emrResponseBean;
@@ -158,8 +182,12 @@ public class InvestigationSummaryController {
 			@RequestParam(value="offset", required=false, defaultValue="") Integer offset) throws Exception {
 		logger.debug("in getting body site details");
 //		Page<BodySite> siteInfo = investigationService.findBodySiteData(searchStr, limit, offset);
+		System.out.println("before request  for body site details "+System.currentTimeMillis());
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findBodySiteData(searchStr, limit, offset));
+		   long starttime=System.currentTimeMillis();
+	         System.out.println("After request  for body site details "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 	
@@ -172,10 +200,15 @@ public class InvestigationSummaryController {
 	public EMRResponseBean getLotNumberData(@RequestParam(value="vaccineId", required=false, defaultValue="") Integer vaccineId, 
 			@RequestParam(value="onLoad", required=false, defaultValue="") String onLoad) throws Exception {
 		logger.debug("in getting lot number details");
+		
 		vaccineId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + vaccineId)).or("-1"));
+		System.out.println("before request  for LotInfo "+System.currentTimeMillis());
+		long starttime=System.currentTimeMillis();
 //		List<VaccineOrderDetails> lotDeatils = investigationService.findLotDetails(vaccineId,onLoad);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findLotDetails(vaccineId,onLoad));
+		 System.out.println("After request  for LotInfo "+System.currentTimeMillis());
+	       System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 	
@@ -188,8 +221,13 @@ public class InvestigationSummaryController {
 	public EMRResponseBean getFrequentOrdersList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId) throws Exception {
 		logger.debug("in getting frequent orders list");
 //		List<FrequentOrders> frequentOrders = investigationService.findFrequentOrders(encounterId);
+		System.out.println("before request  for frequentOrders "+System.currentTimeMillis());
+		long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findFrequentOrders(encounterId));
+		
+        System.out.println("After request  for frequentOrders "+System.currentTimeMillis());
+       System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 		
@@ -202,11 +240,15 @@ public class InvestigationSummaryController {
 	@ResponseBody
 	public List<VaccinationConsentForm> saveVaccineInfo(@RequestBody ConsentDetails consentData) throws Exception {
 		logger.debug("in saving consent details vaccine");
+		System.out.println("before request  for saveconsent "+System.currentTimeMillis());
+		long starttime=System.currentTimeMillis();
 		List<VaccinationConsentForm> consentList = investigationService.saveVaccineConsent(consentData);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,
 				AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,
 				"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,
 				AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		 System.out.println("After request  for saveconsent "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
 		return consentList;
 	}
 		
@@ -221,9 +263,13 @@ public class InvestigationSummaryController {
 			@RequestParam(value="testId", required=false, defaultValue="") Integer testId, @RequestParam(value="groupId", required=false, defaultValue="") String groupId) throws Exception {
 		logger.debug("in getting complete test details");
 //		Orders labInfo = investigationService.findCompleteTestDetails(testDetailId, testId, groupId);
-		
+		System.out.println("before request  for TestDetails "+System.currentTimeMillis());
+		long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findCompleteTestDetails(testDetailId, testId, groupId));
+		   
+	         System.out.println("After request  for TestDetails "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 	
@@ -237,9 +283,15 @@ public class InvestigationSummaryController {
 	public EMRResponseBean getTodaysOrdersList(@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId) throws Exception {
 		logger.debug("in getting todays orders in investigations");
 //		List<LabEntries> labInfo = investigationService.findTodaysOrders(encounterId);
+		System.out.println("before request  for getting todaysorders "+System.currentTimeMillis());
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		
 		emrResponseBean.setData(investigationService.findTodaysOrders(encounterId));
+	       long starttime=System.currentTimeMillis();
+	         System.out.println("After request  for todayOrders "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
+        
 	}
 	
 	/**
@@ -252,12 +304,16 @@ public class InvestigationSummaryController {
 	@RequestMapping(value = "/SaveTestDetails",method = RequestMethod.POST)
 	public String saveTestDetails(@RequestBody SaveLabDetails labDetails) throws Exception {
 		logger.debug("Begin of save the complete details for a particular lab");
+		System.out.println("before request  for Investigation "+System.currentTimeMillis());
+		long starttime=System.currentTimeMillis();
 		investigationService.savelab(labDetails.getRequestToSave(), labDetails.getEncounterId(), labDetails.getPatientId(), labDetails.getChartId(), labDetails.getUserId(), labDetails.getFullData(), "-1", "-1", "false", "" + labDetails.getTestId());
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Investigations,AuditLogConstants.Investigations,
 				1,AuditLogConstants.SUCCESS,"Successfully save data for the patient having PatientId=" + labDetails.getPatientId(),
 				-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Investigations,request,
 				"Successfully save data for the patient having PatientId=" + labDetails.getPatientId());
 		logger.debug("End of save the complete details for a particular lab");
+		System.out.println("After request  for Investigation "+System.currentTimeMillis());
+        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
 		return "success";
 	}
 	
@@ -271,8 +327,16 @@ public class InvestigationSummaryController {
 			throws Exception {
 		String testIdArray[] = labTestIds.split("','");
 		for (int i = 1; i < testIdArray.length; i++) {
+			  System.out.println("before request  for getnewtestdetails "+System.currentTimeMillis());
+		        long starttime=System.currentTimeMillis();
 			LabDescription testDetails = investigationService.getNewTestDetails(Integer.parseInt(testIdArray[i]));
+			System.out.println("After request  for getnewtestdetail "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
+	        System.out.println("before request  for saveneworder "+System.currentTimeMillis());
+	        long starttime1=System.currentTimeMillis();
 			investigationService.saveNewLab(testDetails, encounterId, Integer.parseInt(testIdArray[i]),userId, chartId, patientId);
+			System.out.println("After request  for saveneworder "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime1));
 		}
 		return "success";
 	}
@@ -294,8 +358,12 @@ public class InvestigationSummaryController {
 	@RequestMapping(value = "/OrdersLogByChart",method = RequestMethod.GET)
 	public EMRResponseBean getOrderLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
 //		OrderLogGroups labInfo = investigationService.findOrdersSummary(chartId);
-		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		
+		 System.out.println("before request  for orderHistory "+System.currentTimeMillis());
+	        long starttime=System.currentTimeMillis();EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findOrdersSummary(chartId));
+		 System.out.println("After request  for orderset "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 	
@@ -307,8 +375,12 @@ public class InvestigationSummaryController {
 	@RequestMapping(value = "/ReviewedLogByChart",method = RequestMethod.GET)
 	public EMRResponseBean getReviewedLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
 //		OrderLogGroups labInfo = investigationService.findReviewedSummary(chartId);
+		  System.out.println("before request  for ReviewedLogByChart "+System.currentTimeMillis());
+	        long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findReviewedSummary(chartId));
+		 System.out.println("After request  for ReviewedLogByChart "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 	
@@ -318,10 +390,15 @@ public class InvestigationSummaryController {
             @ApiResponse(code = 500, message = "Internal server error")})
 	@ApiParam(name="chartId", value="id for each patient chart")
 	@RequestMapping(value = "/PendingLogByChart",method = RequestMethod.GET)
+	
 	public EMRResponseBean getPendingLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
 //		OrderLogGroups labInfo = investigationService.findPendingSummary(chartId);
+		  System.out.println("before request  for PendingLogByChart "+System.currentTimeMillis());
+	        long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findPendingSummary(chartId));
+		 System.out.println("After request  for PendingLogByChart "+System.currentTimeMillis());
+	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 	
