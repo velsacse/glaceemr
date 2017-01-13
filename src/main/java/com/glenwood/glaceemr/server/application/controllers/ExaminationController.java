@@ -29,12 +29,20 @@ public class ExaminationController {
 			@RequestParam(value="templateId") Integer templateId,
 			@RequestParam(value="clientId") String clientId) throws Exception{
 
+		long start= System.currentTimeMillis();
+		System.out.println("Getting PE systems Start ###################### "+start);
+		System.out.println("patientId::"+patientId+"chartId::"+chartId+"encounterId::"+encounterId+"templateid::"+templateId);
 		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 		chartId=Integer.parseInt(Optional.fromNullable(chartId+"").or("-1"));
 		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
 		templateId=Integer.parseInt(Optional.fromNullable(templateId+"").or("-1"));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(examinationService.getActiveSystems(clientId,patientId,chartId,encounterId,templateId));
+		long end= System.currentTimeMillis();
+		System.out.println("Getting PE systems End ###################### "+end+"\nTotal time taken:: "+(end-start)+"ms");
+		System.out.println("======================================");
+		System.out.println("Total time taken:: "+(end-start)+"ms");
+		System.out.println("======================================");
 		return emrResponseBean;
 	}
 	
@@ -46,7 +54,10 @@ public class ExaminationController {
 			@RequestParam(value="templateId") Integer templateId,
 			@RequestParam(value="systemId") Integer systemId,
 			@RequestParam(value="clientId") String clientId) throws Exception{
-
+		
+		long start= System.currentTimeMillis();
+		System.out.println("Getting PE elements Start ###################### "+start);
+		System.out.println("patientId::"+patientId+"chartId::"+chartId+"encounterId::"+encounterId+"templateid::"+templateId+"systemId::"+systemId);
 		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 		chartId=Integer.parseInt(Optional.fromNullable(chartId+"").or("-1"));
 		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
@@ -54,6 +65,11 @@ public class ExaminationController {
 		systemId=Integer.parseInt(Optional.fromNullable(systemId+"").or("-1"));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(examinationService.getSystemActiveElements(clientId,patientId, chartId, encounterId, templateId, systemId));
+		long end= System.currentTimeMillis();
+		System.out.println("Getting PE elements End ###################### "+end);
+		System.out.println("======================================");
+		System.out.println("Total time taken:: "+(end-start)+"ms");
+		System.out.println("======================================");
 		return emrResponseBean;
 	}
 	
@@ -105,10 +121,19 @@ public class ExaminationController {
 	@ResponseBody
 	public EMRResponseBean getQuickNotes(@RequestParam(value="tabId") Integer tabId,
 			@RequestParam(value="elementId") String elementId) throws Exception{
+		long start= System.currentTimeMillis();
+		System.out.println("Getting quick notes Start ###################### "+start);
+		System.out.println("tabId::"+tabId+"elementId::"+elementId);
 
 		tabId=Integer.parseInt(Optional.fromNullable(tabId+"").or("-1"));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(examinationService.getQuickNotes(tabId,elementId));
+		
+		long end= System.currentTimeMillis();
+		System.out.println("Getting quick notes End ###################### "+end);
+		System.out.println("======================================");
+		System.out.println("Total time taken:: "+(end-start)+"ms");
+		System.out.println("======================================");
 		return emrResponseBean;
 	}
 	
