@@ -661,6 +661,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 	 */
 	@Override
 	public List<NewRxBean> getNewRxDetails(int encounterId, String prescId) {
+		System.out.println("NewRx for ERx summary::"+encounterId+" "+prescId);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<Prescription> root = cq.from(Prescription.class);
@@ -752,6 +753,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 				eachobj.setDrugcoveragestatuscode("SI");
 			rxList.add(eachobj);
 		}
+		System.out.println("End ERx summary med");
 		return rxList;
 	}
 
