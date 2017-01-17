@@ -1547,10 +1547,45 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		logger.debug("in findTodaysOrders");
 		this.encounterId = encounterId;
 		encounterId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + encounterId)).or("-1"));
-		List<LabEntries> labs = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.labByEncounterId(encounterId)).and(InvestigationSpecification.LabsByTestStatus()));
+		//List<LabEntries> labs = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.labByEncounterId(encounterId)).and(InvestigationSpecification.LabsByTestStatus()));
+		List<LabEntries> labs = getTodayOrdersbasedonEncounterId(encounterId);
 		return labs;
 	}
 
+	
+	private List<LabEntries> getTodayOrdersbasedonEncounterId(
+			Integer encounterId) {
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		List<LabEntries>values=new ArrayList<LabEntries>();
+		CriteriaQuery<LabEntries> cq=cb.createQuery(LabEntries.class);
+		Root<LabEntries>root=cq.from(LabEntries.class);
+		Selection[] selections=new Selection[]{
+				root.get(LabEntries_.labEntriesTestdetailId),
+				root.get(LabEntries_.labEntriesTestDesc),
+				root.get(LabEntries_.labEntriesEncounterId),
+				root.get(LabEntries_.labEntriesTestId),
+				root.get(LabEntries_.labEntriesTestStatus),
+				root.get(LabEntries_.labEntriesGroupid),
+				root.get(LabEntries_.labEntriesIsBillable),
+				root.get(LabEntries_.labEntriesCpt),
+				
+		};
+		cq.select(cb.construct(LabEntries.class,selections));
+		Predicate[] predications=new Predicate[]{
+				cb.equal(root.get(LabEntries_.labEntriesEncounterId), encounterId),
+				cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),2),
+				cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),7),
+				};
+				cq.where (predications);
+				try{
+					values= em.createQuery(cq).getResultList();	
+
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				return values;
+	}
+	
 	private Integer getEmpId(int encounterId2) {
 		Integer employeeId;
 		CriteriaBuilder builder = em.getCriteriaBuilder();

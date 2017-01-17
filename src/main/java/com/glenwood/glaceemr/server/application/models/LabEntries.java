@@ -1381,4 +1381,17 @@ public class LabEntries {
 		this.labEntriesTestdetailId=labEntriesTestdetailId;
 	}
 	
+	public LabEntries(Integer labEntriesTestdetailId,String labEntriesTestDesc,
+			Integer labEntriesEncounterId,Integer labEntriesTestId,
+			Integer labEntriesTestStatus,Integer labEntriesGroupid,Boolean labEntriesIsBillable,String labEntriesCpt){
+		this.labEntriesTestdetailId=labEntriesTestdetailId;
+		this.labEntriesTestDesc=labEntriesTestDesc;
+		this.labEntriesEncounterId=labEntriesEncounterId;
+		this.labEntriesTestId=labEntriesTestId;
+		this.labEntriesTestStatus=labEntriesTestStatus;
+		this.labEntriesGroupid=labEntriesGroupid;
+		this.labEntriesIsBillable=labEntriesIsBillable;
+		this.labEntriesCpt=labEntriesCpt;
+	}
+	
 }
