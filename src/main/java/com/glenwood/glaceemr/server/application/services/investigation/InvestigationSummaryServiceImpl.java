@@ -1559,6 +1559,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		List<LabEntries>values=new ArrayList<LabEntries>();
 		CriteriaQuery<LabEntries> cq=cb.createQuery(LabEntries.class);
 		Root<LabEntries>root=cq.from(LabEntries.class);
+		root.join(LabEntries_.empProfile,JoinType.LEFT);
+		root.join(LabEntries_.encounter,JoinType.LEFT);
+		root.join(LabEntries_.labGroups,JoinType.INNER);
 		Selection[] selections=new Selection[]{
 				root.get(LabEntries_.labEntriesTestdetailId),
 				root.get(LabEntries_.labEntriesTestDesc),
