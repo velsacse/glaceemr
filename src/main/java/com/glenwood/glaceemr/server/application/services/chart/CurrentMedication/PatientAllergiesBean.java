@@ -3,9 +3,9 @@ package com.glenwood.glaceemr.server.application.services.chart.CurrentMedicatio
 import java.util.Date;
 
 public class PatientAllergiesBean {
-	int id;
-	int severity;
-	int typeId;
+	Integer id;
+	Integer severity;
+	Integer typeId;
 	String typeName;
 	String allergyName;
 	String allergyCode;
@@ -37,27 +37,27 @@ public class PatientAllergiesBean {
 		this.createdOn=createdOn;
 	}
 	
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public int getSeverity() {
+	public Integer getSeverity() {
 		return severity;
 	}
 
-	public void setSeverity(int severity) {
+	public void setSeverity(Integer severity) {
 		this.severity = severity;
 	}
 
-	public int gettypeId() {
+	public Integer gettypeId() {
 		return typeId;
 	}
 
-	public void settypeId(int typeId) {
+	public void settypeId(Integer typeId) {
 		this.typeId = typeId;
 	}
 
