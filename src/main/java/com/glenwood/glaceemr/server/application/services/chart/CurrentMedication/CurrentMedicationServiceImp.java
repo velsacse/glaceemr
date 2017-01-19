@@ -140,7 +140,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 	public List<PatientAllergiesBean> getAllergies(int chartId) {
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery();
+		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<PatientAllergies> root = cq.from(PatientAllergies.class);
 		Join<PatientAllergies, AllergiesType> patAllerTypeJoin=root.join(PatientAllergies_.allergiesType,JoinType.INNER);
 		Join<PatientAllergies,EmployeeProfile> AllerEmpModifyJoin=root.join(PatientAllergies_.empProfileAllgModifiedByTable,JoinType.INNER);
@@ -148,7 +148,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		Predicate status=builder.equal(root.get(PatientAllergies_.patAllergStatus), 1);
 		Predicate patChart=builder.equal(root.get(PatientAllergies_.patAllergChartId), chartId);
 		Predicate typeId=builder.greaterThanOrEqualTo(root.get(PatientAllergies_.patAllergTypeId), 0);
-		cq.select(builder.construct(PatientAllergiesBean.class, root.get(PatientAllergies_.patAllergId),
+		/*cq.select(builder.construct(PatientAllergiesBean.class, root.get(PatientAllergies_.patAllergId),
 				root.get(PatientAllergies_.patAllergSeverity),
 				root.get(PatientAllergies_.patAllergTypeId),
 				patAllerTypeJoin.get(AllergiesType_.allergtypeName),
@@ -163,13 +163,44 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				root.get(PatientAllergies_.patAllergOnsetDate),
 				builder.function("format_name", String.class, builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileFname), ""),builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileLname),""),
 						builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileMi), ""),builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
-				root.get(PatientAllergies_.patAllergCreatedOn))).where(typeId,status,patChart).orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));
-		List<Object> allergies=em.createQuery(cq).getResultList();
+				root.get(PatientAllergies_.patAllergCreatedOn))).where(typeId,status,patChart).orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));*/
+		cq.multiselect(root.get(PatientAllergies_.patAllergId),
+				root.get(PatientAllergies_.patAllergSeverity),
+				root.get(PatientAllergies_.patAllergTypeId),
+				patAllerTypeJoin.get(AllergiesType_.allergtypeName),
+				root.get(PatientAllergies_.patAllergAllergicTo),
+				root.get(PatientAllergies_.patAllergAllergyCode),
+				root.get(PatientAllergies_.patAllergCodeSystem),
+				root.get(PatientAllergies_.patAllergDrugCategory),
+				root.get(PatientAllergies_.patAllergReactionTo),
+				builder.function("format_name", String.class, builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileFname), ""),builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileLname),""),
+						builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileMi), ""),builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
+				root.get(PatientAllergies_.patAllergModifiedOn),
+				root.get(PatientAllergies_.patAllergOnsetDate),
+				builder.function("format_name", String.class, builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileFname), ""),builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileLname),""),
+						builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileMi), ""),builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
+				root.get(PatientAllergies_.patAllergCreatedOn)).where(typeId,status,patChart).orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));
+		
+		List<Object[]> allergies=em.createQuery(cq).getResultList();
 		List<PatientAllergiesBean> beanList=new ArrayList<PatientAllergiesBean>();
-		for(int i=0;i<allergies.size();i++){
-			PatientAllergiesBean eachObj=(PatientAllergiesBean) allergies.get(i);
-				beanList.add(eachObj);
-			}
+		for(Object[] details : allergies){
+			PatientAllergiesBean eachObj=new PatientAllergiesBean();
+			eachObj.setId(details[0]==null?-1:(Integer)details[0]);
+			eachObj.setSeverity(details[1]==null?-1:(Integer)details[1]);
+			eachObj.settypeId(details[2]==null?-1:(Integer)details[2]);
+			eachObj.settypeName(details[3]==null?"":details[3].toString());
+			eachObj.setallergyName(details[4]==null?"":details[4].toString());
+			eachObj.setallergyCode(details[5]==null?"":details[5].toString());
+			eachObj.setcodeSystem(details[6]==null?"":details[6].toString());
+			eachObj.setdrugCategory(details[7]==null?"":details[7].toString());
+			eachObj.setreactionTo(details[8]==null?"":details[8].toString());
+			eachObj.setModifiedby(details[9]==null?"":details[9].toString());
+			eachObj.setModifiedon(details[10]==null?"":details[10].toString());
+			eachObj.setonsetDate(details[11]==null?"":details[11].toString());
+			eachObj.setcreatedBy(details[12]==null?"":details[12].toString());
+			eachObj.setcreatedOn(details[13]==null?"":details[13].toString());
+			beanList.add(eachObj);
+		}
 		
 		return beanList;
 	}
@@ -844,5 +875,4 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 	}
 	
 }
-
 

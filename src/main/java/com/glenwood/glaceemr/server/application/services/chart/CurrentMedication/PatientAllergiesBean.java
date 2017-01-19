@@ -1,7 +1,5 @@
 package com.glenwood.glaceemr.server.application.services.chart.CurrentMedication;
 
-import java.util.Date;
-
 public class PatientAllergiesBean {
 	Integer id;
 	Integer severity;
@@ -13,29 +11,10 @@ public class PatientAllergiesBean {
 	String drugCategory;
 	String reactionTo;
 	String modifiedby;
-	Date modifiedon;
+	String modifiedon;
 	String onsetDate;
 	String createdBy;
-	Date createdOn;
-	
-	public PatientAllergiesBean(){}
-	
-	public PatientAllergiesBean(Integer id,Integer severity,Integer typeId,String typeName,String allergyName,String allergyCode,String codeSystem,String drugCategory,String reactionTo,String modifiedby,Date modifiedon,String onsetDate,String createdBy,Date createdOn){
-		this.id=id;
-		this.severity=severity;
-		this.typeId=typeId;
-		this.typeName=typeName;
-		this.allergyName=allergyName;
-		this.allergyCode=allergyCode;
-		this.codeSystem=codeSystem;
-		this.drugCategory=drugCategory;
-		this.reactionTo=reactionTo;
-		this.modifiedby=modifiedby;
-		this.modifiedon=modifiedon;
-		this.onsetDate=onsetDate;
-		this.createdBy=createdBy;
-		this.createdOn=createdOn;
-	}
+	String createdOn;
 	
 	public Integer getId() {
 		return id;
@@ -117,11 +96,11 @@ public class PatientAllergiesBean {
 		this.modifiedby = modifiedby;
 	}
 
-	public Date getModifiedon() {
+	public String getModifiedon() {
 		return modifiedon;
 	}
 
-	public void setModifiedon(Date modifiedon) {
+	public void setModifiedon(String modifiedon) {
 		this.modifiedon = modifiedon;
 	}
 
@@ -141,11 +120,11 @@ public class PatientAllergiesBean {
 		this.createdBy = createdBy;
 	}
 
-	public Date getcreatedOn() {
+	public String getcreatedOn() {
 		return createdOn;
 	}
 
-	public void setcreatedOn(Date createdOn) {
+	public void setcreatedOn(String createdOn) {
 		this.createdOn = createdOn;
 	}
 
