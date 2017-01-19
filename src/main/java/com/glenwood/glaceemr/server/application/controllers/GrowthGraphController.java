@@ -90,9 +90,10 @@ public class GrowthGraphController {
 		    @ApiResponse(code = 404, message = "when patient id does not exist"),
 		    @ApiResponse(code = 500, message = "Internal server error")})
 	public EMRResponseBean getVitalValues(
-			@ApiParam(name="patientId",value="patient id") @RequestParam(value="patientid", required=false, defaultValue="true") String patientId){
+			@ApiParam(name="patientId",value="patient id") @RequestParam(value="patientid", required=false, defaultValue="true") String patientId,
+			@ApiParam(name="wellvisit",value="well visit") @RequestParam(value="wellvisit", required=false, defaultValue="false") boolean wellvisit){
 		
-		List<GrowthGraphVitalData> patientDetails=growthGraphService.getVitalValues(patientId);
+		List<GrowthGraphVitalData> patientDetails=growthGraphService.getVitalValues(patientId,wellvisit);
 		EMRResponseBean result= new EMRResponseBean();
 		result.setData(patientDetails);
 		return result;

@@ -509,7 +509,24 @@ public class ServiceDetail {
 	@JoinColumn(name="service_detail_id", referencedColumnName="service_id" , insertable=false, updatable=false)
 	private ServiceBalances serviceBalances;
     
-    public PatientRegistration getPatientRegistration() {
+    @ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="service_detail_patientid", referencedColumnName="chart_patientid" , insertable=false, updatable=false)
+	private Chart chartTable;
+    
+    
+    
+    public Chart getChartTable() {
+		return chartTable;
+	}
+
+
+	public void setChartTable(Chart chartTable) {
+		this.chartTable = chartTable;
+	}
+
+
+	public PatientRegistration getPatientRegistration() {
 		return patientRegistration;
 	}
 

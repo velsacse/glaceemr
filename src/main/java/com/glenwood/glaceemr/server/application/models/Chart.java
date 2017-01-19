@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -104,6 +106,10 @@ public class Chart implements Serializable{
 
 	@Column(name="chart_remainder_by")
 	private Integer chartRemainderBy;
+	
+	@OneToMany(mappedBy="chartTable")
+	@JsonManagedReference
+	private List<ServiceDetail> serviceDetail;
 
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="chart_remainder_date")

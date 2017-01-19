@@ -841,4 +841,30 @@ public class PatientClinicalElementsSpecification {
 			
 		};
 	}
+	
+	/**
+	 *
+	 *  Get PatientClinicalElements data for given GWID and it is not a history element and its less than or equal to that encounter
+	 * @param patientId
+	 * @param encounterId
+	 * @param gwids
+	 * 
+	 */
+
+	public static Specification<PatientClinicalElements> getClinicalElementByEncId(final Integer patientId,final Integer encounterId,final List<String> gwids){
+
+		return new Specification<PatientClinicalElements>(){
+
+			@Override
+			public Predicate toPredicate(Root<PatientClinicalElements> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate ptClinicalElem=cb.and(
+						cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId),
+						cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId),
+						root.get(PatientClinicalElements_.patientClinicalElementsGwid).in(gwids));
+				return ptClinicalElem;
+
+			}
+
+		};
+	}
 }
