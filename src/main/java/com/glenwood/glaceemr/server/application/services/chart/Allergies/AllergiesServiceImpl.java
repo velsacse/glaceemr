@@ -45,6 +45,7 @@ import com.glenwood.glaceemr.server.application.models.Unii_;
 import com.glenwood.glaceemr.server.application.repositories.AllergiesEncountermapRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientAllergiesRepository;
 import com.glenwood.glaceemr.server.application.repositories.UniiRepository;
+import com.glenwood.glaceemr.server.application.services.chart.print.TextFormatter;
 import com.glenwood.glaceemr.server.application.specifications.AllergiesSpecification;
 import com.glenwood.glaceemr.server.utils.HUtil;
 /**
@@ -65,6 +66,9 @@ public class AllergiesServiceImpl implements AllergiesService{
 	
 	@Autowired
 	AllergiesEncountermapRepository allergiesEncountermapRepository;
+	
+	@Autowired
+	TextFormatter textFormatter;
 	
 	@PersistenceContext
 	EntityManager em;
@@ -443,10 +447,8 @@ public class AllergiesServiceImpl implements AllergiesService{
 				reaction = null,alergyName = null,userId = null,code = null,codeSystem = null,resolveDate = null,inactiveReason = null;
 		Integer status = null;
 		Timestamp current_date = new Timestamp(System.currentTimeMillis());
-		System.out.println("current_date"+current_date);
 		try {
 			String insertParametersDecode=HUtil.Nz(URLDecoder.decode(insertParameters,"UTF-8"),"");
-			System.out.println("insertparameters>>>"+insertParametersDecode);
 			jsonParameters = new JSONObject(insertParametersDecode);
 			chartId = jsonParameters.getString("chartId").toString();
 			encounterId = jsonParameters.getString("encounterId");
@@ -466,10 +468,8 @@ public class AllergiesServiceImpl implements AllergiesService{
 		patientAllergies.setPatAllergId(rowId+1);
 		patientAllergies.setPatAllergChartId(Integer.parseInt(chartId));
 		patientAllergies.setPatAllergEncounterId(Integer.parseInt(encounterId));
-		System.out.println(">>>>"+rowId+">>>"+chartId+">>>"+encounterId);
 		if(save == 1)
 		{
-			System.out.println("allergyType>>>alergyName>>>userId>>>current_date>>>code>>>reaction>>>onSetDate>>>status>>>severText>>codeSystem>>alergyName"+allergyType+">>"+alergyName+">>"+userId+">>"+current_date+">>"+reaction+">>"+onSetDate+">>"+status+">>"+severText+">>"+codeSystem+">>"+alergyName);
 			patientAllergies.setPatAllergTypeId(Integer.parseInt(allergyType));
 			patientAllergies.setPatAllergAllergicTo(alergyName);
 			patientAllergies.setPatAllergCreatedBy(userId);
@@ -1046,8 +1046,10 @@ public class AllergiesServiceImpl implements AllergiesService{
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<AllergiesEncountermap> root = cq.from(AllergiesEncountermap.class);
 		Join<AllergiesEncountermap, EmployeeProfile> empJoin = root.join(AllergiesEncountermap_.empProfile,JoinType.INNER);
-		cq.multiselect(builder.function("format_name", String.class, builder.coalesce(empJoin.get(EmployeeProfile_.empProfileFname), ""),builder.coalesce(empJoin.get(EmployeeProfile_.empProfileLname),""),
-				builder.coalesce(empJoin.get(EmployeeProfile_.empProfileMi), ""),builder.coalesce(empJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
+		cq.multiselect(builder.coalesce(empJoin.get(EmployeeProfile_.empProfileFname), ""),
+				builder.coalesce(empJoin.get(EmployeeProfile_.empProfileLname),""),
+				builder.coalesce(empJoin.get(EmployeeProfile_.empProfileMi), ""),
+				builder.coalesce(empJoin.get(EmployeeProfile_.empProfileCredentials), ""),
 				builder.function("glace_timezone", String.class, root.get(AllergiesEncountermap_.allergencmapReviewedon),builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("reviewOn")
 				);
 		cq.where(builder.and(builder.equal(root.get(AllergiesEncountermap_.allergencmapChartid), chartId),
@@ -1058,12 +1060,17 @@ public class AllergiesServiceImpl implements AllergiesService{
 		int i=0;
 		for(Object[] values : lastReviewDetailsObj)
 		{
+			String fName=values[0]==null?"":values[0].toString();
+			String lName=values[1]==null?"":values[1].toString();
+			String mName=values[2]==null?"":values[2].toString();
+			String credentials=values[3]==null?"":values[3].toString();
 			JSONObject allergEncMapObj = new JSONObject();
 			try {
-				allergEncMapObj.put("reviewby", values[0]==null?"":values[0].toString());
-				allergEncMapObj.put("reviewon", values[1]==null?"":values[1].toString());
+				String empName = textFormatter.getFormattedName(fName, mName, lName, credentials);
+				allergEncMapObj.put("reviewby", textFormatter.getCamelCaseText(empName));
+				allergEncMapObj.put("reviewon", values[4]==null?"":values[4].toString());
 				allergEncMapArray.put(i, allergEncMapObj);
-			} catch (JSONException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			i++;

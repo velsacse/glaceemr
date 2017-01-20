@@ -148,22 +148,6 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		Predicate status=builder.equal(root.get(PatientAllergies_.patAllergStatus), 1);
 		Predicate patChart=builder.equal(root.get(PatientAllergies_.patAllergChartId), chartId);
 		Predicate typeId=builder.greaterThanOrEqualTo(root.get(PatientAllergies_.patAllergTypeId), 0);
-		/*cq.select(builder.construct(PatientAllergiesBean.class, root.get(PatientAllergies_.patAllergId),
-				root.get(PatientAllergies_.patAllergSeverity),
-				root.get(PatientAllergies_.patAllergTypeId),
-				patAllerTypeJoin.get(AllergiesType_.allergtypeName),
-				root.get(PatientAllergies_.patAllergAllergicTo),
-				root.get(PatientAllergies_.patAllergAllergyCode),
-				root.get(PatientAllergies_.patAllergCodeSystem),
-				root.get(PatientAllergies_.patAllergDrugCategory),
-				root.get(PatientAllergies_.patAllergReactionTo),
-				builder.function("format_name", String.class, builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileFname), ""),builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileLname),""),
-						builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileMi), ""),builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
-				root.get(PatientAllergies_.patAllergModifiedOn),
-				root.get(PatientAllergies_.patAllergOnsetDate),
-				builder.function("format_name", String.class, builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileFname), ""),builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileLname),""),
-						builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileMi), ""),builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
-				root.get(PatientAllergies_.patAllergCreatedOn))).where(typeId,status,patChart).orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));*/
 		cq.multiselect(root.get(PatientAllergies_.patAllergId),
 				root.get(PatientAllergies_.patAllergSeverity),
 				root.get(PatientAllergies_.patAllergTypeId),
@@ -173,12 +157,8 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				root.get(PatientAllergies_.patAllergCodeSystem),
 				root.get(PatientAllergies_.patAllergDrugCategory),
 				root.get(PatientAllergies_.patAllergReactionTo),
-				builder.function("format_name", String.class, builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileFname), ""),builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileLname),""),
-						builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileMi), ""),builder.coalesce(AllerEmpModifyJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
 				root.get(PatientAllergies_.patAllergModifiedOn),
 				root.get(PatientAllergies_.patAllergOnsetDate),
-				builder.function("format_name", String.class, builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileFname), ""),builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileLname),""),
-						builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileMi), ""),builder.coalesce(AllerEmpCreateJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
 				root.get(PatientAllergies_.patAllergCreatedOn)).where(typeId,status,patChart).orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));
 		
 		List<Object[]> allergies=em.createQuery(cq).getResultList();
@@ -194,11 +174,9 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 			eachObj.setcodeSystem(details[6]==null?"":details[6].toString());
 			eachObj.setdrugCategory(details[7]==null?"":details[7].toString());
 			eachObj.setreactionTo(details[8]==null?"":details[8].toString());
-			eachObj.setModifiedby(details[9]==null?"":details[9].toString());
-			eachObj.setModifiedon(details[10]==null?"":details[10].toString());
-			eachObj.setonsetDate(details[11]==null?"":details[11].toString());
-			eachObj.setcreatedBy(details[12]==null?"":details[12].toString());
-			eachObj.setcreatedOn(details[13]==null?"":details[13].toString());
+			eachObj.setModifiedon(details[9]==null?"":details[9].toString());
+			eachObj.setonsetDate(details[10]==null?"":details[10].toString());
+			eachObj.setcreatedOn(details[11]==null?"":details[11].toString());
 			beanList.add(eachObj);
 		}
 		

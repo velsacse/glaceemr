@@ -10,10 +10,8 @@ public class PatientAllergiesBean {
 	String codeSystem;
 	String drugCategory;
 	String reactionTo;
-	String modifiedby;
 	String modifiedon;
 	String onsetDate;
-	String createdBy;
 	String createdOn;
 	
 	public Integer getId() {
@@ -88,14 +86,6 @@ public class PatientAllergiesBean {
 		this.reactionTo = reactionTo;
 	}
 
-	public String getModifiedby() {
-		return modifiedby;
-	}
-
-	public void setModifiedby(String modifiedby) {
-		this.modifiedby = modifiedby;
-	}
-
 	public String getModifiedon() {
 		return modifiedon;
 	}
@@ -110,14 +100,6 @@ public class PatientAllergiesBean {
 
 	public void setonsetDate(String onsetDate) {
 		this.onsetDate = onsetDate;
-	}
-
-	public String getcreatedBy() {
-		return createdBy;
-	}
-
-	public void setcreatedBy(String createdBy) {
-		this.createdBy = createdBy;
 	}
 
 	public String getcreatedOn() {
