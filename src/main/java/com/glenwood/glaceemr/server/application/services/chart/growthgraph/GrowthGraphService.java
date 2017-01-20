@@ -29,7 +29,7 @@ public interface GrowthGraphService {
 	 * @param patientId
 	 * @return list of vital data's
 	 */
-	List<GrowthGraphVitalData> getVitalValues(String patientId);
+	List<GrowthGraphVitalData> getVitalValues(String patientId,boolean wellvist);
 	
 	/**
 	 * To get list graph details based on patient id
