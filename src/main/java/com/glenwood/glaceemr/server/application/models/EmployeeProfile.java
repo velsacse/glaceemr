@@ -28,25 +28,6 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @Entity
 @Table(name = "emp_profile")
 public class EmployeeProfile implements Serializable {
-	
-	public EmployeeProfile(){
-		
-	}
-	
-	public EmployeeProfile(Integer empProfileEmpid, Integer empProfileLoginid, String empProfileFname, String empProfileLname, String empProfileMi, String empProfileCredentials, String empProfileAddress, String empProfileCity, String empProfileState, String empProfilePhoneno, String empProfileMailid) {
-		this.empProfileEmpid= empProfileEmpid;
-		this.empProfileLoginid= empProfileLoginid; 
-		this.empProfileFname= empProfileFname;
-		this.empProfileLname= empProfileLname;
-		this.empProfileMi= empProfileMi; 
-		this.empProfileCredentials= empProfileCredentials;
-		this.empProfileAddress= empProfileAddress;
-		this.empProfileCity= empProfileCity;
-		this.empProfileState= empProfileState;				
-		this.empProfilePhoneno= empProfilePhoneno;
-		this.empProfileMailid= empProfileMailid;
-	}
-	
 	/**
 	 * 
 	 */
@@ -184,10 +165,6 @@ public class EmployeeProfile implements Serializable {
 	@OneToMany(mappedBy="empProfile")
 	@JsonBackReference
 	List<Admission> admission;
-	
-	@OneToMany(mappedBy="h478001")
-	@JsonManagedReference
-	List<H478> h478;
 	
 	public Integer getEmpProfileEmpid() {
 		return empProfileEmpid;
@@ -572,6 +549,10 @@ public class EmployeeProfile implements Serializable {
 	public void setSpecialityTable(H077 specialityTable) {
 		this.specialityTable = specialityTable;
 	}
+	
+	@OneToMany(mappedBy="empProfileTableFullName")
+	private List<AttestationStatus> reportingProvider;
+	
 	@OneToMany(mappedBy="employeetableByCreatedName")
 	private List<WarfarinLog> warfarinlogcreatedby;
 	
