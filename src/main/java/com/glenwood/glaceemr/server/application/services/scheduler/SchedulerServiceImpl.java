@@ -34,11 +34,14 @@ import com.glenwood.glaceemr.server.application.models.SchedulerAppointment_;
 import com.glenwood.glaceemr.server.application.models.SchedulerResource;
 import com.glenwood.glaceemr.server.application.models.SchedulerResourceCategory;
 import com.glenwood.glaceemr.server.application.models.SchedulerResource_;
+import com.glenwood.glaceemr.server.application.models.SchedulerUserDefault;
 import com.glenwood.glaceemr.server.application.models.Workflow;
 import com.glenwood.glaceemr.server.application.models.Workflow_;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerAppointmentRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerResourceCategoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerResourcesRepository;
+import com.glenwood.glaceemr.server.application.repositories.SchedulerUserDefaultRepository;
+import com.glenwood.glaceemr.server.application.specifications.SchedulerSpecification;
 /**
  * 
  * @author Manikandan
@@ -56,6 +59,9 @@ public class SchedulerServiceImpl implements SchedulerService{
 	
 	@Autowired
 	SchedulerResourceCategoryRepository schedulerResourceCategoryRepository;
+	
+	@Autowired
+	SchedulerUserDefaultRepository schedulerUserDefaultRepository;
 
 	@PersistenceContext
 	EntityManager em;
@@ -164,5 +170,18 @@ public class SchedulerServiceImpl implements SchedulerService{
 			List<SchedulerAppointmentBean> schedulerAppointments=query.getResultList();
 			
 		return schedulerAppointments;
+	}
+
+	@Override
+	public String getDefaultResource(String userId) {
+		
+		List<SchedulerUserDefault> userList =schedulerUserDefaultRepository.findAll(SchedulerSpecification.getDefaultUserList(userId)); 
+		String defaultResource="";
+		
+		for (SchedulerUserDefault schedulerUserDefault : userList) {
+			defaultResource+=schedulerUserDefault.getSchUserDefaultResourceId()+",";
+		}
+		
+		return defaultResource;
 	}
 }

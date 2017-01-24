@@ -89,4 +89,19 @@ public class SchedulerController {
 			
 		return emrResponseBean;
 	}
+	/**
+	 * To get default resource
+	 * @return
+	 * @param userId
+	 */
+	@RequestMapping(value="/getdefaultresource",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getAppointments(@RequestParam(value="userid",required=true,defaultValue="-1") String userId){
+			
+			String resource = schedulerService.getDefaultResource(userId);
+			EMRResponseBean emrResponseBean=new EMRResponseBean();
+			emrResponseBean.setData(resource);
+			
+		return emrResponseBean;
+	}
 }

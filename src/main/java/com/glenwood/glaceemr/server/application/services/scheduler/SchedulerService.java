@@ -15,4 +15,6 @@ public interface SchedulerService {
 
 	List<SchedulerResourceCategory> getResourceCategories();
 
+	String getDefaultResource(String userId);
+
 }
