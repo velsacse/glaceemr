@@ -85,4 +85,7 @@ public interface ErxSummaryService {
 	 */
 	String checkCS(String medicationNames, int userId, int pharmacyId);
 
+
+	int getMaxEncounterId(int patientId);
+
 }

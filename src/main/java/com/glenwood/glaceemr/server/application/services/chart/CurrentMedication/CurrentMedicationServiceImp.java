@@ -142,6 +142,8 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<PatientAllergies> root = cq.from(PatientAllergies.class);
+		List<PatientAllergiesBean> beanList=new ArrayList<PatientAllergiesBean>();
+		try{
 		Join<PatientAllergies, AllergiesType> patAllerTypeJoin=root.join(PatientAllergies_.allergiesType,JoinType.INNER);
 		Join<PatientAllergies,EmployeeProfile> AllerEmpModifyJoin=root.join(PatientAllergies_.empProfileAllgModifiedByTable,JoinType.INNER);
 		Join<PatientAllergies,EmployeeProfile> AllerEmpCreateJoin=root.join(PatientAllergies_.empProfileAllgCreatedByTable,JoinType.INNER);
@@ -162,7 +164,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				root.get(PatientAllergies_.patAllergCreatedOn)).where(typeId,status,patChart).orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));
 		
 		List<Object[]> allergies=em.createQuery(cq).getResultList();
-		List<PatientAllergiesBean> beanList=new ArrayList<PatientAllergiesBean>();
+		
 		for(Object[] details : allergies){
 			PatientAllergiesBean eachObj=new PatientAllergiesBean();
 			eachObj.setId(details[0]==null?-1:(Integer)details[0]);
@@ -179,7 +181,9 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 			eachObj.setcreatedOn(details[11]==null?"":details[11].toString());
 			beanList.add(eachObj);
 		}
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return beanList;
 	}
 	
@@ -192,7 +196,9 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		Chart chartPharmacy=chartRepository.findOne(CurrentMedicationSpecification.getChartPharmacy(patientId));
 		PatientRegistration patPharmacy=patientRegistrationRepository.findOne(patientId);
 		List<PharmacyMapping> mapPharmacy=pharmacyMappingRepository.findAll(CurrentMedicationSpecification.getMapPharmacy(patientId));
-		int pharmacyId;
+		int pharmacyId=-1;
+		
+		try{
 		String pharm=chartPharmacy.getChartPharmacy();
 		
 		if(chartPharmacy.getChartPharmacy()!=null){
@@ -205,6 +211,9 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 			pharmacyId=mapPharmacy.get(0).getPharmacyMappingPharmacyid();
 		else
 			pharmacyId=-1;
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		PharmDetails pharmacyData=pharmDetailsRepository.findOne(pharmacyId);
 		
 		return pharmacyData;
@@ -313,7 +322,8 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<CurrentMedication> root = cq.from(CurrentMedication.class);
-		
+		List<MedicationDetailBean> beanList=new ArrayList<MedicationDetailBean>();
+		try{
 		Join<CurrentMedication, LeafPatient> medLeafJoin=root.join(CurrentMedication_.leafPatient,JoinType.LEFT);
 		Predicate status=builder.not(root.get(CurrentMedication_.currentMedicationStatus).in(16,18));
 		Predicate isActive=builder.equal(root.get(CurrentMedication_.currentMedicationIsActive), true);
@@ -341,7 +351,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				root.get(CurrentMedication_.currentMedicationDays),
 				builder.coalesce(root.get(CurrentMedication_.currentMedicationFrequency1),""),
 				root.get(CurrentMedication_.currentMedicationFrequency2),
-				root.get(CurrentMedication_.currentMedicationForm),
+				builder.coalesce(root.get(CurrentMedication_.currentMedicationForm),""),
 				root.get(CurrentMedication_.currentMedicationComments),
 				root.get(CurrentMedication_.currentMedicationRouteId),
 				root.get(CurrentMedication_.currentMedicationAllowSubstitution),
@@ -357,11 +367,14 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				medLeafJoin.get(LeafPatient_.leafPatientCompletedOn))).where(status,isActive,encId,patId).orderBy(builder.asc(root.get(CurrentMedication_.currentMedicationId)));
 		
 		List<Object> medlist=em.createQuery(cq).getResultList();
-		List<MedicationDetailBean> beanList=new ArrayList<MedicationDetailBean>();
+		
 		for(int i=0;i<medlist.size();i++){
 			MedicationDetailBean eachObj=(MedicationDetailBean) medlist.get(i);
 				beanList.add(eachObj);
 			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return beanList;
 	}
 
@@ -383,7 +396,9 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<CurrentMedication> root = cq.from(CurrentMedication.class);
+		List<ActiveMedicationsBean> beanList=new ArrayList<ActiveMedicationsBean>();
 		
+		try{
 		Join<CurrentMedication,Encounter> currentEncJoin=root.join(CurrentMedication_.encounter,JoinType.INNER);
 		Join<Encounter, Chart> encChartJoin=currentEncJoin.join(Encounter_.chart, JoinType.INNER);
 		Join<Chart, PatientRegistration> chartPatJoin=encChartJoin.join(Chart_.patientRegistrationTable,JoinType.INNER);
@@ -433,7 +448,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				builder.coalesce(root.get(CurrentMedication_.currentMedicationRxnormCode),""))).where(builder.and(isActive,isMedSup,medStatus,patientid)).orderBy(builder.desc(root.get(CurrentMedication_.currentMedicationModifiedOn)));
 		
 		List<Object> medlist=em.createQuery(cq).getResultList();
-		List<ActiveMedicationsBean> beanList=new ArrayList<ActiveMedicationsBean>();
+		
 		for(int i=0;i<medlist.size();i++){
 			ActiveMedicationsBean eachObj=(ActiveMedicationsBean) medlist.get(i);
 			eachObj.setUnits("");
@@ -461,7 +476,9 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 			eachObj.setIseprescription(1);
 				beanList.add(eachObj);
 			}
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return beanList;
 	}
 
@@ -476,7 +493,8 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<Prescription> root = cq.from(Prescription.class);
-		
+		List<ActiveMedicationsBean> beanList=new ArrayList<ActiveMedicationsBean>();
+		try{
 		Join<Prescription,Encounter> prescEncJoin=root.join(Prescription_.encounter,JoinType.INNER);
 		Join<Encounter, Chart> encChartJoin=prescEncJoin.join(Encounter_.chart, JoinType.INNER);
 		Join<Chart, PatientRegistration> chartPatJoin=encChartJoin.join(Chart_.patientRegistrationTable,JoinType.INNER);
@@ -520,7 +538,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				builder.coalesce(root.get(Prescription_.noofdays),""),
 				builder.coalesce(root.get(Prescription_.rxfreq),""),
 				root.get(Prescription_.docPrescSchedule2),
-				root.get(Prescription_.rxform),
+				builder.coalesce(root.get(Prescription_.rxform),""),
 				root.get(Prescription_.docPrescComments),
 				root.get(Prescription_.rxroute),
 				root.get(Prescription_.docPrescAllowSubstitution),
@@ -556,7 +574,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				root.get(Prescription_.docPrescIsEPresc))).where(builder.and(isActive,isMedSup,medStatus)).orderBy(builder.desc(root.get(Prescription_.docPrescLastModifiedDate)));
 		List<Object> medlist=em.createQuery(cq).getResultList();
 		
-		List<ActiveMedicationsBean> beanList=new ArrayList<ActiveMedicationsBean>();
+		
 		for(int i=0;i<medlist.size();i++){
 			ActiveMedicationsBean eachObj=(ActiveMedicationsBean) medlist.get(i);
 			eachObj.setMedfrom(2);
@@ -564,7 +582,9 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 			eachObj.setPresctype("drug");
 				beanList.add(eachObj);
 			}
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return beanList;
 	}
 	
@@ -593,7 +613,9 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<CurrentMedication> root = cq.from(CurrentMedication.class);
+		List<InactiveMedBean> beanList=new ArrayList<InactiveMedBean>();
 		
+		try{
 		Join<CurrentMedication,Encounter> currentEncJoin=root.join(CurrentMedication_.encounter,JoinType.INNER);
 		Join<Encounter, Chart> encChartJoin=currentEncJoin.join(Encounter_.chart, JoinType.INNER);
 		Join<Chart, PatientRegistration> chartPatJoin=encChartJoin.join(Chart_.patientRegistrationTable,JoinType.INNER);
@@ -625,7 +647,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				builder.coalesce(root.get(CurrentMedication_.currentMedicationDays),""),
 				builder.coalesce(root.get(CurrentMedication_.currentMedicationFrequency1),""),
 				root.get(CurrentMedication_.currentMedicationFrequency2),
-				root.get(CurrentMedication_.currentMedicationForm),
+				builder.coalesce(root.get(CurrentMedication_.currentMedicationForm),""),
 				root.get(CurrentMedication_.currentMedicationNotes),
 				root.get(CurrentMedication_.currentMedicationRouteId),
 				root.get(CurrentMedication_.currentMedicationAllowSubstitution),
@@ -634,7 +656,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				currentMedStatusJoin.get(MedStatus_.medStatusName))).where(medStatus).orderBy(builder.desc(root.get(CurrentMedication_.currentMedicationModifiedOn)));
 		
 		List<Object> sizelist=em.createQuery(cq).getResultList();
-		List<InactiveMedBean> beanList=new ArrayList<InactiveMedBean>();
+		
 		for(int i=0;i<sizelist.size();i++){
 			InactiveMedBean eachObj=(InactiveMedBean) sizelist.get(i);
 				eachObj.setUnits("-");
@@ -692,8 +714,8 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				cb.coalesce(docroot.get(Prescription_.noofdays),""),
 				cb.coalesce(docroot.get(Prescription_.rxfreq),""),
 				docroot.get(Prescription_.docPrescSchedule2),
-				docroot.get(Prescription_.rxform),
-				docroot.get(Prescription_.docPrescComments),
+				cb.coalesce(docroot.get(Prescription_.rxform),""),
+				cb.coalesce(docroot.get(Prescription_.docPrescComments),""),
 				docroot.get(Prescription_.rxroute),
 				docroot.get(Prescription_.docPrescAllowSubstitution),
 				docroot.get(Prescription_.docPrescStartDate),
@@ -722,7 +744,9 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 			}
 			beanList.add(eachObj);
 		}
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return beanList;
 	}
 	
@@ -735,7 +759,9 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<DrugCombination> root = cq.from(DrugCombination.class);
+		List<SearchBean> beanList=new ArrayList<SearchBean>();
 		
+		try{
 		Join<DrugCombination, NdcDrugBrandMap> combNdcMapJoin=root.join(DrugCombination_.ndcDrugBrandMap,JoinType.LEFT);
 		Join<DrugCombination, DrugRelationMap> ndcDrugRelJoin=root.join(DrugCombination_.drugRelationMap,JoinType.LEFT);
 		Join<DrugCombination, Brandname> ndcBrandJoin=root.join(DrugCombination_.brandname,JoinType.LEFT);
@@ -758,22 +784,22 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		Predicate ndcCode=builder.isNotNull(root.get(DrugCombination_.drugCombinationNdcCode));
 	
 		if (!keyword.equals("")){
-			criteria=builder.like(builder.concat(builder.concat(builder.lower(ndcBrandJoin.get(Brandname_.brandDescription)), " "),builder.concat(builder.concat((drugDosageJoin.get(DrugDosage_.DrugDosageDesc)), " "),(drugFormJoin.get(DrugForm_.drugFormName)))),getLikePattern(keyword));
+			criteria=builder.like(builder.lower(builder.concat(builder.concat(builder.coalesce(ndcBrandJoin.get(Brandname_.brandDescription),""), " "),builder.concat(builder.concat(builder.coalesce(drugDosageJoin.get(DrugDosage_.DrugDosageDesc),""), " "),builder.coalesce(drugFormJoin.get(DrugForm_.drugFormName),"")))),getLikePattern(keyword));
 		}
 	
 		if(!mapid.equals("-1")){
-			criteria =	 builder.and(builder.like(builder.concat(builder.concat(builder.lower(ndcBrandJoin.get(Brandname_.brandDescription)), " "),builder.concat(builder.concat((drugDosageJoin.get(DrugDosage_.DrugDosageDesc)), " "),(drugFormJoin.get(DrugForm_.drugFormName)))),getLikePattern(keyword)),builder.equal(root.get(DrugCombination_.drugCombinationSpecificId),mapid));
+			criteria =	 builder.and(builder.like(builder.lower(builder.concat(builder.concat(builder.coalesce(ndcBrandJoin.get(Brandname_.brandDescription),""), " "),builder.concat(builder.concat(builder.coalesce(drugDosageJoin.get(DrugDosage_.DrugDosageDesc),""), " "),builder.coalesce(drugFormJoin.get(DrugForm_.drugFormName),"")))),getLikePattern(keyword)),builder.equal(root.get(DrugCombination_.drugCombinationSpecificId),mapid));
 		}
 		
 		cq.select(builder.construct(SearchBean.class,ndcBrandJoin.get(Brandname_.brandDescription),
 				ndcDrugRelJoin.get(DrugRelationMap_.drugRelationMapDeaSchedule),
 				drugDetailJoin.get(DrugDetails_.drugDetailsName),
 				builder.least(combNdcMapJoin.get(NdcDrugBrandMap_.ndcCode)),
-				drugDosageJoin.get(DrugDosage_.DrugDosageDesc),
-				drugDosageUnitJoin.get(DrugDosageUnit_.drugDosageUnitName),
-				drugRouteJoin.get(DrugRoute_.drugRouteName),
+				builder.coalesce(drugDosageJoin.get(DrugDosage_.DrugDosageDesc),""),
+				builder.coalesce(drugDosageUnitJoin.get(DrugDosageUnit_.drugDosageUnitName),""),
+				builder.coalesce(drugRouteJoin.get(DrugRoute_.drugRouteName),""),
 				builder.coalesce(drugRelSchJoin.get(DrugSchedule_.drugScheduleName),""),
-				drugFormJoin.get(DrugForm_.drugFormName),
+				builder.coalesce(drugFormJoin.get(DrugForm_.drugFormName),""),
 				builder.greatest(ndcDrugRelJoin.get(DrugRelationMap_.drugRelationMapCode)),
 				builder.greatest(root.get(DrugCombination_.drugCombinationSpecificId)),
 				ndcDrugRelJoin.get(DrugRelationMap_.drugRelationMapQty),
@@ -797,12 +823,15 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		long count=sizelist.size();
 		
 		List<Object> medlist=em.createQuery(cq).setFirstResult(offset).setMaxResults(limit).getResultList();
-		List<SearchBean> beanList=new ArrayList<SearchBean>();
+		
 		for(int i=0;i<medlist.size();i++){
 				SearchBean eachObj=(SearchBean) medlist.get(i);
 				eachObj.setTotrec(count);
 				beanList.add(eachObj);
 			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return beanList;
 	}
 
@@ -823,14 +852,18 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<CurrentMedication> root = cq.from(CurrentMedication.class);
-		
+		String orderDate=null;
+		try{
 		Predicate currentMedId=builder.equal(root.get(CurrentMedication_.currentMedicationId), rootId);
 		Predicate currentMedPatId=builder.equal(root.get(CurrentMedication_.currentMedicationPatientId),patientId);
 		cq.select(builder.upper(builder.function("to_char", String.class, root.get(CurrentMedication_.currentMedicationOrderOn),builder.literal("MM/dd/yyyy HH:MI:ss am")))).where(builder.and(currentMedId,currentMedPatId));
 		List<Object> obj=em.createQuery(cq).getResultList();
-		String orderDate=null;
+	
 		if(!obj.isEmpty())
 			orderDate= obj.get(0).toString();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return orderDate;
 	}
 	
@@ -841,14 +874,18 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<Prescription> root = cq.from(Prescription.class);
-		
+		String orderDate=null;
+		try{
 		Predicate prescMedId=builder.equal(root.get(Prescription_.docPrescId), rootId);
 		Predicate prescMedPatId=builder.equal(root.get(Prescription_.docPrescPatientId),patientId);
 		cq.select(builder.upper(builder.function("to_char", String.class, root.get(Prescription_.docPrescOrderedDate),builder.literal("MM/dd/yyyy HH:MI:ss am")))).where(builder.and(prescMedId,prescMedPatId));
 		List<Object> obj=em.createQuery(cq).getResultList();
-		String orderDate=null;
+		
 		if(!obj.isEmpty())
 			orderDate= obj.get(0).toString();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return orderDate;
 	}
 	

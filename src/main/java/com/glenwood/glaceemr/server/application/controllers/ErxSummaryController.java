@@ -72,8 +72,9 @@ public class ErxSummaryController {
     @ResponseBody
 	public EMRResponseBean getERXSummaryData(@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId,@ApiParam(name="chartUserGroupId", value="chartUserGroupId") @RequestParam(value="chartUserGroupId",required=false,defaultValue="-1")int chartUserGroupId,@ApiParam(name="encounterId", value="encounterId") @RequestParam(value="encounterId",required=false,defaultValue="-1")int encounterId,@ApiParam(name="userId", value="userId") @RequestParam(value="userId",required=false,defaultValue="-1")int userId,@ApiParam(name="pharmId", value="pharmId") @RequestParam(value="pharmId",required=false,defaultValue="-1")int pharmId,@ApiParam(name="prescId", value="prescId") @RequestParam(value="prescId",required=false,defaultValue="-1")String prescId,@ApiParam(name="pos", value="pos") @RequestParam(value="pos",required=false,defaultValue="-1")int pos)throws Exception
 	{
-		long start= System.currentTimeMillis();
-		System.out.println("getERXSummaryData Start ###################### "+start);
+		if(encounterId==-1){
+			encounterId=erxSummaryService.getMaxEncounterId(patientId);
+		}
 		List<ErxPatientDataBean> patientData=erxSummaryService.getPatientData(patientId);
 		List<DoctorDetailBean> providerData=erxSummaryService.getDoctorDetails(encounterId,userId,chartUserGroupId,pos);
 		List<PharmacyBean> pharmData=erxSummaryService.getPharmDetails(pharmId);
@@ -81,11 +82,6 @@ public class ErxSummaryController {
 		ErxDataBean finalData=new ErxDataBean(patientData,providerData,pharmData,medDetails);
 		EMRResponseBean dataBean = new EMRResponseBean();
 		dataBean.setData(finalData);
-		long end= System.currentTimeMillis();
-		System.out.println("getERXSummaryData End ###################### "+end+"\nTotal time taken:: "+(end-start)+"ms");
-		System.out.println("======================================");
-		System.out.println("Total time taken:: "+(end-start)+"ms");
-		System.out.println("======================================");
 		return dataBean;
 	}
 	
@@ -104,8 +100,11 @@ public class ErxSummaryController {
             @ApiResponse(code = 404, message = "when patient id does not exist"),
             @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getProviderDetails(@ApiParam(name="userId", value="userId") @RequestParam(value="userId",required=false,defaultValue="-1")int userId,@ApiParam(name="chartUserGroupId", value="chartUserGroupId") @RequestParam(value="chartUserGroupId",required=false,defaultValue="-1")int chartUserGroupId,@ApiParam(name="encounterId", value="encounterId") @RequestParam(value="encounterId",required=false,defaultValue="-1")int encounterId)throws Exception
+	public EMRResponseBean getProviderDetails(@ApiParam(name="userId", value="userId") @RequestParam(value="userId",required=false,defaultValue="-1")int userId,@ApiParam(name="chartUserGroupId", value="chartUserGroupId") @RequestParam(value="chartUserGroupId",required=false,defaultValue="-1")int chartUserGroupId,@ApiParam(name="encounterId", value="encounterId") @RequestParam(value="encounterId",required=false,defaultValue="-1")int encounterId,@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId)throws Exception
 	{
+		if(encounterId==-1){
+			encounterId=erxSummaryService.getMaxEncounterId(patientId);
+		}
 		String poviderData=erxSummaryService.getProvider(userId,chartUserGroupId,encounterId);
 		EMRResponseBean dataBean = new EMRResponseBean();
 		dataBean.setData(poviderData);
@@ -128,6 +127,9 @@ public class ErxSummaryController {
     @ResponseBody
 	public EMRResponseBean getPrescData(@ApiParam(name="userId", value="userId") @RequestParam(value="userId",required=false,defaultValue="-1")int userId,@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId,@ApiParam(name="encounterId", value="encounterId") @RequestParam(value="encounterId",required=false,defaultValue="-1")int encounterId)throws Exception
 	{
+		if(encounterId==-1){
+			encounterId=erxSummaryService.getMaxEncounterId(patientId);
+		}
 		List<PrescribedMedBean> prescData=erxSummaryService.getPrescData(encounterId);
 		EMRResponseBean dataBean = new EMRResponseBean();
 		dataBean.setData(prescData);
