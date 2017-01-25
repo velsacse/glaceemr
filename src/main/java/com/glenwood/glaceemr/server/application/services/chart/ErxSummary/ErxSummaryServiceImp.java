@@ -99,12 +99,13 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
 		Integer pharmId=null;
+		PharmacyBean result=null;
+		try{
 		cq.select(root.get(PatientRegistration_.patientRegistrationPharmacyId)).where(builder.equal(root.get(PatientRegistration_.patientRegistrationId),patientId));
 		List<Object> obj=em.createQuery(cq).getResultList();
 		if(!obj.isEmpty())
 			pharmId= Integer.parseInt(obj.get(0).toString());
 	
-		PharmacyBean result=null;
 		if(pharmId!=null){
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<Object> query = cb.createQuery();
@@ -127,7 +128,9 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 			if(!object.isEmpty())
 				result=(PharmacyBean) object.get(0);
 		}
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return result;
 	}
 
@@ -189,6 +192,29 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		return providerObj.toString();
 	}
 	
+	@Override
+	public int getMaxEncounterId(int patientId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Chart> root = cq.from(Chart.class);
+		cq.select(root.get(Chart_.chartId)).where(builder.equal(root.get(Chart_.chartPatientid),patientId));
+		List<Object> chartData=em.createQuery(cq).getResultList();
+		int chartId=-1;
+		if(!chartData.isEmpty())
+			chartId=(int) chartData.get(0);
+		
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Object> query = cb.createQuery();
+		Root<Encounter> rootEnc = query.from(Encounter.class);
+		query.select(cb.greatest(rootEnc.get(Encounter_.encounterId))).where(cb.equal(rootEnc.get(Encounter_.encounterChartid), chartId));
+		List<Object> EncData=em.createQuery(query).getResultList();
+		int encId=-1;
+		if(!EncData.isEmpty())
+			encId=(int) EncData.get(0);
+		
+		return encId;
+	}
+
 
 	/**
 	 * Getting data from initial settings
@@ -305,9 +331,13 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
     	String DoctorSPI="";
     	boolean isUserRegistered=false;
     	int doctorId = -1;
-		Object[] obj=getEncounterObject(encounterId);
-		short encounterType=(short) obj[0];
-		String encounterReason= obj[1].toString();
+    	short encounterType=0;
+    	String encounterReason=""; 
+		List<Object[]> obj=getEncounterObject(encounterId);
+		if(!obj.isEmpty()){
+			encounterType=(short) obj.get(0)[0];
+			encounterReason= obj.get(0)[1].toString();
+		}
 		int InboxId = getInboxId(encounterId);
 		if(encounterType == 3 && encounterReason.equals("44")){
 			long size=0;
@@ -359,9 +389,9 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 				prescLocJoin.get(LocationDetails_.addressline1),
 				builder.selectCase().when(builder.equal(builder.trim(prescLocJoin.get(LocationDetails_.addressline2)),""),prescLocJoin.get(LocationDetails_.addressline2)).otherwise("AD2"),
 				builder.selectCase().when(builder.notEqual(builder.trim(prescLocJoin.get(LocationDetails_.addressline2)),""),prescLocJoin.get(LocationDetails_.addressline2)).otherwise(""),
-				prescLocJoin.get(LocationDetails_.city),
-				prescLocJoin.get(LocationDetails_.state),
-				prescLocJoin.get(LocationDetails_.zip),
+				builder.coalesce(prescLocJoin.get(LocationDetails_.city),""),
+				builder.coalesce(prescLocJoin.get(LocationDetails_.state),""),
+				builder.coalesce(prescLocJoin.get(LocationDetails_.zip),""),
 				builder.function("replace", String.class, prescLocJoin.get(LocationDetails_.primaryphone) , builder.literal("-"), builder.literal("")),
 				builder.function("formatphoneno", String.class, builder.function("replace", String.class, prescLocJoin.get(LocationDetails_.primaryphone) , builder.literal("-"), builder.literal(""))),
 				builder.selectCase().when(builder.equal(builder.trim(builder.function("replace", String.class, prescLocJoin.get(LocationDetails_.primaryphone) , builder.literal("-"), builder.literal(""))),""), builder.coalesce(prescLocJoin.get(LocationDetails_.primaryphone), "")).otherwise("TE"),
@@ -472,11 +502,16 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		Root<PrescriberDetails> root = cq.from(PrescriberDetails.class);
 		Join<PrescriberDetails, LocationDetails> prescLocJoin=root.join(PrescriberDetails_.locationDetails,JoinType.INNER);
 		Long rowCount;
+		boolean userFlag=false;
+		try{
 		cq.select(builder.count(root.get(PrescriberDetails_.doctorid))).where(builder.and(builder.equal(prescLocJoin.get(LocationDetails_.prescriberId),userId),builder.ge(prescLocJoin.get(LocationDetails_.servicelevel), 0)));
 		rowCount=(Long) em.createQuery(cq).getSingleResult();
-		boolean userFlag=false;
+		
 		if(rowCount>0){
 			userFlag=true;
+		}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 		return userFlag;
 	}
@@ -492,12 +527,16 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		Root<Encounter> root = cq.from(Encounter.class);
 		Join<Encounter, Chart> chartEncJoin=root.join(Encounter_.chart,JoinType.INNER);
 		Join<Chart, PatientRegistration> chartPatJoin=chartEncJoin.join(Chart_.patientRegistrationTable,JoinType.INNER);
+		int doctorId=-1;
+		try{
 		cq.select(chartPatJoin.get(PatientRegistration_.patientRegistrationPrincipalDoctor)).where(builder.equal(root.get(Encounter_.encounterId), encounterId));
 		Object obj=em.createQuery(cq).getSingleResult();
-		int doctorId=-1;
+		
 		if(obj!=null)
 			doctorId= (int) obj;
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return doctorId;
 	}
 
@@ -509,12 +548,16 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<Prescription> root = cq.from(Prescription.class);
+		int doctorId=-1;
+		try{
 		cq.select(root.get(Prescription_.docPrescProviderId)).where(builder.equal(root.get(Prescription_.docPrescEncounterId), encounterId));
 		Object obj=em.createQuery(cq).getSingleResult();
-		int doctorId=-1;
+		
 		if(obj!=null)
 			doctorId= (int) obj;
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return doctorId;
 	}
 
@@ -527,9 +570,13 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<PrescriberDetails> root = cq.from(PrescriberDetails.class);
 		Join<PrescriberDetails, LocationDetails> prescLocJoin=root.join(PrescriberDetails_.locationDetails,JoinType.INNER);
-		Long rowCount;
+		Long rowCount=(long) 0;
+		try{
 		cq.select(builder.count(root.get(PrescriberDetails_.doctorid))).where(builder.equal(prescLocJoin.get(LocationDetails_.prescriberId),doctorId));
 		rowCount=(Long) em.createQuery(cq).getSingleResult();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		
 		return rowCount;
 	}
@@ -541,12 +588,16 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<LocationDetails> root = cq.from(LocationDetails.class);
+		int doctorId=-1;
+		try{
 		cq.select(root.get(LocationDetails_.prescriberId)).where(builder.equal(root.get(LocationDetails_.spiLocationid), doctorSPIStr));
 		Object obj=em.createQuery(cq).getSingleResult();
-		int doctorId=-1;
+		
 		if(obj!=null)
 			doctorId= (int) obj;
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return doctorId;
 	}
 
@@ -558,11 +609,17 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<SSInbox> root = cq.from(SSInbox.class);
+		String spi=null;
+		
+		try{
 		cq.select(root.get(SSInbox_.ssInboxToId)).where(builder.equal(root.get(SSInbox_.ssInboxId), inboxId));
 		Object obj=em.createQuery(cq).getSingleResult();
-		String spi=null;
+		
 		if(obj!=null)
 			spi= (String) obj;
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return spi;
 	}
 
@@ -575,11 +632,16 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<SSPatientMessageMap> root = cq.from(SSPatientMessageMap.class);
+		int inboxId=0;
+		try{
 		cq.select(root.get(SSPatientMessageMap_.ssPatientMessageMapInboxId)).where(builder.equal(root.get(SSPatientMessageMap_.ssPatientMessageMapEncounterId), encounterId));
 		List<Object> obj=em.createQuery(cq).getResultList();
-		int inboxId=0;
+		
 		if(!obj.isEmpty())
 			inboxId=(int) obj.get(0);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return inboxId;
 	}
 
@@ -587,14 +649,14 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 	/**
 	 * Getting encounter details
 	 */
-	private Object[] getEncounterObject(int encounterId) {
+	private List<Object[]> getEncounterObject(int encounterId) {
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery();
+		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<Encounter> root = cq.from(Encounter.class);
 		
 		cq.multiselect(root.get(Encounter_.encounterType),root.get(Encounter_.encounterReason)).where(builder.equal(root.get(Encounter_.encounterId), encounterId));
-		Object[] obj=(Object[]) em.createQuery(cq).getSingleResult();
+		List<Object[]> obj= em.createQuery(cq).getResultList();
 		
 		return obj;		
 	}
@@ -661,10 +723,11 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 	 */
 	@Override
 	public List<NewRxBean> getNewRxDetails(int encounterId, String prescId) {
-		System.out.println("NewRx for ERx summary::"+encounterId+" "+prescId);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<Prescription> root = cq.from(Prescription.class);
+		List<NewRxBean> rxList=new ArrayList<NewRxBean>();
+		try{
 		Join<Prescription, NdcDrugBrandMap> prescNDCJoin=root.join(Prescription_.ndcdrugbrandmap,JoinType.LEFT);
 		Join<NdcDrugBrandMap, DrugRelationMap> ndcRelMapJoin=prescNDCJoin.join(NdcDrugBrandMap_.drugRelationMap,JoinType.LEFT);
 		Join<DrugRelationMap, DeaSchedule> relSchJoin=ndcRelMapJoin.join(DrugRelationMap_.deaSchedule,JoinType.LEFT);
@@ -739,7 +802,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 				root.get(Prescription_.docPrescStatus),
 				prescNDCJoin.get(NdcDrugBrandMap_.isMedSup)));
 		cq.where(builder.and(encId,presc,status,ePresc,ndcCode,ssForm));
-		List<NewRxBean> rxList=new ArrayList<NewRxBean>();
+		
 		List<Object> resultList= em.createQuery(cq).getResultList();
 		for(int i=0;i<resultList.size();i++){
 			NewRxBean eachobj=(NewRxBean) resultList.get(i);
@@ -753,7 +816,9 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 				eachobj.setDrugcoveragestatuscode("SI");
 			rxList.add(eachobj);
 		}
-		System.out.println("End ERx summary med");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return rxList;
 	}
 
@@ -768,7 +833,8 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<Prescription> root = cq.from(Prescription.class);
 		List<Object> maxList=getMaxIdList(encounterId);
-		
+		List<PrescribedMedBean> medList=new ArrayList<PrescribedMedBean>();
+		try{
 		Join<Prescription, EmployeeProfile> prescEmpJoin=root.join(Prescription_.empProfileOrderBy,JoinType.LEFT);
 		Join<Prescription, SSInbox> prescInboxJoin=root.join(Prescription_.ssInbox,JoinType.LEFT);
 		Join<SSInbox, RefillMessageType> inboxMsgTypeJoin=prescInboxJoin.join(SSInbox_.refillMessageType,JoinType.LEFT);
@@ -859,12 +925,13 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 				builder.function("date_diff", Double.class, builder.literal(4),root.get(Prescription_.docPrescOrderedDate),builder.literal(pharmDetailsRepository.findCurrentTimeStamp()))));
 		cq.where(builder.and(builder.equal(root.get(Prescription_.docPrescEncounterId), encounterId),builder.not(root.get(Prescription_.docPrescStatus).in(13,18,19))));
 		List<Object> resultList= em.createQuery(cq).getResultList();
-		List<PrescribedMedBean> medList=new ArrayList<PrescribedMedBean>();
 		for(int i=0;i<resultList.size();i++){
 			PrescribedMedBean eachobj=(PrescribedMedBean) resultList.get(i);
 			medList.add(eachobj);
 		}
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		
 		return medList;
 	}
@@ -907,6 +974,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		{
 			identifier = 0;
 		}
+		try{
 		for(int i=0;i<MedicationNameArr.length;i++)
 		{
 			String temp[]=MedicationNameArr[i].split("@@@");
@@ -935,7 +1003,9 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 				}
 			}
 		}
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		if(controlledSubstanceNDCList.length() > 1){
 			controlledSubstanceNDCList = controlledSubstanceNDCList.substring(0, (controlledSubstanceNDCList.length())-1);
 			if(!checkScheduleVal.equals("true"))
@@ -1057,6 +1127,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Object> query = cb.createQuery();
 		Root<DrugRelationMap> drugRoot = query.from(DrugRelationMap.class);
+		try{
 		Join<DrugRelationMap, DrugDetails> drugRelDetailsJoin=drugRoot.join(DrugRelationMap_.drugDetails,JoinType.INNER);
 		Join<DrugRelationMap, NdcDrugBrandMap> drugNdcJoin=drugRoot.join(DrugRelationMap_.ndcList,JoinType.INNER);
 		Join<NdcDrugBrandMap, Brandname> ndcBrandJoin=drugNdcJoin.join(NdcDrugBrandMap_.brandName,JoinType.INNER);
@@ -1071,6 +1142,9 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		List<Object> data= em.createQuery(query).getResultList();
 		if(!data.isEmpty()){
 			DEASchedule=data.get(0).toString();
+		}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 		return DEASchedule;
 	}
@@ -1104,6 +1178,7 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Object> query = cb.createQuery();
 		Root<DrugRelationMap> drugRoot = query.from(DrugRelationMap.class);
+		try{
 		Join<DrugRelationMap, DrugDetails> drugRelDetailsJoin=drugRoot.join(DrugRelationMap_.drugDetails,JoinType.INNER);
 		Join<DrugRelationMap, NdcDrugBrandMap> drugNdcJoin=drugRoot.join(DrugRelationMap_.ndcList,JoinType.INNER);
 		Join<NdcDrugBrandMap, Brandname> ndcBrandJoin=drugNdcJoin.join(NdcDrugBrandMap_.brandName,JoinType.INNER);
@@ -1123,6 +1198,9 @@ public class ErxSummaryServiceImp implements ErxSummaryService {
 		}
 		if(count>0)
 			isControlledSubstance=true;
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return isControlledSubstance;
 	}
 	
