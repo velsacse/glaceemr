@@ -22,6 +22,11 @@ public class EmployeeDataBean {
 	String empMailId;
 	String empSpecialty;
 	
+	public EmployeeDataBean(Integer empId, String empFullname){
+		this.empId = empId;
+		this.empFullname = empFullname;
+	}
+	
 	public EmployeeDataBean(Integer empId, Integer empLoginId,
 			String empLastName, String empFirstName, String empMiddleName,
 			String empCredentials, String empAddress, String empState,
