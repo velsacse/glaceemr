@@ -64,6 +64,8 @@ import com.glenwood.glaceemr.server.application.models.FileName_;
 import com.glenwood.glaceemr.server.application.models.H068;
 import com.glenwood.glaceemr.server.application.models.H213;
 import com.glenwood.glaceemr.server.application.models.H213_;
+import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping;
+import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping_;
 import com.glenwood.glaceemr.server.application.models.Hl7ResultInbox;
 import com.glenwood.glaceemr.server.application.models.Hl7ResultInbox_;
 import com.glenwood.glaceemr.server.application.models.Hl7Unmappedresults;
@@ -74,10 +76,13 @@ import com.glenwood.glaceemr.server.application.models.LabAlertforwardstatus;
 import com.glenwood.glaceemr.server.application.models.LabAlertforwardstatus_;
 import com.glenwood.glaceemr.server.application.models.LabDescpParameters;
 import com.glenwood.glaceemr.server.application.models.LabDescription;
+import com.glenwood.glaceemr.server.application.models.LabDescription_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
+import com.glenwood.glaceemr.server.application.models.LabFreqorder;
+import com.glenwood.glaceemr.server.application.models.LabFreqorder_;
 import com.glenwood.glaceemr.server.application.models.LabGroups;
 import com.glenwood.glaceemr.server.application.models.LabIncludePrevious;
 import com.glenwood.glaceemr.server.application.models.LabParameterCode;
@@ -1559,6 +1564,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		List<LabEntries>values=new ArrayList<LabEntries>();
 		CriteriaQuery<LabEntries> cq=cb.createQuery(LabEntries.class);
 		Root<LabEntries>root=cq.from(LabEntries.class);
+		root.join(LabEntries_.empProfile,JoinType.LEFT);
+		root.join(LabEntries_.encounter,JoinType.LEFT);
+		root.join(LabEntries_.labGroups,JoinType.INNER);
 		Selection[] selections=new Selection[]{
 				root.get(LabEntries_.labEntriesTestdetailId),
 				root.get(LabEntries_.labEntriesTestDesc),
@@ -1624,25 +1632,45 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			if( labEntry.getEmpProfile() != null ) {
 				EmployeeProfile empData = labEntry.getEmpProfile();
 				labData.setEmpFullName(empData.getEmpProfileFullname());
+				Chart chart = encounter.getChart();
+				PatientRegistration patReg = chart.getPatientRegistrationTable();
 				if( empData.getEmpProfileGroupid() == -10 ) {
 					if( encounter.getEncounterId() == -1 ) {
-						Chart chart = encounter.getChart();
-						PatientRegistration patReg = chart.getPatientRegistrationTable();
+						//int patReg=getPatientIdinChart(labEntry.getLabEntriesChartid());
+					//	String patempId=getPatientRegistrationPrincipalDoctor(patReg);
 						labData.setEmpId("" + patReg.getPatientRegistrationPrincipalDoctor());
 					} else {
+						Long esd=encounter.getEncounterServiceDoctor();
+						if(esd==null){
+							labData.setEmpId("" + patReg.getPatientRegistrationPrincipalDoctor());
+						}else{
 						labData.setEmpId("" + encounter.getEncounterServiceDoctor());
+						}
 					}
 				} else {
 					labData.setEmpId("" + empData.getEmpProfileEmpid());
 				}
 			} else {
+				Chart chart = encounter.getChart();
+				PatientRegistration patReg = chart.getPatientRegistrationTable();
+				//int patReg=getPatientIdinChart(labEntry.getLabEntriesChartid());
+				//String patempId=getPatientRegistrationPrincipalDoctor(patReg);
 				if( encounter.getEncounterId() == -1 ) {
-					Chart chart = encounter.getChart();
-					PatientRegistration patReg = chart.getPatientRegistrationTable();
+					/*Chart chart = encounter.getChart();
+					PatientRegistration patReg = chart.getPatientRegistrationTable();*/
+				/*	int patReg=getPatientIdinChart(labEntry.getLabEntriesChartid());
+					String patempId=getPatientRegistrationPrincipalDoctor(patReg);*/
 					labData.setEmpId("" + patReg.getPatientRegistrationPrincipalDoctor());
 					labData.setEmpFullName(getEmployeeName(labData.getEmpId()));
 				} else {
-					labData.setEmpId("" + encounter.getEncounterServiceDoctor());
+				Long esd=encounter.getEncounterServiceDoctor();
+					if(esd==null){
+						labData.setEmpId("" + patReg.getPatientRegistrationPrincipalDoctor());
+					
+					
+					}else{
+						labData.setEmpId("" + encounter.getEncounterServiceDoctor());
+					}
 					labData.setEmpFullName(getEmployeeName(labData.getEmpId()));
 				}
 			}
@@ -1759,6 +1787,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				LabEntries vaccineInfo = vaccineInfoList.get(i);
 				Vaccines vaccineData = new Vaccines();
 				PatientRegistration patData = patientRegistrationRepository.findOne(InvestigationSpecification.getPatientData(vaccineInfo.getLabEntriesChartid()));
+				//PatientRegistration patData = getPatientData(vaccineInfo.getLabEntriesChartid());
+				//if(patData!=null){
 				vaccineData.setAccountNo(patData.getPatientRegistrationAccountno());
 				vaccineData.setChartId("" + vaccineInfo.getLabEntriesChartid());
 				DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
@@ -1772,6 +1802,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				vaccineData.setTestName(vaccineInfo.getLabEntriesTestDesc());
 				vaccineDataList.add(vaccineData);
 			}
+			
 			orderDetails.setVaccineConsentInfo(vaccineDataList);
 		}
 
@@ -1847,7 +1878,48 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		return orderDetails;
 	}
 
+	private String getPatientRegistrationPrincipalDoctor(int patReg) {
+	
+		System.out.println("employeeId in getemployeeName"+patReg);
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
+		cq.select(root.get(PatientRegistration_.patientRegistrationPrincipalDoctor));
+		cq.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patReg));		
+		return "" + em.createQuery(cq).getSingleResult();
+	}
+
+	private PatientRegistration getPatientData(Integer labEntriesChartid) {
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		PatientRegistration values=null;
+		CriteriaQuery<PatientRegistration> cq=cb.createQuery(PatientRegistration.class);
+		Root<PatientRegistration>root=cq.from(PatientRegistration.class);
+		Join<PatientRegistration, Chart>chartJoin= root.join(PatientRegistration_.alertTable,JoinType.INNER);
+		Selection[] selections=new Selection[]{
+				root.get(PatientRegistration_.patientRegistrationAccountno),
+				root.get(PatientRegistration_.patientRegistrationFirstName),
+				root.get(PatientRegistration_.patientRegistrationLastName),
+				root.get(PatientRegistration_.patientRegistrationMidInitial),
+				root.get(PatientRegistration_.patientRegistrationId),
+				//root.get(PatientRegistration_.patientRegistrationDob),
+				root.get(PatientRegistration_.patientRegistrationPhoneNo),
+		};
+		cq.multiselect(selections);
+		Predicate[] predications=new Predicate[]{
+				cb.equal(chartJoin.get(Chart_.chartId),labEntriesChartid),
+				};
+				cq.where (predications);
+				try{
+					values= em.createQuery(cq).getSingleResult();	
+
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				return values;
+	}
+
 	private String getEmployeeName(String employeeId) {
+		System.out.println("employeeId in getemployeeName"+employeeId);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
@@ -1923,7 +1995,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			LabGroups groups = labGroups.get(i);
 			this.empId = getEmpId(encounterId);
 			Integer loginId = getLoginUserId(this.empId);
-			List<LabDescription> frequentOrder = labDescriptionRepository.findAll(Specifications.where(InvestigationSpecification.getFrequentLabs(groups.getLabGroupsId(),loginId)));
+			//List<LabDescription> frequentOrder = labDescriptionRepository.findAll(Specifications.where(InvestigationSpecification.getFrequentLabs(groups.getLabGroupsId(),loginId)));
+			List<LabDescription> frequentOrder = getFrequentLabs(groups.getLabGroupsId(),loginId);
 			if( frequentOrder.size() > 0 ) {
 				freqOrders.setLabs(frequentOrder);
 				freqOrders.setGroupId(groups.getLabGroupsId());
@@ -1932,6 +2005,46 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			}
 		}
 		return freqList;
+	}
+
+	private List<LabDescription> getFrequentLabs(Integer labGroupsId,
+			Integer loginId2) {
+		CriteriaBuilder cb=em.getCriteriaBuilder();
+		CriteriaQuery<LabDescription> cq = cb.createQuery(LabDescription.class);
+		Root<LabDescription> root = cq.from(LabDescription.class);
+		Join<LabDescription, LabFreqorder> join = root.join(LabDescription_.labFreqOrder, JoinType.INNER);
+		Join<LabDescription, Hl7ExternalTestmapping> rootjoin = root.join(LabDescription_.hl7ExternalTestmappingTable, JoinType.LEFT);
+		rootjoin.join(Hl7ExternalTestmapping_.hl7ExternalTestTable, JoinType.LEFT);
+		@SuppressWarnings("rawtypes")
+		Selection[] selections=new Selection[]{
+		/*	root.get(LabDescription_.labDescriptionTestid),
+			root.get(LabDescription_.labDescriptionGroupid),
+			root.get(LabDescription_.labDescriptionParameters),
+			root.get(LabDescription_.labDescriptionDrugs),
+			root.get(LabDescription_.labDescriptionTestDesc),
+			root.get(LabDescription_.labDescriptionScanGroupid),
+			root.get(LabDescription_.labDescriptionCvx),
+			root.get(LabDescription_.labDescriptionLoinc),
+			*/
+			root.get(LabDescription_.labDescriptionTestid),
+			root.get(LabDescription_.labDescriptionTestDesc),
+		};
+		cq.select(cb.construct(LabDescription.class,selections));
+		Predicate[] restrictions = new Predicate[] {
+				cb.equal(root.get(LabDescription_.labDescriptionGroupid), labGroupsId),
+				cb.equal(root.get(LabDescription_.labDescriptionIsactive), true),
+				join.get(LabFreqorder_.labFreqorderUserid).in(-1, loginId2),
+		};
+		cq.distinct(true);
+		cq.where(restrictions);
+		cq.orderBy(cb.asc(root.get(LabDescription_.labDescriptionTestDesc)));
+		List<LabDescription> rstList=new ArrayList<LabDescription>();
+		try{
+			rstList=em.createQuery(cq).getResultList();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return rstList;
 	}
 
 	/**

@@ -245,6 +245,32 @@ public class LabDescription implements Serializable {
 	private String  labDescriptionDefDx8;
 	
 	
+	public LabDescription(){
+		super();
+	}
+	
+	public LabDescription(Integer labDescriptionTestid,
+			Integer labDescriptionGroupid,String labDescriptionParameters,
+			String labDescriptionDrugs,String labDescriptionTestDesc,Integer labDescriptionScanGroupid,String labDescriptionCvx,
+			String labDescriptionLoinc){
+		this.labDescriptionTestid=labDescriptionTestid;
+		this.labDescriptionGroupid=labDescriptionGroupid;
+		this.labDescriptionParameters=labDescriptionParameters;
+		this.labDescriptionDrugs=labDescriptionDrugs;
+		this.labDescriptionTestDesc=labDescriptionTestDesc;
+		this.labDescriptionScanGroupid=labDescriptionScanGroupid;
+		this.labDescriptionCvx=labDescriptionCvx;
+		this.labDescriptionLoinc=labDescriptionLoinc;
+	}
+	 
+	public LabDescription(Integer labDescriptionTestid,String labDescriptionTestDesc){
+		this.labDescriptionTestid=labDescriptionTestid;
+		this.labDescriptionTestDesc=labDescriptionTestDesc;
+	}
+	
+	 
+	
+	
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="labDescription")
 	@JsonBackReference
 	List<Hl7ExternalTestmapping> hl7ExternalTestmappingTable;
