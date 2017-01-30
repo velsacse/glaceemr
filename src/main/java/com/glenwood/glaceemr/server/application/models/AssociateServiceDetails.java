@@ -96,23 +96,6 @@ public class AssociateServiceDetails {
 	@JoinColumn(name="associate_service_detail_unknown3", referencedColumnName="caseno" , insertable=false, updatable=false)
 	private CaseTab caseTab;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-   	@JsonManagedReference
-//   	@NotFound(action=NotFoundAction.IGNORE)
-   	@JoinColumn(name="associate_service_detail_problem_id", referencedColumnName="ar_problem_list_id" , insertable=false, updatable=false)
-   	private ArProblemList arProblem;
-	
-	
-	
-
-	public ArProblemList getArProblem() {
-		return arProblem;
-	}
-
-	public void setArProblem(ArProblemList arProblem) {
-		this.arProblem = arProblem;
-	}
-
 	public Long getAssociateServiceDetailId() {
 		return associateServiceDetailId;
 	}
