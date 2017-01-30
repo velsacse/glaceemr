@@ -68,7 +68,14 @@ public class SchedulerServiceImpl implements SchedulerService{
 	
 	@Override
 	public List<SchedulerResource> getResources() {
-			List<SchedulerResource> schedulerResources=schedulerResourcesRepository.findAll();
+		List<Integer> resourceList = new ArrayList<Integer>();
+		List<SchedulerResourceCategory> resources = schedulerResourceCategoryRepository.findAll(SchedulerSpecification.getResourcesByCategory());
+		
+		for (SchedulerResourceCategory schedulerResourceCategory : resources) {
+			resourceList.add(schedulerResourceCategory.getSchResourceCategoryResourceId());
+		}
+		
+		List<SchedulerResource> schedulerResources=schedulerResourcesRepository.findAll(SchedulerSpecification.getResources(resourceList));
 		return schedulerResources;
 	}
 
