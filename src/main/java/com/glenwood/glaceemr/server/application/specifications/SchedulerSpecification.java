@@ -9,6 +9,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.SchedulerResource;
 import com.glenwood.glaceemr.server.application.models.SchedulerResource_;
+import com.glenwood.glaceemr.server.application.models.SchedulerUserDefault;
+import com.glenwood.glaceemr.server.application.models.SchedulerUserDefault_;
 /**
  * 
  * @author Manikandan
@@ -27,4 +29,17 @@ public class SchedulerSpecification {
 			}
 		};
 	}
+
+	public static Specification<SchedulerUserDefault> getDefaultUserList(final String userId) {
+		return new Specification<SchedulerUserDefault>() {
+			
+			@Override
+			public Predicate toPredicate(Root<SchedulerUserDefault> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+						Predicate cond=query.where(cb.and(cb.equal(root.get(SchedulerUserDefault_.schUserDefaultUserId), userId),cb.equal(root.get(SchedulerUserDefault_.schUserDefaultTodisplay), true))).getRestriction();
+				return cond;
+			}
+		};
+	}
+	
 }
