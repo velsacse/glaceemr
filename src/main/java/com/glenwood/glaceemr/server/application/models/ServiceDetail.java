@@ -483,33 +483,6 @@ public class ServiceDetail {
     private SubmitStatus submitStatus;
     
     @ManyToOne(fetch=FetchType.LAZY)
-   	@JsonManagedReference
-   	@JoinColumn(name="service_detail_patientid", referencedColumnName="patient_registration_id" , insertable=false, updatable=false)
-   	private PatientRegistration patientRegistration;
-    
-    
-    @OneToMany(mappedBy="serviceDetail")
-   	@JsonManagedReference
-   	private List<NonServiceDetails> nonService;
-     
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-   	@JsonManagedReference
-  	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula = @JoinFormula(value = "service_detail_ar_status::integer", referencedColumnName = "blook_intid")) })
-   	private Billinglookup bllok;
-    
-    
-    @OneToMany(mappedBy="serviceDetails")
-   	@JsonManagedReference
-   	private List<H172> h172;
-	
-    
-    @OneToOne(fetch=FetchType.LAZY)
-	@JsonManagedReference
-	@JoinColumn(name="service_detail_id", referencedColumnName="service_id" , insertable=false, updatable=false)
-	private ServiceBalances serviceBalances;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="service_detail_patientid", referencedColumnName="chart_patientid" , insertable=false, updatable=false)
 	private Chart chartTable;
@@ -524,47 +497,6 @@ public class ServiceDetail {
 	public void setChartTable(Chart chartTable) {
 		this.chartTable = chartTable;
 	}
-
-
-	public PatientRegistration getPatientRegistration() {
-		return patientRegistration;
-	}
-
-
-	public void setPatientRegistration(PatientRegistration patientRegistration) {
-		this.patientRegistration = patientRegistration;
-	}
-
-
-	public List<NonServiceDetails> getNonService() {
-		return nonService;
-	}
-
-
-	public void setNonService(List<NonServiceDetails> nonService) {
-		this.nonService = nonService;
-	}
-
-
-	public Billinglookup getBllok() {
-		return bllok;
-	}
-
-
-	public void setBllok(Billinglookup bllok) {
-		this.bllok = bllok;
-	}
-
-
-	public List<H172> getH172() {
-		return h172;
-	}
-
-
-	public void setH172(List<H172> h172) {
-		this.h172 = h172;
-	}
-
 
 	public SubmitStatus getSubmitStatus() {
 		return submitStatus;
@@ -1748,16 +1680,4 @@ public class ServiceDetail {
 	public void setServiceDetailDx20desc(String serviceDetailDx20desc) {
 		this.serviceDetailDx20desc = serviceDetailDx20desc;
 	}
-
-
-	public ServiceBalances getServiceBalances() {
-		return serviceBalances;
-	}
-
-
-	public void setServiceBalances(ServiceBalances serviceBalances) {
-		this.serviceBalances = serviceBalances;
-	}
-
-	
 }

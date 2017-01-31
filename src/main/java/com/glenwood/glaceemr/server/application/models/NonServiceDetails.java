@@ -177,31 +177,10 @@ public class NonServiceDetails {
 	@JsonManagedReference
     Cpt cpt;
 	
-	
-	@OneToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="non_service_detail_id", referencedColumnName="ad_ah_denialid", insertable=false, updatable=false)
-	@JsonManagedReference
-    AdActionhistory adActionHistory;
-	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="non_service_detail_service_id", referencedColumnName="service_detail_id", insertable=false, updatable=false)
 	@JsonBackReference
     ServiceDetail serviceDetail;
-	
-	
-	/*@OneToMany(mappedBy="patientRegistrationTable")
-	@JsonManagedReference
-	private List<PatientInsDetail> patientInsuranceTable;*/
-	
-	public AdActionhistory getAdActionHistory() {
-		return adActionHistory;
-	}
-
-
-	public void setAdActionHistory(AdActionhistory adActionHistory) {
-		this.adActionHistory = adActionHistory;
-	}
-
 
 	public Cpt getCpt() {
 		return cpt;
