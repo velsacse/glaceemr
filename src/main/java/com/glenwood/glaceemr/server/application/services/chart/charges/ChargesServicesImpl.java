@@ -418,12 +418,32 @@ public class ChargesServicesImpl implements ChargesServices{
 	} 
 	public void requestToSaveService(ServiceDetail createdEntity) {
 		try {
-			AssociateServiceDetails associateServiceInsert=new AssociateServiceDetails();
 			serviceDetailRepository.save(createdEntity);
-			List<H213> h213=h213Repository.findAll(ChargesSpecification.getServiceDetailMaxId());
-			associateServiceInsert.setAssociateServiceDetailId(Long.valueOf(-1));
-			associateServiceInsert.setAssociateServiceDetailServiceId(h213.get(0).getH213003());
+			List<H213> serviceh213=h213Repository.findAll(ChargesSpecification.getServiceDetailMaxId());
+			List<H213> associateh213=h213Repository.findAll(ChargesSpecification.getAssociateServiceDetailMaxId());
+			Integer associateh213003=associateh213.get(0).getH213003();
+			associateh213.get(0).setH213003(associateh213003+1);
+			h213Repository.saveAndFlush(associateh213.get(0));
+			aSDEntityCreation(serviceh213,associateh213003+1);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void aSDEntityCreation(List<H213> serviceh213, int maxAssociate) {
+		try {
+			AssociateServiceDetails associateServiceInsert=new AssociateServiceDetails();
+			associateServiceInsert.setAssociateServiceDetailId(Long.valueOf(maxAssociate));
+			associateServiceInsert.setAssociateServiceDetailServiceId(serviceh213.get(0).getH213003());
 			associateServiceInsert.setAssociateServiceDetailSpecialDx("");
+			reqeustToSaveAssociateServiceDetail(associateServiceInsert);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void reqeustToSaveAssociateServiceDetail(AssociateServiceDetails associateServiceInsert) {
+		try {
 			associateServiceDetailsRepository.save(associateServiceInsert);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -224,6 +224,7 @@ public class ChargesSpecification {
 			}
 		};
 	}
+	
 
 	public static Specification<Cpt> getCptCodeDetails(final List<String> cptCodes) {
 		return new Specification<Cpt>() {
@@ -249,6 +250,18 @@ public class ChargesSpecification {
 		};
 	}
 
+	public static Specification<H213> getAssociateServiceDetailMaxId() {
+		return new Specification<H213>() {
+
+			@Override
+			public Predicate toPredicate(Root<H213> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				
+				Predicate maxValue=cb.equal(root.get(H213_.h213002), "associate_service_detail");
+				return maxValue;
+			}
+		};
+	}
 	public static Specification<InitialSettings> getDefaultBillingReason() {
 		return new Specification<InitialSettings>() {
 
