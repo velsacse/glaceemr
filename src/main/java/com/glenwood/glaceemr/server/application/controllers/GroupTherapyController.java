@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.TherapyGroup;
 import com.glenwood.glaceemr.server.application.models.TherapySession;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.AddNewGroupService;
+import com.glenwood.glaceemr.server.application.services.GroupTherapy.AddNoteBean;
+import com.glenwood.glaceemr.server.application.services.GroupTherapy.AddTherapyBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyGroupBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyLogBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyPatientsBean;
@@ -71,6 +73,20 @@ public class GroupTherapyController {
 		addNewGroupService.saveNewGroup(data);
 		logger.debug("In saveNewGroup - new group saved");
 		return emrResponseBean;
+	}
+	
+	/**
+	 * to save addNotes
+	 */
+	@RequestMapping(value="/saveNotes",  method=RequestMethod.POST)
+	@ResponseBody
+	
+	public void saveNotes(@RequestBody AddNoteBean data) throws Exception{
+		data = getAddNoteBean(data);
+		logger.debug("AddNotes is going to save");
+		addNewGroupService.saveNotes(data);
+		return;
+		
 	}
 	
 	/**
@@ -184,23 +200,107 @@ public class GroupTherapyController {
 		addNewGroupService.deleteTherapyPatient(dataToDelete);
 		logger.debug("In deletePatientFromTherapy - deleted the patient from therapy session or group");
 	}
-
+	
 	/**
-	 * 
+	 * to fetch shortcut code
+	 * @param mode
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/fetchShortcutCode",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean fetchShortcutCode(@RequestParam(value="group") Integer group){
+		group=Integer.parseInt(Optional.fromNullable(group+"").or("-1"));
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(addNewGroupService.fetchShortcutCode(group).toString());
+		return emrResponseBean;
+	}
+	
+	/**
+	 * to fetch shortcut description
+	 * @param shortcutId
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/fetchShortcutDescription",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean fetchShortcutData(@RequestParam(value="shortcutId") String shortcutId)
+	{
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(addNewGroupService.fetchShortcutData(shortcutId).toString());
+		return emrResponseBean;
+	}
+    
+	/**
+	 * to fetch notes data
+	 * @param gwid
+	 * @param patientId
+	 * @param sessionId
+	 * @param isPatient
+	 * @return
+	 */
+	@RequestMapping(value="/fetchNotesData",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean fetchNotesData(@RequestParam(value="gwid") String gwid,@RequestParam(value="patientId") Integer patientId,@RequestParam(value="sessionId") Integer sessionId,@RequestParam(value="isPatient") Boolean isPatient)
+	{
+	List<AddTherapyBean> notesData=addNewGroupService.fetchNotesData(gwid,patientId,sessionId,isPatient);
+	EMRResponseBean emrResponseBean = new EMRResponseBean();
+	emrResponseBean.setData(notesData);
+	return emrResponseBean;
+	}
+	
+	/**
+	 * to fetch data for AddTherapeuticIntervention
+	 * @param gwid
+	 * @param sessionId
+	 * @param isPatient
+	 * @return
+	 */
+	@RequestMapping(value="/fetchDataforTherapy",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean fetchDataforTherapy(@RequestParam(value="gwid") String gwid,@RequestParam(value="sessionId") Integer sessionId,@RequestParam(value="isPatient") Boolean isPatient)
+	{
+	List<AddTherapyBean> therapyData=addNewGroupService.fetchDataforTherapy(gwid,sessionId,isPatient);
+	EMRResponseBean emrResponseBean = new EMRResponseBean();
+	emrResponseBean.setData(therapyData);
+	return emrResponseBean;
+	}
+	
+	
+	/**
+	 * therapyGroupBean for saving Group
 	 * @param data
 	 * @return
 	 */
 	private TherapyGroupBean getTherapyGroupBean(TherapyGroupBean data) {
-		data.setProviderId(Integer.parseInt(Optional.fromNullable(data.getProviderId()+"").or("-1")));
-		data.setPosId(Integer.parseInt(Optional.fromNullable(data.getPosId()+"").or("-1")));
-		data.setGroupName(Optional.fromNullable(data.getGroupName()+"").or(""));
-		data.setGroupDesc(Optional.fromNullable(data.getGroupDesc()+"").or(""));
-		data.setDiagnosis(Optional.fromNullable(data.getDiagnosis()+"").or(""));
-		data.setDefaultTherapyTime(Optional.fromNullable(data.getDefaultTherapyTime()+"").or(""));
-		data.setLoginId(Integer.parseInt(Optional.fromNullable(data.getLoginId()+"").or("-1")));
-		data.setGroupId(Integer.parseInt(Optional.fromNullable(data.getGroupId()+"").or("-1")));
-	    data.setIsActive(Boolean.parseBoolean(Optional.fromNullable(data.getIsActive()+"").or("false")));
-	    return data;
+        data.setProviderId(Integer.parseInt(Optional.fromNullable(data.getProviderId()+"").or("-1")));
+        data.setPosId(Integer.parseInt(Optional.fromNullable(data.getPosId()+"").or("-1")));
+        data.setGroupName(Optional.fromNullable(data.getGroupName()+"").or(""));
+        data.setGroupDesc(Optional.fromNullable(data.getGroupDesc()+"").or(""));
+        data.setDiagnosis(Optional.fromNullable(data.getDiagnosis()+"").or(""));
+        data.setDefaultTherapyTime(Optional.fromNullable(data.getDefaultTherapyTime()+"").or(""));
+        data.setLoginId(Integer.parseInt(Optional.fromNullable(data.getLoginId()+"").or("-1")));
+        data.setGroupId(Integer.parseInt(Optional.fromNullable(data.getGroupId()+"").or("-1")));
+        data.setIsActive(Boolean.parseBoolean(Optional.fromNullable(data.getIsActive()+"").or("false")));
+        data.setLeaderId(Integer.parseInt(Optional.fromNullable(data.getLeaderId()+"").or("-1")));
+        data.setSupervisorId(Integer.parseInt(Optional.fromNullable(data.getSupervisorId()+"").or("-1")));
+        return data;
+    }
+	
+	/**
+	 * addNoteBean for saving notes
+	 * @param data
+	 * @return
+	 */
+	private AddNoteBean getAddNoteBean(AddNoteBean data){
+		data.setGwid(Optional.fromNullable(data.getGwid()+"").or(""));
+		data.setPatientDetailsEnteredBy(Optional.fromNullable(data.getPatientDetailsEnteredBy()+"").or(""));
+		data.setPatientDetailsEnteredOn(Optional.fromNullable(data.getPatientDetailsEnteredOn()+"").or(""));
+		data.setPatientDetailsId(Integer.parseInt(Optional.fromNullable(data.getPatientDetailsId()+"").or("-1")));
+		data.setPatientId(Optional.fromNullable(data.getPatientId()+"").or("-1"));
+		data.setPatientDetailsModifiedBy(Optional.fromNullable(data.getPatientDetailsModifiedBy()+"").or(""));
+		data.setPatientDetailsModifiedOn(Optional.fromNullable(data.getPatientDetailsModifiedOn()+"").or("-1"));
+		data.setSessionId(Integer.parseInt(Optional.fromNullable(data.getSessionId()+"").or("-1")));
+		data.setValue(Optional.fromNullable(data.getValue()+"").or("-1"));
+		return data;
 	}
 	
 }

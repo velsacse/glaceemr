@@ -6,19 +6,16 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "therapy_session_details")
@@ -42,6 +39,193 @@ public class TherapySessionDetails {
 	@Column(name="therapy_session_details_patient_xml_note")
 	private String therapySessionDetailsPatientXmlNote;
 	
+	@Column(name="therapy_session_end_time")
+	private String therapySessionEndTime;
+	
+	@Column(name="therapy_session_details_dx1")
+	private String therapySessionDetailsDx1;
+
+	@Column(name="therapy_session_details_dx2")
+	private String therapySessionDetailsDx2;
+
+	@Column(name="therapy_session_details_dx3")
+	private String therapySessionDetailsDx3;
+
+	@Column(name="therapy_session_details_dx4")
+	private String therapySessionDetailsDx4;
+
+	@Column(name="therapy_session_details_dx5")
+	private String therapySessionDetailsDx5;
+
+	@Column(name="therapy_session_details_dx6")
+	private String therapySessionDetailsDx6;
+
+	@Column(name="therapy_session_details_dx7")
+	private String therapySessionDetailsDx7;
+
+	@Column(name="therapy_session_details_dx8")
+	private String therapySessionDetailsDx8;
+
+	@Column(name="therapy_session_details_dx1desc")
+	private String therapySessionDetailsDx1desc;
+
+	@Column(name="therapy_session_details_dx2desc")
+	private String therapySessionDetailsDx2desc;
+
+	@Column(name="therapy_session_details_dx3desc")
+	private String therapySessionDetailsDx3desc;
+
+	@Column(name="therapy_session_details_dx4desc")
+	private String therapySessionDetailsDx4desc;
+
+	@Column(name="therapy_session_details_dx5desc")
+	private String therapySessionDetailsDx5desc;
+
+	@Column(name="therapy_session_details_dx6desc")
+	private String therapySessionDetailsDx6desc;
+
+	@Column(name="therapy_session_details_dx7desc")
+	private String therapySessionDetailsDx7desc;
+
+	@Column(name="therapy_session_details_dx8desc")
+	private String therapySessionDetailsDx8desc;
+	
+	public String getTherapySessionDetailsDx1() {
+		return therapySessionDetailsDx1;
+	}
+
+	public void setTherapySessionDetailsDx1(String therapySessionDetailsDx1) {
+		this.therapySessionDetailsDx1 = therapySessionDetailsDx1;
+	}
+
+	public String getTherapySessionDetailsDx2() {
+		return therapySessionDetailsDx2;
+	}
+
+	public void setTherapySessionDetailsDx2(String therapySessionDetailsDx2) {
+		this.therapySessionDetailsDx2 = therapySessionDetailsDx2;
+	}
+
+	public String getTherapySessionDetailsDx3() {
+		return therapySessionDetailsDx3;
+	}
+
+	public void setTherapySessionDetailsDx3(String therapySessionDetailsDx3) {
+		this.therapySessionDetailsDx3 = therapySessionDetailsDx3;
+	}
+
+	public String getTherapySessionDetailsDx4() {
+		return therapySessionDetailsDx4;
+	}
+
+	public void setTherapySessionDetailsDx4(String therapySessionDetailsDx4) {
+		this.therapySessionDetailsDx4 = therapySessionDetailsDx4;
+	}
+
+	public String getTherapySessionDetailsDx5() {
+		return therapySessionDetailsDx5;
+	}
+
+	public void setTherapySessionDetailsDx5(String therapySessionDetailsDx5) {
+		this.therapySessionDetailsDx5 = therapySessionDetailsDx5;
+	}
+
+	public String getTherapySessionDetailsDx6() {
+		return therapySessionDetailsDx6;
+	}
+
+	public void setTherapySessionDetailsDx6(String therapySessionDetailsDx6) {
+		this.therapySessionDetailsDx6 = therapySessionDetailsDx6;
+	}
+
+	public String getTherapySessionDetailsDx7() {
+		return therapySessionDetailsDx7;
+	}
+
+	public void setTherapySessionDetailsDx7(String therapySessionDetailsDx7) {
+		this.therapySessionDetailsDx7 = therapySessionDetailsDx7;
+	}
+
+	public String getTherapySessionDetailsDx8() {
+		return therapySessionDetailsDx8;
+	}
+
+	public void setTherapySessionDetailsDx8(String therapySessionDetailsDx8) {
+		this.therapySessionDetailsDx8 = therapySessionDetailsDx8;
+	}
+
+	public String getTherapySessionDetailsDx1desc() {
+		return therapySessionDetailsDx1desc;
+	}
+
+	public void setTherapySessionDetailsDx1desc(String therapySessionDetailsDx1desc) {
+		this.therapySessionDetailsDx1desc = therapySessionDetailsDx1desc;
+	}
+
+	public String getTherapySessionDetailsDx2desc() {
+		return therapySessionDetailsDx2desc;
+	}
+
+	public void setTherapySessionDetailsDx2desc(String therapySessionDetailsDx2desc) {
+		this.therapySessionDetailsDx2desc = therapySessionDetailsDx2desc;
+	}
+
+	public String getTherapySessionDetailsDx3desc() {
+		return therapySessionDetailsDx3desc;
+	}
+
+	public void setTherapySessionDetailsDx3desc(String therapySessionDetailsDx3desc) {
+		this.therapySessionDetailsDx3desc = therapySessionDetailsDx3desc;
+	}
+
+	public String getTherapySessionDetailsDx4desc() {
+		return therapySessionDetailsDx4desc;
+	}
+
+	public void setTherapySessionDetailsDx4desc(String therapySessionDetailsDx4desc) {
+		this.therapySessionDetailsDx4desc = therapySessionDetailsDx4desc;
+	}
+
+	public String getTherapySessionDetailsDx5desc() {
+		return therapySessionDetailsDx5desc;
+	}
+
+	public void setTherapySessionDetailsDx5desc(String therapySessionDetailsDx5desc) {
+		this.therapySessionDetailsDx5desc = therapySessionDetailsDx5desc;
+	}
+
+	public String getTherapySessionDetailsDx6desc() {
+		return therapySessionDetailsDx6desc;
+	}
+
+	public void setTherapySessionDetailsDx6desc(String therapySessionDetailsDx6desc) {
+		this.therapySessionDetailsDx6desc = therapySessionDetailsDx6desc;
+	}
+
+	public String getTherapySessionDetailsDx7desc() {
+		return therapySessionDetailsDx7desc;
+	}
+
+	public void setTherapySessionDetailsDx7desc(String therapySessionDetailsDx7desc) {
+		this.therapySessionDetailsDx7desc = therapySessionDetailsDx7desc;
+	}
+
+	public String getTherapySessionDetailsDx8desc() {
+		return therapySessionDetailsDx8desc;
+	}
+
+	public void setTherapySessionDetailsDx8desc(String therapySessionDetailsDx8desc) {
+		this.therapySessionDetailsDx8desc = therapySessionDetailsDx8desc;
+	}
+
+	public String getTherapySessionEndTime() {
+		return therapySessionEndTime;
+	}
+
+	public void setTherapySessionEndTime(String therapySessionEndTime) {
+		this.therapySessionEndTime = therapySessionEndTime;
+	}
+
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="therapy_session_details_session_id",referencedColumnName="therapy_session_id",insertable=false, updatable=false)
 	@JsonBackReference
