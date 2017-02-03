@@ -182,7 +182,7 @@ public class LabResultsSpecification {
 				Join<FileDetails, FileName> fileJoin = docsJoin.join(FileDetails_.fileName, JoinType.LEFT);
 				Predicate isActive = cb.equal(fileJoin.get(FileName_.filenameIsreviewed), reviewed);
 				Predicate activeDoc = cb.equal(root.get(Hl7DocsInbox_.hl7DocsInboxIsactive), true);				
-				return cb.and(isActive, activeDoc);
+				return cb.or((cb.and(isActive, activeDoc)),(cb.and(activeDoc)));
 			}	
 		};
 	}

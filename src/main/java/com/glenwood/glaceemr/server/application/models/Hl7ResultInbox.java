@@ -1,6 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Entity
 @Table(name = "hl7_result_inbox")
 public class Hl7ResultInbox {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="hl7_result_inbox_hl7_result_inbox_id_seq")
 	@SequenceGenerator(name ="hl7_result_inbox_hl7_result_inbox_id_seq", sequenceName="hl7_result_inbox_hl7_result_inbox_id_seq", allocationSize=1)
@@ -106,6 +105,30 @@ public class Hl7ResultInbox {
 	@JsonManagedReference
 	private List<Hl7Unmappedresults> hl7UnmappedResults;
 	
+	public Hl7ResultInbox() {
+	}
+	
+	public Hl7ResultInbox(Integer hl7ResultInboxId,
+			String hl7ResultInboxAccountno,	
+			String hl7ResultInboxFirstname,	
+			String hl7ResultInboxLastname, 
+			Integer hl7ResultInboxStatus,
+			String hl7ResultInboxFilename, 
+			Integer hl7ResultInboxReviewed,
+			Date hl7ResultInboxDob,
+			Date hl7ResultInboxPlacedDate) {
+		this.hl7ResultInboxId = hl7ResultInboxId;
+		this.hl7ResultInboxAccountno = hl7ResultInboxAccountno;
+		this.hl7ResultInboxFirstname = hl7ResultInboxFirstname;
+		this.hl7ResultInboxLastname = hl7ResultInboxLastname;
+		this.hl7ResultInboxStatus = hl7ResultInboxStatus;
+		this.hl7ResultInboxFilename = hl7ResultInboxFilename;
+		this.hl7ResultInboxReviewed = hl7ResultInboxReviewed;
+		this.hl7ResultInboxDob = hl7ResultInboxDob;
+		this.hl7ResultInboxPlacedDate = hl7ResultInboxPlacedDate;
+		
+	}
+
 	public Integer getHl7ResultInboxId() {
 		return hl7ResultInboxId;
 	}

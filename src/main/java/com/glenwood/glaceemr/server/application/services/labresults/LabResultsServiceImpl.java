@@ -14,10 +14,12 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 
@@ -47,6 +49,7 @@ import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
+import com.glenwood.glaceemr.server.application.models.LabParameters;
 import com.glenwood.glaceemr.server.application.models.LabcompanyDetails;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
@@ -62,7 +65,13 @@ import com.glenwood.glaceemr.server.application.repositories.LabEntriesRepositor
 import com.glenwood.glaceemr.server.application.repositories.LabParametersRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.investigation.InvestigationSummaryService;
 import com.glenwood.glaceemr.server.application.services.investigation.InvestigationSummaryServiceImpl;
 import com.glenwood.glaceemr.server.application.services.investigation.SaveAttachResultData;
@@ -134,6 +143,12 @@ public class LabResultsServiceImpl implements LabResultsService {
 
 	@Autowired
 	HttpServletRequest request;
+	
+	@PersistenceContext
+	EntityManager em;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
 
 	private Logger logger = Logger.getLogger(InvestigationSummaryServiceImpl.class);
 	String rootPath;
@@ -185,13 +200,65 @@ public class LabResultsServiceImpl implements LabResultsService {
 	 * @throws Exception
 	 */
 	@Override
-	public List<ResultList> getListOfResults(String doctorId, String isReviewed, String orderedDate, Integer pageNo,
-			Integer pageSize) throws Exception {
+	public List<ResultList> getListOfResults(String doctorId, String isReviewed, String orderedDate, Integer pageNo,Integer pageSize) {
 		ArrayList<Integer> list = new ArrayList<Integer>();
+//		EntityManager em = emf.createEntityManager();
+		try{
 		for (int j = 0; j < doctorId.split(",").length; j++) {
 			list.add(Integer.parseInt( doctorId.split(",")[j]));
 		}
-		List<Hl7ResultInbox> resultInboxList = resultsRepository.findAll(Specifications.where(LabResultsSpecification.getActiveResult()).and(LabResultsSpecification.verifyReviewedStatus(isReviewed)).and(LabResultsSpecification.verifyOrdBy(list)));
+//		List<Hl7ResultInbox> resultInboxList = resultsRepository.findAll(Specifications.where(LabResultsSpecification.getActiveResult()).and(LabResultsSpecification.verifyReviewedStatus(isReviewed)).and(LabResultsSpecification.verifyOrdBy(list)));
+		
+		CriteriaBuilder cbuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cqry = cbuilder.createQuery();
+		Root<Hl7ResultInbox> rootHl7ResultInbox = cqry.from(Hl7ResultInbox.class);
+		
+		Predicate activeResult = cbuilder.equal(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxIsactive), true);
+		
+		Predicate reviewedResult = cbuilder.equal(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxReviewed), Integer.parseInt(isReviewed));
+		
+		Join<Hl7ResultInbox, Hl7Unmappedresults> resultsJoin = rootHl7ResultInbox.join(Hl7ResultInbox_.hl7UnmappedResults,JoinType.INNER);
+		Join<Hl7ResultInbox, PatientRegistration> patJoin = rootHl7ResultInbox.join(Hl7ResultInbox_.patientRegistration,JoinType.LEFT);
+		
+		Predicate hl7unmapResActive = cbuilder.equal(resultsJoin.get(Hl7Unmappedresults_.hl7UnmappedresultsIsactive), true);
+		resultsJoin.on(hl7unmapResActive);
+		
+//		Predicate patRegRestriction = cbuilder.equal(cbuilder.upper(patJoin.get(PatientRegistration_.patientRegistrationAccountno)), cbuilder.upper(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxAccountno)));
+//		patJoin.on(patRegRestriction);
+		
+		Predicate checkOrdBy = resultsJoin.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdbyDocid).in(list);
+		cqry.where(activeResult,reviewedResult,checkOrdBy,hl7unmapResActive);
+		cqry.multiselect(cbuilder.construct(Hl7ResultInbox.class,
+				rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxId),
+				cbuilder.coalesce(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxAccountno),cbuilder.literal("")),
+				cbuilder.coalesce(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxFirstname),cbuilder.literal("")),
+				cbuilder.coalesce(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxLastname),cbuilder.literal("")),
+				rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxStatus),
+				cbuilder.coalesce(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxFilename),cbuilder.literal("")),
+				rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxReviewed),
+				rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxDob),
+				rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxPlacedDate)));
+		cqry.distinct(true);
+		cqry.orderBy(cbuilder.desc(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxPlacedDate)));
+		List<Object> obj=em.createQuery(cqry).getResultList();
+		
+		List<Hl7ResultInbox> resultInboxList = new ArrayList<Hl7ResultInbox>();
+		for(int i=0;i<obj.size();i++){
+			Hl7ResultInbox hl7Results = (Hl7ResultInbox) obj.get(i);
+			Hl7ResultInbox hl7ResultsData = new Hl7ResultInbox(hl7Results.getHl7ResultInboxId(),
+					hl7Results.getHl7ResultInboxAccountno(),
+					hl7Results.getHl7ResultInboxFirstname(),
+					hl7Results.getHl7ResultInboxLastname(),
+					hl7Results.getHl7ResultInboxStatus(),
+					hl7Results.getHl7ResultInboxFilename(),
+					hl7Results.getHl7ResultInboxReviewed(),
+					hl7Results.getHl7ResultInboxDob(),
+					hl7Results.getHl7ResultInboxPlacedDate());
+			PatientRegistration patReg = new PatientRegistration();
+			hl7ResultsData.setPatientRegistration(patReg);
+			resultInboxList.add(hl7ResultsData);
+		}
+		
 		List<ResultList> resultData = new ArrayList<ResultList>();
 		for (int i = 0; i < resultInboxList.size(); i++) {
 			ResultList results = new ResultList();
@@ -220,9 +287,9 @@ public class LabResultsServiceImpl implements LabResultsService {
 			} else {
 				results.setCategoryName("Unknown");
 			}
-			List<Hl7Unmappedresults> unmappedResultsList = inboxData.getHl7UnmappedResults();
+			List<Hl7UnmappedresultsBean> unmappedResultsList = getHl7UnmappedResults(inboxData.getHl7ResultInboxId());
 			for (int j = 0; j < unmappedResultsList.size(); j++) {
-				Hl7Unmappedresults unmappedResults = unmappedResultsList.get(j);
+				Hl7UnmappedresultsBean unmappedResults = (Hl7UnmappedresultsBean) unmappedResultsList.get(j);
 				results.setOrderedBy(unmappedResults.getHl7UnmappedresultsOrdbyLastname() + ", " + unmappedResults.getHl7UnmappedresultsOrdbyFirstname());
 				results.setOrderedDate(formatter.format(unmappedResults.getHl7UnmappedresultsOrdDate()));
 			}
@@ -239,7 +306,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 		} else {
 			reviewed = false;
 		}
-		List<Hl7DocsInbox> docsInboxList = docsInboxRepository.findAll(Specifications.where(Specifications.where(LabResultsSpecification.checkFileReviewed(reviewed)).or(LabResultsSpecification.checkPatientId())).and(LabResultsSpecification.verifyDocProvider(list)));
+		List<Hl7DocsInbox> docsInboxList = docsInboxRepository.findAll(Specifications.where(Specifications.where(LabResultsSpecification.checkFileReviewed(reviewed)).and(LabResultsSpecification.checkPatientId())).and(LabResultsSpecification.verifyDocProvider(list)));
 		for (int i = 0; i < docsInboxList.size(); i++) {
 			Hl7DocsInbox docsData = docsInboxList.get(i);
 			ResultList results = new ResultList();
@@ -284,7 +351,8 @@ public class LabResultsServiceImpl implements LabResultsService {
 				results.setFileNameId("-1");
 			}
 			results.setOrderedBy(docsData.getHl7DocsInboxProviderName());
-			results.setOrderedDate(formatter.format(docsData.getHl7DocsInboxOrdDate()));
+			if(docsData.getHl7DocsInboxOrdDate()!=null && !docsData.getHl7DocsInboxOrdDate().toString().equalsIgnoreCase(""))
+				results.setOrderedDate(formatter.format(docsData.getHl7DocsInboxOrdDate()));
 			results.setIsDocument("1");
 			resultData.add(results);
 		}
@@ -298,6 +366,44 @@ public class LabResultsServiceImpl implements LabResultsService {
 			}
 		}
 		return resultData;
+	}catch(Exception e) {
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.VIEW, -1,Log_Outcome.FAILURE,"Failure in getting the list of results received for the user" , -1,
+					request.getRemoteAddr() , -1 , "doctorId="+doctorId,LogUserType.USER_LOGIN ,"","");
+			return null;
+		} finally {
+			em.close();
+		}
+	}
+
+	private List<Hl7UnmappedresultsBean> getHl7UnmappedResults(Integer hl7ResultInboxId) {
+		try{
+			
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<Hl7Unmappedresults> root = cq.from(Hl7Unmappedresults.class);
+			cq.select(builder.construct(Hl7UnmappedresultsBean.class, root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdbyFirstname),
+					root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdbyLastname),
+					root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdDate)))
+					.where(builder.equal(root.get(Hl7Unmappedresults_.hl7UnmappedresultsFilewiseId),hl7ResultInboxId));
+			
+			List<Hl7UnmappedresultsBean> resData= new ArrayList<Hl7UnmappedresultsBean>(); 
+			List<Object> resultList = em.createQuery(cq).getResultList();
+			for(int i=0;i<resultList.size();i++){
+				Hl7UnmappedresultsBean hl7unmappedresults = (Hl7UnmappedresultsBean) resultList.get(i);
+				Hl7UnmappedresultsBean resultsData = new Hl7UnmappedresultsBean(hl7unmappedresults.getHl7UnmappedresultsOrdbyFirstname(),
+						hl7unmappedresults.getHl7UnmappedresultsOrdbyLastname(),
+						hl7unmappedresults.getHl7UnmappedresultsOrdDate());
+				resData.add(resultsData);
+			}
+			return resData;
+		}catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			em.close();
+		}
+		
 	}
 
 	/**
@@ -365,11 +471,11 @@ public class LabResultsServiceImpl implements LabResultsService {
 	public ResultDetails getPatientResultData(String hl7FileId) {
 		List<Hl7ResultInbox> resultInboxList = resultsRepository.findAll(LabResultsSpecification.checkHl7Id(hl7FileId));
 		ResultDetails patientResults = new ResultDetails();
-		setPatientResults(patientResults, resultInboxList);		
+		setPatientResults(patientResults, resultInboxList,hl7FileId);		
 		return patientResults;
 	}
 
-	private void setPatientResults(ResultDetails patientResults, List<Hl7ResultInbox> resultInboxList) {
+	private void setPatientResults(ResultDetails patientResults, List<Hl7ResultInbox> resultInboxList,String hl7FileId) {
 		for (int i = 0; i < resultInboxList.size(); i++) {
 			Hl7ResultInbox resultInbox = resultInboxList.get(i);
 			patientResults.setPatientId(getPatientId(resultInbox.getHl7ResultInboxAccountno()));
@@ -488,6 +594,8 @@ public class LabResultsServiceImpl implements LabResultsService {
 					unmappedList.add(unmapped);
 				} catch (Exception e) {
 					e.printStackTrace();
+					auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.VIEW, -1,Log_Outcome.FAILURE,"Failure in getting the complete details of the received result" , -1,
+							request.getRemoteAddr() , -1 , "hl7FileId="+hl7FileId,LogUserType.USER_LOGIN ,"","");
 				}
 			}
 			patientResults.setDocumentId(Optional.fromNullable(Strings.emptyToNull("" + resultInbox.getHl7ResultInboxDocumentid())).or("-1"));
@@ -702,6 +810,8 @@ public class LabResultsServiceImpl implements LabResultsService {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
+					auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.ATTACH, -1,Log_Outcome.FAILURE,"Failure in attaching the result to a Patient" , -1,
+							request.getRemoteAddr() , Integer.parseInt(patientId) , "hl7FileId="+hl7FileId+"|userId="+userId,LogUserType.USER_LOGIN ,"","");
 				}
 			}
 		}
@@ -951,6 +1061,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 	@Override
 	public void saveLabDetails(SaveData labDetails) throws Exception {
 		List<TestDetails> testDetailsList = labDetails.getTestDetails();		
+		try{
 		for (int i = 0; i < testDetailsList.size(); i++) {
 			TestDetails testDetails = testDetailsList.get(i);
 			if( labDetails.getIsReviewAll() ) {
@@ -962,10 +1073,11 @@ public class LabResultsServiceImpl implements LabResultsService {
 			for( LabEntries labEntries : labEntriesList ) {
 				labEntries.setLabEntriesTestStatus(Integer.parseInt(testDetails.getTestStatus()));
 				labEntries.setLabEntriesRevBy(Integer.parseInt(labDetails.getDoctorId()));
-				if( testDetails.getReviewedOn() != null ) {
+				if( testDetails.getReviewedOn() != null && !testDetails.getReviewedOn().equalsIgnoreCase("")) {
 					labEntries.setLabEntriesRevOn(Timestamp.valueOf(testDetails.getReviewedOn()));
 				} else {
-					labEntries.setLabEntriesRevOn(new Timestamp(new Date().getTime()));
+					if(testDetails.getTestStatus().equalsIgnoreCase("4"))
+						labEntries.setLabEntriesRevOn(new Timestamp(new Date().getTime()));
 				}
 				labEntries.setLabEntriesPrelimTestStatus(Integer.parseInt(testDetails.getPrelimStatus()));
 				labEntries.setLabEntriesConfirmTestStatus(Integer.parseInt(testDetails.getFinalStatus()));
@@ -984,6 +1096,13 @@ public class LabResultsServiceImpl implements LabResultsService {
 				labEntries.setLabEntriesAdministrationNotes(0);				
 				labEntriesRepository.saveAndFlush(labEntries);
 			}
+			
+			List<Hl7Unmappedresults> unmapList = unmappedResultsRepository.findAll(LabResultsSpecification.getUnreviewedList(labDetails.getHl7FileId()));
+			if( unmapList.size() <= 0 ) {
+				for(Hl7Unmappedresults unmap:unmapList){
+					unmap.setHl7UnmappedresultsTestStatus(Integer.parseInt(testDetails.getTestStatus()));
+				}
+			}
 		}
 		int reviewStatus = getResultReviewStatus(labDetails.getHl7FileId());
 		if( reviewStatus == 0 ) {
@@ -994,6 +1113,13 @@ public class LabResultsServiceImpl implements LabResultsService {
 					inbox.setHl7ResultInboxReviewed(1);
 				}
 			}
+		}
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.UPDATE, -1,Log_Outcome.SUCCESS,"Success in Saving the details of a lab from Hl7" , -1,
+				request.getRemoteAddr() , -1 , "" ,LogUserType.USER_LOGIN ,"","");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.UPDATE, -1,Log_Outcome.FAILURE,"Failure in Saving the details of a lab from Hl7" , -1,
+					request.getRemoteAddr() , -1 , "" ,LogUserType.USER_LOGIN ,"","");
 		}
 	}
 
@@ -1037,7 +1163,9 @@ public class LabResultsServiceImpl implements LabResultsService {
 		}
 		List<Hl7ResultInbox> resultInboxList = resultsRepository.findAll(LabResultsSpecification.getUnmappedResults(HL7IdList));
 		ResultDetails patientResults = new ResultDetails();
-		setPatientResults(patientResults, resultInboxList);
+		setPatientResults(patientResults, resultInboxList,hl7FileId);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"Success in getting the previous orders for a result" , -1,
+				request.getRemoteAddr() , -1 , "hl7FileId="+hl7FileId,LogUserType.USER_LOGIN ,"","");
 		return patientResults;
 	}
 
@@ -1048,7 +1176,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 		for( Hl7ResultInbox hl7Data : hl7List ) {
 			firstName = hl7Data.getHl7ResultInboxFirstname();
 			lastName = hl7Data.getHl7ResultInboxLastname();
-			dob = hl7Data.getHl7ResultInboxDob();
+			dob = (java.sql.Date) hl7Data.getHl7ResultInboxDob();
 		}
 		EntityManager em = emf.createEntityManager();
 		try {
@@ -1153,6 +1281,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 		List<String> testDetailIdList = attachLabData.getTestDetailId();
 		List<String> testIdList = attachLabData.getTestId();
 		List<String> testNameList = attachLabData.getTestName();
+		try{
 		for(int j = 0; j < resultList.size(); j++) {
 			String resultName = resultList.get(j);
 			String testDetailId = testDetailIdList.get(j);
@@ -1291,6 +1420,13 @@ public class LabResultsServiceImpl implements LabResultsService {
 			}
 			//			EventLog.LogEvent(AuditTrail.GLACE_LOG,AuditTrail.HL7_Lab_Results,AuditTrail.UPDATE,Integer.parseInt(session.getAttribute("parent_event").toString()),AuditTrail.SUCCESS,"Lab Result(testname="+names[i]+") Attached to an ordered Lab(testdetailid="+testIdAttach+") by the user with userid="+userId,Integer.parseInt(session.getAttribute("loginId").toString()),"127.0.01",request.getRemoteAddr(),-1,-1,-1,AuditTrail.USER_LOGIN,request,dbUtils,"Lab result attached to an Ordered Lab");
 		}
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.ATTACH, -1,Log_Outcome.SUCCESS,"Success in attaching unknown result to a lab" , -1,
+				request.getRemoteAddr() , -1 , "" ,LogUserType.USER_LOGIN ,"","");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.ATTACH, -1,Log_Outcome.FAILURE,"Failure in attaching unknown result to a lab" , -1,
+					request.getRemoteAddr() , -1 , "" ,LogUserType.USER_LOGIN ,"","");
+		}
 	}
 
 	private String getIsPdf(String hl7FileId) {
@@ -1331,8 +1467,12 @@ public class LabResultsServiceImpl implements LabResultsService {
 			for( Hl7Unmappedresults deleteLab : deleteList ) {
 				unmappedResultsRepository.delete(deleteLab);
 			}
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.DELETE, -1,Log_Outcome.SUCCESS,"Success in deleting the lab, if no mapping" , -1,
+					request.getRemoteAddr() , -1 , "hl7FileId="+hl7Id+"|testName="+testName,LogUserType.USER_LOGIN ,"","");
 			return "Successfully deleted";
 		} catch (Exception e) {
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.DELETE, -1,Log_Outcome.FAILURE,"Failure in deleting the lab, if no mapping" , -1,
+					request.getRemoteAddr() , -1 , "hl7FileId="+hl7Id+"|testName="+testName,LogUserType.USER_LOGIN ,"","");
 			return "Failed";
 		}		
 	}
@@ -1409,6 +1549,8 @@ public class LabResultsServiceImpl implements LabResultsService {
 					result.setFileName(fileName);
 				}
 				result.setHtmlContent(htmlContent);
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"Success in getting the document data like file name shared folder path, etc" , -1,
+						request.getRemoteAddr() , Integer.parseInt(patientId) , "documentId="+documentId ,LogUserType.USER_LOGIN ,"","");
 				return result;
 			} else {
 				String htmlContent = "";
@@ -1428,11 +1570,15 @@ public class LabResultsServiceImpl implements LabResultsService {
 				} else if( fileType.equals("pdf") ) {								
 					String fileName = getFileName(documentId);
 					result.setFileName(fileName);
-				}			
+				}	
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"Success in getting the document data like file name shared folder path, etc" , -1,
+						request.getRemoteAddr() , Integer.parseInt(patientId) , "documentId="+documentId ,LogUserType.USER_LOGIN ,"","");
 				return result;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.VIEW, -1,Log_Outcome.FAILURE,"Failure in getting the document data like file name shared folder path, etc" , -1,
+					request.getRemoteAddr() , Integer.parseInt(patientId) , "documentId="+documentId ,LogUserType.USER_LOGIN ,"","");
 			return result;
 		}
 	}
@@ -1463,6 +1609,8 @@ public class LabResultsServiceImpl implements LabResultsService {
 			file.setFilenameReviewedon(new Timestamp(new Date().getTime()));
 			fileNameRepository.saveAndFlush(file);
 		}
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.UPDATE, -1,Log_Outcome.SUCCESS,"Success in Reviewing the received documents" , -1,
+				request.getRemoteAddr() , -1 , "fileId="+fileId+"userId="+userId ,LogUserType.USER_LOGIN ,"","");
 		return "Reviewed the document";
 	}
 
@@ -1476,9 +1624,13 @@ public class LabResultsServiceImpl implements LabResultsService {
 			Join<FileName, FileDetails> join = root.join(FileName_.fileNameDetails,JoinType.INNER);
 			cq.select(root.get(FileName_.filenameName));
 			cq.where(builder.equal(join.get(FileDetails_.filedetailsEntityid), Integer.parseInt(testDetailId)));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"Success in getting the PDF details." , -1,
+					request.getRemoteAddr() , -1 , "testDetailId="+testDetailId,LogUserType.USER_LOGIN ,"","");
 			return "" + em.createQuery(cq).getSingleResult();
 		} catch(Exception e) {
 			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.VIEW, -1,Log_Outcome.FAILURE,"Failure in getting the PDF details." , -1,
+					request.getRemoteAddr() , -1 , "testDetailId="+testDetailId,LogUserType.USER_LOGIN ,"","");
 			return null;
 		} finally {
 			em.close();
