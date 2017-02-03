@@ -2,6 +2,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.chart.Allergies.AllergiesService;
 import com.glenwood.glaceemr.server.application.services.chart.Allergies.AllergiesTypeBean;
 import com.glenwood.glaceemr.server.application.services.chart.Allergies.AllergyBean;
@@ -35,6 +43,12 @@ public class AllergiesController {
 	
 	@Autowired
 	AllergiesService AllergiesService;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
 
 	private Logger logger = Logger.getLogger(AllergiesController.class);
 	
@@ -55,6 +69,7 @@ public class AllergiesController {
 		List<AllergiesTypeBean> allergyTypes=AllergiesService.retrievingAllergyType(gender);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(allergyTypes);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved allergy types", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -81,6 +96,7 @@ public class AllergiesController {
 		AllergyBean SearchAllergyData=AllergiesService.searchAllergy(Criteria,mode,offset,limit);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(SearchAllergyData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved data for allergen search", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -105,6 +121,7 @@ public class AllergiesController {
 		AllergyBean SearchAllergyData=AllergiesService.getReactionsOfAllergies(Criteria,offset,limit);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(SearchAllergyData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved Allergy reaction search data", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -125,6 +142,7 @@ public class AllergiesController {
 		List<PatientAllergies> SearchAllergyData=AllergiesService.getNKDAandNKACheckDetails(chartId);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(SearchAllergyData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved NKDA and NKA check details", -1, request.getRemoteAddr(), -1, "chartId="+chartId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -145,6 +163,7 @@ public class AllergiesController {
     		@ApiParam(name="insertParameters", value="insertParameters") @RequestParam(value="insertParameters",required=false,defaultValue="-1")String insertParameters)throws Exception
 	{
 		AllergiesService.saveNewAllergies(save,insertParameters);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "successful insertion of new allergies", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -164,6 +183,7 @@ public class AllergiesController {
     		@ApiParam(name="editData", value="editData") @RequestParam(value="editData",required=false,defaultValue="-1")String editData)throws Exception
 	{
 		AllergiesService.editAllergies(editData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of allergy data", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -183,6 +203,7 @@ public class AllergiesController {
     		@ApiParam(name="allergyId", value="allergyId") @RequestParam(value="allergyId",required=false,defaultValue="-1")String allergyId)throws Exception
 	{
 		AllergiesService.deleteAllergy(allergyId);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.DELETE, 0, Log_Outcome.SUCCESS, "successful deletion of allergies", -1, request.getRemoteAddr(), -1, "allergyId="+allergyId, LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -202,6 +223,7 @@ public class AllergiesController {
     		@ApiParam(name="reviewData", value="reviewData") @RequestParam(value="reviewData",required=false,defaultValue="-1")String reviewData)throws Exception
 	{
 		AllergiesService.reviewAllergies(reviewData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of review details", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -213,7 +235,7 @@ public class AllergiesController {
 	 */
 	@RequestMapping(value ="/NKDACheck", method = RequestMethod.POST)
     @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful insertion of NKDA check data"),
+            @ApiResponse(code = 200, message = "Successful insertion/updation of NKDA check data"),
             @ApiResponse(code = 404, message = "when chart id does not exist"),
             @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
@@ -221,6 +243,7 @@ public class AllergiesController {
     		@ApiParam(name="nkdaData", value="nkdaData") @RequestParam(value="nkdaData",required=false,defaultValue="-1")String nkdaData)throws Exception
 	{
 		AllergiesService.nkdaUpdate(nkdaData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of nkda check details", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -231,7 +254,7 @@ public class AllergiesController {
 	 */
 	@RequestMapping(value ="/NKACheck", method = RequestMethod.POST)
     @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful insertion of NKA Check data"),
+            @ApiResponse(code = 200, message = "Successful insertion/updation of NKA Check data"),
             @ApiResponse(code = 404, message = "when chart id does not exist"),
             @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
@@ -239,6 +262,7 @@ public class AllergiesController {
     		@ApiParam(name="nkaData", value="nkaData") @RequestParam(value="nkaData",required=false,defaultValue="-1")String nkaData)throws Exception
 	{
 		AllergiesService.nkaUpdate(nkaData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of nka check details", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -257,6 +281,7 @@ public class AllergiesController {
     		@ApiParam(name="nkdaData", value="nkdaData") @RequestParam(value="nkdaData",required=false,defaultValue="-1")String nkdaData)throws Exception
 	{
 		AllergiesService.nkdauncheck(nkdaData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of nkda uncheck details", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -275,6 +300,7 @@ public class AllergiesController {
     		@ApiParam(name="nkaData", value="nkaData") @RequestParam(value="nkaData",required=false,defaultValue="-1")String nkaData)throws Exception
 	{
 		AllergiesService.nkauncheck(nkaData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of nka uncheck details", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -297,6 +323,7 @@ public class AllergiesController {
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(AllergiesService.retrieveDataForEditAllerg(chartId, patId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved edit Allergy data", -1, request.getRemoteAddr(), Integer.parseInt(patId), "chartId="+chartId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -317,6 +344,7 @@ public class AllergiesController {
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(AllergiesService.retrieveInActiveAllerg(chartId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "Successful retrieval of in active Allergy data", -1, request.getRemoteAddr(), -1, "chartId="+chartId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -337,6 +365,7 @@ public class AllergiesController {
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(AllergiesService.lastReviewDetails(chartId).toString());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "Successful retrieval of last review details", -1, request.getRemoteAddr(), -1, "chartId="+chartId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 }
