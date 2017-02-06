@@ -3,6 +3,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,12 @@ import com.glenwood.glaceemr.server.application.services.GroupTherapy.AddTherapy
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyGroupBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyLogBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyPatientsBean;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
 
@@ -38,6 +46,12 @@ public class GroupTherapyController {
 	@Autowired
 	AddNewGroupService addNewGroupService;
 	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
+	
 	private Logger logger = Logger.getLogger(GroupTherapyController.class);
 	
 	/**
@@ -52,6 +66,7 @@ public class GroupTherapyController {
 		Map<String, Object> lists=addNewGroupService.listDefaults();
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(lists);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved providers,pos,groups data", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -70,8 +85,10 @@ public class GroupTherapyController {
 		logger.debug("In saveNewGroup - new group is going to save");
 		addNewGroupService.saveNewGroup(data);
 		logger.debug("In saveNewGroup - new group saved");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "successful insertion of new group", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
+	
 	
 	/**
 	 * to save addNotes
@@ -83,9 +100,11 @@ public class GroupTherapyController {
 		data = getAddNoteBean(data);
 		logger.debug("AddNotes is going to save");
 		addNewGroupService.saveNotes(data);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "successfully  saved addNotes", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return;
 		
 	}
+	
 	
 	/**
 	 * To get the list of patients which belongs to the particular Group 
@@ -100,6 +119,7 @@ public class GroupTherapyController {
 		List<TherapyGroup> lists=addNewGroupService.listGroupData(groupId);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(lists);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved list of patients which belongs to the particular Group", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -115,6 +135,7 @@ public class GroupTherapyController {
 		logger.debug("In addPatientToGroup - patiet is adding to group");
 		addNewGroupService.addPatientToTherapyGroup(dataToSave);
 		logger.debug("In addPatientToGroup - patiet added to group");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "successfully added patient to the group", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 	}
 	
 	/**
@@ -132,6 +153,7 @@ public class GroupTherapyController {
 		logger.debug("In createTherapySession - therapy session created");
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(therapy);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "successfully inserted therapy session data for patients", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -148,6 +170,7 @@ public class GroupTherapyController {
 		Map<String, Object> lists=addNewGroupService.getPatientData(groupId);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(lists);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved list patient data by Group", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -165,6 +188,7 @@ public class GroupTherapyController {
 		List<TherapyLogBean> therapy=addNewGroupService.therapySearchLog(dataToSave);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(therapy);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved therapy log data", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -182,6 +206,7 @@ public class GroupTherapyController {
 		List<TherapyPatientsBean> therapy=addNewGroupService.getTherapyPatients(dataToSave);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(therapy);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved the list of therapy patients", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -197,6 +222,7 @@ public class GroupTherapyController {
 		logger.debug("In deletePatientFromTherapy - deleting the patient from therapy session or group");
 		addNewGroupService.deleteTherapyPatient(dataToDelete);
 		logger.debug("In deletePatientFromTherapy - deleted the patient from therapy session or group");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.DELETE, 0, Log_Outcome.SUCCESS, "successfully deleted the patient from therapy group", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 	}
 	
 	/**
@@ -210,6 +236,7 @@ public class GroupTherapyController {
 		group=Integer.parseInt(Optional.fromNullable(group+"").or("-1"));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(addNewGroupService.fetchShortcutCode(group).toString());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of shortcut code", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -224,6 +251,7 @@ public class GroupTherapyController {
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(addNewGroupService.fetchShortcutData(shortcutId).toString());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of shortcut description", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
     
@@ -242,6 +270,7 @@ public class GroupTherapyController {
 	List<AddTherapyBean> notesData=addNewGroupService.fetchNotesData(gwid,patientId,sessionId,isPatient);
 	EMRResponseBean emrResponseBean = new EMRResponseBean();
 	emrResponseBean.setData(notesData);
+	auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of notes data", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 	return emrResponseBean;
 	}
 	
@@ -259,6 +288,7 @@ public class GroupTherapyController {
 	List<AddTherapyBean> therapyData=addNewGroupService.fetchDataforTherapy(gwid,sessionId,isPatient);
 	EMRResponseBean emrResponseBean = new EMRResponseBean();
 	emrResponseBean.setData(therapyData);
+	auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of data for AddTherapeuticIntervention", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 	return emrResponseBean;
 	}
 	
@@ -269,19 +299,19 @@ public class GroupTherapyController {
 	 * @return
 	 */
 	private TherapyGroupBean getTherapyGroupBean(TherapyGroupBean data) {
-        data.setProviderId(Integer.parseInt(Optional.fromNullable(data.getProviderId()+"").or("-1")));
-        data.setPosId(Integer.parseInt(Optional.fromNullable(data.getPosId()+"").or("-1")));
-        data.setGroupName(Optional.fromNullable(data.getGroupName()+"").or(""));
-        data.setGroupDesc(Optional.fromNullable(data.getGroupDesc()+"").or(""));
-        data.setDiagnosis(Optional.fromNullable(data.getDiagnosis()+"").or(""));
-        data.setDefaultTherapyTime(Optional.fromNullable(data.getDefaultTherapyTime()+"").or(""));
-        data.setLoginId(Integer.parseInt(Optional.fromNullable(data.getLoginId()+"").or("-1")));
-        data.setGroupId(Integer.parseInt(Optional.fromNullable(data.getGroupId()+"").or("-1")));
-        data.setIsActive(Boolean.parseBoolean(Optional.fromNullable(data.getIsActive()+"").or("false")));
-        data.setLeaderId(Integer.parseInt(Optional.fromNullable(data.getLeaderId()+"").or("-1")));
+		data.setProviderId(Integer.parseInt(Optional.fromNullable(data.getProviderId()+"").or("-1")));
+		data.setPosId(Integer.parseInt(Optional.fromNullable(data.getPosId()+"").or("-1")));
+		data.setGroupName(Optional.fromNullable(data.getGroupName()+"").or(""));
+		data.setGroupDesc(Optional.fromNullable(data.getGroupDesc()+"").or(""));
+		data.setDiagnosis(Optional.fromNullable(data.getDiagnosis()+"").or(""));
+		data.setDefaultTherapyTime(Optional.fromNullable(data.getDefaultTherapyTime()+"").or(""));
+		data.setLoginId(Integer.parseInt(Optional.fromNullable(data.getLoginId()+"").or("-1")));
+		data.setGroupId(Integer.parseInt(Optional.fromNullable(data.getGroupId()+"").or("-1")));
+	    data.setIsActive(Boolean.parseBoolean(Optional.fromNullable(data.getIsActive()+"").or("false")));
+	    data.setLeaderId(Integer.parseInt(Optional.fromNullable(data.getLeaderId()+"").or("-1")));
         data.setSupervisorId(Integer.parseInt(Optional.fromNullable(data.getSupervisorId()+"").or("-1")));
-        return data;
-    }
+	    return data;
+	}
 	
 	/**
 	 * addNoteBean for saving notes
