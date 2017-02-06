@@ -129,6 +129,12 @@ public class TherapyGroup {
 	
 	@Column(name="therapy_group_dx12desc")
 	private String therapyGroupDx12desc;
+	
+	@Column(name="therapy_group_leader_id")
+	private Integer therapyGroupLeaderId;
+	
+	@Column(name="therapy_group_supervisor_id")
+	private Integer therapyGroupSupervisorId;
 
 	public Integer getTherapyGroupId() {
 		return therapyGroupId;
@@ -408,6 +414,22 @@ public class TherapyGroup {
 
 	public void setTherapyGroupDx12desc(String therapyGroupDx12desc) {
 		this.therapyGroupDx12desc = therapyGroupDx12desc;
+	}
+
+	public Integer getTherapyGroupLeaderId() {
+		return therapyGroupLeaderId;
+	}
+
+	public void setTherapyGroupLeaderId(Integer therapyGroupLeaderId) {
+		this.therapyGroupLeaderId = therapyGroupLeaderId;
+	}
+
+	public Integer getTherapyGroupSupervisorId() {
+		return therapyGroupSupervisorId;
+	}
+
+	public void setTherapyGroupSupervisorId(Integer therapyGroupSupervisorId) {
+		this.therapyGroupSupervisorId = therapyGroupSupervisorId;
 	}
 	
 	

@@ -108,6 +108,8 @@ public class ClinicalElements implements Serializable{
 	@OneToMany(mappedBy="clinicalElements")
 	List<ClinicalTextMapping> clinicalTextMappings;
 	
+	
+	
 	/*@OneToMany(mappedBy="clinicalElements")
 	List<FocalShortcutElements> focalShortcutElements;
 	
@@ -122,6 +124,9 @@ public class ClinicalElements implements Serializable{
 	
 	@OneToMany(mappedBy="clinicalElements")
 	List<FocalShortcutElements> focalShortcutElements;
+	
+	@OneToMany(mappedBy="clinicalElements")
+	List<TherapySessionPatientDetails> therupeticElements;
 	
 	public List<ClinicalElementTemplateMapping> getClinicalElementTemplateMapping() {
 		return clinicalElementTemplateMapping;
@@ -347,4 +352,15 @@ public class ClinicalElements implements Serializable{
 			List<FocalShortcutElements> focalShortcutElements) {
 		this.focalShortcutElements = focalShortcutElements;
 	}
+	
+	
+	public List<TherapySessionPatientDetails> getTherupeticElements() {
+		return therupeticElements;
+	}
+
+	public void setTherupeticElements(
+			List<TherapySessionPatientDetails> therupeticElements) {
+		this.therupeticElements = therupeticElements;
+	}
+	
 }

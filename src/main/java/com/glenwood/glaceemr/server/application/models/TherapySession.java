@@ -63,6 +63,32 @@ public class TherapySession {
 	@Column(name="therapy_session_end_time")
 	private String therapySessionEndTime;
 	
+	@Column(name="therapy_session_topic")
+	private String therapySessionTopic;
+	
+	@Column(name="therapy_session_leader_id")
+	private Integer therapySessionLeaderId;
+
+	@Column(name="therapy_session_supervisor_id")
+	private Integer therapySessionSupervisorId;
+	
+	
+	public Integer getTherapySessionLeaderId() {
+		return therapySessionLeaderId;
+	}
+
+	public void setTherapySessionLeaderId(Integer therapySessionLeaderId) {
+		this.therapySessionLeaderId = therapySessionLeaderId;
+	}
+
+	public Integer getTherapySessionSupervisorId() {
+		return therapySessionSupervisorId;
+	}
+
+	public void setTherapySessionSupervisorId(Integer therapySessionSupervisorId) {
+		this.therapySessionSupervisorId = therapySessionSupervisorId;
+	}
+
 	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -199,6 +225,12 @@ public class TherapySession {
 		this.therapySessionEndTime = therapySessionEndTime;
 	}
 	
-	
+	public String getTherapySessionTopic() {
+		return therapySessionTopic;
+	}
+
+	public void setTherapySessionTopic(String therapySessionTopic) {
+		this.therapySessionTopic = therapySessionTopic;
+	}
 	
  }

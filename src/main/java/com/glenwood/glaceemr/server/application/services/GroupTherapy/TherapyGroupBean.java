@@ -10,7 +10,8 @@ public class TherapyGroupBean {
 	Integer loginId;
 	String defaultTherapyTime;
 	Boolean isActive;
-	
+	Integer leaderId;
+	Integer supervisorId;
 	
 	public Integer getProviderId() {
 		return providerId;
@@ -65,6 +66,18 @@ public class TherapyGroupBean {
 	}
 	public void setIsActive(Boolean isActive) {
 		this.isActive = isActive;
+	}
+	public Integer getLeaderId() {
+		return leaderId;
+	}
+	public void setLeaderId(Integer leaderId) {
+		this.leaderId = leaderId;
+	}
+	public Integer getSupervisorId() {
+		return supervisorId;
+	}
+	public void setSupervisorId(Integer supervisorId) {
+		this.supervisorId = supervisorId;
 	}
 	
 	

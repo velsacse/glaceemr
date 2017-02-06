@@ -28,7 +28,7 @@ public interface AddNewGroupService {
 	 * @throws JSONException
 	 */
 	void saveNewGroup(TherapyGroupBean data) throws JSONException;
-
+	
 	/**
 	 * To list group data
 	 * @param groupId
@@ -82,5 +82,45 @@ public interface AddNewGroupService {
 	 * @throws JSONException
 	 */
 	void deleteTherapyPatient(String dataToDelete) throws JSONException;
+	
+	/**
+	 * To fetch the shortcutcode 
+	 * @param mode
+	 * @return
+	 */
+	List<String> fetchShortcutCode(Integer group);
+	
+	/**
+	 * To fetch the shortcutData
+	 * @param shortcutId
+	 * @return
+	 */
+	List<String> fetchShortcutData(String shortcutId);
+
+	/**
+	 * To save notes
+	 * @param data
+	 * @throws Exception
+	 */
+	void saveNotes(AddNoteBean data) throws Exception;
+	
+	/**
+	 * to get the data for addNotes and EditNotes
+	 * @param gwid
+	 * @param patientId
+	 * @param sessionId
+	 * @param isPatient
+	 * @return
+	 */
+	List<AddTherapyBean> fetchNotesData(String gwid,Integer patientId,Integer sessionId,Boolean isPatient);
+
+	/**
+	 * to get the data for addTherapeutic Intervention
+	 * @param gwid
+	 * @param sessionId
+	 * @param isPatient
+	 * @return
+	 */
+	List<AddTherapyBean> fetchDataforTherapy(String gwid, Integer sessionId, Boolean isPatient);
 
 }
