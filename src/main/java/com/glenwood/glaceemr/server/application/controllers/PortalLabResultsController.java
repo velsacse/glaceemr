@@ -11,11 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.services.portal.portalLabResults.PortalLabResultsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * @author Manne Teja
@@ -23,7 +18,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *         Controller for Lab results in Patient Portal, contains request to get
  *         the list of results, reviewed results. and ability to filter results.
  */
-@Api(value = "PortalLabResultsController", description = "Contains the methods to get and save the results details.", consumes = "application/json")
 @RestController
 @Transactional
 @RequestMapping(value = "/user/PortalLabResults")
@@ -68,8 +62,8 @@ public class PortalLabResultsController {
 	public EMRResponseBean getPatientLabResultList(
 			@RequestParam(value = "patientId", required = false, defaultValue = "") int patientId,
 			@RequestParam(value = "chartId", required = false, defaultValue = "") int chartId,
-			@ApiParam(name = "pageOffset", value = "offset of the page") @RequestParam(value = "pageOffset", required = false, defaultValue = "5") int pageOffset,
-			@ApiParam(name = "pageIndex", value = "index of the page") @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
+			@RequestParam(value = "pageOffset", required = false, defaultValue = "5") int pageOffset,
+			 @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
 					throws Exception {
 
 		EMRResponseBean responseBean=new EMRResponseBean();
@@ -100,8 +94,8 @@ public class PortalLabResultsController {
 			@RequestParam(value = "testDetailId", required = false, defaultValue = "") int testDetailId,
 			@RequestParam(value = "chartId", required = false, defaultValue = "") int chartId,
 			@RequestParam(value = "patientId", required = false, defaultValue = "") int patientId,
-			@ApiParam(name = "pageOffset", value = "offset of the page") @RequestParam(value = "pageOffset", required = false, defaultValue = "5") int pageOffset,
-			@ApiParam(name = "pageIndex", value = "index of the page") @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
+			 @RequestParam(value = "pageOffset", required = false, defaultValue = "5") int pageOffset,
+			 @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
 					throws Exception {
 
 		EMRResponseBean responseBean=new EMRResponseBean();
@@ -129,14 +123,9 @@ public class PortalLabResultsController {
 	 * @return File Details of a patient document.
 	 */
 	@RequestMapping(value = "/LabAttachments", method = RequestMethod.GET)
-	@ApiOperation(value = "Returns file details of a patient lab attachments.", notes = "Returns file details of a patient lab attachments.", response = User.class)
-	@ApiResponses(value= {
-			@ApiResponse(code = 200, message = "Successful retrieval of file details of a patient lab attachments"),
-			@ApiResponse(code = 404, message = "file with given id does not exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getLabAttachmentsDetails(@ApiParam(name="patientId", value="patient's id whose lab attchments details are to be retrieved") @RequestParam(value="patientId", required=true, defaultValue="") int patientId,
-			@ApiParam(name="fileDetailEntityId", value="patient's id whose lab attchments details are to be retrieved") @RequestParam(value="fileDetailEntityId", required=true, defaultValue="") int fileDetailEntityId) throws Exception{
+	public EMRResponseBean getLabAttachmentsDetails( @RequestParam(value="patientId", required=true, defaultValue="") int patientId,
+			 @RequestParam(value="fileDetailEntityId", required=true, defaultValue="") int fileDetailEntityId) throws Exception{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		

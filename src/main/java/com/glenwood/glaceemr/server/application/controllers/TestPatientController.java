@@ -2,7 +2,6 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -15,8 +14,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.models.TesttableAdrs;
-import com.glenwood.glaceemr.server.application.models.Testtableenctr;
 import com.glenwood.glaceemr.server.application.models.TesttablePtn;
 import com.glenwood.glaceemr.server.application.services.patient.PatientService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;

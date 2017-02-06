@@ -24,10 +24,6 @@ import com.glenwood.glaceemr.server.application.services.chart.Allergies.Allergi
 import com.glenwood.glaceemr.server.application.services.chart.Allergies.AllergiesTypeBean;
 import com.glenwood.glaceemr.server.application.services.chart.Allergies.AllergyBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * Controller for Allergies
@@ -35,7 +31,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  */
 
-@Api(value="/user/Allergies",description="To get Allergies",consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/Allergies")
@@ -59,12 +54,8 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/retrievingAllergyType", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of Allergy data"),
-            @ApiResponse(code = 404, message = "when gender does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getAllergyData(@ApiParam(name="gender", value="gender") @RequestParam(value="gender",required=false,defaultValue="-1")int gender)throws Exception
+	public EMRResponseBean getAllergyData(@RequestParam(value="gender",required=false,defaultValue="-1")int gender)throws Exception
 	{
 		List<AllergiesTypeBean> allergyTypes=AllergiesService.retrievingAllergyType(gender);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
@@ -83,15 +74,11 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/searchAllergyData", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful search of Allergy data"),
-            @ApiResponse(code = 404, message = "when Criteria or mode or offset or limit does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getSearchAllergyData(@ApiParam(name="Criteria", value="Criteria") @RequestParam(value="Criteria",required=false,defaultValue="-1")String Criteria,
-			@ApiParam(name="mode", value="mode") @RequestParam(value="mode",required=false,defaultValue="-1")int mode,
-			@ApiParam(name="offset", value="offset") @RequestParam(value="offset",required=false,defaultValue="-1")int offset,
-			@ApiParam(name="limit", value="limit") @RequestParam(value="limit",required=false,defaultValue="-1")int limit)throws Exception
+	public EMRResponseBean getSearchAllergyData(@RequestParam(value="Criteria",required=false,defaultValue="-1")String Criteria,
+			@RequestParam(value="mode",required=false,defaultValue="-1")int mode,
+			 @RequestParam(value="offset",required=false,defaultValue="-1")int offset,
+			 @RequestParam(value="limit",required=false,defaultValue="-1")int limit)throws Exception
 	{
 		AllergyBean SearchAllergyData=AllergiesService.searchAllergy(Criteria,mode,offset,limit);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
@@ -109,14 +96,10 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/getReactionsOfAllergies", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of reactions of Allergies"),
-            @ApiResponse(code = 404, message = "when Criteria or offset or limit does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getReactionsOfAllergies(@ApiParam(name="Criteria", value="Criteria") @RequestParam(value="Criteria",required=false,defaultValue="-1")String Criteria,
-			@ApiParam(name="offset", value="offset") @RequestParam(value="offset",required=false,defaultValue="-1")int offset,
-			@ApiParam(name="limit", value="limit") @RequestParam(value="limit",required=false,defaultValue="-1")int limit)throws Exception
+	public EMRResponseBean getReactionsOfAllergies(@RequestParam(value="Criteria",required=false,defaultValue="-1")String Criteria,
+			 @RequestParam(value="offset",required=false,defaultValue="-1")int offset,
+			 @RequestParam(value="limit",required=false,defaultValue="-1")int limit)throws Exception
 	{
 		AllergyBean SearchAllergyData=AllergiesService.getReactionsOfAllergies(Criteria,offset,limit);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
@@ -132,12 +115,8 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/getNKDAandNKACheckDetails", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of NKDA and NKA Check details"),
-            @ApiResponse(code = 404, message = "when chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getNKDAandNKACheckDetails(@ApiParam(name="chartId", value="chartId") @RequestParam(value="chartId",required=false,defaultValue="-1")Integer chartId)throws Exception
+	public EMRResponseBean getNKDAandNKACheckDetails( @RequestParam(value="chartId",required=false,defaultValue="-1")Integer chartId)throws Exception
 	{
 		List<PatientAllergies> SearchAllergyData=AllergiesService.getNKDAandNKACheckDetails(chartId);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
@@ -154,13 +133,9 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/saveNewAllergies", method = RequestMethod.POST)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful insertion of new Allergy data"),
-            @ApiResponse(code = 404, message = "when save or insertParameters does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-    public void saveNewAllergies(@ApiParam(name="save", value="save") @RequestParam(value="save",required=false,defaultValue="-1")Integer save,
-    		@ApiParam(name="insertParameters", value="insertParameters") @RequestParam(value="insertParameters",required=false,defaultValue="-1")String insertParameters)throws Exception
+    public void saveNewAllergies(@RequestParam(value="save",required=false,defaultValue="-1")Integer save,
+    		 @RequestParam(value="insertParameters",required=false,defaultValue="-1")String insertParameters)throws Exception
 	{
 		AllergiesService.saveNewAllergies(save,insertParameters);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "successful insertion of new allergies", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
@@ -174,13 +149,9 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/saveAllergyEditData", method = RequestMethod.POST)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful insertion of edit Allergy data"),
-            @ApiResponse(code = 404, message = "when edit data field does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
     public void saveNewAllergies(
-    		@ApiParam(name="editData", value="editData") @RequestParam(value="editData",required=false,defaultValue="-1")String editData)throws Exception
+    		@RequestParam(value="editData",required=false,defaultValue="-1")String editData)throws Exception
 	{
 		AllergiesService.editAllergies(editData);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of allergy data", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
@@ -194,13 +165,9 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/deleteAllergies", method = RequestMethod.POST)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful deletion of Allergy data"),
-            @ApiResponse(code = 404, message = "when allergy id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
     public void deleteAllergies(
-    		@ApiParam(name="allergyId", value="allergyId") @RequestParam(value="allergyId",required=false,defaultValue="-1")String allergyId)throws Exception
+    		 @RequestParam(value="allergyId",required=false,defaultValue="-1")String allergyId)throws Exception
 	{
 		AllergiesService.deleteAllergy(allergyId);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.DELETE, 0, Log_Outcome.SUCCESS, "successful deletion of allergies", -1, request.getRemoteAddr(), -1, "allergyId="+allergyId, LogUserType.USER_LOGIN, "", "");
@@ -214,13 +181,9 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/reviewAllergies", method = RequestMethod.POST)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful updation of review details"),
-            @ApiResponse(code = 404, message = "when review data does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
     public void reviewAllergies(
-    		@ApiParam(name="reviewData", value="reviewData") @RequestParam(value="reviewData",required=false,defaultValue="-1")String reviewData)throws Exception
+    		 @RequestParam(value="reviewData",required=false,defaultValue="-1")String reviewData)throws Exception
 	{
 		AllergiesService.reviewAllergies(reviewData);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of review details", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
@@ -234,13 +197,9 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/NKDACheck", method = RequestMethod.POST)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful insertion/updation of NKDA check data"),
-            @ApiResponse(code = 404, message = "when chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
     public void NKDACheck(
-    		@ApiParam(name="nkdaData", value="nkdaData") @RequestParam(value="nkdaData",required=false,defaultValue="-1")String nkdaData)throws Exception
+    		 @RequestParam(value="nkdaData",required=false,defaultValue="-1")String nkdaData)throws Exception
 	{
 		AllergiesService.nkdaUpdate(nkdaData);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of nkda check details", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
@@ -253,13 +212,9 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/NKACheck", method = RequestMethod.POST)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful insertion/updation of NKA Check data"),
-            @ApiResponse(code = 404, message = "when chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
     public void NKACheck(
-    		@ApiParam(name="nkaData", value="nkaData") @RequestParam(value="nkaData",required=false,defaultValue="-1")String nkaData)throws Exception
+    		 @RequestParam(value="nkaData",required=false,defaultValue="-1")String nkaData)throws Exception
 	{
 		AllergiesService.nkaUpdate(nkaData);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of nka check details", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
@@ -272,13 +227,9 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/NKDAUnCheck", method = RequestMethod.POST)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful insertion of NKDA Uncheck data"),
-            @ApiResponse(code = 404, message = "when chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
     public void NKDAUnCheck(
-    		@ApiParam(name="nkdaData", value="nkdaData") @RequestParam(value="nkdaData",required=false,defaultValue="-1")String nkdaData)throws Exception
+    		 @RequestParam(value="nkdaData",required=false,defaultValue="-1")String nkdaData)throws Exception
 	{
 		AllergiesService.nkdauncheck(nkdaData);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of nkda uncheck details", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
@@ -291,13 +242,9 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/NKAUnCheck", method = RequestMethod.POST)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful insertion of NKA Uncheck data"),
-            @ApiResponse(code = 404, message = "when chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
     public void NKAUnCheck(
-    		@ApiParam(name="nkaData", value="nkaData") @RequestParam(value="nkaData",required=false,defaultValue="-1")String nkaData)throws Exception
+    		 @RequestParam(value="nkaData",required=false,defaultValue="-1")String nkaData)throws Exception
 	{
 		AllergiesService.nkauncheck(nkaData);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successful updation of nka uncheck details", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
@@ -312,14 +259,10 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/RetrieveEditAllergData", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of edit Allergy data"),
-            @ApiResponse(code = 404, message = "when chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
     public EMRResponseBean RetrieveEditAllergData(
-    		@ApiParam(name="chartId", value="chartId") @RequestParam(value="chartId",required=false,defaultValue="-1")String chartId,
-    		@ApiParam(name="patId", value="patId") @RequestParam(value="patId",required=false,defaultValue="-1")String patId)throws Exception
+    		 @RequestParam(value="chartId",required=false,defaultValue="-1")String chartId,
+    		@RequestParam(value="patId",required=false,defaultValue="-1")String patId)throws Exception
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(AllergiesService.retrieveDataForEditAllerg(chartId, patId));
@@ -334,13 +277,9 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/RetrieveInActiveAllergData", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of in active Allergy data"),
-            @ApiResponse(code = 404, message = "when chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
     public EMRResponseBean RetrieveInActiveAllergData(
-    		@ApiParam(name="chartId", value="chartId") @RequestParam(value="chartId",required=false,defaultValue="-1")String chartId)throws Exception
+    		 @RequestParam(value="chartId",required=false,defaultValue="-1")String chartId)throws Exception
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(AllergiesService.retrieveInActiveAllerg(chartId));
@@ -355,13 +294,9 @@ public class AllergiesController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/LastReviewDetails", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of last review details"),
-            @ApiResponse(code = 404, message = "when chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
     public EMRResponseBean LastReviewDetails(
-    		@ApiParam(name="chartId", value="chartId") @RequestParam(value="chartId",required=false,defaultValue="-1")String chartId)throws Exception
+    		 @RequestParam(value="chartId",required=false,defaultValue="-1")String chartId)throws Exception
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(AllergiesService.lastReviewDetails(chartId).toString());

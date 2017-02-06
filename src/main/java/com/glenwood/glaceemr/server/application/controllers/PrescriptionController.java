@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,20 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.DrugSchedule;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
+import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
 import com.glenwood.glaceemr.server.application.models.PharmacyFilterBean;
 import com.glenwood.glaceemr.server.application.models.PortalRefillRequestBean;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.IntakeBean;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionBean;
-import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * Controller for Prescriptions in GlaceEMR, 
@@ -39,7 +33,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author software
  *
  */
-@Api(value = "Prescriptions", description = "contains the methods to get the patient medications and performing different operations on those", consumes="application/json")
 @RestController
 @RequestMapping(value = "/user/Prescription.Action")
 public class PrescriptionController {
@@ -294,11 +287,6 @@ public class PrescriptionController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/PharmacyList", method = RequestMethod.POST)
-    @ApiOperation(value = "Returns list of filtered pharmacies", notes = "Returns list of filtered pharmacies", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Pharmacy list retrieval successful"),
-		    @ApiResponse(code = 404, message = "Pharmacy list retrieval failure"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getPharmacyList(@RequestBody PharmacyFilterBean pharmacyFilterBean)throws Exception{
 
@@ -328,14 +316,9 @@ public class PrescriptionController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/RefillRequestHistory", method = RequestMethod.GET)
-    @ApiOperation(value = "Returns list of completed medications", notes = "Returns list of filtered pharmacies", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Pharmacy list retrieval successful"),
-		    @ApiResponse(code = 404, message = "Pharmacy list retrieval failure"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getPatientRefillRequestHistory(@ApiParam(name="patientId", value="patient's id whose refill request history is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
-			@ApiParam(name="chartId", value="chart id of a patient, whose refill request history is to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
+	public EMRResponseBean getPatientRefillRequestHistory(@RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+			 @RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -362,14 +345,9 @@ public class PrescriptionController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/RefillRequestMedications", method = RequestMethod.GET)
-    @ApiOperation(value = "Returns list of completed medications", notes = "Returns list of filtered pharmacies", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Pharmacy list retrieval successful"),
-		    @ApiResponse(code = 404, message = "Pharmacy list retrieval failure"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getPatientRefillRequestMedications(@ApiParam(name="patientId", value="patient's id whose completed medications list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
-			@ApiParam(name="chartId", value="chart id of a patient, whose completed medications are to be retrieved") @RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
+	public EMRResponseBean getPatientRefillRequestMedications( @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+			@RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -394,11 +372,6 @@ public class PrescriptionController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/RefillRequest", method = RequestMethod.POST)
-    @ApiOperation(value = "Returns list of filtered pharmacies", notes = "Returns list of filtered pharmacies", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Pharmacy list retrieval successful"),
-		    @ApiResponse(code = 404, message = "Pharmacy list retrieval failure"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean requestFillFromPortal(@RequestBody PortalRefillRequestBean portalRefillRequestBean)throws Exception{
 

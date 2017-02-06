@@ -49,7 +49,6 @@ import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
-import com.glenwood.glaceemr.server.application.models.LabParameters;
 import com.glenwood.glaceemr.server.application.models.LabcompanyDetails;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
@@ -65,13 +64,13 @@ import com.glenwood.glaceemr.server.application.repositories.LabEntriesRepositor
 import com.glenwood.glaceemr.server.application.repositories.LabParametersRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.investigation.InvestigationSummaryService;
 import com.glenwood.glaceemr.server.application.services.investigation.InvestigationSummaryServiceImpl;
 import com.glenwood.glaceemr.server.application.services.investigation.SaveAttachResultData;
@@ -81,7 +80,6 @@ import com.glenwood.glaceemr.server.utils.HUtil;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.wordnik.swagger.annotations.Api;
 
 /**
  * @author yasodha
@@ -89,7 +87,6 @@ import com.wordnik.swagger.annotations.Api;
  * LabResultsServiceImpl gives the data required for 
  * external lab results
  */
-@Api(value = "LabResultsService", description = "Contains the implementations to get and save the lab results data.", consumes="application/json")
 @Service
 public class LabResultsServiceImpl implements LabResultsService {
 

@@ -14,10 +14,7 @@ import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
 import com.glenwood.glaceemr.server.application.services.phonemessages.PhoneMessagesService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "Phone messages", description = "API for phone messages encounter", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/PhoneMessages")
@@ -36,7 +33,6 @@ public class PhoneMessagesController {
 	 * @param endDate
 	 * @return
 	 */
-	@ApiOperation(value = "Get phone messages", notes = "To get the list of phone messages based on the patient id.")
 	@RequestMapping(value = "/getPhoneEncounters", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getPhoneEncounters(@RequestParam(value="patientid", required=true, defaultValue="") String patientId,
@@ -58,7 +54,6 @@ public class PhoneMessagesController {
 	 * @param createdBy
 	 * @return
 	 */
-	@ApiOperation(value = "Create phone message encounter", notes = "To create phone message encounter.")
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean create(
@@ -81,7 +76,6 @@ public class PhoneMessagesController {
 	 * @param encounterId
 	 * @return
 	 */
-	@ApiOperation(value = "Get particular encounter details", notes = "To get the particular encounter details based on the encounter id")	
 	@RequestMapping(value = "/getEncounterDetails", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getEncounterDetails(
@@ -102,7 +96,6 @@ public class PhoneMessagesController {
 	 * @param serviceDr
 	 * @return
 	 */
-	@ApiOperation(value = "Update encounter details", notes = "To update the particular encounter details")
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean update(
@@ -126,7 +119,6 @@ public class PhoneMessagesController {
 	 * @param severity
 	 * @return
 	 */
-	@ApiOperation(value = "Send reply to a phone message", notes = "To send reply to a phone message encounter.")
 	@RequestMapping(value = "/sendreply", method = RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean sendReply(

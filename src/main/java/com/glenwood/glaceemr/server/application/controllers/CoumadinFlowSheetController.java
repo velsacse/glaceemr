@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.DocumentBuilder;
@@ -20,9 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import com.glenwood.glaceemr.server.application.models.PatientEpisode;
-import com.glenwood.glaceemr.server.application.models.WarfarinIndication;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
@@ -30,14 +26,9 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEn
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.CoumadinFlowSheetService;
-import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.LabDetailsBean;
-import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.LogInfoBean;
-import com.glenwood.glaceemr.server.application.services.chart.coumadinflowsheet.RecentINRBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
 
-@Api(value = "CoumadinFlowSheet", description = "CoumadinFlowSheet", consumes = "application/json")
 @RestController
 @Transactional
 @RequestMapping(value = "/CoumadinFlowSheet")

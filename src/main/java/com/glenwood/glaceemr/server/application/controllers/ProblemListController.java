@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.services.chart.problemlist.ProblemListService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
 
-@Api(value = "ProblemList", description = "Contains all the operations related to problem list", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/ProblemList")
 public class ProblemListController {

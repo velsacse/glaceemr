@@ -20,10 +20,8 @@ import com.glenwood.glaceemr.server.application.services.chart.admission.Admissi
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
-import com.wordnik.swagger.annotations.Api;
 
 
-@Api(value = "Admission", description = "Admission", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/Admission")

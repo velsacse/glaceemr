@@ -75,7 +75,6 @@ import com.glenwood.glaceemr.server.application.specifications.LabResultsSpecifi
 import com.glenwood.glaceemr.server.utils.HUtil;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.wordnik.swagger.annotations.Api;
 
 
 /**
@@ -84,7 +83,7 @@ import com.wordnik.swagger.annotations.Api;
  * InvestigationSummaryServiceImpl gives the data required for 
  * investigation summary
  */
-@Api(value = "ResultParameterService", description = "Contains the methods to get and save the Hl7 parameters details.", consumes="application/json")
+
 @Service
 public class ResultParametersServiceImpl implements ResultParametersService {
 

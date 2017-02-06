@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.glenwood.glaceemr.server.application.models.ConcentrateGroup;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.PosTable;
-import com.glenwood.glaceemr.server.application.models.ConcentrateGroup;
 import com.glenwood.glaceemr.server.application.models.SkinTestOrder;
 import com.glenwood.glaceemr.server.application.models.SkinTestOrderEntry;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
@@ -24,7 +24,6 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEn
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Relavant_Id;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.DxAndPendingOrdersBean;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestOrderBean;
@@ -35,7 +34,6 @@ import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTest
 import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestShortcutBean;
 import com.glenwood.glaceemr.server.application.services.chart.skintest.SkinTestingFormService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
 
 /**
  * Controller for Skin Testing Forms in GlaceEMR, 
@@ -44,7 +42,6 @@ import com.wordnik.swagger.annotations.Api;
  * @author software
  *
  */
-@Api(value = "Skin Testing Forms", description = "contains the methods to create/edit/get the skin testing sheets (Shortcuts) and to perform the skin tests on patients", consumes="application/json")
 @RestController
 @RequestMapping(value = "/user/SkinTestingForms.Action")
 public class SkinTestingFormController {

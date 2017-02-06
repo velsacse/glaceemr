@@ -25,11 +25,8 @@ import com.glenwood.glaceemr.server.application.services.employee.EmployeeDataBe
 import com.glenwood.glaceemr.server.application.services.pos.PosDataBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 
-@Api(value = "LetterHeaderConfiguration", description = "Letter Header", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/LetterHeader.Action")
 public class LetterHeaderController {
@@ -52,7 +49,6 @@ public class LetterHeaderController {
 	 * Request to get the list of all letter headers for configuration
 	 * 
 	 */
-	@ApiOperation(value = "Get the list of all letter headers", notes = "Get the list of all letter headers")
 	@RequestMapping(value = "/FetchLetterHeader",method = RequestMethod.GET)
 	public EMRResponseBean fetchLetterHeaderList() throws Exception{
 		logger.debug("Begin of request to get the list of all letter headers.");
@@ -69,7 +65,6 @@ public class LetterHeaderController {
 	 * Request to get letter header content details based on header id for configuration
 	 * 
 	 */
-	@ApiOperation(value = "Get letter header content details based on header id", notes = "Get letter header content details based on header id")
 	@RequestMapping(value = "/FetchLetterHeaderContent",method = RequestMethod.GET)
 	public EMRResponseBean fetchPatientHeaderDetailsList(@RequestParam(value="headerId") Integer headerId) throws Exception{
 		logger.debug("Begin of request to get letter header content details based on header id.");
@@ -86,7 +81,6 @@ public class LetterHeaderController {
 	 * Request to save Letter header
 	 * 
 	 */
-	@ApiOperation(value = "Save Letter header", notes = "Save Letter header")
 	@RequestMapping(value = "/SaveLetterHeader",method = RequestMethod.POST)
 	public EMRResponseBean saveLetterHeader(@RequestParam(value="headerName") String headerName,@RequestParam(value="headerType") Integer headerType,
 			@RequestParam(value="leftFormat") Integer leftFormat,@RequestParam(value="leftFormatAddress") Integer leftFormatAddress,
@@ -114,7 +108,6 @@ public class LetterHeaderController {
 	 * Request to save Letter header
 	 * 
 	 */
-	@ApiOperation(value = "Update Letter header", notes = "Update Letter header")
 	@RequestMapping(value = "/UpdateLetterHeader",method = RequestMethod.POST)
 	public EMRResponseBean updateLetterHeader(@RequestParam(value="headerName") String headerName,@RequestParam(value="headerType") Integer headerType,
 			@RequestParam(value="leftFormat") Integer leftFormat,@RequestParam(value="leftFormatAddress") Integer leftFormatAddress,
@@ -144,7 +137,6 @@ public class LetterHeaderController {
 	 * Request to delete letter header details
 	 * 
 	 */
-	@ApiOperation(value = "Delete letter header details", notes = "Delete letter header details")
 	@RequestMapping(value = "/deleteLetterHeaderContent",method = RequestMethod.POST)
 	public EMRResponseBean deleteLetterHeaderDetails(@RequestParam(value="headerId") Integer headerId) throws Exception{
 		logger.debug("Begin of request to delete letter header details.");
@@ -163,7 +155,6 @@ public class LetterHeaderController {
 	 * Request to save letter header details
 	 * 
 	 */
-	@ApiOperation(value = "Save letter header details", notes = "Save letter header details")
 	@RequestMapping(value = "/saveLetterHeaderContent",method = RequestMethod.POST)
 	public EMRResponseBean saveLetterHeaderDetails(@RequestParam(value="headerId") Integer headerId,@RequestParam(value="variantId") Integer variantId,
 			@RequestParam(value="flagId") Integer flagId,@RequestParam(value="customText") String customText,@RequestParam(value="style") String style) throws Exception{
@@ -187,7 +178,6 @@ public class LetterHeaderController {
 	 * @return 
 	 * @throws Exception 
 	 */
-	@ApiOperation(value = "Get list of employee", notes = "Get list of employee")
 	@RequestMapping(value = "/FetchEmployeeList", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getEmployeeList() throws Exception {
@@ -205,7 +195,6 @@ public class LetterHeaderController {
 	 * @return 
 	 * @throws Exception 
 	 */
-	@ApiOperation(value = "Get list of POS", notes = "Get list of POS")
 	@RequestMapping(value = "/FetchPOSList", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getPOSList() throws Exception {
@@ -219,7 +208,6 @@ public class LetterHeaderController {
 
 	}
 	
-	@ApiOperation(value = "Fetch letter header pos details", notes = "fetch letter header pos details")
 	@RequestMapping(value = "/FetchLetterHeaderPOSList",method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean fetchLetterHeaderPOSList(@RequestParam(value="headerId") Integer headerId,
@@ -240,7 +228,6 @@ public class LetterHeaderController {
 		return respBean;
 	}
 	
-	@ApiOperation(value = "Fetch letter header employee details", notes = "Fetch letter header employee details")
 	@RequestMapping(value = "/FetchLetterHeaderEmpList",method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean fetchLetterHeaderEmpList(@RequestParam(value="headerId") Integer headerId,
@@ -261,7 +248,6 @@ public class LetterHeaderController {
 		return respBean;
 	}
 	
-	@ApiOperation(value = "save letter header pos details", notes = "save letter header pos details")
 	@RequestMapping(value = "/SaveLetterHeaderPOSList",method = RequestMethod.POST)
 	public EMRResponseBean saveLetterHeaderPOSList(@RequestParam(value="orderValue", defaultValue="") String orderValue,
 			@RequestParam(value="value", defaultValue="") String value,
@@ -289,7 +275,6 @@ public class LetterHeaderController {
 		return respBean;
 	}
 	
-	@ApiOperation(value = "Save letter header employee details", notes = "Save letter header employee details")
 	@RequestMapping(value = "/SaveLetterHeaderEmpList",method = RequestMethod.POST)
 	public EMRResponseBean saveLetterHeaderEmpList(@RequestParam(value="orderValue", defaultValue="") String orderValue,
 			@RequestParam(value="value", defaultValue="") String value,

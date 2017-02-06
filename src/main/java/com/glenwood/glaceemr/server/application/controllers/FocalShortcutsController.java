@@ -14,15 +14,12 @@ import com.glenwood.glaceemr.server.application.services.chart.FocalShortcuts.Fo
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.HUtil;
 import com.google.common.base.Optional;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
  * Controller for FocalShortcuts
  * @author Bhagya Lakshmi
  *
  */
-@Api(value="/user/FocalShortcuts",description="To get Symptoms data",consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/FocalShortcuts.Action")
@@ -175,7 +172,6 @@ public class FocalShortcutsController {
 	 * @return
 	 * @throws JSONException 
 	 */
-	@ApiOperation(value="/SearchFocalShortcut")
 	@RequestMapping(value="/SearchFocalShortcut", method= RequestMethod.GET)
 	public EMRResponseBean searchFocalShortcut(
 		@RequestParam(value="key", defaultValue="", required=true) String key,
@@ -191,7 +187,6 @@ public class FocalShortcutsController {
 	 * @return
 	 * @throws JSONException
 	 */
-	@ApiOperation(value="/FetchFocalShortcut")
 	@RequestMapping(value="/FetchFocalShortcut", method= RequestMethod.GET)
 	public EMRResponseBean fetchFocalShortcut(
 		@RequestParam(value="focalId", defaultValue="-1", required=true) Integer focalId) throws JSONException{		
@@ -208,7 +203,6 @@ public class FocalShortcutsController {
 	 * @return
 	 * @throws JSONException
 	 */
-	@ApiOperation(value="/FetchPatientData")
 	@RequestMapping(value="/FetchPatientData", method= RequestMethod.GET)
 	public EMRResponseBean fetchPatientData(
 		@RequestParam(value="patientId", defaultValue="-1", required=true) Integer patientId,

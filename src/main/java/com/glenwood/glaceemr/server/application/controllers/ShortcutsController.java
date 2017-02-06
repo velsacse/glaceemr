@@ -18,15 +18,12 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogCons
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.shortcuts.ShortcutsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
  * Shortcuts controller
  * @author software
  *
  */
-@Api(value = "Shortcuts", description = "To get element shortcuts", consumes="application/json")
 
 @RestController
 @RequestMapping(value="/user/Shortcuts.Action")
@@ -52,7 +49,6 @@ public class ShortcutsController {
 	 * @throws JSONException
 	 */
 	
-	@ApiOperation(value = "Adding shortcut", notes = "Adding element shortcut to shortcut list")
 	@RequestMapping(value = "/AddShortcut", method = RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean addShort(@RequestParam(value="tabId",required = false, defaultValue="-1") Integer tabId,
@@ -80,7 +76,6 @@ public class ShortcutsController {
 	 * @throws JSONException
 	 */
 	
-	@ApiOperation(value = "Deleting shortcut", notes = "Deleting element shortcut")
 	@RequestMapping(value = "/deleteShortcut", method = RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean deleteShort(@RequestParam(value="shortcutId",required = false, defaultValue="-1") Integer shortcutId,

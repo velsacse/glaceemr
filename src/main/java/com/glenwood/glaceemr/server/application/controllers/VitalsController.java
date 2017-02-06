@@ -11,10 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.services.chart.vitals.VitalsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
-import com.wordnik.swagger.annotations.Api;
 
 
-@Api(value = "Vitals", description = "Vitals Data", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/VitalElements.Action")

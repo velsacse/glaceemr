@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.services.chart.dischargeVitals.DischargeSaveVitalBean;
 import com.glenwood.glaceemr.server.application.services.chart.dischargeVitals.DischargeVitalService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
 
-@Api(value = "DischargeVitals", description = "Multiple Vital Recording", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/DischargeVitals")

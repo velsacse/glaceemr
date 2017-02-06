@@ -13,16 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.VaccineUpdateBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalImmunizationHistory.PortalImmunizationHistoryService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 @RestController
 @Transactional
 @RequestMapping("/user/PortalImmunizationHistory")
-@Api(value = "PortalImmunizationHistoryController", description = "Used to get immunization history of a patient")
 public class PortalImmunizationHistoryController {
 
 	@Autowired
@@ -39,17 +33,12 @@ public class PortalImmunizationHistoryController {
 	 * @return List of Appointments of a patient.
 	 */
 	@RequestMapping(value = "/ImmunizationHistory", method = RequestMethod.GET)
-	@ApiOperation(value = "Returns patient's appointments list", notes = "Returns a complete list of appointments.", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Successful retrieval of patient's appointments list"),
-			@ApiResponse(code = 404, message = "Patient with given id does not exist"),
-			@ApiResponse(code = 500, message = "Internal server error") })
 	@ResponseBody
 	public EMRResponseBean getImmunizationHistory(
-			@ApiParam(name = "patientId", value = "patient's id whose appointments list is to be retrieved") @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
-			@ApiParam(name = "chartId", value = "type of appointment (Future, Past, Present)") @RequestParam(value = "chartId", required = false, defaultValue = "present") int chartId,
-			@ApiParam(name = "pageOffset", value = "offset of the page") @RequestParam(value = "pageOffset", required = false, defaultValue = "5") int pageOffset,
-			@ApiParam(name = "pageIndex", value = "index of the page") @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
+			 @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
+			@RequestParam(value = "chartId", required = false, defaultValue = "present") int chartId,
+			 @RequestParam(value = "pageOffset", required = false, defaultValue = "5") int pageOffset,
+			 @RequestParam(value = "pageIndex", required = false, defaultValue = "0") int pageIndex)
 			throws Exception {
 
 		EMRResponseBean responseBean=new EMRResponseBean();
@@ -82,14 +71,9 @@ public class PortalImmunizationHistoryController {
 	 * @return List of Appointments of a patient.
 	 */
 	@RequestMapping(value = "/VISFilesList", method = RequestMethod.GET)
-	@ApiOperation(value = "Returns patient's appointments list", notes = "Returns a complete list of appointments.", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Successful retrieval of lab VIS files"),
-			@ApiResponse(code = 404, message = "Patient with given id does not exist"),
-			@ApiResponse(code = 500, message = "Internal server error") })
 	@ResponseBody
 	public EMRResponseBean getVaccineVISFilesList(
-			@ApiParam(name = "labDescCVX", value = "lab cvx for which VIS files need to be retrieved") @RequestParam(value = "labDescCVX", required = false, defaultValue = "0") String labDescCVX)
+			 @RequestParam(value = "labDescCVX", required = false, defaultValue = "0") String labDescCVX)
 			throws Exception {
 
 		EMRResponseBean responseBean=new EMRResponseBean();
@@ -124,14 +108,9 @@ public class PortalImmunizationHistoryController {
 	 * @return Vaccines list
 	 */
 	@RequestMapping(value = "/VaccineList", method = RequestMethod.GET)
-	@ApiOperation(value = "Returns vaccines list", notes = "Returns vaccines list.", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Successful retrieval of vaccines list"),
-			@ApiResponse(code = 404, message = "Not Found"),
-			@ApiResponse(code = 500, message = "Internal server error") })
 	@ResponseBody
 	public EMRResponseBean getVaccineList(
-			@ApiParam(name = "searchKey", value = "type of appointment (Future, Past, Present)") @RequestParam(value = "searchKey", required = false, defaultValue = "present") String searchKey)
+			@RequestParam(value = "searchKey", required = false, defaultValue = "present") String searchKey)
 			throws Exception {
 
 		EMRResponseBean responseBean=new EMRResponseBean();
@@ -160,11 +139,6 @@ public class PortalImmunizationHistoryController {
 	 * @return reasons list.
 	 */
 	@RequestMapping(value = "/VaccineUpdateReasonsList", method = RequestMethod.GET)
-	@ApiOperation(value = "Returns vaccine update reasons list", notes = "Returns vaccine update reasons list", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Successful retrieval of vaccine update reaons list"),
-			@ApiResponse(code = 404, message = "No Found"),
-			@ApiResponse(code = 500, message = "Internal server error") })
 	@ResponseBody
 	public EMRResponseBean getVaccUpdateReasonList() throws Exception {
 
@@ -194,11 +168,6 @@ public class PortalImmunizationHistoryController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/VaccineUpdate", method = RequestMethod.POST)
-	@ApiOperation(value = "Returns patient vaccine information", notes = "Returns patient vaccine information", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Vaccine information updated successfully."),
-			@ApiResponse(code = 404, message = "Vaccine updation failure"),
-			@ApiResponse(code = 500, message = "Internal server error") })
 	@ResponseBody
 	public EMRResponseBean bookAppointment(
 			@RequestBody VaccineUpdateBean vaccineUpdateBean) throws Exception {

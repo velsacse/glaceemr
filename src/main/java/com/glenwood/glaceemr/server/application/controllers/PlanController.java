@@ -8,15 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.services.chart.plan.PlanService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
  * Controller for plan module
  * @author Chandrahas
  *
  */
-@Api(value = "/user/Plan", description = "Plan", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/Plan")
 public class PlanController {
@@ -37,7 +34,6 @@ public class PlanController {
 	 * @param clientId
 	 * @return
 	 */
-	@ApiOperation(value="/FetchSystems")
 	@RequestMapping(value="/FetchSystems", method=RequestMethod.GET)	
 	public EMRResponseBean getSystems(
 		@RequestParam(value="patientId", defaultValue="-1", required=false) Integer patientId,
@@ -58,7 +54,6 @@ public class PlanController {
 	 * @param templateId
 	 * @return
 	 */
-	@ApiOperation(value="/FetchInstructions")
 	@RequestMapping(value="/FetchInstructions", method=RequestMethod.GET)	
 	public EMRResponseBean getInstructions(
 		@RequestParam(value="patientId", defaultValue="-1", required=true) Integer patientId,
@@ -80,7 +75,6 @@ public class PlanController {
 	 * @param dxcode
 	 * @return
 	 */
-	@ApiOperation(value="/FetchNotes")
 	@RequestMapping(value="/FetchNotes", method=RequestMethod.GET)
 	public EMRResponseBean getNotes(
 		@RequestParam(value="patientId", defaultValue="-1", required=false) Integer patientId,
@@ -98,7 +92,6 @@ public class PlanController {
 	 * @param offset
 	 * @return
 	 */
-	@ApiOperation(value="/FetchPlanShortcuts")
 	@RequestMapping(value="/FetchPlanShortcuts", method= RequestMethod.GET)
 	public EMRResponseBean getPlanShortcus(
 		@RequestParam(value="limit", defaultValue="10", required=false) Integer limit,
@@ -114,7 +107,6 @@ public class PlanController {
 	 * @param encounterId
 	 * @return
 	 */
-	@ApiOperation(value="/FetchPatientInstructions")
 	@RequestMapping(value="/FetchPatientInstructions", method= RequestMethod.GET)
 	public EMRResponseBean fetchPatientInstructions(
 		@RequestParam(value="encounterId", defaultValue="-1", required= true) Integer encounterId){
@@ -129,7 +121,6 @@ public class PlanController {
 	 * @param patientId
 	 * @return
 	 */
-	@ApiOperation(value="/FetchCurrentDiagnosis")
 	@RequestMapping(value="/FetchCurrentDiagnosis", method= RequestMethod.GET)
 	public EMRResponseBean fetchCurrentDiagnosis(
 		@RequestParam(value="encounterId", defaultValue="-1", required= true) Integer encounterId,
@@ -145,7 +136,6 @@ public class PlanController {
 	 * @param templateId
 	 * @return
 	 */
-	@ApiOperation(value="/FetchReturnVisit")
 	@RequestMapping(value="/FetchReturnVisit", method= RequestMethod.GET)
 	public EMRResponseBean fetchReturnVisit(
 		@RequestParam(value="encounterId", defaultValue="-1", required= true) Integer encounterId,
@@ -163,7 +153,6 @@ public class PlanController {
 	 * @param codingsystem
 	 * @return
 	 */
-	@ApiOperation(value="/mapInstructiontoDx")
 	@RequestMapping(value="/mapInstructiontoDx", method= RequestMethod.GET)
 	public EMRResponseBean mapInstructiontoDx(
 		@RequestParam(value="insId", defaultValue="-1", required=true) Integer insId,
@@ -176,7 +165,6 @@ public class PlanController {
 		return emrResponseBean;
 	}
 	
-	@ApiOperation(value="/updateAftercareIns")
 	@RequestMapping(value="/updateAftercareIns", method= RequestMethod.GET)
 	public EMRResponseBean updateAftercareIns(
 		@RequestParam(value="insId", defaultValue="-1", required=true) Integer insId,
@@ -194,7 +182,6 @@ public class PlanController {
 		return emrResponseBean;
 	}
 	
-	@ApiOperation(value="/getLanguages")
 	@RequestMapping(value="/getLanguages", method= RequestMethod.GET)
 	public EMRResponseBean getLanguages(
 		@RequestParam(value="insId", defaultValue="-1", required=true) Integer insId,
@@ -205,7 +192,6 @@ public class PlanController {
 		return emrResponseBean;
 	}
 	
-	@ApiOperation(value="/getReferringPhysicians")
 	@RequestMapping(value="/getReferringPhysicians", method= RequestMethod.GET)
 	public EMRResponseBean getReferringPhysicians(){
 		

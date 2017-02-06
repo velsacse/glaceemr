@@ -42,10 +42,7 @@ import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value="Charges Page")
 @RestController
 @Transactional
 @RequestMapping(value = "/user/Charges")
@@ -74,7 +71,6 @@ public class ChargesController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value="List of POS,Doctor,Insurance details",notes="Get all the basic details related to charges page")
 	@RequestMapping(value="/getBasicDetails",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getBasicDetails(@RequestParam(value="patientId", required=true)Integer patientId) throws Exception{
@@ -89,7 +85,6 @@ public class ChargesController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value="To get all the quick cpt codes",notes="Get all the quick cpt codes with detailed cpt related information")
 	@RequestMapping(value="/getQuickCPTCodes",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getQuickCptCodes() throws Exception{
@@ -105,7 +100,6 @@ public class ChargesController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value="To get all services",notes="Request to get all the service related to particular patient")
 	@RequestMapping(value="/getServicesList",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getServicesList(@RequestParam(value="patientId", required=true)Integer patientId) throws Exception{
@@ -122,7 +116,6 @@ public class ChargesController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request to get service details",notes="Request to get particuler service details to a particular partient based on particuler service Id")
 	@RequestMapping(value="/getServiceDetails",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getServiceDetails(@RequestParam(value="patientId", required=true)Integer patientId,
@@ -143,7 +136,6 @@ public class ChargesController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request to delete services",notes="Request to delete all services which are mentoined in the string")
 	@RequestMapping(value="/deleteServices",method=RequestMethod.DELETE)
 	@ResponseBody
 	public EMRResponseBean deleteServices(@RequestParam(value="deleteServiceIDs", required=true)String serviceIDs,
@@ -163,7 +155,6 @@ public class ChargesController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request to get pervious Dx codes",notes="Request to get previous visist Dx codes list")
 	@RequestMapping(value="/previousVisitDxCodes",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getPreviousVisitDxCodes(@RequestParam(value="patientId", required=true)Integer patientId) throws Exception{
@@ -180,7 +171,6 @@ public class ChargesController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request to get EMR diagnosis",notes="Request to get EMR diagnosis list")
 	@RequestMapping(value="/getEMRDxCodes",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getEMRDxCodes(@RequestParam(value="patientId", required=true)Integer patientId,
@@ -196,7 +186,6 @@ public class ChargesController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request to get submit status",notes="Request to get submit status type information")
 	@RequestMapping(value="/getSubmitStatusInfo",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getSubmitStatusInfo() throws Exception{
@@ -211,7 +200,6 @@ public class ChargesController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request to save services",notes="Request to save services")
 	@RequestMapping(value="/saveServices",method=RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean saveServices(@RequestBody List<SaveServicesBean> saveServicesBean) throws Exception{
@@ -227,7 +215,6 @@ public class ChargesController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request to update service",notes="Request to update service")
 	@RequestMapping(value="/updateService",method=RequestMethod.POST,consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EMRResponseBean updateService(@RequestBody UpdateServiceBean updateService) throws Exception{

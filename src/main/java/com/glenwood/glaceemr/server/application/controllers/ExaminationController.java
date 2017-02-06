@@ -18,10 +18,9 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSa
 import com.glenwood.glaceemr.server.application.services.chart.Examination.ExaminationService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
-import com.wordnik.swagger.annotations.Api;
 
 
-@Api(value = "Examination", description = "Examination Data", consumes="application/json")
+
 @RestController
 @RequestMapping(value="/user/ExaminationElements.Action")
 public class ExaminationController {

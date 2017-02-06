@@ -18,13 +18,11 @@ import com.glenwood.glaceemr.server.application.models.SchedulerResource;
 import com.glenwood.glaceemr.server.application.models.SchedulerResourceCategory;
 import com.glenwood.glaceemr.server.application.services.scheduler.SchedulerService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
 /**
  * 
  * @author Manikandan
  *
  */
-@Api(value = "/Scheduler", description = "To get the appointments based on date and resource.", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/Scheduler")

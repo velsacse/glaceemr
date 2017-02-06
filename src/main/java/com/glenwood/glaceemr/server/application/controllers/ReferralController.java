@@ -20,13 +20,11 @@ import com.glenwood.glaceemr.server.application.services.referral.ReferralListBe
 import com.glenwood.glaceemr.server.application.services.referral.ReferralService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
 
 /**
  * Controller for referral module
  * @author software
  */
-@Api(value = "ReferralTabletSummary", description = "To get referral details", consumes="application/json")
 
 @RestController
 @RequestMapping(value="/user/ReferralTabletSummary.Action")

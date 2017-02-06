@@ -78,8 +78,5 @@
 			class="com.glenwood.glaceemr.server.utils.EMRRequestInterceptor" />
 	</mvc:interceptors>
 	
-	<!-- Swagger -->
-	<context:property-placeholder location="classpath:/swagger.properties"/>
-     <bean id="springSwaggerConfig" class="com.mangofactory.swagger.configuration.SpringSwaggerConfig" />
 	
 </beans>

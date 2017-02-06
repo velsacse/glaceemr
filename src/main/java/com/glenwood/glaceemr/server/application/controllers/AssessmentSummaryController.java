@@ -15,10 +15,8 @@ import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.services.chart.assessment.AssessmentSummaryService;
 import com.glenwood.glaceemr.server.application.services.chart.problemlist.ProblemListService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
 
 
-@Api(value = "Assessment", description = "gets list of active problems of a patient", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/Assessment.Action")
 public class AssessmentSummaryController {

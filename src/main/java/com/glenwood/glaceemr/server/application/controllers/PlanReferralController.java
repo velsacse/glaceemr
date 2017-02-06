@@ -20,8 +20,6 @@ import com.glenwood.glaceemr.server.application.services.referral.ReferralBean;
 import com.glenwood.glaceemr.server.application.services.referral.ReferralService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
  * Controller for plan referral. It has one main entity, <b>H413 </b>.
@@ -40,7 +38,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
  * Mark one or more alerts to read and updates the modified user and date.</li><br>
  * </ul>
  */
-@Api(value = "ReferralSummary", description = "To get referral details", consumes="application/json")
 
 @RestController
 @RequestMapping(value="/user/ReferralSummary.Action")
@@ -68,7 +65,6 @@ public class PlanReferralController {
 	 * @return list of referrals
 	 * @throws JSONException
 	 */
-	@ApiOperation(value = "Getting referral list", notes = "Getting referral list based on encounterid and chartId")
 	@RequestMapping(value = "/listReferral", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getReferralList(@RequestParam(value="encounterId",required = false) Integer encounterId,
@@ -91,7 +87,6 @@ public class PlanReferralController {
 	 * @return
 	 * @throws JSONException
 	 */
-	@ApiOperation(value = "Getting referral and diagnosis", notes = "Getting referral details and patient dianosis data")
 	@RequestMapping(value = "/GetReferralWithDiagnosis", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getReferral(@RequestParam(value="referralId",required = false,defaultValue="-1") Integer referralId,
@@ -114,7 +109,6 @@ public class PlanReferralController {
 	 * @return
 	 * @throws JSONException
 	 */
-	@ApiOperation(value = "Getting referral", notes = "Getting referral based on referralId")
 	@RequestMapping(value = "/GetReferral", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getReferral(@RequestParam(value="referralId",required = false,defaultValue="-1") Integer referralId)
@@ -137,7 +131,6 @@ public class PlanReferralController {
 	 * @return
 	 * @throws JSONException
 	 */
-	@ApiOperation(value = "Saving referral", notes = "Saving referral details based on referralId")
 	@RequestMapping(value = "/SaveReferral", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean saveReferral(
@@ -162,7 +155,6 @@ public class PlanReferralController {
 	 * @return
 	 * @throws JSONException
 	 */
-	@ApiOperation(value = "Cancel referral", notes = "Change referral status to cancel and save active user id in cancelled by field")
 	@RequestMapping(value = "/CancelReferral", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean cancelReferral(@RequestParam(value="loginId",required = false, defaultValue = "-1") Integer loginID,

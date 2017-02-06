@@ -21,14 +21,12 @@ import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyLog
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyPatientsBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
-import com.wordnik.swagger.annotations.Api;
 
 /**
  * Controller for Group therapy
  * @author software
  *
  */
-@Api(value = "Group Therapy", description = "contains the methods of Group Therapy", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value = "/user/GroupTherapy.Action")

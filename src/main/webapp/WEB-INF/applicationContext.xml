@@ -18,15 +18,12 @@
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
         http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-	<context:component-scan base-package="com.glenwood.glaceemr.server.filters" />
+	 <context:component-scan base-package="com.glenwood.glaceemr.server.filters" />
 	<context:component-scan base-package="com.glenwood.glaceemr.server.utils" />
 	<context:component-scan base-package="com.glenwood.glaceemr.server.application.Bean" />
-	<context:component-scan
-		base-package="com.glenwood.glaceemr.server.application.controllers" />
-	<context:component-scan
-		base-package="com.glenwood.glaceemr.server.application.services" />
-	<jpa:repositories
-		base-package="com.glenwood.glaceemr.server.application.repositories" />
+	<context:component-scan base-package="com.glenwood.glaceemr.server.application.controllers" />
+	<context:component-scan base-package="com.glenwood.glaceemr.server.application.services" />
+	<jpa:repositories base-package="com.glenwood.glaceemr.server.application.repositories" />
 
 	<mvc:annotation-driven>
 		<mvc:message-converters>
@@ -124,10 +121,6 @@
 		</property>
 	</bean>
 
-	<!-- Ecache related stuff -->
-	<!-- <cache:annotation-driven /> <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" 
-		p:cache-manager-ref="ehcache"/> <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" 
-		p:config-location="classpath:ehcache.xml" p:shared="true"/> -->
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="EntityManagerFactory" />
@@ -146,10 +139,6 @@
 	<mvc:interceptors>
 		<bean class="com.glenwood.glaceemr.server.utils.EMRRequestInterceptor" />
 	</mvc:interceptors>
-	<!-- Swagger -->
-	<context:property-placeholder location="classpath:/swagger.properties" />
-	<bean id="springSwaggerConfig"
-		class="com.mangofactory.swagger.configuration.SpringSwaggerConfig" />
 	<!-- File Upload -->	
 	<bean id="multipartResolver"
 		class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />

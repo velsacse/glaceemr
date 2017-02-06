@@ -6,7 +6,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,17 +19,11 @@ import com.glenwood.glaceemr.server.application.models.SchedulerAppointment;
 import com.glenwood.glaceemr.server.application.models.SchedulerApptBookingBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalAppointments.PortalAppointmentsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 
 @RestController
 @Transactional
 @RequestMapping("/user/PortalAppointments")
-@Api(value="PortalAppointmentsController", description="Can be used to request, cancel, get list of appointments by the patient for doctor.")
 public class PortalAppointmentsController {
 
 	@Autowired
@@ -47,16 +40,11 @@ public class PortalAppointmentsController {
 	 * @return List of Appointments of a patient.
 	 */
 	@RequestMapping(value = "/AppointmentsList", method = RequestMethod.GET)
-    @ApiOperation(value = "Returns patient's appointments list", notes = "Returns a complete list of appointments.", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful retrieval of patient's appointments list"),
-		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getPatientAppointmentsList(@ApiParam(name="patientId", value="patient's id whose appointments list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
-			@ApiParam(name="appointmentsType", value="type of appointment (Future, Past, Present)") @RequestParam(value="appointmentsType", required=false, defaultValue="present") String appointmentsType,
-			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
-			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
+	public EMRResponseBean getPatientAppointmentsList(@RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
+			 @RequestParam(value="appointmentsType", required=false, defaultValue="present") String appointmentsType,
+			 @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
+			@RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -92,16 +80,11 @@ public class PortalAppointmentsController {
 	 * @return List of Appointments of a patient.
 	 */
 	@RequestMapping(value = "/PatientAppointments", method = RequestMethod.GET)
-    @ApiOperation(value = "Returns patient's appointments list", notes = "Returns a complete list of appointments.", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful retrieval of patient's appointments list"),
-		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getPatientAppointments(@ApiParam(name="patientId", value="patient's id whose appointments list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
-			@ApiParam(name="appointmentsType", value="type of appointment (Future, Past, Present)") @RequestParam(value="appointmentsType", required=false, defaultValue="present") String appointmentsType,
-			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
-			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
+	public EMRResponseBean getPatientAppointments( @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
+			 @RequestParam(value="appointmentsType", required=false, defaultValue="present") String appointmentsType,
+			@RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
+			 @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -128,15 +111,10 @@ public class PortalAppointmentsController {
 	 * @return List of Appointments Requests of a patient.
 	 */
 	@RequestMapping(value = "/AppointmentRequestsList", method = RequestMethod.GET)
-    @ApiOperation(value = "Returns  list of Appointments Requests of a patient", notes = "Returns  list of Appointments Requests of a patient", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful retrieval of patient's appointment requests list"),
-		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getPatientAppointmentRequestsList(@ApiParam(name="patientId", value="patient's id whose appointment requests list is to be retrieved") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
-			@ApiParam(name="pageOffset", value="offset of the page") @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
-			@ApiParam(name="pageIndex", value="index of the page") @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
+	public EMRResponseBean getPatientAppointmentRequestsList( @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
+			 @RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
+			 @RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -164,11 +142,6 @@ public class PortalAppointmentsController {
 	 * @return List of Appointments of a patient.
 	 */
 	@RequestMapping(value = "/AppointmentDetails", method = RequestMethod.GET)
-    @ApiOperation(value = "Returns appointment details bean", notes = "Returns a complete bean of appointment details .", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful retrieval of patient's appointments list"),
-		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getAppointmentDetails() throws Exception{
 
@@ -198,14 +171,9 @@ public class PortalAppointmentsController {
 	 */
 	@SuppressWarnings("deprecation")
 	@RequestMapping(value = "/BookedSlots", method = RequestMethod.GET)
-    @ApiOperation(value = "List of booked slots", notes = "List of booked slots", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful retrieval of List of booked slots"),
-		    @ApiResponse(code = 404, message = "No locations exist"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getBookedSlotsList(@ApiParam(name="resourceId", value="") @RequestParam(value="resourceId", required=false, defaultValue="0") int resourceId,
-			@ApiParam(name="apptDate", value="") @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate) throws Exception{
+	public EMRResponseBean getBookedSlotsList( @RequestParam(value="resourceId", required=false, defaultValue="0") int resourceId,
+			 @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate) throws Exception{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -232,14 +200,9 @@ public class PortalAppointmentsController {
 	 */
 	@SuppressWarnings("deprecation")
 	@RequestMapping(value = "/LockedSlots", method = RequestMethod.GET)
-    @ApiOperation(value = "List of Locked Slots", notes = "List of Locked Slots", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful retrieval of List of Locked Slots"),
-		    @ApiResponse(code = 404, message = "No locations exist"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getLockedSlotsList(@ApiParam(name="resourceId", value="") @RequestParam(value="resourceId", required=false, defaultValue="0") int resourceId,
-			@ApiParam(name="apptDate", value="") @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate) throws Exception{
+	public EMRResponseBean getLockedSlotsList( @RequestParam(value="resourceId", required=false, defaultValue="0") int resourceId,
+			 @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate) throws Exception{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -264,11 +227,6 @@ public class PortalAppointmentsController {
 	 * @return List of Appointment Booking Locations
 	 */
 	@RequestMapping(value = "/AppointmentBookLocationsList", method = RequestMethod.GET)
-    @ApiOperation(value = "List of Appointment Booking Locations", notes = "Returns List of Appointment Booking Locations.", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful retrieval of List of Appointment Booking Locations"),
-		    @ApiResponse(code = 404, message = "No locations exist"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getAppointmentBookLocationsList() throws Exception{
 
@@ -296,11 +254,6 @@ public class PortalAppointmentsController {
 	 * @return List of Appointment Booking Categories
 	 */
 	@RequestMapping(value = "/AppointmentBookCategoriesList", method = RequestMethod.GET)
-    @ApiOperation(value = "List of Appointment Booking Categories", notes = "Returns List of Appointment Booking Categories.", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful retrieval of List of Appointment Booking Categories"),
-		    @ApiResponse(code = 404, message = "No locations exist"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getAppointmentBookCategoriesList() throws Exception{
 
@@ -329,13 +282,8 @@ public class PortalAppointmentsController {
 	 * @return List of Appointment Booking Doctors
 	 */
 	@RequestMapping(value = "/AppointmentBookDoctorsList", method = RequestMethod.GET)
-    @ApiOperation(value = "List of Appointment Booking Locations", notes = "Returns List of Appointment Booking Doctors.", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful retrieval of List of Appointment Booking Doctors"),
-		    @ApiResponse(code = 404, message = "No locations exist"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getApptBookDoctorsList(@ApiParam(name="posId", value="place of service id form where we want the doctors List") @RequestParam(value="posId", required=false, defaultValue="0") int posId) throws Exception{
+	public EMRResponseBean getApptBookDoctorsList(@RequestParam(value="posId", required=false, defaultValue="0") int posId) throws Exception{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -364,14 +312,9 @@ public class PortalAppointmentsController {
 	 * @return List of Free Slots
 	 */
 	@RequestMapping(value = "/Appointment/FreeSlots", method = RequestMethod.GET)
-    @ApiOperation(value = "List of Appointment Booking Locations", notes = "Returns List of Appointment Booking Locations.", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful retrieval of List of free slots"),
-		    @ApiResponse(code = 404, message = "Not Found"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean getApptFreeSlotsByProviderIdAndDate(@ApiParam(name="providerId", value="") @RequestParam(value="providerId", required=false, defaultValue="0") int providerId,
-			@ApiParam(name="apptDate", value="") @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate){
+	public EMRResponseBean getApptFreeSlotsByProviderIdAndDate( @RequestParam(value="providerId", required=false, defaultValue="0") int providerId,
+			 @RequestParam(value="apptDate", required=false, defaultValue="") String apptDate){
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -399,11 +342,6 @@ public class PortalAppointmentsController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/Appointment/AppointmentRequest", method = RequestMethod.POST)
-    @ApiOperation(value = "Returns appointment request alert event details", notes = "Returns appointment request alert event details", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Successful creation alert for appointment request"),
-		    @ApiResponse(code = 404, message = "Patient with given id does not exist"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public  EMRResponseBean createPortalAppointmentRequestAlert(@RequestBody ApptRequestBean apptRequestAlertEventBean) throws Exception{
 
@@ -431,11 +369,6 @@ public class PortalAppointmentsController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/Appointment/BookAppointment", method = RequestMethod.POST)
-    @ApiOperation(value = "Returns Booked Appointment Details", notes = "Returns Booked Appointment Details", response = User.class)
-	@ApiResponses(value= {
-		    @ApiResponse(code = 200, message = "Appointment Booking Successful"),
-		    @ApiResponse(code = 404, message = "Appointment Booking Failure"),
-		    @ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public  EMRResponseBean bookAppointment(@RequestBody SchedulerApptBookingBean schedulerApptBookingBean) throws Exception{
 

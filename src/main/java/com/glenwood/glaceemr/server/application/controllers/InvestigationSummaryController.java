@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,30 +15,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.glenwood.glaceemr.server.application.models.BodySite;
 import com.glenwood.glaceemr.server.application.models.LabDescription;
-import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.VaccinationConsentForm;
-import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.investigation.ConsentDetails;
-import com.glenwood.glaceemr.server.application.services.investigation.FrequentOrders;
 import com.glenwood.glaceemr.server.application.services.investigation.InvestigationSummaryService;
-import com.glenwood.glaceemr.server.application.services.investigation.LS_Bean;
-import com.glenwood.glaceemr.server.application.services.investigation.OrderLogGroups;
-import com.glenwood.glaceemr.server.application.services.investigation.OrderSetData;
-import com.glenwood.glaceemr.server.application.services.investigation.Orders;
 import com.glenwood.glaceemr.server.application.services.investigation.SaveLabDetails;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * @author yasodha
@@ -48,7 +34,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * contains request to get the list of ordered labs, performed labs and reviewed labs.
  * and ability to order the lab.
  */
-@Api(value = "InvestigationController", description = "Contains the methods to get and save the order details.", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value = "/user/Investigation")
@@ -300,7 +285,6 @@ public class InvestigationSummaryController {
 	 * @return the message
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "Save the details of an order", notes = "Save the details of an order")
 	@RequestMapping(value = "/SaveTestDetails",method = RequestMethod.POST)
 	public String saveTestDetails(@RequestBody SaveLabDetails labDetails) throws Exception {
 		logger.debug("Begin of save the complete details for a particular lab");
@@ -317,7 +301,6 @@ public class InvestigationSummaryController {
 		return "success";
 	}
 	
-	@ApiOperation(value = "on saving new order", notes = "on saving new order")
 	@RequestMapping(value = "/SaveNewOrder", method = RequestMethod.GET)
 	public String saveNewOrder(@RequestParam(value = "encounterId", required = false, defaultValue = "") Integer encounterId,
 			@RequestParam(value = "chartId", required = false, defaultValue = "") Integer chartId,
@@ -341,7 +324,6 @@ public class InvestigationSummaryController {
 		return "success";
 	}
 	
-	@ApiOperation(value = "Get the complete details for a patient", notes = "Get the complete details for a patient")
 	@RequestMapping(value = "/OrdersHistoryByChart",method = RequestMethod.GET)
 	public EMRResponseBean getLabDetailsByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
 		logger.debug("Get the complete details for a patient");
@@ -354,7 +336,6 @@ public class InvestigationSummaryController {
         return emrResponseBean;
 	}
 	
-	@ApiOperation(value = "Get the complete details for a patient", notes = "Get the complete details for a patient")
 	@RequestMapping(value = "/OrdersLogByChart",method = RequestMethod.GET)
 	public EMRResponseBean getOrderLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
 //		OrderLogGroups labInfo = investigationService.findOrdersSummary(chartId);
@@ -367,11 +348,6 @@ public class InvestigationSummaryController {
         return emrResponseBean;
 	}
 	
-	@ApiOperation(value = "Get the complete reviewed lab list for a patient", notes = "Get the complete reviewed lab list for a patient")
-	@ApiResponses(value={@ApiResponse(code = 200, message = "Successful retrieval of reviewed orders for a patient"),
-            @ApiResponse(code = 404, message = "Labs with given chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
-	@ApiParam(name="chartId", value="id for each patient chart")
 	@RequestMapping(value = "/ReviewedLogByChart",method = RequestMethod.GET)
 	public EMRResponseBean getReviewedLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
 //		OrderLogGroups labInfo = investigationService.findReviewedSummary(chartId);
@@ -384,11 +360,6 @@ public class InvestigationSummaryController {
         return emrResponseBean;
 	}
 	
-	@ApiOperation(value = "Get the complete pending orders for a patient", notes = "Get the complete pending orders for a patient")
-	@ApiResponses(value={@ApiResponse(code = 200, message = "Successful retrieval of pending orders for a patient"),
-            @ApiResponse(code = 404, message = "Labs with given chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
-	@ApiParam(name="chartId", value="id for each patient chart")
 	@RequestMapping(value = "/PendingLogByChart",method = RequestMethod.GET)
 	
 	public EMRResponseBean getPendingLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
@@ -402,7 +373,6 @@ public class InvestigationSummaryController {
         return emrResponseBean;
 	}
 	
-	@ApiOperation(value = "Get the complete parameter details for a patient in between the selected dates", notes = "Get the complete parameter details for a patient in between the selected dates")
 	@RequestMapping(value = "/ParamDataByDate",method = RequestMethod.GET)
 	public EMRResponseBean getLabDetailsByDate(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
 			@RequestParam(value="fromDate", required=false, defaultValue="") String fromDate,
@@ -414,7 +384,6 @@ public class InvestigationSummaryController {
         return emrResponseBean;
 	}
 	
-	@ApiOperation(value = "Get the complete details based on category", notes = "Get the complete details based on category")
 	@RequestMapping(value = "/OrdersHistoryByCategory",method = RequestMethod.GET)
 	public EMRResponseBean getLabDetailsByCategory(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
 			@RequestParam(value="categoryId", required=false, defaultValue="-1") Integer catetoryId) throws Exception {
@@ -428,7 +397,6 @@ public class InvestigationSummaryController {
         return emrResponseBean;
 	}
 	
-	@ApiOperation(value = "Get the complete details based on test", notes = "Get the complete details based on test")
 	@RequestMapping(value = "/OrdersHistoryByTest",method = RequestMethod.GET)
 	public EMRResponseBean getLabDetailsByTest(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
 			@RequestParam(value="testId", required=false, defaultValue="-1") Integer testId) throws Exception {

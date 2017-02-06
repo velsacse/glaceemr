@@ -14,11 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.PatientReviewedDetails;
 import com.glenwood.glaceemr.server.application.services.chart.patientreview.PatientReviewService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
 
-@Api(value = "PatientReview", description = "To get patient review information", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/PatientReview")
 public class PatientReviewController {
@@ -34,11 +30,10 @@ public class PatientReviewController {
 	 * @param chartId
 	 * @return
 	 */
-	@ApiOperation(value = "Get reviewed information", notes = "Get reviewed user information")
 	@RequestMapping(value="/getReviewInfo", method=RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean getReviewInfo(
-			@ApiParam(name="chartId",value="chart id") @RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId){
+			 @RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId){
 		
 		logger.debug("Getting review information");
 		EMRResponseBean respBean= new EMRResponseBean();
@@ -51,14 +46,13 @@ public class PatientReviewController {
 	 * @param userId
 	 * @return
 	 */
-	@ApiOperation(value = "Save reviewed userid", notes = "Save reviewed userid")
 	@RequestMapping(value="/saveReviewInfo", method=RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean getReviewInfo(
-			@ApiParam(name="userId",value="login user id") @RequestParam(value="userId", required=false, defaultValue="-1") Integer userId,
-			@ApiParam(name="patientId",value="patient id") @RequestParam(value="patientId", required=false, defaultValue="-1") Integer patientId,
-			@ApiParam(name="chartId",value="chart id") @RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
-			@ApiParam(name="encounterId",value="encounter id") @RequestParam(value="encounterId", required=false, defaultValue="-1") Integer encounterId){
+			 @RequestParam(value="userId", required=false, defaultValue="-1") Integer userId,
+			 @RequestParam(value="patientId", required=false, defaultValue="-1") Integer patientId,
+			@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
+			@RequestParam(value="encounterId", required=false, defaultValue="-1") Integer encounterId){
 		
 		logger.debug("Saving review information");
 		

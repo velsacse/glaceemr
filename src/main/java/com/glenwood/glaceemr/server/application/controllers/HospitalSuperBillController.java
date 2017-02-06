@@ -24,10 +24,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogCons
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "HospitalSuperbill", description = "To get the list of admitted patients and updations", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/HospitalSuperbill")
 public class HospitalSuperBillController {
@@ -54,7 +51,6 @@ public class HospitalSuperBillController {
 	 * @return admission
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request to get admitted patients list",notes="Request to get all the admitted patients list present in the selcted pos")
 	@RequestMapping(value="/getAdmittedPatientsList",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getAdmittedPatientsList(@RequestParam(value="posId",required=false)Integer posId,@RequestParam(value="date",required=false)String date,@RequestParam(value="doctorId",required=false)Integer doctorId) throws Exception{
@@ -72,7 +68,6 @@ public class HospitalSuperBillController {
 	 * @return cpt
 	 * @throws Exception
 	 */
-	@ApiOperation(value="List of frequently used cpt codes",notes="Get the list of frequently used cpt codes depending upon pos type")
 	@RequestMapping(value="/getCptCodes",method=RequestMethod.GET)
 	@ResponseBody 
 	public EMRResponseBean getCptCodes(@RequestParam(value="selectedPosType", required=false)String posTypeId) throws Exception{
@@ -93,7 +88,6 @@ public class HospitalSuperBillController {
 	 * @return discharge
 	 * @throws Exception 
 	 */
-	@ApiOperation(value="Request to discharge",notes="Request to discharge the patients from the admitted pos")
 	@RequestMapping(value="/dischargePatient",method=RequestMethod.PUT)
 	@ResponseBody
 	public EMRResponseBean updateDischargeDate(@RequestParam(value="patientId", required=false)Integer patientId,
@@ -113,7 +107,6 @@ public class HospitalSuperBillController {
 	 * @return previousDx
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request for recently used Dx codes",notes="Request to get recently used Dx codes for the patient depend upon recent service date")
 	@RequestMapping(value="/getDxCodes",method=RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
@@ -131,7 +124,6 @@ public class HospitalSuperBillController {
 	 * @return List<EmpProfile>
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request to get provider information list",notes="Request for to get provider information")
 	@RequestMapping(value="/getProviderList",method= RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getProviderList() throws Exception{
@@ -150,7 +142,6 @@ public class HospitalSuperBillController {
 	 * @return services
 	 * @throws Exception
 	 */
-	@ApiOperation(value="Request to get the services list",notes="Request to get all the services list added to the patient by depending upon patientId,admissionDate etc...")
 	@RequestMapping(value="/getServicesList",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getServicesList(@RequestParam(value="patientId",required=false)Integer patientId,@RequestParam(value="admissionDate",required=false)String admissionDate) throws Exception{

@@ -25,8 +25,6 @@ import com.glenwood.glaceemr.server.application.services.labresults.ResultDetail
 import com.glenwood.glaceemr.server.application.services.labresults.SaveData;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 
 /**
@@ -36,7 +34,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
  * contains request to get the list of results, reviewed results.
  * and ability to filter results based on ordered date of the lab.
  */
-@Api(value = "LabResultsController", description = "Contains the methods to get and save the results details.", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value = "/user/LabResults")
@@ -64,7 +61,6 @@ public class LabResultsController {
 	 * @return usersList
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "Get List Of Users", notes = "To get the list of users.")
 	@RequestMapping(value = "/ListOfUsers",method = RequestMethod.GET)
 	public EMRResponseBean getUsersList() throws Exception {
 		logger.debug("in getting pending orders in investigations");
@@ -80,7 +76,6 @@ public class LabResultsController {
 	 * Method to get todays orders
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "Get todays orders", notes = "To get the list of ordered labs.")
 	@RequestMapping(value = "/TodaysOrders",method = RequestMethod.GET)
 	public EMRResponseBean getTodaysOrders(@RequestParam(value="orderedOn", required=false, defaultValue="") String orderedOn,
 			@RequestParam(value="patientId", required=false, defaultValue="") String patientId) throws Exception {
@@ -97,7 +92,6 @@ public class LabResultsController {
 	 * Method to get todays orders
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "Get pending orders", notes = "To get the list of pending labs.")
 	@RequestMapping(value = "/PendingOrders",method = RequestMethod.GET)
 	public EMRResponseBean getPendingOrders(@RequestParam(value="orderedOn", required=false, defaultValue="") String orderedOn,
 			@RequestParam(value="patientId", required=false, defaultValue="") String patientId) throws Exception {
@@ -114,7 +108,6 @@ public class LabResultsController {
 	 * Method to get todays orders
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "check the mapping", notes = "To verify the mappings of the lab.")
 	@RequestMapping(value = "/LabMapping",method = RequestMethod.GET)
 	public Boolean checkLabMapping(@RequestParam(value="patientId", required=false, defaultValue="") String patientId,
 			@RequestParam(value="hl7Id", required=false, defaultValue="") String hl7Id,
@@ -131,7 +124,6 @@ public class LabResultsController {
 	 * Method to get todays orders
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "delete unmapped lab", notes = "To delete the lab, if there is no mapping.")
 	@RequestMapping(value = "/deleteLab",method = RequestMethod.GET)
 	public String deleteLab(@RequestParam(value="hl7Id", required=false, defaultValue="") String hl7Id,
 			@RequestParam(value="testName", required=false, defaultValue="") String testName, @RequestParam(value="orderedOn", required=false, defaultValue="") String orderedOn) throws Exception {
@@ -144,7 +136,6 @@ public class LabResultsController {
 	 * Method to get list of results
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "Get list of results received for the user", notes = "To get the list of results received for the user.")
 	@RequestMapping(value = "/ResultsList",method = RequestMethod.GET)
 	public EMRResponseBean getResultList(@RequestParam(value="doctorId", required=false, defaultValue="") String doctorId,
 			@RequestParam(value="isReviewed", required=false, defaultValue="") String isReviewed,
@@ -164,7 +155,6 @@ public class LabResultsController {
 	 * Method to get patient result data
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "Get complete details of a received result", notes = "To get the complete details of the received result.")
 	@RequestMapping(value = "/ResultsDetails",method = RequestMethod.GET)
 	public ResultDetails getResultDetails(@RequestParam(value="hl7FileId", required=false, defaultValue="") String hl7FileId) {
 		logger.debug("in getting complete details of each patient result");
@@ -178,7 +168,6 @@ public class LabResultsController {
 	 * Method to attach result to patient
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "Attach the result to a Patient", notes = "To attach the result to a Patient.")
 	@RequestMapping(value = "/attachToPatient",method = RequestMethod.GET)
 	public String attachResults(@RequestParam(value="hl7FileId", required=false, defaultValue="") String hl7FileId,
 			@RequestParam(value="patientId", required=false, defaultValue="") String patientId,
@@ -191,7 +180,6 @@ public class LabResultsController {
 		return "successfully attached";
 	}
 	
-	@ApiOperation(value = "Get previous orders for a result", notes = "To get previous orders for a result.")
 	@RequestMapping(value = "/getPreviousOrders", method = RequestMethod.GET)
 	public ResultDetails getPreviousOrders(@RequestParam(value="hl7FileId", required=false, defaultValue="-1") String hl7FileId) {
 		logger.debug("in getting previous orders");		
@@ -202,7 +190,6 @@ public class LabResultsController {
 	 * Method to attach result to patient
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "Attach unknown result to a lab.", notes = "To attach unknown result to a lab.")
 	@RequestMapping(value = "/attachToLabs",method = RequestMethod.PUT)
 	public String attachLabs(@RequestBody AttachLabData attachLabData) throws Exception {
 		logger.debug("in attaching result to ordered labs");
@@ -210,7 +197,6 @@ public class LabResultsController {
 		return "successfully attached";
 	}
 	
-	@ApiOperation(value = "Save the details of a lab from Hl7", notes = "Save the details of a lab from Hl7")
 	@RequestMapping(value = "/SaveLabData",method = RequestMethod.POST)
 	public String saveLabData(@RequestBody SaveData labDetails) throws Exception {
 		logger.debug("Begin of save the complete details for a particular lab from Hl7");
@@ -219,7 +205,6 @@ public class LabResultsController {
 		return "Successfully saved";
 	}
 	
-	@ApiOperation(value = "Get documents data.", notes = "To get the document data which includes file name shared folder path, etc.,.")
 	@RequestMapping(value = "/DocumentsData", method = RequestMethod.GET)
 	public DocumentData getDocumentsInfo(@RequestParam(value="fileType", required=false, defaultValue="-1") String fileType,
 			@RequestParam(value="patientId", required=false, defaultValue="-1") String patientId,
@@ -229,7 +214,6 @@ public class LabResultsController {
 		return labResultsService.getDocumentData(fileType, patientId, documentId, sharedFolderPath);
 	}
 	
-	@ApiOperation(value = "Review documents data.", notes = "To Review the received documents.")
 	@RequestMapping(value = "/ReviewDocuments", method = RequestMethod.GET)
 	public String reviewDocuments(@RequestParam(value="fileId", required=false, defaultValue="-1") String fileId,
 			@RequestParam(value="userId", required=false, defaultValue="-1") String userId) {
@@ -237,7 +221,6 @@ public class LabResultsController {
 		return labResultsService.reviewFile(fileId, userId);
 	}
 	
-	@ApiOperation(value = "Get PDF details.", notes = "To get the PDF details.")
 	@RequestMapping(value = "/PdfInfo", method = RequestMethod.GET)
 	public String getPDFData(@RequestParam(value="testDetailId", required=false, defaultValue="-1") String testDetailId) {
 		logger.debug("in getting PDF name");		

@@ -14,8 +14,6 @@ import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
 import com.glenwood.glaceemr.server.application.services.internalmessages.InternalMessagesService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
  * Controller for Internal Messages.
@@ -24,7 +22,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
  *
  */
 
-@Api(value = "Internal messages", description = "API for internal messages encounter", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/InternalMessages")
@@ -52,7 +49,6 @@ public class InternalMessagesController {
 	 * @param encounterId
 	 * @return
 	 */
-	@ApiOperation(value = "Get particular encounter details", notes = "To get the particular encounter details based on the encounter id")	
 	@RequestMapping(value = "/getEncounterDetails", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getEncounterDetails(
@@ -69,7 +65,6 @@ public class InternalMessagesController {
 	 * @param encounterId
 	 * @return
 	 */
-	@ApiOperation(value = "update particular encounter details", notes = "To update the particular encounter details based on the encounter id")	
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean update(
@@ -94,7 +89,6 @@ public class InternalMessagesController {
 	 * @param encounterId
 	 * @return
 	 */
-	@ApiOperation(value = "create new encounter details", notes = "To create new encounter details")	
 	@RequestMapping(value = "/compose", method = RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean compose(

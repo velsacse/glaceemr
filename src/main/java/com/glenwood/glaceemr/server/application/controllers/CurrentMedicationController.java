@@ -24,13 +24,8 @@ import com.glenwood.glaceemr.server.application.services.chart.CurrentMedication
 import com.glenwood.glaceemr.server.application.services.chart.CurrentMedication.PatientAllergiesBean;
 import com.glenwood.glaceemr.server.application.services.chart.CurrentMedication.SearchBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 
-@Api(value = "/user/CurrentMedication", description = "To get all the details in current medication page", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value = "/user/CurrentMedication")
@@ -46,12 +41,8 @@ public class CurrentMedicationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/allergyData", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of Allergy data"),
-            @ApiResponse(code = 404, message = "when chart id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getAllergyData(@ApiParam(name="chartId", value="chartId") @RequestParam(value="chartId",required=false,defaultValue="-1")int chartId)throws Exception
+	public EMRResponseBean getAllergyData( @RequestParam(value="chartId",required=false,defaultValue="-1")int chartId)throws Exception
 	{
 		List<PatientAllergiesBean> allergies=currentMedicationService.getAllergies(chartId);
 		EMRResponseBean allergyList = new EMRResponseBean();
@@ -67,12 +58,8 @@ public class CurrentMedicationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/pharmacyData", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of Pharmacy data"),
-            @ApiResponse(code = 404, message = "when patient id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getPharmacy(@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId)throws Exception
+	public EMRResponseBean getPharmacy( @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId)throws Exception
 	{
 		PharmDetails pharmData=currentMedicationService.getPharmacy(patientId);
 		EMRResponseBean dataBean = new EMRResponseBean();
@@ -89,12 +76,8 @@ public class CurrentMedicationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/encounterData", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of encounter data"),
-            @ApiResponse(code = 404, message = "when patient id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getEncounterData(@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId,@ApiParam(name="encounterId", value="encounterId") @RequestParam(value="encounterId",required=false,defaultValue="-1")int encounterId)throws Exception
+	public EMRResponseBean getEncounterData(@RequestParam(value="patientId",required=false,defaultValue="-1")int patientId, @RequestParam(value="encounterId",required=false,defaultValue="-1")int encounterId)throws Exception
 	{
 		List<Encounter> encData=currentMedicationService.getEncounterData(encounterId);
 		PatientRegistration copay=currentMedicationService.getCopay(patientId);
@@ -115,12 +98,8 @@ public class CurrentMedicationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/currentMedData", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of current medication data"),
-            @ApiResponse(code = 404, message = "when patient id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getCurrentMedData(@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId,@ApiParam(name="encounterId", value="encounterId") @RequestParam(value="encounterId",required=false,defaultValue="-1")int encounterId,@ApiParam(name="userId", value="userId") @RequestParam(value="userId",required=false,defaultValue="-1")int userId)throws Exception
+	public EMRResponseBean getCurrentMedData(@RequestParam(value="patientId",required=false,defaultValue="-1")int patientId, @RequestParam(value="encounterId",required=false,defaultValue="-1")int encounterId, @RequestParam(value="userId",required=false,defaultValue="-1")int userId)throws Exception
 	{
 		int locEncounterId=encounterId;
 		Chart chartDetails=currentMedicationService.getchartDetails(patientId);
@@ -152,12 +131,8 @@ public class CurrentMedicationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/activeMed", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of encounter data"),
-            @ApiResponse(code = 404, message = "when patient id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getActiveMedications(@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId)throws Exception
+	public EMRResponseBean getActiveMedications( @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId)throws Exception
 	{
 		List<ActiveMedicationsBean> currentMeds =currentMedicationService.getActiveCurrentMeds(patientId);
 		List<ActiveMedicationsBean> prescriptionMeds=currentMedicationService.getActivePrescMeds(patientId);
@@ -176,12 +151,8 @@ public class CurrentMedicationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/inActiveMed", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of encounter data"),
-            @ApiResponse(code = 404, message = "when patient id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getInActiveMedications(@ApiParam(name="patientId", value="patientId") @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId)throws Exception
+	public EMRResponseBean getInActiveMedications( @RequestParam(value="patientId",required=false,defaultValue="-1")int patientId)throws Exception
 	{
 		List<InactiveMedBean> currentMeds =currentMedicationService.getInActiveCurrentMeds(patientId);
 		EMRResponseBean dataBean = new EMRResponseBean();
@@ -201,12 +172,8 @@ public class CurrentMedicationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value ="/medSearch", method = RequestMethod.GET)
-    @ApiResponses(value= {
-            @ApiResponse(code = 200, message = "Successful retrieval of encounter data"),
-            @ApiResponse(code = 404, message = "when patient id does not exist"),
-            @ApiResponse(code = 500, message = "Internal server error")})
     @ResponseBody
-	public EMRResponseBean getMedSearchDetails(@ApiParam(name="keyword", value="keyword") @RequestParam(value="keyword",required=false,defaultValue="-1")String keyword, @ApiParam(name="prescriberspecific", value="prescriberspecific") @RequestParam(value="prescriberspecific",required=false,defaultValue="false")String prescriberspecific, @ApiParam(name="mapid", value="mapid") @RequestParam(value="mapid",required=false,defaultValue="-1")String mapid, @ApiParam(name="userId", value="userId") @RequestParam(value="userId",required=false,defaultValue="-1")int userId, @ApiParam(name="offset", value="offset") @RequestParam(value="offset",required=false,defaultValue="-1")int offset,@ApiParam(name="limit", value="limit") @RequestParam(value="limit",required=false,defaultValue="-1")int limit)throws Exception
+	public EMRResponseBean getMedSearchDetails(@RequestParam(value="keyword",required=false,defaultValue="-1")String keyword,  @RequestParam(value="prescriberspecific",required=false,defaultValue="false")String prescriberspecific,  @RequestParam(value="mapid",required=false,defaultValue="-1")String mapid,  @RequestParam(value="userId",required=false,defaultValue="-1")int userId,  @RequestParam(value="offset",required=false,defaultValue="-1")int offset, @RequestParam(value="limit",required=false,defaultValue="-1")int limit)throws Exception
 	{
 		List<SearchBean> drugList=currentMedicationService.getsearchData(keyword,prescriberspecific,mapid,userId,offset,limit);
 		EMRResponseBean dataBean = new EMRResponseBean();

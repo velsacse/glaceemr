@@ -16,15 +16,12 @@ import com.glenwood.glaceemr.server.application.services.chart.reports.OverrideA
 import com.glenwood.glaceemr.server.application.services.chart.reports.OverrideBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
  * Controller to override the data
  * @author smita
  */
 
-@Api(value = "OverrideAlerts", description = "Contains the methods to override the element details.", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/OverrideAlerts")
 public class OverrideAlertsController {
@@ -49,7 +46,6 @@ public class OverrideAlertsController {
 	 * @return
 	 * @throws Exception
 	 */
-	@ApiOperation(value = "Override the flowsheet elements(includes vitals, clinical elements and medication section)", notes = "Override the flowsheet elements(includes vitals, clinical elements and medication section)")
 	@RequestMapping(value = "/OverrideFlowsheet",method = RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean getFlowsheets(@RequestBody OverrideBean overrideBean) throws Exception{

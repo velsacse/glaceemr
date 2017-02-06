@@ -32,16 +32,10 @@ import com.glenwood.glaceemr.server.application.services.portal.fileUploadServic
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.PortalDocumentsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.HUtil;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 @RestController
 @Transactional
 @RequestMapping(value = "/user/FileUploadAndRetrieve")
-@Api(value = "FileUploadAndRetrieveController", description = "Handles requests regarding all types of uploads.")
 public class FileUploadAndRetrieveController {
 
 	@Autowired
@@ -59,15 +53,10 @@ public class FileUploadAndRetrieveController {
 	String pathSeperator = java.io.File.separator;
 
 	@RequestMapping(value = "/upload/image", method = RequestMethod.POST, produces = "text/html")
-	@ApiOperation(value = "Uploads user patient picture and returns the saved path", notes = "Uploads user profile picture and returns the saved path.", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Patient profile picture upload successfull."),
-			@ApiResponse(code = 404, message = "Patient profile picture to be uploaded not found."),
-			@ApiResponse(code = 500, message = "Internal server error.") })
 	@ResponseBody
 	public EMRResponseBean uploadPatientProfilePicture(
-			@ApiParam(name = "file", value = "") @RequestParam(value = "file", required = false, defaultValue = "") MultipartFile file,
-			@ApiParam(name = "patientId", value = "") @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId) {
+			 @RequestParam(value = "file", required = false, defaultValue = "") MultipartFile file,
+			@RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId) {
 
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -99,11 +88,6 @@ public class FileUploadAndRetrieveController {
 	}
 
 	@RequestMapping(value = "/upload/profilePicture", method = RequestMethod.POST)
-	@ApiOperation(value = "Uploads user patient picture and returns the saved path", notes = "Uploads user profile picture and returns the saved path.", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Patient profile picture upload successfull."),
-			@ApiResponse(code = 404, message = "Patient profile picture to be uploaded not found."),
-			@ApiResponse(code = 500, message = "Internal server error.") })
 	@ResponseBody
 	public EMRResponseBean uploadPatientProfilePicture(
 			@RequestBody FileDataBean dataBean) {
@@ -137,14 +121,9 @@ public class FileUploadAndRetrieveController {
 	}
 
 	@RequestMapping(value = "/retrieve/profilePicture", method = RequestMethod.GET)
-	@ApiOperation(value = "Retrieves user patient picture and returns base64 String format", notes = "Uploads user profile picture and returns the saved path.", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Patient profile picture retrieve successfull."),
-			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
-			@ApiResponse(code = 500, message = "Internal server error.") })
 	@ResponseBody
 	public EMRResponseBean retrievePatientProfilePicture(
-			@ApiParam(name = "patientId", value = "") @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId) {
+			 @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId) {
 
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -176,16 +155,11 @@ public class FileUploadAndRetrieveController {
 	}
 
 	@RequestMapping(value = "/retrieve/image", method = RequestMethod.GET)
-	@ApiOperation(value = "Retrieves user patient picture and returns base64 String format", notes = "Uploads user profile picture and returns the saved path.", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Patient profile picture retrieve successfull."),
-			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
-			@ApiResponse(code = 500, message = "Internal server error.") })
 	@ResponseBody
 	public EMRResponseBean retrievePatientImageDocuments(
-			@ApiParam(name = "patientId", value = "") @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
-			@ApiParam(name = "fileName", value = "") @RequestParam(value = "fileName", required = false, defaultValue = "0") String fileName,
-			@ApiParam(name = "fileCategory", value = "") @RequestParam(value = "fileCategory", required = false, defaultValue = "0") String fileCategory) {
+			@RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
+			 @RequestParam(value = "fileName", required = false, defaultValue = "0") String fileName,
+			 @RequestParam(value = "fileCategory", required = false, defaultValue = "0") String fileCategory) {
 
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -231,16 +205,11 @@ public class FileUploadAndRetrieveController {
 	}
 
 	@RequestMapping(value = "/retrieve/html", method = RequestMethod.GET)
-	@ApiOperation(value = "Retrieves patient html document in String format.", notes = "Retrieves patient html document in String format.", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Patient profile picture retrieve successfull."),
-			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
-			@ApiResponse(code = 500, message = "Internal server error.") })
 	@ResponseBody
 	public EMRResponseBean retrievePatientHTMLDocuments(
-			@ApiParam(name = "patientId", value = "") @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
-			@ApiParam(name = "fileName", value = "") @RequestParam(value = "fileName", required = false, defaultValue = "0") String fileName,
-			@ApiParam(name = "fileCategory", value = "") @RequestParam(value = "fileCategory", required = false, defaultValue = "0") String fileCategory) {
+			 @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
+			 @RequestParam(value = "fileName", required = false, defaultValue = "0") String fileName,
+			@RequestParam(value = "fileCategory", required = false, defaultValue = "0") String fileCategory) {
 
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -275,16 +244,11 @@ public class FileUploadAndRetrieveController {
 	}
 
 	@RequestMapping(value = "/preview/file/{patientId}/{fileName}", method = RequestMethod.GET)
-	@ApiOperation(value = "Retrieves user patient picture and returns base64 String format", notes = "Uploads user profile picture and returns the saved path.", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Patient profile picture retrieve successfull."),
-			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
-			@ApiResponse(code = 500, message = "Internal server error.") })
 	@ResponseBody
 	public EMRResponseBean filePreviewByFileId(
-			@ApiParam(name = "patientId", value = "") @PathVariable("patientId") int patientId,
-			@ApiParam(name = "fileName", value = "") @PathVariable("fileName") String fileDetailsName,
-			@ApiParam(name = "isToDownload", value = "") @RequestParam(value = "isToDownload", required = false) String isToDownLoad,
+			 @PathVariable("patientId") int patientId,
+			@PathVariable("fileName") String fileDetailsName,
+			 @RequestParam(value = "isToDownload", required = false) String isToDownLoad,
 			HttpServletRequest request, HttpServletResponse response) {
 
 		responseBean.setCanUserAccess(true);
@@ -328,17 +292,12 @@ public class FileUploadAndRetrieveController {
 	}
 
 	@RequestMapping(value = "/FilePreview/{patientId}/{fileCategory}/{fileName}", method = RequestMethod.GET)
-	@ApiOperation(value = "Retrieves user patient picture and returns base64 String format", notes = "Uploads user profile picture and returns the saved path.", response = User.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Patient profile picture retrieve successfull."),
-			@ApiResponse(code = 404, message = "Patient profile picture to be retrieved not found."),
-			@ApiResponse(code = 500, message = "Internal server error.") })
 	@ResponseBody
 	public EMRResponseBean filePreviewByFileName(
-			@ApiParam(name = "patientId", value = "") @PathVariable("patientId") int patientId,
-			@ApiParam(name = "fileCategory", value = "") @PathVariable("fileCategory") String fileCategory,
-			@ApiParam(name = "fileName", value = "") @PathVariable("fileName") String fileDetailsName,
-			@ApiParam(name = "isToDownload", value = "") @RequestParam(value = "isToDownload", required = false) String isToDownLoad,
+			 @PathVariable("patientId") int patientId,
+			 @PathVariable("fileCategory") String fileCategory,
+			 @PathVariable("fileName") String fileDetailsName,
+			 @RequestParam(value = "isToDownload", required = false) String isToDownLoad,
 			HttpServletRequest request, HttpServletResponse response) {
 
 		responseBean.setCanUserAccess(true);

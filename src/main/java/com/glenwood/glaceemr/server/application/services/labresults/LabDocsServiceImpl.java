@@ -5,15 +5,13 @@ import java.io.FileReader;
 
 import org.springframework.stereotype.Service;
 
-import com.wordnik.swagger.annotations.Api;
-
 /**
  * @author yasodha
  * 
  * LabResultsServiceImpl gives the data required for 
  * external lab results
  */
-@Api(value = "LabDocsService", description = "Contains the implementations to get and save the lab documents data.", consumes="application/json")
+
 @Service
 public class LabDocsServiceImpl implements LabDocsService {
 

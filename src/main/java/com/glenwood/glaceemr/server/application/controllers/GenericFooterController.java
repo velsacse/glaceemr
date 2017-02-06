@@ -17,11 +17,8 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSe
 import com.glenwood.glaceemr.server.application.services.chart.print.genericfooter.GenericFooterService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
  
-@Api(value = "GenericFooterConfiguration", description = "Generic Footer", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/LetterFooter.Action")
 public class GenericFooterController {
@@ -44,7 +41,6 @@ public class GenericFooterController {
 	 * Request to get the list of all generic footers
 	 * 
 	 */
-	@ApiOperation(value = "Get the list of all generic footers", notes = "Get the list of all generic footers")
 	@RequestMapping(value = "/FetchGenericFooterList",method = RequestMethod.GET)
 	public EMRResponseBean fetchGenericFooterList() throws Exception{
 		logger.debug("Begin of request to get the list of all generic footers.");
@@ -61,7 +57,6 @@ public class GenericFooterController {
 	 * Request to save generic footer
 	 * 
 	 */
-	@ApiOperation(value = "Save generic footer", notes = "Save generic footer")
 	@RequestMapping(value = "/saveGenericFooter",method = RequestMethod.POST)
 	public EMRResponseBean saveGenericFooter(@RequestParam(value="footerName") String footerName,@RequestParam(value="footerVariant") Integer footerVariant,
 			@RequestParam(value="footerText") String footerText,@RequestParam(value="footerStyle") String footerStyle,@RequestParam(value="isDefault") Boolean isDefault) throws Exception{
@@ -87,7 +82,6 @@ public class GenericFooterController {
 	 * Request to update generic footer
 	 * 
 	 */
-	@ApiOperation(value = "Update generic footer", notes = "Update generic footer")
 	@RequestMapping(value = "/updateGenericFooter",method = RequestMethod.POST)
 	public EMRResponseBean updateGenericFooter(@RequestParam(value="footerName") String footerName,@RequestParam(value="footerVariant") Integer footerVariant,
 			@RequestParam(value="footerText") String footerText,@RequestParam(value="footerStyle") String footerStyle,
@@ -116,7 +110,6 @@ public class GenericFooterController {
 	 * Request to get generic footer based on id
 	 * 
 	 */
-	@ApiOperation(value = "Fetch generic footer", notes = "Fetch generic footer")
 	@RequestMapping(value = "/FetchGenericFooter",method = RequestMethod.GET)
 	public EMRResponseBean getGenericFooter(@RequestParam(value="footerId") Integer footerId) throws Exception{
 		logger.debug("Begin of request to Fetch generic footer.");

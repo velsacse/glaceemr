@@ -8,16 +8,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.glenwood.glaceemr.server.application.services.fax.FaxService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
 
 /**
  * Controller for fax module. 
  * @author Anil Kumar
  *
  */
-@Api(value = "Fax", description = "Fax", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/Fax")

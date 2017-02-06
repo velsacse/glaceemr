@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,17 +26,10 @@ import com.glenwood.glaceemr.server.application.services.portal.portalSettings.P
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PrincipalDoctor;
 import com.glenwood.glaceemr.server.application.services.portalLogin.PortalLoginService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 
 @RestController
 @RequestMapping("/login/PatientRegistration")
-@Api(value="PatientRegistrationController", description="Can be used to retrieve patient profile "
-		+ "settings fields details, set the preferences e.t.c.., register patient, activate patient.")
 public class PortalPatientRegistrationController {
 
 
@@ -60,11 +52,6 @@ public class PortalPatientRegistrationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/RegistrationSetupFields", method = RequestMethod.GET)
-	@ApiOperation(value = "Returns list of registration settings fields with available options.", notes = "Returns list of registration settings fields with available options.", response = User.class)
-	@ApiResponses(value= {
-			@ApiResponse(code = 200, message = "Successful retrieval of list of registration settings fields with available options"),
-			@ApiResponse(code = 404, message = "Details doesn't exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
 	public EMRResponseBean getPatientProfileSettingsFieldsOprions(){
 
@@ -112,16 +99,11 @@ public class PortalPatientRegistrationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/UsernameVerification", method = RequestMethod.GET)
-	@ApiOperation(value = "Returns list of registration settings fields with available options.", notes = "Returns list of registration settings fields with available options.", response = User.class)
-	@ApiResponses(value= {
-			@ApiResponse(code = 200, message = "Successful retrieval of list of registration settings fields with available options"),
-			@ApiResponse(code = 404, message = "Details doesn't exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean verifyUsername(@ApiParam(name="username", value="username to be verified") @RequestParam(value="username", required=false, defaultValue="-1") String username,
-			@ApiParam(name="dob", value="username to be verified") @RequestParam(value="dob", required=false, defaultValue="-1") String dob,
-			@ApiParam(name="firstName", value="username to be verified") @RequestParam(value="firstName", required=false, defaultValue="-1") String firstName,
-			@ApiParam(name="lastName", value="username to be verified") @RequestParam(value="lastName", required=false, defaultValue="-1") String lastName){
+	public EMRResponseBean verifyUsername(@RequestParam(value="username", required=false, defaultValue="-1") String username,
+			@RequestParam(value="dob", required=false, defaultValue="-1") String dob,
+			 @RequestParam(value="firstName", required=false, defaultValue="-1") String firstName,
+			 @RequestParam(value="lastName", required=false, defaultValue="-1") String lastName){
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -152,14 +134,9 @@ public class PortalPatientRegistrationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/RegisterNewUserForPortal", method = RequestMethod.POST)
-	@ApiOperation(value = "Register the patient", notes = "Register the patient.", response = User.class)
-	@ApiResponses(value= {
-			@ApiResponse(code = 200, message = "Patient registered successfully."),
-			@ApiResponse(code = 404, message = "Details doesn't exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean registerNewUser(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
-			@ApiParam(name="dbname", value="username to be verified") @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
+	public EMRResponseBean registerNewUser(@RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
+			@RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -189,14 +166,9 @@ public class PortalPatientRegistrationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/RegisterExistingUserForPortal", method = RequestMethod.POST)
-	@ApiOperation(value = "Register the patient", notes = "Register the patient.", response = User.class)
-	@ApiResponses(value= {
-			@ApiResponse(code = 200, message = "Patient signed up successfully."),
-			@ApiResponse(code = 404, message = "Details doesn't exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean registerExistingUser(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
-			@ApiParam(name="dbname", value="username to be verified") @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
+	public EMRResponseBean registerExistingUser( @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
+			@RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -226,14 +198,9 @@ public class PortalPatientRegistrationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/RequestSignupCredentials", method = RequestMethod.POST)
-	@ApiOperation(value = "Register the patient", notes = "Register the patient.", response = User.class)
-	@ApiResponses(value= {
-			@ApiResponse(code = 200, message = "Patient signed up successfully."),
-			@ApiResponse(code = 404, message = "Details doesn't exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean requestSignupCredentials(@ApiParam(name="registrationDetails", value="username to be verified") @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
-			@ApiParam(name="dbname", value="username to be verified") @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
+	public EMRResponseBean requestSignupCredentials( @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
+			 @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -264,14 +231,9 @@ public class PortalPatientRegistrationController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/ActivateAccount", method = RequestMethod.POST)
-	@ApiOperation(value = "Register the patient", notes = "Register the patient.", response = User.class)
-	@ApiResponses(value= {
-			@ApiResponse(code = 200, message = "Patient registered successfully."),
-			@ApiResponse(code = 404, message = "Details doesn't exist"),
-			@ApiResponse(code = 500, message = "Internal server error")})
 	@ResponseBody
-	public EMRResponseBean activateAccount(@ApiParam(name="patientId", value="patient id to activate the account") @RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
-			@ApiParam(name="practiceId", value="practice id") @RequestParam(value="practiceId", required=false, defaultValue="0") String practiceId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
+	public EMRResponseBean activateAccount(@RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
+			@RequestParam(value="practiceId", required=false, defaultValue="0") String practiceId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		

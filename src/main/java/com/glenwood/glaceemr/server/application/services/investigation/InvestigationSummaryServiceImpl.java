@@ -152,11 +152,8 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSe
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.ClinicalElementsService;
 import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
 import com.glenwood.glaceemr.server.application.specifications.ChartSpecification;
-import com.glenwood.glaceemr.server.application.specifications.EmployeeSpecification;
-import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
 import com.glenwood.glaceemr.server.application.specifications.InitialSettingsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.InvestigationSpecification;
-import com.glenwood.glaceemr.server.application.specifications.LoginSpecfication;
 import com.glenwood.glaceemr.server.application.specifications.PatientClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.VaccineReportSpecification;
 import com.glenwood.glaceemr.server.utils.HUtil;
@@ -164,7 +161,6 @@ import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.wordnik.swagger.annotations.Api;
 
 /**
  * @author yasodha
@@ -172,7 +168,7 @@ import com.wordnik.swagger.annotations.Api;
  * InvestigationSummaryServiceImpl gives the data required for 
  * investigation summary
  */
-@Api(value = "InvestigationService", description = "Contains the methods to get and save the order details.", consumes="application/json")
+
 @Service
 public class InvestigationSummaryServiceImpl implements	InvestigationSummaryService {
 

@@ -2,10 +2,9 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,10 +18,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSe
 import com.glenwood.glaceemr.server.application.services.chart.print.patientheader.PatientHeaderService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "PatientHeaderConfiguration", description = "Patient Header", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/GenericPatientHeader.Action")
 public class PatientHeaderController {
@@ -45,7 +41,6 @@ public class PatientHeaderController {
 	 * Request to get the list of all patient headers for configuration
 	 * 
 	 */
-	@ApiOperation(value = "Get the list of all patient headers", notes = "Get the list of all patient headers")
 	@RequestMapping(value = "/FetchPatientHeader",method = RequestMethod.GET)
 	public EMRResponseBean fetchPatientHeaderList() throws Exception{
 		logger.debug("Begin of request to get the list of all patient headers.");
@@ -62,7 +57,6 @@ public class PatientHeaderController {
 	 * Request to get the list of all patient header details based on header id and page id for configuration
 	 * 
 	 */
-	@ApiOperation(value = "Get patient headers details based on header id and page id", notes = "Get patient headers details based on header id and page id")
 	@RequestMapping(value = "/FetchPatientHeaderDetails",method = RequestMethod.GET)
 	public EMRResponseBean fetchPatientHeaderDetailsList(@RequestParam(value="headerId") Integer headerId,@RequestParam(value="pageId") Integer pageId) throws Exception{
 		logger.debug("Begin of request to get patient headers details based on header id and page id.");
@@ -79,7 +73,6 @@ public class PatientHeaderController {
 	 * Request to save Patient header
 	 * 
 	 */
-	@ApiOperation(value = "Save patient header", notes = "Save patient header")
 	@RequestMapping(value = "/savePatientHeader",method = RequestMethod.POST)
 	public EMRResponseBean savePatientHeader(@RequestParam(value="headerName") String headerName,@RequestParam(value="headerType") Integer headerType,
 			@RequestParam(value="isDefault") Boolean isDefault) throws Exception{
@@ -103,7 +96,6 @@ public class PatientHeaderController {
 	 * Request to update Patient header
 	 * 
 	 */
-	@ApiOperation(value = "Update Patient header", notes = "Update Patient header")
 	@RequestMapping(value = "/updatePatientHeader",method = RequestMethod.POST)
 	public EMRResponseBean updatePatientHeader(@RequestParam(value="headerName") String headerName,@RequestParam(value="headerType") Integer headerType,
 			@RequestParam(value="isDefault") Boolean isDefault,@RequestParam(value="isActive") Boolean isActive,@RequestParam(value="headerId") Integer headerId) throws Exception{
@@ -128,7 +120,6 @@ public class PatientHeaderController {
 	 * Request to delete patient header details
 	 * 
 	 */
-	@ApiOperation(value = "Delete patient header details", notes = "Delete patient header details")
 	@RequestMapping(value = "/deletePatientHeaderDetails",method = RequestMethod.POST)
 	public void deletePatientHeaderDetails(@RequestParam(value="headerId") Integer headerId,@RequestParam(value="pageId") Integer pageId) throws Exception{
 		logger.debug("Begin of request to delete patient header details.");
@@ -144,7 +135,6 @@ public class PatientHeaderController {
 	 * Request to save patient header details
 	 * 
 	 */
-	@ApiOperation(value = "Save patient header details", notes = "Save patient header details")
 	@RequestMapping(value = "/savePatientHeaderDetails",method = RequestMethod.POST)
 	public void savePatientHeaderDetails(@RequestParam(value="headerId") Integer headerId,@RequestParam(value="pageId") Integer pageId,
 			@RequestParam(value="componentId") Integer componentId,@RequestParam(value="order") Integer order) throws Exception{

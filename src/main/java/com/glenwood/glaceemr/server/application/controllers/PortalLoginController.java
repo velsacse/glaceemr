@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
 
 @RestController
 @RequestMapping(value="/login/PortalLoginAndLogout")
-@Api(value="PortalLoginController", description="Manages the login mechanism")
 
 public class PortalLoginController {
 

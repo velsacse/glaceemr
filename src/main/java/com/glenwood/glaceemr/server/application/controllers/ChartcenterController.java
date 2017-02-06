@@ -16,9 +16,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSe
 import com.glenwood.glaceemr.server.application.services.chartcenter.ChartcenterService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
 
-@Api(value = "PatientLookup", description = "gets list of active patients", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/PatientSearch.Action")
 public class ChartcenterController {

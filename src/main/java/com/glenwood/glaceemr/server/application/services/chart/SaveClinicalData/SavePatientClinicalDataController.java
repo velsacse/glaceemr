@@ -10,11 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wordnik.swagger.annotations.Api;
 
 
-
-@Api(value = "Save Clinical Data", description = "Save Clinical Data", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/SavePatientClinicalData.Action")

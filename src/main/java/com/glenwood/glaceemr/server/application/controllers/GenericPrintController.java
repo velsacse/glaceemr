@@ -18,15 +18,12 @@ import com.glenwood.glaceemr.server.application.models.print.GenericPrintStyle;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.print.CustomGenericBean;
-import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintService;
 import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintBean;
+import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintService;
 import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintTemplateBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "GenericPrintConfiguration", description = "Generic Print Styles", consumes="application/json")
 @RestController
 @RequestMapping(value="/user/GenericPrintStyle.Action")
 public class GenericPrintController {
@@ -53,7 +50,6 @@ public class GenericPrintController {
 	 * Request to get the list of all generic print styles for configuration
 	 * 
 	 */
-	@ApiOperation(value = "Get the list of all generic print styles", notes = "Get the list of all generic print styles")
 	@RequestMapping(value = "/FetchGenericPrintStyleList",method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean fetchgenericPrintStyleList() throws Exception{
@@ -72,7 +68,6 @@ public class GenericPrintController {
 	 * Request to get generic print styles based on id for configuration
 	 * 
 	 */
-	@ApiOperation(value = "Get generic print styles", notes = "Get generic print styles")
 	@RequestMapping(value = "/FetchGenericPrintStyle",method = RequestMethod.GET)
 	public EMRResponseBean fetchgenericPrintStyle(@RequestParam(value="styleId") Integer styleId) throws Exception{
 		logger.debug("Begin of request to get the list of all generic print styles.");
@@ -89,7 +84,6 @@ public class GenericPrintController {
 	 * Request to save generic footer
 	 * 
 	 */
-	@ApiOperation(value = "Save generic print style", notes = "Save generic print style")
 	@RequestMapping(value = "/saveGenericPrintStyle",method = RequestMethod.POST)
 	public EMRResponseBean saveGenericPrintStyle(@RequestParam(value="styleName") String styleName,@RequestParam(value="letterHeaderId") Integer letterHeaderId,
 			@RequestParam(value="patientHeaderId") Integer patientHeaderId,@RequestParam(value="footerId") Integer footerId,
@@ -119,7 +113,6 @@ public class GenericPrintController {
 	 * Request to save generic footer
 	 * 
 	 */
-	@ApiOperation(value = "Update generic print style", notes = "Update generic print style")
 	@RequestMapping(value = "/updateGenericPrintStyle",method = RequestMethod.POST)
 	public EMRResponseBean updateGenericPrintStyle(@RequestParam(value="styleName") String styleName,@RequestParam(value="letterHeaderId") Integer letterHeaderId,
 			@RequestParam(value="patientHeaderId") Integer patientHeaderId,@RequestParam(value="footerId") Integer footerId,@RequestParam(value="styleId") Integer styleId,
@@ -150,7 +143,6 @@ public class GenericPrintController {
 	 * Request to get generic print styles based on id for configuration
 	 * 
 	 */
-	@ApiOperation(value = "Get generic print styles", notes = "Get generic print styles")
 	@RequestMapping(value = "/FetchGenericPrintPDF",method = RequestMethod.GET)
 	public void fetchgenericPrintPDF(@RequestParam(value="styleId") Integer styleId) throws Exception{
 		logger.debug("Begin of request to get the list of all generic print styles.");
@@ -165,7 +157,6 @@ public class GenericPrintController {
 	 * Request to get generic print styles based on id for configuration
 	 * 
 	 */
-	@ApiOperation(value = "Get generic print styles", notes = "Get generic print styles")
 	@RequestMapping(value = "/FetchGenericPrintPDFData",method = RequestMethod.GET)
 	public void fetchgenericPrintPDFData(@RequestParam(value="styleId") Integer styleId,
 			@RequestParam(value="patientId") Integer patientId/*,@RequestParam(value="printDetails")String printDetails*/) throws Exception{
@@ -186,7 +177,6 @@ public class GenericPrintController {
 	 * @return 
 	 * @throws Exception 
 	 */
-	@ApiOperation(value = "Getting note print", notes = "Getting note print for specific patient")
 	@RequestMapping(value = "/GetPrint", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getCompleteDetails(@RequestParam(value="patientId",required = false) Integer patientId,
@@ -201,7 +191,6 @@ public class GenericPrintController {
 
 	}
 	
-	@ApiOperation(value = "Get generic print header data", notes = "Get generic print header data")
 	@RequestMapping(value = "/FetchGenericPrintHeaderData",method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean fetchGenericPrintHeader(@RequestParam(value="styleId") Integer styleId,
@@ -218,7 +207,6 @@ public class GenericPrintController {
 		
 	}
 	
-	@ApiOperation(value = "Get generic print patient header data", notes = "Get generic print patient header data")
 	@RequestMapping(value = "/FetchGenericPrintPatientHeaderData",method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean fetchGenericPrintPatientHeader(@RequestParam(value="styleId") Integer styleId,
@@ -234,7 +222,6 @@ public class GenericPrintController {
 		
 	}
 	
-	@ApiOperation(value = "Get generic print footer data", notes = "Get generic print footer data")
 	@RequestMapping(value = "/FetchGenericPrintFooterData",method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean fetchGenericPrintFooter(@RequestParam(value="styleId") Integer styleId) throws Exception{
@@ -248,7 +235,6 @@ public class GenericPrintController {
 		
 	}
 	
-	@ApiOperation(value = "Get generic print left data", notes = "Get generic print left data")
 	@RequestMapping(value = "/FetchGenericPrintLeftHeaderData",method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean fetchGenericPrintLeftData(@RequestParam(value="styleId") Integer styleId) throws Exception{
@@ -262,7 +248,6 @@ public class GenericPrintController {
 		
 	}
 	
-	@ApiOperation(value = "Get generic print data", notes = "Get generic print data")
 	@RequestMapping(value = "/FetchGenericPrintData",method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean fetchGenericPrint(@RequestParam(value="styleId") Integer styleId,
@@ -283,7 +268,6 @@ public class GenericPrintController {
 	 * Request to get template list
 	 * 
 	 */
-	@ApiOperation(value = "Get template list", notes = "Get template list")
 	@RequestMapping(value = "/FetchTemplatesList",method = RequestMethod.GET)
 	public EMRResponseBean fetchTemplatesList(@RequestParam(value="styleId", defaultValue="-1") Integer styleId) throws Exception{
 		logger.debug("Begin of request to get template list.");
@@ -307,7 +291,6 @@ public class GenericPrintController {
 	 * Request to save style for template
 	 * 
 	 */
-	@ApiOperation(value = "Update style for template", notes = "Update style for template")
 	@RequestMapping(value = "/UpdateTemplatesList",method = RequestMethod.POST)
 	public void updateTemplatesList(@RequestParam(value="styleId") Integer styleId,
 			@RequestParam(value="value") String value) throws Exception{

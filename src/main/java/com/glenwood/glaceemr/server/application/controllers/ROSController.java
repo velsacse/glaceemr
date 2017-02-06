@@ -14,9 +14,7 @@ import com.glenwood.glaceemr.server.application.services.chart.ros.ROSService;
 import com.glenwood.glaceemr.server.application.services.chart.ros.ROSSystemBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.google.common.base.Optional;
-import com.wordnik.swagger.annotations.Api;
 
-@Api(value = "ROS", description = "ROS Data", consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/ROSElements")

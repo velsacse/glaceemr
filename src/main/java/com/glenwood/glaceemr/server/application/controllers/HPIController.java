@@ -13,14 +13,12 @@ import com.glenwood.glaceemr.server.application.services.chart.HPI.HPIService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.HUtil;
 import com.google.common.base.Optional;
-import com.wordnik.swagger.annotations.Api;
 /**
  * Controller for HPI
  * @author Bhagya Lakshmi
  *
  */
 
-@Api(value="/user/HPI",description="To get history of present illness of Particular patient",consumes="application/json")
 @RestController
 @Transactional
 @RequestMapping(value="/user/HPIElements.Action")

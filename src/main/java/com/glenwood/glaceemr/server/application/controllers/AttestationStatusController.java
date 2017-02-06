@@ -17,9 +17,7 @@ import com.glenwood.glaceemr.server.application.models.AttestationStatus;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.AttestationStatusService;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeDataBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-import com.wordnik.swagger.annotations.Api;
 
-@Api(value = "AttestationStatusController", description = "AttestationStatusController", consumes = "application/json")
 @RestController
 @Transactional
 @RequestMapping(value = "/user/ReportingStatus")
