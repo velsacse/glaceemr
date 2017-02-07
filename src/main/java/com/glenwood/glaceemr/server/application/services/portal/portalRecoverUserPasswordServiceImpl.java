@@ -126,7 +126,6 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 		toIds.put(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationMailId());
 
 		JSONArray ccids = new JSONArray();
-		ccids.put("brahma@glenwoodsystems.com");
 
 		JSONArray bccids = new JSONArray();
 		bccids.put(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationMailId());

@@ -277,13 +277,18 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 	
 	public Integer getNewPortalMessageParentId() {
 
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<PortalMessage> root = cq.from(PortalMessage.class);
-		cq.select(builder.max(root.get(PortalMessage_.parentid)));
-		Integer parentId=(Integer) em.createQuery(cq).getSingleResult();
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<PortalMessage> root = cq.from(PortalMessage.class);
+			cq.select(builder.max(root.get(PortalMessage_.parentid)));
+			Integer parentId=(Integer) em.createQuery(cq).getSingleResult();
 
-		return parentId+1;
+			return parentId+1;
+		} catch (Exception e) {
+			return 1;
+		}
+		
 	}
 	
 	public Integer getNewPortalMessageAlertId() {

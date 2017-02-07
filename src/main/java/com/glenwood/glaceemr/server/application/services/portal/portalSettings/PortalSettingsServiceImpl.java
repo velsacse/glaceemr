@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -211,17 +212,17 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 
 		H807 demographicChanges=new H807();
 		if(regSaveDetailsBean.getPatientRegistrationFirstName()!=null&&!regSaveDetailsBean.getPatientRegistrationFirstName().equals(registrationDetails.getPatientRegistrationFirstName()))
-			demographicChanges.setH807002(regSaveDetailsBean.getPatientRegistrationFirstName());
+			demographicChanges.setH807002(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationFirstName()));
 		else
 			demographicChanges.setH807002("");
 
 		if(regSaveDetailsBean.getPatientRegistrationLastName()!=null&&!regSaveDetailsBean.getPatientRegistrationLastName().equals(registrationDetails.getPatientRegistrationLastName()))
-			demographicChanges.setH807003(regSaveDetailsBean.getPatientRegistrationLastName());
+			demographicChanges.setH807003(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationLastName()));
 		else 
 			demographicChanges.setH807003("");
 
 		if(regSaveDetailsBean.getPatientRegistrationMidInitial()!=null&&!regSaveDetailsBean.getPatientRegistrationMidInitial().equals(registrationDetails.getPatientRegistrationMidInitial()))
-			demographicChanges.setH807004(regSaveDetailsBean.getPatientRegistrationMidInitial());
+			demographicChanges.setH807004(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationMidInitial()));
 		else
 			demographicChanges.setH807004("");
 
@@ -259,7 +260,7 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 			demographicChanges.setH807009("");
 
 		if(!(regSaveDetailsBean.getPatientRegistrationAddress1()+regSaveDetailsBean.getPatientRegistrationAddress2()).equals(registrationDetails.getPatientRegistrationAddress1()+registrationDetails.getPatientRegistrationAddress2()))
-			demographicChanges.setH807010(regSaveDetailsBean.getPatientRegistrationAddress1()+regSaveDetailsBean.getPatientRegistrationAddress2());
+			demographicChanges.setH807010(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationAddress1()+regSaveDetailsBean.getPatientRegistrationAddress2()));
 		else
 			demographicChanges.setH807010("");
 

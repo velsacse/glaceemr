@@ -55,7 +55,7 @@ public class FileUploadAndRetrieveController {
 	@RequestMapping(value = "/upload/image", method = RequestMethod.POST, produces = "text/html")
 	@ResponseBody
 	public EMRResponseBean uploadPatientProfilePicture(
-			 @RequestParam(value = "file", required = false, defaultValue = "") MultipartFile file,
+			@RequestParam(value = "file", required = false, defaultValue = "") MultipartFile file,
 			@RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId) {
 
 		responseBean.setCanUserAccess(true);
@@ -122,8 +122,7 @@ public class FileUploadAndRetrieveController {
 
 	@RequestMapping(value = "/retrieve/profilePicture", method = RequestMethod.GET)
 	@ResponseBody
-	public EMRResponseBean retrievePatientProfilePicture(
-			 @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId) {
+	public EMRResponseBean retrievePatientProfilePicture(@RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId) {
 
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -153,13 +152,15 @@ public class FileUploadAndRetrieveController {
 			return responseBean;
 		}
 	}
-
-	@RequestMapping(value = "/retrieve/image", method = RequestMethod.GET)
+	
+	@RequestMapping(value = "/retrieve/file", method = RequestMethod.GET)
 	@ResponseBody
-	public EMRResponseBean retrievePatientImageDocuments(
+	public EMRResponseBean retrievePatientFile(
 			@RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
-			 @RequestParam(value = "fileName", required = false, defaultValue = "0") String fileName,
-			 @RequestParam(value = "fileCategory", required = false, defaultValue = "0") String fileCategory) {
+			@RequestParam(value = "fileName", required = false, defaultValue = "0") String fileName,
+			@RequestParam(value = "filedetailsType", required=false, defaultValue="0") int filedetailsType,
+			@RequestParam(value = "fileCategory", required = false, defaultValue = "0") String fileCategory,
+			HttpServletRequest request, HttpServletResponse response) {
 
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -171,18 +172,94 @@ public class FileUploadAndRetrieveController {
 			Assert.notNull(fileCategory, "fileCategory is not passed");
 			Assert.notNull(patientId, "patientId Id is not passed");
 			String absolutePath = null;
-			if (fileCategory.equalsIgnoreCase("SharedDocument"))
-				absolutePath = fileUploadAndRetrieveService
-						.getSharedFolderPath()
-						+ pathSeperator
-						+ "Attachments"
-						+ pathSeperator + patientId + pathSeperator + fileName;
-			else if (fileCategory.equalsIgnoreCase("ProfilePicture"))
+			
+			if (fileCategory.equalsIgnoreCase("ProfilePicture"))
 				absolutePath = fileUploadAndRetrieveService
 						.getSharedFolderPath()
 						+ pathSeperator
 						+ "photo"
 						+ pathSeperator + patientId + pathSeperator + fileName;
+			else{
+				if(filedetailsType==1)
+					absolutePath = fileUploadAndRetrieveService
+					.getSharedFolderPath()
+					+ pathSeperator
+					+ "patientinfo"
+					+ pathSeperator + patientId + pathSeperator + fileName;
+				else if(filedetailsType==2)
+					absolutePath = fileUploadAndRetrieveService
+					.getSharedFolderPath()
+					+ pathSeperator
+					+ "Attachments"
+					+ pathSeperator + patientId + pathSeperator + fileName;
+				else if(filedetailsType==3)
+					absolutePath = fileUploadAndRetrieveService
+					.getSharedFolderPath()
+					+ pathSeperator
+					+ "dicomAttachment"
+					+ pathSeperator + patientId + pathSeperator + fileName;
+			}
+			Assert.notNull(absolutePath, "absolute path is empty");
+			String fileType = fileUploadAndRetrieveService .parseFileType(absolutePath);
+			response.setContentType(fileUploadAndRetrieveService .getResponseContentType(fileType));
+			FileDataBean dataBean = new FileDataBean();
+			dataBean.setByteArrayContent(readAndReturnFileStream(absolutePath, response));
+			responseBean.setSuccess(true);
+			responseBean.setData(dataBean);
+			return responseBean;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving file!");
+			return responseBean;
+		}
+	}
+
+	@RequestMapping(value = "/retrieve/image", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean retrievePatientImageDocuments(
+			@RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
+			@RequestParam(value = "fileName", required = false, defaultValue = "0") String fileName,
+			@RequestParam(value = "filedetailsType", required=false, defaultValue="0") int filedetailsType,
+			@RequestParam(value = "fileCategory", required = false, defaultValue = "0") String fileCategory) {
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			Assert.notNull(patientId, "patient Id is not passed");
+			Assert.notNull(fileName, "fileName is not passed");
+			Assert.notNull(fileCategory, "fileCategory is not passed");
+			Assert.notNull(patientId, "patientId Id is not passed");
+			String absolutePath = null;
+			
+			if (fileCategory.equalsIgnoreCase("ProfilePicture"))
+				absolutePath = fileUploadAndRetrieveService
+						.getSharedFolderPath()
+						+ pathSeperator
+						+ "photo"
+						+ pathSeperator + patientId + pathSeperator + fileName;
+			else{
+				if(filedetailsType==1)
+					absolutePath = fileUploadAndRetrieveService
+					.getSharedFolderPath()
+					+ pathSeperator
+					+ "patientinfo"
+					+ pathSeperator + patientId + pathSeperator + fileName;
+				else if(filedetailsType==2)
+					absolutePath = fileUploadAndRetrieveService
+					.getSharedFolderPath()
+					+ pathSeperator
+					+ "Attachments"
+					+ pathSeperator + patientId + pathSeperator + fileName;
+				else if(filedetailsType==3)
+					absolutePath = fileUploadAndRetrieveService
+					.getSharedFolderPath()
+					+ pathSeperator
+					+ "dicomAttachment"
+					+ pathSeperator + patientId + pathSeperator + fileName;
+			}
 			Assert.notNull(absolutePath, "absolute path is empty");
 			File imageFile = new File(absolutePath);
 			byte[] byteFileStore = new byte[(int) imageFile.length()];
@@ -207,8 +284,8 @@ public class FileUploadAndRetrieveController {
 	@RequestMapping(value = "/retrieve/html", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean retrievePatientHTMLDocuments(
-			 @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
-			 @RequestParam(value = "fileName", required = false, defaultValue = "0") String fileName,
+			@RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
+			@RequestParam(value = "fileName", required = false, defaultValue = "0") String fileName,
 			@RequestParam(value = "fileCategory", required = false, defaultValue = "0") String fileCategory) {
 
 		responseBean.setCanUserAccess(true);
@@ -246,9 +323,9 @@ public class FileUploadAndRetrieveController {
 	@RequestMapping(value = "/preview/file/{patientId}/{fileName}", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean filePreviewByFileId(
-			 @PathVariable("patientId") int patientId,
+			@PathVariable("patientId") int patientId,
 			@PathVariable("fileName") String fileDetailsName,
-			 @RequestParam(value = "isToDownload", required = false) String isToDownLoad,
+			@RequestParam(value = "isToDownload", required = false) String isToDownLoad,
 			HttpServletRequest request, HttpServletResponse response) {
 
 		responseBean.setCanUserAccess(true);
@@ -294,10 +371,10 @@ public class FileUploadAndRetrieveController {
 	@RequestMapping(value = "/FilePreview/{patientId}/{fileCategory}/{fileName}", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean filePreviewByFileName(
-			 @PathVariable("patientId") int patientId,
-			 @PathVariable("fileCategory") String fileCategory,
-			 @PathVariable("fileName") String fileDetailsName,
-			 @RequestParam(value = "isToDownload", required = false) String isToDownLoad,
+			@PathVariable("patientId") int patientId,
+			@PathVariable("fileCategory") String fileCategory,
+			@PathVariable("fileName") String fileDetailsName,
+			@RequestParam(value = "isToDownload", required = false) String isToDownLoad,
 			HttpServletRequest request, HttpServletResponse response) {
 
 		responseBean.setCanUserAccess(true);

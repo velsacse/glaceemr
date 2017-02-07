@@ -322,8 +322,8 @@ public class PortalSettingsSpecification {
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				
 				Expression<Integer> exprToId=root.get(EmployeeProfile_.empProfileGroupid);
-				Predicate activeEmployee=cb.and(cb.equal(root.get(EmployeeProfile_.empProfileIsActive), true),cb.notLike(cb.lower(root.get(EmployeeProfile_.empProfileFullname)), "%demo%"),exprToId.in(-1,-2));
-				Predicate predicate=cq.where(cb.and(cb.isNotNull(root.get(EmployeeProfile_.empProfileEmpid))),activeEmployee).orderBy(cb.desc(root.get(EmployeeProfile_.empProfileFullname))).getRestriction();
+				Expression<String> empName=root.get(EmployeeProfile_.empProfileFullname);
+				Predicate predicate=cq.where(cb.and(cb.isNotNull(root.get(EmployeeProfile_.empProfileEmpid)),cb.equal(root.get(EmployeeProfile_.empProfileIsActive), true),cb.not(cb.like(cb.lower(empName), "%demo%")), cb.not(cb.like(cb.lower(empName), "%test%")),exprToId.in(-1))).orderBy(cb.asc(root.get(EmployeeProfile_.empProfileFullname))).getRestriction();
 					
 				return predicate;
 			}

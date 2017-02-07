@@ -129,17 +129,17 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		PatientRegistration patientDetails=new PatientRegistration();
 
 		patientDetails.setPatientRegistrationId(getNewRegistrationId());
-		patientDetails.setPatientRegistrationFirstName(registrationBean.getPatRegFirstName());
-		patientDetails.setPatientRegistrationLastName(registrationBean.getPatRegLastName());
-		patientDetails.setPatientRegistrationMidInitial(registrationBean.getPatRegMiddleName());
+		patientDetails.setPatientRegistrationFirstName(WordUtils.capitalize(registrationBean.getPatRegFirstName()));
+		patientDetails.setPatientRegistrationLastName(WordUtils.capitalize(registrationBean.getPatRegLastName()));
+		patientDetails.setPatientRegistrationMidInitial(WordUtils.capitalize(registrationBean.getPatRegMiddleName()));
 		patientDetails.setPatientRegistrationDob(new java.sql.Date(new Date(registrationBean.getPatRegDOB()).getTime()));
 		patientDetails.setPatientRegistrationRace(String.valueOf(registrationBean.getPatRegRace()));
 		patientDetails.setPatientRegistrationEthnicity(registrationBean.getPatRegEthnicity());
 		patientDetails.setPatientRegistrationSex(registrationBean.getPatRegGender());
 		patientDetails.setPatientRegistrationPreferredLan("-1");
 
-		patientDetails.setPatientRegistrationAddress1(registrationBean.getPatRegAddress1());
-		patientDetails.setPatientRegistrationAddress2(registrationBean.getPatRegAddress2());
+		patientDetails.setPatientRegistrationAddress1(WordUtils.capitalize(registrationBean.getPatRegAddress1()));
+		patientDetails.setPatientRegistrationAddress2(WordUtils.capitalize(registrationBean.getPatRegAddress2()));
 		patientDetails.setPatientRegistrationState(registrationBean.getPatRegState());
 		patientDetails.setPatientRegistrationCity(registrationBean.getPatRegCity());
 		patientDetails.setPatientRegistrationPhoneNo(registrationBean.getPatRegHomePhone());
@@ -240,7 +240,6 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		toIds.put(registrationBean.getPatRegEmailId());
 
 		JSONArray ccids = new JSONArray();
-		ccids.put("brahma@glenwoodsystems.com");
 
 		JSONArray bccids = new JSONArray();
 		bccids.put("");
@@ -447,7 +446,6 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 			toIds.put(patientsList.get(0).getPatientRegistrationMailId());
 
 			JSONArray ccids = new JSONArray();
-			ccids.put("brahma@glenwoodsystems.com");
 
 			JSONArray bccids = new JSONArray();
 			bccids.put("");

@@ -8,6 +8,8 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,12 +21,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.SchedulerApptBookingBean;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PatientRegistrationSetupFields;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalPatientRegistrationBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalSettingsService;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PrincipalDoctor;
 import com.glenwood.glaceemr.server.application.services.portalLogin.PortalLoginService;
+import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
 
@@ -45,6 +49,9 @@ public class PortalPatientRegistrationController {
 	@Autowired
 	EmployeeService employeeService;
 
+	@Autowired
+	EMRResponseBean responseBean;
+
 	Logger logger=LoggerFactory.getLogger(PortalPatientRegistrationController.class);
 
 	/**
@@ -56,8 +63,6 @@ public class PortalPatientRegistrationController {
 	public EMRResponseBean getPatientProfileSettingsFieldsOprions(){
 
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -68,7 +73,7 @@ public class PortalPatientRegistrationController {
 			setupFields.setPatientProfileSettingsFields(portalSettingsService.getPatientProfileSettingsFieldsList());
 			setupFields.setPortalBillingConfigFields(portalSettingsService.getPortalBillingConfigFields());
 
-			List<EmployeeProfile> doctorsList=employeeService.getEmployeeDetails("-1", "asc");
+			List<EmployeeProfile> doctorsList=portalSettingsService.getProvidersList();
 
 			List<PrincipalDoctor> principalDoctorsList=new ArrayList<PrincipalDoctor>();
 
@@ -102,11 +107,9 @@ public class PortalPatientRegistrationController {
 	@ResponseBody
 	public EMRResponseBean verifyUsername(@RequestParam(value="username", required=false, defaultValue="-1") String username,
 			@RequestParam(value="dob", required=false, defaultValue="-1") String dob,
-			 @RequestParam(value="firstName", required=false, defaultValue="-1") String firstName,
-			 @RequestParam(value="lastName", required=false, defaultValue="-1") String lastName){
+			@RequestParam(value="firstName", required=false, defaultValue="-1") String firstName,
+			@RequestParam(value="lastName", required=false, defaultValue="-1") String lastName){
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -135,18 +138,15 @@ public class PortalPatientRegistrationController {
 	 */
 	@RequestMapping(value = "/RegisterNewUserForPortal", method = RequestMethod.POST)
 	@ResponseBody
-	public EMRResponseBean registerNewUser(@RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
-			@RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
+	public EMRResponseBean registerNewUser(@RequestBody PortalPatientRegistrationBean registrationDetailsBean) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
 
 		try {
 			responseBean.setSuccess(true);
-			responseBean.setData(portalLoginService.registerNewUserForPortal(objectMapper.readValue(registrationDetailsString, PortalPatientRegistrationBean.class), dbname));
+			responseBean.setData(portalLoginService.registerNewUserForPortal(registrationDetailsBean, TennantContextHolder.getTennantId()));
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -167,18 +167,15 @@ public class PortalPatientRegistrationController {
 	 */
 	@RequestMapping(value = "/RegisterExistingUserForPortal", method = RequestMethod.POST)
 	@ResponseBody
-	public EMRResponseBean registerExistingUser( @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
-			@RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
+	public EMRResponseBean registerExistingUser(@RequestBody PortalPatientRegistrationBean registrationDetailsBean) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
 
 		try {
 			responseBean.setSuccess(true);
-			responseBean.setData(portalLoginService.registerExistingUserForPortal(objectMapper.readValue(registrationDetailsString, PortalPatientRegistrationBean.class), dbname));
+			responseBean.setData(portalLoginService.registerExistingUserForPortal(registrationDetailsBean, TennantContextHolder.getTennantId()));
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -199,18 +196,15 @@ public class PortalPatientRegistrationController {
 	 */
 	@RequestMapping(value = "/RequestSignupCredentials", method = RequestMethod.POST)
 	@ResponseBody
-	public EMRResponseBean requestSignupCredentials( @RequestParam(value="registrationDetails", required=false, defaultValue="0") String registrationDetailsString,
-			 @RequestParam(value="dbname", required=false, defaultValue="0") String dbname) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
+	public EMRResponseBean requestSignupCredentials(@RequestBody PortalPatientRegistrationBean registrationDetailsBean) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
 
 		try {
 			responseBean.setSuccess(true);
-			responseBean.setData(portalLoginService.requestSignupCredentials(objectMapper.readValue(registrationDetailsString, PortalPatientRegistrationBean.class), dbname));
+			responseBean.setData(portalLoginService.requestSignupCredentials(registrationDetailsBean, TennantContextHolder.getTennantId()));
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -235,8 +229,6 @@ public class PortalPatientRegistrationController {
 	public EMRResponseBean activateAccount(@RequestParam(value="patientId", required=false, defaultValue="0") int patientId,
 			@RequestParam(value="practiceId", required=false, defaultValue="0") String practiceId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException, JSONException{
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
