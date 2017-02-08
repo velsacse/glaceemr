@@ -8,17 +8,19 @@ public class AddTherapyBean {
 	private String optionsName;
 	private String optionsValue;
 	private String result = "";
-
-	public AddTherapyBean(String gwid,String name,Integer Type,String optionsName,String optionsValue){
+	
+	private Integer therapySessionPatientDetailsId;
+	public AddTherapyBean(String gwid,String name,Integer Type,String optionsName,String optionsValue,Integer therapySessionPatientDetailsId){
 		super();
 		this.gwid = gwid;
 		this.name = name;
 		this.Type = Type;
 		this.optionsName = optionsName;
 		this.optionsValue = optionsValue;
+		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
 	}
 	
-	public AddTherapyBean(String gwid,String name,Integer Type,String optionsName,String optionsValue,String result){
+	public AddTherapyBean(String gwid,String name,Integer Type,String optionsName,String optionsValue,String result,Integer therapySessionPatientDetailsId){
 		super();
 		this.gwid = gwid;
 		this.name = name;
@@ -26,8 +28,33 @@ public class AddTherapyBean {
 		this.optionsName = optionsName;
 		this.optionsValue = optionsValue;
 		this.result=result;
+		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
 	}
 	
+	public Integer getTherapySessionPatientDetailsId() {
+		return therapySessionPatientDetailsId;
+	}
+
+	public void setTherapySessionPatientDetailsId(
+			Integer therapySessionPatientDetailsId) {
+		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
+	}
+
+	public AddTherapyBean(String gwid,String name,Integer Type,String result,Integer therapySessionPatientDetailsId){
+		super();
+		this.gwid = gwid;
+		this.name = name;
+		this.Type = Type;
+		this.result = result;
+		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId; 
+	}
+	public AddTherapyBean(String gwid,String name,Integer Type,Integer therapySessionPatientDetailsId){
+		super();
+		this.gwid = gwid;
+		this.name = name;
+		this.Type = Type;
+		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
+	}
 	public AddTherapyBean(String gwid,String name,Integer Type,String result){
 		super();
 		this.gwid = gwid;
@@ -35,11 +62,13 @@ public class AddTherapyBean {
 		this.Type = Type;
 		this.result = result;
 	}
-	public AddTherapyBean(String gwid,String name,Integer Type){
-		super();
+	public AddTherapyBean(String gwid,String name,Integer Type,String optionsName,String optionsValue,String result){
 		this.gwid = gwid;
 		this.name = name;
 		this.Type = Type;
+		this.optionsName = optionsName;
+		this.optionsValue = optionsValue;
+		this.result=result;
 	}
 	
 	

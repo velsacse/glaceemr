@@ -23,6 +23,7 @@ import com.glenwood.glaceemr.server.application.services.GroupTherapy.AddTherapy
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyGroupBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyLogBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyPatientsBean;
+import com.glenwood.glaceemr.server.application.services.GroupTherapy.TherapyPrintBean;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
@@ -291,6 +292,25 @@ public class GroupTherapyController {
 	auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of data for AddTherapeuticIntervention", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 	return emrResponseBean;
 	}
+	
+	/**
+	 * to get data for print
+	 * @param groupId
+	 * @param sessionId
+	 * @param patientId
+	 * @param gwids
+	 * @return
+	 */
+	@RequestMapping(value="/fetchPrintData",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean fetchGroupTherapyPrintData(@RequestParam(value="groupId") Integer groupId,@RequestParam(value="sessionId") Integer sessionId,@RequestParam(value="patientId") Integer patientId,@RequestParam(value="gwids") String gwids)
+	{
+	TherapyPrintBean therapyPrintBean=addNewGroupService.fetchGrouptherapyPrintData(groupId,sessionId,patientId,gwids);
+	EMRResponseBean emrResponseBean = new EMRResponseBean();
+	emrResponseBean.setData(therapyPrintBean);
+	return emrResponseBean;
+	}
+	
 	
 	
 	/**

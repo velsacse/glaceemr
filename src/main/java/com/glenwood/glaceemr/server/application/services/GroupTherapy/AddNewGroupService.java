@@ -122,5 +122,9 @@ public interface AddNewGroupService {
 	 * @return
 	 */
 	List<AddTherapyBean> fetchDataforTherapy(String gwid, Integer sessionId, Boolean isPatient);
-
+	
+	/**
+	 * to get complete data for print
+	 */
+	TherapyPrintBean fetchGrouptherapyPrintData(Integer groupId,Integer sessionId,Integer patientId,String gwids);
 }

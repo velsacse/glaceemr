@@ -17,6 +17,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -153,18 +154,31 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	 */
 	@Override
 	public void saveNotes(AddNoteBean data) throws Exception {
-		TherapySessionPatientDetails patDetails = new TherapySessionPatientDetails();
-		if(data.getGwid()!=""){
-			patDetails.setTherapySessionPatientDetailsGwid(data.getGwid());
-		patDetails.setTherapySessionPatientDetailsEnteredBy(data.getPatientDetailsEnteredBy());
-		patDetails.setTherapySessionPatientDetailsEnteredOn(therapyGroupRepository.findCurrentTimeStamp());
-		patDetails.setTherapySessionPatientDetailsModifiedBy(data.getPatientDetailsModifiedBy());
-		patDetails.setTherapySessionPatientDetailsModifiedOn(therapyGroupRepository.findCurrentTimeStamp());
-		patDetails.setTherapySessionPatientDetailsPatientId((Integer.parseInt(data.getPatientId())));
-		patDetails.setTherapySessionPatientDetailsSessionId(data.getSessionId());
-		patDetails.setTherapySessionPatientDetailsValue(data.getValue());
-		therapySessionPatientDetailsRepository.saveAndFlush(patDetails);
+		if(data.getPatientDetailsId()==-1){
+		TherapySessionPatientDetails therapySessionPatientDetails = new TherapySessionPatientDetails();
+		therapySessionPatientDetails.setTherapySessionPatientDetailsEnteredBy(data.getPatientDetailsModifiedBy());
+		therapySessionPatientDetails.setTherapySessionPatientDetailsEnteredOn(therapyGroupRepository.findCurrentTimeStamp());
+		therapySessionPatientDetails.setTherapySessionPatientDetailsGwid(data.getGwid());
+		if(data.getPatientDetailsId()!=-1){
+			therapySessionPatientDetails.setTherapySessionPatientDetailsId(data.getPatientDetailsId());
 		}
+		therapySessionPatientDetails.setTherapySessionPatientDetailsModifiedBy(data.getPatientDetailsModifiedBy());
+		therapySessionPatientDetails.setTherapySessionPatientDetailsModifiedOn(therapyGroupRepository.findCurrentTimeStamp());;
+		therapySessionPatientDetails.setTherapySessionPatientDetailsPatientId(Integer.parseInt(data.getPatientId()));
+		therapySessionPatientDetails.setTherapySessionPatientDetailsSessionId(data.getSessionId());
+		therapySessionPatientDetails.setTherapySessionPatientDetailsValue(data.getValue());
+		therapySessionPatientDetailsRepository.saveAndFlush(therapySessionPatientDetails);
+		}
+		else{
+			CriteriaBuilder cb=em.getCriteriaBuilder();
+			CriteriaUpdate<TherapySessionPatientDetails> cu=cb.createCriteriaUpdate(TherapySessionPatientDetails.class);
+			Root<TherapySessionPatientDetails> root = cu.from(TherapySessionPatientDetails.class);
+			cu.set(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue), data.getValue());
+			cu.where(cb.and(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsGwid).in(data.getGwid()),
+					cb.equal(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId),data.getSessionId()),
+					cb.equal(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsPatientId),data.getPatientId())));
+					this.em.createQuery(cu).executeUpdate();
+			}
 	}
 
 	/**
@@ -361,7 +375,24 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 				patientJoin.get(PatientRegistration_.patientRegistrationLastName),
 				patientJoin.get(PatientRegistration_.patientRegistrationFirstName),
 				patientJoin.get(PatientRegistration_.patientRegistrationDob),
-				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsSessionId)
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsSessionId),
+				sessionJoin.get(TherapySessionDetails_.therapySessionEndTime),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx1),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx1desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx2),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx2desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx3),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx3desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx4),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx4desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx5),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx5desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx6),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx6desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx7),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx7desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx8),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx8desc)
 				
 		};
 		cq.select(builder.construct(TherapyPatientsBean.class, selections));
@@ -369,8 +400,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		List<TherapyPatientsBean> confData=new ArrayList<TherapyPatientsBean>();
 
 		 confData=em.createQuery(cq).getResultList();
-
-		return confData;
+		 return confData;
 
 	}
 	
@@ -446,26 +476,27 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<ClinicalElements> root = cq.from(ClinicalElements.class);
 		Join<ClinicalElements, ClinicalElementsOptions> clinicalJoin=root.join(ClinicalElements_.clinicalElementsOptions ,JoinType.LEFT);
-		
-		if(isPatient){//EditNotes
 		Join<ClinicalElements, TherapySessionPatientDetails> patientJoin=root.join(ClinicalElements_.therupeticElements ,JoinType.LEFT);
 		Predicate checkPatientId=builder.equal(patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsPatientId),patientId);
 		Predicate checkSessionId=builder.equal(patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId),sessionId);
 		patientJoin.on(builder.and(checkPatientId,checkSessionId));
 		
+		if(isPatient){//EditNotes
 		cq.select(builder.construct(AddTherapyBean.class,root.get(ClinicalElements_.clinicalElementsGwid),
-							root.get(ClinicalElements_.clinicalElementsName),
-							root.get(ClinicalElements_.clinicalElementsDatatype),
-							clinicalJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName),
-							clinicalJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),
-							patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue).alias("result")));
+					root.get(ClinicalElements_.clinicalElementsName),
+					root.get(ClinicalElements_.clinicalElementsDatatype),
+					clinicalJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName),
+					clinicalJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),
+					patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue).alias("result"),
+					patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsId)));
 		}
 		else{//AddNotes
 			cq.select(builder.construct(AddTherapyBean.class,root.get(ClinicalElements_.clinicalElementsGwid),
 					root.get(ClinicalElements_.clinicalElementsName),
 					root.get(ClinicalElements_.clinicalElementsDatatype),
 					clinicalJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName),
-					clinicalJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue)));
+					clinicalJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),
+					patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsId)));
 		}
 		cq.where(root.get(ClinicalElements_.clinicalElementsGwid).in(gwidList));
 		List<Object> resultset  = em.createQuery(cq).getResultList();
@@ -483,31 +514,175 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	@Override
 	public List<AddTherapyBean> fetchDataforTherapy(String gwid,Integer sessionId,Boolean isPatient) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery();
+		CriteriaQuery<AddTherapyBean> cq = builder.createQuery(AddTherapyBean.class);
 		Root<ClinicalElements> root = cq.from(ClinicalElements.class);
-		if(isPatient){//Add Therapy
 		Join<ClinicalElements, TherapySessionPatientDetails> patientJoin=root.join(ClinicalElements_.therupeticElements ,JoinType.LEFT);
 		Predicate checkSessionId=builder.equal(patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId),sessionId);
 		patientJoin.on(checkSessionId);
 		
+		if(isPatient){//Add Therapy
+			cq.select(builder.construct(AddTherapyBean.class,root.get(ClinicalElements_.clinicalElementsGwid),
+					root.get(ClinicalElements_.clinicalElementsName),
+					root.get(ClinicalElements_.clinicalElementsDatatype),
+					patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue).alias("result"),
+					patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsId)));
+		}
+		else{//Edit therapy
+			cq.select(builder.construct(AddTherapyBean.class,root.get(ClinicalElements_.clinicalElementsGwid),
+					root.get(ClinicalElements_.clinicalElementsName),
+					root.get(ClinicalElements_.clinicalElementsDatatype),
+					patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsId)));
+		}
+		cq.where(builder.and(root.get(ClinicalElements_.clinicalElementsGwid).in(gwid)));
+		List<AddTherapyBean> resultset  = em.createQuery(cq).setMaxResults(1).getResultList();
+		return resultset;
+	}
+	
+	/**
+	 * To fetch Group therapy complete session details of each patient
+	 */
+	@Override
+	public TherapyPrintBean fetchGrouptherapyPrintData(Integer groupId,Integer sessionId,Integer paientId,String gwids) {
+		List<String> gwidList = new ArrayList<String>(Arrays.asList(gwids.split(",")));
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<TherapyPrintBean> cq = builder.createQuery(TherapyPrintBean.class);
+		Root<TherapyGroup> root = cq.from(TherapyGroup.class);
+		Selection[] selections= new Selection[] {
+				root.get(TherapyGroup_.therapyGroupId),
+				root.get(TherapyGroup_.therapyGroupName),
+				root.get(TherapyGroup_.therapyGroupProviderId),
+				root.get(TherapyGroup_.therapyGroupLeaderId),
+				root.get(TherapyGroup_.therapyGroupSupervisorId),
+				root.get(TherapyGroup_.therapyGroupDescription),
+				root.get(TherapyGroup_.therapyGroupPosId),
+				root.get(TherapyGroup_.therapyGroupDefaulttime),
+				root.get(TherapyGroup_.therapyGroupIsActive)
+		};
+		cq.select(builder.construct(TherapyPrintBean.class,selections));
+		cq.where(builder.equal(root.get(TherapyGroup_.therapyGroupId),groupId));
+		List<TherapyPrintBean> therapyPrintBeanList =new ArrayList<TherapyPrintBean>(); 
+		therapyPrintBeanList=em.createQuery(cq).getResultList();
+		TherapyPrintBean therapyPrintBean=null;
+		if(therapyPrintBeanList.size()>0)
+		therapyPrintBean=therapyPrintBeanList.get(0);
+		therapyPrintBean.setTherapyElementsDetails(fetchClinicalDataForPrint(sessionId,paientId,gwidList));
+		therapyPrintBean.setTherapyPatientDetails(fetchPatientDataForPrint(sessionId,groupId));
+		therapyPrintBean.setTherapySessionDetails(fetchSessionDataForPrint(sessionId,groupId));
+		return therapyPrintBean;
+	}
+	
+	/**
+	 * To fetch Group therapy session data based on given sessionId
+	 */
+	public TherapySessionBean fetchSessionDataForPrint(Integer sessionId,Integer groupId){
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<TherapySessionBean> cq = builder.createQuery(TherapySessionBean.class);
+		Root<TherapySession> root = cq.from(TherapySession.class);
+		Join<TherapySession,EmployeeProfile> docJoin=root.join(TherapySession_.empProfile,JoinType.INNER);
+		Join<TherapySession,PosTable> posJoin=root.join(TherapySession_.posTable,JoinType.INNER);
+		
+		Selection[] selections= new Selection[] {
+				root.get(TherapySession_.therapySessionId),
+				root.get(TherapySession_.therapySessionDate),
+				root.get(TherapySession_.therapySessionProviderId),
+				docJoin.get(EmployeeProfile_.empProfileFullname),
+				root.get(TherapySession_.therapySessionLeaderId),
+				root.get(TherapySession_.therapySessionSupervisorId),
+				root.get(TherapySession_.therapySessionTopic),
+				root.get(TherapySession_.therapySessionPosId),
+				posJoin.get(PosTable_.posTableFacilityComments),
+				root.get(TherapySession_.therapySessionDateValue),
+				root.get(TherapySession_.therapySessionStatus),
+				root.get(TherapySession_.therapySessionEndTime),
+				
+		};
+		
+		cq.select(builder.construct(TherapySessionBean.class,selections));
+		cq.where(builder.equal(root.get(TherapySession_.therapySessionId),sessionId));	
+		List<TherapySessionBean> therapySessionBeanList =new ArrayList<TherapySessionBean>();
+		therapySessionBeanList=em.createQuery(cq).getResultList();
+
+		return therapySessionBeanList.get(0);
+	}		
+	
+	/**
+	 * To fetch list of patients with details participated in session
+	 */
+	
+	public List<TherapyPatientsBean> fetchPatientDataForPrint(Integer sessionId, Integer groupId){
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+	    CriteriaQuery<TherapyPatientsBean> cq = builder.createQuery(TherapyPatientsBean.class);
+		Root<TherapySession> root = cq.from(TherapySession.class);
+		Join<TherapySession,TherapySessionDetails> sessionJoin=root.join(TherapySession_.therapySessionDetails,JoinType.INNER);
+		Join<TherapySessionDetails,PatientRegistration> patientJoin=sessionJoin.join(TherapySessionDetails_.patientRegistration,JoinType.INNER);
+	    List<Predicate> predicates = new ArrayList<>();
+		if(groupId!=-1)
+			predicates.add(builder.equal(root.get(TherapySession_.therapySessionGroupId), groupId));
+		if(sessionId!=-1)
+			predicates.add(builder.equal(root.get(TherapySession_.therapySessionId), sessionId));
+
+		Selection[] selections= new Selection[] {
+				patientJoin.get(PatientRegistration_.patientRegistrationId),
+				patientJoin.get(PatientRegistration_.patientRegistrationAccountno),
+				patientJoin.get(PatientRegistration_.patientRegistrationLastName),
+				patientJoin.get(PatientRegistration_.patientRegistrationFirstName),
+				patientJoin.get(PatientRegistration_.patientRegistrationDob),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsSessionId),
+				sessionJoin.get(TherapySessionDetails_.therapySessionEndTime),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx1),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx1desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx2),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx2desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx3),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx3desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx4),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx4desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx5),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx5desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx6),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx6desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx7),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx7desc),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx8),
+				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx8desc),
+				
+				
+				
+				
+		};
+		cq.select(builder.construct(TherapyPatientsBean.class, selections));
+		cq.where(predicates.toArray(new Predicate[predicates.size()]));
+		List<TherapyPatientsBean> therapyPatientsBean=new ArrayList<TherapyPatientsBean>();		
+		therapyPatientsBean=em.createQuery(cq).getResultList();		
+		return therapyPatientsBean;
+	}
+
+	/**
+	 * To fetch list of clinical elements documents for patient in session
+	 */
+	public List<AddTherapyBean> fetchClinicalDataForPrint(Integer sessionId,Integer paientId,List<String> gwidList){
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<AddTherapyBean> cq = builder.createQuery(AddTherapyBean.class);
+		Root<ClinicalElements> root = cq.from(ClinicalElements.class);
+		Join<ClinicalElements, TherapySessionPatientDetails> patientJoin=root.join(ClinicalElements_.therupeticElements ,JoinType.LEFT);
+		Join<ClinicalElements, ClinicalElementsOptions> optionsJoin=root.join(ClinicalElements_.clinicalElementsOptions ,JoinType.LEFT);
+		
+		Predicate checkSessionId=builder.equal(patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId),sessionId);
+		Predicate checkPatientId=builder.equal(patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsPatientId),paientId);
+		patientJoin.on(builder.and(checkSessionId,checkPatientId));
+				
 		cq.select(builder.construct(AddTherapyBean.class,root.get(ClinicalElements_.clinicalElementsGwid),
 							root.get(ClinicalElements_.clinicalElementsName),
 							root.get(ClinicalElements_.clinicalElementsDatatype),
-							patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue).alias("result")));
-		}
-		else{//Edit therapy
-		cq.select(builder.construct(AddTherapyBean.class,root.get(ClinicalElements_.clinicalElementsGwid),
-				root.get(ClinicalElements_.clinicalElementsName),
-				root.get(ClinicalElements_.clinicalElementsDatatype)));
-		}
-		cq.where(builder.and(root.get(ClinicalElements_.clinicalElementsGwid).in(gwid)));
-		List<Object> resultset  = em.createQuery(cq).setMaxResults(1).getResultList();
-		List<AddTherapyBean> therapyData = new ArrayList<AddTherapyBean>();
-		for(int i=0;i<resultset.size();i++){
-			AddTherapyBean gw = (AddTherapyBean)resultset.get(i);
-			therapyData.add(gw);
-		}
-		return therapyData;
-	}
+							optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName),
 
+							optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),
+							patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue).alias("result")));
+		cq.where(root.get(ClinicalElements_.clinicalElementsGwid).in(gwidList));
+		
+		List<AddTherapyBean> clinicalData  =new ArrayList<AddTherapyBean>();
+		clinicalData=em.createQuery(cq).getResultList();
+		return clinicalData;
+	}
+	
 }

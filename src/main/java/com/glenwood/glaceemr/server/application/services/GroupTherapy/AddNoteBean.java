@@ -10,16 +10,9 @@ public class AddNoteBean {
 	private Integer patientDetailsId;
 	private String patientDetailsEnteredOn;
 	private String patientDetailsModifiedBy;
-	private String addTherapyFlag;
 	
 	public String getPatientId() {
 		return patientId;
-	}
-	public String getAddTherapyFlag() {
-		return addTherapyFlag;
-	}
-	public void setAddTherapyFlag(String addTherapyFlag) {
-		this.addTherapyFlag = addTherapyFlag;
 	}
 	public void setPatientId(String patientId) {
 		this.patientId = patientId;
