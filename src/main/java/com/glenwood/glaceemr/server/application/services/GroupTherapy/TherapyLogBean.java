@@ -16,8 +16,9 @@ public class TherapyLogBean {
 	int posId;
 	String endTime="";
 	String therapyStartDate="";
+	int status;
 	
-	public TherapyLogBean(Date date,String docName,String groupName,String pos,Long count,int groupId,int providerId,int posId,String endTime,Date therapyStartDate){
+	public TherapyLogBean(Date date,String docName,String groupName,String pos,Long count,int groupId,int providerId,int posId,String endTime,Date therapyStartDate,int status){
 		
 		this.docName=docName;
 		this.count=count;
@@ -31,10 +32,23 @@ public class TherapyLogBean {
         this.endTime=endTime;
         DateFormat timeFormat=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
         this.therapyStartDate=timeFormat.format(therapyStartDate);
+        this.status=status;
 	}
 
 
 	
+	public int getStatus() {
+		return status;
+	}
+
+
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+
+
 	public int getGroupId() {
 		return groupId;
 	}

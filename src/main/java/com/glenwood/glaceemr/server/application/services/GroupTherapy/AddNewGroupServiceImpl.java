@@ -329,7 +329,8 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 			    docJoin.get(EmployeeProfile_.empProfileEmpid),
 			    posJoin.get(PosTable_.posTableRelationId),
 			    root.get((TherapySession_.therapySessionEndTime)),
-			    root.get(TherapySession_.therapySessionDate)
+			    root.get(TherapySession_.therapySessionDate),
+			    root.get(TherapySession_.therapySessionStatus)
 				
 		};
 		cq.select(builder.construct(TherapyLogBean.class, selections));
