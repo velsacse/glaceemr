@@ -198,7 +198,7 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 			receipt.setReceiptDetailPaymentPlace(paymentDetailsBean.getPosName());
 			//TODO
 			//receipt.setReceiptDetailPaymentReason(paymentDetailsBean.getReason());
-			receipt.setReceiptDetailPostedAmt(paymentSummary.getPaymentServiceAmount());
+			receipt.setReceiptDetailPostedAmt(0.00);
 			receipt.setReceiptDetailReasonType(Short.valueOf("1"));
 			receipt.setReceiptDetailReceiptAmt(paymentSummary.getPaymentServiceAmount());
 			receipt.setReceiptDetailTotalReceiptAmt(paymentSummary.getPaymentServiceAmount());
