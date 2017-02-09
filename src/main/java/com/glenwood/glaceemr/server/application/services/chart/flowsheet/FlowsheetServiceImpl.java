@@ -1254,7 +1254,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 
 							cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus), 2),		
 							cb.notEqual(root.get(LabEntries_.labEntriesTestStatus),7)),
-							cb.lessThanOrEqualTo(root.get(LabEntries_.labEntriesOrdOn), encounterDate)
+							//cb.lessThanOrEqualTo(root.get(LabEntries_.labEntriesOrdOn), encounterDate)
 
 			};
 			cq.where(restrictions);
