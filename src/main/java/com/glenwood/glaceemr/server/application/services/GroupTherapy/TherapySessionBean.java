@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class TherapySessionBean {
 	Integer sessionId;
-	String sessionDate;
+	String sessionStartTime;
 	Integer sessionProviderId;
 	String sessionProviderName;
 	Integer sessionLeaderId;
@@ -21,13 +21,12 @@ public class TherapySessionBean {
 
 	
 	
-	public TherapySessionBean(Integer sessionId,Date sessionDate,Integer sessionProviderId,String sessionProviderName,Integer sessionLeaderId,int sessionSupervisorId,String sessionTopic,Integer sessionPosId,String sessionPOSName,Date sessionDateValue,Integer sessionStatus,String sessionEndTime){
+	public TherapySessionBean(Integer sessionId,String sessionStartTime,Integer sessionProviderId,String sessionProviderName,Integer sessionLeaderId,int sessionSupervisorId,String sessionTopic,Integer sessionPosId,String sessionPOSName,Date sessionDateValue,Integer sessionStatus,String sessionEndTime){
 		super();
-		DateFormat timeFormat=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+		DateFormat timeFormat=new SimpleDateFormat("MM/dd/yyyy");
 		
 		this.sessionId= sessionId;
-		this.sessionDate= timeFormat.format(sessionDate);
-		this.sessionDate=timeFormat.format(sessionDate);
+		this.sessionStartTime=sessionStartTime;
 		this.sessionProviderId= sessionProviderId;
 		this.sessionProviderName=sessionProviderName;
 		this.sessionLeaderId= sessionLeaderId;
@@ -47,11 +46,11 @@ public class TherapySessionBean {
 	public void setSessionId(Integer sessionId) {
 		this.sessionId = sessionId;
 	}
-	public String getSessionDate() {
-		return sessionDate;
+	public String getSessionStartTime() {
+		return sessionStartTime;
 	}
-	public void setSessionDate(String sessionDate) {
-		this.sessionDate = sessionDate;
+	public void setSessionStartTime(String sessionStartTime) {
+		this.sessionStartTime = sessionStartTime;
 	}
 	public Integer getSessionProviderId() {
 		return sessionProviderId;

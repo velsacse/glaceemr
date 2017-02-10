@@ -154,6 +154,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	 */
 	@Override
 	public void saveNotes(AddNoteBean data) throws Exception {
+		
 		if(data.getPatientDetailsId()==-1){
 		TherapySessionPatientDetails therapySessionPatientDetails = new TherapySessionPatientDetails();
 		therapySessionPatientDetails.setTherapySessionPatientDetailsEnteredBy(data.getPatientDetailsModifiedBy());
@@ -334,7 +335,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 				
 		};
 		cq.select(builder.construct(TherapyLogBean.class, selections));
-		cq.where(predicates.toArray(new Predicate[predicates.size()])).groupBy(root.get(TherapySession_.therapySessionDateValue),docJoin.get(EmployeeProfile_.empProfileFullname),groupJoin.get(TherapyGroup_.therapyGroupName),posJoin.get(PosTable_.posTableFacilityComments),groupJoin.get(TherapyGroup_.therapyGroupId),docJoin.get(EmployeeProfile_.empProfileEmpid),posJoin.get(PosTable_.posTableRelationId),root.get((TherapySession_.therapySessionEndTime)),root.get(TherapySession_.therapySessionDate));
+		cq.where(predicates.toArray(new Predicate[predicates.size()])).groupBy(root.get(TherapySession_.therapySessionDateValue),docJoin.get(EmployeeProfile_.empProfileFullname),groupJoin.get(TherapyGroup_.therapyGroupName),posJoin.get(PosTable_.posTableFacilityComments),groupJoin.get(TherapyGroup_.therapyGroupId),docJoin.get(EmployeeProfile_.empProfileEmpid),posJoin.get(PosTable_.posTableRelationId),root.get((TherapySession_.therapySessionEndTime)),root.get(TherapySession_.therapySessionDate),root.get(TherapySession_.therapySessionStatus));
 		List<TherapyLogBean> confData=new ArrayList<TherapyLogBean>();
 
 		 confData=em.createQuery(cq).getResultList();
@@ -584,7 +585,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		
 		Selection[] selections= new Selection[] {
 				root.get(TherapySession_.therapySessionId),
-				root.get(TherapySession_.therapySessionDate),
+				builder.function("to_char",String.class, root.get(TherapySession_.therapySessionDate),builder.literal("HH:MI:ss am")),
 				root.get(TherapySession_.therapySessionProviderId),
 				docJoin.get(EmployeeProfile_.empProfileFullname),
 				root.get(TherapySession_.therapySessionLeaderId),
