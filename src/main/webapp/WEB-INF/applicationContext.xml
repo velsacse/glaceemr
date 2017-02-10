@@ -142,6 +142,13 @@
 	<!-- File Upload -->	
 	<bean id="multipartResolver"
 		class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
-
-
+	
+	<!-- Shared folder bean -->
+ <bean id="sharedFolderBean" class="com.glenwood.glaceemr.server.application.Bean.SharedFolderBean">
+  <property name="sharedFolderPath">
+                 <map>
+				<entry key="glace" value="${shared.glace}" />
+			</map>
+		</property>
+	</bean>
 </beans>
