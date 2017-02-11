@@ -1,6 +1,5 @@
 package com.glenwood.glaceemr.server.application.services.chart.admission;
 
-import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,7 +32,6 @@ import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientEpisode;
 import com.glenwood.glaceemr.server.application.repositories.AdmissionRepository;
 import com.glenwood.glaceemr.server.application.repositories.AdmissionRoomRepository;
-import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
 import com.glenwood.glaceemr.server.application.repositories.H496Repository;

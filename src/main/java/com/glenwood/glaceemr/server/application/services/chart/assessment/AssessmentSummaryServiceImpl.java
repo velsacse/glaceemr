@@ -21,8 +21,6 @@ import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.repositories.AssessmentRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
 import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.specifications.AssessmentSpecification;
 import com.glenwood.glaceemr.server.application.specifications.ProblemListSpecification;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -46,9 +44,6 @@ public class AssessmentSummaryServiceImpl implements AssessmentSummaryService{
 	
 	@PersistenceContext
 	EntityManager em;
-	
-	@Autowired
-	AuditTrailService auditTrailService;
 
 	@Autowired
 	SessionMap sessionMap;
@@ -68,11 +63,7 @@ public class AssessmentSummaryServiceImpl implements AssessmentSummaryService{
 		logger.error("in getCurrentDiagnosis");
 		encounterId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + encounterId)).or("-1"));
 		patientId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + patientId)).or("-1"));
-		List<H611> dxs = assessmentRepository.findAll(Specifications.where(AssessmentSpecification.DxByPatientId(patientId)).and(AssessmentSpecification.DxByEncounterId(encounterId)).and(AssessmentSpecification.getOrder()));
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,
-				   AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,
-				   "127.0.0.1",request.getRemoteAddr(),-1,-1,-1,
-				   AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		List<H611> dxs = assessmentRepository.findAll(Specifications.where(AssessmentSpecification.DxByPatientId(patientId)).and(AssessmentSpecification.DxByEncounterId(encounterId)).and(AssessmentSpecification.getOrder()));		
 		return dxs;
 		
 	}

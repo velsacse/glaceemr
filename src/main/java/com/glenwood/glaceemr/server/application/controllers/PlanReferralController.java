@@ -14,8 +14,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.Referral;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.referral.ReferralBean;
 import com.glenwood.glaceemr.server.application.services.referral.ReferralService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
@@ -47,13 +51,16 @@ public class PlanReferralController {
 	ReferralService referralService;
 	
 	@Autowired
-	AuditTrailService auditTrailService;
-	
-	@Autowired
 	SessionMap sessionMap;
 	
 	@Autowired
 	HttpServletRequest request;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	EMRResponseBean emrResponseBean;
 	
 	private Logger logger = Logger.getLogger(PlanReferralController.class);
 	
@@ -71,13 +78,16 @@ public class PlanReferralController {
 			   @RequestParam(value="chartId",required = false) Integer chartId,
 			   @RequestParam(value="dxCode",required = false,defaultValue="") String dx) throws JSONException {
 	
-		logger.debug("Getting referral list::encounterId"+encounterId+" chartId"+chartId+" dxCode"+dx);
-		List<Referral> result = referralService.getListOfReferralsPlan(encounterId,chartId,dx);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"View Referrals details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referrals details viewed");
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData(result);
-		return respBean;
-
+		try{
+			logger.debug("Getting referral list::encounterId"+encounterId+" chartId"+chartId+" dxCode"+dx);
+			List<Referral> result = referralService.getListOfReferralsPlan(encounterId,chartId,dx);
+			emrResponseBean.setData(result);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Referrals viewed in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "chartId="+chartId+"|encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Referrals viewed in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "chartId="+chartId+"|encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 	}
 	
 	
@@ -94,12 +104,16 @@ public class PlanReferralController {
 			@RequestParam(value="encounterId",required = false,defaultValue="-1") Integer encounterId)
 			    throws JSONException {
 		
-		logger.debug("Getting referral::referralId"+referralId);
-		ReferralBean result = referralService.getReferral(referralId, chartId, encounterId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"View Referral details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral details viewed");
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData(result);
-		return respBean;
+		try{
+			logger.debug("Getting referral::referralId"+referralId);
+			ReferralBean result = referralService.getReferral(referralId, chartId, encounterId);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Referral viewed in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "refId="+referralId+"|chartId="+chartId+"|encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
+			emrResponseBean.setData(result);
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Referral viewed in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "refId="+referralId+"|chartId="+chartId+"|encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 
 	}
 	
@@ -113,13 +127,16 @@ public class PlanReferralController {
 	@ResponseBody
 	public EMRResponseBean getReferral(@RequestParam(value="referralId",required = false,defaultValue="-1") Integer referralId)
 			    throws JSONException {
-		
-		logger.debug("Getting referral::referralId"+referralId);
-		Referral result = referralService.getReferralPlan(referralId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"View Referral details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral details viewed");
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData(result);
-		return respBean;
+		try{
+			logger.debug("Getting referral::referralId"+referralId);
+			Referral result = referralService.getReferralPlan(referralId);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Referral viewed in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "refId="+referralId, LogUserType.USER_LOGIN, "", "");
+			emrResponseBean.setData(result);
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Referral viewed in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "refId="+referralId, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 
 	}
 	
@@ -140,12 +157,16 @@ public class PlanReferralController {
 			  @RequestParam(value="criticalstatus",required = false) Integer criticalstatus,
 			  @RequestParam(value="diagnosis",required = false, defaultValue="") String diagnosis) throws JSONException {
 		
-		logger.debug("Saving referral::referralId"+referralId+" reason"+reason+" notes"+notes+"criticalstatus"+criticalstatus);
-		referralService.saveReferralPlan(referralId,reason,notes,diagnosis,criticalstatus);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.UPDATE,1,AuditLogConstants.SUCCESS,"Update Referral Details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral details updated");
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData("success");
-		return respBean;
+		try{
+			logger.debug("Saving referral::referralId"+referralId+" reason"+reason+" notes"+notes+"criticalstatus"+criticalstatus);
+			referralService.saveReferralPlan(referralId,reason,notes,diagnosis,criticalstatus);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.UPDATE, 1, Log_Outcome.SUCCESS, "Referral details updated in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "refId="+referralId, LogUserType.USER_LOGIN, "", "");
+			emrResponseBean.setData("success");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.UPDATE, 1, Log_Outcome.EXCEPTION, "Referral details updated in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "refId="+referralId, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 	}
 		
 	/** 
@@ -160,12 +181,16 @@ public class PlanReferralController {
 	public EMRResponseBean cancelReferral(@RequestParam(value="loginId",required = false, defaultValue = "-1") Integer loginID,
 			   @RequestParam(value="referralId",required = false, defaultValue = "-1") Integer referralId) throws JSONException {
 		
-		logger.debug("Cancelling referral::referralId"+referralId+" loginId"+loginID);
-		referralService.cancelReferral(loginID,referralId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Referral,AuditLogConstants.CANCELED,1,AuditLogConstants.SUCCESS,"Cancel Referral",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Referral,request,"Referral cancelled");
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData("success");
-		return respBean;
+		try{
+			logger.debug("Cancelling referral::referralId"+referralId+" loginId"+loginID);
+			referralService.cancelReferral(loginID,referralId);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.UPDATE, 1, Log_Outcome.SUCCESS, "Referral cancelled in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "refId="+referralId, LogUserType.USER_LOGIN, "", "");
+			emrResponseBean.setData("success");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.UPDATE, 1, Log_Outcome.EXCEPTION, "Referral cancelled in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "refId="+referralId, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 
 	}
 	

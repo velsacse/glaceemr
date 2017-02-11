@@ -14,6 +14,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
@@ -46,6 +47,12 @@ import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElem
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalHistoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientVitalsRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.chart.HPI.ClinicalElementsOptionBean;
 import com.glenwood.glaceemr.server.application.specifications.ClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
@@ -55,6 +62,7 @@ import com.glenwood.glaceemr.server.application.specifications.LeafPatientSpecfi
 import com.glenwood.glaceemr.server.application.specifications.PatientClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.utils.DateUtil;
 import com.glenwood.glaceemr.server.utils.HUtil;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 
 
 @Service
@@ -102,6 +110,15 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 
 	@PersistenceContext
 	EntityManager em;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	SessionMap sessionMap;
+	
+	@Autowired
+	HttpServletRequest request;
 		
 	Short patientSex=0;
 	Date patDOB=new Date();
@@ -111,6 +128,7 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 	
 	@Override
 	public List<ClinicalElementsOptions> getClinicalElementOptions(String gwid) {
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Clinical element options viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "gwid="+gwid, LogUserType.USER_LOGIN, "", "");
 		return clinicalElementsOptionsRepository.findAll(ClinicalElementsSpecification.getclinicalElementOptions(gwid));
 
 	}
@@ -211,6 +229,7 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 				SimpleDateFormat mdyFormat = new SimpleDateFormat("MM/dd/yyyy");
 				ageinDay = (int)((DateUtil.dateDiff( DateUtil.DATE , DateUtil.getDate(mdyFormat.format(patDOB)) , new java.util.Date())));
 			}
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "clinical element patient details viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
 
 		}catch(Exception e){
 			System.out.println("Exception while getting patient details for clinical elements");
@@ -307,6 +326,7 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 			mappedGwids.add(mapping.getClinicalElementTemplateMappingGwid());
 		}
 		patientClinicalElementsRepository.deleteInBatch(patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinicalDataByGWID(patientId, encounterId, mappedGwids)));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "clinical data deleted @encounterId="+encounterId+" @templateId="+templateId+" @tabId="+tabId, sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
 		return mappedGwids;
 	}
 
@@ -324,6 +344,7 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		}
 		if(notesGWID!=null)
 			patientClinicalElementsRepository.deleteInBatch(patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(encounterId, patientId, notesGWID)));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "clinical notes data deleted @encounterId="+encounterId+" @templateId="+templateId+" @tabId="+tabId, sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
 	}
 
 

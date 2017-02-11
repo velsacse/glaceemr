@@ -388,7 +388,11 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		}catch(NoResultException e){
 			return null;
 		}*/
-		return em.createQuery(query).getSingleResult();
+		try{
+			return em.createQuery(query).getSingleResult();
+		}catch(NoResultException e){			
+			return null;
+		}
 	}
 
 	/**
@@ -518,7 +522,8 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		EmployeeDataBean serviceDrData = null;
 		if(encounter != null) {
 			EmployeeProfile emp = getEmpDetails(encounter.getEncounterServiceDoctor());
-			serviceDrData = parseDoctorDetails(emp);
+			if(emp!=null)
+				serviceDrData = parseDoctorDetails(emp);
             
         }
 		
@@ -652,6 +657,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	private EmployeeProfile getEmpDetails(
 			Long empId) {
 		
+		try{
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<EmployeeProfile> query= builder.createQuery(EmployeeProfile.class);
 		Root<EmployeeProfile> root= query.from(EmployeeProfile.class);
@@ -672,6 +678,9 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		query.where(builder.equal(root.get(EmployeeProfile_.empProfileEmpid), empId));
 		
 		return em.createQuery(query).getSingleResult();
+		}catch(NoResultException e){			
+			return null;
+		}
 	}
 
 	private H076 getReferringPhyDetails(

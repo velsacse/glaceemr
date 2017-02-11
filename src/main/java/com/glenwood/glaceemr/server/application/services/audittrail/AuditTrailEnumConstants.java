@@ -11,7 +11,8 @@ public interface AuditTrailEnumConstants {
 				"Chart"), PRESCRIPTIONS(27, "Prescriptions"), IMMUNIZATION(28, "Immunization"), FINANCE_ELIGIBILITY(29, "Finance/Eligibility"), OPENPROBLEM(30, "OpenProblem"), DASHBOARD(31, "Dashboard"), CONSENTFORM(32, "ConsentForm"), SCHEDULER(33,
 				"Scheduler"), INVESTIGATION(34, "Investigation"), REFERRAL(35, "Referral"), FLOWSHEET(36, "Flowsheet"), INVENTORY(37, "Inventory"), ENCOUNTER(38, "Encounter"), MESSAGE(39, "Message"), DME(40, "DME"), DIRECT(41, "Direct"), GLACEMESSAGING_LETTER(
 				42, "GlaceMessaging/Letter"), ASSESSMENT(43, "Assessment"), AMENDMENT(44, "Amendment"), ALLERGY(45, "Allergy"), PATIENT_EDUCATION(46, "PatientEducation"), TEMPLATE(47, "Template"), LoginAndLogOut(48, "Login/LogOut"), ALERTS(49, "Alerts"),SUPERBILL(50,"SuperBill"), ROOMSTATUS(51,"RoomStatus"),CoumadinFlowSheet(52,"CoumadinFlowSheet"),
-				THERAPHYSESSION(53,"TheraphySession"), SKINTESTINGFORMS(54,"SkinTestingForms"), PHYSICALEXAMINATION(55,"PhysicalExamination");
+				THERAPHYSESSION(53,"TheraphySession"), SKINTESTINGFORMS(54,"SkinTestingForms"), PHYSICALEXAMINATION(55,"PhysicalExamination"),
+				ROS(56,"ReviewOfSystems"),VITALS(57,"Vitals"),HISTORY(58,"History"),ADMISSION(59,"Admission"),SHORTCUTS(60,"QuickShortcuts"),PRINTINGANDREPORTING(61,"PrintingAndReporting");
 		// semicolon needed when fields / methods follow
 
 		public final int Value;
