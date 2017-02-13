@@ -2,6 +2,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,8 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.phonemessages.PhoneMessagesService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 
 @RestController
 @Transactional
@@ -25,6 +34,15 @@ public class PhoneMessagesController {
 
 	@Autowired
 	EncounterRepository encounterRepository;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	SessionMap sessionMap;
+	
+	@Autowired
+	HttpServletRequest request;
 	
 	/**
 	 * To get the list of phone messages based on the patient id
@@ -40,7 +58,8 @@ public class PhoneMessagesController {
 			@RequestParam(value="enddate", required=false, defaultValue="-1") String endDate){
 			List<Encounter> encounterList=phoneMessageService.getPhoneEncounters(patientId, startDate, endDate);
 			EMRResponseBean encounter=new EMRResponseBean();
-			encounter.setData(encounterList);  
+			encounter.setData(encounterList); 
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting phone messages", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return encounter;
 	}
 	
@@ -68,6 +87,7 @@ public class PhoneMessagesController {
 			Encounter encounterList=phoneMessageService.createEncounter(chartId, severity, encounterType, serviceDr, comments, createdBy);
 			EMRResponseBean encounter=new EMRResponseBean();
 			encounter.setData(encounterList);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Create phone message.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "patientId="+patientId+"&chartId="+chartId+"&severity="+severity+"&serviceDr="+serviceDr, LogUserType.USER_LOGIN, "", "");
 		return encounter;
 	}
 	
@@ -84,6 +104,7 @@ public class PhoneMessagesController {
 			Encounter encounter=phoneMessageService.getEncounterDetails(encounterId);
 			EMRResponseBean encounters=new EMRResponseBean();
 			encounters.setData(encounter);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting phone messages by encounter id", sessionMap.getUserID(), request.getRemoteAddr(), -1, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 			return encounters;
 	}
 	
@@ -107,6 +128,7 @@ public class PhoneMessagesController {
 			Encounter encounter=phoneMessageService.update(encounterId, response, status, modifiedBy, serviceDr);
 			EMRResponseBean encounters=new EMRResponseBean();
 			encounters.setData(encounter);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Update phone messages by encounter id", sessionMap.getUserID(), request.getRemoteAddr(), -1, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 		return encounters;
 	}
 	
@@ -131,6 +153,7 @@ public class PhoneMessagesController {
 			Encounter encounter=phoneMessageService.sendReply(encounterId, replyMessage, status, modifiedBy, severity);
 			EMRResponseBean encounters=new EMRResponseBean();
 			encounters.setData(encounter);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Update phone messages by encounter id", sessionMap.getUserID(), request.getRemoteAddr(), -1, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 		return encounters;
 	}
 }
