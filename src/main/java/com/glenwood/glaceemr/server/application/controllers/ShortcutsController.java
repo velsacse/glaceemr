@@ -14,10 +14,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.SoapElementDatalist;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.shortcuts.ShortcutsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 
 /**
  * Shortcuts controller
@@ -30,15 +35,21 @@ import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 public class ShortcutsController {
 	
 	@Autowired
-	AuditTrailService auditTrailService;
-	
-	@Autowired
 	HttpServletRequest request;
 	
 	@Autowired
 	ShortcutsService shortcutsService;
 	
-	private Logger logger = Logger.getLogger(PlanReferralController.class);
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	SessionMap sessionMap;
+	
+	@Autowired
+	EMRResponseBean emrResponseBean;
+	
+	private Logger logger = Logger.getLogger(ShortcutsController.class);
 	
 	/**
 	 * Method to add a new shortcut
@@ -55,15 +66,18 @@ public class ShortcutsController {
 			   @RequestParam(value="elementId",required = false, defaultValue="") String elementId,
 			   @RequestParam(value="data",required = false, defaultValue="") String data) throws JSONException {
 	
-		logger.debug("Begin of request to Add shortcut @@tabId"+tabId+" elementId"+elementId+" data"+data);
-		
-		List<SoapElementDatalist> shortcutList = shortcutsService.addShortcut(tabId, elementId, data);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Leaf ,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully loaded letter headers details based on header id",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Leaf,request,"Successfully added quick notes shortcut");
-		logger.debug("End of request to Add shortcut");
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData(shortcutList);
-		
-		return respBean;
+		try{
+			logger.debug("Begin of request to Add shortcut @@tabId"+tabId+" elementId"+elementId+" data"+data);
+
+			List<SoapElementDatalist> shortcutList = shortcutsService.addShortcut(tabId, elementId, data);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SHORTCUTS, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Quick shorcut added", sessionMap.getUserID(), request.getRemoteAddr(), -1, "tabId="+tabId+"|elementId="+elementId, LogUserType.USER_LOGIN, "", "");
+			logger.debug("End of request to Add shortcut");
+			emrResponseBean.setData(shortcutList);
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SHORTCUTS, LogActionType.CREATE, 1, Log_Outcome.EXCEPTION, "Quick shorcut added", sessionMap.getUserID(), request.getRemoteAddr(), -1, "tabId="+tabId+"|elementId="+elementId, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 
 	}
 	
@@ -83,17 +97,21 @@ public class ShortcutsController {
 			   @RequestParam(value="elementId",required = false, defaultValue="") String elementId)
 			   throws JSONException {
 		
-		logger.debug("Begin of request to Delete shortcut @@shortcutId:"+shortcutId);
-		List<SoapElementDatalist> list = shortcutsService.fetchShortcuts(shortcutId);
-		if(list != null && !list.isEmpty())
-			shortcutsService.deleteShortcut(list);
+		try{
+			logger.debug("Begin of request to Delete shortcut @@shortcutId:"+shortcutId);
+			List<SoapElementDatalist> list = shortcutsService.fetchShortcuts(shortcutId);
+			if(list != null && !list.isEmpty())
+				shortcutsService.deleteShortcut(list);
 
-		List<SoapElementDatalist> shortcutList = shortcutsService.fetchShortcuts(tabId, elementId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Leaf,AuditLogConstants.DELETED,1,AuditLogConstants.SUCCESS,"Successfully loaded letter headers details based on header id",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Leaf,request,"Successfully deleted quick notes shortcut");
-		logger.debug("End of request to Delete shortcut");
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData(shortcutList);
-		return respBean;
+			List<SoapElementDatalist> shortcutList = shortcutsService.fetchShortcuts(tabId, elementId);
+			emrResponseBean.setData(shortcutList);
+			logger.debug("End of request to Delete shortcut");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SHORTCUTS, LogActionType.DELETE, 1, Log_Outcome.SUCCESS, "Quick shorcut deleted", sessionMap.getUserID(), request.getRemoteAddr(), -1, "shortcutId="+shortcutId+"|tabId="+tabId+"|elementId="+elementId, LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SHORTCUTS, LogActionType.DELETE, 1, Log_Outcome.EXCEPTION, "Quick shorcut deleted", sessionMap.getUserID(), request.getRemoteAddr(), -1, "shortcutId="+shortcutId+"|tabId="+tabId+"|elementId="+elementId, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 
 	}
 		

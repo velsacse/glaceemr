@@ -17,7 +17,13 @@ import com.glenwood.glaceemr.server.application.models.LetterHeaderPos;
 import com.glenwood.glaceemr.server.application.models.print.GenericLetterHeader;
 import com.glenwood.glaceemr.server.application.models.print.LetterHeaderContent;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.chart.print.genericheader.LetterHeaderEmployeeBean;
 import com.glenwood.glaceemr.server.application.services.chart.print.genericheader.LetterHeaderPosBean;
 import com.glenwood.glaceemr.server.application.services.chart.print.genericheader.LetterHeaderService;
@@ -35,7 +41,7 @@ public class LetterHeaderController {
 	LetterHeaderService letterHeaderService;
 	
 	@Autowired
-	AuditTrailService auditTrailService;
+	AuditTrailSaveService auditTrailSaveService;
 	
 	@Autowired
 	SessionMap sessionMap;
@@ -53,7 +59,7 @@ public class LetterHeaderController {
 	public EMRResponseBean fetchLetterHeaderList() throws Exception{
 		logger.debug("Begin of request to get the list of all letter headers.");
 		List<GenericLetterHeader> letterHeaderList = letterHeaderService.getLetterHeaderList();
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded header list for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded header list for configuration");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully loaded header list for configuration", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");		
 		logger.debug("End of request to get the list of all letter headers.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(letterHeaderList);
@@ -69,7 +75,7 @@ public class LetterHeaderController {
 	public EMRResponseBean fetchPatientHeaderDetailsList(@RequestParam(value="headerId") Integer headerId) throws Exception{
 		logger.debug("Begin of request to get letter header content details based on header id.");
 		List<LetterHeaderContent> letterHeaderContent = letterHeaderService.getLetterHeaderContentList(headerId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded letter headers details based on header id",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded letter headers details based on header id");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully loaded letter headers details based on header id", sessionMap.getUserID(), request.getRemoteAddr(), -1, "headerId="+headerId, LogUserType.USER_LOGIN, "", "");		
 		logger.debug("End of request to get letter header content details based on header id.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(letterHeaderContent);
@@ -96,7 +102,7 @@ public class LetterHeaderController {
 		newLetterHeader.setGenericLetterHeaderIsDefault(isDefault);
 		newLetterHeader.setGenericLetterHeaderIsActive(true);
 		GenericLetterHeader letterHeader = letterHeaderService.saveLetterHeader(newLetterHeader);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved Letter header",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved Letter header");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Successfully saved Letter header", sessionMap.getUserID(), request.getRemoteAddr(), -1, "headerType="+headerType+"|headerName="+headerName, LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to Save Letter header.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(letterHeader);
@@ -125,7 +131,7 @@ public class LetterHeaderController {
 		newLetterHeader.setGenericLetterHeaderIsDefault(isDefault);
 		newLetterHeader.setGenericLetterHeaderIsActive(isActive);
 		GenericLetterHeader letterHeader = letterHeaderService.saveLetterHeader(newLetterHeader);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved Letter header",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved Letter header");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Successfully saved Letter header", sessionMap.getUserID(), request.getRemoteAddr(), -1, "headerId="+headerId, LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to Save Letter header.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(letterHeader);
@@ -144,7 +150,7 @@ public class LetterHeaderController {
 		if(letterHeaderContent!=null && !letterHeaderContent.isEmpty()){
 			letterHeaderService.deleteLetterHeaderContent(letterHeaderContent);
 		}
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.DELETED,1,AuditLogConstants.SUCCESS,"Successfully deleted letter header details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully deleted letter header details");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.DELETE, 1, Log_Outcome.SUCCESS, "Successfully deleted letter header details", sessionMap.getUserID(), request.getRemoteAddr(), -1, "headerId="+headerId, LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to delete letter header details.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData("success");
@@ -166,7 +172,7 @@ public class LetterHeaderController {
 		newLetterHeaderContent.setLetterHeaderContentCustom(customText);
 		newLetterHeaderContent.setLetterHeaderContentStyle(style);
 		letterHeaderService.saveLetterHeaderContent(newLetterHeaderContent);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved letter header details",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved letter header details");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Successfully saved letter header details", sessionMap.getUserID(), request.getRemoteAddr(), -1, "headerId="+headerId, LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to save letter header details.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData("success");
@@ -187,6 +193,7 @@ public class LetterHeaderController {
 		logger.debug("End of request to get the list of employees details.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(bean);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully viewed employee list in configuration", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return respBean;
 
 	}
@@ -204,6 +211,7 @@ public class LetterHeaderController {
 		logger.debug("End of request to get the list of POS.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(bean);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully viewed POS list in configuration", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return respBean;
 
 	}
@@ -225,6 +233,7 @@ public class LetterHeaderController {
 		
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(bean);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully viewed saved employee list in configuration", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return respBean;
 	}
 	
@@ -245,6 +254,7 @@ public class LetterHeaderController {
 		
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(bean);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully viewed saved POS list in configuration", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return respBean;
 	}
 	
@@ -272,6 +282,7 @@ public class LetterHeaderController {
 		logger.debug("End of request to save letter header pos details.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData("Success");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.CREATEORUPDATE, 1, Log_Outcome.SUCCESS, "Successfully saved employee list in configuration", sessionMap.getUserID(), request.getRemoteAddr(), -1, "headerId="+headerId, LogUserType.USER_LOGIN, "", "");
 		return respBean;
 	}
 	
@@ -298,6 +309,7 @@ public class LetterHeaderController {
 		}
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData("Success");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.CREATEORUPDATE, 1, Log_Outcome.SUCCESS, "Successfully saved POS list in configuration", sessionMap.getUserID(), request.getRemoteAddr(), -1, "headerId="+headerId, LogUserType.USER_LOGIN, "", "");
 		return respBean;
 	}	
 }

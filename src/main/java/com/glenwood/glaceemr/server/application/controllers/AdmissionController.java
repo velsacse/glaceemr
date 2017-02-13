@@ -2,6 +2,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,13 +17,24 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.Admission;
 import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
 import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionBean;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionLeafBean;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.google.common.base.Optional;
 
-
+/**
+ * Controller for Admission module
+ * @author software
+ *
+ */
 @RestController
 @Transactional
 @RequestMapping(value="/user/Admission")
@@ -31,6 +44,18 @@ public class AdmissionController {
 	@Autowired
 	AdmissionService admissionService;
 
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
+	
+	@Autowired
+	SessionMap sessionMap;
+	
+	@Autowired
+	EMRResponseBean emrResponseBean;
+	
 	/**
 	 * To Create and update Admission details
 	 * @param dataJson
@@ -40,11 +65,16 @@ public class AdmissionController {
 	@RequestMapping(value="/saveAdmission",method=RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean createAdmission(@RequestBody AdmissionBean dataJson) throws Exception{
-		dataJson = getAdmissionBeanData(dataJson);
-		String data= admissionService.saveAdmission(dataJson);
-		EMRResponseBean dataToSave=new EMRResponseBean();
-		dataToSave.setData(data);
-		return dataToSave;
+		try{
+			dataJson = getAdmissionBeanData(dataJson);
+			String data= admissionService.saveAdmission(dataJson);		
+			emrResponseBean.setData(data);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.CREATEORUPDATE, 1, Log_Outcome.SUCCESS, "Admission created/updated", sessionMap.getUserID(), request.getRemoteAddr(), dataJson.getPatientId(), "", LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){			
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.CREATEORUPDATE, 1, Log_Outcome.EXCEPTION, "Admission created/updated", sessionMap.getUserID(), request.getRemoteAddr(), dataJson.getPatientId(), "", LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 	}
 	
 	/**
@@ -56,9 +86,14 @@ public class AdmissionController {
 	@RequestMapping(value="/getAdmission",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getAdmission(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
-		Admission admission= admissionService.getAdmission(patientId);
-	    EMRResponseBean emrResponseBean=new EMRResponseBean();
-	    emrResponseBean.setData(admission);
+		try{
+			Admission admission= admissionService.getAdmission(patientId);
+			emrResponseBean.setData(admission);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Admissions viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Admissions viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+		}
 	    return emrResponseBean;
 	}
 	
@@ -76,10 +111,18 @@ public class AdmissionController {
 	public EMRResponseBean dischargePatient(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId,
 			   @RequestParam(value="loginId",required=false, defaultValue="") Integer loginId,						 
 			   @RequestParam(value="userId",required=false, defaultValue="") Integer userId) throws Exception{
-       String discharge= admissionService.dischargePatient(patientId,loginId,userId);
-       EMRResponseBean dischargePatient=new EMRResponseBean();
-       dischargePatient.setData(discharge);
-       return dischargePatient;
+		try{
+			String discharge= admissionService.dischargePatient(patientId,loginId,userId);
+			emrResponseBean.setData(discharge);
+			if(discharge.equals("success"))
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.UPDATE, 1, Log_Outcome.SUCCESS, "Patient discharged", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+			else
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.UPDATE, 1, Log_Outcome.EXCEPTION, "Unable to discharge patient", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.UPDATE, 1, Log_Outcome.EXCEPTION, "Unable to discharge patient", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
     }
 
 	
@@ -92,9 +135,14 @@ public class AdmissionController {
 	@RequestMapping(value="/getPastAdmission",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getPastAdmission(@RequestParam(value="admissionId",required=false, defaultValue="") Integer admissionId) throws Exception{
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData(admissionService.getPastAdmission(admissionId));
-		return respBean;
+		try{
+			emrResponseBean.setData(admissionService.getPastAdmission(admissionId));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Past Admission viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "admissionId="+admissionId, LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Past Admission viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "admissionId="+admissionId, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 	}
 	
 	/**
@@ -106,9 +154,14 @@ public class AdmissionController {
 	@RequestMapping(value="/getAdmissionPast",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getPastAdmissionPast(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData(admissionService.getAdmissionPast(patientId));
-		return respBean;
+		try{
+			emrResponseBean.setData(admissionService.getAdmissionPast(patientId));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Recent Past Admission viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Recent Past Admission viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 	}
 	
 	/**
@@ -119,9 +172,14 @@ public class AdmissionController {
 	 */
 	@RequestMapping(value="/getPastAdmissionDates",method=RequestMethod.GET)
 	public EMRResponseBean getPastAdmissionDates(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData(admissionService.getPastAdmissionDates(patientId));
-		return respBean;
+		try{
+			emrResponseBean.setData(admissionService.getPastAdmissionDates(patientId));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Past Admissions list viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Past Admissions list viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 	}
 	
 	/**
@@ -135,10 +193,15 @@ public class AdmissionController {
 	@ResponseBody
 	public EMRResponseBean getLeafDetails(@RequestParam(value="encounterId",required=false, defaultValue="") Integer encounterId,
 			  @RequestParam(value="userId",required=false, defaultValue="") Integer userId) throws Exception{
-        List<Admission> leafDetails=admissionService.getLeafDetails(encounterId,userId);
-        EMRResponseBean getLeafDetails=new EMRResponseBean();
-        getLeafDetails.setData(leafDetails);
-        return getLeafDetails;
+		try{
+			List<Admission> leafDetails=admissionService.getLeafDetails(encounterId,userId);
+			emrResponseBean.setData(leafDetails);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Admission leaf details viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Admission leaf details viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
+		}
+        return emrResponseBean;
       }
 	
 	/**
@@ -150,11 +213,16 @@ public class AdmissionController {
 	@RequestMapping(value="/getAdmissionEncounterDetails",method=RequestMethod.GET)
 	@ResponseBody
 		public EMRResponseBean getAdmissionEncDetails(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
+		try{
 			String encDetails=admissionService.getAdmissionEncDetails(admssEpisode);
-			EMRResponseBean getAdmissionEncDetails=new EMRResponseBean();
-			getAdmissionEncDetails.setData(encDetails);
-			return getAdmissionEncDetails;
-			}
+			emrResponseBean.setData(encDetails);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Admission episode encounters viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "admssEpisode="+admssEpisode, LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Admission episode encounters viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "admssEpisode="+admssEpisode, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
+	}
 	
 	/**
 	 * Creating clinical note
@@ -165,11 +233,16 @@ public class AdmissionController {
 	@RequestMapping(value="/openLeaf",method=RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean openAdmissionLeaf(@RequestBody AdmissionBean dataJson) throws Exception{
-		dataJson = getAdmissionBeanData(dataJson);
-		Encounter leaf=admissionService.openAdmissionLeaf(dataJson);
-		EMRResponseBean openAdmissionLeaf=new EMRResponseBean();
-		openAdmissionLeaf.setData(leaf);
-		return openAdmissionLeaf;
+		try{
+			dataJson = getAdmissionBeanData(dataJson);
+			Encounter leaf=admissionService.openAdmissionLeaf(dataJson);
+			emrResponseBean.setData(leaf);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Admission leaf created", sessionMap.getUserID(), request.getRemoteAddr(), dataJson.getPatientId(), "admissionDate="+dataJson.getAdmissionDate(), LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.CREATE, 1, Log_Outcome.EXCEPTION, "Admission leaf created", sessionMap.getUserID(), request.getRemoteAddr(), dataJson.getPatientId(), "admissionDate="+dataJson.getAdmissionDate(), LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 	}
 	
 	/**
@@ -181,10 +254,15 @@ public class AdmissionController {
 	@RequestMapping(value="/AdmissionLeafs",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getAdmissionLeafs(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
-		AdmissionLeafBean leafs=admissionService.getAdmissionLeafs(admssEpisode);
-		EMRResponseBean getAdmissionLeafs=new EMRResponseBean();
-		getAdmissionLeafs.setData(leafs);
-		return getAdmissionLeafs;
+		try{
+			AdmissionLeafBean leafs=admissionService.getAdmissionLeafs(admssEpisode);
+			emrResponseBean.setData(leafs);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Admission leafs and allergies viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "admssEpisode="+admssEpisode, LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Admission leafs and allergies viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "admssEpisode="+admssEpisode, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 	}
 	
 	/**
@@ -196,10 +274,15 @@ public class AdmissionController {
 	@RequestMapping(value="/getRooms",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getRooms(@RequestParam(value="blockId",required=false, defaultValue="-1") Integer blockId) throws Exception{
-		List<AdmissionRoom> room=admissionService.getRooms(blockId);
-		EMRResponseBean getRooms=new EMRResponseBean();
-		getRooms.setData(room);
-		return getRooms;
+		try{
+			List<AdmissionRoom> room=admissionService.getRooms(blockId);
+			emrResponseBean.setData(room);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Admission rooms viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "unitId::"+blockId, LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Admission rooms viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "unitId::"+blockId, LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 	}	
 	
 	/**
@@ -226,9 +309,14 @@ public class AdmissionController {
 	@ResponseBody
 	public EMRResponseBean saveDischargeDetails(@RequestBody AdmissionBean dataJson) throws JSONException{
 		
-		admissionService.saveDishcargeDetails(dataJson);
-		EMRResponseBean respBean= new EMRResponseBean();
-		respBean.setData("success");
-		return respBean;
+		try{
+			admissionService.saveDishcargeDetails(dataJson);
+			emrResponseBean.setData("success");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.UPDATE, 1, Log_Outcome.SUCCESS, "Discharge details saved and Patient discharged", sessionMap.getUserID(), request.getRemoteAddr(), dataJson.getPatientId(), "admissionId="+dataJson.getAdmissionId(), LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.UPDATE, 1, Log_Outcome.EXCEPTION, "Discharge details saved and Patient discharged", sessionMap.getUserID(), request.getRemoteAddr(), dataJson.getPatientId(), "admissionId="+dataJson.getAdmissionId(), LogUserType.USER_LOGIN, "", "");
+		}
+		return emrResponseBean;
 	}
 }

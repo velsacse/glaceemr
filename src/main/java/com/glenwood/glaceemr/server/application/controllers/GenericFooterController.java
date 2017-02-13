@@ -12,8 +12,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.print.GenericLetterFooter;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.chart.print.genericfooter.GenericFooterService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -27,7 +31,7 @@ public class GenericFooterController {
 	GenericFooterService genericFooterService;
 
 	@Autowired
-	AuditTrailService auditTrailService;
+	AuditTrailSaveService auditTrailSaveService;
 	
 	@Autowired
 	SessionMap sessionMap;
@@ -44,11 +48,11 @@ public class GenericFooterController {
 	@RequestMapping(value = "/FetchGenericFooterList",method = RequestMethod.GET)
 	public EMRResponseBean fetchGenericFooterList() throws Exception{
 		logger.debug("Begin of request to get the list of all generic footers.");
-		List<GenericLetterFooter> genericLetterFooterList = genericFooterService.getGenericFooterList();
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded generic footers",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded generic footers");
+		List<GenericLetterFooter> genericLetterFooterList = genericFooterService.getGenericFooterList();		
 		logger.debug("End of request to get the list of all generic footers.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(genericLetterFooterList);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully loaded generic footers", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return respBean;
 		
 	}
@@ -70,10 +74,10 @@ public class GenericFooterController {
 		newGenericLetterFooter.setGenericLetterFooterIsDefault(isDefault);
 		newGenericLetterFooter.setGenericLetterFooterIsActive(true);
 		GenericLetterFooter genericLetterFooter = genericFooterService.saveGenericFooter(newGenericLetterFooter);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved generic footer",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved generic footer");
 		logger.debug("End of request to Save generic footer.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(genericLetterFooter);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Successfully saved generic footer", sessionMap.getUserID(), request.getRemoteAddr(), -1, "footerName="+footerName, LogUserType.USER_LOGIN, "", "");
 		return respBean;
 		
 	}
@@ -98,10 +102,10 @@ public class GenericFooterController {
 		updateGenericLetterFooter.setGenericLetterFooterIsDefault(isDefault);
 		updateGenericLetterFooter.setGenericLetterFooterIsActive(isActive);
 		GenericLetterFooter genericLetterFooter = genericFooterService.saveGenericFooter(updateGenericLetterFooter);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.UPDATE,"Successfully saved generic footer",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved generic footer");
 		logger.debug("End of request to Update generic footer.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(genericLetterFooter);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Successfully saved generic footer", sessionMap.getUserID(), request.getRemoteAddr(), -1, "footerId="+footerId, LogUserType.USER_LOGIN, "", "");
 		return respBean;
 		
 	}
@@ -114,10 +118,10 @@ public class GenericFooterController {
 	public EMRResponseBean getGenericFooter(@RequestParam(value="footerId") Integer footerId) throws Exception{
 		logger.debug("Begin of request to Fetch generic footer.");
 		GenericLetterFooter genericLetterFooter = genericFooterService.getGenericFooter(footerId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.UPDATE,"Successfully fetch generic footer",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully fetch generic footer");
 		logger.debug("End of request to Fetch generic footer.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(genericLetterFooter);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully fetch generic footer", sessionMap.getUserID(), request.getRemoteAddr(), -1, "footerId="+footerId, LogUserType.USER_LOGIN, "", "");
 		return respBean;
 		
 	}
