@@ -18,6 +18,7 @@ import com.glenwood.glaceemr.server.application.models.LabDescription;
 import com.glenwood.glaceemr.server.application.models.LabDescription_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
+import com.glenwood.glaceemr.server.application.models.VaccineGroupMapping;
 import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails_;
 import com.glenwood.glaceemr.server.application.models.VaccineOrder_;
 import com.glenwood.glaceemr.server.application.models.VaccineReport;
@@ -118,8 +119,10 @@ public class PortalImmunizationHistorySpecification {
 			@Override
 			public Predicate toPredicate(Root<CvxVaccineGroupMapping> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				
-				Predicate visFilesListPredicate=cq.where(cb.and(cb.equal(root.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingCvxCode), labDescCVX))).getRestriction();
-				return visFilesListPredicate;
+				//Join<CvxVaccineGroupMapping, VaccineGroupMapping> vaccineGroupJoin=root.join(CvxVaccineGroupMapping_.vaccineGroupMapping);
+				Predicate labDescCvxPredicate=cb.equal(root.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingCvxCode), labDescCVX);
+				root.fetch(CvxVaccineGroupMapping_.vaccineGroupMapping, JoinType.INNER);
+				return cq.where(cb.and(labDescCvxPredicate)).getRestriction();
 			}
 
 		};

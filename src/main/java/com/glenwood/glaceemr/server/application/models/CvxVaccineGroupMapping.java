@@ -4,8 +4,13 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @SuppressWarnings("serial")
 @Entity
@@ -30,6 +35,11 @@ public class CvxVaccineGroupMapping implements Serializable{
 
 	@Column(name="cvx_vaccine_group_mapping_uncertain_formulation_cvx")
 	private String cvxVaccineGroupMappingUncertainFormulationCvx;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="cvx_vaccine_group_mapping_uncertain_formulation_cvx", referencedColumnName="vaccine_group_cvx", updatable=false, insertable=false)
+	VaccineGroupMapping vaccineGroupMapping;
 
 	public Integer getCvxVaccineGroupMappingId() {
 		return cvxVaccineGroupMappingId;
@@ -83,4 +93,13 @@ public class CvxVaccineGroupMapping implements Serializable{
 			String cvxVaccineGroupMappingUncertainFormulationCvx) {
 		this.cvxVaccineGroupMappingUncertainFormulationCvx = cvxVaccineGroupMappingUncertainFormulationCvx;
 	}
+
+	public VaccineGroupMapping getVaccineGroupMapping() {
+		return vaccineGroupMapping;
+	}
+
+	public void setVaccineGroupMapping(VaccineGroupMapping vaccineGroupMapping) {
+		this.vaccineGroupMapping = vaccineGroupMapping;
+	}
+	
 }

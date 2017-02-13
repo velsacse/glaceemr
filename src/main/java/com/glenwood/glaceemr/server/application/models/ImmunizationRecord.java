@@ -13,6 +13,8 @@ public class ImmunizationRecord {
 	
 	String vaccineCvx;
 	
+	int vaccineSortOrder;
+	
 	String vaccineGroup;
 	
 	@JsonSerialize(using = JsonTimestampSerializer.class)
@@ -30,6 +32,9 @@ public class ImmunizationRecord {
 	
 	String vaccineMfg;
 	
+	boolean isBillable;
+	
+	@JsonSerialize(using = JsonTimestampSerializer.class)
 	Timestamp vaccineExpDate;
 
 	public Integer getVaccineId() {
@@ -126,6 +131,22 @@ public class ImmunizationRecord {
 
 	public void setVaccineExpDate(Timestamp timestamp) {
 		this.vaccineExpDate = timestamp;
+	}
+
+	public int getVaccineSortOrder() {
+		return vaccineSortOrder;
+	}
+
+	public void setVaccineSortOrder(int vaccineSortOrder) {
+		this.vaccineSortOrder = vaccineSortOrder;
+	}
+
+	public boolean isBillable() {
+		return isBillable;
+	}
+
+	public void setBillable(boolean isBillable) {
+		this.isBillable = isBillable;
 	}
 	
 }

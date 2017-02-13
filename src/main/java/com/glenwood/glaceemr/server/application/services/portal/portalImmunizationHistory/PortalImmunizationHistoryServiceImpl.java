@@ -129,12 +129,23 @@ public class PortalImmunizationHistoryServiceImpl implements PortalImmunizationH
 				for(int c=0;c<cvxGroupList.size();c++){
 
 					ImmunizationRecord record=new ImmunizationRecord();
+					
+					if(labDescImmunizationHistoryList.get(i).getLabEntriesIsBillable()!=null)
+						record.setBillable(labDescImmunizationHistoryList.get(i).getLabEntriesIsBillable());
+					else
+						record.setBillable(false);
 
 					if(cvxGroupList.get(c)!=null&&
 							cvxGroupList.get(c).getCvxVaccineGroupMappingVaccineGroupCode()!=null)
-						record.setVaccineGroup(cvxGroupList.get(c).getCvxVaccineGroupMappingVaccineGroupCode());
-
-					record.setVaccineCvx(labDescImmunizationHistoryList.get(i).getLabDescriptionTable().getLabDescriptionCvx());
+						record.setVaccineGroup(cvxGroupList.get(c).getVaccineGroupMapping().getVaccineGroup());
+					
+					if(cvxGroupList.get(c)!=null&&
+							cvxGroupList.get(c).getVaccineGroupMapping().getVaccineGroupCvx()!=null)
+						record.setVaccineCvx(cvxGroupList.get(c).getVaccineGroupMapping().getVaccineGroupCvx());
+					
+					if(cvxGroupList.get(c)!=null&&
+							cvxGroupList.get(c).getVaccineGroupMapping().getVaccineGroupCvx()!=null)
+						record.setVaccineSortOrder(cvxGroupList.get(c).getVaccineGroupMapping().getVaccineGroupSortOrder());
 
 					if(labDescImmunizationHistoryList.get(i)!=null)
 						record.setVaccineId(labDescImmunizationHistoryList.get(i).getLabEntriesTestId());
@@ -191,10 +202,21 @@ public class PortalImmunizationHistoryServiceImpl implements PortalImmunizationH
 					for(int c=0;c<cvxGroupList.size();c++){
 
 						ImmunizationRecord record=new ImmunizationRecord();
+						
+						
+					     record.setBillable(false);
 
 						if(cvxGroupList.get(c)!=null&&
 								cvxGroupList.get(c).getCvxVaccineGroupMappingVaccineGroupCode()!=null)
-							record.setVaccineGroup(cvxGroupList.get(c).getCvxVaccineGroupMappingVaccineGroupCode());
+							record.setVaccineGroup(cvxGroupList.get(c).getVaccineGroupMapping().getVaccineGroup());
+						
+						if(cvxGroupList.get(c)!=null&&
+								cvxGroupList.get(c).getVaccineGroupMapping().getVaccineGroupCvx()!=null)
+							record.setVaccineCvx(cvxGroupList.get(c).getVaccineGroupMapping().getVaccineGroupCvx());
+						
+						if(cvxGroupList.get(c)!=null&&
+								cvxGroupList.get(c).getVaccineGroupMapping().getVaccineGroupCvx()!=null)
+							record.setVaccineSortOrder(cvxGroupList.get(c).getVaccineGroupMapping().getVaccineGroupSortOrder());
 
 						if(vaccineReportImmunizationHistoryList.get(i).getLabDescriptionTable().getLabDescriptionTestDesc()!=null)
 							record.setVaccineName(vaccineReportImmunizationHistoryList.get(i).getLabDescriptionTable().getLabDescriptionTestDesc());
