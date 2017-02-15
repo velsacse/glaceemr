@@ -14,7 +14,7 @@ public class PortalPatientRegistrationBean {
 	
 	int patRegRace;
 	
-	String patRegEthnicity;
+	int patRegEthnicity;
 	
 	int patRegGender;
 	
@@ -116,11 +116,11 @@ public class PortalPatientRegistrationBean {
 		this.patRegRace = patRegRace;
 	}
 
-	public String getPatRegEthnicity() {
+	public int getPatRegEthnicity() {
 		return patRegEthnicity;
 	}
 
-	public void setPatRegEthnicity(String patRegEthnicity) {
+	public void setPatRegEthnicity(int patRegEthnicity) {
 		this.patRegEthnicity = patRegEthnicity;
 	}
 

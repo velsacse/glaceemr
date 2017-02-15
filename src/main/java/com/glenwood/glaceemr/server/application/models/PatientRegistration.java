@@ -35,7 +35,7 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @Table(name = "patient_registration")
 public class PatientRegistration implements Serializable {
 
-	public PatientRegistration(String patientRegistrationLastName, String patientRegistrationMidInitial, String patientRegistrationFirstName, String patientRegistrationAccountno, String patientRegistrationDob, Integer patientRegistrationSex, String patientRegistrationAddress1, String patientRegistrationAddress2, String patientRegistrationCity, String patientRegistrationState, String patientRegistrationZip, String patientRegistrationPhoneNo, String patientRegistrationWorkNo, Integer patientRegistrationPosId, Integer patientRegistrationReferingPhysician, Integer patientRegistrationPrincipalDoctor, String patientRegistrationCellno, String patientRegistrationEthnicity, String patientRegistrationRace, String patientRegistrationPreferredLan){
+	public PatientRegistration(String patientRegistrationLastName, String patientRegistrationMidInitial, String patientRegistrationFirstName, String patientRegistrationAccountno, String patientRegistrationDob, Integer patientRegistrationSex, String patientRegistrationAddress1, String patientRegistrationAddress2, String patientRegistrationCity, String patientRegistrationState, String patientRegistrationZip, String patientRegistrationPhoneNo, String patientRegistrationWorkNo, Integer patientRegistrationPosId, Integer patientRegistrationReferingPhysician, Integer patientRegistrationPrincipalDoctor, String patientRegistrationCellno, Integer patientRegistrationEthnicity, String patientRegistrationRace, String patientRegistrationPreferredLan){
 		super();
 		this.patientRegistrationLastName=  patientRegistrationLastName;
 		this.patientRegistrationMidInitial= patientRegistrationMidInitial; 
@@ -425,7 +425,7 @@ public class PatientRegistration implements Serializable {
 	private String patientRegistrationRace;
 
 	@Column(name="patient_registration_ethnicity")
-	private String patientRegistrationEthnicity;
+	private Integer patientRegistrationEthnicity;
 
 	@Column(name="patient_registration_preferred_lan")
 	private String patientRegistrationPreferredLan;
@@ -1681,11 +1681,11 @@ public class PatientRegistration implements Serializable {
 		this.patientRegistrationRace = patientRegistrationRace;
 	}
 
-	public String getPatientRegistrationEthnicity() {
+	public Integer getPatientRegistrationEthnicity() {
 		return patientRegistrationEthnicity;
 	}
 
-	public void setPatientRegistrationEthnicity(String patientRegistrationEthnicity) {
+	public void setPatientRegistrationEthnicity(Integer patientRegistrationEthnicity) {
 		this.patientRegistrationEthnicity = patientRegistrationEthnicity;
 	}
 
