@@ -97,7 +97,7 @@ public class GroupTherapyController {
 	@RequestMapping(value="/saveNotes",  method=RequestMethod.POST)
 	@ResponseBody
 	
-	public void saveNotes(@RequestBody AddNoteBean data) throws Exception{
+	public void saveNotes(@RequestBody List<AddNoteBean> data) throws Exception{
 		data = getAddNoteBean(data);
 		logger.debug("AddNotes is going to save");
 		addNewGroupService.saveNotes(data);
@@ -338,16 +338,10 @@ public class GroupTherapyController {
 	 * @param data
 	 * @return
 	 */
-	private AddNoteBean getAddNoteBean(AddNoteBean data){
-		data.setGwid(Optional.fromNullable(data.getGwid()+"").or(""));
-		data.setPatientDetailsEnteredBy(Optional.fromNullable(data.getPatientDetailsEnteredBy()+"").or(""));
-		data.setPatientDetailsEnteredOn(Optional.fromNullable(data.getPatientDetailsEnteredOn()+"").or(""));
-		data.setPatientDetailsId(Integer.parseInt(Optional.fromNullable(data.getPatientDetailsId()+"").or("-1")));
-		data.setPatientId(Optional.fromNullable(data.getPatientId()+"").or("-1"));
-		data.setPatientDetailsModifiedBy(Optional.fromNullable(data.getPatientDetailsModifiedBy()+"").or(""));
-		data.setPatientDetailsModifiedOn(Optional.fromNullable(data.getPatientDetailsModifiedOn()+"").or("-1"));
-		data.setSessionId(Integer.parseInt(Optional.fromNullable(data.getSessionId()+"").or("-1")));
-		data.setValue(Optional.fromNullable(data.getValue()+"").or("-1"));
+	private List<AddNoteBean> getAddNoteBean(List<AddNoteBean> data){
+		for(int i=0;i<data.size();i++){
+			data.set(i,data.get(i));
+		}
 		return data;
 	}
 	

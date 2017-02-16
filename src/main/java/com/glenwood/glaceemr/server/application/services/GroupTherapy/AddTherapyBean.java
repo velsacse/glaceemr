@@ -8,67 +8,189 @@ public class AddTherapyBean {
 	private String optionsName;
 	private String optionsValue;
 	private String result = "";
-	
 	private Integer therapySessionPatientDetailsId;
 	public AddTherapyBean(String gwid,String name,Integer Type,String optionsName,String optionsValue,Integer therapySessionPatientDetailsId){
 		super();
-		this.gwid = gwid;
-		this.name = name;
-		this.Type = Type;
-		this.optionsName = optionsName;
-		this.optionsValue = optionsValue;
-		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
+		if(gwid!=null){
+			this.gwid = gwid;
+		}else{
+			this.gwid = "";
+		}
+		if(name!=null){
+			this.name = name;
+		}else{
+			this.name = "";
+		}
+		if(Type!=null){
+			this.Type = Type;
+		}else{
+			this.Type = -1;
+		}
+		if(optionsName!=null){
+			this.optionsName = optionsName;
+		}else{
+			this.optionsName = "";
+		}
+		if(optionsValue!=null){
+			this.optionsValue = optionsValue;
+		}else{
+			this.optionsValue = "";
+		}
+		if(therapySessionPatientDetailsId!=null){
+			this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
+		}else{
+			this.therapySessionPatientDetailsId = -1;
+		}
 	}
 	
 	public AddTherapyBean(String gwid,String name,Integer Type,String optionsName,String optionsValue,String result,Integer therapySessionPatientDetailsId){
 		super();
-		this.gwid = gwid;
-		this.name = name;
-		this.Type = Type;
-		this.optionsName = optionsName;
-		this.optionsValue = optionsValue;
-		this.result=result;
-		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
+		if(gwid!=null){
+			this.gwid = gwid;
+		}else{
+			this.gwid = "";
+		}
+		if(name!=null){
+			this.name = name;
+		}else{
+			this.name = "";
+		}
+		if(Type!=null){
+			this.Type = Type;
+		}else{
+			this.Type =-1;
+		}
+		if(optionsName!=null){
+			this.optionsName = optionsName;
+		}else{
+			this.optionsName = "";
+		}
+		if(optionsValue!=null){
+			this.optionsValue = optionsValue;
+		}else{
+			this.optionsValue = "";
+		}
+		if(result!=null){
+			this.result=result;
+		}else{
+			this.result="";
+		}
+		if(therapySessionPatientDetailsId!=null){
+			this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
+		}else{
+			this.therapySessionPatientDetailsId = -1;
+		}
 	}
 	
-	public Integer getTherapySessionPatientDetailsId() {
-		return therapySessionPatientDetailsId;
-	}
-
-	public void setTherapySessionPatientDetailsId(
-			Integer therapySessionPatientDetailsId) {
-		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
-	}
-
+	
 	public AddTherapyBean(String gwid,String name,Integer Type,String result,Integer therapySessionPatientDetailsId){
 		super();
-		this.gwid = gwid;
-		this.name = name;
-		this.Type = Type;
-		this.result = result;
-		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId; 
+		if(gwid!=null){
+			this.gwid = gwid;
+		}else{
+			this.gwid = "";
+		}
+		if(name!=null){
+			this.name = name;
+		}else{
+			this.name = "";
+		}
+		if(Type!=null){
+			this.Type = Type;
+		}else{
+			this.Type = -1;
+		}
+		if(result!=null){
+			this.result=result;
+		}else{
+			this.result="";
+		}
+		if(therapySessionPatientDetailsId!=null){
+			this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
+		}else{
+			this.therapySessionPatientDetailsId = -1;
+		} 
 	}
+	
 	public AddTherapyBean(String gwid,String name,Integer Type,Integer therapySessionPatientDetailsId){
 		super();
-		this.gwid = gwid;
-		this.name = name;
-		this.Type = Type;
-		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
+		if(gwid!=null){
+			this.gwid = gwid;
+		}else{
+			this.gwid = "";
+		}
+		if(name!=null){
+			this.name = name;
+		}else{
+			this.name = "";
+		}
+		if(Type!=null){
+			this.Type = Type;
+		}else{
+			this.Type = -1;
+		}
+		if(therapySessionPatientDetailsId!=null){
+			this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
+		}else{
+			this.therapySessionPatientDetailsId = -1;
+		}
 	}
 	public AddTherapyBean(String gwid,String name,Integer Type,String result){
 		super();
-		this.gwid = gwid;
-		this.name = name;
-		this.Type = Type;
-		this.result = result;
+		if(gwid!=null){
+			this.gwid = gwid;
+		}
+		else{
+			this.gwid = "";
+		}
+		if(name!=null){
+			this.name = name;
+		}
+		else{
+			this.name = "";
+		}
+		if(Type!=null){
+			this.Type = Type;
+		}else{
+			this.Type = -1;
+		}
+		if(result!=null){
+			this.result = result;
+		}else{
+			this.result = "";
+		}
 	}
 	public AddTherapyBean(String gwid,String name,Integer Type,String optionsName,String optionsValue,String result){
-		this.gwid = gwid;
-		this.name = name;
-		this.Type = Type;
-		this.optionsName = optionsName;
-		this.optionsValue = optionsValue;
-		this.result=result;
+		if(gwid!=null){
+			this.gwid = gwid;
+		}else{
+			this.gwid = "";
+		}
+		if(name!=null){
+			this.name = name;
+		}else{
+			this.name = "";
+		}
+		if(Type!=null){
+			this.Type = Type;
+		}else{
+			this.Type = -1;
+		}
+		if(optionsName!=null){
+			this.optionsName = optionsName;
+		}else{
+			this.optionsName = "";
+		}
+		if(optionsValue!=null){
+			this.optionsValue = optionsValue;
+		}else{
+			this.optionsValue = "";
+		}
+		if(result!=null){
+			this.result = result;
+		}else{
+			this.result = "";
+		}
 	}
 	
 	
@@ -118,6 +240,13 @@ public class AddTherapyBean {
 
 	public void setResult(String result) {
 		this.result = result;
+	}
+	public Integer getTherapySessionPatientDetailsId() {
+		return therapySessionPatientDetailsId;
+	}
+
+	public void setTherapySessionPatientDetailsId(Integer therapySessionPatientDetailsId) {
+		this.therapySessionPatientDetailsId = therapySessionPatientDetailsId;
 	}
 
 }

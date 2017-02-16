@@ -20,16 +20,60 @@ public class TherapyPrintBean {
 	
 	public TherapyPrintBean(Integer groupId,String groupName,Integer groupProviderId,Integer groupLeaderId,Integer groupSupervisorId,String groupDesc,Integer gropPosId,String defaultTherapyTime,Boolean isActive){
 		super();
-		
-		this.groupId= groupId;
-		this.groupName= groupName;
-		this.groupProviderId= groupProviderId;
-		this.groupLeaderId= groupLeaderId;
-		this.groupSupervisorId= groupSupervisorId;
-		this.groupDesc= groupDesc;
-		this.gropPosId= gropPosId;
-		this.defaultTherapyTime= defaultTherapyTime;
-		this.isActive= isActive;
+		if(groupId!=null){
+			this.groupId = groupId;
+		}
+		else{
+			this.groupId =-1;
+		}
+		if(groupName!=null){
+			this.groupName = groupName;
+		}
+		else{
+			this.groupName = "";
+		} 
+		if(groupProviderId!=null){
+			this.groupProviderId = groupProviderId;
+		}
+		else{
+			this.groupProviderId = -1;
+		}
+		if(groupLeaderId!=null){
+			this.groupLeaderId = groupLeaderId;
+		}
+		else{
+			this.groupLeaderId = -1;
+		}
+		if(groupSupervisorId!=null){
+			this.groupSupervisorId = groupSupervisorId;
+		}
+		else{
+			this.groupSupervisorId = -1;
+		}
+		if(groupDesc!=null){
+			this.groupDesc = groupDesc;
+		}
+		else{
+			this.groupDesc = "";
+		}
+		if(gropPosId!=null){
+			this.gropPosId = gropPosId;
+		}
+		else{
+			this.gropPosId = -1;
+		}
+		if(defaultTherapyTime!=null){
+			this.defaultTherapyTime = defaultTherapyTime;
+		}
+		else{
+			this.defaultTherapyTime = "";
+		}
+		if(isActive!=null){
+			this.isActive= isActive;
+		}
+		else{
+			this.isActive = false;
+		}
 		
 	}
 	

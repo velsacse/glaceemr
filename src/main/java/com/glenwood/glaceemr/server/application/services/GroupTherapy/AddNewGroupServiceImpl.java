@@ -153,35 +153,36 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	 * to save the notes
 	 */
 	@Override
-	public void saveNotes(AddNoteBean data) throws Exception {
-		
-		if(data.getPatientDetailsId()==-1){
-		TherapySessionPatientDetails therapySessionPatientDetails = new TherapySessionPatientDetails();
-		therapySessionPatientDetails.setTherapySessionPatientDetailsEnteredBy(data.getPatientDetailsModifiedBy());
-		therapySessionPatientDetails.setTherapySessionPatientDetailsEnteredOn(therapyGroupRepository.findCurrentTimeStamp());
-		therapySessionPatientDetails.setTherapySessionPatientDetailsGwid(data.getGwid());
-		if(data.getPatientDetailsId()!=-1){
-			therapySessionPatientDetails.setTherapySessionPatientDetailsId(data.getPatientDetailsId());
-		}
-		therapySessionPatientDetails.setTherapySessionPatientDetailsModifiedBy(data.getPatientDetailsModifiedBy());
-		therapySessionPatientDetails.setTherapySessionPatientDetailsModifiedOn(therapyGroupRepository.findCurrentTimeStamp());;
-		therapySessionPatientDetails.setTherapySessionPatientDetailsPatientId(Integer.parseInt(data.getPatientId()));
-		therapySessionPatientDetails.setTherapySessionPatientDetailsSessionId(data.getSessionId());
-		therapySessionPatientDetails.setTherapySessionPatientDetailsValue(data.getValue());
-		therapySessionPatientDetailsRepository.saveAndFlush(therapySessionPatientDetails);
-		}
-		else{
+	public void saveNotes(List<AddNoteBean> data) throws Exception {
+		for(int i=0;i<data.size();i++){
+			if(data.get(i).getPatientDetailsId()==-1){
+				 TherapySessionPatientDetails therapySessionPatientDetails = new TherapySessionPatientDetails();
+				 therapySessionPatientDetails.setTherapySessionPatientDetailsEnteredBy(data.get(i).getPatientDetailsModifiedBy());
+			     therapySessionPatientDetails.setTherapySessionPatientDetailsEnteredOn(therapyGroupRepository.findCurrentTimeStamp());
+			     therapySessionPatientDetails.setTherapySessionPatientDetailsGwid(data.get(i).getGwid());  
+			 	 if(data.get(i).getPatientDetailsId()!=-1){ 
+			 		therapySessionPatientDetails.setTherapySessionPatientDetailsId(data.get(i).getPatientDetailsId());
+			 	 }
+			 	 therapySessionPatientDetails.setTherapySessionPatientDetailsModifiedBy(data.get(i).getPatientDetailsModifiedBy());
+			 	 therapySessionPatientDetails.setTherapySessionPatientDetailsModifiedOn(therapyGroupRepository.findCurrentTimeStamp());
+			 	 therapySessionPatientDetails.setTherapySessionPatientDetailsPatientId(Integer.parseInt(data.get(i).getPatientId()));
+			 	 therapySessionPatientDetails.setTherapySessionPatientDetailsSessionId(data.get(i).getSessionId());
+			     therapySessionPatientDetails.setTherapySessionPatientDetailsValue(data.get(i).getValue());
+			     therapySessionPatientDetailsRepository.saveAndFlush(therapySessionPatientDetails);
+			}
+		   else{
 			CriteriaBuilder cb=em.getCriteriaBuilder();
 			CriteriaUpdate<TherapySessionPatientDetails> cu=cb.createCriteriaUpdate(TherapySessionPatientDetails.class);
 			Root<TherapySessionPatientDetails> root = cu.from(TherapySessionPatientDetails.class);
-			cu.set(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue), data.getValue());
-			cu.where(cb.and(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsGwid).in(data.getGwid()),
-					cb.equal(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId),data.getSessionId()),
-					cb.equal(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsPatientId),data.getPatientId())));
+			cu.set(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue), data.get(i).getValue());
+			cu.where(cb.and(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsGwid).in(data.get(i).getGwid()),
+					cb.equal(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId),data.get(i).getSessionId()),
+					cb.equal(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsPatientId),data.get(i).getPatientId())));
 					this.em.createQuery(cu).executeUpdate();
 			}
+		}
 	}
-
+	
 	/**
 	 * To list group data
 	 */
@@ -235,7 +236,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
         int leaderList=Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("leaderList").toString())).or("-1"));
         int therapySessionStatus = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("sessionStatus").toString())).or("-1"));
         String therapySessionId =Optional.fromNullable(Strings.emptyToNull(therapyData.get("sessionId").toString())).or("");
-         int therapyId = 0;
+        int therapyId = 0;
         if(therapySessionId.trim().equalsIgnoreCase("")  ||therapySessionId.trim().equalsIgnoreCase("0") ){
         TherapySession therapySession=new TherapySession();
         therapySession.setTherapySessionGroupId(groupId);
@@ -245,12 +246,11 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
         therapySession.setTherapySessionLeaderId(leaderList);
         therapySession.setTherapySessionSupervisorId(supervisorList);
         SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/yyyy kk:mm:ss");
-
         Date date = (Date) ft.parse(therapyDate);
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
         DateFormat mmformat=new SimpleDateFormat("yyyy-MM-dd");
-         therapySession.setTherapySessionDate(new Timestamp(date.getTime()));
-         therapySession.setTherapySessionDateValue(java.sql.Date.valueOf(mmformat.format(date)));
+        therapySession.setTherapySessionDate(new Timestamp(date.getTime()));
+        therapySession.setTherapySessionDateValue(java.sql.Date.valueOf(mmformat.format(date)));
         therapySession.setTherapySessionStatus(therapySessionStatus);
         therapySession = therapySessionRepository.saveAndFlush(therapySession);
         therapyId=therapySession.getTherapySessionId();
@@ -266,9 +266,9 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
         }
         }
         return therapySessionRepository.findAll(GroupTherapySpecification.byTherapyId(therapyId));
-
     }
-	/**
+	
+    /**
 	 * To get the patient data by groupid
 	 */
 	@Override
@@ -501,6 +501,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 					patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsId)));
 		}
 		cq.where(root.get(ClinicalElements_.clinicalElementsGwid).in(gwidList));
+		cq.orderBy(builder.asc(root.get(ClinicalElements_.clinicalElementsId)));
 		List<Object> resultset  = em.createQuery(cq).getResultList();
 		List<AddTherapyBean> notesData = new ArrayList<AddTherapyBean>();
 		for(int i=0;i<resultset.size();i++){
@@ -677,11 +678,10 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 							root.get(ClinicalElements_.clinicalElementsName),
 							root.get(ClinicalElements_.clinicalElementsDatatype),
 							optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName),
-
 							optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),
 							patientJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue).alias("result")));
 		cq.where(root.get(ClinicalElements_.clinicalElementsGwid).in(gwidList));
-		
+		cq.orderBy(builder.asc(root.get(ClinicalElements_.clinicalElementsId)));
 		List<AddTherapyBean> clinicalData  =new ArrayList<AddTherapyBean>();
 		clinicalData=em.createQuery(cq).getResultList();
 		return clinicalData;

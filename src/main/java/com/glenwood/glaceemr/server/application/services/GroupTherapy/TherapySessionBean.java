@@ -21,22 +21,81 @@ public class TherapySessionBean {
 
 	
 	
-	public TherapySessionBean(Integer sessionId,String sessionStartTime,Integer sessionProviderId,String sessionProviderName,Integer sessionLeaderId,int sessionSupervisorId,String sessionTopic,Integer sessionPosId,String sessionPOSName,Date sessionDateValue,Integer sessionStatus,String sessionEndTime){
+	public TherapySessionBean(Integer sessionId,String sessionStartTime,Integer sessionProviderId,String sessionProviderName,Integer sessionLeaderId,Integer sessionSupervisorId,String sessionTopic,Integer sessionPosId,String sessionPOSName,Date sessionDateValue,Integer sessionStatus,String sessionEndTime){
 		super();
 		DateFormat timeFormat=new SimpleDateFormat("MM/dd/yyyy");
-		
-		this.sessionId= sessionId;
-		this.sessionStartTime=sessionStartTime;
-		this.sessionProviderId= sessionProviderId;
-		this.sessionProviderName=sessionProviderName;
-		this.sessionLeaderId= sessionLeaderId;
-		this.sessionSupervisorId= sessionSupervisorId;
-		this.sessionTopic= sessionTopic;
-		this.sessionPosId= sessionPosId;
-		this.sessionPOSName=sessionPOSName;
-		this.sessionDateValue=timeFormat.format(sessionDateValue);
-		this.sessionStatus= sessionStatus;
-		this.sessionEndTime=sessionEndTime;
+		if(sessionId!=null){
+			this.sessionId = sessionId;
+		}
+		else{
+			this.sessionId = -1;
+		}
+		if(sessionStartTime!=null){
+			this.sessionStartTime=sessionStartTime;
+		}
+		else{
+			this.sessionStartTime = "";
+		}
+		if(sessionProviderId!=null){
+			this.sessionProviderId= sessionProviderId;
+		}
+		else{
+			this.sessionProviderId = -1;
+		}
+		if(sessionProviderName!=null){
+			this.sessionProviderName=sessionProviderName;
+		}
+		else{
+			this.sessionProviderName = "";
+		}
+		if(sessionLeaderId!=null){
+			this.sessionLeaderId= sessionLeaderId;
+		}
+		else{
+			this.sessionLeaderId =-1;
+		}
+		if(sessionSupervisorId!=null){
+			this.sessionSupervisorId= sessionSupervisorId;
+		}
+		else{
+			this.sessionSupervisorId = -1;
+		}
+		if(sessionTopic!=null){
+			this.sessionTopic= sessionTopic;
+		}
+		else{
+			this.sessionTopic = "";
+		}
+		if(sessionPosId!=null){
+			this.sessionPosId = sessionPosId;
+		}
+		else{
+			this.sessionPosId = -1;
+		}
+		if(sessionPOSName!=null){
+			this.sessionPOSName = sessionPOSName;
+		}
+		else{
+			this.sessionPOSName = "";
+		}
+		if(sessionDateValue!=null){
+			this.sessionDateValue = timeFormat.format(sessionDateValue);
+		}
+		else{
+			this.sessionDateValue = "";
+		}
+		if(sessionStatus!=null){
+			this.sessionStatus = sessionStatus;
+		}
+		else{
+			this.sessionStatus = -1;
+		}
+		if(sessionEndTime!=null){
+			this.sessionEndTime = sessionEndTime;
+		}
+		else{
+			this.sessionEndTime = "";
+		}
 	}
 	
 	
@@ -46,14 +105,15 @@ public class TherapySessionBean {
 	public void setSessionId(Integer sessionId) {
 		this.sessionId = sessionId;
 	}
+	
+	public Integer getSessionProviderId() {
+		return sessionProviderId;
+	}
 	public String getSessionStartTime() {
 		return sessionStartTime;
 	}
 	public void setSessionStartTime(String sessionStartTime) {
 		this.sessionStartTime = sessionStartTime;
-	}
-	public Integer getSessionProviderId() {
-		return sessionProviderId;
 	}
 	public void setSessionProviderId(Integer sessionProviderId) {
 		this.sessionProviderId = sessionProviderId;

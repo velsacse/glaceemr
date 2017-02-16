@@ -5,12 +5,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class TherapyPatientsBean {
-	int patientId;
+	Integer patientId;
     String accountNo;
     String lastName;
     String firstName;
     String dob;
-    int sessionId;
+    Integer sessionId;
     String stopTime;
 	String dx1="";
 	String dx1Desc="";
@@ -31,31 +31,146 @@ public class TherapyPatientsBean {
     
     
 
-    public TherapyPatientsBean(int patientId,String accountNo,String lastName,String firstName,Date dob,int sessionId,String stopTime,String dx1,String dx1Desc,String dx2, String dx2Desc,String dx3,String dx3Desc,String dx4,String dx4Desc,String dx5,String dx5Desc,String dx6,String dx6Desc,String dx7,String dx7Desc,String dx8,String dx8Desc){
-    	this.patientId=patientId;
-    	this.accountNo=accountNo;
-    	this.lastName=lastName;
-    	this.firstName=firstName;
+    public TherapyPatientsBean(Integer patientId,String accountNo,String lastName,String firstName,Date dob,Integer sessionId,String stopTime,String dx1,String dx1Desc,String dx2, String dx2Desc,String dx3,String dx3Desc,String dx4,String dx4Desc,String dx5,String dx5Desc,String dx6,String dx6Desc,String dx7,String dx7Desc,String dx8,String dx8Desc){
+    	if(patientId != null){
+        	this.patientId=patientId;
+    	}
+    	else{
+    		this.patientId=-1;
+    	}
+    	if(accountNo!=null){
+    		this.accountNo=accountNo;
+    	}
+    	else{
+    		this.accountNo="";
+    	}
+    	if(lastName!=null){
+    		this.lastName=lastName;
+    	}
+    	else{
+    		this.lastName="";
+    	}
+    	if(firstName!=null){
+    		this.firstName=firstName;
+    	}
+    	else{
+    		this.lastName="";
+    	}
     	DateFormat mmformat=new SimpleDateFormat("MM/dd/yyyy");
-		this.dob=mmformat.format(dob);
-    	this.sessionId=sessionId;
-    	this.stopTime=stopTime;
-    	this.dx1=dx1;
-    	this.dx1Desc=dx1Desc;
-    	this.dx2=dx2;
-    	this.dx2Desc=dx2Desc;
-    	this.dx3=dx3;
-    	this.dx3Desc=dx3Desc;
-    	this.dx4=dx4;
-    	this.dx4Desc=dx4Desc;
-    	this.dx5=dx5;
-    	this.dx5Desc=dx5Desc;
-    	this.dx6=dx6;
-    	this.dx6Desc=dx6Desc;
-    	this.dx7=dx7;
-    	this.dx7Desc=dx7Desc;
-    	this.dx8=dx8;
-    	this.dx8Desc=dx8Desc;
+    	if(dob!=null){
+    		this.dob=mmformat.format(dob);
+    	}
+    	else{
+    		this.dob="";
+    	}
+    	if(sessionId!=null){
+    		this.sessionId=sessionId;
+    	}
+    	else{
+    		this.sessionId=-1;
+    	}
+    	if(stopTime!=null){
+    		this.stopTime=stopTime;
+    	}
+    	else{
+    		this.stopTime="";
+    	}
+    	if(dx1!=null){
+    		this.dx1=dx1;
+    	}
+    	else{
+    		this.dx1="";
+    	}
+    	if(dx1Desc!=null){
+    		this.dx1Desc=dx1Desc;
+    	}
+    	else{
+    		this.dx1Desc="";
+    	}
+    	if(dx2!=null){
+    		this.dx2=dx2;
+    	}
+    	else{
+    		this.dx2="";
+    	}
+    	if(dx2Desc!=null){
+    		this.dx2Desc=dx2Desc;
+    	}
+    	else{
+    		this.dx2Desc="";
+    	}
+    	if(dx3!=null){
+    		this.dx3=dx3;
+    	}
+    	else{
+    		this.dx3="";
+    	}
+    	if(dx3Desc!=null){
+    		this.dx3Desc=dx3Desc;
+    	}
+    	else{
+    		this.dx3Desc="";
+    	}
+    	if(dx4!=null){
+    		this.dx4=dx4;
+    	}
+    	else{
+    		this.dx4="";
+    	}
+    	if(dx5Desc!=null){
+    		this.dx4Desc=dx4Desc;
+    	}
+    	else{
+    		this.dx4Desc="";
+    	}
+    	if(dx5!=null){
+    		this.dx5=dx5;
+    	}
+    	else{
+    		this.dx5="";
+    	}
+    	if(dx5Desc!=null){
+    		this.dx5Desc=dx5Desc;
+    	}
+    	else{
+    		this.dx5Desc="";
+    	}
+    	if(dx6!=null){
+    		this.dx6=dx6;
+    	}
+    	else{
+    		this.dx6="";
+    	}
+    	if(dx6Desc!=null){
+    		this.dx6Desc=dx6Desc;
+    	}
+    	else{
+    		this.dx6Desc="";
+    	}
+    	if(dx7!=null){
+    		this.dx7=dx7;
+    	}
+    	else{
+    		this.dx7="";
+    	}
+    	if(dx7Desc!=null){
+    		this.dx7Desc=dx7Desc;
+    	}
+    	else{
+    		this.dx7Desc="";
+    	}
+    	if(dx8!=null){
+    		this.dx8=dx8;
+    	}
+    	else{
+    		this.dx8="";
+    	}
+    	if(dx8Desc!=null){
+    		this.dx8Desc=dx8Desc;
+    	}
+    	else{
+    		this.dx8Desc="";
+    	}
     }
 
 	public int getSessionId() {

@@ -102,7 +102,7 @@ public interface AddNewGroupService {
 	 * @param data
 	 * @throws Exception
 	 */
-	void saveNotes(AddNoteBean data) throws Exception;
+	void saveNotes(List<AddNoteBean> data) throws Exception;
 	
 	/**
 	 * to get the data for addNotes and EditNotes
