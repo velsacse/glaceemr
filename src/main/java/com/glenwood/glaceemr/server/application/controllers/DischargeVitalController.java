@@ -44,12 +44,10 @@ public class DischargeVitalController {
 	@Autowired
 	SessionMap sessionMap;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	@RequestMapping(value="/saveVitals",method=RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean saveDischargeVitals(@RequestBody DischargeSaveVitalBean vitalDataBean) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(dischargeVitalService.saveDischargeVitals(vitalDataBean));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.CREATEORUPDATE, 1, Log_Outcome.SUCCESS, "Discharge vitals saved", sessionMap.getUserID(), request.getRemoteAddr(), vitalDataBean.getPatientId(), "encounterId="+vitalDataBean.getEncounterId(), LogUserType.USER_LOGIN, "", "");
@@ -66,6 +64,7 @@ public class DischargeVitalController {
 	public EMRResponseBean getAdmissionEncDetails(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId,
 								@RequestParam(value="chartId",required=false, defaultValue="") Integer encounterId,
 								@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(dischargeVitalService.getDischartgeVitals(patientId,encounterId,admssEpisode));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Discharge vitals viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "encounterId="+encounterId+"|episodeId="+admssEpisode, LogUserType.USER_LOGIN, "", "");

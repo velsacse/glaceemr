@@ -38,9 +38,6 @@ public class ImportDataController {
 	@Autowired
 	SessionMap sessionMap;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	/**
 	 * Getting patient encounter list
 	 * @param patientId
@@ -53,6 +50,7 @@ public class ImportDataController {
 	public EMRResponseBean getImportEncList(@RequestParam(value="patientId") Integer patientId,
 			@RequestParam(value="encounterId") Integer encounterId) throws Exception{
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 			encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));

@@ -59,9 +59,6 @@ public class PlanReferralController {
 	@Autowired
 	AuditTrailSaveService auditTrailSaveService;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	private Logger logger = Logger.getLogger(PlanReferralController.class);
 	
 		
@@ -78,6 +75,7 @@ public class PlanReferralController {
 			   @RequestParam(value="chartId",required = false) Integer chartId,
 			   @RequestParam(value="dxCode",required = false,defaultValue="") String dx) throws JSONException {
 	
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Getting referral list::encounterId"+encounterId+" chartId"+chartId+" dxCode"+dx);
 			List<Referral> result = referralService.getListOfReferralsPlan(encounterId,chartId,dx);
@@ -104,6 +102,7 @@ public class PlanReferralController {
 			@RequestParam(value="encounterId",required = false,defaultValue="-1") Integer encounterId)
 			    throws JSONException {
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Getting referral::referralId"+referralId);
 			ReferralBean result = referralService.getReferral(referralId, chartId, encounterId);
@@ -127,6 +126,8 @@ public class PlanReferralController {
 	@ResponseBody
 	public EMRResponseBean getReferral(@RequestParam(value="referralId",required = false,defaultValue="-1") Integer referralId)
 			    throws JSONException {
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Getting referral::referralId"+referralId);
 			Referral result = referralService.getReferralPlan(referralId);
@@ -157,6 +158,7 @@ public class PlanReferralController {
 			  @RequestParam(value="criticalstatus",required = false) Integer criticalstatus,
 			  @RequestParam(value="diagnosis",required = false, defaultValue="") String diagnosis) throws JSONException {
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Saving referral::referralId"+referralId+" reason"+reason+" notes"+notes+"criticalstatus"+criticalstatus);
 			referralService.saveReferralPlan(referralId,reason,notes,diagnosis,criticalstatus);
@@ -181,6 +183,7 @@ public class PlanReferralController {
 	public EMRResponseBean cancelReferral(@RequestParam(value="loginId",required = false, defaultValue = "-1") Integer loginID,
 			   @RequestParam(value="referralId",required = false, defaultValue = "-1") Integer referralId) throws JSONException {
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Cancelling referral::referralId"+referralId+" loginId"+loginID);
 			referralService.cancelReferral(loginID,referralId);

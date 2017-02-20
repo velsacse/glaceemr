@@ -43,9 +43,6 @@ public class VitalsController {
 	@Autowired
 	SessionMap sessionMap;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	/**
 	 * Get Vital groups
 	 * @param patientId
@@ -57,6 +54,8 @@ public class VitalsController {
 	@ResponseBody
 	public EMRResponseBean getVitalGroups(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="groupId") Integer groupId) throws Exception{
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 			groupId=Integer.parseInt(Optional.fromNullable(groupId+"").or("-1"));
@@ -91,6 +90,7 @@ public class VitalsController {
 									@RequestParam(value="admssEpisode", defaultValue="-1", required=false) Integer admssEpisode,
 									@RequestParam(value="clientId", defaultValue="000", required=false) String clientId) throws Exception{
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 			chartId=Integer.parseInt(Optional.fromNullable(chartId+"").or("-1"));
@@ -129,6 +129,8 @@ public class VitalsController {
 									@RequestParam(value="dischargeVitals") Boolean isDischargeVitals,
 									@RequestParam(value="admssEpisode") Integer admssEpisode,
 									@RequestParam(value="clientId") String clientId) throws Exception{
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 			chartId=Integer.parseInt(Optional.fromNullable(chartId+"").or("-1"));
@@ -156,6 +158,8 @@ public class VitalsController {
 	public EMRResponseBean getVitalNotes(@RequestParam(value="patientId") Integer patientId,
 								@RequestParam(value="encounterId") Integer encounterId,
 								@RequestParam(value="gwId") String gwId) {
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 			encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));

@@ -42,9 +42,6 @@ public class ROSController {
 	@Autowired
 	SessionMap sessionMap;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	/**
 	 * Getting ROS Elements
 	 * @param patientId
@@ -65,6 +62,7 @@ public class ROSController {
 									   @RequestParam(value="clientId") String clientId,
 									   @RequestParam(value="tabId") Integer tabId) throws Exception{
 			
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 			chartId=Integer.parseInt(Optional.fromNullable(chartId+"").or("-1"));
@@ -93,6 +91,7 @@ public class ROSController {
 	public EMRResponseBean getROSNotes(@RequestParam(value="patientId") Integer patientId,
 							 @RequestParam(value="encounterId") Integer encounterId) throws Exception{
 
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 			encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));

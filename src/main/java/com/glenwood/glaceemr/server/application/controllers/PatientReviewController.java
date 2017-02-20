@@ -40,9 +40,6 @@ public class PatientReviewController {
 	@Autowired
 	HttpServletRequest request;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	private Logger logger = Logger.getLogger(PatientReviewController.class);
 
 	/**
@@ -55,6 +52,7 @@ public class PatientReviewController {
 	@ResponseBody
 	public EMRResponseBean getReviewInfo(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId){
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Getting review information");
 			emrResponseBean.setData(patientReviewService.getReviewInfo(chartId));
@@ -79,6 +77,7 @@ public class PatientReviewController {
 			@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId,
 			@RequestParam(value="encounterId", required=false, defaultValue="-1") Integer encounterId){
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Saving review information");
 

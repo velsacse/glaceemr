@@ -28,9 +28,6 @@ public class FocalShortcutsController {
 	@Autowired
 	FocalShortcutsService FocalShortcutsService;
 
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	private Logger logger = Logger.getLogger(FocalShortcutsController.class);
 
 	/**
@@ -42,6 +39,7 @@ public class FocalShortcutsController {
 	@ResponseBody
 	public EMRResponseBean GetFocalshortcutsAvailable(@RequestParam(value="tabId") String tabId)
 	{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		emrResponseBean.setData(FocalShortcutsService.getFocalshortcutsAvailable(tabId).toString());
 		return emrResponseBean;
 	}
@@ -94,6 +92,7 @@ public class FocalShortcutsController {
 			@RequestParam(value="chartId") Integer chartId,
 			@RequestParam(value="encounterId") Integer encounterId,
 			@RequestParam(value="templateId") Integer templateId){
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		focalIndex=Optional.fromNullable(focalIndex).or("-1");
 		tabId=Integer.parseInt(Optional.fromNullable(tabId+"").or("-1"));
 		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
@@ -117,6 +116,7 @@ public class FocalShortcutsController {
 			@RequestParam(value="patientId") Integer patientId,
 			@RequestParam(value="encounterId") Integer encounterId,
 			@RequestParam(value="symptomIds") String symptomIds){
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		tabId=Integer.parseInt(Optional.fromNullable(tabId+"").or("-1"));
 		patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 		symptomIds=Optional.fromNullable(symptomIds+"").or("-1");
@@ -139,6 +139,7 @@ public class FocalShortcutsController {
 			@RequestParam(value="shortcutName") String shortcutName,
 			@RequestParam(value="focalDescription") String focalDescription,
 			@RequestParam(value="xmlData") String xmlData){
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		tabid=Optional.fromNullable(tabid+"").or("-1");
 		shortcutName=Optional.fromNullable(shortcutName+"").or("-1");
 		focalDescription=Optional.fromNullable(focalDescription+"").or("-1");
@@ -159,6 +160,7 @@ public class FocalShortcutsController {
 	@ResponseBody
 	public EMRResponseBean SearchFocalShortcuts(@RequestParam(value="tabId") Integer tabId,
 			@RequestParam(value="focalsearch") String focalsearch){
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		tabId=Optional.fromNullable(tabId).or(-1);
 		focalsearch=Optional.fromNullable(focalsearch+"").or("-1");
 		emrResponseBean.setData(FocalShortcutsService.searchFocalShortcuts(tabId,focalsearch).toString());
@@ -176,7 +178,7 @@ public class FocalShortcutsController {
 	public EMRResponseBean searchFocalShortcut(
 		@RequestParam(value="key", defaultValue="", required=true) String key,
 		@RequestParam(value="tabId", defaultValue="-1", required=true) Integer tabId) throws JSONException{
-		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		emrResponseBean.setData(FocalShortcutsService.searchFocalShortcut(key, tabId).toString());		
 		return emrResponseBean;
 	}
@@ -190,7 +192,7 @@ public class FocalShortcutsController {
 	@RequestMapping(value="/FetchFocalShortcut", method= RequestMethod.GET)
 	public EMRResponseBean fetchFocalShortcut(
 		@RequestParam(value="focalId", defaultValue="-1", required=true) Integer focalId) throws JSONException{		
-		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		emrResponseBean.setData(FocalShortcutsService.fetchFocalShortcut(focalId).toString());		
 		return emrResponseBean;
 	}
@@ -208,7 +210,7 @@ public class FocalShortcutsController {
 		@RequestParam(value="patientId", defaultValue="-1", required=true) Integer patientId,
 		@RequestParam(value="encounterId", defaultValue="-1", required=true) Integer encounterId,
 		@RequestParam(value="gwPattern", defaultValue="", required=true) String gwPattern) throws JSONException{		
-		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		emrResponseBean.setData(FocalShortcutsService.fetchPatientData(patientId, encounterId, gwPattern).toString());		
 		return emrResponseBean;
 	}

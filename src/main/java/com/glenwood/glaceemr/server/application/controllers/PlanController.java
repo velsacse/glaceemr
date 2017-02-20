@@ -28,9 +28,6 @@ import com.glenwood.glaceemr.server.utils.SessionMap;
 public class PlanController {
 	
 	@Autowired
-	EMRResponseBean emrResponseBean;
-	
-	@Autowired
 	PlanService service;
 	
 	@Autowired
@@ -61,7 +58,8 @@ public class PlanController {
 		@RequestParam(value="tabId", defaultValue="-1", required=false) Integer tabId,
 		@RequestParam(value="clientId", defaultValue="-1", required=false) String clientId){
 			
-		try{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
+		try{			
 			emrResponseBean.setData(service.getSystems(patientId, chartId, encounterId, templateId, clientId, tabId));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Plan systems viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId="+encounterId+"|templateId="+templateId+"|tabId="+tabId+"|clientId="+clientId, LogUserType.USER_LOGIN, "", "");
 		}catch(Exception e){
@@ -87,7 +85,8 @@ public class PlanController {
 		@RequestParam(value="tabId", defaultValue="-1", required=true) Integer tabId,
 		@RequestParam(value="clientId", defaultValue="-1", required=false) String clientId,
 		@RequestParam(value="dxcode", defaultValue="", required=false) String dxcode){
-			
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(service.getInstructions(patientId, chartId, encounterId, templateId, clientId, tabId, dxcode));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Plan instructions viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId="+encounterId+"|templateId="+templateId+"|tabId="+tabId+"|clientId="+clientId+"|dxcode="+dxcode, LogUserType.USER_LOGIN, "", "");
@@ -111,6 +110,7 @@ public class PlanController {
 		@RequestParam(value="encounterId", defaultValue="-1", required=false) Integer encounterId,
 		@RequestParam(value="dxcode", defaultValue="", required=false) String dxcode){
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(service.getNotes(patientId, encounterId, dxcode));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Plan notes viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "encounterId="+encounterId+"|dxcode="+dxcode, LogUserType.USER_LOGIN, "", "");
@@ -134,6 +134,7 @@ public class PlanController {
 		@RequestParam(value="offset", defaultValue="0", required=false) Integer offset,
 		@RequestParam(value="key", defaultValue="", required=false) String key){
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(service.getPlanShortcuts(limit, offset, key));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Plan notes shortcuts viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "key="+key+"|offset="+offset+"|limit="+limit, LogUserType.USER_LOGIN, "", "");
@@ -153,6 +154,7 @@ public class PlanController {
 	public EMRResponseBean fetchPatientInstructions(
 		@RequestParam(value="encounterId", defaultValue="-1", required= true) Integer encounterId){
 
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(service.getPatientIns(encounterId, "0000400000000000007"));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Patient instructions viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
@@ -174,6 +176,7 @@ public class PlanController {
 		@RequestParam(value="encounterId", defaultValue="-1", required= true) Integer encounterId,
 		@RequestParam(value="patientId", defaultValue="-1", required= true) Integer patientId){
 
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(service.getCurrentDx(patientId, encounterId));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Imported current encounter Dx", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
@@ -195,6 +198,7 @@ public class PlanController {
 		@RequestParam(value="encounterId", defaultValue="-1", required= true) Integer encounterId,
 		@RequestParam(value="templateId", defaultValue="-1", required= true) Integer templateId){
 
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(service.getReturnVisit(templateId, encounterId));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Plan Return visit viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "encounterId="+encounterId+"|templateId="+templateId, LogUserType.USER_LOGIN, "", "");
@@ -220,6 +224,7 @@ public class PlanController {
 		@RequestParam(value="dxcode", defaultValue="", required=true) String dxcode,
 		@RequestParam(value="codingsystem", defaultValue="-1", required=true) String codingsystem){
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			service.mapInstructiontoDx(insId, dxcode, mappingType, codingsystem);
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.CREATEORUPDATE, 1, Log_Outcome.SUCCESS, "Plan Instruction mapped to '"+dxcode+"'", sessionMap.getUserID(), request.getRemoteAddr(), -1, "insId="+insId+"|mappingType="+mappingType+"|dxcode="+dxcode+"|codingsystem="+codingsystem, LogUserType.USER_LOGIN, "", "");
@@ -244,6 +249,7 @@ public class PlanController {
 		@RequestParam(value="dxCode", defaultValue="", required=false) String dxCode,
 		@RequestParam(value="codingsystem", defaultValue="", required=false) String codingsystem){
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			service.updatePatientAftercareIns(insId, insName, insStatus, encounterId, patientId, otherIns, dxHandout, dxCode, codingsystem);
 			emrResponseBean.setData("success");
@@ -260,6 +266,7 @@ public class PlanController {
 		@RequestParam(value="insId", defaultValue="-1", required=true) Integer insId,
 		@RequestParam(value="patientId", defaultValue="-1", required=true) Integer patientId){
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			service.getLanguages(insId, patientId);
 			emrResponseBean.setData("success");
@@ -278,6 +285,7 @@ public class PlanController {
 	@RequestMapping(value="/getReferringPhysicians", method= RequestMethod.GET)
 	public EMRResponseBean getReferringPhysicians(){
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(service.getReferringPhysicians());
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Referring physicians viewed in Plan", sessionMap.getUserID(), request.getRemoteAddr(), 1, "", LogUserType.USER_LOGIN, "", "");

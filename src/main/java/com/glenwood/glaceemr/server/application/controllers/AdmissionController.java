@@ -53,9 +53,6 @@ public class AdmissionController {
 	@Autowired
 	SessionMap sessionMap;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	/**
 	 * To Create and update Admission details
 	 * @param dataJson
@@ -65,6 +62,7 @@ public class AdmissionController {
 	@RequestMapping(value="/saveAdmission",method=RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean createAdmission(@RequestBody AdmissionBean dataJson) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			dataJson = getAdmissionBeanData(dataJson);
 			String data= admissionService.saveAdmission(dataJson);		
@@ -86,6 +84,7 @@ public class AdmissionController {
 	@RequestMapping(value="/getAdmission",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getAdmission(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			Admission admission= admissionService.getAdmission(patientId);
 			emrResponseBean.setData(admission);
@@ -111,6 +110,7 @@ public class AdmissionController {
 	public EMRResponseBean dischargePatient(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId,
 			   @RequestParam(value="loginId",required=false, defaultValue="") Integer loginId,						 
 			   @RequestParam(value="userId",required=false, defaultValue="") Integer userId) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			String discharge= admissionService.dischargePatient(patientId,loginId,userId);
 			emrResponseBean.setData(discharge);
@@ -135,6 +135,7 @@ public class AdmissionController {
 	@RequestMapping(value="/getPastAdmission",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getPastAdmission(@RequestParam(value="admissionId",required=false, defaultValue="") Integer admissionId) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(admissionService.getPastAdmission(admissionId));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Past Admission viewed", sessionMap.getUserID(), request.getRemoteAddr(), -1, "admissionId="+admissionId, LogUserType.USER_LOGIN, "", "");
@@ -154,6 +155,7 @@ public class AdmissionController {
 	@RequestMapping(value="/getAdmissionPast",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getPastAdmissionPast(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(admissionService.getAdmissionPast(patientId));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Recent Past Admission viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
@@ -172,6 +174,7 @@ public class AdmissionController {
 	 */
 	@RequestMapping(value="/getPastAdmissionDates",method=RequestMethod.GET)
 	public EMRResponseBean getPastAdmissionDates(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			emrResponseBean.setData(admissionService.getPastAdmissionDates(patientId));
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Past Admissions list viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
@@ -193,6 +196,7 @@ public class AdmissionController {
 	@ResponseBody
 	public EMRResponseBean getLeafDetails(@RequestParam(value="encounterId",required=false, defaultValue="") Integer encounterId,
 			  @RequestParam(value="userId",required=false, defaultValue="") Integer userId) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			List<Admission> leafDetails=admissionService.getLeafDetails(encounterId,userId);
 			emrResponseBean.setData(leafDetails);
@@ -213,6 +217,7 @@ public class AdmissionController {
 	@RequestMapping(value="/getAdmissionEncounterDetails",method=RequestMethod.GET)
 	@ResponseBody
 		public EMRResponseBean getAdmissionEncDetails(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			String encDetails=admissionService.getAdmissionEncDetails(admssEpisode);
 			emrResponseBean.setData(encDetails);
@@ -233,6 +238,7 @@ public class AdmissionController {
 	@RequestMapping(value="/openLeaf",method=RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean openAdmissionLeaf(@RequestBody AdmissionBean dataJson) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			dataJson = getAdmissionBeanData(dataJson);
 			Encounter leaf=admissionService.openAdmissionLeaf(dataJson);
@@ -254,6 +260,7 @@ public class AdmissionController {
 	@RequestMapping(value="/AdmissionLeafs",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getAdmissionLeafs(@RequestParam(value="admssEpisode",required=false, defaultValue="") Integer admssEpisode) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			AdmissionLeafBean leafs=admissionService.getAdmissionLeafs(admssEpisode);
 			emrResponseBean.setData(leafs);
@@ -274,6 +281,7 @@ public class AdmissionController {
 	@RequestMapping(value="/getRooms",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getRooms(@RequestParam(value="blockId",required=false, defaultValue="-1") Integer blockId) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			List<AdmissionRoom> room=admissionService.getRooms(blockId);
 			emrResponseBean.setData(room);
@@ -308,7 +316,7 @@ public class AdmissionController {
 	@RequestMapping(value="/SaveDischargeDetails", method=RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean saveDischargeDetails(@RequestBody AdmissionBean dataJson) throws JSONException{
-		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			admissionService.saveDishcargeDetails(dataJson);
 			emrResponseBean.setData("success");

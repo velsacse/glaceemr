@@ -46,9 +46,6 @@ public class ShortcutsController {
 	@Autowired
 	SessionMap sessionMap;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	private Logger logger = Logger.getLogger(ShortcutsController.class);
 	
 	/**
@@ -66,6 +63,7 @@ public class ShortcutsController {
 			   @RequestParam(value="elementId",required = false, defaultValue="") String elementId,
 			   @RequestParam(value="data",required = false, defaultValue="") String data) throws JSONException {
 	
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Begin of request to Add shortcut @@tabId"+tabId+" elementId"+elementId+" data"+data);
 
@@ -97,6 +95,7 @@ public class ShortcutsController {
 			   @RequestParam(value="elementId",required = false, defaultValue="") String elementId)
 			   throws JSONException {
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Begin of request to Delete shortcut @@shortcutId:"+shortcutId);
 			List<SoapElementDatalist> list = shortcutsService.fetchShortcuts(shortcutId);

@@ -49,9 +49,6 @@ public class AssessmentSummaryController {
 	@Autowired
 	HttpServletRequest request;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean; 
-	
 	private Logger logger = Logger.getLogger(AssessmentSummaryController.class);
 	
 	/**
@@ -65,6 +62,7 @@ public class AssessmentSummaryController {
 	public EMRResponseBean getCurrentDiagnosis(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId) throws Exception {
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("getting current diagnosis");
 			logger.error("getting current diagnosis");
@@ -87,6 +85,7 @@ public class AssessmentSummaryController {
 	@RequestMapping(value="/SaveCodes",method = RequestMethod.GET)
 	public EMRResponseBean saveCurrentDiagnosis(
 			@RequestParam(value="assessListobj", required=false, defaultValue="") JSONObject assessListobj) throws Exception {
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 		logger.debug("getting current diagnosis");
 		logger.error("getting current diagnosis");
@@ -110,6 +109,7 @@ public class AssessmentSummaryController {
 	@RequestMapping(value="/ActiveProblems",method = RequestMethod.GET)
 	public EMRResponseBean activeProblems(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception {
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Fetching active problems");
 			logger.error("Fetching active problems");		
@@ -138,7 +138,7 @@ public class AssessmentSummaryController {
 			@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId,
 			@RequestParam(value="dxCode", required=false, defaultValue="") String dxCode,
 			@RequestParam(value="problemId", required=false, defaultValue="") Integer problemId) throws Exception {
-		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Fetching data corresponds to edit dx");
 			logger.error("Fetching data corresponds to edit dx");
@@ -166,6 +166,7 @@ public class AssessmentSummaryController {
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="encounterId", required=false, defaultValue="") Integer encounterId,
 			@RequestParam(value="userId", required=false, defaultValue="") Integer userId) throws Exception {
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("load data corresponds to current dx");		
 			String message = assessmentService.moveToProblemList(patientId,encounterId,userId);

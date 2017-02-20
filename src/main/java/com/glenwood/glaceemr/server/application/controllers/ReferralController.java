@@ -45,9 +45,6 @@ public class ReferralController {
 	@Autowired
 	AuditTrailSaveService auditTrailSaveService;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	private Logger logger = Logger.getLogger(ReferralController.class);
 	
 	
@@ -60,6 +57,8 @@ public class ReferralController {
 	@RequestMapping(value = "/listReferral", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getReferralList(@RequestParam(value="chartId",required = false) Integer chartId) throws JSONException {
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Getting list of referrals:: chartId"+chartId);
 			ReferralListBean result = referralService.getListOfReferrals(chartId);
@@ -86,6 +85,8 @@ public class ReferralController {
 	public EMRResponseBean getReferral(@RequestParam(value="referralId",required = false) Integer referralId,
 			   @RequestParam(value="chartId",required = false) Integer chartId,
 			   @RequestParam(value="fromEdit",required = false,defaultValue="false") Boolean fromEdit) throws JSONException {
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Getting referral:: chartId"+chartId+" referralId"+referralId);
 			ReferralBean result = referralService.getReferral(referralId,chartId,fromEdit);
@@ -107,6 +108,7 @@ public class ReferralController {
 	@RequestMapping(value = "/SaveReferralForm", method = RequestMethod.POST)
 	public EMRResponseBean saveReferral(@RequestBody ReferralForm formBean) throws JSONException {
 
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Saving referral");
 			String result = referralService.saveReferral(formBean);

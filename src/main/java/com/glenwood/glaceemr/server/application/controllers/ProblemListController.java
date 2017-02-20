@@ -44,9 +44,6 @@ public class ProblemListController {
 	@Autowired
 	SessionMap sessionMap;
 	
-	@Autowired
-	EMRResponseBean emrResponseBean;
-	
 	private Logger logger = Logger.getLogger(ProblemListController.class);
 	
 	/**
@@ -58,6 +55,8 @@ public class ProblemListController {
 	@RequestMapping(value="/ActiveProblems",method = RequestMethod.GET)
 	public EMRResponseBean activeProblems(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception {
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Fetching active problems");
 			logger.error("Fetching active problems");		
@@ -81,6 +80,8 @@ public class ProblemListController {
 	@RequestMapping(value="/InactiveProblems",method = RequestMethod.GET)
 	public EMRResponseBean inactiveProblems(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId) throws Exception {
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Fetching inactive and resolved problems");
 			logger.error("Fetching inactive and resolved problems");		
@@ -108,6 +109,7 @@ public class ProblemListController {
 		logger.debug("Fetching data corresponds to edit dx");
 		logger.error("Fetching data corresponds to edit dx");
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			List<ProblemList> editData = problemListService.getEditData(patientId,problemId);
 			emrResponseBean.setData(editData);
@@ -132,6 +134,8 @@ public class ProblemListController {
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="userId", required=false, defaultValue="") Integer userId,
 			@RequestParam(value="saveData", required=false, defaultValue="") String saveData) throws Exception {
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Updating problem list data");
 			logger.error("Updating problem list data");		
@@ -156,6 +160,8 @@ public class ProblemListController {
 	public EMRResponseBean deleteDxData(
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="deleteData", required=false, defaultValue="") String deleteData) throws Exception {
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{ 
 			logger.debug("Problem list delete");
 			logger.error("Problem list delete");
@@ -182,6 +188,7 @@ public class ProblemListController {
 			@RequestParam(value="patientId", required=false, defaultValue="") Integer patientId,
 			@RequestParam(value="deleteData", required=false, defaultValue="") String deleteData) throws Exception {
 		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Problem list delete");
 			logger.error("Problem list delete");
