@@ -106,7 +106,7 @@ public class Chart implements Serializable{
 
 	@Column(name="chart_remainder_by")
 	private Integer chartRemainderBy;
-	
+
 	@OneToMany(mappedBy="chartTable")
 	@JsonManagedReference
 	private List<ServiceDetail> serviceDetail;
@@ -114,7 +114,7 @@ public class Chart implements Serializable{
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="chart_remainder_date")
 	private Timestamp chartRemainderDate;
-	
+
 	@Column(name="chart_immnotes")
 	private String chartImmnotes;
 
@@ -123,7 +123,26 @@ public class Chart implements Serializable{
 	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="chart_patientid", referencedColumnName="patient_registration_id", insertable=false, updatable=false)
 	private PatientRegistration patientRegistrationTable;
+
+	@OneToMany(mappedBy="chartTable")
+	@JsonManagedReference
+	private List<DirectEmailLog> directEmailLogTable;
 	
+	@OneToMany(mappedBy="chartTable")
+	private List<Encounter> encounterTable;
+	
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="chart1")
+	@JsonManagedReference
+	List<LabEntriesParameter> labEntriesParameter; 
+
+	public List<DirectEmailLog> getDirectEmailLogTable() {
+		return directEmailLogTable;
+	}
+
+	public void setDirectEmailLogTable(List<DirectEmailLog> directEmailLogTable) {
+		this.directEmailLogTable = directEmailLogTable;
+	}
+
 	public Integer getChartId() {
 		return chartId;
 	}

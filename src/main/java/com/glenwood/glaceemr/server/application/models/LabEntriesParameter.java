@@ -84,13 +84,18 @@ public class LabEntriesParameter implements Serializable{
 	@JoinColumn(name="lab_entries_parameter_testdetailid", referencedColumnName="lab_entries_testdetail_id", insertable=false, updatable=false)
 	@JsonManagedReference
 	private LabEntries labEntriesTable;
-	
+
 	@NotFound(action=NotFoundAction.IGNORE) 
 	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.LAZY)
 	@JoinColumn(name="lab_entries_parameter_mapid", referencedColumnName="lab_parameters_id", insertable=false, updatable=false)
 	@JsonManagedReference
 	LabParameters labParametersTable;
-		
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="lab_entries_parameter_chartid",referencedColumnName="chart_id",insertable=false,updatable=false)
+	Chart chart1; 
+
 	public Integer getLabEntriesParameterId() {
 		return labEntriesParameterId;
 	}
@@ -250,5 +255,5 @@ public class LabEntriesParameter implements Serializable{
 	@JsonManagedReference
 	@JoinColumn(name="lab_entries_parameter_mapid",referencedColumnName="patient_episode_id", nullable=false, insertable=false, updatable=false)
 	PatientEpisode patientepisodeTable;
-	*/
+	 */
 }

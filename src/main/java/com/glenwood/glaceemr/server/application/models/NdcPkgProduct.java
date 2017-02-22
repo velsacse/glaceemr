@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -30,6 +31,21 @@ public class NdcPkgProduct implements Serializable{
 	@JoinColumn(name="genproduct_id",referencedColumnName="genproduct_id",insertable=false, updatable=false)
 	@JsonManagedReference
 	CoreGenproduct coregenproduct;
+	
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="drug_syn_id",referencedColumnName="drug_syn_id",insertable=false, updatable=false)
+	@JsonManagedReference
+	XrefGenproductSynRxnorm xrefGenproductSynRxnorm;
+
+	public XrefGenproductSynRxnorm getXrefGenproductSynRxnorm() {
+		return xrefGenproductSynRxnorm;
+	}
+
+	public void setXrefGenproductSynRxnorm(
+			XrefGenproductSynRxnorm xrefGenproductSynRxnorm) {
+		this.xrefGenproductSynRxnorm = xrefGenproductSynRxnorm;
+	}
 
 	public Integer getId() {
 		return id;

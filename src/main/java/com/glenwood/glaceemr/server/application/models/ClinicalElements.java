@@ -353,7 +353,6 @@ public class ClinicalElements implements Serializable{
 		this.focalShortcutElements = focalShortcutElements;
 	}
 	
-	
 	public List<TherapySessionPatientDetails> getTherupeticElements() {
 		return therupeticElements;
 	}
@@ -362,5 +361,16 @@ public class ClinicalElements implements Serializable{
 			List<TherapySessionPatientDetails> therupeticElements) {
 		this.therupeticElements = therupeticElements;
 	}
+	
+	@OneToMany(mappedBy="clinicalElements")
+    private List<CNMCodeSystem> cnmCodeSystems;
+	
+	public List<CNMCodeSystem> getCnmCodeSystems() {
+        return cnmCodeSystems;
+    }
+
+    public void setCnmCodeSystems(List<CNMCodeSystem> cnmCodeSystems) {
+        this.cnmCodeSystems = cnmCodeSystems;
+    }
 	
 }

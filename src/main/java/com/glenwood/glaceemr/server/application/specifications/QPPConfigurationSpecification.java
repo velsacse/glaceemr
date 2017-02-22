@@ -9,6 +9,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
+import com.glenwood.glaceemr.server.application.models.MacraConfiguration;
+import com.glenwood.glaceemr.server.application.models.MacraConfiguration_;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration_;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping;
@@ -16,18 +18,7 @@ import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMa
 
 
 public class QPPConfigurationSpecification {
-	public static Specification<MacraProviderConfiguration> getGroupData() {
-		return new Specification<MacraProviderConfiguration>() {
-			public Predicate toPredicate(Root<MacraProviderConfiguration> root,
-					CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate predicateByProviderId = cb.equal(
-						root.get(MacraProviderConfiguration_.macraProviderConfigurationProviderId),-1);
-				Predicate groupDetails=cb.and(predicateByProviderId);
-				return groupDetails;
-			}
-		};
-
-	}
+	
 	public static Specification<MacraProviderConfiguration> getProviderData(final Integer providerId){
 		return new Specification<MacraProviderConfiguration>() {
 
@@ -57,21 +48,8 @@ public class QPPConfigurationSpecification {
 		};
 		
 	}
-	public static Specification<QualityMeasuresProviderMapping> getMeasureIds(){
-		return new Specification<QualityMeasuresProviderMapping>() {
-
-			@Override
-			public Predicate toPredicate(
-					Root<QualityMeasuresProviderMapping> root,
-					CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate predicateByproviderId=cb.equal(root.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),"-1");
-				Predicate measureID=cb.and(predicateByproviderId);
-
-				return measureID;
-			}
-		};
-	}
-	public static Specification<QualityMeasuresProviderMapping> getIndividualMeasureIds(final Integer providerId){
+	
+	public static Specification<QualityMeasuresProviderMapping> getMeasureIds(final Integer providerId){
 		return new Specification<QualityMeasuresProviderMapping>() {
 
 			@Override
@@ -99,4 +77,17 @@ public class QPPConfigurationSpecification {
 		
 	}
 	
+	public static Specification<MacraConfiguration> getConfObj(final Integer programYear){
+		return new Specification<MacraConfiguration>() {
+
+			@Override
+			public Predicate toPredicate(Root<MacraConfiguration> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate predicateByProgramYear=cb.equal(root.get(MacraConfiguration_.macraConfigurationYear),programYear);
+				Predicate confObj=cb.and(predicateByProgramYear);
+				return confObj;
+			}
+		};
+		
+	}
 }

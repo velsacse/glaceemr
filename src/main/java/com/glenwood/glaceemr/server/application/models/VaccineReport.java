@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -161,4 +162,10 @@ public class VaccineReport {
 	public void setLabDescriptionTable(LabDescription labDescriptionTable) {
 		this.labDescriptionTable = labDescriptionTable;
 	}
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="vaccine_report_chart_id",referencedColumnName="chart_id",insertable=false,updatable=false)
+	@JsonBackReference
+	Chart chartTable;
+	
 }

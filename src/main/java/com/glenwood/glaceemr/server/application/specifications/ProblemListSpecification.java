@@ -45,6 +45,28 @@ public class ProblemListSpecification {
 	}
 	
 	/**
+	 * Specification to retrieve all patient problems
+	 * @param patientid
+	 * @return
+	 */
+	public static Specification<ProblemList> getAllproblemlist(final int patientid) {
+		return new Specification<ProblemList>() {
+
+			@Override
+			public Predicate toPredicate(Root<ProblemList> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {			
+
+				Predicate predicate=cb.equal(root.get(ProblemList_.problemListPatientId), patientid);
+				Predicate predicate1=cb.notEqual(root.get(ProblemList_.problemListIsactive), false);
+				Predicate result = cb.and(predicate, predicate1);
+				return result;
+
+			}
+		};
+
+	}
+	
+	/**
 	 * Specification to retrieve patient inactive problems
 	 * @param patientid
 	 * @return
