@@ -76,15 +76,13 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		MacraProviderConfiguration providerThereOrNot=macraProviderConfigurationRepository.findOne(Specifications.where(QPPConfigurationSpecification.getProviderObj(providerId)));
 		
 		if(providerThereOrNot==null || providerThereOrNot.equals(null)){
-		
-		System.out.println("comingoooooooooooooooooooooo");
-		MacraProviderConfiguration macraProviderConfObj=new MacraProviderConfiguration();
-		macraProviderConfObj.setMacraProviderConfigurationProviderId(providerId);
-		macraProviderConfObj.setMacraProviderConfigurationReportingMethod(submissionMtd);
-		macraProviderConfObj.setMacraProviderConfigurationReportingStart(sqlStartDate);
-		macraProviderConfObj.setMacraProviderConfigurationReportingEnd(sqlEndDate);
-		macraProviderConfObj.setMacraProviderConfigurationReportingYear(programYear);
-		macraProviderConfigurationRepository.saveAndFlush(macraProviderConfObj);
+			MacraProviderConfiguration macraProviderConfObj=new MacraProviderConfiguration();
+			macraProviderConfObj.setMacraProviderConfigurationProviderId(providerId);
+			macraProviderConfObj.setMacraProviderConfigurationReportingMethod(submissionMtd);
+			macraProviderConfObj.setMacraProviderConfigurationReportingStart(sqlStartDate);
+			macraProviderConfObj.setMacraProviderConfigurationReportingEnd(sqlEndDate);
+			macraProviderConfObj.setMacraProviderConfigurationReportingYear(programYear);
+			macraProviderConfigurationRepository.saveAndFlush(macraProviderConfObj);
 		}
 		else{
 			providerThereOrNot.setMacraProviderConfigurationReportingEnd(sqlEndDate);

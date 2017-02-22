@@ -167,6 +167,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 			if(codeListForQDM.containsKey("Medication")){
 				requestObj.setMedicationOrders(qdmData.getMedicationQDM(em, codeListForQDM.get("Medication").get("RXNORM"), patientID, 2));
+				requestObj.setActiveMedicationsList(qdmData.getActiveMedications(em, codeListForQDM.get("Medication").get("RXNORM"), patientID, 2));
 			}
 
 			List<InvestigationQDM> investigationQDM = qdmData.getInvestigationQDM(em,patientID,providerId);
