@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.services.chart.MIPS;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.Bean.AttestationBean;
+import com.glenwood.glaceemr.server.application.Bean.AttestationInfo;
+import com.glenwood.glaceemr.server.application.Bean.MUAnalyticsBean;
 import com.glenwood.glaceemr.server.application.Bean.ReportingInfo;
 import com.glenwood.glaceemr.server.application.models.AttestationStatus;
 import com.glenwood.glaceemr.server.application.models.AttestationStatus_;
@@ -109,15 +112,29 @@ public class AttestationStatusServiceImpl implements AttestationStatusService{
 	
 	@SuppressWarnings("rawtypes")
 	@Override
-	public ReportingInfo getAllActiveProviderStatus(Integer reportingYear) {
+	public List<MUAnalyticsBean> getAllActiveProviderStatus() {
 		
-		ReportingInfo finalReportingDataDetails = new ReportingInfo();
+		List<MUAnalyticsBean> resultBean = new ArrayList<MUAnalyticsBean>();
+		
+		List<ReportingInfo> finalReportingDataDetails = new ArrayList<ReportingInfo>();
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Integer> cq1 = builder.createQuery(Integer.class);
 		CriteriaQuery<AttestationBean> cq = builder.createQuery(AttestationBean.class);
+		Root<AttestationStatus> root1 = cq1.from(AttestationStatus.class);
 		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
 		
 		Join<EmployeeProfile, AttestationStatus> attestationTable = root.join(EmployeeProfile_.reportingProvider, JoinType.LEFT);
+		
+		cq1.distinct(true);
+
+		cq1.multiselect(root1.get(AttestationStatus_.reportingYear));
+		
+		cq1.groupBy(root1.get(AttestationStatus_.reportingYear));
+		
+		cq1.orderBy(builder.asc(root1.get(AttestationStatus_.reportingYear)));
+		
+		List<Integer> reportingYrs = em.createQuery(cq1).getResultList();
 		
 		Predicate[] restrictions = new Predicate[] {
 				builder.equal(root.get(EmployeeProfile_.empProfileIsActive),true),
@@ -141,57 +158,190 @@ public class AttestationStatusServiceImpl implements AttestationStatusService{
 		
 		cq.multiselect(selections);
 		
+		cq.orderBy(builder.asc(root.get(EmployeeProfile_.empProfileEmpid)));
+		
 		List<AttestationBean> reportingInfo = em.createQuery(cq).getResultList();
 		
-		HashMap<String, HashMap<String, AttestationBean>> completeReportingInfo = new HashMap<String, HashMap<String,AttestationBean>>();
-		
-		for(int i=0;i<reportingInfo.size();i++){
+		HashMap<String, HashMap<String, AttestationInfo>> completeReportingInfo = new HashMap<String, HashMap<String,AttestationInfo>>();
+
+		for(int j=0;j<reportingYrs.size();j++){
 			
-			AttestationBean obj = reportingInfo.get(i);
+			Integer reportingYear = reportingYrs.get(j);
 			
-			HashMap<String, AttestationBean> providerInfo = new HashMap<String, AttestationBean>();
+			finalReportingDataDetails = new ArrayList<ReportingInfo>();
 			
-			if(obj.getReportingYear() == null){
+			completeReportingInfo = new HashMap<String, HashMap<String,AttestationInfo>>();
+			
+			AttestationBean prevRepObject = new AttestationBean();
+			
+			boolean isProviderExisting = false;
+			
+			for(int i=0;i<reportingInfo.size();i++){
+			
+				ReportingInfo reportingInfoDetails = new ReportingInfo();
+
+				AttestationBean object = reportingInfo.get(i);
 				
-				providerInfo.put("MU", obj);
+				AttestationInfo obj = new AttestationInfo(object.getReportingType(), object.getReportingMethod(), object.getReportingStatus(), object.getReportedDate(), object.getReportingComments());
+
+				HashMap<String, AttestationInfo> providerInfo = new HashMap<String, AttestationInfo>();
 				
-				providerInfo.put("PQRS", obj);
-				
-			}else{
-				
-				if(completeReportingInfo.containsKey(obj.getReportingProvider())){
+				if(i>0 && !prevRepObject.getReportingProvider().equals(object.getReportingProvider()) && completeReportingInfo.size() >= 1){
 					
-					providerInfo = completeReportingInfo.get(obj.getReportingProvider());
+					reportingInfoDetails.setEmployeeId(prevRepObject.getEmployeeID());
+					
+					reportingInfoDetails.setProvider(prevRepObject.getReportingProvider());
+					
+					providerInfo = completeReportingInfo.get(prevRepObject.getReportingProvider());
+					
+					if(prevRepObject.getReportingYear() == null){
+
+						providerInfo.put("MU", new AttestationInfo());
+
+						providerInfo.put("PQRS", new AttestationInfo());
+
+					}else{
+						
+						obj = new AttestationInfo(prevRepObject.getReportingType(), prevRepObject.getReportingMethod(), prevRepObject.getReportingStatus(), prevRepObject.getReportedDate(), prevRepObject.getReportingComments());
+						
+						addToProviderInfo(prevRepObject, obj, reportingYear, providerInfo, completeReportingInfo, true);
+						
+					}
+					
+					reportingInfoDetails.setReportingInfo(providerInfo);
+					
+					finalReportingDataDetails.add(reportingInfoDetails);
+					
+					completeReportingInfo.remove(prevRepObject.getReportingProvider());
 					
 				}
-			
-				if(obj.getReportingYear().equals(reportingYear)){
 				
-					if(obj.getReportingType().trim().equals("MU")){
+				prevRepObject = object;
+				
+				reportingInfoDetails = new ReportingInfo();
+				
+				providerInfo = new HashMap<String, AttestationInfo>();
+				
+				obj = new AttestationInfo(object.getReportingType(), object.getReportingMethod(), object.getReportingStatus(), object.getReportedDate(), object.getReportingComments());
+				
+				if(completeReportingInfo.containsKey(object.getReportingProvider())){
+					
+					isProviderExisting = true;
+					
+					providerInfo = completeReportingInfo.get(object.getReportingProvider());
+					
+				}
+				
+				addToProviderInfo(object, obj, reportingYear, providerInfo, completeReportingInfo, false);
+				
+				completeReportingInfo.put(object.getReportingProvider(), providerInfo);
+				
+				if(providerInfo.keySet().size() == 2){
+				
+					reportingInfoDetails.setEmployeeId(object.getEmployeeID());
+				
+					reportingInfoDetails.setProvider(object.getReportingProvider());
+					
+					reportingInfoDetails.setReportingInfo(providerInfo);
+					
+					if(isProviderExisting){
 						
-						providerInfo.put("MU", obj);
+						isProviderExisting = false;
+						finalReportingDataDetails.add(reportingInfoDetails);
+						
+					}else{
+						
+						finalReportingDataDetails.add(reportingInfoDetails);
 						
 					}
 					
-					if(obj.getReportingType().trim().equals("PQRS")){
-					
-						providerInfo.put("PQRS", obj);
-						
-					}
+					completeReportingInfo.remove(object.getReportingProvider());
 					
 				}
 				
 			}
 			
-			completeReportingInfo.put(obj.getReportingProvider(), providerInfo);
+			resultBean.add(j, new MUAnalyticsBean(reportingYear, finalReportingDataDetails));
 			
 		}
 		
-		finalReportingDataDetails.setReportingYear(reportingYear);
+		return resultBean;
 		
-		finalReportingDataDetails.setReportingInfo(completeReportingInfo);
+	}
+	
+	private void addToProviderInfo(AttestationBean object, AttestationInfo obj, Integer reportingYear,
+			HashMap<String, AttestationInfo> providerInfo, HashMap<String, HashMap<String, AttestationInfo>> completeReportingInfo, boolean isFromCondition){
 		
-		return finalReportingDataDetails;
+		
+		if(isFromCondition){
+			
+			if(object.getReportingType().trim().equals("MU")){
+
+				providerInfo.put("PQRS", new AttestationInfo());
+
+			}
+
+			if(object.getReportingType().trim().equals("PQRS")){
+
+				providerInfo.put("MU", new AttestationInfo());
+
+			}
+			
+		}else{
+			
+			if(object.getReportingYear() == null){
+
+				providerInfo.put("MU", obj);
+
+				providerInfo.put("PQRS", obj);
+
+			}else{
+
+				if(completeReportingInfo.containsKey(object.getReportingProvider())){
+
+					providerInfo = completeReportingInfo.get(object.getReportingProvider());
+
+				}
+
+				if(object.getReportingYear().equals(reportingYear)){
+
+					if(object.getReportingType().trim().equals("MU")){
+
+						providerInfo.put("MU", obj);
+
+					}
+
+					if(object.getReportingType().trim().equals("PQRS")){
+
+						providerInfo.put("PQRS", obj);
+
+					}
+
+				}else{
+				
+					if(providerInfo.keySet().size() == 0){
+					
+						providerInfo.put(object.getReportingType(), new AttestationInfo());
+					
+					}else{
+					
+						if(providerInfo.containsKey("MU")){
+						
+							providerInfo.put("PQRS", new AttestationInfo());
+						
+						}else{
+						
+							providerInfo.put("MU", new AttestationInfo());
+						
+						}
+						
+					}
+					
+				}
+
+			}
+			
+		}
 		
 	}
 	

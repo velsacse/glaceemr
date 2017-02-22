@@ -1,7 +1,10 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.Bean.AttestationBean;
-import com.glenwood.glaceemr.server.application.Bean.ReportingInfo;
+import com.glenwood.glaceemr.server.application.Bean.MUAnalyticsBean;
 import com.glenwood.glaceemr.server.application.models.AttestationStatus;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.AttestationStatusService;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeDataBean;
@@ -71,14 +74,17 @@ public class AttestationStatusController {
 	
 	@RequestMapping(value = "/getAllReportingDetails", method = RequestMethod.GET)
 	@ResponseBody
-	public EMRResponseBean getAllProviderReportingStatus(
-			@RequestParam(value = "reportingYear", required = true, defaultValue="2016") Integer reportingYear){
+	public EMRResponseBean getAllProviderReportingStatus() throws JSONException{
 		
 		EMRResponseBean response=new EMRResponseBean();
 		
-		ReportingInfo reportingInfo = statusSerivce.getAllActiveProviderStatus(reportingYear);
+		List<MUAnalyticsBean> reportingInfo = statusSerivce.getAllActiveProviderStatus();
 		
-		response.setData(reportingInfo);
+		Map<String, List<MUAnalyticsBean>> result = new HashMap<String, List<MUAnalyticsBean>>();
+		
+		result.put("reportingYears", reportingInfo);
+		
+		response.setData(result);
 		
 		return response;
 		
