@@ -2,6 +2,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,8 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.internalmessages.InternalMessagesService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 
 /**
  * Controller for Internal Messages.
@@ -33,6 +42,15 @@ public class InternalMessagesController {
 	@Autowired
 	InternalMessagesService internalMessagesService;
 	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	SessionMap sessionMap;
+	
+	@Autowired
+	HttpServletRequest request;
+	
 	@RequestMapping(value = "/getEncounters", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getIMEncounters(@RequestParam(value="patientid", required=true, defaultValue="") String patientId){
@@ -41,6 +59,7 @@ public class InternalMessagesController {
 			List<Encounter> encounterList=internalMessagesService.getIMEncounters(patientId);
 			EMRResponseBean result= new EMRResponseBean();
 			result.setData(encounterList);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting internal messages", sessionMap.getUserID(), request.getRemoteAddr(), Integer.parseInt(patientId), "", LogUserType.USER_LOGIN, "", "");
 		return result;
 	}
 	
@@ -57,6 +76,7 @@ public class InternalMessagesController {
 			Encounter encounter=internalMessagesService.getEncounterDetails(encounterId);
 			EMRResponseBean result= new EMRResponseBean();
 			result.setData(encounter);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting internal messages by encounter id", sessionMap.getUserID(), request.getRemoteAddr(),-1, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 		return result;
 	}
 	
@@ -81,6 +101,7 @@ public class InternalMessagesController {
 			Encounter encounter=internalMessagesService.update(encounterId,patientId,chartId,userId,serviceDoctor,message,severity,status,encounterType);
 			EMRResponseBean result= new EMRResponseBean();
 			result.setData(encounter);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Update internal messages by encounter id", sessionMap.getUserID(), request.getRemoteAddr(),-1, "encounterId="+encounterId+"patientId="+patientId+"&chartId="+chartId+"&severity="+severity+"&serviceDoctor="+serviceDoctor, LogUserType.USER_LOGIN, "", "");
 		return result;
 	}
 	
@@ -104,6 +125,7 @@ public class InternalMessagesController {
 			Encounter encounter=internalMessagesService.compose(patientId,chartId,userId,serviceDoctor,toId,message,severity,encounterType);
 			EMRResponseBean result= new EMRResponseBean();
 			result.setData(encounter);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Create internal messages", sessionMap.getUserID(), request.getRemoteAddr(),-1, "encounterType="+encounterType+"patientId="+patientId+"&chartId="+chartId+"&severity="+severity+"&serviceDoctor="+serviceDoctor, LogUserType.USER_LOGIN, "", "");
 		return result;
 	}
 	

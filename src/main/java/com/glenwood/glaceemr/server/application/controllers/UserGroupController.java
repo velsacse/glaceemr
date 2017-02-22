@@ -3,6 +3,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.UserGroup;
 import com.glenwood.glaceemr.server.application.services.alertinbox.UserGroupService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 
 /**
  * Controller for UserGroup module. It has one main entities, <b> UserGroup </b>.
@@ -26,7 +35,14 @@ public class UserGroupController{
 
 	@Autowired
 	UserGroupService userGroupService;
-
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	SessionMap sessionMap;
+	
+	@Autowired
+	HttpServletRequest request;
 
 	/**
 	 * 
@@ -42,6 +58,8 @@ public class UserGroupController{
 		grpDetails=userGroupService.getUserGroup();
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(grpDetails);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting user group names.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 
@@ -60,6 +78,8 @@ public class UserGroupController{
 		grpDetails=userGroupService.getUserGroupByGroupId(Integer.parseInt(groupid));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(grpDetails);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting user group names by id.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "groupid="+groupid, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 
@@ -78,6 +98,8 @@ public class UserGroupController{
 		List<UserGroup> grpDetails=userGroupService.deleteUserGroupByGroupId(Integer.parseInt(groupId));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(grpDetails);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Delete user group names.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "groupid="+groupId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 
@@ -113,6 +135,8 @@ public class UserGroupController{
 		List<UserGroup> grpDetails=userGroupService.updateUserGroupByGroupId(Integer.parseInt(groupId),groupName,userIdList,userNameList);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(grpDetails);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Update user group names.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "groupid="+groupId+"&userId="+userId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 			}
 
@@ -146,6 +170,8 @@ public class UserGroupController{
 		List<UserGroup> grpDetails=userGroupService.insertUserGroup(groupName,userIdList,userNameList);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(grpDetails);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Create user group names.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "groupName="+groupName+"&userId="+userId+"&userName="+userName, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 			}
 

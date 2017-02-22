@@ -2,6 +2,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,8 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.GrowthGraphPatientData;
 import com.glenwood.glaceemr.server.application.models.GrowthGraphVitalData;
 import com.glenwood.glaceemr.server.application.models.H650;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.chart.growthgraph.GrowthGraphService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 
 /**
  * Controller for growth graph
@@ -30,6 +39,14 @@ public class GrowthGraphController {
 	@Autowired
 	GrowthGraphService growthGraphService;
 
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	SessionMap sessionMap;
+	
+	@Autowired
+	HttpServletRequest request;
 	
 	/**
 	 * To get the default graph for the patient. (Based on patient's age)
@@ -44,6 +61,7 @@ public class GrowthGraphController {
 			String defaultId=growthGraphService.getDefaultGraphId(patientId);
 			EMRResponseBean result= new EMRResponseBean();
 			result.setData(defaultId);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting default graph id", sessionMap.getUserID(), request.getRemoteAddr(), Integer.parseInt(patientId), "", LogUserType.USER_LOGIN, "", "");
 		return result;
 	}
 	
@@ -60,6 +78,7 @@ public class GrowthGraphController {
 		GrowthGraphPatientData patientDetails=growthGraphService.getpatientinfo(patientId);
 		EMRResponseBean result= new EMRResponseBean();
 		result.setData(patientDetails);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting patient info for growth graph", sessionMap.getUserID(), request.getRemoteAddr(), Integer.parseInt(patientId), "", LogUserType.USER_LOGIN, "", "");
 		return result;
 	}
 	
@@ -77,6 +96,7 @@ public class GrowthGraphController {
 		List<GrowthGraphVitalData> patientDetails=growthGraphService.getVitalValues(patientId,wellvisit);
 		EMRResponseBean result= new EMRResponseBean();
 		result.setData(patientDetails);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting patient vital dta for growth graph", sessionMap.getUserID(), request.getRemoteAddr(), Integer.parseInt(patientId), "", LogUserType.USER_LOGIN, "", "");
 		return result;
 	}
 	
@@ -93,6 +113,7 @@ public class GrowthGraphController {
 		List<H650> patientDetails=growthGraphService.getGraphList(patientId);
 		EMRResponseBean result= new EMRResponseBean();
 		result.setData(patientDetails);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting list of growth graph", sessionMap.getUserID(), request.getRemoteAddr(), Integer.parseInt(patientId), "", LogUserType.USER_LOGIN, "", "");
 		return result;
 	}
 }
