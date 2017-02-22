@@ -5,13 +5,15 @@ import java.util.Date;
 public class ReferralQDM {
 	
 	Integer refId;
-	Date referredDate;
+	Date orderedDate;
+	Date reviewedDate;
 	Integer status;
 	
-	public ReferralQDM(Integer refId, Date referredDate, Integer status) {
+	public ReferralQDM(Integer refId, Date orderedDate,Date reviewedDate, Integer status) {
 		super();
 		this.refId = refId;
-		this.referredDate = referredDate;
+		this.orderedDate = orderedDate;
+		this.reviewedDate=reviewedDate;
 		this.status = status;
 	}	
 
@@ -23,14 +25,24 @@ public class ReferralQDM {
 		this.refId = refId;
 	}
 	
-	public Date getReferredDate() {
-		return referredDate;
-	}
 	
-	public void setReferredDate(Date referredDate) {
-		this.referredDate = referredDate;
-	}
 	
+	public Date getOrderedDate() {
+		return orderedDate;
+	}
+
+	public void setOrderedDate(Date orderedDate) {
+		this.orderedDate = orderedDate;
+	}
+
+	public Date getReviewedDate() {
+		return reviewedDate;
+	}
+
+	public void setReviewedDate(Date reviewedDate) {
+		this.reviewedDate = reviewedDate;
+	}
+
 	public Integer getStatus() {
 		return status;
 	}

@@ -50,8 +50,6 @@ public class EMeasureUtils {
 		
 		for(int index = 0;index < emeasure.size();index++){
 			
-			System.out.println(new Date()+"started working for measure at index : "+emeasure.get(index).getId());
-			
 			measureInfo.put(""+emeasure.get(index).getId(), emeasure.get(index).getTitle());
 			
 			specification = emeasure.get(index).getSpecification();
@@ -118,8 +116,6 @@ public class EMeasureUtils {
 								codeKey = codeSetString.split(",")[limit - codeSet -1];
 							}
 							
-							System.out.println(new Date()+"Category Name: "+qdmCategoryNames[i]+" codeKey: "+codeKey);
-							
 							if(categoryObj.containsKey(codeKey)){
 								
 								if(codeSetString.contains(codeKey) && c.getCodeList().containsKey(codeKey)){
@@ -143,30 +139,21 @@ public class EMeasureUtils {
 							
 						}
 						
-						System.out.println(c.getCategory()+">>>>>> "+c.getCodeList().get("SNOMEDCT"));
 						finalCodeList.put(qdmCategoryNames[i], categoryObj);
 						
 					}else{
-						System.out.println(c.getCategory()+" ********* "+c.getCodeList().get("SNOMEDCT"));
 						finalCodeList.put(qdmCategoryNames[i], c.getCodeList());
 					}
 					
 				}else{
-					System.out.println(c.getCategory()+" :::::: "+c.getCodeList().get("SNOMEDCT"));
 					finalCodeList.put(qdmCategoryNames[i], c.getCodeList());
 				}
 				
 			}
 			
-			System.out.println(new Date()+"completed working for measure at index : "+(index+1));
-			
 		}
 		
 		setMeasureInfo(measureInfo);
-		
-		System.out.println(new Date()+"returning hashmap of measures codelist");
-		
-		System.out.println("\n\n codelist for Physical Exam: "+finalCodeList.get("Physical Exam").get("SNOMEDCT"));
 		
 		return finalCodeList;
 		
@@ -177,15 +164,9 @@ public class EMeasureUtils {
 		
 		String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/eCQMServices/getECQMInfoById?ids="+measureIds;
 		
-		System.out.println(new Date()+"rest api url call : "+apiUrl);
-		
 	    String result = restTemplate.getForObject(apiUrl, String.class);
 		
-	    System.out.println(new Date()+"getting measure info to display provider details");
-	    	    
 	    getMeasureInfo(result);
-	    
-	    System.out.println(new Date()+"success in getting measure info for display provider details");
 	    
 		return (List<EMeasure>) mapper.readValue(result, mapper.getTypeFactory().constructCollectionType(List.class, EMeasure.class));
 		
@@ -239,8 +220,6 @@ public class EMeasureUtils {
 				
 			}
 			
-		}else{
-			System.out.println(new Date()+"no "+categoryName+" in measure object");
 		}
 		
 		return codeList;
@@ -254,14 +233,9 @@ public class EMeasureUtils {
 		if(measureObj.containsKey(categoryName)){
 
 			HashMap<String, String> codeSet = measureObj.get(categoryName);
-			System.out.println(new Date()+"-------------------------------------------------------------------");
-			System.out.println(new Date()+"code set is:::::::::::::::"+codeSet.toString());
 			for(int i=0;i<codeSet.keySet().toArray().length;i++){
 
 				if(codeSet.keySet().toArray()[i].equals("CPT")){
-					System.out.println(new Date()+"111111111............."+codeSet.keySet().toArray()[i].toString());
-					System.out.println(new Date()+"222222222............."+codeSet.get(codeSet.keySet().toArray()[i].toString()));
-					System.out.println(new Date()+"33333333333..........."+codeSet.get("CPT").toString());
 					codeList = Arrays.asList(codeSet.get("CPT").toString().split(","));
 				}
 
@@ -365,9 +339,11 @@ public class EMeasureUtils {
 				}
 				
 				labTestObj.setDescription(eachObj.getCodeDescription());
-				if(eachObj.getStatus()==3 || eachObj.getStatus()==4 || eachObj.getStatus()==5 || eachObj.getStatus()==6)
+				if(eachObj.getStatus()==3 || eachObj.getStatus()==4 || eachObj.getStatus()==5 || eachObj.getStatus()==6){
 					labTestObj.setStatus(2);
-				else if(eachObj.getStatus() == 1){
+					labTestObj.setStartDate(eachObj.getPerformeOn());
+					labTestObj.setEndDate(eachObj.getPerformeOn());
+				}else if(eachObj.getStatus() == 1){
 					labTestObj.setStartDate(eachObj.getCreatedOn());
 					labTestObj.setEndDate(eachObj.getCreatedOn());
 				}else if(eachObj.getStatus() == 8){
@@ -414,9 +390,11 @@ public class EMeasureUtils {
 				}
 				
 				diagnosticStudyObj.setDescription(eachObj.getCodeDescription());
-				if(eachObj.getStatus()==3 || eachObj.getStatus()==4 || eachObj.getStatus()==5 || eachObj.getStatus()==6)
+				if(eachObj.getStatus()==3 || eachObj.getStatus()==4 || eachObj.getStatus()==5 || eachObj.getStatus()==6){
 					diagnosticStudyObj.setStatus(2);
-				else if(eachObj.getStatus() == 1){
+					diagnosticStudyObj.setStartDate(eachObj.getPerformeOn());
+					diagnosticStudyObj.setEndDate(eachObj.getPerformeOn());
+				}else if(eachObj.getStatus() == 1){
 					diagnosticStudyObj.setStartDate(eachObj.getCreatedOn());
 					diagnosticStudyObj.setEndDate(eachObj.getCreatedOn());
 				}else if(eachObj.getStatus() == 8){
@@ -466,9 +444,11 @@ public class EMeasureUtils {
 				}
 				
 				interventionObj.setDescription(eachObj.getCodeDescription());
-				if(eachObj.getStatus()==3 || eachObj.getStatus()==4 || eachObj.getStatus()==5 || eachObj.getStatus()==6)
+				if(eachObj.getStatus()==3 || eachObj.getStatus()==4 || eachObj.getStatus()==5 || eachObj.getStatus()==6){
 					interventionObj.setStatus(2);
-				else if(eachObj.getStatus() == 1){
+					interventionObj.setStartDate(eachObj.getPerformeOn());
+					interventionObj.setEndDate(eachObj.getPerformeOn());
+				}else if(eachObj.getStatus() == 1){
 					interventionObj.setStartDate(eachObj.getCreatedOn());
 					interventionObj.setEndDate(eachObj.getCreatedOn());
 				}else if(eachObj.getStatus() == 8){
@@ -503,7 +483,6 @@ public class EMeasureUtils {
 
 			eachObj = patientInvestigationData.get(i);
 			procedureObj = new Procedure();
-			System.out.println(new Date()+"code from db is:::::::::::"+eachObj.getCode().toString());
 			if(codeList.contains(eachObj.getCode())){
 
 				procedureObj.setCode(eachObj.getCode());
@@ -515,9 +494,11 @@ public class EMeasureUtils {
 				}
 
 				procedureObj.setDescription(eachObj.getCodeDescription());
-				if(eachObj.getStatus()==3 || eachObj.getStatus()==4 || eachObj.getStatus()==5 || eachObj.getStatus()==6)
+				if(eachObj.getStatus()==3 || eachObj.getStatus()==4 || eachObj.getStatus()==5 || eachObj.getStatus()==6){
 					procedureObj.setStatus(2);
-				else if(eachObj.getStatus() == 1){
+					procedureObj.setStartDate(eachObj.getPerformeOn());
+					procedureObj.setEndDate(eachObj.getPerformeOn());
+				}else if(eachObj.getStatus() == 1){
 					procedureObj.setStartDate(eachObj.getCreatedOn());
 					procedureObj.setEndDate(eachObj.getCreatedOn());
 				}else if(eachObj.getStatus() == 8){
@@ -543,18 +524,11 @@ public class EMeasureUtils {
 		if(ProcedureObj!=null){
 			procedureQDM.addAll(ProcedureObj);
 		}
-		System.out.println(new Date()+"size before is::::::;;;;"+procedureQDM.size());
-		for(int i=0;i<procedureQDM.size();i++){
-			System.out.println(new Date()+"data before is..............."+procedureQDM.get(i).getCode().toString());
-		}
+		
 		if(ProcBasedOnCPT!=null){
-			System.out.println(new Date()+"not null only................");
 			procedureQDM.addAll(ProcBasedOnCPT);
 		}
-		System.out.println(new Date()+"size after is::::::;;;;"+procedureQDM.size());
-		for(int i=0;i<procedureQDM.size();i++){
-			System.out.println(new Date()+"data after is..............."+procedureQDM.get(i).getCode().toString());
-		}
+		
 		return procedureQDM;
 
 	}
@@ -569,7 +543,6 @@ public class EMeasureUtils {
 			procedureObj.setStatus(2);
 			Date reviewedDate = obj.get(i);
 			try {
-				System.out.println(new Date()+"reviewed date is:::::::::::::::::::::"+reviewedDate.toString());
 				procedureObj.setStartDate(reviewedDate);
 				procedureObj.setEndDate(reviewedDate);
 			} catch (Exception e) {

@@ -36,6 +36,7 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.MedicationOr
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Negation;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Patient;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Procedure;
+import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.QDM;
 import com.glenwood.glaceemr.server.application.models.CNMCodeSystem;
 import com.glenwood.glaceemr.server.application.models.CNMCodeSystem_;
 import com.glenwood.glaceemr.server.application.models.Chart;
@@ -79,6 +80,8 @@ import com.glenwood.glaceemr.server.application.models.NdcPkgProduct;
 import com.glenwood.glaceemr.server.application.models.NdcPkgProduct_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PortalMessage;
 import com.glenwood.glaceemr.server.application.models.PortalMessage_;
@@ -113,10 +116,7 @@ public class ExportQDM {
 	}
 	
 	public List<Procedure> getProcBasedOnCPT(EntityManager em,int patientID, int providerId,List<String> cptCodes){
-		System.out.println(new Date()+"cpt codes are::::::::::......."+cptCodes.toString());
-		System.out.println(new Date()+"Query starts here plsssssssssssssssssss");
 		if(cptCodes.size()==0){
-			System.out.println(new Date()+"Coming mummy");
 			cptCodes.add("000000");}
 		else if(cptCodes.toString()=="[]")
 			cptCodes.add("000000");
@@ -144,13 +144,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 		List<EncounterQDM> encounterObj = new ArrayList<EncounterQDM>();
 		List<Procedure> procedureList = new ArrayList<Procedure>();
 		encounterObj = em.createQuery(cq).getResultList();
-		System.out.println(new Date()+"the size of encounter obj is::::::::::::"+encounterObj.size());
-		System.out.println(new Date()+"query ends here plssssssssssssssssss");
 		Procedure procedureObj;
 		for(int i=0;i<encounterObj.size();i++){
 			
 			procedureObj = new Procedure();
-			System.out.println(new Date()+"inside for loop is ........."+encounterObj.get(i).getCode().toString());
 			procedureObj.setCode(encounterObj.get(i).getCode());
 			procedureObj.setCodeSystemOID("2.16.840.1.113883.6.12");
 			procedureObj.setStartDate(encounterObj.get(i).getStartDate());
@@ -158,7 +155,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 			procedureObj.setStatus(2);
 			procedureList.add(i, procedureObj);
 		}
-		System.out.println(new Date()+"size of procedure list is:::::::::::::"+procedureList.size());
 		return procedureList;
 	}
 	
@@ -192,7 +188,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					builder.equal(encounterChartJoin.get(Chart_.chartPatientid), patientID),
 					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
 					builder.equal(chartServiceJoin.get(ServiceDetail_.sdoctors), providerId),
-					builder.equal(root.get(Encounter_.encounterDate),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)),
+					builder.equal(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)),builder.function("DATE", Date.class,chartServiceJoin.get(ServiceDetail_.serviceDetailDos))),
 			};
 			
 		}else{
@@ -200,13 +196,12 @@ Root<Encounter> root = cq.from(Encounter.class);
 			restrictions = new Predicate[] {
 					builder.equal(encounterChartJoin.get(Chart_.chartPatientid), patientID),
 					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
-					builder.equal(root.get(Encounter_.encounterDate),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)),
+					builder.equal(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)),builder.function("DATE", Date.class,chartServiceJoin.get(ServiceDetail_.serviceDetailDos))),
 			};
 			
 		}
 		
 		cq.where(restrictions);
-		System.out.println(new Date()+"cq>>>>>>>"+cq.toString());
 		
 		CriteriaBuilder builder1 = em.getCriteriaBuilder();
 		CriteriaQuery<EncounterQDM> cq1 = builder1.createQuery(EncounterQDM.class);
@@ -220,8 +215,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 				encounterRoot.get(Encounter_.encounterClosedDate),
 		};
 		cq1.select(builder1.construct(EncounterQDM.class,selections1));
-		System.out.println(new Date()+"encounter details::::::::::::");
-		System.out.println(new Date()+"cq>>>>>>>"+cq1.toString());
 		List<EncounterQDM> encounterObj = new ArrayList<EncounterQDM>();
 		List<EncounterQDM> encounterObj1 = new ArrayList<EncounterQDM>();
 		
@@ -246,7 +239,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 				encObject.setCode(encounterObj.get(i).getCode());
 				encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
 				encObject.setStartDate(encounterObj.get(i).getStartDate());
-				System.out.println(new Date()+"Encounter date is::................"+encounterObj.get(i).getStartDate().toString());
 				encObject.setEndDate(encounterObj.get(i).getEndDate());
 				
 				encounterQDM.add(i, encObject);
@@ -295,8 +287,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 			Calendar c = Calendar.getInstance();
 			if(diagnosisObj.get(i).getProblemListCreatedon()!=null)
 			c.setTimeInMillis(diagnosisObj.get(i).getProblemListCreatedon().getTime());
-			
-			System.out.println(new Date()+"\n "+c.getTime()+"\n");
 			
 			if(diagnosisObj.get(i).getProblemListOnsetDate()==null){
 				assessmentObj.setStartDate(c.getTime());
@@ -358,8 +348,6 @@ Root<Encounter> root = cq.from(Encounter.class);
             Date endDate = cal.getTime();
             cal.add(Calendar.YEAR, range);
             Date startDate = cal.getTime();
-            System.out.println(new Date()+"start date::::::::::;"+startDate.toString());
-            System.out.println(new Date()+"end date::::::::::::::"+endDate.toString());
             Predicate dateRange=builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate);
             cq.where(builder.and(patId,status,dateRange));
         }
@@ -402,9 +390,89 @@ Root<Encounter> root = cq.from(Encounter.class);
         
     }
 	
+	public List<ActiveMedication> getActiveMedications(EntityManager em,String rxNormCodes,int patientId, int range) {
+
+		String [] codes=rxNormCodes.split(",");
+
+		List<String> codeList=new ArrayList<String>();
+		for(int i=0;i<codes.length;i++){
+			codeList.add(codes[i]);
+		}
+
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+
+		Root<Prescription> root = cq.from(Prescription.class);
+
+		Join<Prescription, NdcPkgProduct> prescNdcJoin=root.join(Prescription_.ndcPkgProduct,JoinType.INNER);
+		Join<NdcPkgProduct, XrefGenproductSynRxnorm> ndcNormJoin=prescNdcJoin.join(NdcPkgProduct_.xrefGenproductSynRxnorm,JoinType.INNER);
+		Join<Prescription, MedStatus> prescStatusJoin=root.join(Prescription_.medstatus,JoinType.INNER);
+		ndcNormJoin.on(ndcNormJoin.get(XrefGenproductSynRxnorm_.rxcui).in(codeList));
+
+		Predicate patId=builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
+		Predicate status=root.get(Prescription_.docPrescStatus).in(1,2);
+		Predicate activeMed=builder.equal(root.get(Prescription_.docPrescIsActive), true);
+		cq.select(builder.construct(MedicationQDM.class, root.get(Prescription_.rxname),
+				root.get(Prescription_.rxstrength),
+				root.get(Prescription_.rxform),
+				root.get(Prescription_.docPrescRoute),
+				prescStatusJoin.get(MedStatus_.medStatusName),
+				root.get(Prescription_.rxfreq),
+				ndcNormJoin.get(XrefGenproductSynRxnorm_.rxcui),
+				builder.selectCase().when(builder.notEqual(builder.coalesce(root.get(Prescription_.noofrefills), ""), ""), root.get(Prescription_.noofrefills)).otherwise("0"),
+				builder.selectCase().when(builder.notEqual(builder.coalesce(root.get(Prescription_.noofdays), ""), ""), root.get(Prescription_.noofdays)).otherwise("0"),
+				root.get(Prescription_.docPrescOrderedDate),
+				builder.selectCase().when(root.get(Prescription_.docPrescStartDate).isNotNull(), root.get(Prescription_.docPrescStartDate)).otherwise(root.get(Prescription_.docPrescOrderedDate))));
+
+		if(range!=0){
+			range=range* (-1);
+			Calendar cal = Calendar.getInstance();
+			Date endDate = cal.getTime();
+			cal.add(Calendar.YEAR, range);
+			Date startDate = cal.getTime();
+			Predicate dateRange=builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate);
+			cq.where(builder.and(patId,status,dateRange,activeMed));
+		}
+		else{
+			cq.where(builder.and(patId,status,activeMed));	
+		}
+
+		cq.distinct(true);
+
+		List<Object> result=em.createQuery(cq).getResultList();
+
+		List<ActiveMedication> medicationObj = new ArrayList<ActiveMedication>();
+
+		for(int i=0;i<result.size();i++){
+
+			ActiveMedication eachMedObj = new ActiveMedication();
+			MedicationQDM eachData=(MedicationQDM) result.get(i);
+
+			int cmd=(Integer.parseInt(eachData.getDays()) * (Integer.parseInt(eachData.getRefills())+1));
+			eachData.setCMD(cmd);
+
+			eachMedObj.setCode(eachData.getCode());
+			eachMedObj.setCodeSystem("RXNORM");
+			eachMedObj.setCodeSystemOID("2.16.840.1.113883.6.88");
+			eachMedObj.setDescription(eachData.getDescription());
+			eachMedObj.setStartDate(eachData.getStartDate());
+
+			eachMedObj.setCMD(cmd);
+			eachMedObj.setDose(eachData.getDose());
+			eachMedObj.setFrequency(eachData.getFrequency());
+			eachMedObj.setRefills(Integer.parseInt(eachData.getRefills()));
+			eachMedObj.setRoute(eachData.getRoute());
+
+			medicationObj.add(eachMedObj);
+
+		}
+
+		return medicationObj;
+
+	}
+	
 	@SuppressWarnings("rawtypes")
 	public List<InvestigationQDM> getInvestigationQDM(EntityManager em, int patientID, int providerId) {
-		System.out.println(new Date()+"query starys here ::::::::::::::::::::::");
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<InvestigationQDM> cq = builder.createQuery(InvestigationQDM.class);
 		
@@ -446,7 +514,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 		}catch(Exception e){
 			e.printStackTrace();			
 		}
-		System.out.println(new Date()+"query ends here::::::::::::::::::::");
 		return procedureForLabs;
 		
 	}
@@ -500,7 +567,9 @@ Root<Encounter> root = cq.from(Encounter.class);
 			interventionObj.setCode("306253008");
 			interventionObj.setCodeSystem("Referral to doctor (procedure)");
 			interventionObj.setCodeSystemOID("2.16.840.1.113883.6.96");
-			interventionObj.setStartDate(obj.get(i).getReferredDate());
+			interventionObj.setStartDate(obj.get(i).getOrderedDate());
+			interventionObj.setEndDate(obj.get(i).getReviewedDate());
+			interventionObj.setId(obj.get(i).getRefId().toString());
 			
 			interventionList.add(interventionObj);
 			
@@ -523,6 +592,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				Communication eachObj = new Communication();
 				
 				eachObj.setFulFillmentId(""+referralObj.get(i).getRefId());
+				eachObj.setStartDate(referralObj.get(i).getReviewedDate());
 				eachObj.setCode("371530004");
 				eachObj.setCodeSystemOID("2.16.840.1.113883.6.96");
 				eachObj.setCodeSystem("Clinical consultation report (record artifact)");
@@ -580,7 +650,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Root<H413> rooth413 = cq.from(H413.class);
 		Selection[] selections= new Selection[] {
 				rooth413.get(H413_.h413001).alias("Referral id"),
-				rooth413.get(H413_.h413004).alias("Referred Date"),
+				rooth413.get(H413_.referralOrderOn).alias("Ordered Date"),
+				rooth413.get(H413_.referralReviewedOn).alias("Reviewed On"),
 				rooth413.get(H413_.h413041).alias("Status")
 		};
 		cq.select(builder.construct(ReferralQDM.class,selections));
@@ -723,8 +794,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 			immuObject.setStartDate(immuFirstQueryResult.get(i).getPerformedDate());
 			immuObject.setEndDate(immuFirstQueryResult.get(i).getPerformedDate());
 			immuObject.setStatus(immuFirstQueryResult.get(i).getStatus());
-			if(immuFirstQueryResult.get(i).getStatus()==3)
-			immuObject.setStatus(2);
+			if(immuFirstQueryResult.get(i).getStatus()==3 || immuFirstQueryResult.get(i).getStatus()==4 || immuFirstQueryResult.get(i).getStatus()==5 || immuFirstQueryResult.get(i).getStatus()==6)
+				immuObject.setStatus(2);
 			else if(immuFirstQueryResult.get(i).getStatus()==8 && immuFirstQueryResult.get(i).getRefusalReason()==1){
 				immuObject.setStatus(2);
 				Negation negationObj=new Negation();
@@ -889,7 +960,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			Predicate checkSnomedCodeNotEmpty=builder.notEqual(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed),builder.literal(""));   
 			codeSystemJoin.on(builder.and(checkOid,checkCodeList,checkCodeNotNull));   
 
-			Expression<String> rcode = builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).isNotNull(),clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed)).otherwise(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode));
+			Expression<String> rcode = builder.<String>selectCase().when(builder.notEqual(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed),builder.literal("")),clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed)).otherwise(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode));
 			Expression<String> rvalue = builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsDatatype).in("4","5"),clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName)).otherwise(root.get(PatientClinicalElements_.patientClinicalElementsValue));
 
 			Selection[] selections= new Selection[] {
@@ -946,9 +1017,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			}
 
 		}
-		System.out.println("size inside after snomed isS>>>>>>>>>>>>>>>>>>"+clinicaldataFinal.size());
 		if(loincCodeList.size()>0){                                   
-			System.out.println("coming only>>>>>>>>>>>>>>>>>>>>");
 			CriteriaQuery<ClinicalDataQDM> cqForLoinc = builder.createQuery(ClinicalDataQDM.class);       
 			Root<PatientClinicalElements> root = cqForLoinc.from(PatientClinicalElements.class);
 			Join<PatientClinicalElements, Encounter> EncElementJoin = root.join(PatientClinicalElements_.encounter, JoinType.INNER);
@@ -963,8 +1032,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 			Predicate checkCodeNotEmpty=builder.notEqual(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode),builder.literal(""));       
 			codeSystemJoin.on(builder.and(checkOid,checkCodeList,checkCodeNotNull));   
 
-			Expression<String> rcode=codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode);
-			Expression<String> rvalue=    builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsDatatype).in("3","4"),clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName)).otherwise(root.get(PatientClinicalElements_.patientClinicalElementsValue));
+			Expression<String> rcode = codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode);
+			Expression<String> rvalue = builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsDatatype).in("5","4"),clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName)).otherwise(root.get(PatientClinicalElements_.patientClinicalElementsValue));
 
 			Selection[] selections= new Selection[] {
 					rcode,           
@@ -999,7 +1068,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 
 			for(int i=0;i<clinicalDataLOINC.size();i++){
 				ClinicalDataQDM clinicalDataQDM=clinicalDataLOINC.get(i);
-				System.out.println("data is>>>>>>>>>>>>>>>>>>>>>>>>"+clinicalDataLOINC.get(i).getCode().toString());
 				clinicalDataQDM.setEndDate(endDate);
 				clinicalDataQDM.setStartDate(startDate);
 				if(clinicalDataQDM.getResultCode()!=null && (clinicalDataQDM.getResultCode().trim().equalsIgnoreCase("2") || clinicalDataQDM.getResultCode().trim().equalsIgnoreCase("3"))){               
@@ -1020,9 +1088,64 @@ Root<Encounter> root = cq.from(Encounter.class);
 				}
 			}
 		}   
-		System.out.println("size inside is>>>>>>>>>>>>>>>>"+clinicaldataFinal.size());
 		return clinicaldataFinal;
 
+	}
+	
+	public List<QDM> getTobaccoDetails(EntityManager em,int patientId)    {      
+
+
+		List<ClinicalDataQDM> clinicalDataSNOMED = new ArrayList<ClinicalDataQDM>();
+		ArrayList<String> gwids=new ArrayList<String>(){{
+			add("0000100303000000015");
+			add("0000100303000000013");
+		}};
+
+		CriteriaBuilder builder=em.getCriteriaBuilder();
+		CriteriaQuery<ClinicalDataQDM> cq=builder.createQuery(ClinicalDataQDM.class);
+		Root<PatientClinicalHistory> root = cq.from(PatientClinicalHistory.class);
+		Join<PatientClinicalHistory, ClinicalElements> clinicalElementsJoin = root.join(PatientClinicalHistory_.clinicalElement, JoinType.INNER);
+		clinicalElementsJoin.on(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsGwid).in(gwids));
+		Join<ClinicalElements, ClinicalElementsOptions> clinicalElementsOptionsJoin = clinicalElementsJoin.join(ClinicalElements_.clinicalElementsOptions, JoinType.INNER);
+		Join<ClinicalElements,CNMCodeSystem> codeSystemJoin = clinicalElementsJoin.join(ClinicalElements_.cnmCodeSystems, JoinType.LEFT);
+		clinicalElementsOptionsJoin.on(builder.equal(root.get(PatientClinicalHistory_.patientClinicalHistoryValue),ClinicalElementsOptions_.clinicalElementsOptionsValue));
+
+		Predicate checkOid=codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemOid).in(builder.literal("2.16.840.1.113883.6.96"));
+		Predicate checkCodeNotNull=codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).isNotNull();
+		Predicate checkCodeNotEmpty=builder.notEqual(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode),builder.literal(""));
+		codeSystemJoin.on(builder.and(checkOid,checkCodeNotNull,checkCodeNotEmpty));  
+		Predicate checkPatientId=builder.equal(root.get(PatientClinicalHistory_.patientClinicalHistoryPatientid),patientId);
+
+		Expression<String> rcode = builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).isNotNull(),clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed)).otherwise(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode));
+		Expression<String> rvalue = builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsDatatype).in("4","5"),clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName)).otherwise(root.get(PatientClinicalHistory_.patientClinicalHistoryValue));
+
+		Selection selections[]=new Selection[]{
+				root.get(PatientClinicalHistory_.patientClinicalHistoryPatientid).alias("patientId"),
+				rcode.alias("code"),           
+				codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemOid).alias("codesystem"),
+				clinicalElementsJoin.get(ClinicalElements_.clinicalElementsName).alias("description"),
+				clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsSnomed).alias("resultcode"),
+				rvalue.alias("resultvalue")
+		};
+
+		cq.select(builder.construct(ClinicalDataQDM.class,selections));
+		cq.where(checkPatientId);
+		cq.distinct(true);
+		clinicalDataSNOMED = em.createQuery(cq).getResultList();
+
+		List<QDM> tobaccoStatus=new ArrayList<QDM>();
+		QDM QDMObj;
+		ClinicalDataQDM eachObj= null;
+		for(int i=0;i<clinicalDataSNOMED.size();i++){
+			eachObj=clinicalDataSNOMED.get(i);
+			QDMObj=new QDM();
+			QDMObj.setCode(eachObj.getCode());
+			QDMObj.setCodeSystem(eachObj.getCodeSystem());
+			QDMObj.setCodeSystemOID(eachObj.getCodeSystemOID());
+			tobaccoStatus.add(QDMObj);
+		}
+		
+		return tobaccoStatus;
 	}
 	
 	/**
@@ -1193,7 +1316,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 			List<Object[]> result = em.createQuery(cq).getResultList();
 			
-			System.out.println("result size: "+result.size());
 			
 			if(result.size() == 2){
 			
@@ -1264,7 +1386,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 			List<Object[]> result = em.createQuery(cq).getResultList();
 			
-			System.out.println("result size: "+result.size());
 			
 			if(result.size() == 2){
 			

@@ -84,25 +84,15 @@ public class QPPPerformanceController {
 		
 		if(providerInfo!=null){
 			
-			System.out.println(new Date()+"provider info is not null");
-			
 			String[] measureIds = providerInfo.get(0).getMeasures().split(",");
-			
-			System.out.println(new Date()+"total measure length: "+measureIds.length);
 			
 			for(int i=0;i<measureIds.length;i++){
 				cqmMeasures.add(Integer.parseInt(measureIds[i]));
 			}
 			
-			System.out.println(new Date()+"sending request to get QDM codelist");
-			
 			HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures()));
 			
-			System.out.println("\n\n resultant code list for QDM \n\n "+codeListForQDM.toString());
-			
 			finalResponse.setMeasureInfo(utils.getMeasureInfo());
-			
-			System.out.println(new Date()+"received codelist QDM from utils function");
 			
 			requestObj = measureService.getQDMRequestObject(patientID, providerId, codeListForQDM);
 
@@ -116,9 +106,7 @@ public class QPPPerformanceController {
 			
 			ObjectMapper objectMapper = new ObjectMapper();
 			String requestString = objectMapper.writeValueAsString(requestObj);
-			System.out.println(new Date()+"request string is::::::::::::;;;"+requestString.toString());
 			String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
-			System.out.println(new Date()+"response: "+responseStr);
 			responseFromCentralServer = objectMapper.readValue(responseStr, Response.class);
 			
 			Map<String,MeasureStatus> measureStatus = responseFromCentralServer.getMeasureStatus();
