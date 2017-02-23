@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class TherapyLogBean {
-
+    int therapyId;
 	String date;
 	String docName;
 	String pos;
@@ -18,8 +18,9 @@ public class TherapyLogBean {
 	String therapyStartDate="";
 	int status;
 	
-	public TherapyLogBean(Date date,String docName,String groupName,String pos,Long count,int groupId,int providerId,int posId,String endTime,Date therapyStartDate,int status){
+	public TherapyLogBean(int therapyId,Date date,String docName,String groupName,String pos,Long count,int groupId,int providerId,int posId,String endTime,Date therapyStartDate,int status){
 		
+		this.therapyId=therapyId;
 		this.docName=docName;
 		this.count=count;
 		this.pos=pos;
@@ -45,6 +46,19 @@ public class TherapyLogBean {
 
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+		
+
+
+	public int getTherapyId() {
+		return therapyId;
+	}
+
+
+
+	public void setTherapyId(int therapyId) {
+		this.therapyId = therapyId;
 	}
 
 

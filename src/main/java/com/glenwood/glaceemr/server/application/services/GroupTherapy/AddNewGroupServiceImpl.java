@@ -321,6 +321,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 			predicates.add(builder.lessThanOrEqualTo(root.get(TherapySession_.therapySessionDateValue), todate));
 		}
 		Selection[] selections= new Selection[] {
+			    root.get((TherapySession_.therapySessionId)),
 			    root.get((TherapySession_.therapySessionDateValue)),
 				docJoin.get(EmployeeProfile_.empProfileFullname),
 				groupJoin.get(TherapyGroup_.therapyGroupName),
@@ -335,7 +336,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 				
 		};
 		cq.select(builder.construct(TherapyLogBean.class, selections));
-		cq.where(predicates.toArray(new Predicate[predicates.size()])).groupBy(root.get(TherapySession_.therapySessionDateValue),docJoin.get(EmployeeProfile_.empProfileFullname),groupJoin.get(TherapyGroup_.therapyGroupName),posJoin.get(PosTable_.posTableFacilityComments),groupJoin.get(TherapyGroup_.therapyGroupId),docJoin.get(EmployeeProfile_.empProfileEmpid),posJoin.get(PosTable_.posTableRelationId),root.get((TherapySession_.therapySessionEndTime)),root.get(TherapySession_.therapySessionDate),root.get(TherapySession_.therapySessionStatus));
+		cq.where(predicates.toArray(new Predicate[predicates.size()])).groupBy(root.get((TherapySession_.therapySessionId)),root.get(TherapySession_.therapySessionDateValue),docJoin.get(EmployeeProfile_.empProfileFullname),groupJoin.get(TherapyGroup_.therapyGroupName),posJoin.get(PosTable_.posTableFacilityComments),groupJoin.get(TherapyGroup_.therapyGroupId),docJoin.get(EmployeeProfile_.empProfileEmpid),posJoin.get(PosTable_.posTableRelationId),root.get((TherapySession_.therapySessionEndTime)),root.get(TherapySession_.therapySessionDate),root.get(TherapySession_.therapySessionStatus));
 		List<TherapyLogBean> confData=new ArrayList<TherapyLogBean>();
 
 		 confData=em.createQuery(cq).getResultList();
@@ -349,6 +350,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	@Override
 	public List<TherapyPatientsBean> getTherapyPatients(String dataToSearch) throws Exception {
 		JSONObject therapyData= new JSONObject(dataToSearch);
+		int therapyId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("therapyId").toString())).or("-1"));
 		int providerId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("providerId").toString())).or("-1"));
 		int groupId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("groupId").toString())).or("-1"));
 		String fromDate=Optional.fromNullable(Strings.emptyToNull(therapyData.get("date").toString())).or("");
@@ -370,6 +372,9 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		}
 		if(posId!=-1){
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionPosId),posId));
+		}
+		if(therapyId!=-1) {
+			predicates.add(builder.equal(root.get(TherapySession_.therapySessionId),therapyId));
 		}
 		Selection[] selections= new Selection[] {
 				patientJoin.get(PatientRegistration_.patientRegistrationId),
@@ -586,7 +591,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		
 		Selection[] selections= new Selection[] {
 				root.get(TherapySession_.therapySessionId),
-				builder.function("to_char",String.class, root.get(TherapySession_.therapySessionDate),builder.literal("HH:MI:ss am")),
+				builder.function("to_char",String.class, root.get(TherapySession_.therapySessionDate),builder.literal("HH:MI am")),
 				root.get(TherapySession_.therapySessionProviderId),
 				docJoin.get(EmployeeProfile_.empProfileFullname),
 				root.get(TherapySession_.therapySessionLeaderId),
