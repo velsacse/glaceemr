@@ -17,6 +17,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import com.glenwood.glaceemr.server.application.models.H076;
 import com.glenwood.glaceemr.server.application.models.H076_;
 import com.glenwood.glaceemr.server.application.models.H113;
 import com.glenwood.glaceemr.server.application.models.H113_;
+import com.glenwood.glaceemr.server.application.models.H213;
 import com.glenwood.glaceemr.server.application.models.H810;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
@@ -62,15 +64,18 @@ import com.glenwood.glaceemr.server.application.repositories.PortalApptRequestDe
 import com.glenwood.glaceemr.server.application.repositories.PortalApptRequestRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchDateTemplateRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerAppointmentParameterRepository;
+import com.glenwood.glaceemr.server.application.repositories.SchedulerAppointmentRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerLockRepository;
+import com.glenwood.glaceemr.server.application.repositories.SchedulerResourceCategoryRepository;
+import com.glenwood.glaceemr.server.application.repositories.SchedulerResourcesRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerTemplateDetailRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerTemplateRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerTemplateTimeMappingRepository;
-import com.glenwood.glaceemr.server.application.repositories.SchedulerAppointmentRepository;
-import com.glenwood.glaceemr.server.application.repositories.SchedulerResourceCategoryRepository;
-import com.glenwood.glaceemr.server.application.repositories.SchedulerResourcesRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.specifications.PortalAppointmentsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalSettingsSpecification;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 
 @Service
 public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
@@ -126,6 +131,15 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 	
 	@Autowired
 	ObjectMapper objectMapper; 
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
+	
+	@Autowired
+	SessionMap sessionMap;
 
 	@Override
 	public List<SchedulerAppointment> getPatientFutureAppointmentsList(int patientId, int pageOffset, int pageIndex) {
@@ -456,42 +470,58 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
         int provider = Integer.parseInt(demographicAlertCategory.getH810003());
         int forwardTo = Integer.parseInt(demographicAlertCategory.getH810004());
         
-		AlertEvent alert=new AlertEvent();
-		alert.setAlertEventCategoryId(19);
-		alert.setAlertEventStatus(1);
-		alert.setAlertEventPatientId(apptRequestBean.getAlertEventPatientId());
-		alert.setAlertEventPatientName(apptRequestBean.getAlertEventPatientName());
-		alert.setAlertEventEncounterId(-1);
-		alert.setAlertEventRefId(apptRequest.getPortalApptRequestId());
-		alert.setAlertEventMessage("Appointment Request from Patient Portal.");
-		alert.setAlertEventRoomId(-1);
-		alert.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
-		alert.setAlertEventModifiedby(-100);
-		alert.setAlertEventFrom(-100);
+		AlertEvent alert1=new AlertEvent();
+		alert1.setAlertEventCategoryId(19);
+		alert1.setAlertEventStatus(1);
+		alert1.setAlertEventPatientId(apptRequestBean.getAlertEventPatientId());
+		alert1.setAlertEventPatientName(apptRequestBean.getAlertEventPatientName());
+		alert1.setAlertEventEncounterId(-1);
+		alert1.setAlertEventRefId(apptRequest.getPortalApptRequestId());
+		alert1.setAlertEventMessage("Appointment Request from Patient Portal.");
+		alert1.setAlertEventRoomId(-1);
+		alert1.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+		alert1.setAlertEventModifiedby(-100);
+		alert1.setAlertEventFrom(-100);
 		
 		if(provider==0 && forwardTo==0)
-			alert.setAlertEventTo(-1);
+			alert1.setAlertEventTo(-1);
       else {
         if(sendToAll){
        	 if(forwardTo!=provider){
-       		alert.setAlertEventTo(forwardTo);
-       		AlertEvent alert2=alert;
+       		alert1.setAlertEventTo(forwardTo);
+       		AlertEvent alert2=new AlertEvent();
+    		alert2.setAlertEventCategoryId(19);
+    		alert2.setAlertEventStatus(1);
+    		alert2.setAlertEventPatientId(apptRequestBean.getAlertEventPatientId());
+    		alert2.setAlertEventPatientName(apptRequestBean.getAlertEventPatientName());
+    		alert2.setAlertEventEncounterId(-1);
+    		alert2.setAlertEventRefId(apptRequest.getPortalApptRequestId());
+    		alert2.setAlertEventMessage("Appointment Request from Patient Portal.");
+    		alert2.setAlertEventRoomId(-1);
+    		alert2.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+    		alert2.setAlertEventModifiedby(-100);
+    		alert2.setAlertEventFrom(-100);
        		alert2.setAlertEventTo(provider);
        		alertEventRepository.saveAndFlush(alert2);
        	 } else {
-       		alert.setAlertEventTo(forwardTo);
+       		alert1.setAlertEventTo(forwardTo);
        	 }            	 
         }else{
        	 if(forwardTo!=0){
-       		alert.setAlertEventTo(forwardTo);
+       		alert1.setAlertEventTo(forwardTo);
        	 } else {
-       		alert.setAlertEventTo(provider);
+       		alert1.setAlertEventTo(provider);
        	}
         }
        }
 		
 		
-		AlertEvent savedAlert=alertEventRepository.saveAndFlush(alert);
+		AlertEvent savedAlert=alertEventRepository.saveAndFlush(alert1);
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Created an appointment request",-1,
+				request.getRemoteAddr(),apptRequestBean.getAlertEventPatientId(),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+apptRequestBean.getAlertEventPatientId()+"requested an appointment","");
 				
 		return savedAlert;
 	}
@@ -665,6 +695,8 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		schApptParam.setSchApptParameterValueId(schedulerApptBookingBean.getSchApptReason());
 		schApptParam.setSchApptParameterId(getNewSchApptParameterId());
 		schedulerAppointmentParameterRepository.saveAndFlush(schApptParam);
+		
+		executeTesttableh213();
 				
 		
 		/*Creating an alert for the booked appointment*/
@@ -673,45 +705,71 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
       int provider = Integer.parseInt(demographicAlertCategory.getH810003());
       int forwardTo = Integer.parseInt(demographicAlertCategory.getH810004());
       
-		AlertEvent alert=new AlertEvent();
-		alert.setAlertEventCategoryId(19);
-		alert.setAlertEventStatus(1);
-		alert.setAlertEventPatientId(schedulerApptBookingBean.getSchApptPatientId());
-		alert.setAlertEventPatientName(schedulerApptBookingBean.getSchApptPatientname());
-		alert.setAlertEventEncounterId(-1);
-		alert.setAlertEventRefId(schAppt.getSchApptId());
-		alert.setAlertEventMessage("Appointment Booking from Patient Portal.");
-		alert.setAlertEventRoomId(-1);
-		alert.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
-		alert.setAlertEventModifiedby(-100);
-		alert.setAlertEventFrom(-100);
+		AlertEvent alert1=new AlertEvent();
+		alert1.setAlertEventCategoryId(19);
+		alert1.setAlertEventStatus(1);
+		alert1.setAlertEventPatientId(schedulerApptBookingBean.getSchApptPatientId());
+		alert1.setAlertEventPatientName(schedulerApptBookingBean.getSchApptPatientname());
+		alert1.setAlertEventEncounterId(-1);
+		alert1.setAlertEventRefId(schAppt.getSchApptId());
+		alert1.setAlertEventMessage("Appointment Booking from Patient Portal.");
+		alert1.setAlertEventRoomId(-1);
+		alert1.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+		alert1.setAlertEventModifiedby(-100);
+		alert1.setAlertEventFrom(-100);
 		
 		if(provider==0 && forwardTo==0)
-			alert.setAlertEventTo(-1);
+			alert1.setAlertEventTo(-1);
     else {
       if(sendToAll){
      	 if(forwardTo!=provider){
-     		alert.setAlertEventTo(forwardTo);
-     		AlertEvent alert2=alert;
+     		alert1.setAlertEventTo(forwardTo);
+     		AlertEvent alert2=new AlertEvent();
+    		alert2.setAlertEventCategoryId(19);
+    		alert2.setAlertEventStatus(1);
+    		alert2.setAlertEventPatientId(schedulerApptBookingBean.getSchApptPatientId());
+    		alert2.setAlertEventPatientName(schedulerApptBookingBean.getSchApptPatientname());
+    		alert2.setAlertEventEncounterId(-1);
+    		alert2.setAlertEventRefId(schAppt.getSchApptId());
+    		alert2.setAlertEventMessage("Appointment Booking from Patient Portal.");
+    		alert2.setAlertEventRoomId(-1);
+    		alert2.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+    		alert2.setAlertEventModifiedby(-100);
+    		alert2.setAlertEventFrom(-100);
      		alert2.setAlertEventTo(provider);
      		alertEventRepository.saveAndFlush(alert2);
      	 } else {
-     		alert.setAlertEventTo(forwardTo);
+     		alert1.setAlertEventTo(forwardTo);
      	 }            	 
       }else{
      	 if(forwardTo!=0){
-     		alert.setAlertEventTo(forwardTo);
+     		alert1.setAlertEventTo(forwardTo);
      	 } else {
-     		alert.setAlertEventTo(provider);
+     		alert1.setAlertEventTo(provider);
      	}
       }
      }
 		
-   AlertEvent savedAlert=alertEventRepository.saveAndFlush(alert);
+   AlertEvent savedAlert=alertEventRepository.saveAndFlush(alert1);
 				
-		
+   auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+			AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Booked an appointment from Patient Portal",-1,
+			request.getRemoteAddr(),schAppt.getSchApptPatientId(),"",
+			AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+schAppt.getSchApptPatientId()+"booked an appointment","");
+   
 		/*returning the booked appointment details*/
 		return schAppt;
+	}
+	
+	
+public void executeTesttableh213(){
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<H213> root = cq.from(H213.class);
+		cq.select(builder.function("testtableh213", String.class));
+		
+		em.createQuery(cq).getResultList();
 	}
 	
 public Integer getNewSchApptParameterId() {

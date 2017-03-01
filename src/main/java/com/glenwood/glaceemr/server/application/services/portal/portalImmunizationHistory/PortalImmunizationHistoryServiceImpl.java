@@ -13,6 +13,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -45,6 +46,8 @@ import com.glenwood.glaceemr.server.application.repositories.LabEntriesRepositor
 import com.glenwood.glaceemr.server.application.repositories.PatientImmunizationInformationRepository;
 import com.glenwood.glaceemr.server.application.repositories.VaccineReportRepository;
 import com.glenwood.glaceemr.server.application.repositories.VisRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalAlertSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalImmunizationHistorySpecification;
@@ -89,6 +92,12 @@ public class PortalImmunizationHistoryServiceImpl implements PortalImmunizationH
 
 	@PersistenceContext
 	EntityManager em;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
 
 
 	@Override
@@ -352,42 +361,58 @@ public class PortalImmunizationHistoryServiceImpl implements PortalImmunizationH
 		
 		AlertCategory alertCategory=alertCategoryRepository.findOne(AlertCategorySpecification.getAlertCategoryByName("Clinical Intake"));
 
-		AlertEvent alert=new AlertEvent();
-		alert.setAlertEventCategoryId(alertCategory.getAlertCategoryId());
-		alert.setAlertEventStatus(1);
-		alert.setAlertEventPatientId(vaccineUpdateBean.getPatientId());
-		alert.setAlertEventPatientName(vaccineUpdateBean.getPatientName());
-		alert.setAlertEventEncounterId(-1);
-		alert.setAlertEventRefId(pii.getId());
-		alert.setAlertEventMessage("Clinical Intake");
-		alert.setAlertEventRoomId(-1);
-		alert.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
-		alert.setAlertEventModifiedby(-100);
-		alert.setAlertEventFrom(-100);
+		AlertEvent alert1=new AlertEvent();
+		alert1.setAlertEventCategoryId(alertCategory.getAlertCategoryId());
+		alert1.setAlertEventStatus(1);
+		alert1.setAlertEventPatientId(vaccineUpdateBean.getPatientId());
+		alert1.setAlertEventPatientName(vaccineUpdateBean.getPatientName());
+		alert1.setAlertEventEncounterId(-1);
+		alert1.setAlertEventRefId(pii.getId());
+		alert1.setAlertEventMessage("Clinical Intake");
+		alert1.setAlertEventRoomId(-1);
+		alert1.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+		alert1.setAlertEventModifiedby(-100);
+		alert1.setAlertEventFrom(-100);
 
 
 		if(provider==0 && forwardTo==0)
-			alert.setAlertEventTo(-1);
+			alert1.setAlertEventTo(-1);
 		else {
 			if(sendToAll){
 				if(forwardTo!=provider){
-					alert.setAlertEventTo(forwardTo);
-					AlertEvent alert2=alert;
+					alert1.setAlertEventTo(forwardTo);
+					AlertEvent alert2=new AlertEvent();
+					alert2.setAlertEventCategoryId(alertCategory.getAlertCategoryId());
+					alert2.setAlertEventStatus(1);
+					alert2.setAlertEventPatientId(vaccineUpdateBean.getPatientId());
+					alert2.setAlertEventPatientName(vaccineUpdateBean.getPatientName());
+					alert2.setAlertEventEncounterId(-1);
+					alert2.setAlertEventRefId(pii.getId());
+					alert2.setAlertEventMessage("Clinical Intake");
+					alert2.setAlertEventRoomId(-1);
+					alert2.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+					alert2.setAlertEventModifiedby(-100);
+					alert2.setAlertEventFrom(-100);
 					alert2.setAlertEventTo(provider);
 					alertEventRepository.saveAndFlush(alert2);
 				} else {
-					alert.setAlertEventTo(forwardTo);
+					alert1.setAlertEventTo(forwardTo);
 				}            	 
 			}else{
 				if(forwardTo!=0){
-					alert.setAlertEventTo(forwardTo);
+					alert1.setAlertEventTo(forwardTo);
 				} else {
-					alert.setAlertEventTo(provider);
+					alert1.setAlertEventTo(provider);
 				}
 			}
 		}
 
-		alertEventRepository.saveAndFlush(alert);
+		alertEventRepository.saveAndFlush(alert1);
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+vaccineUpdateBean.getPatientId()+" requested for vaccination update.",-1,
+				request.getRemoteAddr(),vaccineUpdateBean.getPatientId(),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+vaccineUpdateBean.getPatientId()+" requested for vaccination update.","");
 
 		return pii;
 	}

@@ -8,6 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.H809;
 import com.glenwood.glaceemr.server.application.repositories.H809Repository;
 import com.glenwood.glaceemr.server.application.repositories.PortalUserRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.specifications.PortalRecoverUserPasswordSpecifiction;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.MultipartUtility;
@@ -31,6 +35,12 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 
 	@Autowired
 	ObjectMapper objectMapper;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
 
 	@Override
 	public RecoverPortalPasswordBean authenticateUsernameAndGetSecurityQuestions(
@@ -181,6 +191,11 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 			bean.setSuccess(false);
 		bean.setData("Email sending failed. Please try after some time.");
 		}
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.UPDATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalUser.getH809002()+" recovered his/her password for Patient Portal login.",-1,
+				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalUser.getH809002()+" recovered his/her password for Patient Portal login.","");
 
 		return bean;
 	}

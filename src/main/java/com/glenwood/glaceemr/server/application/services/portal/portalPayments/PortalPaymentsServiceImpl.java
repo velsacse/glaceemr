@@ -13,6 +13,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -51,6 +52,8 @@ import com.glenwood.glaceemr.server.application.repositories.PaymentServiceRepos
 import com.glenwood.glaceemr.server.application.repositories.PosTableRepository;
 import com.glenwood.glaceemr.server.application.repositories.ReceiptDetailRepository;
 import com.glenwood.glaceemr.server.application.repositories.UserinformationCreditcardRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.SharedFolderUtil;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalSettingsService;
 import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
@@ -111,6 +114,12 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 
 	@Autowired
 	EntityManagerFactory emf;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
 
 	@Override
 	public List<H093> getPatientStatementHistory(int patientId, int chartId,int pageOffset, int pageIndex) {
@@ -217,42 +226,58 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 
 		AlertCategory alertCategory=alertCategoryRepository.findOne(AlertCategorySpecification.getAlertCategoryByName("Payment from Patient Portal"));
 		
-		AlertEvent alert=new AlertEvent();
-		alert.setAlertEventCategoryId(alertCategory.getAlertCategoryId());
-		alert.setAlertEventStatus(1);
-		alert.setAlertEventPatientId(paymentDetailsBean.getPatientId());
-		alert.setAlertEventPatientName(paymentDetailsBean.getUsername());
-		alert.setAlertEventEncounterId(-1);
-		alert.setAlertEventRefId(Integer.parseInt(String.valueOf(paymentSummary.getPaymentServiceTransactionid())));
-		alert.setAlertEventMessage("Payment from Patient Portal.");
-		alert.setAlertEventRoomId(-1);
-		alert.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
-		alert.setAlertEventModifiedby(-100);
-		alert.setAlertEventFrom(-100);
+		AlertEvent alert1=new AlertEvent();
+		alert1.setAlertEventCategoryId(alertCategory.getAlertCategoryId());
+		alert1.setAlertEventStatus(1);
+		alert1.setAlertEventPatientId(paymentDetailsBean.getPatientId());
+		alert1.setAlertEventPatientName(paymentDetailsBean.getUsername());
+		alert1.setAlertEventEncounterId(-1);
+		alert1.setAlertEventRefId(Integer.parseInt(String.valueOf(paymentSummary.getPaymentServiceTransactionid())));
+		alert1.setAlertEventMessage("Payment from Patient Portal.");
+		alert1.setAlertEventRoomId(-1);
+		alert1.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+		alert1.setAlertEventModifiedby(-100);
+		alert1.setAlertEventFrom(-100);
 
 
 		if(provider==0 && forwardTo==0)
-			alert.setAlertEventTo(-1);
+			alert1.setAlertEventTo(-1);
 		else {
 			if(sendToAll){
 				if(forwardTo!=provider){
-					alert.setAlertEventTo(forwardTo);
-					AlertEvent alert2=alert;
+					alert1.setAlertEventTo(forwardTo);
+					AlertEvent alert2=new AlertEvent();
+					alert2.setAlertEventCategoryId(alertCategory.getAlertCategoryId());
+					alert2.setAlertEventStatus(1);
+					alert2.setAlertEventPatientId(paymentDetailsBean.getPatientId());
+					alert2.setAlertEventPatientName(paymentDetailsBean.getUsername());
+					alert2.setAlertEventEncounterId(-1);
+					alert2.setAlertEventRefId(Integer.parseInt(String.valueOf(paymentSummary.getPaymentServiceTransactionid())));
+					alert2.setAlertEventMessage("Payment from Patient Portal.");
+					alert2.setAlertEventRoomId(-1);
+					alert2.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+					alert2.setAlertEventModifiedby(-100);
+					alert2.setAlertEventFrom(-100);
 					alert2.setAlertEventTo(provider);
 					alertEventRepository.saveAndFlush(alert2);
 				} else {
-					alert.setAlertEventTo(forwardTo);
+					alert1.setAlertEventTo(forwardTo);
 				}            	 
 			}else{
 				if(forwardTo!=0){
-					alert.setAlertEventTo(forwardTo);
+					alert1.setAlertEventTo(forwardTo);
 				} else {
-					alert.setAlertEventTo(provider);
+					alert1.setAlertEventTo(provider);
 				}
 			}
 		}
 
-		alertEventRepository.saveAndFlush(alert);
+		alertEventRepository.saveAndFlush(alert1);
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.GENERATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+paymentDetailsBean.getPatientId()+" performed a credit card payment transaction through Patient Portal.",-1,
+				request.getRemoteAddr(),paymentDetailsBean.getPatientId(),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+paymentDetailsBean.getPatientId()+" performed a credit card payment transaction through Patient Portal.","");
 
 		return receipt;
 	}

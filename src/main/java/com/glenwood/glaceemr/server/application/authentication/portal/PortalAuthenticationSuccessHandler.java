@@ -11,6 +11,9 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.glenwood.glaceemr.server.application.models.PortalUser;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.portalLogin.PortalLoginService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -30,6 +33,9 @@ public class PortalAuthenticationSuccessHandler implements AuthenticationSuccess
 	
 	@Autowired
 	ObjectMapper objectMapper;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
 
 
 	@Override
@@ -38,7 +44,8 @@ public class PortalAuthenticationSuccessHandler implements AuthenticationSuccess
 		try{
 			System.out.println("In onAuthenticationSuccess PortalAuthenticationSuccessHandler");
 			emrResponseBean.setLogin(true);
-			sessionMap.setPortalUserID(portalLoginService.findByUserNameIgnoreCase(authentication.getName().toString()).getId());
+			PortalUser portalUser=portalLoginService.findByUserNameIgnoreCase(authentication.getName().toString());
+			sessionMap.setPortalUserID(portalUser.getId());
 			String dbAccountId = request.getParameter("dbname");
 			String portal_login_url=request.getParameter("portal_login_url");
 			String portal_login_context=request.getParameter("portal_login_context");
@@ -68,23 +75,38 @@ public class PortalAuthenticationSuccessHandler implements AuthenticationSuccess
 
 			if(sessionMap.getPortalPassworResetCount()<=0){
 
+				auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+						AuditTrailEnumConstants.LogActionType.LOGIN,1,AuditTrailEnumConstants.Log_Outcome.FAILURE,"Patient Portal Login Failed.",-1,
+						request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getId())),"",
+						AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalUser.getId()+" tried to log into Patient Portal.","");
 				out.println("{\"sessionId\":\""+request.getSession().getId()+"\",\"userId\":"+sessionMap.getPortalUserID()+",\"login\":true,\"isAuthenticated\":true,\"log\":12}");
 				return;
 			}
 
 			if(sessionMap.getIsPortalUserActive()!=1){
 
+				auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+						AuditTrailEnumConstants.LogActionType.LOGIN,1,AuditTrailEnumConstants.Log_Outcome.FAILURE,"Patient Portal Login Failed. Inactive account.",-1,
+						request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getId())),"",
+						AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalUser.getId()+" tried to log into Patient Portal.","");
 				out.println("{\"sessionId\":\""+request.getSession().getId()+"\",\"userId\":"+sessionMap.getPortalUserID()+",\"login\":true,\"isAuthenticated\":true,\"log\":8}");
 				return;
 			}
 
 			if(sessionMap.getIsOldPortalUser()!=1){
-
+				
+				auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+						AuditTrailEnumConstants.LogActionType.LOGIN,1,AuditTrailEnumConstants.Log_Outcome.FAILURE,"Patient Portal Login Failed. Inactive account.",-1,
+						request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getId())),"",
+						AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalUser.getId()+" tried to log into Patient Portal.","");
 				out.println("{\"sessionId\":\""+request.getSession().getId()+"\",\"userId\":"+sessionMap.getPortalUserID()+",\"login\":true,\"isAuthenticated\":true,\"log\":8}");
 				return;
 			}
 
-			
+			auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+					AuditTrailEnumConstants.LogActionType.LOGIN,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Logged into Patient Portal successfully.",-1,
+					request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getId())),"",
+					AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalUser.getId()+" logged into Patient Portal successfully.","");
 			out.println("{\"sessionId\":\""+request.getSession().getId()+"\",\"userId\":"+sessionMap.getPortalUserID()+",\"login\":true,\"isAuthenticated\":true,\"log\":-1}");
 
 		}catch(Exception ex){

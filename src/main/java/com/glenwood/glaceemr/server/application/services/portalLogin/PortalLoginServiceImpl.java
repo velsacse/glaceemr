@@ -12,6 +12,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONArray;
@@ -34,6 +35,8 @@ import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepo
 import com.glenwood.glaceemr.server.application.repositories.PatientInsDetailRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PortalUserRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.portal.portalMedicalSummary.PortalMedicalSummaryService;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalPatientRegistrationBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalRegistrationResponse;
@@ -74,6 +77,12 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 
 	@Autowired
 	EntityManagerFactory emf;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
 
 	@Override
 	public PortalUser findByUserNameIgnoreCase(String userName) {
@@ -304,6 +313,10 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 			regResponse.setMessage("You have been registered successfully! Account activation link has been sent to your registered email address. Please click on the link sent to your email, to activate your account.");
 		}
 		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENT_REGISTRATION,
+				AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"New patient registered through Patient Portal.",-1,
+				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"New patient registered through Patient Portal with id "+portalUser.getH809002(),"");
 		
 		return regResponse;
 	}
@@ -384,9 +397,17 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		regResponse.setSuccess(true);
 		regResponse.setMessage("You have been registered successfully.");
 		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+registrationBean.getPatientId()+" signed up for Patient Portal.",-1,
+				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+registrationBean.getPatientId()+" signed up for Patient Portal","");
+		
 		return regResponse;
 		}else{
-			
+			auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+					AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.FAILURE,"Patient with id "+registrationBean.getPatientId()+" failed to sign up for Patient Portal.",-1,
+					request.getRemoteAddr(),-1,"",
+					AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+registrationBean.getPatientId()+" failed to sign up for Patient Portal","");
 			regResponse.setSuccess(false);
 			regResponse.setMessage("Registration Failure");
 			

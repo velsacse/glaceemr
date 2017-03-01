@@ -46,7 +46,7 @@ public interface AuditTrailEnumConstants {
 	public enum LogActionType {
 		LOGIN(1, "Login"), LOGOUT(2, "Logout"), CREATE(3, "Create"), UPDATE(4, "Update"), VIEW(5, "View"), DELETE(6, "Delete"), START(7, "Start"), STOP(8, "Stop"), CLOSE(9, "Close"), FINISH(10, "Finish"), CREATEORUPDATE(11, "Create or Update"), SEND(
 				12, "Send"), RECEIVE(13, "Receive"), CANCEL(14, "Cancel"), BULKCANCEL(15, "BulkCancel"), DOWNLOAD(16, "Download"), EXPORT(17, "Export"), PRINT(18, "Print"), SEARCH(19, "Search"), BULKDELETE(20, "Bulkdelete"), ATTACH(21, "Attach"), MOVE(
-				22, "Move"), FORWARD(23, "Forward"), GENERATE(24, "Generate"), READ(25, "Read"), UNREAD(26, "Unread"), RESEND(27, "Resend"), REOPEN(28, "Reopen");
+				22, "Move"), FORWARD(23, "Forward"), GENERATE(24, "Generate"), READ(25, "Read"), UNREAD(26, "Unread"), RESEND(27, "Resend"), REOPEN(28, "Reopen"), SIGNUP(29, "Signup");
 		// semicolon needed when fields / methods follow
 
 		public final int Value;
