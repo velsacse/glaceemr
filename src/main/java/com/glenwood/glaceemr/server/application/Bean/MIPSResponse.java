@@ -1,8 +1,6 @@
 package com.glenwood.glaceemr.server.application.Bean;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Response;
@@ -13,8 +11,7 @@ public class MIPSResponse {
 	private long patientId;
 	private Map<String, String> measureInfo = new HashMap<String, String>();
 	private Map<String,MeasureStatus> measureStatus = new HashMap<String, MeasureStatus>();
-	List<EPMeasureBean> epMeasureStatus = new ArrayList<EPMeasureBean>();
-	
+
 	public void setDataFromResponse(Response obj){
 		
 		setAccountId(obj.getAccountId());
@@ -23,14 +20,6 @@ public class MIPSResponse {
 		
 	}
 	
-	public List<EPMeasureBean> getEpMeasureStatus() {
-		return epMeasureStatus;
-	}
-
-	public void setEpMeasureStatus(List<EPMeasureBean> epMeasureStatus) {
-		this.epMeasureStatus = epMeasureStatus;
-	}
-
 	public String getAccountId() {
 		return accountId;
 	}

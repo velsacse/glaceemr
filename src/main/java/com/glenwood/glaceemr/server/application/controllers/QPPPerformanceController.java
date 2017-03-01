@@ -1,7 +1,6 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.glenwood.glaceemr.server.application.Bean.EPMeasureBean;
 import com.glenwood.glaceemr.server.application.Bean.MIPSResponse;
 import com.glenwood.glaceemr.server.application.Bean.MacraProviderQDM;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
@@ -68,6 +68,8 @@ public class QPPPerformanceController {
 	public EMRResponseBean getQDMRequestObject(
 			@RequestParam(value="accountId", required=true) String accountId,
 			@RequestParam(value="patientID", required=true) int patientID,
+			@RequestParam(value="userId", required=true) int userId,
+			@RequestParam(value="sharedFolder", required=true) String sharedPath,
 			@RequestParam(value="providerId", required=true) int providerId) throws Exception
 	{
 	
@@ -90,11 +92,11 @@ public class QPPPerformanceController {
 				cqmMeasures.add(Integer.parseInt(measureIds[i]));
 			}
 			
-			HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures()));
+			HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedPath));
 			
 			finalResponse.setMeasureInfo(utils.getMeasureInfo());
 			
-			requestObj = measureService.getQDMRequestObject(patientID, providerId, codeListForQDM);
+			requestObj = measureService.getQDMRequestObject(patientID, userId, codeListForQDM);
 
 			requestObj.setAccountId(accountId);
 			requestObj.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
@@ -106,35 +108,59 @@ public class QPPPerformanceController {
 			
 			ObjectMapper objectMapper = new ObjectMapper();
 			String requestString = objectMapper.writeValueAsString(requestObj);
+			
+			System.out.println("request string is...................."+requestString.toString());
+			
 			String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
+			
+			System.out.println("response string is...................."+responseStr.toString());
+			
 			responseFromCentralServer = objectMapper.readValue(responseStr, Response.class);
 			
 			Map<String,MeasureStatus> measureStatus = responseFromCentralServer.getMeasureStatus();
 			
-			if(measureStatus.containsKey("236")) measureStatus.get("236").setCmsId("CMS165v5");
-			if(measureStatus.containsKey("113")) measureStatus.get("113").setCmsId("CMS130v5");
-			if(measureStatus.containsKey("1"))   measureStatus.get("1").setCmsId("CMS122v5");
-			if(measureStatus.containsKey("373")) measureStatus.get("373").setCmsId("CMS65v5");
-			if(measureStatus.containsKey("110")) measureStatus.get("110").setCmsId("CMS147v6");
-			if(measureStatus.containsKey("226")) measureStatus.get("226").setCmsId("CMS138v5");
-			if(measureStatus.containsKey("130")) measureStatus.get("130").setCmsId("CMS68v6");
-			if(measureStatus.containsKey("111")) measureStatus.get("111").setCmsId("CMS127v5");
-			if(measureStatus.containsKey("112")) measureStatus.get("112").setCmsId("CMS125v5");
-			if(measureStatus.containsKey("318")) measureStatus.get("318").setCmsId("CMS139v5");
-			if(measureStatus.containsKey("134")) measureStatus.get("134").setCmsId("CMS2v6");
-			if(measureStatus.containsKey("317")) measureStatus.get("317").setCmsId("CMS22v5");
-			
 			responseFromCentralServer.setMeasureStatus(measureStatus);
 			
 			finalResponse.setDataFromResponse(responseFromCentralServer);
-			
-			finalResponse.setEpMeasureStatus(measureService.getEPMeasuresResponseObject(patientID, providerId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd()));
 			
 		}else{
 			
 		}
 		
 		response.setData(finalResponse);
+		
+		return response;
+		
+	}
+	
+	/**
+	 * Function to get EP Measure status for given patientID
+	 */
+	
+	@RequestMapping(value = "/getEPStatusByPatient", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getEPRequestObject(
+			@RequestParam(value="accountId", required=true) String accountId,
+			@RequestParam(value="patientID", required=true) int patientID,
+			@RequestParam(value="userId", required=true) int userId,
+			@RequestParam(value="providerId", required=true) int providerId) throws Exception
+	{
+	
+		EMRResponseBean response = new EMRResponseBean();
+		
+		List<EPMeasureBean> epMeasureStatus = new ArrayList<EPMeasureBean>();
+		
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+		
+		if(providerInfo!=null){
+			
+			epMeasureStatus = measureService.getEPMeasuresResponseObject(patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
+			
+		}else{
+			
+		}
+		
+		response.setData(epMeasureStatus);
 		
 		return response;
 		

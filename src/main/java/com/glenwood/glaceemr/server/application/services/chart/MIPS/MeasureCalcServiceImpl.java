@@ -19,6 +19,7 @@ import com.glenwood.glaceemr.server.application.Bean.ClinicalDataQDM;
 import com.glenwood.glaceemr.server.application.Bean.EPMeasureBean;
 import com.glenwood.glaceemr.server.application.Bean.InvestigationQDM;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
+import com.glenwood.glaceemr.server.application.Bean.MedicationQDM;
 import com.glenwood.glaceemr.server.application.Bean.ReferralQDM;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Assessment;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.DiagnosticStudy;
@@ -27,6 +28,7 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.LabTest;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Patient;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.PhysicalExam;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Procedure;
+import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.QDM;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEntries;
@@ -35,7 +37,6 @@ import com.glenwood.glaceemr.server.application.repositories.PatientMeasureStatu
 import com.glenwood.glaceemr.server.application.repositories.PatientMeasureStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
-import com.glenwood.glaceemr.server.application.services.chart.MIPS.ExportQDM;
 import com.glenwood.glaceemr.server.application.specifications.QPPConfigurationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.QPPPerformanceSpecification;
 
@@ -150,7 +151,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 			String loincCodesForCNM = codeListForCNM.get("LOINC");
 
-			List<Date> medicationsReviewed = qdmData.getMedicationsReviewed(em,patientID,date1,date2);
+			List<MedicationQDM> medicationsReviewed = qdmData.getMedicationsReviewed(em,patientID,date1,date2);
 
 			Integer confType = macraConfRepo.findOne(Specifications.where(QPPConfigurationSpecification.getConfObj(2017))).getMacraConfigurationType();
 
@@ -165,6 +166,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 			requestObj.setDxList(qdmData.getPatientDiagnosisQDM(diagnosisRepo, patientID));
 
+			List<QDM> tobaccoDetails=qdmData.getTobaccoDetails(em, patientID);
+			
+			requestObj.setTobaccoStatusList(tobaccoDetails);
+			
 			if(codeListForQDM.containsKey("Medication")){
 				requestObj.setMedicationOrders(qdmData.getMedicationQDM(em, codeListForQDM.get("Medication").get("RXNORM"), patientID, 2));
 				requestObj.setActiveMedicationsList(qdmData.getActiveMedications(em, codeListForQDM.get("Medication").get("RXNORM"), patientID, 2));
@@ -172,7 +177,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 			List<InvestigationQDM> investigationQDM = qdmData.getInvestigationQDM(em,patientID,providerId);
 
-			List<ClinicalDataQDM> clinicalDataQDM =qdmData.getClinicalDataQDM(em,snomedCodesForCNM,loincCodesForCNM,patientID,true,date1,date2);
+			List<ClinicalDataQDM> clinicalDataQDM =qdmData.getClinicalDataQDM(em,patientID,snomedCodesForCNM,loincCodesForCNM,true,date1,date2);
 
 			if(codeListForQDM.containsKey("Immunization")){
 				requestObj.setImmunizationList(qdmData.getImmuDetails(em, patientID));
@@ -282,11 +287,11 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		epObject.setDescription(ePrescResult.split("&&&&")[0]);
 		
 		if(Integer.parseInt(ePrescResult.split("&&&&")[1]) == -1){
-			epObject.setStatus("Not Applicable");
+			epObject.setStatus("Not Completed");
 		}else if(Integer.parseInt(ePrescResult.split("&&&&")[1]) == 0){
-			epObject.setStatus("Not Met");
+			epObject.setStatus("Not Completed");
 		}else{
-			epObject.setStatus("Met");
+			epObject.setStatus("Completed");
 		}
 		
 		return epObject;
@@ -303,16 +308,16 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		epObject.setMeasureTitle("Medication Reconciliation");
 		if(!isTransitionOfCare){
 			epObject.setDescription("Transition of Care not checked for current encounter");
-			epObject.setStatus("Not Applicable");
+			epObject.setStatus("Not Completed");
 		}else{
 			
 			boolean medReconcilationResult = qdmData.getReconcilationStatusByEncId(encounterId,em);
 			
 			if(medReconcilationResult){
-				epObject.setStatus("Met");
+				epObject.setStatus("Completed");
 			}else{
 				epObject.setDescription("Reconcile medications to complete this measure");
-				epObject.setStatus("Not Met");
+				epObject.setStatus("Not Completed");
 			}
 			
 		} 
@@ -332,13 +337,13 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		epObject.setDescription(result);
 		
 		if(Integer.parseInt(result.split("\n")[1].split(":")[1].replace(" ","")) == 0){
-			epObject.setStatus("Not Applicable");
+			epObject.setStatus("Not Completed");
 		}else{
 			
 			if(Integer.parseInt(result.split("\n")[0].split(":")[1].replace(" ","")) >= 1){
-				epObject.setStatus("Met");
+				epObject.setStatus("Completed");
 			}else{
-				epObject.setStatus("Not Met");
+				epObject.setStatus("Not Completed");
 			}
 		}
 		
@@ -357,13 +362,13 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		epObject.setDescription(result);
 		
 		if( (Integer.parseInt(result.split("\n")[0].split(":")[1].replace(" ","")) == 0) && (Integer.parseInt(result.split("\n")[1].split(":")[1].replace(" ","")) == 0) ){
-			epObject.setStatus("Not Applicable");
+			epObject.setStatus("Not Completed");
 		}else{
 			
 			if( (Integer.parseInt(result.split("\n")[0].split(":")[1].replace(" ","")) >= 1) || (Integer.parseInt(result.split("\n")[1].split(":")[1].replace(" ","")) >= 1)){
-				epObject.setStatus("Met");
+				epObject.setStatus("Completed");
 			}else{
-				epObject.setStatus("Not Met");
+				epObject.setStatus("Not Completed");
 			}
 		}
 		
@@ -382,10 +387,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 		if(Integer.parseInt(patientCount.split("&")[1]) > 0){
 			epObject.setDescription("Last Accessed On: "+patientCount.split("&")[0]);
-			epObject.setStatus("Met");
+			epObject.setStatus("Completed");
 		}else{
 			epObject.setDescription("Not an active portal user");
-			epObject.setStatus("Not Met");
+			epObject.setStatus("Not Completed");
 		}
 		
 		return epObject;
@@ -402,10 +407,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		epObject.setMeasureTitle("Patient Access");
 		
 		if(portalLastAccessed!=""){
-			epObject.setStatus("Met");
+			epObject.setStatus("Completed");
 			epObject.setDescription("Last Accessed Portal on: "+portalLastAccessed);
 		}else{
-			epObject.setStatus("Not Met");
+			epObject.setStatus("Not Completed");
 			epObject.setDescription("Not an active portal user");
 		}
 		

@@ -7,6 +7,8 @@
 
 package com.glenwood.glaceemr.server.application.Bean.macra.ecqm;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -20,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.Bean.ClinicalDataQDM;
 import com.glenwood.glaceemr.server.application.Bean.InvestigationQDM;
+import com.glenwood.glaceemr.server.application.Bean.MedicationQDM;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Assessment;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.DiagnosticStudy;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Intervention;
@@ -159,16 +162,97 @@ public class EMeasureUtils {
 		
 	}
 	
-	@SuppressWarnings("unchecked")
-	public List<EMeasure> getMeasureBeanDetails(String measureIds) throws Exception{
+	public List<EMeasure> getMeasureBeanDetails(String measureIds, String sharedPath) throws Exception{
 		
-		String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/eCQMServices/getECQMInfoById?ids="+measureIds;
+		List<EMeasure> measureInfo = new ArrayList<EMeasure>();
+	    
+	    for(int i=0;i<measureIds.split(",").length;i++){
+	    	
+	    	int measureId = Integer.parseInt(measureIds.split(",")[i]);
+	    	
+	    	measureInfo.add(getMeasureInfo(measureId, sharedPath));
+	    	
+	    }
+	    
+	    return measureInfo;
+		
+	}
+	
+	private void putMeasureInfoDetails(int measureId, String sharedPath) throws Exception{
+		
+		String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/eCQMServices/getECQMInfoById?ids="+measureId;
 		
 	    String result = restTemplate.getForObject(apiUrl, String.class);
 		
-	    getMeasureInfo(result);
+	    writeStringToJsonFile(result, measureId, sharedPath);
 	    
-		return (List<EMeasure>) mapper.readValue(result, mapper.getTypeFactory().constructCollectionType(List.class, EMeasure.class));
+	}
+	
+	@SuppressWarnings("unchecked")
+	private EMeasure getMeasureInfo(int measureId, String sharedPath){
+		
+		EMeasure measureInfo = new EMeasure();
+		
+		try{
+			
+			String filename = sharedPath+File.separator+"ECQM"+File.separator+measureId+".json";
+			
+			File jsonFile = new File(filename);
+			
+			if(jsonFile.exists() && jsonFile.isFile()){
+				
+				List<EMeasure> emeasureInfo = (List<EMeasure>) mapper.readValue(jsonFile, mapper.getTypeFactory().constructCollectionType(List.class, EMeasure.class));
+				
+				measureInfo = emeasureInfo.get(0);
+				
+			}else{
+				
+				putMeasureInfoDetails(measureId, sharedPath);
+				
+				getMeasureInfo(measureId, sharedPath);
+				
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return measureInfo;
+		
+	}
+	
+	@SuppressWarnings("resource")
+	private void writeStringToJsonFile(String jsonContent, int measureId, String sharedPath){
+		
+		String sharedFolderPath = sharedPath+File.separator+"ECQM";
+		
+		String filename = sharedFolderPath+File.separator+measureId+".json";
+		
+		File f = new File(filename);
+		
+		try{
+			
+			if(!f.exists()){
+
+				if(!f.getParentFile().exists()){
+					f.getParentFile().mkdirs();
+				}
+				
+				f.createNewFile();
+				
+			}
+			
+			FileWriter resultFile = new FileWriter(f);
+			
+			resultFile.write(jsonContent);
+			
+			resultFile.flush();
+			
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
 		
 	}
 	
@@ -473,7 +557,7 @@ public class EMeasureUtils {
 		
 	}
 	
-	public List<Procedure> getProcedureQDM(List<InvestigationQDM> patientInvestigationData, String codeList,List<Date> obj,List<Procedure> ProcedureObj,List<Procedure> ProcBasedOnCPT){
+	public List<Procedure> getProcedureQDM(List<InvestigationQDM> patientInvestigationData, String codeList,List<MedicationQDM> obj,List<Procedure> ProcedureObj,List<Procedure> ProcBasedOnCPT){
 
 		InvestigationQDM eachObj = null;
 		Procedure procedureObj;
@@ -533,15 +617,16 @@ public class EMeasureUtils {
 
 	}
 	
-	public List<Procedure> setMedicationObj(List<Date> obj){
+	public List<Procedure> setMedicationObj(List<MedicationQDM> obj){
 		List<Procedure> procList=new ArrayList<Procedure>();
 		for(int i=0;i<obj.size();i++){
 			Procedure procedureObj=new Procedure();
+			if(obj.get(0).getReviewStatus()==true){
 			procedureObj.setCode("428191000124101");
 			procedureObj.setDescription("Documentation of current medications (procedure)");
 			procedureObj.setCodeSystemOID("2.16.840.1.113883.6.96");
 			procedureObj.setStatus(2);
-			Date reviewedDate = obj.get(i);
+			Date reviewedDate = obj.get(0).getAttestationDate();
 			try {
 				procedureObj.setStartDate(reviewedDate);
 				procedureObj.setEndDate(reviewedDate);
@@ -549,7 +634,7 @@ public class EMeasureUtils {
 				e.printStackTrace();
 			}
 
-			procList.add(procedureObj);
+			procList.add(procedureObj);}
 		}
 		return procList;
 	}
@@ -565,34 +650,36 @@ public class EMeasureUtils {
 				assessmentObj.setCode(eachObj.getCode());
 				assessmentObj.setCodeSystem(eachObj.getCodeSystem());
 				assessmentObj.setCodeSystemOID(eachObj.getCodeSystemOID());
-				assessmentObj.setDescription(eachObj.getDescription());
+				assessmentObj.setResultCode(eachObj.getResultCode());
+				assessmentObj.setResultCodeSystemOID(eachObj.getResultCodeSystem());
 				assessmentObj.setStartDate(eachObj.getRecordedDate());
 				assessmentList.add(assessmentObj);
 			}
 		}
-	return assessmentList;
+		return assessmentList;
 	}
 	
 	public List<PhysicalExam> getPhysicalexamFromCNM(List<ClinicalDataQDM> clinicalData,String codeList){
 		ClinicalDataQDM eachObj= null;
 		PhysicalExam phyExamObj;
 		List<PhysicalExam> PhysicalExamList=new ArrayList<PhysicalExam>();
-		
+
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			phyExamObj=new PhysicalExam();
 			if(codeList.contains(eachObj.getCode())){
-			phyExamObj.setCode(eachObj.getCode());
-			phyExamObj.setCodeSystem(eachObj.getCodeSystem());
-			phyExamObj.setCodeSystemOID(eachObj.getCodeSystemOID());
-			phyExamObj.setDescription(eachObj.getDescription());
-			phyExamObj.setStartDate(eachObj.getRecordedDate());
-			phyExamObj.setResultValue(eachObj.getResultValue());
-			PhysicalExamList.add(phyExamObj);
+				phyExamObj.setCode(eachObj.getCode());
+				phyExamObj.setCodeSystem(eachObj.getCodeSystem());
+				phyExamObj.setCodeSystemOID(eachObj.getCodeSystemOID());
+				phyExamObj.setResultCode(eachObj.getResultCode());
+				phyExamObj.setResultCodeSystemOID(eachObj.getResultCodeSystem());
+				phyExamObj.setStartDate(eachObj.getRecordedDate());
+				phyExamObj.setResultValue(eachObj.getResultValue());
+				PhysicalExamList.add(phyExamObj);
+			}
 		}
-		}
-	
-	return PhysicalExamList;
+
+		return PhysicalExamList;
 	}
 	
 	public List<Procedure> getProcFromCNM(List<ClinicalDataQDM> clinicalData,String codeList){
@@ -606,14 +693,15 @@ public class EMeasureUtils {
 				procedureObj.setCode(eachObj.getCode());
 				procedureObj.setCodeSystem(eachObj.getCodeSystem());
 				procedureObj.setCodeSystemOID(eachObj.getCodeSystemOID());
-				procedureObj.setDescription(eachObj.getDescription());
+				procedureObj.setResultCode(eachObj.getResultCode());
+				procedureObj.setResultCodeSystemOID(eachObj.getResultCodeSystem());
 				procedureObj.setStartDate(eachObj.getRecordedDate());
 				procedureList.add(procedureObj);
 			}
 		}
 		return procedureList;
 	}
-	
+
 	public List<Intervention> getInterventionFromCNM(List<ClinicalDataQDM> clinicalData,String codeList){
 		ClinicalDataQDM eachObj= null;
 		Intervention interventionObj;
@@ -625,14 +713,15 @@ public class EMeasureUtils {
 				interventionObj.setCode(eachObj.getCode());
 				interventionObj.setCodeSystem(eachObj.getCodeSystem());
 				interventionObj.setCodeSystemOID(eachObj.getCodeSystemOID());
-				interventionObj.setDescription(eachObj.getDescription());
+				interventionObj.setResultCode(eachObj.getResultCode());
+				interventionObj.setResultCodeSystemOID(eachObj.getResultCodeSystem());
 				interventionObj.setStartDate(eachObj.getRecordedDate());
 				interventionList.add(interventionObj);
 			}
 		}
 		return interventionList;
 	}
-	
+
 	public List<DiagnosticStudy> getDiagnosisFromCNM(List<ClinicalDataQDM> clinicalData,String codeList){
 		ClinicalDataQDM eachObj= null;
 		DiagnosticStudy diagnosticObj;
@@ -644,7 +733,8 @@ public class EMeasureUtils {
 				diagnosticObj.setCode(eachObj.getCode());
 				diagnosticObj.setCodeSystem(eachObj.getCodeSystem());
 				diagnosticObj.setCodeSystemOID(eachObj.getCodeSystemOID());
-				diagnosticObj.setDescription(eachObj.getDescription());
+				diagnosticObj.setResultCode(eachObj.getResultCode());
+				diagnosticObj.setResultCodeSystemOID(eachObj.getResultCodeSystem());
 				diagnosticObj.setStartDate(eachObj.getRecordedDate());
 				diagnosticList.add(diagnosticObj);
 			}

@@ -2,58 +2,46 @@ package com.glenwood.glaceemr.server.application.Bean;
 
 import java.util.Date;
 
+
 public class ClinicalDataQDM {
 	private String code;	
 	private String codeSystem;
 	private String codeSystemOID;
-	private String description;
-	private Date startDate;
-	private Date endDate;
-	private Date recordedDate;
+	private String elementName;
+	private Date  startDate;
+	private Date  endDate;
+	private Date  recordedDate;
 	private String resultCode;
 	private String resultCodeSystem;
 	private String resultValue;
+	private String patientResult;
+	private int patientId;
+	private String optionValue;
 	
-	
-	public ClinicalDataQDM(String code, String codeSystem,String description,Date recordedDate,String resultCode,String resultCodeSystem,String resultValue) {	
+ public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,String resultCode,String optionValue,String patientResult,String resultValue) {	
 		super();	
 		this.code = code;
+		this.patientId=patientId;
 		this.codeSystem = codeSystem;
-		this.description = description;
-		this.recordedDate =recordedDate;
+		this.elementName = elementName;
 		this.resultCode = resultCode;
-		this.resultCodeSystem = resultCodeSystem;			
+		this.optionValue = optionValue;	
+		this.patientResult=patientResult;
 		this.resultValue = resultValue;				
 	}
-	
-	public ClinicalDataQDM(String code, String codeSystem,String description,Date recordedDate,Integer resultCode,String resultCodeSystem,String resultValue) {	
+	public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,Date recordedDate,String resultCode,String resultValue,String optionValue,String patientResult) {	
 		super();	
+		this.patientId=patientId;
 		this.code = code;
 		this.codeSystem = codeSystem;
-		this.description = description;
-		this.recordedDate =recordedDate;
-		this.resultCode = resultCode.toString();
-		this.resultCodeSystem = resultCodeSystem;			
-		this.resultValue = resultValue;				
+		this.elementName = elementName;
+		this.recordedDate=recordedDate;
+		this.resultCode = resultCode;
+		this.resultValue = resultValue;	
+		this.optionValue = optionValue;	
+		this.patientResult=patientResult;				
 	}
 	
- /* public ClinicalDataQDM(String code, String codeSystem, String codeSystemOID, String description,String resultCode,String resultCodeSystem,String resultValue) {
-		
-		super();
-		
-		this.code = code;
-		this.codeSystem = codeSystem;
-		this.codeSystemOID = codeSystemOID;
-		this.description = description;
-		
-		this.resultCode = resultCode;
-		this.resultCodeSystem = resultCodeSystem;
-		this.resultValue = resultValue;
-		
-		
-	}
-	*/
-
 	public String getCode() {
 		return code;
 	}
@@ -79,12 +67,12 @@ public class ClinicalDataQDM {
 		this.codeSystemOID = codeSystemOID;
 	}
 
-	public String getDescription() {
-		return description;
+	public String getElementName() {
+		return elementName;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setElementName(String elementName) {
+		this.elementName = elementName;
 	}
 
 	public Date getStartDate() {
@@ -134,6 +122,30 @@ public class ClinicalDataQDM {
 
 	public void setResultValue(String resultValue) {
 		this.resultValue = resultValue;
+	}
+
+	public int getPatientId() {
+		return patientId;
+	}
+
+	public void setPatientId(int patientId) {
+		this.patientId = patientId;
+	}
+
+	public String getOptionValue() {
+		return optionValue;
+	}
+
+	public void setOptionValue(String optionValue) {
+		this.optionValue = optionValue;
+	}
+	
+	public String getPatientResult() {
+		return patientResult;
+	}
+
+	public void setPatientResult(String patientResult) {
+		this.patientResult = patientResult;
 	}
 
 }

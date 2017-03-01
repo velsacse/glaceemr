@@ -17,6 +17,25 @@ public class MedicationQDM {
 	String code;
 	String frequency;
 	
+	Date attestationDate;
+	boolean reviewStatus;
+	
+	public Date getAttestationDate() {
+		return attestationDate;
+	}
+
+	public void setAttestationDate(Date attestationDate) {
+		this.attestationDate = attestationDate;
+	}
+
+	public boolean getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(boolean reviewStatus) {
+		this.reviewStatus = reviewStatus;
+	}
+
 	public String getFrequency() {
 		return frequency;
 	}
@@ -128,5 +147,11 @@ public class MedicationQDM {
 		this.startDate=startDate;
 		
 	}
+	
+	public MedicationQDM(Date attestationDate,boolean reviewStatus){
+		this.attestationDate=attestationDate;
+		this.reviewStatus=reviewStatus;
+	}
+	
 	
 }

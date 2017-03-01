@@ -908,43 +908,63 @@ Root<Encounter> root = cq.from(Encounter.class);
 	 * 
 	 */
 	
-	public List<Date> getMedicationsReviewed(EntityManager em,int patientId,Date date1,Date date2){
-	       
-        CriteriaBuilder builder = em.getCriteriaBuilder();
-        CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+	public List<MedicationQDM> getMedicationsReviewed(EntityManager em,int patientId,Date date1,Date date2){
+	     
+		CriteriaBuilder builder1 = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq1 = builder1.createQuery(Object.class);
+		Root<Encounter> encounterRoot = cq1.from(Encounter.class);
+		Join<Encounter, Chart> encounterChartJoin1 = encounterRoot.join(Encounter_.chart,JoinType.INNER);
+		Predicate prediByPatientId=builder1.equal(encounterChartJoin1.get(Chart_.chartPatientid), patientId);
+		
+		encounterChartJoin1.on(prediByPatientId);
+		cq1.orderBy(builder1.desc(encounterRoot.get(Encounter_.encounterId)));
+		cq1.select(encounterRoot.get(Encounter_.encounterId));
+		
+		List<Object> currentEncounter=em.createQuery(cq1).setMaxResults(1).getResultList();
+        
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
         Root<Encounter> root = cq.from(Encounter.class);
-       
+        Integer currentEncounterId=Integer.parseInt(currentEncounter.get(0).toString());
+        Predicate currentEncounterPredicate=builder.equal(root.get(Encounter_.encounterId),currentEncounterId);
         Join<Encounter, Chart> encChartJoin=root.join(Encounter_.chartTable,JoinType.INNER);
+        
         encChartJoin.on(builder.equal(encChartJoin.get(Chart_.chartPatientid),patientId));
         Predicate date=builder.between(root.get(Encounter_.encounterDate), date1, date2);
         Predicate attest=builder.gt(builder.length(builder.trim(root.get(Encounter_.medicationAttestationStatus))), 0);
-        cq.select(root.get(Encounter_.encounterDate));
-        cq.where(date,attest);
-        List<Object> result=em.createQuery(cq).getResultList();
-        List<Date> dateList=new ArrayList<Date>();
+        cq.multiselect(root.get(Encounter_.encounterDate),root.get(Encounter_.medicationAttestationStatus));
+        cq.where(date,attest,currentEncounterPredicate);
+        
+        List<Object[]> result=em.createQuery(cq).getResultList();
+        List<MedicationQDM> attestList=new ArrayList<MedicationQDM>();
+        
         for(int i=0;i<result.size();i++){
-        	dateList.add((Date) result.get(i));
+        	
+        	Date attastationDate=(Date) result.get(i)[0];
+        	boolean status=false;
+        	if((result.get(i)[1].toString()).equals("428191000124101"))
+        		status=true;
+        		MedicationQDM eachObj=new MedicationQDM(attastationDate, status);
+        		attestList.add(eachObj);
         }
        
-        return dateList;
+        return attestList;
     }
 	
 	@SuppressWarnings("rawtypes")
-	public List<ClinicalDataQDM> getClinicalDataQDM(EntityManager em, String snomedCodes,String loincCodes,int patientId, Boolean range, Date startDate, Date endDate)    {      
-
+	public List<ClinicalDataQDM> getClinicalDataQDM(EntityManager em,int patientId, String snomedCodes,String loincCodes,Boolean range, Date startDate, Date endDate)    {     
+		
 		String []  codeListString=snomedCodes.split(",");
 		String [] loincCodeListString=loincCodes.split(",");
 		List<String> snomedCodeList= Arrays.asList(codeListString);
 		List<String> loincCodeList=Arrays.asList(loincCodeListString);
-
 		List<ClinicalDataQDM> clinicalDataSNOMED = new ArrayList<ClinicalDataQDM>();
 		List<ClinicalDataQDM> clinicalDataLOINC = new ArrayList<ClinicalDataQDM>();
 		List<ClinicalDataQDM> clinicaldataFinal = new ArrayList<ClinicalDataQDM>();
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-
 		if(snomedCodeList.size()>0){
-			CriteriaQuery<ClinicalDataQDM> cqForSnomed = builder.createQuery(ClinicalDataQDM.class);       
+			CriteriaQuery<ClinicalDataQDM> cqForSnomed = builder.createQuery(ClinicalDataQDM.class);      
 			Root<PatientClinicalElements> root = cqForSnomed.from(PatientClinicalElements.class);
 			Join<PatientClinicalElements, Encounter> EncElementJoin = root.join(PatientClinicalElements_.encounter, JoinType.INNER);
 			Join<Encounter, Chart> EncChartJoin = EncElementJoin.join(Encounter_.chartTable, JoinType.INNER);
@@ -957,35 +977,41 @@ Root<Encounter> root = cq.from(Encounter.class);
 			Predicate checkCodeNotNull=codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).isNotNull();
 			Predicate checkCodeNotEmpty=builder.notEqual(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode),builder.literal(""));
 			Predicate checkSnomedCodeNotNull=clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).isNotNull();
-			Predicate checkSnomedCodeNotEmpty=builder.notEqual(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed),builder.literal(""));   
-			codeSystemJoin.on(builder.and(checkOid,checkCodeList,checkCodeNotNull));   
+			Predicate checkSnomedCodeNotEmpty=builder.notEqual(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed),builder.literal(""));  
+			codeSystemJoin.on(builder.and(checkOid,checkCodeList,checkCodeNotNull));  
 
-			Expression<String> rcode = builder.<String>selectCase().when(builder.notEqual(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed),builder.literal("")),clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed)).otherwise(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode));
+			Expression<String> rcode = builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).isNotNull(),clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed)).otherwise(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode));
 			Expression<String> rvalue = builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsDatatype).in("4","5"),clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName)).otherwise(root.get(PatientClinicalElements_.patientClinicalElementsValue));
 
 			Selection[] selections= new Selection[] {
-					rcode,           
-					root.get(PatientClinicalElements_.patientClinicalElementsValue), // value set for comparison
-					clinicalElementsJoin.get(ClinicalElements_.clinicalElementsName),
-					EncElementJoin.get(Encounter_.encounterDate),
-					clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsSnomed),
-					clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),// value set for comparison
-					rvalue
+					root.get(PatientClinicalElements_.patientClinicalElementsPatientid).alias("patientId"),       
+					rcode.alias("code"),
+					codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemOid).alias("codesystem"),// value set for comparison
+					clinicalElementsJoin.get(ClinicalElements_.clinicalElementsName).alias("elementName"),
+					EncElementJoin.get(Encounter_.encounterDate).alias("recordedDate"),
+					clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsSnomed).alias("resultCode"),
+					rvalue.alias("resultValue"),
+					clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue).alias("optionValue"),
+					root.get(PatientClinicalElements_.patientClinicalElementsValue).alias("patientResult")
 			};
+
 
 			Predicate[] restrictions = new Predicate[] {
 					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
-					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),             
-					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),   
+					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),            
+					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),  
+					builder.or((clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).in(snomedCodeList)),(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).in(snomedCodeList))),  
 
 			};
 
 			Predicate[] restrictionsWithDate = new Predicate[] {
 					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
-					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),               
-					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),       
+					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),              
+					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),      
 					builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,EncElementJoin.get(Encounter_.encounterDate)),startDate),
-					builder.lessThanOrEqualTo(builder.function("DATE", Date.class,EncElementJoin.get(Encounter_.encounterDate)),endDate)                                                   
+					builder.lessThanOrEqualTo(builder.function("DATE", Date.class,EncElementJoin.get(Encounter_.encounterDate)),endDate),                                                
+					builder.or((clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).in(snomedCodeList)),(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).in(snomedCodeList)))  
+
 			};
 
 			cqForSnomed.select(builder.construct(ClinicalDataQDM.class,selections));
@@ -996,66 +1022,66 @@ Root<Encounter> root = cq.from(Encounter.class);
 			cqForSnomed.distinct(true);
 			clinicalDataSNOMED = em.createQuery(cqForSnomed).getResultList();
 
-			for(int i=0;i<clinicalDataSNOMED.size();i++){
-				ClinicalDataQDM clinicalDataQDM=clinicalDataSNOMED.get(i);
+			for(ClinicalDataQDM clinicalDataQDM: clinicalDataSNOMED){
 				clinicalDataQDM.setEndDate(endDate);
 				clinicalDataQDM.setStartDate(startDate);
-				if(clinicalDataQDM.getResultCode()==null || clinicalDataQDM.getResultCode().trim().equalsIgnoreCase("") || clinicalDataQDM.getResultCode().trim().equalsIgnoreCase("null")){               
+				if(clinicalDataQDM.getOptionValue()==null ){              
 					clinicalDataQDM.setCodeSystemOID("2.16.840.1.113883.6.96");
 					clinicalDataQDM.setCodeSystem("2.16.840.1.113883.6.96");
 					clinicalDataQDM.setResultCodeSystem("2.16.840.1.113883.6.96");
-					if(clinicalDataQDM.getResultValue()!=null)
-						clinicaldataFinal.add(clinicalDataQDM);
-				}   
-				else if(clinicalDataQDM.getResultCodeSystem().equalsIgnoreCase(clinicalDataQDM.getCodeSystem())){
+					clinicalDataQDM.setResultValue(clinicalDataQDM.getPatientResult());
+					clinicaldataFinal.add(clinicalDataQDM);
+				}  
+				else if(clinicalDataQDM.getOptionValue().equalsIgnoreCase(clinicalDataQDM.getPatientResult())){
 					clinicalDataQDM.setCodeSystemOID("2.16.840.1.113883.6.96");
 					clinicalDataQDM.setCodeSystem("2.16.840.1.113883.6.96");
-					clinicalDataQDM.setResultCodeSystem("2.16.840.1.113883.6.96");   
-					if(clinicalDataQDM.getResultCode()!=null)
-						clinicaldataFinal.add(clinicalDataQDM);
+					clinicalDataQDM.setResultCodeSystem("2.16.840.1.113883.6.96");  
+					clinicaldataFinal.add(clinicalDataQDM);
 				}
 			}
-
 		}
-		if(loincCodeList.size()>0){                                   
-			CriteriaQuery<ClinicalDataQDM> cqForLoinc = builder.createQuery(ClinicalDataQDM.class);       
+
+		if(loincCodeList.size()>0){                                  
+			CriteriaQuery<ClinicalDataQDM> cqForLoinc = builder.createQuery(ClinicalDataQDM.class);      
 			Root<PatientClinicalElements> root = cqForLoinc.from(PatientClinicalElements.class);
 			Join<PatientClinicalElements, Encounter> EncElementJoin = root.join(PatientClinicalElements_.encounter, JoinType.INNER);
 			Join<Encounter, Chart> EncChartJoin = EncElementJoin.join(Encounter_.chartTable, JoinType.INNER);
 			Join<PatientClinicalElements, ClinicalElements> clinicalElementsJoin = root.join(PatientClinicalElements_.clinicalElement, JoinType.INNER);
 			Join<ClinicalElements, ClinicalElementsOptions> clinicalElementsOptionsJoin = clinicalElementsJoin.join(ClinicalElements_.clinicalElementsOptions, JoinType.LEFT);
-			Join<ClinicalElements,CNMCodeSystem> codeSystemJoin = clinicalElementsJoin.join(ClinicalElements_.cnmCodeSystems, JoinType.INNER);       
+			Join<ClinicalElements,CNMCodeSystem> codeSystemJoin = clinicalElementsJoin.join(ClinicalElements_.cnmCodeSystems, JoinType.INNER);      
 
 			Predicate checkOid=codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemOid).in(builder.literal("2.16.840.1.113883.6.1"));
 			Predicate checkCodeList=codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).in(loincCodeList);
 			Predicate checkCodeNotNull=codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).isNotNull();
-			Predicate checkCodeNotEmpty=builder.notEqual(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode),builder.literal(""));       
-			codeSystemJoin.on(builder.and(checkOid,checkCodeList,checkCodeNotNull));   
+			Predicate checkCodeNotEmpty=builder.notEqual(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode),builder.literal(""));      
+			codeSystemJoin.on(builder.and(checkOid,checkCodeList,checkCodeNotNull));  
 
-			Expression<String> rcode = codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode);
-			Expression<String> rvalue = builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsDatatype).in("5","4"),clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName)).otherwise(root.get(PatientClinicalElements_.patientClinicalElementsValue));
+			Expression<String> rcode=codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode);
+			Expression<String> rvalue=    builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsDatatype).in("3","4"),clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName)).otherwise(root.get(PatientClinicalElements_.patientClinicalElementsValue));
 
 			Selection[] selections= new Selection[] {
-					rcode,           
-					root.get(PatientClinicalElements_.patientClinicalElementsValue),// value set for comparison
-					clinicalElementsJoin.get(ClinicalElements_.clinicalElementsName),
-					EncElementJoin.get(Encounter_.encounterDate),                   
-					clinicalElementsJoin.get(ClinicalElements_.clinicalElementsDatatype),
-					clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue),// value set for comparison
-					rvalue
-			};   
+					root.get(PatientClinicalElements_.patientClinicalElementsPatientid).alias("patientId"),       
+					rcode.alias("code"),
+					codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemOid).alias("codesystem"),// value set for comparison
+					clinicalElementsJoin.get(ClinicalElements_.clinicalElementsName).alias("elementName"),
+					EncElementJoin.get(Encounter_.encounterDate).alias("recordedDate"),
+					clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsSnomed).alias("resultCode"),
+					rvalue.alias("resultValue"),
+					clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue).alias("optionValue"),
+					root.get(PatientClinicalElements_.patientClinicalElementsValue).alias("patientResult")
+			};  
 			Predicate[] restrictions = new Predicate[] {
 					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
-					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),               
+					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),              
 					checkCodeNotNull,
 					checkCodeNotEmpty
 			};
 			Predicate[] restrictionsWithDate = new Predicate[] {
 					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
-					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),               
+					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),              
 					checkCodeNotNull,checkCodeNotEmpty,
 					builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,EncElementJoin.get(Encounter_.encounterDate)),startDate),
-					builder.lessThanOrEqualTo(builder.function("DATE", Date.class,EncElementJoin.get(Encounter_.encounterDate)),endDate)                                                   
+					builder.lessThanOrEqualTo(builder.function("DATE", Date.class,EncElementJoin.get(Encounter_.encounterDate)),endDate)                                                  
 			};
 
 			cqForLoinc.select(builder.construct(ClinicalDataQDM.class,selections));
@@ -1063,37 +1089,33 @@ Root<Encounter> root = cq.from(Encounter.class);
 				cqForLoinc.where(restrictionsWithDate);
 			else
 				cqForLoinc.where(restrictions);
-			cqForLoinc.distinct(true);    
+			cqForLoinc.distinct(true);   
 			clinicalDataLOINC = em.createQuery(cqForLoinc).setMaxResults(500).getResultList();
 
-			for(int i=0;i<clinicalDataLOINC.size();i++){
-				ClinicalDataQDM clinicalDataQDM=clinicalDataLOINC.get(i);
+			for(ClinicalDataQDM clinicalDataQDM: clinicalDataLOINC){
+
 				clinicalDataQDM.setEndDate(endDate);
 				clinicalDataQDM.setStartDate(startDate);
-				if(clinicalDataQDM.getResultCode()!=null && (clinicalDataQDM.getResultCode().trim().equalsIgnoreCase("2") || clinicalDataQDM.getResultCode().trim().equalsIgnoreCase("3"))){               
+				if(clinicalDataQDM.getOptionValue()==null ){
 					clinicalDataQDM.setCodeSystemOID("2.16.840.1.113883.6.1");
 					clinicalDataQDM.setCodeSystem("2.16.840.1.113883.6.1");
 					clinicalDataQDM.setResultCodeSystem("2.16.840.1.113883.6.1");
-					clinicalDataQDM.setResultCode("");
-					if(clinicalDataQDM.getResultValue()!=null)
-						clinicaldataFinal.add(clinicalDataQDM);
-				}   
-				else if(clinicalDataQDM.getResultCodeSystem().equalsIgnoreCase(clinicalDataQDM.getCodeSystem())){
+					clinicaldataFinal.add(clinicalDataQDM);
+				}  
+				else if(clinicalDataQDM.getOptionValue().equalsIgnoreCase(clinicalDataQDM.getPatientResult())){
 					clinicalDataQDM.setCodeSystemOID("2.16.840.1.113883.6.1");
 					clinicalDataQDM.setCodeSystem("2.16.840.1.113883.6.1");
-					clinicalDataQDM.setResultCodeSystem("2.16.840.1.113883.6.1");   
-					clinicalDataQDM.setResultCode("");
-					if(clinicalDataQDM.getResultValue()!=null)
-						clinicaldataFinal.add(clinicalDataQDM);
+					clinicalDataQDM.setResultCodeSystem("2.16.840.1.113883.6.96");  
+					clinicaldataFinal.add(clinicalDataQDM);
 				}
 			}
-		}   
+		}  
+		
 		return clinicaldataFinal;
-
 	}
-	
-	public List<QDM> getTobaccoDetails(EntityManager em,int patientId)    {      
 
+	@SuppressWarnings("rawtypes")
+	public List<QDM> getTobaccoDetails(EntityManager em,int patientId)    {      
 
 		List<ClinicalDataQDM> clinicalDataSNOMED = new ArrayList<ClinicalDataQDM>();
 		ArrayList<String> gwids=new ArrayList<String>(){{
@@ -1108,7 +1130,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		clinicalElementsJoin.on(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsGwid).in(gwids));
 		Join<ClinicalElements, ClinicalElementsOptions> clinicalElementsOptionsJoin = clinicalElementsJoin.join(ClinicalElements_.clinicalElementsOptions, JoinType.INNER);
 		Join<ClinicalElements,CNMCodeSystem> codeSystemJoin = clinicalElementsJoin.join(ClinicalElements_.cnmCodeSystems, JoinType.LEFT);
-		clinicalElementsOptionsJoin.on(builder.equal(root.get(PatientClinicalHistory_.patientClinicalHistoryValue),ClinicalElementsOptions_.clinicalElementsOptionsValue));
+		//clinicalElementsOptionsJoin.on(builder.equal(root.get(PatientClinicalHistory_.patientClinicalHistoryValue),ClinicalElementsOptions_.clinicalElementsOptionsValue));
 
 		Predicate checkOid=codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemOid).in(builder.literal("2.16.840.1.113883.6.96"));
 		Predicate checkCodeNotNull=codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).isNotNull();
@@ -1125,26 +1147,46 @@ Root<Encounter> root = cq.from(Encounter.class);
 				codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemOid).alias("codesystem"),
 				clinicalElementsJoin.get(ClinicalElements_.clinicalElementsName).alias("description"),
 				clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsSnomed).alias("resultcode"),
-				rvalue.alias("resultvalue")
+				clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue).alias("optionvalue"),
+				root.get(PatientClinicalHistory_.patientClinicalHistoryValue).alias("value"),
+				clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName).alias("resultvalue")
 		};
 
 		cq.select(builder.construct(ClinicalDataQDM.class,selections));
 		cq.where(checkPatientId);
 		cq.distinct(true);
+
 		clinicalDataSNOMED = em.createQuery(cq).getResultList();
+
+		List<ClinicalDataQDM> clinicalDataFinal=new ArrayList<ClinicalDataQDM>();
+		for(ClinicalDataQDM clinicalDataQdm:clinicalDataSNOMED){
+			if(clinicalDataQdm.getOptionValue()==null || clinicalDataQdm.getOptionValue().isEmpty())
+			{
+				clinicalDataQdm.setResultValue(clinicalDataQdm.getPatientResult());
+				clinicalDataQdm.setResultCodeSystem("2.16.840.1.113883.6.96");  
+				clinicalDataFinal.add(clinicalDataQdm);
+			}
+			else if(clinicalDataQdm.getOptionValue().equalsIgnoreCase(clinicalDataQdm.getPatientResult())){
+				clinicalDataQdm.setResultCodeSystem("2.16.840.1.113883.6.96");  
+				clinicalDataFinal.add(clinicalDataQdm);
+			}   
+		}
+
 
 		List<QDM> tobaccoStatus=new ArrayList<QDM>();
 		QDM QDMObj;
 		ClinicalDataQDM eachObj= null;
-		for(int i=0;i<clinicalDataSNOMED.size();i++){
-			eachObj=clinicalDataSNOMED.get(i);
+		for(int i=0;i<clinicalDataFinal.size();i++){
+			eachObj=clinicalDataFinal.get(i);
 			QDMObj=new QDM();
-			QDMObj.setCode(eachObj.getCode());
+			QDMObj.setCode(eachObj.getResultCode());
 			QDMObj.setCodeSystem(eachObj.getCodeSystem());
-			QDMObj.setCodeSystemOID(eachObj.getCodeSystemOID());
+			QDMObj.setCodeSystemOID("2.16.840.1.113883.6.96");
 			tobaccoStatus.add(QDMObj);
 		}
-		
+
+
+
 		return tobaccoStatus;
 	}
 	
