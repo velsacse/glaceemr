@@ -6,7 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map; 
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -16,6 +16,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,6 +67,8 @@ import com.glenwood.glaceemr.server.application.repositories.MedAdministrationPl
 import com.glenwood.glaceemr.server.application.repositories.PharmDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PharmacyMappingRepository;
 import com.glenwood.glaceemr.server.application.repositories.PrescriptionRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PharmacyFilterSpecification;
@@ -124,6 +127,12 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	
 	@PersistenceContext
 	EntityManager em;
+
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
 	/**
 	 * To get the prescribed medications by the doctor
 	 */
@@ -532,6 +541,11 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		reposnseBean.setLogin(true);
 		reposnseBean.setIsAuthorizationPresent(true);
 		reposnseBean.setData("Refill request sent successfully");
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+requestBean.getPatientId()+" made a refill request.",-1,
+				request.getRemoteAddr(),requestBean.getPatientId(),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+requestBean.getPatientId()+" made a refill request.","");
 		
 		return reposnseBean;
 	}

@@ -10,6 +10,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ import com.glenwood.glaceemr.server.application.repositories.AlertCategoryReposi
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
 import com.glenwood.glaceemr.server.application.repositories.H810Respository;
 import com.glenwood.glaceemr.server.application.repositories.PortalMessageRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalAlertEventSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalAlertSpecification;
@@ -56,6 +59,12 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 
 	@Autowired
 	EntityManagerFactory emf;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
 
 	@Override
 	public PortalMessagesDetailsBean getMessagesDetailsByPatientId(int patientId) {
@@ -162,7 +171,12 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 
 	@Override
 	public EMRResponseBean deletePortalMessageByMessageId(int patientId,int messageId) {
-		portalMessageRepository.delete(portalMessageRepository.findAll(PortalMessagesSpecification.deleteMessageById(messageId)));	
+		portalMessageRepository.delete(portalMessageRepository.findAll(PortalMessagesSpecification.deleteMessageById(messageId)));
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.DELETE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" deleted the message with id "+messageId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" deleted the message with id "+messageId,"");
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		responseBean.setLogin(true);
@@ -177,6 +191,11 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 	public EMRResponseBean deletePortalMessageThread(int patientId, int threadId) {
 		
 		portalMessageRepository.delete(portalMessageRepository.findAll(PortalMessagesSpecification.deleteMessageThreadById(patientId, threadId)));
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.DELETE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" deleted the message thread with id "+threadId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" deleted the message thread with id "+threadId,"");
 		
 		EMRResponseBean responseBean=new EMRResponseBean();
 		responseBean.setLogin(true);
@@ -199,46 +218,61 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
         
 		AlertCategory alertCategory=alertCategoryRepository.findOne(AlertCategorySpecification.getAlertCategoryByName("Message from Patient Portal"));
         
-		AlertEvent alertEventBean=new AlertEvent();
-		alertEventBean.setAlertEventCategoryId(alertCategory.getAlertCategoryId());
-		alertEventBean.setAlertEventStatus(1);
-		alertEventBean.setAlertEventChartId(portalMessageBean.getChartid());
-		alertEventBean.setAlertEventPatientId(portalMessageBean.getPatientid());
-		alertEventBean.setAlertEventPatientName(portalMessageBean.getMessageSender());
-		alertEventBean.setAlertEventEncounterId(-1);
-		alertEventBean.setAlertEventHighlight(true);
-		alertEventBean.setAlertEventMessage("Message from Patient Portal.");
-		alertEventBean.setAlertEventRoomId(-1);
-		alertEventBean.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
-		alertEventBean.setAlertEventModifiedDate(new Timestamp(new Date().getTime()));
-		alertEventBean.setAlertEventModifiedby(portalMessageBean.getMessasgeBy());
-		alertEventBean.setAlertEventFrom(-100);
-		alertEventBean.setAlertEventRefId(getNewPortalMessageAlertId());
-		alertEventBean.setAlertEventParentalertid(-1);
+		AlertEvent alert1=new AlertEvent();
+		alert1.setAlertEventCategoryId(alertCategory.getAlertCategoryId());
+		alert1.setAlertEventStatus(1);
+		alert1.setAlertEventChartId(portalMessageBean.getChartid());
+		alert1.setAlertEventPatientId(portalMessageBean.getPatientid());
+		alert1.setAlertEventPatientName(portalMessageBean.getMessageSender());
+		alert1.setAlertEventEncounterId(-1);
+		alert1.setAlertEventHighlight(true);
+		alert1.setAlertEventMessage("Message from Patient Portal.");
+		alert1.setAlertEventRoomId(-1);
+		alert1.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+		alert1.setAlertEventModifiedDate(new Timestamp(new Date().getTime()));
+		alert1.setAlertEventModifiedby(portalMessageBean.getMessasgeBy());
+		alert1.setAlertEventFrom(-100);
+		alert1.setAlertEventRefId(getNewPortalMessageAlertId());
+		alert1.setAlertEventParentalertid(-1);
 				
 		
 		if(provider==0 && forwardTo==0)
-			alertEventBean.setAlertEventTo(-1);
+			alert1.setAlertEventTo(-1);
         else {
           if(sendToAll){
          	 if(forwardTo!=provider){
-         		alertEventBean.setAlertEventTo(forwardTo);
-         		AlertEvent alert2=alertEventBean;
+         		alert1.setAlertEventTo(forwardTo);
+         		AlertEvent alert2=new AlertEvent();
+        		alert2.setAlertEventCategoryId(alertCategory.getAlertCategoryId());
+        		alert2.setAlertEventStatus(1);
+        		alert2.setAlertEventChartId(portalMessageBean.getChartid());
+        		alert2.setAlertEventPatientId(portalMessageBean.getPatientid());
+        		alert2.setAlertEventPatientName(portalMessageBean.getMessageSender());
+        		alert2.setAlertEventEncounterId(-1);
+        		alert2.setAlertEventHighlight(true);
+        		alert2.setAlertEventMessage("Message from Patient Portal.");
+        		alert2.setAlertEventRoomId(-1);
+        		alert2.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+        		alert2.setAlertEventModifiedDate(new Timestamp(new Date().getTime()));
+        		alert2.setAlertEventModifiedby(portalMessageBean.getMessasgeBy());
+        		alert2.setAlertEventFrom(-100);
+        		alert2.setAlertEventRefId(getNewPortalMessageAlertId());
+        		alert2.setAlertEventParentalertid(-1);
          		alert2.setAlertEventTo(provider);
          		alertEventRepository.saveAndFlush(alert2);
          	 } else {
-         		alertEventBean.setAlertEventTo(forwardTo);
+         		alert1.setAlertEventTo(forwardTo);
          	 }            	 
           }else{
          	 if(forwardTo!=0){
-         		alertEventBean.setAlertEventTo(forwardTo);
+         		alert1.setAlertEventTo(forwardTo);
          	 } else {
-         		alertEventBean.setAlertEventTo(provider);
+         		alert1.setAlertEventTo(provider);
          	}
           }
         }
 		
-		alertEventBean=alertEventRepository.saveAndFlush(alertEventBean);
+		alert1=alertEventRepository.saveAndFlush(alert1);
 		
 		PortalMessage portalMessage=new PortalMessage();
 
@@ -254,7 +288,7 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 			portalMessage.setParentid(getNewPortalMessageParentId());
 		
 		portalMessage.setPatientid(portalMessageBean.getPatientid());
-		portalMessage.setPortalMessageAlertid(alertEventBean.getAlertEventRefId());
+		portalMessage.setPortalMessageAlertid(alert1.getAlertEventRefId());
 		portalMessage.setPortalMessageHasreplied(portalMessageBean.getIsPortalMessageReplied());
 		portalMessage.setPortalMessageMapid(portalMessageBean.getMessageMapid());
 		portalMessage.setPortalMessageReceiver(portalMessageBean.getMessageReceiver());
@@ -271,6 +305,11 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
 		responseBean.setSuccess(true);
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalMessage.getPatientid()+" created a message with id "+portalMessage.getId(),-1,
+				request.getRemoteAddr(),portalMessage.getPatientid(),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalMessage.getPatientid()+" deleted the message with id "+portalMessage.getId(),"");
 
 		return responseBean;
 	}

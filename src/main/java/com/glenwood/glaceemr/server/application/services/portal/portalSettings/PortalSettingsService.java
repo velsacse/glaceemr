@@ -10,10 +10,10 @@ import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
 import com.glenwood.glaceemr.server.application.models.PatientPortalFeatureConfig;
 import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
-import com.glenwood.glaceemr.server.application.models.PortalNotificationAlertsBean;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
-import com.glenwood.glaceemr.server.application.models.PatientRegistrationBean;
+import com.glenwood.glaceemr.server.application.models.PortalNotificationAlertsBean;
 import com.glenwood.glaceemr.server.application.models.PosTable;
+import com.glenwood.glaceemr.server.application.models.SavePatientDemographicsBean;
 
 public interface PortalSettingsService {
 
@@ -26,7 +26,7 @@ public interface PortalSettingsService {
 	
 	PortalBillingConfigFields getPortalBillingConfigFields();
 
-	PatientRegistration saveDemographicChanges(PatientRegistrationBean regDetailsBean);
+	PatientRegistration saveDemographicChanges(SavePatientDemographicsBean regDetailsBean);
 	
 	EncryptedPatientDetails getActiveSessionForOldEMR(int patientId, int chartId) throws Exception;
 	

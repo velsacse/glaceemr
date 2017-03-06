@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,8 @@ import com.glenwood.glaceemr.server.application.repositories.H810Respository;
 import com.glenwood.glaceemr.server.application.repositories.PatientFeedbackAnswersRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientFeedbackQuestionnaireRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientFeedbackRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.specifications.PortalPatientFeedbackSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalSettingsSpecification;
 
@@ -47,7 +50,12 @@ public class PortalPatientFeedbackServiceImpl implements PortalPatientFeedbackSe
 	
 	@Autowired
 	EntityManager em;
+
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
 	
+	@Autowired
+	HttpServletRequest request;
 	
 	@Override
 	public List<PatientFeedbackQuestionnaire> getPatientFeedbackSurveyQuestionnaire() {
@@ -134,6 +142,11 @@ public class PortalPatientFeedbackServiceImpl implements PortalPatientFeedbackSe
         }
 		
 		alertEventRepository.saveAndFlush(alert);*/
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+feedbackSaveBean.getPatientId()+" submitted a feedback.",-1,
+				request.getRemoteAddr(),feedbackSaveBean.getPatientId(),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+feedbackSaveBean.getPatientId()+" submitted a feedback.","");
 		
 		return feedbackSummary;
 	}

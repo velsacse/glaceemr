@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
-import com.glenwood.glaceemr.server.application.models.PatientRegistrationBean;
+import com.glenwood.glaceemr.server.application.models.SavePatientDemographicsBean;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalSettingsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
@@ -27,6 +27,9 @@ public class PortalSettingsController {
 	
 	@Autowired
 	EmployeeService employeeService;
+
+	@Autowired
+	EMRResponseBean responseBean;
 	
 	Logger logger=LoggerFactory.getLogger(PortalSettingsController.class);
 	
@@ -37,9 +40,7 @@ public class PortalSettingsController {
 	@RequestMapping(value = "/ProfileSettingsFields", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getPatientProfileSettingsFieldsOprions(){
-		
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
+
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -65,8 +66,6 @@ public class PortalSettingsController {
 	@ResponseBody
 	public EMRResponseBean getPortalBillingConfigFields(){
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -92,10 +91,8 @@ public class PortalSettingsController {
 	@RequestMapping(value = "/EmployeesList", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getEmployeesList(@RequestParam(value="groupId", required=false, defaultValue="") String groupId,
-			 @RequestParam(value="sort", required=false, defaultValue="") String sort){
+			@RequestParam(value="sort", required=false, defaultValue="") String sort){
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -121,8 +118,6 @@ public class PortalSettingsController {
 	@ResponseBody
 	public EMRResponseBean getActivePosList(){
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -148,8 +143,6 @@ public class PortalSettingsController {
 	@ResponseBody
 	public EMRResponseBean getProvidersList(){
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -174,10 +167,8 @@ public class PortalSettingsController {
 	 */
 	@RequestMapping(value = "/SaveDemographicChanges", method = RequestMethod.POST)
 	@ResponseBody
-	public  EMRResponseBean saveDemographicChanges(@RequestBody PatientRegistrationBean regDetailsBean) throws Exception{
+	public  EMRResponseBean saveDemographicChanges(@RequestBody SavePatientDemographicsBean regDetailsBean) throws Exception{
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -205,8 +196,6 @@ public class PortalSettingsController {
 	public EMRResponseBean getActiveSessionForOldEMR(@RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -233,11 +222,9 @@ public class PortalSettingsController {
 	 */
 	@RequestMapping(value = "/PortalConfigDetails", method = RequestMethod.GET)
 	@ResponseBody
-	public EMRResponseBean getPortalConfigDetails(String JSESSIONID, @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+	public EMRResponseBean getPortalConfigDetails(String JSESSIONID,  @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
 			@RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -263,8 +250,6 @@ public class PortalSettingsController {
 	@ResponseBody
 	public EMRResponseBean getInsuranceList(@RequestBody InsuranceFilterBean insFilterBean)throws Exception{
 
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);

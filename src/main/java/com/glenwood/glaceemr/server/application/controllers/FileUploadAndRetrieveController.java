@@ -16,7 +16,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.glenwood.glaceemr.server.application.models.FileDataBean;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.portal.fileUploadService.FileUploadService;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.PortalDocumentsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
@@ -50,13 +51,17 @@ public class FileUploadAndRetrieveController {
 	@Autowired
 	EMRResponseBean responseBean;
 
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
+
 	String pathSeperator = java.io.File.separator;
 
 	@RequestMapping(value = "/upload/image", method = RequestMethod.POST, produces = "text/html")
 	@ResponseBody
-	public EMRResponseBean uploadPatientProfilePicture(
-			@RequestParam(value = "file", required = false, defaultValue = "") MultipartFile file,
-			@RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId) {
+	public EMRResponseBean uploadPatientProfilePicture(@RequestParam(value = "file", required = false, defaultValue = "") MultipartFile file, @RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId) {
 
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
@@ -77,12 +82,20 @@ public class FileUploadAndRetrieveController {
 			System.out.println("File uploaded successfully!");
 			responseBean.setSuccess(true);
 			responseBean.setData("Profile Picture uploaded successfully!");
+			auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+					AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" uploaded a new profile picture.",-1,
+					request.getRemoteAddr(),patientId,"",
+					AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" uploaded a new profile picture.","");
 			return responseBean;
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Profile picture upload failed!");
+			auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+					AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" failed to upload a new profile picture.",-1,
+					request.getRemoteAddr(),patientId,"",
+					AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" failed to upload a new profile picture.","");
 			return responseBean;
 		}
 	}
@@ -155,8 +168,7 @@ public class FileUploadAndRetrieveController {
 	
 	@RequestMapping(value = "/retrieve/file", method = RequestMethod.GET)
 	@ResponseBody
-	public EMRResponseBean retrievePatientFile(
-			@RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
+	public EMRResponseBean retrievePatientFile(@RequestParam(value = "patientId", required = false, defaultValue = "0") int patientId,
 			@RequestParam(value = "fileName", required = false, defaultValue = "0") String fileName,
 			@RequestParam(value = "filedetailsType", required=false, defaultValue="0") int filedetailsType,
 			@RequestParam(value = "fileCategory", required = false, defaultValue = "0") String fileCategory,

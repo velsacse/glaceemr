@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.text.WordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ import com.glenwood.glaceemr.server.application.models.PortalNotificationAlertsB
 import com.glenwood.glaceemr.server.application.models.PortalPatientPaymentsSummary;
 import com.glenwood.glaceemr.server.application.models.PortalSchedulerAppointmentBean;
 import com.glenwood.glaceemr.server.application.models.PosTable;
+import com.glenwood.glaceemr.server.application.models.SavePatientDemographicsBean;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
 import com.glenwood.glaceemr.server.application.repositories.BillingConfigTableRepository;
 import com.glenwood.glaceemr.server.application.repositories.BillinglookupRepository;
@@ -49,6 +52,8 @@ import com.glenwood.glaceemr.server.application.repositories.PatientPortalFeatur
 import com.glenwood.glaceemr.server.application.repositories.PatientPortalMenuConfigRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PosTableRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.portal.portalAppointments.PortalAppointmentsService;
 import com.glenwood.glaceemr.server.application.services.portal.portalForms.PortalClinicalIntakeAndConsentFormsListBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalForms.PortalFormsService;
@@ -133,6 +138,12 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 	@Autowired
 	ObjectMapper objectMapper;
 	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
+	
 
 	@Override
 	public List<PatientPortalMenuConfig> getPortalMenuConfig(boolean isActiveMenuItemList) {
@@ -205,9 +216,9 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 	}
 
 	@Override
-	public PatientRegistration saveDemographicChanges(PatientRegistrationBean regSaveDetailsBean) {
+	public PatientRegistration saveDemographicChanges(SavePatientDemographicsBean savePatientDemographicsBean) {
 
-
+		PatientRegistrationBean regSaveDetailsBean=savePatientDemographicsBean.getSavePatientRegistrationBean();
 		PatientRegistration registrationDetails=portalMedicalSummaryService.getPatientPersonalDetails(regSaveDetailsBean.getPatientRegistrationId());
 
 		H807 demographicChanges=new H807();
@@ -357,43 +368,61 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 		int provider = Integer.parseInt(demographicAlertCategory.getH810003());
 		int forwardTo = Integer.parseInt(demographicAlertCategory.getH810004());
 
-		AlertEvent alert=new AlertEvent();
-		alert.setAlertEventCategoryId(22);
-		alert.setAlertEventStatus(1);
-		alert.setAlertEventPatientId(regSaveDetailsBean.getPatientRegistrationId());
-		alert.setAlertEventPatientName(registrationDetails.getPatientRegistrationLastName()+", "+registrationDetails.getPatientRegistrationFirstName());
-		alert.setAlertEventEncounterId(-1);
-		alert.setAlertEventRefId(demographicEntry.getH807001());
-		alert.setAlertEventMessage("Request to change the Demographics Details.");
-		alert.setAlertEventRoomId(-1);
-		alert.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
-		alert.setAlertEventModifiedby(-100);
-		alert.setAlertEventFrom(-100);
+		AlertEvent alert1=new AlertEvent();
+		alert1.setAlertEventCategoryId(22);
+		alert1.setAlertEventStatus(1);
+		alert1.setAlertEventPatientId(regSaveDetailsBean.getPatientRegistrationId());
+		alert1.setAlertEventPatientName(registrationDetails.getPatientRegistrationLastName()+", "+registrationDetails.getPatientRegistrationFirstName());
+		alert1.setAlertEventEncounterId(-1);
+		alert1.setAlertEventRefId(demographicEntry.getH807001());
+		alert1.setAlertEventMessage("Request to change the Demographics Details.");
+		alert1.setAlertEventRoomId(-1);
+		alert1.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+		alert1.setAlertEventModifiedby(-100);
+		alert1.setAlertEventFrom(-100);
+		
+		
 
 		if(provider==0 && forwardTo==0)
-			alert.setAlertEventTo(-1);
+			alert1.setAlertEventTo(-1);
 		else {
 			if(sendToAll){
 				if(forwardTo!=provider){
-					alert.setAlertEventTo(forwardTo);
-					AlertEvent alert2=alert;
+					alert1.setAlertEventTo(forwardTo);
+					AlertEvent alert2=new AlertEvent();
+					alert2.setAlertEventCategoryId(22);
+					alert2.setAlertEventStatus(1);
+					alert2.setAlertEventPatientId(regSaveDetailsBean.getPatientRegistrationId());
+					alert2.setAlertEventPatientName(registrationDetails.getPatientRegistrationLastName()+", "+registrationDetails.getPatientRegistrationFirstName());
+					alert2.setAlertEventEncounterId(-1);
+					alert2.setAlertEventRefId(demographicEntry.getH807001());
+					alert2.setAlertEventMessage("Request to change the Demographics Details.");
+					alert2.setAlertEventRoomId(-1);
+					alert2.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
+					alert2.setAlertEventModifiedby(-100);
+					alert2.setAlertEventFrom(-100);
 					alert2.setAlertEventTo(provider);
 					alertEventRepository.saveAndFlush(alert2);
 				} else {
-					alert.setAlertEventTo(forwardTo);
+					alert1.setAlertEventTo(forwardTo);
 				}            	 
 			}else{
 				if(forwardTo!=0){
-					alert.setAlertEventTo(forwardTo);
+					alert1.setAlertEventTo(forwardTo);
 				} else {
-					alert.setAlertEventTo(provider);
+					alert1.setAlertEventTo(provider);
 				}
 			}
 		}
 
-		alertEventRepository.saveAndFlush(alert);
+		alertEventRepository.saveAndFlush(alert1);
 
 		registrationDetails=portalMedicalSummaryService.getPatientPersonalDetails(regSaveDetailsBean.getPatientRegistrationId());
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.CREATEORUPDATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+registrationDetails.getPatientRegistrationId()+" requested to update his/her demographic details.",-1,
+				request.getRemoteAddr(),registrationDetails.getPatientRegistrationId(),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+registrationDetails.getPatientRegistrationId()+" requested to update his/her demographic details.","");
 
 		return registrationDetails;
 	}

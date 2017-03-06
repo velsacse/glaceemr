@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ import com.glenwood.glaceemr.server.application.repositories.CahpsQuestionnaireR
 import com.glenwood.glaceemr.server.application.repositories.H810Respository;
 import com.glenwood.glaceemr.server.application.repositories.PatientCahpsSurveyRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientSurveyAnswersRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.specifications.PortalCahpsSurveySpecification;
 
 
@@ -47,6 +50,12 @@ public class PortalCahpsSurveyServiceImpl implements PortalCahpsSurveyService{
 	
 	@Autowired
 	EntityManager em;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
 
 	@Override
 	public List<CahpsQuestionnaire> getPatientCahpsSurveyQuestionnaire(int patientAge) {
@@ -133,6 +142,11 @@ public class PortalCahpsSurveyServiceImpl implements PortalCahpsSurveyService{
         }
 		
 		alertEventRepository.saveAndFlush(alert);*/
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+surveySaveBean.getPatientId()+" performed a CAHPS Survey.",-1,
+				request.getRemoteAddr(),surveySaveBean.getPatientId(),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+surveySaveBean.getPatientId()+" performed a CAHPS Survey.","");
 
 		return lastSurvey;
 	}
