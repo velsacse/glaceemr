@@ -56,5 +56,9 @@ public class PatientHeaderServiceImpl implements PatientHeaderService{
 		return patientHeader;
 	}
 	
-
+	//To get patient header attribute count
+	@Override
+	public Integer getPatientHeaderAttributeCount(int patientHeaderId, int pageId) {
+		return Integer.parseInt(patientHeaderDetailRepository.countByPatientHeaderIdAndPageId(patientHeaderId, pageId)+"");
+	}
 }

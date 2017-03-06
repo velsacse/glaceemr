@@ -5,19 +5,15 @@ import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Fetch;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.H076;
-import com.glenwood.glaceemr.server.application.models.InsCompAddr;
-import com.glenwood.glaceemr.server.application.models.InsCompany;
-import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
-import com.glenwood.glaceemr.server.application.models.PatientInsDetail_;
+import com.glenwood.glaceemr.server.application.models.InitialSettings;
+import com.glenwood.glaceemr.server.application.models.InitialSettings_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 
@@ -91,4 +87,22 @@ public class GenericPrintSpecification {
 
 		};
 	}
+	
+	/**To get list of practice details
+     * @return specification to fetch list of practice details
+     */    
+    public static Specification<InitialSettings> getPracticeDetails()
+       {
+           return new Specification<InitialSettings>() {
+
+            @Override
+            public Predicate toPredicate(Root<InitialSettings> root,
+                    CriteriaQuery<?> cq, CriteriaBuilder cb) {
+                
+                Predicate practicePredicate=cq.where(cb.equal(root.get(InitialSettings_.initialSettingsOptionType), 4)).getRestriction();
+                return practicePredicate;
+            }
+               
+        };
+       }
 }

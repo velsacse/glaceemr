@@ -11,6 +11,7 @@ public interface PatientHeaderService {
 	PatientHeader getPatientHeader(int patientHeaderId);
 	List<PatientHeaderDetails> getPatientHeaderDetailList(int patientHeaderId,int pageId);
 	PatientHeader savePatientHeader(PatientHeader patientHeader);
+	Integer getPatientHeaderAttributeCount(int patientHeaderId,int pageId);
 	void deletePatientHeaderDetails(List<PatientHeaderDetails> PatientHeaderDetailsList);
 	void savePatientHeaderDetails(PatientHeaderDetails patientHeaderDetails);
 }

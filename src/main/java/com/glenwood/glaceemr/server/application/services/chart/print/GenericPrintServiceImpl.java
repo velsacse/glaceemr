@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.services.chart.print;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -67,6 +68,7 @@ import com.glenwood.glaceemr.server.application.specifications.LeafLibrarySpecif
 import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PosTableSpecification;
 import com.glenwood.glaceemr.server.application.specifications.print.GenericPrintSpecification;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Rectangle;
 
@@ -79,13 +81,13 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 
 	@Autowired
 	PatientRegistrationRepository patientRegistrationRepository;
-	
+
 	@Autowired
 	EncounterRepository encounterRepository;
-		
+
 	@Autowired
 	PosTableRepository posTableRepository;
-	
+
 	@Autowired
 	GenerateHeaderBean generateHeaderBean;
 
@@ -94,19 +96,22 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 
 	@Autowired
 	GeneratePDFBean generatePDFBean;
-	
+
 	@Autowired
 	TextFormatter textFormat;
 
 	@Autowired
 	InitialSettingsRepository initialSettingsRepository;
-	
+
 	@Autowired
 	LeafLibraryRepository leafLibraryRepository;
-		
+
 	@Autowired
 	EntityManager em;
-	
+
+	@Autowired
+	SessionMap sessionMap;
+
 	@Override
 	public List<GenericPrintStyle> getGenericPrintStyleList() {
 		List<GenericPrintStyle> genericPrintStyleList=genericPrintStyleRepository.findAll();
@@ -151,13 +156,13 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 				pageVariant=generateFooterBean.getPageFormatForFooter(footerId);
 			}
 
-			generatePDFBean.generatePDF(headerHTML,patientHeaderPage1,patientHeaderHTML,footerHTML,pageVariant);
+			//generatePDFBean.generatePDF(headerHTML,patientHeaderPage1,patientHeaderHTML,footerHTML,pageVariant);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 
 	}
-	
+
 	public String[] generatePatentDetailsArr(PatientDataBean patientBean){
 		String[] patientDetailsArr=new String[20];
 		//"Patient Name", "Age", "DOS", "Gender","Account #","Phone #","DOB","Mobile #","Address","Referring Doctor","Insurance Details","Supervising doctor",
@@ -178,9 +183,9 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		patientDetailsArr[13]=isNull(patientBean.getEthinicity());
 		patientDetailsArr[14]=isNull(patientBean.getRace());
 		patientDetailsArr[15]=isNull(patientBean.getPrefLang());
-		
+
 		return patientDetailsArr;
-		
+
 	}
 
 	@Override
@@ -190,7 +195,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
 			int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
 			String patientHeaderPage1;
-			
+
 			PatientRegistration patientDetails= patientRegistrationRepository.findOne(GenericPrintSpecification.getPatientDetails(patientId));
 			List<InsuranceDataBean> insuranceList= getPatientInsuranceDetails(patientId); //patientInsDetailsRepository.findAll(PatientInsDetailsSpecification.getByPatientId(patientId));
 			int encounterId=7328;//printDetails.getEncounterId();
@@ -217,20 +222,20 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			}
 			int pageOrientation=1;//landscape
 			Rectangle pageSize=PageSize.A4;
-			generatePDFBean.generatePDF(headerHTML,patientHeaderPage1,patientHeaderHTML,footerHTML,pageVariant,pageSize,pageOrientation);
+			//generatePDFBean.generatePDF(headerHTML,patientHeaderPage1,patientHeaderHTML,footerHTML,pageVariant,pageSize,pageOrientation);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	@Override
 	public GenericPrintBean getCompleteDetails(Integer patientId, Integer encounterId) throws Exception {
-		
+
 		List<Integer> insTypeList = new ArrayList<Integer>();
 		insTypeList.add(1);
 		insTypeList.add(2);
-		
+
 		PatientRegistration patientDetails= getPatientDetails(patientId);
 		List<InsuranceDataBean> insuranceList= getPatientInsuranceDetails(patientId);//patientInsDetailsRepository.findAll(PatientInsDetailsSpecification.getByPatientId(patientId));
 		Encounter encounter = getEncounterDetails(encounterId);
@@ -240,88 +245,88 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		List<EmployeeDataBean> empolyeeBean = parseEmpState(empList);
 		List<PosDataBean> posBean = parsePOSDetails(posList);
 		List<InitialSettings> initialList= initialSettingsRepository.findAll(Specifications.where(InitialSettingsSpecification.optionType(4)).and(InitialSettingsSpecification.optionVisible(true)));
-		
+
 		DefaultPracticeBean practiceBean = parsePracticeDetails(initialList);
 		GenericPrintBean genericBean = new GenericPrintBean(patientBean, empolyeeBean, posBean, practiceBean);
 		return genericBean;
-				
+
 	}
 
 	private List<EmployeeDataBean> getEmployeeDetails() {
 		final ArrayList<Integer> groupIdList=new ArrayList<Integer>(Arrays.asList(-1,-2,-3,-5,-6,-7,-10,-25));
-		
+
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<EmployeeDataBean> query= builder.createQuery(EmployeeDataBean.class);
 		Root<EmployeeProfile> root= query.from(EmployeeProfile.class);
-		
+
 		Expression<Integer> exprToId= root.get(EmployeeProfile_.empProfileGroupid);
 		Predicate activeEmployee= builder.and(
-									builder.equal(root.get(EmployeeProfile_.empProfileIsActive), true), 
-									builder.notLike(builder.lower(root.get(EmployeeProfile_.empProfileFullname)), "%demo%"),
-									exprToId.in(groupIdList));
+				builder.equal(root.get(EmployeeProfile_.empProfileIsActive), true), 
+				builder.notLike(builder.lower(root.get(EmployeeProfile_.empProfileFullname)), "%demo%"),
+				exprToId.in(groupIdList));
 		Predicate predicate= builder.and(builder.isNotNull(root.get(EmployeeProfile_.empProfileEmpid)));
-		
+
 		query.select(builder.construct(EmployeeDataBean.class, 
-										root.get(EmployeeProfile_.empProfileEmpid),
-										 root.get(EmployeeProfile_.empProfileLoginid),
-										 root.get(EmployeeProfile_.empProfileLname),
-										 root.get(EmployeeProfile_.empProfileFname),
-										 root.get(EmployeeProfile_.empProfileMi),
-										 root.get(EmployeeProfile_.empProfileCredentials),
-										 root.get(EmployeeProfile_.empProfileAddress),
-										 root.get(EmployeeProfile_.empProfileState),
-										 root.get(EmployeeProfile_.empProfileCity),
-										 root.get(EmployeeProfile_.empProfileZip),
-										 root.get(EmployeeProfile_.empProfilePhoneno),
-										 root.get(EmployeeProfile_.empProfileMailid))
-										);
+				root.get(EmployeeProfile_.empProfileEmpid),
+				root.get(EmployeeProfile_.empProfileLoginid),
+				root.get(EmployeeProfile_.empProfileLname),
+				root.get(EmployeeProfile_.empProfileFname),
+				root.get(EmployeeProfile_.empProfileMi),
+				root.get(EmployeeProfile_.empProfileCredentials),
+				root.get(EmployeeProfile_.empProfileAddress),
+				root.get(EmployeeProfile_.empProfileState),
+				root.get(EmployeeProfile_.empProfileCity),
+				root.get(EmployeeProfile_.empProfileZip),
+				root.get(EmployeeProfile_.empProfilePhoneno),
+				root.get(EmployeeProfile_.empProfileMailid))
+				);
 		query.where(predicate, activeEmployee);
 		query.orderBy(builder.asc(root.get(EmployeeProfile_.empProfileGroupid)),builder.asc(root.get(EmployeeProfile_.empProfileFullname)));
-		
+
 		return em.createQuery(query).getResultList();
 
 	}
 
 	private List<InsuranceDataBean> getPatientInsuranceDetails(Integer patientId) {
-		
+
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<InsuranceDataBean> query= builder.createQuery(InsuranceDataBean.class);
 		Root<PatientInsDetail> root= query.from(PatientInsDetail.class);
 		Join<PatientInsDetail, InsCompAddr> addrJoin= root.join(PatientInsDetail_.insCompAddr,JoinType.LEFT);
 		Join<InsCompAddr, InsCompany> compJoin= addrJoin.join(InsCompAddr_.insCompany, JoinType.LEFT);
-		
+
 		Predicate patientIdPred= builder.equal(root.get(PatientInsDetail_.patientInsDetailPatientid),patientId);
 		Predicate insTypePred = root.get(PatientInsDetail_.patientInsDetailInstype).in(1,2);
 		Predicate insIsactivePred = builder.equal(root.get(PatientInsDetail_.patientInsDetailIsactive), true);		
-		
+
 		query.select(builder.construct(InsuranceDataBean.class, 
-						root.get(PatientInsDetail_.patientInsDetailPatientinsuranceid),
-						 builder.coalesce(root.get(PatientInsDetail_.patientInsDetailInstype),-1),
-						  builder.coalesce(compJoin.get(InsCompany_.insCompanyId), -1),
-						   builder.coalesce(compJoin.get(InsCompany_.insCompanyName), ""),
-						    builder.coalesce(addrJoin.get(InsCompAddr_.insCompAddrAddress), ""),
-						     builder.coalesce(addrJoin.get(InsCompAddr_.insCompAddrCity), ""),
-						      builder.coalesce(addrJoin.get(InsCompAddr_.insCompAddrState), ""),
-						       builder.coalesce(addrJoin.get(InsCompAddr_.insCompAddrZip), "")));
-		
+				root.get(PatientInsDetail_.patientInsDetailPatientinsuranceid),
+				builder.coalesce(root.get(PatientInsDetail_.patientInsDetailInstype),-1),
+				builder.coalesce(compJoin.get(InsCompany_.insCompanyId), -1),
+				builder.coalesce(compJoin.get(InsCompany_.insCompanyName), ""),
+				builder.coalesce(addrJoin.get(InsCompAddr_.insCompAddrAddress), ""),
+				builder.coalesce(addrJoin.get(InsCompAddr_.insCompAddrCity), ""),
+				builder.coalesce(addrJoin.get(InsCompAddr_.insCompAddrState), ""),
+				builder.coalesce(addrJoin.get(InsCompAddr_.insCompAddrZip), "")));
+
 		query.where(patientIdPred,insTypePred,insIsactivePred);
 		return em.createQuery(query).getResultList();
 	}
 
 	private Encounter getEncounterDetails(Integer encounterId) {
-		
+
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<Encounter> query= builder.createQuery(Encounter.class);
 		Root<Encounter> root= query.from(Encounter.class);
-		
+
 		query.select(builder.construct(Encounter.class, root.get(Encounter_.encounterId),
 				builder.function("to_char", String.class, root.get(Encounter_.encounterDate),builder.literal("MM/dd/yyyy")),
 				root.get(Encounter_.encounterPos),
 				root.get(Encounter_.encounterRefDoctor),
 				root.get(Encounter_.encounter_service_doctor)));
-		
+
 		query.where(builder.equal(root.get(Encounter_.encounterId), encounterId));
-		
+
 		try{
 			return em.createQuery(query).getSingleResult();
 		}catch(NoResultException e){
@@ -333,7 +338,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<PatientRegistration> query= builder.createQuery(PatientRegistration.class);
 		Root<PatientRegistration> root= query.from(PatientRegistration.class);
-		
+
 		/*PatientRegistration patient= new PatientRegistration();
 		query.multiselect(
 				root.get(PatientRegistration_.patientRegistrationLastName),
@@ -347,28 +352,28 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 				builder.coalesce(root.get(PatientRegistration_.patientRegistrationState), ""),
 				builder.coalesce(root.get(PatientRegistration_.patientRegistrationZip), ""));*/
 		query.select(builder.construct(PatientRegistration.class,
-						root.get(PatientRegistration_.patientRegistrationLastName),
-						root.get(PatientRegistration_.patientRegistrationMidInitial),
-						root.get(PatientRegistration_.patientRegistrationFirstName),
-						root.get(PatientRegistration_.patientRegistrationAccountno),
-						builder.function("to_char", String.class, root.get(PatientRegistration_.patientRegistrationDob),builder.literal("MM/dd/yyyy")),
-						root.get(PatientRegistration_.patientRegistrationSex),
-						root.get(PatientRegistration_.patientRegistrationAddress1),
-						root.get(PatientRegistration_.patientRegistrationAddress2),
-						root.get(PatientRegistration_.patientRegistrationCity),
-						root.get(PatientRegistration_.patientRegistrationState),
-						root.get(PatientRegistration_.patientRegistrationZip),
-						root.get(PatientRegistration_.patientRegistrationPhoneNo),
-						root.get(PatientRegistration_.patientRegistrationWorkNo),
-						root.get(PatientRegistration_.patientRegistrationPosId),
-						root.get(PatientRegistration_.patientRegistrationReferingPhysician),
-						root.get(PatientRegistration_.patientRegistrationPrincipalDoctor),										
-						root.get(PatientRegistration_.patientRegistrationCellno),
-						root.get(PatientRegistration_.patientRegistrationEthnicity),
-						root.get(PatientRegistration_.patientRegistrationRace),
-						root.get(PatientRegistration_.patientRegistrationPreferredLan)));
-		query.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId),
-					builder.equal(root.get(PatientRegistration_.patientRegistrationActive), true));
+				root.get(PatientRegistration_.patientRegistrationLastName),
+				root.get(PatientRegistration_.patientRegistrationMidInitial),
+				root.get(PatientRegistration_.patientRegistrationFirstName),
+				root.get(PatientRegistration_.patientRegistrationAccountno),
+				builder.function("to_char", String.class, root.get(PatientRegistration_.patientRegistrationDob),builder.literal("MM/dd/yyyy")),
+				root.get(PatientRegistration_.patientRegistrationSex),
+				root.get(PatientRegistration_.patientRegistrationAddress1),
+				root.get(PatientRegistration_.patientRegistrationAddress2),
+				root.get(PatientRegistration_.patientRegistrationCity),
+				root.get(PatientRegistration_.patientRegistrationState),
+				root.get(PatientRegistration_.patientRegistrationZip),
+				root.get(PatientRegistration_.patientRegistrationPhoneNo),
+				root.get(PatientRegistration_.patientRegistrationWorkNo),
+				root.get(PatientRegistration_.patientRegistrationPosId),
+				root.get(PatientRegistration_.patientRegistrationReferingPhysician),
+				root.get(PatientRegistration_.patientRegistrationPrincipalDoctor),										
+				root.get(PatientRegistration_.patientRegistrationCellno),
+				root.get(PatientRegistration_.patientRegistrationEthnicity),
+				root.get(PatientRegistration_.patientRegistrationRace),
+				root.get(PatientRegistration_.patientRegistrationPreferredLan)));
+				query.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId),
+				builder.equal(root.get(PatientRegistration_.patientRegistrationActive), true));
 		/*
 		try{
 			Object[] result= em.createQuery(query).getSingleResult();
@@ -401,7 +406,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	 * @return
 	 */
 	private DefaultPracticeBean parsePracticeDetails(List<InitialSettings> initialList) {
-		
+
 		DefaultPracticeBean practiceBean = new DefaultPracticeBean();
 		for(int i=0; i<initialList.size(); i++){
 			if(initialList.get(i).getInitialSettingsOptionName() != null && !initialList.get(i).getInitialSettingsOptionName().trim().isEmpty()){
@@ -452,15 +457,15 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		String address = null;
 		String refPhyName = null;
 		String serviceRefName = null;
-		String ethinicity = patientDetails.getPatientRegistrationEthnicity().toString();
+		String ethinicity = isNull(patientDetails.getPatientRegistrationEthnicity());
 		String race = patientDetails.getPatientRegistrationRace();
 		String prefLang = patientDetails.getPatientRegistrationPreferredLan();
-		
+
 		if(encounter != null) {
-//			dos = textFormat.getFormattedDate(encounter.getEncounterDate());
+			//			dos = textFormat.getFormattedDate(encounter.getEncounterDate());
 			dos = encounter.getMedicationAttestationStatus();
 		}
-		
+
 		List<Map<String, String>> billing = getStateGender(state, gender);//billingConfigTableRepository.findAll(BillingConfigTableSpecification.getStateGender(state, gender));		
 		state = "";
 		gender = "";
@@ -475,7 +480,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 				}
 			}
 		}
-		
+
 		address = textFormat.getAddress(patientDetails.getPatientRegistrationAddress1(),patientDetails.getPatientRegistrationAddress2(),patientDetails.getPatientRegistrationCity(),state,patientDetails.getPatientRegistrationZip());
 		H076 refPhyEntity = null;
 		if(patientDetails.getPatientRegistrationReferingPhysician() != null)
@@ -489,19 +494,21 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		serviceRefName = "";
 		if(serviceRefEntity != null)
 			serviceRefName = textFormat.getFormattedName(serviceRefEntity.getH076005(), serviceRefEntity.getH076004(), serviceRefEntity.getH076003(), serviceRefEntity.getH076021());
-		
-//		List<InsuranceDataBean> insuranceBean = parseInsuranceDetails(practiceList);
-		
+
+		//		List<InsuranceDataBean> insuranceBean = parseInsuranceDetails(practiceList);
+
 		EmployeeDataBean principalDrData = null;
 		EmployeeProfile employee = getEmpDetails((long)patientDetails.getPatientRegistrationPrincipalDoctor());
 		if(employee != null){
 			principalDrData = parseDoctorDetails(employee);
 		}
-		
-//		List<Billinglookup> billingEthinicity = billinglookupRepository.findAll(BillingLookupSpecification.getDetails(ethinicity, race, prefLang));
+
+		//		List<Billinglookup> billingEthinicity = billinglookupRepository.findAll(BillingLookupSpecification.getDetails(ethinicity, race, prefLang));
+		if(ethinicity.isEmpty())
+			ethinicity="-1";
 		JSONArray billingEthinicity = getLookupDetails(ethinicity, race, prefLang);
-		
-		ethinicity = "";
+
+		ethinicity = "-1";
 		race = "";
 		prefLang = "";
 		if(billingEthinicity != null) {
@@ -518,16 +525,16 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 				}
 			}
 		}
-		
+
 		EmployeeDataBean serviceDrData = null;
 		if(encounter != null) {
 			EmployeeProfile emp = getEmpDetails(encounter.getEncounterServiceDoctor());
 			if(emp!=null)
 				serviceDrData = parseDoctorDetails(emp);
-            
-        }
-		
-		
+
+		}
+
+
 		Integer encounterId = null, patientId = null;
 		if(encounter != null)
 			encounterId = encounter.getEncounterId();
@@ -538,41 +545,41 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		if(encounter != null)
 			posList = getPOSDetails(encounter.getEncounterPos()); //posTableRepository.findAll(PosTableSpecification.getPOSDetailsById(encounter.getEncounterPos()));
 		List<PosDataBean> posBean = parsePOSDetails1(posList);
-        PatientDataBean bean = new PatientDataBean(patientName, age, dos, gender, accountId, phNum, dob,
-                                                   mobileNum, address, refPhyName, serviceRefName, insuranceBean, posBean, principalDrData,
-                                                   serviceDrData, ethinicity, race, prefLang, patientId, encounterId);
-		
+		PatientDataBean bean = new PatientDataBean(patientName, age, dos, gender, accountId, phNum, dob,
+				mobileNum, address, refPhyName, serviceRefName, insuranceBean, posBean, principalDrData,
+				serviceDrData, ethinicity, race, prefLang, patientId, encounterId);
+
 		return bean;
 	}
-	
+
 	private JSONArray getLookupDetails(String ethinicity,
 			String race, String prefLang) throws Exception {
-		
+
 		JSONArray returnList= new JSONArray();
-		
+
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
 		Root<Billinglookup> root= query.from(Billinglookup.class);
-		
+
 		Predicate ethinPred= builder.equal(root.get(Billinglookup_.blookIntid), ethinicity);
 		Predicate groupPred1 = builder.equal(root.get(Billinglookup_.blookGroup), 251);
-		
+
 		Predicate racePred= builder.equal(root.get(Billinglookup_.blookIntid), race);
 		Predicate groupPred2 = builder.equal(root.get(Billinglookup_.blookGroup), 250);
-		
+
 		Predicate prefLangPred= builder.equal(root.get(Billinglookup_.blookIntid), prefLang);
 		Predicate groupPred3 = builder.equal(root.get(Billinglookup_.blookGroup), 253);
-		
+
 		Predicate ethPred = builder.and(ethinPred, groupPred1);
 		Predicate racPred = builder.and(racePred, groupPred2);
 		Predicate prePred = builder.and(prefLangPred, groupPred3);
-		
+
 		query.multiselect(builder.coalesce(root.get(Billinglookup_.blookGroup), -1),
-						   builder.coalesce(root.get(Billinglookup_.blookName),""));	
+				builder.coalesce(root.get(Billinglookup_.blookName),""));	
 		query.where(builder.or(ethPred, racPred, prePred));
-		
+
 		List<Object[]> result= em.createQuery(query).getResultList();
-		
+
 		for(int i=0; i<result.size(); i++){
 			Object[] resultObj= result.get(i);
 			JSONObject obj= new JSONObject();
@@ -584,36 +591,36 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	}
 
 	private List<PosDataBean> getPOSDetails(Integer posId) {
-		
+
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<PosDataBean> query= builder.createQuery(PosDataBean.class);
 		Root<PosTable> root= query.from(PosTable.class);
-		
+
 		Join<PosTable, PlaceOfService> posJoin = root.join(PosTable_.placeOfService,JoinType.LEFT);
 		Join<PosTable, PosType> typeJoin= root.join(PosTable_.posType,JoinType.LEFT);
-		
-		
+
+
 		Predicate isactivePred = builder.equal(root.get(PosTable_.posTableIsActive), true);
 		Predicate poscodePred = builder.not((root.get(PosTable_.posTablePosCode).in(40)));
 		Predicate placeIsActivePred = builder.equal(posJoin.get(PlaceOfService_.placeOfServiceIsActive), true);
 		Predicate posIdpred = builder.equal(root.get(PosTable_.posTableRelationId), posId);
-		
+
 		query.select(builder.construct(PosDataBean.class, 
-										root.get(PosTable_.posTableRelationId),
-										 root.get(PosTable_.posTablePlaceId),
-										  root.get(PosTable_.posTablePlaceOfService),
-										   root.get(PosTable_.posTableFacilityComments),
-										    posJoin.get(PlaceOfService_.placeOfServiceAddress),
-										     posJoin.get(PlaceOfService_.placeOfServiceState),
-										      posJoin.get(PlaceOfService_.placeOfServiceCity),
-										       posJoin.get(PlaceOfService_.placeOfServiceZip),
-										        posJoin.get(PlaceOfService_.placeOfServicePhone),
-										         posJoin.get(PlaceOfService_.placeOfServiceFax),
-										          typeJoin.get(PosType_.posTypeTypeName)));
-		
+				root.get(PosTable_.posTableRelationId),
+				root.get(PosTable_.posTablePlaceId),
+				root.get(PosTable_.posTablePlaceOfService),
+				root.get(PosTable_.posTableFacilityComments),
+				posJoin.get(PlaceOfService_.placeOfServiceAddress),
+				posJoin.get(PlaceOfService_.placeOfServiceState),
+				posJoin.get(PlaceOfService_.placeOfServiceCity),
+				posJoin.get(PlaceOfService_.placeOfServiceZip),
+				posJoin.get(PlaceOfService_.placeOfServicePhone),
+				posJoin.get(PlaceOfService_.placeOfServiceFax),
+				typeJoin.get(PosType_.posTypeTypeName)));
+
 		query.where(posIdpred, isactivePred, poscodePred, placeIsActivePred);
 		query.orderBy(builder.asc(root.get(PosTable_.posTableFacilityComments)));
-		
+
 		return em.createQuery(query).getResultList();
 	}
 
@@ -624,24 +631,24 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	 * @return
 	 */
 	private List<Map<String, String>> getStateGender(String state, String gender) {
-		
+
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
 		Root<BillingConfigTable> root= query.from(BillingConfigTable.class);
-		
+
 		Predicate statePedicate = builder.equal(root.get(BillingConfigTable_.billingConfigTableConfigId), state);
 		Predicate lookupPredicate1 = builder.equal(root.get(BillingConfigTable_.billingConfigTableLookupId), 5001);
-		
+
 		Predicate genderPedicate = builder.equal(root.get(BillingConfigTable_.billingConfigTableConfigId), gender);
 		Predicate lookupPredicate2 = builder.equal(root.get(BillingConfigTable_.billingConfigTableLookupId), 51);
-		
+
 		Predicate sPred = builder.and(statePedicate,lookupPredicate1);
 		Predicate gPred = builder.and(genderPedicate,lookupPredicate2);
 
 		query.multiselect(root.get(BillingConfigTable_.billingConfigTableLookupId),
-						   root.get(BillingConfigTable_.billingConfigTableLookupDesc));
+				root.get(BillingConfigTable_.billingConfigTableLookupDesc));
 		query.where(builder.or(sPred, gPred));
-		
+
 		List<Object[]> result= em.createQuery(query).getResultList();
 		List<Map<String, String>> returnList= new ArrayList<Map<String,String>>();
 		for(int i=0; i<result.size(); i++){
@@ -656,28 +663,28 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 
 	private EmployeeProfile getEmpDetails(
 			Long empId) {
-		
+
 		try{
-		CriteriaBuilder builder= em.getCriteriaBuilder();
-		CriteriaQuery<EmployeeProfile> query= builder.createQuery(EmployeeProfile.class);
-		Root<EmployeeProfile> root= query.from(EmployeeProfile.class);
-		
-		query.select(builder.construct(EmployeeProfile.class, 
-					  root.get(EmployeeProfile_.empProfileEmpid),
-					   root.get(EmployeeProfile_.empProfileLoginid),
-						root.get(EmployeeProfile_.empProfileFname),
-						 root.get(EmployeeProfile_.empProfileLname),
-						  root.get(EmployeeProfile_.empProfileMi),
-						   root.get(EmployeeProfile_.empProfileCredentials),
-						    root.get(EmployeeProfile_.empProfileAddress),
-						     root.get(EmployeeProfile_.empProfileCity),
-						      root.get(EmployeeProfile_.empProfileState),				
-						       root.get(EmployeeProfile_.empProfilePhoneno),
-						        root.get(EmployeeProfile_.empProfileMailid)));
-		
-		query.where(builder.equal(root.get(EmployeeProfile_.empProfileEmpid), empId));
-		
-		return em.createQuery(query).getSingleResult();
+			CriteriaBuilder builder= em.getCriteriaBuilder();
+			CriteriaQuery<EmployeeProfile> query= builder.createQuery(EmployeeProfile.class);
+			Root<EmployeeProfile> root= query.from(EmployeeProfile.class);
+
+			query.select(builder.construct(EmployeeProfile.class, 
+					root.get(EmployeeProfile_.empProfileEmpid),
+					root.get(EmployeeProfile_.empProfileLoginid),
+					root.get(EmployeeProfile_.empProfileFname),
+					root.get(EmployeeProfile_.empProfileLname),
+					root.get(EmployeeProfile_.empProfileMi),
+					root.get(EmployeeProfile_.empProfileCredentials),
+					root.get(EmployeeProfile_.empProfileAddress),
+					root.get(EmployeeProfile_.empProfileCity),
+					root.get(EmployeeProfile_.empProfileState),				
+					root.get(EmployeeProfile_.empProfilePhoneno),
+					root.get(EmployeeProfile_.empProfileMailid)));
+
+			query.where(builder.equal(root.get(EmployeeProfile_.empProfileEmpid), empId));
+
+			return em.createQuery(query).getSingleResult();
 		}catch(NoResultException e){			
 			return null;
 		}
@@ -685,18 +692,18 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 
 	private H076 getReferringPhyDetails(
 			Long refId) {
-		
+
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<H076> query= builder.createQuery(H076.class);
 		Root<H076> root= query.from(H076.class);
-		
+
 		query.select(builder.construct(H076.class, root.get(H076_.h076001),
-												    root.get(H076_.h076003),
-												     root.get(H076_.h076004),
-												      root.get(H076_.h076005),
-												       root.get(H076_.h076021)));
+				root.get(H076_.h076003),
+				root.get(H076_.h076004),
+				root.get(H076_.h076005),
+				root.get(H076_.h076021)));
 		query.where(builder.equal(root.get(H076_.h076001), refId));
-		
+
 		try{
 			H076 result= em.createQuery(query).getSingleResult();
 			return result;
@@ -714,12 +721,12 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	private EmployeeDataBean parseDoctorDetails(EmployeeProfile emp) throws Exception {
 		EmployeeDataBean doctorData = null;		
 		String name = "", state = "";
-        if(emp != null) {
-            name = textFormat.getFormattedName(emp.getEmpProfileFname(), emp.getEmpProfileMi(), emp.getEmpProfileLname(), emp.getEmpProfileCredentials());
-        }
-        state = getState(emp.getEmpProfileState()); //billingConfigTableRepository.findAll(BillingConfigTableSpecification.getState(emp.getEmpProfileState()));
-        doctorData = new EmployeeDataBean(emp.getEmpProfileEmpid(), -1, name, emp.getEmpProfileAddress(), state, emp.getEmpProfileCity(), emp.getEmpProfileZip(), emp.getEmpProfilePhoneno(), emp.getEmpProfileMailid());
-        return doctorData;
+		if(emp != null) {
+			name = textFormat.getFormattedName(emp.getEmpProfileFname(), emp.getEmpProfileMi(), emp.getEmpProfileLname(), emp.getEmpProfileCredentials());
+		}
+		state = getState(emp.getEmpProfileState()); //billingConfigTableRepository.findAll(BillingConfigTableSpecification.getState(emp.getEmpProfileState()));
+		doctorData = new EmployeeDataBean(emp.getEmpProfileEmpid(), -1, name, emp.getEmpProfileAddress(), state, emp.getEmpProfileCity(), emp.getEmpProfileZip(), emp.getEmpProfilePhoneno(), emp.getEmpProfileMailid());
+		return doctorData;
 	}
 
 	/**
@@ -731,48 +738,48 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	 */
 	@Override
 	public List<EmployeeDataBean> parseEmployeeDetails(List<EmployeeProfile> empList) throws Exception {
-		
+
 		List<EmployeeDataBean> empBean = new ArrayList<EmployeeDataBean>();
-		
+
 		for(int i=0; i<empList.size(); i++) {
 			EmployeeProfile emp = empList.get(i);
-			
+
 			if(emp != null) {
 				int empId = emp.getEmpProfileEmpid();
 				int loginId = emp.getEmpProfileLoginid();
 				String state = emp.getEmpProfileState();
 				state= getState(state); //billingConfigTableRepository.findOne(BillingConfigTableSpecification.getState(state));
 				String fullName = textFormat.getFormattedName(emp.getEmpProfileFname(), emp.getEmpProfileMi(), emp.getEmpProfileLname(), emp.getEmpProfileCredentials());
-//				String fullAddress = textFormat.getAddress(emp.getEmpProfileAddress(), "", emp.getEmpProfileCity(), state, emp.getEmpProfileZip());
+				//				String fullAddress = textFormat.getAddress(emp.getEmpProfileAddress(), "", emp.getEmpProfileCity(), state, emp.getEmpProfileZip());
 
 				empBean.add(new EmployeeDataBean(empId, loginId, fullName, emp.getEmpProfileAddress(), state, emp.getEmpProfileCity(), emp.getEmpProfileZip(), emp.getEmpProfilePhoneno(), emp.getEmpProfileMailid()));
 			}
 		}
-		
+
 		return empBean;
 	}
 
 	public List<EmployeeDataBean> parseEmpState(List<EmployeeDataBean> empList) throws Exception {
-		
+
 		for(int i=0; i<empList.size(); i++) {
 			EmployeeDataBean emp = empList.get(i);
-			
+
 			if(emp != null) {
 				String state = emp.getEmpState();
 				state = getState(state); //billingConfigTableRepository.findOne(BillingConfigTableSpecification.getState(state));
 				String fullName = textFormat.getFormattedName(emp.getEmpFirstName(), emp.getEmpMiddleName(), emp.getEmpLastName(), emp.getEmpCredentials());
-//				String fullAddress = textFormat.getAddress(emp.getEmpProfileAddress(), "", emp.getEmpProfileCity(), state, emp.getEmpProfileZip());
+				//				String fullAddress = textFormat.getAddress(emp.getEmpProfileAddress(), "", emp.getEmpProfileCity(), state, emp.getEmpProfileZip());
 				emp.setEmpFullname(fullName);
 				emp.setEmpState(state);				
 			}
 		}
-		
+
 		return empList;
 	}
-	
+
 	@Override
 	public EmployeeDataBean parseEmployeeDetail(EmployeeProfile emp) throws Exception {
-		
+
 		EmployeeDataBean empBean = null;
 
 		if(emp != null) {
@@ -781,7 +788,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			String state = emp.getEmpProfileState();
 			state = getState(state); //billingConfigTableRepository.findOne(BillingConfigTableSpecification.getState(state));
 			String fullName = textFormat.getFormattedName(emp.getEmpProfileFname(), emp.getEmpProfileMi(), emp.getEmpProfileLname(), emp.getEmpProfileCredentials());
-//			String fullAddress = textFormat.getAddress(emp.getEmpProfileAddress(), "", emp.getEmpProfileCity(), state, emp.getEmpProfileZip());
+			//			String fullAddress = textFormat.getAddress(emp.getEmpProfileAddress(), "", emp.getEmpProfileCity(), state, emp.getEmpProfileZip());
 
 			empBean = new EmployeeDataBean(empId, loginId, fullName, emp.getEmpProfileAddress(), state, emp.getEmpProfileCity(), emp.getEmpProfileZip(), emp.getEmpProfilePhoneno(), emp.getEmpProfileMailid());
 		}
@@ -791,12 +798,12 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 
 	@Override
 	public EmployeeDataBean parseEmployeeDetail1(EmployeeDataBean emp) throws Exception {
-		
+
 		if(emp != null) {
 			String state = emp.getEmpState();
 			state = getState(state); //billingConfigTableRepository.findOne(BillingConfigTableSpecification.getState(state));
 			String fullName = textFormat.getFormattedName(emp.getEmpFirstName(), emp.getEmpMiddleName(), emp.getEmpLastName(), emp.getEmpCredentials());
-//			String fullAddress = textFormat.getAddress(emp.getEmpProfileAddress(), "", emp.getEmpProfileCity(), state, emp.getEmpProfileZip());
+			//			String fullAddress = textFormat.getAddress(emp.getEmpProfileAddress(), "", emp.getEmpProfileCity(), state, emp.getEmpProfileZip());
 
 			emp.setEmpFullname(fullName);
 			emp.setEmpState(state);
@@ -804,7 +811,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 
 		return emp;
 	}
-	
+
 	/**
 	 * Parsing Insurance Details
 	 * @param patientDetails
@@ -839,20 +846,20 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			}
 		return insuranceBean;
 	}
-	
-	private String isNull(String value) {
+
+	private String isNull(Object value) {
 		if(value == null)
 			return "";
 		else
-			return value.trim();
+			return value.toString().trim();
 	}
 
 	/**
-     * Parsing POS details
-     * @param posList
-     * @param textFormat
-     * @return
-     */
+	 * Parsing POS details
+	 * @param posList
+	 * @param textFormat
+	 * @return
+	 */
 	public List<PosDataBean> parsePOSDetails1(List<PosDataBean> posList) {
 
 		if(posList != null){
@@ -865,7 +872,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 					name = "(" + practice + ") ";
 				if(comments != null && !comments.isEmpty())
 					name = name + comments;
-				
+
 				pos.setPosName(name);
 				pos.setPosState(getState(pos.getPosState()));
 			}
@@ -913,23 +920,23 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		}
 		return posBean;
 	}
-	
+
 	/**
 	 * Get State
 	 * @param state
 	 * @return
 	 */
 	private String getState(String state) {
-		
+
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<String> query= builder.createQuery(String.class);
 		Root<BillingConfigTable> root= query.from(BillingConfigTable.class);
 		Predicate statePedicate = builder.equal(root.get(BillingConfigTable_.billingConfigTableConfigId), state);
 		Predicate lookupPredicate = builder.equal(root.get(BillingConfigTable_.billingConfigTableLookupId), 5001);
-		
+
 		query.select(builder.coalesce(root.get(BillingConfigTable_.billingConfigTableLookupDesc), ""));
 		query.where(builder.and(statePedicate,lookupPredicate));
-		
+
 		state="";
 		try{
 			state= em.createQuery(query).getSingleResult();
@@ -976,81 +983,81 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		}
 		return posBean;
 	}
-	
-    /**
-     * Method to get Header HTML as String
-     * @throws Exception 
-     */
-    @Override
-    public String getHeaderHTML(Integer styleId, Integer patientId, Integer encounterId,  String sharedPath) throws Exception{
-    	String headerHTML = "";
-    	try{
 
-    		GenericPrintBean genericPrintBean = getCompleteDetails(patientId, encounterId);
-    		GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
-    		int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
-    		if(letterHeaderId>0){
-    			headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedPath, genericPrintBean);
-    		}
-    	}
-    	catch(Exception e){
-    		e.printStackTrace();
-    		return "failure";
-    	}
-    	return headerHTML;
-    }
-  
-    @Override
-    public String getPatientHeaderHTML(Integer styleId, Integer patientId, Integer encounterId) throws Exception {
-    	
-    	List<Integer> insTypeList = new ArrayList<Integer>();
+	/**
+	 * Method to get Header HTML as String
+	 * @throws Exception 
+	 */
+	@Override
+	public String getHeaderHTML(Integer styleId, Integer patientId, Integer encounterId,  String sharedPath) throws Exception{
+		String headerHTML = "";
+		try{
+
+			GenericPrintBean genericPrintBean = getCompleteDetails(patientId, encounterId);
+			GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
+			int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
+			if(letterHeaderId>0){
+				headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedPath, genericPrintBean);
+			}
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return "failure";
+		}
+		return headerHTML;
+	}
+
+	@Override
+	public String getPatientHeaderHTML(Integer styleId, Integer patientId, Integer encounterId) throws Exception {
+
+		List<Integer> insTypeList = new ArrayList<Integer>();
 		insTypeList.add(1);
 		insTypeList.add(2);
-		
-    	GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
+
+		GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
 		int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
-		
-    	String patientHeaderHTML = "";
-    	PatientRegistration patientDetails= patientRegistrationRepository.findOne(GenericPrintSpecification.getPatientDetails(patientId, insTypeList));
-    	List<InsuranceDataBean> insuranceList= getPatientInsuranceDetails(patientId);//patientInsDetailsRepository.findAll(PatientInsDetailsSpecification.getByPatientId(patientId));
-//		int encounterId=7328;//printDetails.getEncounterId();
+
+		String patientHeaderHTML = "";
+		PatientRegistration patientDetails= patientRegistrationRepository.findOne(GenericPrintSpecification.getPatientDetails(patientId, insTypeList));
+		List<InsuranceDataBean> insuranceList= getPatientInsuranceDetails(patientId);//patientInsDetailsRepository.findAll(PatientInsDetailsSpecification.getByPatientId(patientId));
+		//		int encounterId=7328;//printDetails.getEncounterId();
 		Encounter encounter = encounterRepository.findOne(EncounterSpecification.EncounterById(encounterId, true));
 		PatientDataBean patientBean = parsePatientDetails(patientDetails, encounter, insuranceList);
 		String[] patientDetailsArr=generatePatentDetailsArr(patientBean);
-		
+
 		if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
 			patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
 		}else{
 			patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
 		}
-		
+
 		return patientHeaderHTML;
-    }
-    
-    @Override
-    public String getFooterHTML(Integer styleId){
-    	
-    	String footerHTML = "";
-    	GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
-    	int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
-//		int pageVariant=0;
+	}
+
+	@Override
+	public String getFooterHTML(Integer styleId){
+
+		String footerHTML = "";
+		GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
+		int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
+		//		int pageVariant=0;
 		if(footerId>0){
 			footerHTML=generateFooterBean.generateFooter(footerId);
-//			pageVariant=generateFooterBean.getPageFormatForFooter(footerId);
+			//			pageVariant=generateFooterBean.getPageFormatForFooter(footerId);
 		}    	
-    	return footerHTML;
-    }
+		return footerHTML;
+	}
 
 	@Override
 	public PatientRegistration getPatientData(int patientId) {
 		return patientRegistrationRepository.findOne(PatientRegistrationSpecification.byPatientId(patientId));
 	}
-	
+
 	@Override
 	public PatientRegistration getTesData(int patientId){
 		return patientRegistrationRepository.findOne(GenericPrintSpecification.getPatientDetails(patientId));
 	}
-	
+
 	@Override
 	public Encounter getEncounterData(int encounterId) {
 		return encounterRepository.findOne(EncounterSpecification.EncounterById(encounterId, true));
@@ -1060,49 +1067,52 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	public String getLeftHeaderHTML(Integer styleId) {
 		String leftHeaderHTML="";
 		GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
-    	int headerId=genericPrintStyle.getGenericPrintStyleHeaderId();
-    	/*if(headerId>0)
+		int headerId=genericPrintStyle.getGenericPrintStyleHeaderId();
+		/*if(headerId>0)
     		leftHeaderHTML=generateHeaderBean.generateLeftHeader(headerId);*/
 		return leftHeaderHTML;
 	}
-	
+
 	@Override
 	public CustomGenericBean getCustomeGenericData(Integer styleId, Integer patientId, Integer encounterId, String sharedFolderPath) throws Exception{
-		
+
 		String headerHTML="",patientHeaderHTML="",leftHeaderHTML="",footerHTML="";
 		CustomGenericBean customGenericBean = new CustomGenericBean();
-		
+
 		GenericPrintBean genericPrintBean = getCompleteDetails(patientId, encounterId);
 		GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
-		int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
-		int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
-		int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
 
-		PatientDataBean patientDataBean=genericPrintBean.getPatientBean(); 
-		String[] patientDetailsArr=generatePatentDetailsArr(patientDataBean);
-
-		if(letterHeaderId>0){
-			headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedFolderPath, genericPrintBean);
+		if(genericPrintStyle!=null){
+			int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
+			int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
+			int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
+	
+			PatientDataBean patientDataBean=genericPrintBean.getPatientBean(); 
+			String[] patientDetailsArr=generatePatentDetailsArr(patientDataBean);
+	
+			if(letterHeaderId>0){
+				headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedFolderPath, genericPrintBean);
+			}
+	
+			if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
+				patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
+			}else{
+				patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
+			}
+	
+			if(footerId>0){
+				footerHTML=generateFooterBean.generateFooter(footerId);
+			}
+	
+			if(letterHeaderId>0){
+				leftHeaderHTML=generateHeaderBean.generateLeftHeader(letterHeaderId,genericPrintBean);
+			}
 		}
-
-		if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
-			patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
-		}else{
-			patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
-		}
-
-		if(footerId>0){
-			footerHTML=generateFooterBean.generateFooter(footerId);
-		}
-
-		if(letterHeaderId>0)
-    		leftHeaderHTML=generateHeaderBean.generateLeftHeader(letterHeaderId,genericPrintBean);
-		
 		customGenericBean.setHeaderHTML(headerHTML);
 		customGenericBean.setPatientHeaderHTML(patientHeaderHTML);
 		customGenericBean.setLeftHeaderHTML(leftHeaderHTML);
 		customGenericBean.setFooterHTML(footerHTML);
-		
+
 		return customGenericBean;
 	}
 
@@ -1125,7 +1135,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	public LeafLibrary getLeafLibrary(int templateId) {
 		return leafLibraryRepository.findOne(LeafLibrarySpecification.getLeafDetailsById(templateId)) ;
 	}
-	
+
 	public String getInsuranceName(PatientDataBean patientBean){
 		String primInsId="";
 		try{
@@ -1157,7 +1167,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	 */
 	@SuppressWarnings("unchecked")
 	private String getAge(String dob) {
-		
+
 		try{
 			List<Object[]> result= em.createNativeQuery("select date_part('years',age( (select current_date),'"+dob+"')) as years,"
 					+ "date_part('months',age( (select current_date),'"+dob+"')) as months,"
@@ -1187,4 +1197,120 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			return "";
 		}
 	}
+
+	/** 
+	 * Set shared folder path from initial settings table
+	 * */
+	@Override
+	public List<InitialSettings> getPracticeDetails() {
+
+		List<InitialSettings> practiceDetails=initialSettingsRepository.findAll(GenericPrintSpecification.getPracticeDetails());
+
+		for(int i=0;i<practiceDetails.size();i++){
+			if(practiceDetails.get(i).getInitialSettingsOptionName()!=null && practiceDetails.get(i).getInitialSettingsOptionName().equalsIgnoreCase("Shared Folder Path")){
+				sessionMap.setPracticeSharedFolderPath(practiceDetails.get(i).getInitialSettingsOptionValue());
+			}
+		}
+
+		return practiceDetails;
+	}
+
+	/**
+	 * Generate PDF file using HTML data input in shared folder
+	 * @param styleId - Generic print style id
+	 * @param patientId
+	 * @param dataBean - Print details data bean
+	 */
+	@Override
+	public void generatePDFPrint(Integer styleId, Integer patientId,PrintDetailsDataBean databean) {
+
+		//Need to replace with common function
+		getPracticeDetails();
+
+		String sharedFolderPath=sessionMap.getPracticeSharedFolderPath()+"/CNM/PRINT";
+
+		String headerHTML="",patientHeaderHTML="",leftHeaderHTML="",footerHTML="";
+		String patientHeaderPage1="";
+		int pageVariant=0;
+
+		try{
+
+			int encounterId=databean.getEncounterId();
+			GenericPrintBean genericPrintBean = getCompleteDetails(patientId, encounterId);
+
+			GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
+			int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
+			int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
+			int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
+			PatientDataBean patientDataBean=genericPrintBean.getPatientBean(); 
+			String[] patientDetailsArr=generatePatentDetailsArr(patientDataBean);
+
+			//Header row count is used to get the height of top margin for PDF
+			int headerRowCount=generateHeaderBean.getPatientHeaderAttributeCount(patientHeaderId, 1);
+
+			//Generate Letter header HTML
+			if(letterHeaderId>0){
+				headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedFolderPath, genericPrintBean);
+				if(!headerHTML.equalsIgnoreCase("")){
+					headerHTML=headerHTML.replaceAll("cellpadding='0'", "");
+					headerHTML="<head><style type='text/css' media='all'>td{padding-top:5px;}</style></head><body>"+headerHTML+"</body>";
+				}
+			}
+
+			//Generate Patient header HTML
+			patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
+			if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
+				patientHeaderPage1 = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
+			}else{
+				patientHeaderPage1 = patientHeaderHTML;
+			}
+
+			//Generate footer HTML along with page number style
+			if(footerId>0){
+				footerHTML=generateFooterBean.generateFooter(footerId);
+				pageVariant=generateFooterBean.getPageFormatForFooter(footerId);
+			}
+
+			//Generate Left side header HTML			
+			if(letterHeaderId>0){
+				leftHeaderHTML=generateHeaderBean.generateLeftHeader(letterHeaderId,genericPrintBean);
+				if(!leftHeaderHTML.equalsIgnoreCase("")){
+					leftHeaderHTML=leftHeaderHTML.replaceAll("cellpadding='0'", "");
+					leftHeaderHTML="<head><style type='text/css' media='all'>td{padding-top:7px;}</style></head><body>"+leftHeaderHTML+"</body>";
+				}
+			}
+			
+			// Content of PDF
+			String contentHTML=URLDecoder.decode(databean.getHtmlData(),"UTF-8");
+
+			//Filepath of PDF file
+			String fileName=sharedFolderPath+"/"+databean.getFileName();
+
+			//Call to generate PDF with provided details
+			generatePDFBean.generatePDF(fileName,headerHTML,patientHeaderPage1,patientHeaderHTML,footerHTML,leftHeaderHTML,contentHTML,pageVariant,getPageSize(1),0,headerRowCount);
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+
+	}
+
+	//To identify page size based on integer input given
+	public Rectangle getPageSize(int pagesize){
+		Rectangle pageRect;
+		switch(pagesize){
+		case 1:
+			pageRect=PageSize.LETTER;
+			break;
+		case 2:
+			pageRect=PageSize.A4;
+			break;
+		default:
+			pageRect=PageSize.A4;
+		}
+
+		return pageRect;
+	}
+
 }

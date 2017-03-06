@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.LeafLibrary;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PosTable;
@@ -18,7 +19,8 @@ public interface GenericPrintService {
 	public GenericPrintStyle saveGenericPrintStyle(GenericPrintStyle genericPrintStyle);
 	public void generatePDFPreview(Integer styleId);
 	public void generatePDFPreview(Integer styleId,Integer patientId);
-	
+	public void generatePDFPrint(Integer styleId,Integer patientId,PrintDetailsDataBean databean);
+	public List<InitialSettings> getPracticeDetails();
 	/*
 	 * <b> Purpose: </b> To get patient details, employee details and pos details
 	 */

@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +26,7 @@ import com.glenwood.glaceemr.server.application.services.chart.print.CustomGener
 import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintService;
 import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintBean;
 import com.glenwood.glaceemr.server.application.services.chart.print.GenericPrintTemplateBean;
+import com.glenwood.glaceemr.server.application.services.chart.print.PrintDetailsDataBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 
@@ -91,7 +93,7 @@ public class GenericPrintController {
 	@RequestMapping(value = "/saveGenericPrintStyle",method = RequestMethod.POST)
 	public EMRResponseBean saveGenericPrintStyle(@RequestParam(value="styleName") String styleName,@RequestParam(value="letterHeaderId") Integer letterHeaderId,
 			@RequestParam(value="patientHeaderId") Integer patientHeaderId,@RequestParam(value="footerId") Integer footerId,
-			@RequestParam(value="isDefault") Boolean isDefault) throws Exception{
+			@RequestParam(value="isDefault") Boolean isDefault,@RequestParam(value="signId") Integer signId) throws Exception{
 		
 		logger.debug("Begin of request to Save generic print style.");
 		
@@ -100,6 +102,7 @@ public class GenericPrintController {
 		newGenericPrintStyle.setGenericPrintStyleHeaderId(letterHeaderId);
 		newGenericPrintStyle.setGenericPrintStylePatientHeaderId(patientHeaderId);
 		newGenericPrintStyle.setGenericPrintStyleFooterId(footerId);
+		newGenericPrintStyle.setGenericPrintStyleSignId(signId);
 		newGenericPrintStyle.setGenericPrintStyleIsDefault(isDefault);
 		newGenericPrintStyle.setGenericPrintStyleIsActive(true);
 		
@@ -119,7 +122,8 @@ public class GenericPrintController {
 	@RequestMapping(value = "/updateGenericPrintStyle",method = RequestMethod.POST)
 	public EMRResponseBean updateGenericPrintStyle(@RequestParam(value="styleName") String styleName,@RequestParam(value="letterHeaderId") Integer letterHeaderId,
 			@RequestParam(value="patientHeaderId") Integer patientHeaderId,@RequestParam(value="footerId") Integer footerId,@RequestParam(value="styleId") Integer styleId,
-			@RequestParam(value="isDefault") Boolean isDefault,@RequestParam(value="isActive") Boolean isActive) throws Exception{
+			@RequestParam(value="isDefault") Boolean isDefault,@RequestParam(value="isActive") Boolean isActive
+			,@RequestParam(value="signId") Integer signId) throws Exception{
 		
 		logger.debug("Begin of request to Update generic print style.");
 		
@@ -129,6 +133,7 @@ public class GenericPrintController {
 		updateGenericPrintStyle.setGenericPrintStyleHeaderId(letterHeaderId);
 		updateGenericPrintStyle.setGenericPrintStylePatientHeaderId(patientHeaderId);
 		updateGenericPrintStyle.setGenericPrintStyleFooterId(footerId);
+		updateGenericPrintStyle.setGenericPrintStyleSignId(signId);
 		updateGenericPrintStyle.setGenericPrintStyleIsDefault(isDefault);
 		updateGenericPrintStyle.setGenericPrintStyleIsActive(isActive);
 		
@@ -321,6 +326,26 @@ public class GenericPrintController {
 		}		
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Successfully saved style for template", sessionMap.getUserID(), request.getRemoteAddr(), -1, "styleId="+styleId, LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to Update style for template.");
+	}
+	
+	/**
+	 * Request to generate PDF for template print - Creates a temp file in shared folder
+	 * @param PrintDetailsDataBean - Contains details required for printing and print data
+	 */
+	@RequestMapping(value = "/FetchGenericPrintPDFData",method = RequestMethod.POST, consumes = "application/json")
+	public void fetchgenericPrintPDFData(@RequestBody PrintDetailsDataBean dataBean) throws Exception{
+		try{
+			logger.debug("Begin of request to Generate PDF file.");
+
+			genericPrintService.generatePDFPrint(dataBean.getStyleId(),dataBean.getPatientId(),dataBean);
+
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.CREATE,1,Log_Outcome.SUCCESS,"Successfully generated PDF file.",sessionMap.getUserID(), request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN,"","");		
+			logger.debug("End of request to Generate PDF file.");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+
 	}
 }
 
