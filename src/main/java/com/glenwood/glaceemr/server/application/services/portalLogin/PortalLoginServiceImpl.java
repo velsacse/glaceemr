@@ -222,7 +222,9 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		portalUser.setSecurityAnswer3(registrationBean.getSecurityAnswer3());
 		portalUser.setPasswordReset(0);
 		portalUser.setAccessTime(new Timestamp(new Date().getTime()));
-		portalUser.setFromPortal(true);		
+        portalUser.setFromPortalIsactive(true);
+        portalUser.setFromPortal(true);
+        portalUser.setH809Token("-1");
 
 		portalUser=h809Repository.saveAndFlush(portalUser);//creating an entry in h809 table
 		
@@ -390,6 +392,9 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		portalUser.setSecurityAnswer2(registrationBean.getSecurityAnswer2());
 		portalUser.setSecurityQuestion3(registrationBean.getSecurityQuestion3());
 		portalUser.setSecurityAnswer3(registrationBean.getSecurityAnswer3());
+        portalUser.setFromPortalIsactive(true);
+        portalUser.setFromPortal(true);
+        portalUser.setH809Token("-1");
 		
 		h809Repository.saveAndFlush(portalUser);
 		

@@ -2,14 +2,16 @@ package com.glenwood.glaceemr.server.application.services.portal;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,12 +21,19 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.H809;
+import com.glenwood.glaceemr.server.application.models.InitialSettings;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PortalPasswordResetBean;
 import com.glenwood.glaceemr.server.application.repositories.H809Repository;
-import com.glenwood.glaceemr.server.application.repositories.PortalUserRepository;
+import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalRegistrationResponse;
+import com.glenwood.glaceemr.server.application.specifications.PortalLoginSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalRecoverUserPasswordSpecifiction;
+import com.glenwood.glaceemr.server.application.specifications.PortalSettingsSpecification;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.MD5;
 import com.glenwood.glaceemr.server.utils.MultipartUtility;
 
 @Service
@@ -41,6 +50,9 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 	
 	@Autowired
 	HttpServletRequest request;
+	
+	@Autowired
+	InitialSettingsRepository initialSettingsRepository;
 
 	@Override
 	public RecoverPortalPasswordBean authenticateUsernameAndGetSecurityQuestions(
@@ -66,6 +78,7 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 			RecoverPortalPasswordBean recoverBean) throws IOException, JSONException {
 
 		H809 portalUser=h809Repository.findOne(PortalRecoverUserPasswordSpecifiction.authenticatePortalUser(recoverBean.getUsername()));
+		InitialSettings practiceDetails=initialSettingsRepository.findOne(PortalSettingsSpecification.getPracticeDetails("Practice Name"));
 
 
 		EMRResponseBean bean=new EMRResponseBean();
@@ -114,7 +127,12 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 			bean.setData(sb.toString().substring(0, sb.toString().length()-2)+" authentication failed.");
 			return bean;
 		}
-
+		
+		portalUser.setH809Token(generateRandomString());
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalUser.getH809002()+" has successfully updated the token.",-1,
+				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalUser.getH809002()+" has requested the password reset.","");
 
 
 		String URL ="https://mailer1.glaceemr.com/Mailer/sendMail";
@@ -138,17 +156,22 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 		JSONArray ccids = new JSONArray();
 
 		JSONArray bccids = new JSONArray();
-		bccids.put(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationMailId());
 
 		String accountId="Glenwood";
 
 
-		String htmlbody = "<html><head></head><body width='100%'>"+
-				"<label style='width:100%;padding:10px 5px;font-size:14px;color:#272727;'>Dear "+portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationFirstName()+" "+portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationLastName()+",</label><br><br>"+
-				"<label style='width:100%;padding:10px 5px;font-size:14px;color:#272727;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-				+ "Your password is "+portalUser.getH809010()+" . Do not share this information for your security reasons.</label><br><br><label style='width:100%;padding:10px 5px;font-size:14px;color:#272727;'>Thanks and Regards,</label>"
-				+ "<br><label style='width:100%;padding:10px 5px;font-size:14px;color:#272727;'>Glenwood Systems.</label><label></label>"+
-				"</body></html>";
+		String htmlbody="<html><head></head>"+
+				"<body style='width:100%;color:#1e1e1e;font-size:16px;'>"+
+				"<label style='width:100%;padding:10px 5px;'>Dear "+WordUtils.capitalizeFully(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationFirstName())+" "+WordUtils.capitalizeFully(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationLastName())+",</label>"+
+				"<br><br>"+
+				"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Welcome to Patient Portal password reset service.</label>"+
+				"<br><br>"+
+				"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='color:#1773cf' href='https://patientportal.glaceemr.com/glaceportal_login/PasswordReset.jsp?practiceId="+recoverBean.getDbname()+"&patientId="+portalUser.getH809002()+"&resetToken="+portalUser.getH809Token()+"'>Click here to reset password.</a></label>"+
+				"<br><br>"+
+				"<label style='width:100%;padding:10px 5px;'>Thanks and Regards,</label>"+
+				"<br>"+
+				"<label style='width:100%;padding:10px 5px;'>"+WordUtils.capitalizeFully(practiceDetails.getInitialSettingsOptionValue())+".</label>"+
+				"<label></label></body></html>";
 
 		String plaintext="";
 
@@ -191,12 +214,117 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 			bean.setSuccess(false);
 		bean.setData("Email sending failed. Please try after some time.");
 		}
-		
-		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
-				AuditTrailEnumConstants.LogActionType.UPDATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalUser.getH809002()+" recovered his/her password for Patient Portal login.",-1,
-				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
-				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalUser.getH809002()+" recovered his/her password for Patient Portal login.","");
 
 		return bean;
 	}
+
+	@Override
+	public PortalRegistrationResponse resetPatientPassword(PortalPasswordResetBean portalPasswordResetBean) {
+		
+		PortalRegistrationResponse regResponse=new PortalRegistrationResponse();
+		
+		if(portalPasswordResetBean.getPatientId()!=-1){
+			H809 portalUser=h809Repository.findOne(PortalLoginSpecification.patientById(String.valueOf(portalPasswordResetBean.getPatientId())));
+			
+			if(portalUser.getH809Token()==null||portalUser.getH809Token().equals("-1")){
+				regResponse.setSuccess(false);
+				regResponse.setMessage("Password reset link has been expired.");
+			}else if(!portalUser.getH809Token().equals(portalPasswordResetBean.getToken())){
+				regResponse.setSuccess(false);
+				regResponse.setMessage("Password reset token mismatch.");
+				auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+						AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalPasswordResetBean.getPatientId()+" has successfully reset the password.",-1,
+						request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+						AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalPasswordResetBean.getPatientId()+" has successfully reset the password.","");
+			}else if(portalUser.getH809Token().equals(portalPasswordResetBean.getToken())){
+				
+				if(!portalPasswordResetBean.getPassword().equals(portalUser.getH809010())){
+				portalUser.setH809Token("-1");
+				portalUser.setH809010(portalPasswordResetBean.getPassword());
+				MD5 md5 = new MD5();
+				md5.setHashString(portalPasswordResetBean.getPassword());
+				String encryptedPassword=md5.getHashString();
+				portalUser.setH809005(encryptedPassword);
+				h809Repository.saveAndFlush(portalUser);
+				regResponse.setSuccess(true);
+				regResponse.setMessage("Your password has been reset successfully.");
+				auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+						AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalPasswordResetBean.getPatientId()+" has successfully reset the password.",-1,
+						request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+						AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalPasswordResetBean.getPatientId()+" has successfully reset the password.","");
+				}else{
+					regResponse.setSuccess(false);
+					regResponse.setMessage("Please enter new password different from old one.");
+					auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+							AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalPasswordResetBean.getPatientId()+" has failed to reset the password.",-1,
+							request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+							AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalPasswordResetBean.getPatientId()+" has failed to reset the password.","");
+				}
+			}
+				
+		}else{
+			regResponse.setSuccess(false);
+			regResponse.setMessage("Password reset link is invalid or corrupted.");
+		}
+		
+		return regResponse;
+	
+	}
+	
+	@Override
+	public PortalRegistrationResponse updatePasswordResetToken(Integer patientId) {
+		
+		PortalRegistrationResponse regResponse=new PortalRegistrationResponse();
+		
+		if(patientId!=-1){
+			H809 portalUser=h809Repository.findOne(PortalLoginSpecification.patientById(String.valueOf(patientId)));
+			
+			portalUser.setH809Token(generateRandomString());
+			regResponse.setSuccess(true);
+			regResponse.setMessage("Password reset token has been generated successfully.");
+			auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+					AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" has successfully updated the token.",-1,
+					request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+					AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" has requested the password reset.","");
+		}else{
+			regResponse.setSuccess(false);
+			regResponse.setMessage("No such user exists.");
+		}
+		
+		return regResponse;
+	
+	}
+	
+	 	private static final String CHAR_LIST =  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+	    private static final int RANDOM_STRING_LENGTH = 10;
+	     
+	    /**
+	     * This method generates random string
+	     * @return
+	     */
+	    public String generateRandomString(){
+	         
+	        StringBuffer randStr = new StringBuffer();
+	        for(int i=0; i<RANDOM_STRING_LENGTH; i++){
+	            int number = getRandomNumber();
+	            char ch = CHAR_LIST.charAt(number);
+	            randStr.append(ch);
+	        }
+	        return randStr.toString();
+	    }
+	     
+	    /**
+	     * This method generates random numbers
+	     * @return int
+	     */
+	    private int getRandomNumber() {
+	        int randomInt = 0;
+	        Random randomGenerator = new Random();
+	        randomInt = randomGenerator.nextInt(CHAR_LIST.length());
+	        if (randomInt - 1 == -1) {
+	            return randomInt;
+	        } else {
+	            return randomInt - 1;
+	        }
+	    }
 }

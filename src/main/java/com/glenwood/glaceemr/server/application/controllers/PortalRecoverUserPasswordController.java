@@ -7,9 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.glenwood.glaceemr.server.application.models.PortalPasswordResetBean;
 import com.glenwood.glaceemr.server.application.services.portal.RecoverPortalPasswordBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalRecoverUserPasswordService;
 import com.glenwood.glaceemr.server.application.services.portal.portalAppointments.PortalAppointmentsService;
@@ -80,4 +82,56 @@ public class PortalRecoverUserPasswordController {
 			return responseBean;
 		}
 	}	
+	
+
+@RequestMapping(value = "/Reset", method = RequestMethod.POST)
+     @ResponseBody
+     public EMRResponseBean resetPatientPassword(@RequestBody PortalPasswordResetBean portalPasswordResetBean) throws Exception{
+
+         EMRResponseBean responseBean=new EMRResponseBean();
+
+         responseBean.setCanUserAccess(true);
+         responseBean.setIsAuthorizationPresent(true);
+         responseBean.setLogin(false);
+
+         try {
+             responseBean.setData(portalRecoverPasswordService.resetPatientPassword(portalPasswordResetBean));
+             return responseBean;
+         } catch (Exception e) {
+             e.printStackTrace();
+             responseBean.setSuccess(false);
+             responseBean.setData("Error in resetting the password!");
+             return responseBean;
+         }
+     }
+
+     /**
+      * Appointment list of a patient appointments.
+      * @param patientId : id of the required patient.
+      * @param appointmentsType : indicates future or past or present day appointment .
+      * @return List of Appointments of a patient.
+      */
+     @RequestMapping(value = "/update/resetToken", method = RequestMethod.POST)
+     @ResponseBody
+     public EMRResponseBean updatePortalPasswordResetToken(@RequestParam(value="patientId", required=false, defaultValue="") int patientId) throws Exception{
+
+         EMRResponseBean responseBean=new EMRResponseBean();
+
+         responseBean.setCanUserAccess(true);
+         responseBean.setIsAuthorizationPresent(true);
+         responseBean.setLogin(false);
+
+         try {
+             responseBean.setData(portalRecoverPasswordService.updatePasswordResetToken(patientId));
+             return responseBean;
+         } catch (Exception e) {
+             e.printStackTrace();
+             responseBean.setSuccess(false);
+             responseBean.setData("Error in updaing the token!");
+             return responseBean;
+         }
+     }
+
+
+
 }
