@@ -31,6 +31,12 @@ public class DoctorSign implements Serializable{
 	@Column(name="signaccess")
 	private Boolean signaccess;
 	
+	@Column(name="signfooter")
+	private String signfooter;
+	
+	@Column(name="signstyle")
+	private String signstyle;
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name = "loginid", referencedColumnName = "login_users_id", insertable = false, updatable = false)
@@ -88,5 +94,21 @@ public class DoctorSign implements Serializable{
 
 	public void setSignaccess(Boolean signaccess) {
 		this.signaccess = signaccess;
+	}
+	
+	public String getSignfooter() {
+		return signfooter;
+	}
+
+	public void setSignfooter(String signfooter) {
+		this.signfooter = signfooter;
+	}
+
+	public String getSignstyle() {
+		return signstyle;
+	}
+
+	public void setSignstyle(String signstyle) {
+		this.signstyle = signstyle;
 	}
 }

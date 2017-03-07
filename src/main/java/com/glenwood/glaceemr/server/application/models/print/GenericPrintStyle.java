@@ -27,12 +27,24 @@ public class GenericPrintStyle {
 	
 	@Column(name="generic_print_styles_footer_id")
 	private Integer genericPrintStyleFooterId;
+	
+	@Column(name="generic_print_styles_sign_id")
+	private Integer genericPrintStyleSignId;
 
 	@Column(name="generic_print_styles_isdefault")
 	private Boolean genericPrintStyleIsDefault;
 	
 	@Column(name="generic_print_styles_isactive")
 	private Boolean genericPrintStyleIsActive;
+	
+	
+	public Integer getGenericPrintStyleSignId() {
+		return genericPrintStyleSignId;
+	}
+
+	public void setGenericPrintStyleSignId(Integer genericPrintStyleSignId) {
+		this.genericPrintStyleSignId = genericPrintStyleSignId;
+	}
 
 	public Integer getGenericPrintStyleId() {
 		return genericPrintStyleId;
