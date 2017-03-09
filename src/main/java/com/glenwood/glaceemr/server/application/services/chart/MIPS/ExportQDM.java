@@ -556,7 +556,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 	}
 	
-	public List<Intervention> setReferrals(List<ReferralQDM> obj){
+public List<Intervention> setReferrals(List<ReferralQDM> obj){
 		
 		List<Intervention> interventionList=new ArrayList<Intervention>();
 		
@@ -567,7 +567,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 			interventionObj.setCode("306253008");
 			interventionObj.setCodeSystem("Referral to doctor (procedure)");
 			interventionObj.setCodeSystemOID("2.16.840.1.113883.6.96");
+			if(obj.get(i).getOrderedDate()!=null)
 			interventionObj.setStartDate(obj.get(i).getOrderedDate());
+			else
+			interventionObj.setStartDate(obj.get(i).getRefDate());
 			interventionObj.setEndDate(obj.get(i).getReviewedDate());
 			interventionObj.setId(obj.get(i).getRefId().toString());
 			
@@ -650,6 +653,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Root<H413> rooth413 = cq.from(H413.class);
 		Selection[] selections= new Selection[] {
 				rooth413.get(H413_.h413001).alias("Referral id"),
+				rooth413.get(H413_.h413004).alias("Referred Date"),
 				rooth413.get(H413_.referralOrderOn).alias("Ordered Date"),
 				rooth413.get(H413_.referralReviewedOn).alias("Reviewed On"),
 				rooth413.get(H413_.h413041).alias("Status")
