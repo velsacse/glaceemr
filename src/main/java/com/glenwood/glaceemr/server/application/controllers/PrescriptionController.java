@@ -19,12 +19,14 @@ import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
 import com.glenwood.glaceemr.server.application.models.PharmacyFilterBean;
 import com.glenwood.glaceemr.server.application.models.PortalRefillRequestBean;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.IntakeBean;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionBean;
 import com.glenwood.glaceemr.server.application.services.chart.prescription.PrescriptionService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
+
 
 /**
  * Controller for Prescriptions in GlaceEMR, 
@@ -39,8 +41,9 @@ public class PrescriptionController {
 	
 	@Autowired
 	PrescriptionService prescriptionService;
+	
 	@Autowired
-	AuditTrailService auditTrailService;
+	AuditTrailSaveService auditTrailService;
 	
 	@Autowired
 	SessionMap sessionMap;
@@ -73,11 +76,13 @@ public class PrescriptionController {
 			Map<String, Object> drugs=prescriptionService.getactivemedwithclass(patientid);
 			responseBean.setSuccess(true);
 			responseBean.setData(drugs);
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull retrieved active medication data",sessionMap.getUserID(),"127.0.0.1",patientid,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Error in retrieving active meds!");
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.FAILURE,"Failed to retrieve active medication data",sessionMap.getUserID(),"127.0.0.1",patientid,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return responseBean;
 		}		
 	}
@@ -100,6 +105,7 @@ public class PrescriptionController {
 		Map<String, Object> drugs=prescriptionService.getOneMonthActiveMeds(patientid,whichMonth,year);
 		EMRResponseBean activeMedsByMonth = new EMRResponseBean();
 		activeMedsByMonth.setData(drugs);
+		auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfully retrieved medications of the month",sessionMap.getUserID(),"127.0.0.1",patientid,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		return activeMedsByMonth;
 	}
 	
@@ -114,6 +120,7 @@ public class PrescriptionController {
 	public void savemedAdministrationNewPlan(@RequestParam(value="dataToSave",required=false,defaultValue="-1")String dataToSave)throws Exception{
 		logger.debug("In saveMedPlan - new plan is going to save");
 		prescriptionService.saveMedicationAdminPlan(dataToSave);
+		auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.MOVE,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfully saved medAdministration New Plan",sessionMap.getUserID(),"127.0.0.1",-1,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		logger.debug("In saveMedPlan - saved");
 	}
 	
@@ -128,6 +135,7 @@ public class PrescriptionController {
 	public void savemedAdministrationLog(@RequestParam(value="dataToSave",required=false,defaultValue="-1")String dataToSave)throws Exception{
 		logger.debug("In saveMedAdminLog - administration log for a plan is going to save");
 		prescriptionService.saveMedicationAdminLog(dataToSave);
+		auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.MOVE,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfully saved medAdministration Log",sessionMap.getUserID(),"127.0.0.1",-1,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		logger.debug("In saveMedAdminLog - administration log for a plan got saved");
 	}
 	
@@ -144,6 +152,7 @@ public class PrescriptionController {
 		List<MedsAdminLog> logDetails = prescriptionService.getMedicationAdminLogHistory(planId);
 		EMRResponseBean logHistory = new EMRResponseBean();
 		logHistory.setData(logDetails);
+		auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfully retrieved MedAdministration Log History",sessionMap.getUserID(),"127.0.0.1",-1,planId.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		return logHistory;
 	}
 
@@ -160,6 +169,8 @@ public class PrescriptionController {
 		List<MedsAdminLog> logDetails = prescriptionService.getMedicationAdminLog(logId);
 		EMRResponseBean logData = new EMRResponseBean();
 		logData.setData(logDetails);
+		auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfully retrieved MedAdmin Log",sessionMap.getUserID(),"127.0.0.1",-1,logId.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
+
 		return logData;
 	}
 	
@@ -176,6 +187,8 @@ public class PrescriptionController {
 		logger.debug("In deleteMedAdminLog - "+logId+"is going to be deleted");
 		prescriptionService.deleteMedicationAdminLog(deletedBy,logId);
 		logger.debug("In deleteMedAdminLog - "+logId+"got deleted");
+		auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.DELETE,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull deleted medAdministration Log",sessionMap.getUserID(),"127.0.0.1",-1,logId.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
+
 	}
 
 	/**
@@ -189,6 +202,8 @@ public class PrescriptionController {
 		logger.debug("In editDeleteMedAdminPlan - plan is going to be edited");
 		prescriptionService.editMedicationAdminPlan(dataToSave);
 		logger.debug("In editDeleteMedAdminPlan - saved");
+		auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.DELETE,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull edited medAdministration Plan",sessionMap.getUserID(),"127.0.0.1",-1,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
+
 	}
 	
 	
@@ -206,6 +221,8 @@ public class PrescriptionController {
 		logger.debug("Got the medical supplies data");
 		EMRResponseBean activeMedSupplies = new EMRResponseBean();
 		activeMedSupplies.setData(drugs);
+		auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull retrieved active medication data",sessionMap.getUserID(),"127.0.0.1",patientid,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
+
 		return activeMedSupplies;
 	}
 	
@@ -220,6 +237,8 @@ public class PrescriptionController {
 			List<DrugSchedule> schedulename=prescriptionService.getfrequencylist(brandname.replaceAll("'","''"),mode);
 			EMRResponseBean frequencyList = new EMRResponseBean();
 			frequencyList.setData(schedulename);
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull retrieved Take And Frequency List",sessionMap.getUserID(),"127.0.0.1",-1,brandname,AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
+
 			return frequencyList;
 
 		}
@@ -235,6 +254,8 @@ public class PrescriptionController {
 			List<DrugSchedule> schedulename=prescriptionService.getfrequencylistall(brandname.replaceAll("'","''"),mode);
 			EMRResponseBean frequencyList = new EMRResponseBean();
 			frequencyList.setData(schedulename);
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull retrieved all frequency list",sessionMap.getUserID(),"127.0.0.1",-1,brandname,AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
+
 			return frequencyList;
 
 		}
@@ -249,6 +270,8 @@ public class PrescriptionController {
 			List<IntakeBean> takevalues=prescriptionService.gettake(brandname.replaceAll("'","''"));
 			EMRResponseBean intakeData = new EMRResponseBean();
 			intakeData.setData(takevalues);
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull retrieved take List",sessionMap.getUserID(),"127.0.0.1",-1,brandname,AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
+
 			return intakeData;
 
 		}
@@ -266,6 +289,8 @@ public class PrescriptionController {
 		logger.debug("In updateMedAdministrationLogNotes - "+logId+"is going to be modified");
 		prescriptionService.updateMedicationAdminLogNotes(modifiedBy,logId,notes);
 		logger.debug("In updateMedAdministrationLogNotes - "+logId+"got modified");
+		auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.UPDATE,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull updating MedAdministration Log Notes",sessionMap.getUserID(),"127.0.0.1",-1,notes,AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
+
 	}
 	
 	/**
@@ -279,6 +304,8 @@ public class PrescriptionController {
 		List<MedsAdminPlanShortcut> shortcutsList = prescriptionService.getMedAdminPlanShortcuts();
 		EMRResponseBean medShortcuts = new EMRResponseBean();
 		medShortcuts.setData(shortcutsList);
+		auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull retrieved MedAdmin Plan Shortcuts",sessionMap.getUserID(),"127.0.0.1",-1,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
+
 		return medShortcuts;
 	}
 	
@@ -299,11 +326,13 @@ public class PrescriptionController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(prescriptionService.getPharmacyList(pharmacyFilterBean));
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfully retrieved Pharmacy List",sessionMap.getUserID(),"127.0.0.1",-1,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Error in retrieving pharmacy list!");
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Failed to retrieved Pharmacy List",sessionMap.getUserID(),"127.0.0.1",-1,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return responseBean;
 		}		
 	}
@@ -322,6 +351,7 @@ public class PrescriptionController {
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
+		
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
@@ -329,11 +359,13 @@ public class PrescriptionController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(prescriptionService.getPatientRefillRequestHistory(patientId, chartId));
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfully retrieved Patient RefillRequest History",sessionMap.getUserID(),"127.0.0.1",patientId,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Error in retrieving refill request history!");
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Failed to retrieve Patient RefillRequest History",sessionMap.getUserID(),"127.0.0.1",patientId,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return responseBean;
 		}	
 	}
@@ -346,8 +378,8 @@ public class PrescriptionController {
 	 */
 	@RequestMapping(value = "/RefillRequestMedications", method = RequestMethod.GET)
 	@ResponseBody
-	public EMRResponseBean getPatientRefillRequestMedications( @RequestParam(value="patientId", required=false, defaultValue="") int patientId,
-			@RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
+	public EMRResponseBean getPatientRefillRequestMedications(@RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+			 @RequestParam(value="chartId", required=false, defaultValue="") int chartId)throws Exception{
 
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -358,11 +390,13 @@ public class PrescriptionController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(prescriptionService.getPatientRefillRequestMedications(patientId, chartId));
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull retrieved Patient RefillRequest Medications",sessionMap.getUserID(),"127.0.0.1",patientId,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Error in retrieving refill request medications!");
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Failed to retrieve Patient RefillRequest Medications",sessionMap.getUserID(),"127.0.0.1",patientId,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return responseBean;
 		}	
 	}
@@ -384,11 +418,13 @@ public class PrescriptionController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(prescriptionService.requestRefill(portalRefillRequestBean));
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Sucessfull requested Fill From Portal",sessionMap.getUserID(),"127.0.0.1",-1,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Error in retrieving refill request medications!");
+			auditTrailService.LogEvent(AuditTrailEnumConstants.LogType.AUDIT_LOG,AuditTrailEnumConstants.LogModuleType.PRESCRIPTIONS,AuditTrailEnumConstants.LogActionType.READ,-1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Failed to request Fill From Portal",sessionMap.getUserID(),"127.0.0.1",-1,AuditTrailEnumConstants.Log_Relavant_Id.PATIENT_ID.toString(),AuditTrailEnumConstants.LogUserType.USER_LOGIN,"-1","User (" + sessionMap.getUserID()+ ") logged in through SSO");
 			return responseBean;
 		}
 		
