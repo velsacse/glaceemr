@@ -90,6 +90,10 @@ public class TherapySessionDetails {
 	@Column(name="therapy_session_details_dx8desc")
 	private String therapySessionDetailsDx8desc;
 	
+	@Column(name="therapy_session_details_end_reason")
+	private String therapysessiondetailsleftearlyreason;
+	
+	
 	public String getTherapySessionDetailsDx1() {
 		return therapySessionDetailsDx1;
 	}
@@ -218,6 +222,15 @@ public class TherapySessionDetails {
 		this.therapySessionDetailsDx8desc = therapySessionDetailsDx8desc;
 	}
 
+	public String getTherapysessiondetailsleftearlyreason() {
+		return therapysessiondetailsleftearlyreason;
+	}
+
+	public void setTherapysessiondetailsleftearlyreason(
+			String therapysessiondetailsleftearlyreason) {
+		this.therapysessiondetailsleftearlyreason = therapysessiondetailsleftearlyreason;
+	}
+
 	public String getTherapySessionEndTime() {
 		return therapySessionEndTime;
 	}
@@ -225,7 +238,7 @@ public class TherapySessionDetails {
 	public void setTherapySessionEndTime(String therapySessionEndTime) {
 		this.therapySessionEndTime = therapySessionEndTime;
 	}
-
+	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="therapy_session_details_session_id",referencedColumnName="therapy_session_id",insertable=false, updatable=false)
 	@JsonBackReference

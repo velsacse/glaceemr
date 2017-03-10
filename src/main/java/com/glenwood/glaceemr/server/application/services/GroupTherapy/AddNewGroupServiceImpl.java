@@ -94,10 +94,28 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	@Override
 	public Map<String, Object> listDefaults() {
 		Map<String, Object> mapObject=new HashMap<String,Object>();
-		List<EmployeeProfile> phisicianList=empProfileRepository.findAll(GroupTherapySpecification.getListOfPhysicians());
 		List<PosTable>  posValue=posTableRepository.findAll(GroupTherapySpecification.getAllPosValue());
 		List<TherapyGroup> groups=therapyGroupRepository.findAll(GroupTherapySpecification.getActiveGroups());
-		mapObject.put("doctors",phisicianList);
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
+		cq.multiselect(root.get(EmployeeProfile_.empProfileEmpid),root.get(EmployeeProfile_.empProfileFullname),root.get(EmployeeProfile_.empProfileGroupid));
+		Predicate predicateByIsActive=builder.equal(root.get(EmployeeProfile_.empProfileIsActive), true);
+		Predicate predicateByEmpGroupId=root.get(EmployeeProfile_.empProfileGroupid).in(-1,-10,-2,-3);
+		cq.where(predicateByIsActive,predicateByEmpGroupId).orderBy(builder.desc(root.get(EmployeeProfile_.empProfileGroupid)),builder.asc(root.get(EmployeeProfile_.empProfileFullname)));
+		List<Object[]> resultset = em.createQuery(cq).getResultList();
+		List<EmployeeProfile> phisicianList = new ArrayList<EmployeeProfile>();
+		for(int i=0;i<resultset.size();i++){ 
+			Integer empId = Integer.parseInt(resultset.get(i)[0].toString());
+			String empName = resultset.get(i)[1].toString();
+			Integer empGroupId = Integer.parseInt(resultset.get(i)[2].toString());
+			EmployeeProfile eachObject = new EmployeeProfile();
+			eachObject.setEmpProfileEmpid(empId);
+			eachObject.setEmpProfileFullname(empName);
+			eachObject.setEmpProfileGroupid(empGroupId);
+			phisicianList.add(eachObject);			
+		}
+	  	mapObject.put("doctors",phisicianList);
 		mapObject.put("pos",posValue);
 		mapObject.put("therapy groups",groups);
 		return mapObject;
