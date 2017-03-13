@@ -157,6 +157,13 @@ public interface InvestigationSummaryService {
 	 * @return
 	 */
 	String getFileScanId(int parameterId);
+	
+	/**
+	 * Method to get All Investigation data orderby date
+	 * @param parameterId
+	 * @return
+	 */
+	public List<OrderLog> findOrderByDateSummary(Integer chartId);
 
 	public String decodeToPDF(String encryptedData, String destPath, String resultFileName) throws Exception;
 
@@ -168,4 +175,6 @@ public interface InvestigationSummaryService {
 	public OrderLogGroups findReviewedSummary(Integer chartId);
 
 	public OrderLogGroups findPendingSummary(Integer chartId);
+	
+	
 }
