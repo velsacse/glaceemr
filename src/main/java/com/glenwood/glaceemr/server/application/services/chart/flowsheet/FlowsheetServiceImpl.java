@@ -1731,14 +1731,14 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				Predicate entriesIsActivePred=cb.equal(cb.coalesce(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterIsactive), true),true);
 				Predicate chartIdPred=cb.equal(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterChartid), chartId);
 				Predicate paramDetails = null;
-				if((encounterId!=-1)&&(getEncounterStatusforLab(encounterId)==3)){
+				/*if((encounterId!=-1)&&(getEncounterStatusforLab(encounterId)==3)){
 					Predicate encounterDatePred=cb.lessThanOrEqualTo(endDateExpr, getencounterDateforLab(encounterId));
 					//Predicate encounterDatePred=cb.lessThanOrEqualTo(rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterDate), getencounterDateforLab(encounterId));
 					paramDetails = cb.and(paramMapId,isActivePred,entriesIsActivePred,chartIdPred,encounterDatePred);
-				}else{
+				}else{*/
 				
 					paramDetails = cb.and(paramMapId,isActivePred,entriesIsActivePred,chartIdPred);
-				}
+				//}
 				
 				cq1.multiselect(cb.construct(LabParametersData.class, rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterMapid),
 						 rootLabEntriesParameter.get(LabEntriesParameter_.labEntriesParameterValue),
