@@ -831,6 +831,26 @@ public class InvestigationSpecification {
 			}
 		};
 	}
+	
+	/**
+	 * Specification to get the list of labs having chart Id with Orderby OrderDate
+	 * @param chart Id
+	 * @return Specification<LabEntries>
+	 */
+	public static Specification<LabEntries> chartIdLogOrderBy(final Integer chartId) {
+		return new Specification<LabEntries>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabEntries> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate chartIdPred = cb.equal(root.get(LabEntries_.labEntriesChartid),chartId);
+				query.orderBy(cb.desc(root.get(LabEntries_.labEntriesOrdOn)), cb.desc(root.get(LabEntries_.labEntriesPerfOn)));
+				query.distinct(true);
+				return chartIdPred;
+			}
+		};
+	}
+
 
 	/**
 	 * Specification to get the list of labs having encounter Id

@@ -4343,7 +4343,52 @@ private int getPatientIdinChart(int chartId2) {
 		List<LabEntries> labsList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.checkDeleted()).and(InvestigationSpecification.checkReviewedStatus()));			
 		return setOrdersData(labsList);
 	}
-
+	
+	/**
+	 * Method to find summary of all orders by OrderDate
+	 */
+	@Override
+	public List<OrderLog> findOrderByDateSummary(Integer chartId) {		
+		List<LabEntries> labsList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLogOrderBy(chartId)).and(InvestigationSpecification.checkDeleted()));
+		return setOrdersDataByOrderDate(labsList);
+	}
+	private List<OrderLog> setOrdersDataByOrderDate(List<LabEntries> labsList) {
+		//List<LabEntries> SortedLabData = new ArrayList<LabEntries>();
+		List<OrderLog> logDatasByOrderDate = new ArrayList<OrderLog>();
+		String testCategory = "4";
+		Integer testId = -1;
+		for (int i = 0; i < labsList.size(); i++) {
+			OrderLog orderLog = new OrderLog();
+			LabEntries labs = labsList.get(i);
+			testId = labs.getLabEntriesTestId();
+			LabDescription labDescription = labDescriptionRepository.findOne(InvestigationSpecification.labByTestId(labs.getLabEntriesTestId()));
+			if(labDescription != null) {
+				testCategory = Optional.fromNullable(labDescription.getLabDescriptionTestcategoryType()).or(4) + "";
+			} else {
+				testCategory = "4";
+			}
+			orderLog.setConfirmStatus("" + labs.getLabEntriesConfirmTestStatus());
+			orderLog.setEncounterId("" + labs.getLabEntriesEncounterId());
+			orderLog.setLabName(labs.getLabEntriesTestDesc());
+			orderLog.setTestGroupId("" + labs.getLabEntriesGroupid());
+			DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+			orderLog.setOrderedDate(formatter.format(labs.getLabEntriesOrdOn()));
+			if( labs.getLabEntriesPerfOn() != null ) {
+				orderLog.setPerformedDate(formatter.format(labs.getLabEntriesPerfOn()));
+			} else {
+				orderLog.setPerformedDate("-");
+			}
+			orderLog.setPrelimStatus("" + labs.getLabEntriesPrelimTestStatus());
+			orderLog.setResultStatus("" + labs.getLabEntriesStatus());
+			orderLog.setTestCategory(testCategory);
+			orderLog.setTestDetailId("" + labs.getLabEntriesTestdetailId());
+			orderLog.setTestId("" + testId);
+			orderLog.setTestStatus("" + labs.getLabEntriesTestStatus());
+			logDatasByOrderDate.add(orderLog);
+		}						
+		return  logDatasByOrderDate;
+	}
+	
 	private OrderLogGroups setOrdersData(List<LabEntries> labsList) {
 		OrderLogGroups logGroups = new OrderLogGroups();
 		List<OrderLog> radiology = new ArrayList<OrderLog>();

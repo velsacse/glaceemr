@@ -409,4 +409,11 @@ public class InvestigationSummaryController {
 		emrResponseBean.setData(investigationService.findPatientLabDataByTest(chartId, testId));
         return emrResponseBean;
 	}
+	@RequestMapping(value = "/OrderByDateLogByChart",method = RequestMethod.GET)
+	public EMRResponseBean OrderByDateLogByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
+//		OrderLogGroups labInfo = investigationService.findReviewedSummary(chartId);
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(investigationService.findOrderByDateSummary(chartId));
+        return emrResponseBean;
+	}
 }
