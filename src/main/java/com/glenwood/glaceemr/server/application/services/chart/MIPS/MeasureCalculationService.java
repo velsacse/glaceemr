@@ -10,10 +10,12 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 
 public interface MeasureCalculationService {
 
-	void saveMeasureDetails(String measureID, int patientId, List<MeasureStatus> measureStatus);
+	void saveMeasureDetails(int providerId, int patientId, List<MeasureStatus> measureStatus);
 
-	Request getQDMRequestObject(int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM);
+	Request getQDMRequestObject(Boolean isIndividual,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM);
 
-	List<EPMeasureBean> getEPMeasuresResponseObject(int patientID, int providerId, Date startDate, Date endDate);
+	List<EPMeasureBean> getEPMeasuresResponseObject(Boolean isGroup,int patientID, int providerId, Date startDate, Date endDate);
+	
+	Boolean checkGroupOrIndividual(int year);
 	
 }

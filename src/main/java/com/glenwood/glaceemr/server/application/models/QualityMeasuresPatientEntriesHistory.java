@@ -19,7 +19,7 @@ public class QualityMeasuresPatientEntriesHistory {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="quality_measures_patient_entr_quality_measures_patient_ent_seq1")
-	@SequenceGenerator(name = "quality_measures_patient_entr_quality_measures_patient_ent_seq1", sequenceName="quality_measures_patient_entr_quality_measures_patient_ent_seq1", allocationSize=1)
+	@SequenceGenerator(name ="quality_measures_patient_entr_quality_measures_patient_ent_seq1", sequenceName="quality_measures_patient_entr_quality_measures_patient_ent_seq1", allocationSize=1)
 	@Column(name="quality_measures_patient_entries_id")
 	private Integer qualityMeasuresPatientEntriesId;
 
@@ -63,11 +63,15 @@ public class QualityMeasuresPatientEntriesHistory {
 	@Column(name="quality_measures_patient_entries_measure_observation")
 	private Integer qualityMeasuresPatientEntriesMeasureObservation;
 
+	@Column(name="quality_measures_patient_entries_provider_id")
+	private Integer qualityMeasuresPatientEntriesProviderId;
+
 	public Integer getQualityMeasuresPatientEntriesId() {
 		return qualityMeasuresPatientEntriesId;
 	}
 
-	public void setQualityMeasuresPatientEntriesId(Integer qualityMeasuresPatientEntriesId) {
+	public void setQualityMeasuresPatientEntriesId(
+			Integer qualityMeasuresPatientEntriesId) {
 		this.qualityMeasuresPatientEntriesId = qualityMeasuresPatientEntriesId;
 	}
 
@@ -75,7 +79,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesPatientId;
 	}
 
-	public void setQualityMeasuresPatientEntriesPatientId(Integer qualityMeasuresPatientEntriesPatientId) {
+	public void setQualityMeasuresPatientEntriesPatientId(
+			Integer qualityMeasuresPatientEntriesPatientId) {
 		this.qualityMeasuresPatientEntriesPatientId = qualityMeasuresPatientEntriesPatientId;
 	}
 
@@ -83,7 +88,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesReportingYear;
 	}
 
-	public void setQualityMeasuresPatientEntriesReportingYear(Integer qualityMeasuresPatientEntriesReportingYear) {
+	public void setQualityMeasuresPatientEntriesReportingYear(
+			Integer qualityMeasuresPatientEntriesReportingYear) {
 		this.qualityMeasuresPatientEntriesReportingYear = qualityMeasuresPatientEntriesReportingYear;
 	}
 
@@ -91,7 +97,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesMeasureId;
 	}
 
-	public void setQualityMeasuresPatientEntriesMeasureId(String qualityMeasuresPatientEntriesMeasureId) {
+	public void setQualityMeasuresPatientEntriesMeasureId(
+			String qualityMeasuresPatientEntriesMeasureId) {
 		this.qualityMeasuresPatientEntriesMeasureId = qualityMeasuresPatientEntriesMeasureId;
 	}
 
@@ -99,7 +106,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesUpdatedOn;
 	}
 
-	public void setQualityMeasuresPatientEntriesUpdatedOn(Timestamp qualityMeasuresPatientEntriesUpdatedOn) {
+	public void setQualityMeasuresPatientEntriesUpdatedOn(
+			Timestamp qualityMeasuresPatientEntriesUpdatedOn) {
 		this.qualityMeasuresPatientEntriesUpdatedOn = qualityMeasuresPatientEntriesUpdatedOn;
 	}
 
@@ -107,7 +115,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesIpp;
 	}
 
-	public void setQualityMeasuresPatientEntriesIpp(Integer qualityMeasuresPatientEntriesIpp) {
+	public void setQualityMeasuresPatientEntriesIpp(
+			Integer qualityMeasuresPatientEntriesIpp) {
 		this.qualityMeasuresPatientEntriesIpp = qualityMeasuresPatientEntriesIpp;
 	}
 
@@ -115,7 +124,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesDenominator;
 	}
 
-	public void setQualityMeasuresPatientEntriesDenominator(Integer qualityMeasuresPatientEntriesDenominator) {
+	public void setQualityMeasuresPatientEntriesDenominator(
+			Integer qualityMeasuresPatientEntriesDenominator) {
 		this.qualityMeasuresPatientEntriesDenominator = qualityMeasuresPatientEntriesDenominator;
 	}
 
@@ -123,7 +133,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesDenominatorExclusion;
 	}
 
-	public void setQualityMeasuresPatientEntriesDenominatorExclusion(Integer qualityMeasuresPatientEntriesDenominatorExclusion) {
+	public void setQualityMeasuresPatientEntriesDenominatorExclusion(
+			Integer qualityMeasuresPatientEntriesDenominatorExclusion) {
 		this.qualityMeasuresPatientEntriesDenominatorExclusion = qualityMeasuresPatientEntriesDenominatorExclusion;
 	}
 
@@ -131,7 +142,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesNumerator;
 	}
 
-	public void setQualityMeasuresPatientEntriesNumerator(Integer qualityMeasuresPatientEntriesNumerator) {
+	public void setQualityMeasuresPatientEntriesNumerator(
+			Integer qualityMeasuresPatientEntriesNumerator) {
 		this.qualityMeasuresPatientEntriesNumerator = qualityMeasuresPatientEntriesNumerator;
 	}
 
@@ -139,7 +151,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesNumeratorExclusion;
 	}
 
-	public void setQualityMeasuresPatientEntriesNumeratorExclusion(Integer qualityMeasuresPatientEntriesNumeratorExclusion) {
+	public void setQualityMeasuresPatientEntriesNumeratorExclusion(
+			Integer qualityMeasuresPatientEntriesNumeratorExclusion) {
 		this.qualityMeasuresPatientEntriesNumeratorExclusion = qualityMeasuresPatientEntriesNumeratorExclusion;
 	}
 
@@ -147,7 +160,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesDenominatorException;
 	}
 
-	public void setQualityMeasuresPatientEntriesDenominatorException(Integer qualityMeasuresPatientEntriesDenominatorException) {
+	public void setQualityMeasuresPatientEntriesDenominatorException(
+			Integer qualityMeasuresPatientEntriesDenominatorException) {
 		this.qualityMeasuresPatientEntriesDenominatorException = qualityMeasuresPatientEntriesDenominatorException;
 	}
 
@@ -155,7 +169,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesMeasurePopulation;
 	}
 
-	public void setQualityMeasuresPatientEntriesMeasurePopulation(Integer qualityMeasuresPatientEntriesMeasurePopulation) {
+	public void setQualityMeasuresPatientEntriesMeasurePopulation(
+			Integer qualityMeasuresPatientEntriesMeasurePopulation) {
 		this.qualityMeasuresPatientEntriesMeasurePopulation = qualityMeasuresPatientEntriesMeasurePopulation;
 	}
 
@@ -163,7 +178,8 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesMeasurePopulationExclusion;
 	}
 
-	public void setQualityMeasuresPatientEntriesMeasurePopulationExclusion(Integer qualityMeasuresPatientEntriesMeasurePopulationExclusion) {
+	public void setQualityMeasuresPatientEntriesMeasurePopulationExclusion(
+			Integer qualityMeasuresPatientEntriesMeasurePopulationExclusion) {
 		this.qualityMeasuresPatientEntriesMeasurePopulationExclusion = qualityMeasuresPatientEntriesMeasurePopulationExclusion;
 	}
 
@@ -171,8 +187,18 @@ public class QualityMeasuresPatientEntriesHistory {
 		return qualityMeasuresPatientEntriesMeasureObservation;
 	}
 
-	public void setQualityMeasuresPatientEntriesMeasureObservation(Integer qualityMeasuresPatientEntriesMeasureObservation) {
+	public void setQualityMeasuresPatientEntriesMeasureObservation(
+			Integer qualityMeasuresPatientEntriesMeasureObservation) {
 		this.qualityMeasuresPatientEntriesMeasureObservation = qualityMeasuresPatientEntriesMeasureObservation;
+	}
+
+	public Integer getQualityMeasuresPatientEntriesProviderId() {
+		return qualityMeasuresPatientEntriesProviderId;
+	}
+
+	public void setQualityMeasuresPatientEntriesProviderId(
+			Integer qualityMeasuresPatientEntriesProviderId) {
+		this.qualityMeasuresPatientEntriesProviderId = qualityMeasuresPatientEntriesProviderId;
 	}
 	
 }

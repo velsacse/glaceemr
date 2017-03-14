@@ -9,6 +9,10 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
@@ -31,15 +35,16 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Procedure;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.QDM;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
+import com.glenwood.glaceemr.server.application.models.MacraConfiguration;
+import com.glenwood.glaceemr.server.application.models.MacraConfiguration_;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEntries;
+import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEntriesHistory;
 import com.glenwood.glaceemr.server.application.repositories.MacraConfigurationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientMeasureStatusLogRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientMeasureStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
-import com.glenwood.glaceemr.server.application.specifications.QPPConfigurationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.QPPPerformanceSpecification;
-
 
 @Service
 @Transactional
@@ -63,12 +68,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	@PersistenceContext
 	EntityManager em;
 	
-	
-	
 	@Override
-	public void saveMeasureDetails(String measureId, int patientId, List<MeasureStatus> measureStatus) {
+	public void saveMeasureDetails(int providerId, int patientId, List<MeasureStatus> measureStatus) {
 		
 		MeasureStatus patientObj = new MeasureStatus();
+		
+		QualityMeasuresPatientEntriesHistory patientLogObj = new QualityMeasuresPatientEntriesHistory();
 		
 		Date d = new Date();
 		Timestamp curr_time = new Timestamp(d.getTime());
@@ -77,12 +82,19 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			
 			patientObj = measureStatus.get(i);
 			
+			String measureId = ""+patientObj.getMeasureId();
+			
+			patientLogObj = new QualityMeasuresPatientEntriesHistory();
+			
 			QualityMeasuresPatientEntries patientData = patientDataRepo.findOne(Specifications.where(QPPPerformanceSpecification.isPatientExisting(measureId, patientId, patientObj.getReportingYear())));
 			
 			if(patientData == null || patientData.equals(null)){
 				
+				patientData = new QualityMeasuresPatientEntries();
+				
 				patientData.setQualityMeasuresPatientEntriesPatientId(patientId);
 				patientData.setQualityMeasuresPatientEntriesMeasureId(measureId);
+				patientData.setQualityMeasuresPatientEntriesProviderId(providerId);
 				patientData.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(patientObj.getReportingYear()));
 				patientData.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
 				patientData.setQualityMeasuresPatientEntriesIpp(patientObj.getIpp());
@@ -93,14 +105,30 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				patientData.setQualityMeasuresPatientEntriesDenominatorException(patientObj.getDenominatorException());
 				patientData.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
 				patientData.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
-				patientData.setQualityMeasuresPatientEntriesMeasureObservation(Integer.parseInt(""+patientObj.getMeasureObservation()));
+				patientData.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
 
 				patientDataRepo.saveAndFlush(patientData);
 				
-				patientLogRepo.saveAndFlush(patientData);
+				patientLogObj.setQualityMeasuresPatientEntriesPatientId(patientId);
+				patientLogObj.setQualityMeasuresPatientEntriesMeasureId(measureId);
+				patientLogObj.setQualityMeasuresPatientEntriesProviderId(providerId);
+				patientLogObj.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(patientObj.getReportingYear()));
+				patientLogObj.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
+				patientLogObj.setQualityMeasuresPatientEntriesIpp(patientObj.getIpp());
+				patientLogObj.setQualityMeasuresPatientEntriesDenominator(patientObj.getDenominator());
+				patientLogObj.setQualityMeasuresPatientEntriesDenominatorExclusion(patientObj.getDenominatorExclusion());
+				patientLogObj.setQualityMeasuresPatientEntriesNumerator(patientObj.getNumerator());
+				patientLogObj.setQualityMeasuresPatientEntriesNumeratorExclusion(patientObj.getNumeratorExclusion());
+				patientLogObj.setQualityMeasuresPatientEntriesDenominatorException(patientObj.getDenominatorException());
+				patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
+				patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
+				patientLogObj.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
+				
+				patientLogRepo.saveAndFlush(patientLogObj);
 				
 			}else{
 				
+				patientData.setQualityMeasuresPatientEntriesProviderId(providerId);
 				patientData.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
 				patientData.setQualityMeasuresPatientEntriesIpp(patientObj.getIpp());
 				patientData.setQualityMeasuresPatientEntriesDenominator(patientObj.getDenominator());
@@ -110,15 +138,26 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				patientData.setQualityMeasuresPatientEntriesDenominatorException(patientObj.getDenominatorException());
 				patientData.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
 				patientData.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
-				patientData.setQualityMeasuresPatientEntriesMeasureObservation(Integer.parseInt(""+patientObj.getMeasureObservation()));
+				patientData.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
 				
 				patientDataRepo.saveAndFlush(patientData);
 
-				patientData.setQualityMeasuresPatientEntriesPatientId(patientId);
-				patientData.setQualityMeasuresPatientEntriesMeasureId(measureId);
-				patientData.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(patientObj.getReportingYear()));
+				patientLogObj.setQualityMeasuresPatientEntriesPatientId(patientId);
+				patientLogObj.setQualityMeasuresPatientEntriesMeasureId(measureId);
+				patientLogObj.setQualityMeasuresPatientEntriesProviderId(providerId);
+				patientLogObj.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(patientObj.getReportingYear()));
+				patientLogObj.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
+				patientLogObj.setQualityMeasuresPatientEntriesIpp(patientObj.getIpp());
+				patientLogObj.setQualityMeasuresPatientEntriesDenominator(patientObj.getDenominator());
+				patientLogObj.setQualityMeasuresPatientEntriesDenominatorExclusion(patientObj.getDenominatorExclusion());
+				patientLogObj.setQualityMeasuresPatientEntriesNumerator(patientObj.getNumerator());
+				patientLogObj.setQualityMeasuresPatientEntriesNumeratorExclusion(patientObj.getNumeratorExclusion());
+				patientLogObj.setQualityMeasuresPatientEntriesDenominatorException(patientObj.getDenominatorException());
+				patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
+				patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
+				patientLogObj.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
 				
-				patientLogRepo.saveAndFlush(patientData);
+				patientLogRepo.saveAndFlush(patientLogObj);
 				
 			}
 			
@@ -127,7 +166,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	}
 
 	@Override
-	public Request getQDMRequestObject(int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM) {
+	public Request getQDMRequestObject(Boolean considerProvider,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM) {
 		
 		Request finalReqObject = new Request();
 		try{
@@ -143,24 +182,15 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			Date date1=format.parse(startDate);
 			Date date2=format.parse(endDate);
 			
-			boolean considerProvider = false;
-
 			HashMap<String, String> codeListForCNM = measureUtils.getCodeListForCNM(codeListForQDM);
 
 			String snomedCodesForCNM = codeListForCNM.get("SNOMED");
 
 			String loincCodesForCNM = codeListForCNM.get("LOINC");
 
-			List<MedicationQDM> medicationsReviewed = qdmData.getMedicationsReviewed(em,patientID,date1,date2);
-
-			Integer confType = macraConfRepo.findOne(Specifications.where(QPPConfigurationSpecification.getConfObj(2017))).getMacraConfigurationType();
-
-			if(confType == 0){
-				requestObj = qdmData.getRequestQDM(patientInfoRepo, diagnosisRepo, patientID, providerId);
-				considerProvider = true;
-			}else{
-				requestObj = qdmData.getRequestQDM(patientInfoRepo, diagnosisRepo, patientID, -1);
-			}
+			requestObj = qdmData.getRequestQDM(em,patientInfoRepo, diagnosisRepo, patientID, providerId);
+				
+			List<MedicationQDM> medicationsReviewed = qdmData.getMedicationsReviewed(em,considerProvider,providerId,patientID,date1,date2);
 
 			requestObj.setEncounterList(qdmData.getEncounterQDM(em, considerProvider, patientID, providerId, codeListForQDM.get("Encounter")));
 
@@ -171,16 +201,16 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			requestObj.setTobaccoStatusList(tobaccoDetails);
 			
 			if(codeListForQDM.containsKey("Medication")){
-				requestObj.setMedicationOrders(qdmData.getMedicationQDM(em, codeListForQDM.get("Medication").get("RXNORM"), patientID, 2));
-				requestObj.setActiveMedicationsList(qdmData.getActiveMedications(em, codeListForQDM.get("Medication").get("RXNORM"), patientID, 2));
+				requestObj.setMedicationOrders(qdmData.getMedicationQDM(em,considerProvider,providerId,codeListForQDM.get("Medication").get("RXNORM"), patientID, 2));
+				requestObj.setActiveMedicationsList(qdmData.getActiveMedications(em,considerProvider,providerId, codeListForQDM.get("Medication").get("RXNORM"), patientID, 2));
 			}
 
-			List<InvestigationQDM> investigationQDM = qdmData.getInvestigationQDM(em,patientID,providerId);
+			List<InvestigationQDM> investigationQDM = qdmData.getInvestigationQDM(em,considerProvider,patientID,providerId);
 
-			List<ClinicalDataQDM> clinicalDataQDM =qdmData.getClinicalDataQDM(em,patientID,snomedCodesForCNM,loincCodesForCNM,true,date1,date2);
+			List<ClinicalDataQDM> clinicalDataQDM =qdmData.getClinicalDataQDM(em,considerProvider,providerId,patientID,snomedCodesForCNM,loincCodesForCNM,true,date1,date2);
 
 			if(codeListForQDM.containsKey("Immunization")){
-				requestObj.setImmunizationList(qdmData.getImmuDetails(em, patientID));
+				requestObj.setImmunizationList(qdmData.getImmuDetails(em,considerProvider,providerId, patientID));
 			}
 
 			if(codeListForQDM.containsKey("Diagnostic Study")){
@@ -207,7 +237,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			if(codeListForQDM.containsKey("Procedure")){
 				String codeList=measureUtils.getCodeListByCategory(codeListForQDM, "Procedure");
 				List<String> cptCodes=measureUtils.getCPTCodes(codeListForQDM, "Procedure");
-				List<Procedure> procBasedOnCPT=qdmData.getProcBasedOnCPT(em, patientID, providerId, cptCodes);
+				List<Procedure> procBasedOnCPT=qdmData.getProcBasedOnCPT(em,considerProvider, patientID, providerId, cptCodes);
 				List<Procedure>  procFromCNM = measureUtils.getProcFromCNM(clinicalDataQDM,codeList);
 				requestObj.setProcedureList(measureUtils.getProcedureQDM(investigationQDM,codeList,medicationsReviewed,procFromCNM,procBasedOnCPT));
 			}
@@ -226,7 +256,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 				if(codeListForQDM.containsKey("Communication")){
 					
-					List<ReferralQDM> referralObj = qdmData.getReferrals(em,patientID);
+					List<ReferralQDM> referralObj = qdmData.getReferrals(em,considerProvider,providerId,patientID);
 					
 					if(referralObj.size() > 0){
 						
@@ -252,7 +282,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	}
 
 	@Override
-	public List<EPMeasureBean> getEPMeasuresResponseObject(int patientID, int providerId, Date startDate, Date endDate) {
+	public List<EPMeasureBean> getEPMeasuresResponseObject(Boolean isGroup,int patientID, int providerId, Date startDate, Date endDate) {
 		
 		List<EPMeasureBean> epMeasureInfo = new ArrayList<EPMeasureBean>();
 		
@@ -260,15 +290,15 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 		int encounterId = qdmData.getMaxEncounterIdByPatient(patientID, em);
 		
-		epMeasureInfo.add(setEPrescriptionDetails(qdmData, encounterId, providerId));
+		epMeasureInfo.add(setEPrescriptionDetails(isGroup,qdmData, encounterId, providerId));
 		
-		epMeasureInfo.add(setMedicationReconcilatonDetails(qdmData, encounterId, providerId));
+		epMeasureInfo.add(setMedicationReconcilatonDetails(isGroup,qdmData, encounterId, providerId));
 		
-		epMeasureInfo.add(setReferralExchangeInfo(qdmData, patientID, providerId, startDate, endDate));
+		epMeasureInfo.add(setReferralExchangeInfo(isGroup,qdmData, patientID, providerId, startDate, endDate));
 		
-		epMeasureInfo.add(setSecureMessageInfoDetails(qdmData, patientID, providerId, startDate, endDate));
+		epMeasureInfo.add(setSecureMessageInfoDetails(isGroup,qdmData, patientID, providerId, startDate, endDate));
 		
-		epMeasureInfo.add(setPatientElectronicAccessInfo(qdmData, patientID, providerId, startDate, endDate));
+		epMeasureInfo.add(setPatientElectronicAccessInfo(isGroup,qdmData, patientID, providerId, startDate, endDate));
 		
 		epMeasureInfo.add(setPatientAccessInfoForPortal(qdmData, patientID, providerId, startDate, endDate));
 		
@@ -276,9 +306,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 	}
 	
-	private EPMeasureBean setEPrescriptionDetails(ExportQDM qdmData, int encounterId, int providerId){
+	private EPMeasureBean setEPrescriptionDetails(Boolean isGroup,ExportQDM qdmData, int encounterId, int providerId){
 		
-		String ePrescResult = qdmData.getEPrescribingDetails(encounterId,em);
+		String ePrescResult = qdmData.getEPrescribingDetails(isGroup,encounterId,em,providerId);
 		
 		EPMeasureBean epObject = new EPMeasureBean();
 		
@@ -298,9 +328,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 	}
 	
-	private EPMeasureBean setMedicationReconcilatonDetails(ExportQDM qdmData, int encounterId, int providerId){
+	private EPMeasureBean setMedicationReconcilatonDetails(Boolean isGroup,ExportQDM qdmData, int encounterId, int providerId){
 		
-		boolean isTransitionOfCare = qdmData.checkTransitionOfCareByEncId(encounterId, em);
+		boolean isTransitionOfCare = qdmData.checkTransitionOfCareByEncId(isGroup,encounterId, em,providerId);
 		
 		EPMeasureBean epObject = new EPMeasureBean();
 		
@@ -311,7 +341,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			epObject.setStatus("Not Completed");
 		}else{
 			
-			boolean medReconcilationResult = qdmData.getReconcilationStatusByEncId(encounterId,em);
+			boolean medReconcilationResult = qdmData.getReconcilationStatusByEncId(isGroup,encounterId,em,providerId);
 			
 			if(medReconcilationResult){
 				epObject.setStatus("Completed");
@@ -326,11 +356,11 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 	}
 	
-	private EPMeasureBean setReferralExchangeInfo(ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
+	private EPMeasureBean setReferralExchangeInfo(Boolean isGroup,ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
 		
 		EPMeasureBean epObject = new EPMeasureBean();
 		
-		String result = qdmData.getReferralInfoExchangeByProvider(providerId, patientId, startDate, endDate,em);
+		String result = qdmData.getReferralInfoExchangeByProvider(isGroup,providerId, patientId, startDate, endDate,em);
 		
 		epObject.setMeasureId("C217");
 		epObject.setMeasureTitle("Health Information Exchange");
@@ -351,11 +381,11 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 	}
 	
-	private EPMeasureBean setSecureMessageInfoDetails(ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
+	private EPMeasureBean setSecureMessageInfoDetails(Boolean isGroup,ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
 		
 		EPMeasureBean epObject = new EPMeasureBean();
 		
-		String result = qdmData.getSecureMessagingInfo(providerId, patientId, startDate, endDate,em);
+		String result = qdmData.getSecureMessagingInfo(isGroup,providerId, patientId, startDate, endDate,em);
 		
 		epObject.setMeasureId("C213");
 		epObject.setMeasureTitle("Secure Messaging");
@@ -376,11 +406,11 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 	}
 	
-	private EPMeasureBean setPatientElectronicAccessInfo(ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
+	private EPMeasureBean setPatientElectronicAccessInfo(Boolean isGroup,ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
 		
 		EPMeasureBean epObject = new EPMeasureBean();
 		
-		String patientCount = qdmData.getPatientElectronicAccessInfo(providerId, patientId, startDate, endDate, em);
+		String patientCount = qdmData.getPatientElectronicAccessInfo(isGroup,providerId, patientId, startDate, endDate, em);
 		
 		epObject.setMeasureId("C207");
 		epObject.setMeasureTitle("Patient Electronic Access (VDT)");
@@ -416,6 +446,24 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 		return epObject;
 		
+	}
+
+	@Override
+	public Boolean checkGroupOrIndividual(int year) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+        Root<MacraConfiguration> root = cq.from(MacraConfiguration.class);
+        Predicate yearPredicate=builder.equal(root.get(MacraConfiguration_.macraConfigurationYear),year);
+        cq.select(root.get(MacraConfiguration_.macraConfigurationType));
+        cq.where(yearPredicate);
+        List<Object> result=em.createQuery(cq).getResultList();
+        System.out.println("result.get(0).toString() is.........."+result.get(0).toString());
+        if(Integer.parseInt(result.get(0).toString())==0){
+        	System.out.println("coming here");
+        	return true;}
+        else{
+        	return false;
+        }
 	}
 	
 }

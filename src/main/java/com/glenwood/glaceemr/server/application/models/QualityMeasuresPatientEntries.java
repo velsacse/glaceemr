@@ -19,7 +19,7 @@ public class QualityMeasuresPatientEntries {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="quality_measures_patient_entr_quality_measures_patient_entr_seq")
-	@SequenceGenerator(name = "quality_measures_patient_entr_quality_measures_patient_entr_seq", sequenceName="quality_measures_patient_entr_quality_measures_patient_entr_seq", allocationSize=1)
+	@SequenceGenerator(name ="quality_measures_patient_entr_quality_measures_patient_entr_seq", sequenceName="quality_measures_patient_entr_quality_measures_patient_entr_seq", allocationSize=1)
 	@Column(name="quality_measures_patient_entries_id")
 	private Integer qualityMeasuresPatientEntriesId;
 
@@ -63,6 +63,9 @@ public class QualityMeasuresPatientEntries {
 	@Column(name="quality_measures_patient_entries_measure_observation")
 	private Integer qualityMeasuresPatientEntriesMeasureObservation;
 
+	@Column(name="quality_measures_patient_entries_provider_id")
+	private Integer qualityMeasuresPatientEntriesProviderId;
+
 	public Integer getQualityMeasuresPatientEntriesId() {
 		return qualityMeasuresPatientEntriesId;
 	}
@@ -97,6 +100,15 @@ public class QualityMeasuresPatientEntries {
 	public void setQualityMeasuresPatientEntriesMeasureId(
 			String qualityMeasuresPatientEntriesMeasureId) {
 		this.qualityMeasuresPatientEntriesMeasureId = qualityMeasuresPatientEntriesMeasureId;
+	}
+
+	public Timestamp getQualityMeasuresPatientEntriesUpdatedOn() {
+		return qualityMeasuresPatientEntriesUpdatedOn;
+	}
+
+	public void setQualityMeasuresPatientEntriesUpdatedOn(
+			Timestamp qualityMeasuresPatientEntriesUpdatedOn) {
+		this.qualityMeasuresPatientEntriesUpdatedOn = qualityMeasuresPatientEntriesUpdatedOn;
 	}
 
 	public Integer getQualityMeasuresPatientEntriesIpp() {
@@ -180,12 +192,13 @@ public class QualityMeasuresPatientEntries {
 		this.qualityMeasuresPatientEntriesMeasureObservation = qualityMeasuresPatientEntriesMeasureObservation;
 	}
 
-	public Timestamp getQualityMeasuresPatientEntriesUpdatedOn() {
-		return qualityMeasuresPatientEntriesUpdatedOn;
+	public Integer getQualityMeasuresPatientEntriesProviderId() {
+		return qualityMeasuresPatientEntriesProviderId;
 	}
 
-	public void setQualityMeasuresPatientEntriesUpdatedOn(Timestamp qualityMeasuresPatientEntriesUpdatedOn) {
-		this.qualityMeasuresPatientEntriesUpdatedOn = qualityMeasuresPatientEntriesUpdatedOn;
+	public void setQualityMeasuresPatientEntriesProviderId(
+			Integer qualityMeasuresPatientEntriesProviderId) {
+		this.qualityMeasuresPatientEntriesProviderId = qualityMeasuresPatientEntriesProviderId;
 	}
 	
 }

@@ -41,11 +41,11 @@ public class QPPPerformanceController {
 	@RequestMapping(value = "/insertPatientEntries", method = RequestMethod.GET)
 	@ResponseBody
 	public void saveMeasureDetails(
-			@RequestParam(value="measureID", required=true) String measureID,
+			@RequestParam(value="userId", required=true) int userId,
 			@RequestParam(value="patientID", required=true) int patientID,
 			@RequestParam(value="measureStatus", required=true) List<MeasureStatus> measureStatus)
 	{
-		measureService.saveMeasureDetails(measureID, patientID, measureStatus);
+		measureService.saveMeasureDetails(userId, patientID, measureStatus);
 	}
 	
 	/**
@@ -82,8 +82,14 @@ public class QPPPerformanceController {
 		
 		String hub_url = "http://test.glaceemr.com/glacecds/ECQMServices/validateECQM";
 		
-		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+		Boolean isIndividual=measureService.checkGroupOrIndividual(2017);
 		
+		if(!isIndividual){
+			providerId=-1;
+			userId=-1;
+		}
+		
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 		if(providerInfo!=null){
 			
 			String[] measureIds = providerInfo.get(0).getMeasures().split(",");
@@ -93,10 +99,8 @@ public class QPPPerformanceController {
 			}
 			
 			HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedPath));
-			
 			finalResponse.setMeasureInfo(utils.getMeasureInfo());
-			
-			requestObj = measureService.getQDMRequestObject(patientID, userId, codeListForQDM);
+			requestObj = measureService.getQDMRequestObject(isIndividual,patientID, userId, codeListForQDM);
 
 			requestObj.setAccountId(accountId);
 			requestObj.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
@@ -122,6 +126,17 @@ public class QPPPerformanceController {
 			responseFromCentralServer.setMeasureStatus(measureStatus);
 			
 			finalResponse.setDataFromResponse(responseFromCentralServer);
+			
+			List<MeasureStatus> responseToSave = new ArrayList<MeasureStatus>();
+			
+			for(int i=0;i<measureIds.length;i++){
+				
+				measureStatus.get(measureIds[i]).setReportingYear(""+providerInfo.get(0).getMacraProviderConfigurationReportingYear());
+				responseToSave.add(measureStatus.get(measureIds[i]));
+				
+			}
+			
+			measureService.saveMeasureDetails(providerId, patientID, responseToSave);
 			
 		}else{
 			
@@ -150,11 +165,17 @@ public class QPPPerformanceController {
 		
 		List<EPMeasureBean> epMeasureStatus = new ArrayList<EPMeasureBean>();
 		
+		Boolean isGroup=measureService.checkGroupOrIndividual(2017);
+		if(isGroup){
+			providerId=-1;
+			userId=-1;
+		}
+		
 		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 		
 		if(providerInfo!=null){
 			
-			epMeasureStatus = measureService.getEPMeasuresResponseObject(patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
+			epMeasureStatus = measureService.getEPMeasuresResponseObject(isGroup,patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 			
 		}else{
 			

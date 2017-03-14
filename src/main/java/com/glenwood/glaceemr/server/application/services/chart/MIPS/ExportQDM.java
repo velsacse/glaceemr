@@ -83,6 +83,7 @@ import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PortalMessage;
 import com.glenwood.glaceemr.server.application.models.PortalMessage_;
 import com.glenwood.glaceemr.server.application.models.Prescription;
@@ -107,15 +108,15 @@ public class ExportQDM {
 
 	Patient patientObj = new Patient();
 	
-	public Patient getRequestQDM(PatientRegistrationRepository patientRepo, ProblemListRepository diagnosisRepo, int patientId, int providerId){
+	public Patient getRequestQDM(EntityManager em,PatientRegistrationRepository patientRepo, ProblemListRepository diagnosisRepo, int patientId, int providerId){
 		
-		getPatientInfoQDM(patientRepo, patientId);
+		getPatientInfoQDM(em,patientRepo, patientId);
 		
 		return patientObj;
 		
 	}
 	
-	public List<Procedure> getProcBasedOnCPT(EntityManager em,int patientID, int providerId,List<String> cptCodes){
+	public List<Procedure> getProcBasedOnCPT(EntityManager em,Boolean considerProvider,int patientID, int providerId,List<String> cptCodes){
 		if(cptCodes.size()==0){
 			cptCodes.add("000000");}
 		else if(cptCodes.toString()=="[]")
@@ -135,9 +136,20 @@ Root<Encounter> root = cq.from(Encounter.class);
 				root.get(Encounter_.encounterClosedDate),
 		};
 		cq.select(builder.construct(EncounterQDM.class,selections));
-		Predicate[] restrictions= new Predicate[] {
+		Predicate[] restrictions=null;
+		if(considerProvider)
+		restrictions= new Predicate[] {
+				builder.equal(root.get(Encounter_.encounter_service_doctor),providerId),
 				builder.equal(encounterChartJoin.get(Chart_.chartPatientid), patientID),
 				serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
+				
+				builder.equal(builder.function("DATE", Date.class, root.get(Encounter_.encounterCreatedDate)), builder.function("DATE", Date.class, chartServiceJoin.get(ServiceDetail_.serviceDetailDos))),
+		};
+		else
+			restrictions= new Predicate[] {
+				builder.equal(encounterChartJoin.get(Chart_.chartPatientid), patientID),
+				serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
+				
 				builder.equal(builder.function("DATE", Date.class, root.get(Encounter_.encounterCreatedDate)), builder.function("DATE", Date.class, chartServiceJoin.get(ServiceDetail_.serviceDetailDos))),
 		};
 		cq.where(restrictions);
@@ -162,7 +174,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 	public List<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter> getEncounterQDM(EntityManager em, boolean considerProvider,int patientID, int providerId, HashMap<String, String> encounterCodeList){
 		
 		List<String> cptCodes = new ArrayList<String>(Arrays.asList(encounterCodeList.get("CPT").toString().split(",")));
-		
+		if(cptCodes.size()==0)
+			cptCodes.add("000000");
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<EncounterQDM> cq = builder.createQuery(EncounterQDM.class);
 		
@@ -308,7 +321,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 
 	
 	
-	public List<MedicationOrder> getMedicationQDM(EntityManager em,String rxNormCodes,int patientId, int range) {
+	public List<MedicationOrder> getMedicationQDM(EntityManager em,Boolean considerProvider,int providerId,String rxNormCodes,int patientId, int range) {
 	       
         String [] codes=rxNormCodes.split(",");
         
@@ -327,6 +340,7 @@ Root<Encounter> root = cq.from(Encounter.class);
         Join<Prescription, MedStatus> prescStatusJoin=root.join(Prescription_.medstatus,JoinType.INNER);
         ndcNormJoin.on(ndcNormJoin.get(XrefGenproductSynRxnorm_.rxcui).in(codeList));
         
+        Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
         Predicate patId=builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
         Predicate status=root.get(Prescription_.docPrescStatus).in(1,2);
        
@@ -349,9 +363,15 @@ Root<Encounter> root = cq.from(Encounter.class);
             cal.add(Calendar.YEAR, range);
             Date startDate = cal.getTime();
             Predicate dateRange=builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate);
-            cq.where(builder.and(patId,status,dateRange));
+            if(considerProvider)
+            cq.where(builder.and(patId,status,dateRange,byProvider));
+            else
+            	cq.where(builder.and(patId,status,dateRange));
         }
         else{
+        	if(considerProvider)
+        	cq.where(builder.and(patId,status,byProvider));
+        	else
             cq.where(builder.and(patId,status));
         }
         
@@ -390,7 +410,7 @@ Root<Encounter> root = cq.from(Encounter.class);
         
     }
 	
-	public List<ActiveMedication> getActiveMedications(EntityManager em,String rxNormCodes,int patientId, int range) {
+	public List<ActiveMedication> getActiveMedications(EntityManager em,Boolean considerProvider,int providerId,String rxNormCodes,int patientId, int range) {
 
 		String [] codes=rxNormCodes.split(",");
 
@@ -408,7 +428,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Join<NdcPkgProduct, XrefGenproductSynRxnorm> ndcNormJoin=prescNdcJoin.join(NdcPkgProduct_.xrefGenproductSynRxnorm,JoinType.INNER);
 		Join<Prescription, MedStatus> prescStatusJoin=root.join(Prescription_.medstatus,JoinType.INNER);
 		ndcNormJoin.on(ndcNormJoin.get(XrefGenproductSynRxnorm_.rxcui).in(codeList));
-
+		
+		Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
 		Predicate patId=builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
 		Predicate status=root.get(Prescription_.docPrescStatus).in(1,2);
 		Predicate activeMed=builder.equal(root.get(Prescription_.docPrescIsActive), true);
@@ -431,10 +452,16 @@ Root<Encounter> root = cq.from(Encounter.class);
 			cal.add(Calendar.YEAR, range);
 			Date startDate = cal.getTime();
 			Predicate dateRange=builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate);
-			cq.where(builder.and(patId,status,dateRange,activeMed));
+			if(considerProvider)
+			cq.where(builder.and(patId,status,dateRange,activeMed,byProvider));
+			else
+			cq.where(builder.and(patId,status,dateRange,activeMed));	
 		}
 		else{
-			cq.where(builder.and(patId,status,activeMed));	
+			if(considerProvider)
+			cq.where(builder.and(patId,status,activeMed,byProvider));
+			else
+			cq.where(builder.and(patId,status,activeMed));
 		}
 
 		cq.distinct(true);
@@ -472,7 +499,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public List<InvestigationQDM> getInvestigationQDM(EntityManager em, int patientID, int providerId) {
+	public List<InvestigationQDM> getInvestigationQDM(EntityManager em,Boolean considerProvider, int patientID, int providerId) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<InvestigationQDM> cq = builder.createQuery(InvestigationQDM.class);
 		
@@ -494,15 +521,26 @@ Root<Encounter> root = cq.from(Encounter.class);
 		};
 		
 		cq.select(builder.construct(InvestigationQDM.class,selections));
-		
-		Predicate[] restrictions = new Predicate[] {
+		Predicate[] restrictions=null;
+		if(considerProvider){
+		restrictions = new Predicate[] {
+				builder.equal(EncLabJoin.get(Encounter_.encounter_service_doctor), providerId),
 				builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientID),
 				builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
 				builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
 				builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
 				hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
 		};
-		
+		}
+		else
+			restrictions = new Predicate[] {
+				builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientID),
+				builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
+				builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
+				builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
+				hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
+		};
+			
 		cq.where(restrictions);
 		
 		List<InvestigationQDM> procedureForLabs = new ArrayList<InvestigationQDM>();
@@ -556,7 +594,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 	}
 	
-public List<Intervention> setReferrals(List<ReferralQDM> obj){
+	public List<Intervention> setReferrals(List<ReferralQDM> obj){
 		
 		List<Intervention> interventionList=new ArrayList<Intervention>();
 		
@@ -567,10 +605,7 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 			interventionObj.setCode("306253008");
 			interventionObj.setCodeSystem("Referral to doctor (procedure)");
 			interventionObj.setCodeSystemOID("2.16.840.1.113883.6.96");
-			if(obj.get(i).getOrderedDate()!=null)
 			interventionObj.setStartDate(obj.get(i).getOrderedDate());
-			else
-			interventionObj.setStartDate(obj.get(i).getRefDate());
 			interventionObj.setEndDate(obj.get(i).getReviewedDate());
 			interventionObj.setId(obj.get(i).getRefId().toString());
 			
@@ -616,18 +651,24 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 	 * @param patientId
 	 */
 	
-	private void getPatientInfoQDM(PatientRegistrationRepository patientRepo, int patientId){
+	private void getPatientInfoQDM(EntityManager em,PatientRegistrationRepository patientRepo, int patientId){
 		
-		PatientRegistration patientDetail = patientRepo.findOne(patientId);
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
+		cq.multiselect(root.get(PatientRegistration_.patientRegistrationId),root.get(PatientRegistration_.patientRegistrationFirstName),root.get(PatientRegistration_.patientRegistrationLastName),root.get(PatientRegistration_.patientRegistrationDob),root.get(PatientRegistration_.patientRegistrationSex));
+		Predicate byPatient=builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId);
+		cq.where(byPatient);
+		List<Object[]> result = em.createQuery(cq).setMaxResults(1).getResultList();
+		patientObj.setPatientId(Integer.parseInt((result.get(0)[0].toString())));
+		System.out.println("patient name is............"+patientObj.getPatientId());
+		patientObj.setFirstName(result.get(0)[1].toString());
+		patientObj.setLastName(result.get(0)[2].toString());
+		patientObj.setDob((Date)result.get(0)[3]);
 		
-		patientObj.setPatientId(patientDetail.getPatientRegistrationId());
-		patientObj.setFirstName(patientDetail.getPatientRegistrationFirstName());
-		patientObj.setLastName(patientDetail.getPatientRegistrationLastName());
-		patientObj.setDob(patientDetail.getPatientRegistrationDob());
-		
-		if(patientDetail.getPatientRegistrationSex() == 2){
+		if((int)result.get(0)[4] == 2){
 			patientObj.setGender("F");
-		}else if(patientDetail.getPatientRegistrationSex() == 1){
+		}else if((int)result.get(0)[4] == 1){
 			patientObj.setGender("M");
 		}else{
 			patientObj.setGender("TG");
@@ -646,20 +687,23 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 	 */
 	
 	@SuppressWarnings("rawtypes")
-	public List<ReferralQDM> getReferrals(EntityManager em,Integer patientId) {
+	public List<ReferralQDM> getReferrals(EntityManager em,Boolean considerProvider,int providerId,Integer patientId) {
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<ReferralQDM> cq = builder.createQuery(ReferralQDM.class);
 		Root<H413> rooth413 = cq.from(H413.class);
 		Selection[] selections= new Selection[] {
 				rooth413.get(H413_.h413001).alias("Referral id"),
-				rooth413.get(H413_.h413004).alias("Referred Date"),
 				rooth413.get(H413_.referralOrderOn).alias("Ordered Date"),
 				rooth413.get(H413_.referralReviewedOn).alias("Reviewed On"),
 				rooth413.get(H413_.h413041).alias("Status")
 		};
 		cq.select(builder.construct(ReferralQDM.class,selections));
 		Predicate predicateByPatientId=builder.equal(rooth413.get(H413_.h413035),patientId);
+		Predicate byProvider=builder.equal(rooth413.get(H413_.referralOrderBy), providerId);
+		if(considerProvider)
+		cq.where(predicateByPatientId,byProvider);
+		else
 		cq.where(predicateByPatientId);
 		List<ReferralQDM> alertsResultList = em.createQuery(cq).getResultList();
 		return alertsResultList;
@@ -676,13 +720,14 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 	 * @return
 	 */
 	
-	public List<Immunization> getImmuDetails(EntityManager em,Integer patientId)
+	public List<Immunization> getImmuDetails(EntityManager em,Boolean considerProvider,int providerId,Integer patientId)
 	{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<ImmunizationDetailsBean> cq = builder.createQuery(ImmunizationDetailsBean.class);
 		
 		Root<LabDescription> rootlabDescription= cq.from(LabDescription.class);
 		Join<LabDescription, LabEntries> joinLabdescLabentries=rootlabDescription.join(LabDescription_.labEntriesTable,JoinType.INNER);
+		Join<LabEntries, Encounter> EncLabJoin = joinLabdescLabentries.join(LabEntries_.encounter, JoinType.INNER);
 		Join<LabEntries, Chart> joinLabentriesChart=joinLabdescLabentries.join(LabEntries_.chart,JoinType.INNER);
 		
 		Predicate predicateByPatientId=builder.equal(joinLabentriesChart.get(Chart_.chartPatientid),patientId);
@@ -698,8 +743,13 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 				));
 		Predicate predicateBytestStatus=builder.greaterThan(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),2);
 		Predicate predicateBytestStatus1=builder.notEqual(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),7);
+		Predicate byProvider=builder.equal(EncLabJoin.get(Encounter_.encounter_service_doctor), providerId);
 		
+		if(considerProvider)
+		cq.where(predicateBytestStatus,predicateBytestStatus1,byProvider);
+		else
 		cq.where(predicateBytestStatus,predicateBytestStatus1);
+		
 		cq.distinct(true);
 		
 		List<ImmunizationDetailsBean> immunizationDetails = em.createQuery(cq).getResultList();
@@ -912,32 +962,22 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 	 * 
 	 */
 	
-	public List<MedicationQDM> getMedicationsReviewed(EntityManager em,int patientId,Date date1,Date date2){
-	     
-		CriteriaBuilder builder1 = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq1 = builder1.createQuery(Object.class);
-		Root<Encounter> encounterRoot = cq1.from(Encounter.class);
-		Join<Encounter, Chart> encounterChartJoin1 = encounterRoot.join(Encounter_.chart,JoinType.INNER);
-		Predicate prediByPatientId=builder1.equal(encounterChartJoin1.get(Chart_.chartPatientid), patientId);
-		
-		encounterChartJoin1.on(prediByPatientId);
-		cq1.orderBy(builder1.desc(encounterRoot.get(Encounter_.encounterId)));
-		cq1.select(encounterRoot.get(Encounter_.encounterId));
-		
-		List<Object> currentEncounter=em.createQuery(cq1).setMaxResults(1).getResultList();
-        
+	public List<MedicationQDM> getMedicationsReviewed(EntityManager em,Boolean considerProvider,int providerId,int patientId,Date date1,Date date2){
+	      System.out.println("consider provider ................"+considerProvider);    
 		CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
         Root<Encounter> root = cq.from(Encounter.class);
-        Integer currentEncounterId=Integer.parseInt(currentEncounter.get(0).toString());
-        Predicate currentEncounterPredicate=builder.equal(root.get(Encounter_.encounterId),currentEncounterId);
         Join<Encounter, Chart> encChartJoin=root.join(Encounter_.chartTable,JoinType.INNER);
         
         encChartJoin.on(builder.equal(encChartJoin.get(Chart_.chartPatientid),patientId));
         Predicate date=builder.between(root.get(Encounter_.encounterDate), date1, date2);
+        Predicate byProvider=builder.equal(root.get(Encounter_.encounter_service_doctor), providerId);
         Predicate attest=builder.gt(builder.length(builder.trim(root.get(Encounter_.medicationAttestationStatus))), 0);
         cq.multiselect(root.get(Encounter_.encounterDate),root.get(Encounter_.medicationAttestationStatus));
-        cq.where(date,attest,currentEncounterPredicate);
+        if(considerProvider)
+        	cq.where(date,attest,byProvider);
+        else
+        cq.where(date,attest);
         
         List<Object[]> result=em.createQuery(cq).getResultList();
         List<MedicationQDM> attestList=new ArrayList<MedicationQDM>();
@@ -956,7 +996,7 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
     }
 	
 	@SuppressWarnings("rawtypes")
-	public List<ClinicalDataQDM> getClinicalDataQDM(EntityManager em,int patientId, String snomedCodes,String loincCodes,Boolean range, Date startDate, Date endDate)    {     
+	public List<ClinicalDataQDM> getClinicalDataQDM(EntityManager em,Boolean considerProvider,int providerId,int patientId, String snomedCodes,String loincCodes,Boolean range, Date startDate, Date endDate)    {     
 		
 		String []  codeListString=snomedCodes.split(",");
 		String [] loincCodeListString=loincCodes.split(",");
@@ -999,16 +1039,28 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 					root.get(PatientClinicalElements_.patientClinicalElementsValue).alias("patientResult")
 			};
 
-
-			Predicate[] restrictions = new Predicate[] {
+			Predicate[] restrictions=null;
+			if(considerProvider)
+			 restrictions = new Predicate[] {
+					builder.equal(EncElementJoin.get(Encounter_.encounter_service_doctor), providerId),
 					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
 					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),            
 					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),  
 					builder.or((clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).in(snomedCodeList)),(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).in(snomedCodeList))),  
 
 			};
+			else
+				restrictions = new Predicate[] {
+					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
+					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),            
+					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),  
+					builder.or((clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).in(snomedCodeList)),(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).in(snomedCodeList))),  
 
-			Predicate[] restrictionsWithDate = new Predicate[] {
+			};
+			Predicate[] restrictionsWithDate=null;
+			if(considerProvider)
+					restrictionsWithDate = new Predicate[] {
+					builder.equal(EncElementJoin.get(Encounter_.encounter_service_doctor), providerId),
 					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
 					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),              
 					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),      
@@ -1017,12 +1069,24 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 					builder.or((clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).in(snomedCodeList)),(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).in(snomedCodeList)))  
 
 			};
-
-			cqForSnomed.select(builder.construct(ClinicalDataQDM.class,selections));
-			if(range)
-				cqForSnomed.where(restrictionsWithDate);
 			else
+				restrictionsWithDate = new Predicate[] {
+					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
+					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),              
+					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),      
+					builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,EncElementJoin.get(Encounter_.encounterDate)),startDate),
+					builder.lessThanOrEqualTo(builder.function("DATE", Date.class,EncElementJoin.get(Encounter_.encounterDate)),endDate),                                                
+					builder.or((clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).in(snomedCodeList)),(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).in(snomedCodeList)))  
+
+			};
+				
+			cqForSnomed.select(builder.construct(ClinicalDataQDM.class,selections));
+			if(range){
+				cqForSnomed.where(restrictionsWithDate);
+			}
+			else{
 				cqForSnomed.where(restrictions);
+			}
 			cqForSnomed.distinct(true);
 			clinicalDataSNOMED = em.createQuery(cqForSnomed).getResultList();
 
@@ -1118,7 +1182,7 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 		return clinicaldataFinal;
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "serial" })
 	public List<QDM> getTobaccoDetails(EntityManager em,int patientId)    {      
 
 		List<ClinicalDataQDM> clinicalDataSNOMED = new ArrayList<ClinicalDataQDM>();
@@ -1143,7 +1207,6 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 		Predicate checkPatientId=builder.equal(root.get(PatientClinicalHistory_.patientClinicalHistoryPatientid),patientId);
 
 		Expression<String> rcode = builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).isNotNull(),clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed)).otherwise(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode));
-		Expression<String> rvalue = builder.<String>selectCase().when(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsDatatype).in("4","5"),clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName)).otherwise(root.get(PatientClinicalHistory_.patientClinicalHistoryValue));
 
 		Selection selections[]=new Selection[]{
 				root.get(PatientClinicalHistory_.patientClinicalHistoryPatientid).alias("patientId"),
@@ -1234,7 +1297,7 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 	 * @return
 	 */
 	
-	public String getEPrescribingDetails(Integer encounterId, EntityManager em) {
+	public String getEPrescribingDetails(Boolean isGroup,Integer encounterId, EntityManager em,int providerId) {
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
@@ -1243,10 +1306,11 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 		int ePrescStatus = -1, i = 0;
 		
 		int electronicallySentMedications = 0;
-		
+		Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
 		cq.multiselect(root.get(Prescription_.rxname).alias("Medication"),
 				builder.coalesce(root.get(Prescription_.docPrescIsEPrescSent),0).alias("IsSentElectronically")).where(builder.equal(root.get(Prescription_.docPrescIsActive), true),builder.equal(root.get(Prescription_.docPrescEncounterId), encounterId));
-		
+		if(!isGroup)
+			cq.where(byProvider);
 		List<Object[]> result=em.createQuery(cq).getResultList();
 		
 		for(i=0;i<result.size();i++){
@@ -1277,14 +1341,17 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 	 * @return
 	 */
 	
-	public boolean checkTransitionOfCareByEncId(int encounterId, EntityManager em){
+	public boolean checkTransitionOfCareByEncId(Boolean isGroup,int encounterId, EntityManager em,int providerId){
 	
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Boolean> cq = builder.createQuery(Boolean.class);
 		Root<Encounter> root = cq.from(Encounter.class);
 		
 		cq.select(builder.coalesce(root.get(Encounter_.transitionOfCare),false));
-		
+		if(!isGroup){
+			cq.where(builder.equal(root.get(Encounter_.encounterId), encounterId),builder.equal(root.get(Encounter_.encounter_service_doctor), providerId));
+		}
+		else
 		cq.where(builder.equal(root.get(Encounter_.encounterId), encounterId));
 		
 		cq.orderBy(builder.desc(root.get(Encounter_.encounterId)));
@@ -1303,7 +1370,7 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 	 * @return
 	 */
 	
-	public boolean getReconcilationStatusByEncId(int encounterId, EntityManager em){
+	public boolean getReconcilationStatusByEncId(Boolean isGroup,int encounterId, EntityManager em,int providerId){
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Integer> cq = builder.createQuery(Integer.class);
@@ -1312,7 +1379,9 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 		boolean isMedicationReconciled = false;
 		
 		cq.select(root.get(ReconciledMedication_.reconciledMedicationBy));
-		
+		if(!isGroup)
+		cq.where(builder.equal(root.get(ReconciledMedication_.reconciledMedicationEncounterid), encounterId),builder.equal(root.get(ReconciledMedication_.reconciledMedicationBy), providerId));
+		else
 		cq.where(builder.equal(root.get(ReconciledMedication_.reconciledMedicationEncounterid), encounterId));
 		
 		List<Integer> reconciledBy = em.createQuery(cq).getResultList();
@@ -1336,7 +1405,7 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 	 */
 	
 	@SuppressWarnings("rawtypes")
-	public String getReferralInfoExchangeByProvider(int providerId, int patientId, Date startDate, Date endDate, EntityManager em){
+	public String getReferralInfoExchangeByProvider(Boolean isGroup,int providerId, int patientId, Date startDate, Date endDate, EntityManager em){
 
 		String returnString = "";
 		
@@ -1354,9 +1423,10 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 			};
 			
 			cq.multiselect(selections);
-			
-			cq.where(builder.equal(root.get(H413_.referralById), providerId), 
-					builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate));
+			if(!isGroup)
+			cq.where(builder.equal(root.get(H413_.referralById), providerId),builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate));
+			else
+			cq.where(builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate));
 			
 			cq.groupBy(root.get(H413_.summaryCareRecordProvidedElectronic));
 			
@@ -1405,7 +1475,7 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 	 */
 	
 	@SuppressWarnings("rawtypes")
-	public String getSecureMessagingInfo(int providerId, int patientId, Date startDate, Date endDate, EntityManager em){
+	public String getSecureMessagingInfo(Boolean isGroup,int providerId, int patientId, Date startDate, Date endDate, EntityManager em){
 		
 		String returnString = "";
 		
@@ -1423,11 +1493,13 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 			};
 			
 			cq.multiselect(selections);
-			
+			if(!isGroup)
 			cq.where(builder.equal(root.get(PortalMessage_.messageBy), providerId), 
 					builder.between(builder.function("DATE", Date.class, root.get(PortalMessage_.mdate)), startDate, endDate),
 					builder.equal(root.get(PortalMessage_.messageTo), patientId));
-			
+			else
+				cq.where(builder.between(builder.function("DATE", Date.class, root.get(PortalMessage_.mdate)), startDate, endDate),
+						builder.equal(root.get(PortalMessage_.messageTo), patientId));
 			cq.groupBy(root.get(PortalMessage_.portalMessageHasreplied));
 			
 			List<Object[]> result = em.createQuery(cq).getResultList();
@@ -1475,7 +1547,7 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 	 */
 	
 	@SuppressWarnings("unused")
-	public String getPatientElectronicAccessInfo(int providerId, int patientId, Date startDate, Date endDate, EntityManager em){
+	public String getPatientElectronicAccessInfo(Boolean isGroup,int providerId, int patientId, Date startDate, Date endDate, EntityManager em){
 		
 		long patientCount = 0;
 		
@@ -1509,12 +1581,22 @@ public List<Intervention> setReferrals(List<ReferralQDM> obj){
 				builder.equal(root.get(Chart_.chartPatientid), patientId)
 				
 			};
-			
+			Predicate[] restriction=new Predicate[] {
+					
+					builder.equal(encounterTable.get(Encounter_.encounterType), 1),
+					encounterTable.get(Encounter_.encounterStatus).in(encounterStatus),
+					directEmailLogTable.get(DirectEmailLog_.directEmailLogActionType).in(directEmailAction),
+					builder.between(builder.function("DATE", Date.class, encounterTable.get(Encounter_.encounterDate)), startDate, endDate),
+					builder.equal(root.get(Chart_.chartPatientid), patientId)
+					
+				};
 			cq.multiselect(builder.function("to_char", String.class, directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn), builder.literal("MM/DD/YYYY HH:MI:SS am")));
 			
 			cq.orderBy(builder.desc(directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn)));
-			
+			if(!isGroup)
 			cq.where(restrictions);
+			else
+			cq.where(restriction);
 			
 			List<String> queryResult = em.createQuery(cq).getResultList();
 			
