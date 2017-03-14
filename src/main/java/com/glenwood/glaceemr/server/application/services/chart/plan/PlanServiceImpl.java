@@ -1171,7 +1171,7 @@ public class PlanServiceImpl implements PlanService{
 			 .orderBy(builder.asc(root.get(GeneralShortcut_.generalShortcutCode)));
 		
 		List<Data> result= em.createQuery(query).setMaxResults(limit).setFirstResult(offset).getResultList();
-		
+		long count= em.createQuery(query).getResultList().size();
 		/*List<Data> shortcutsArr= new ArrayList<Data>();
 		for(int i=0; i<result.size(); i++){
 			 JSONObject shortcutObj= new JSONObject();
@@ -1184,7 +1184,7 @@ public class PlanServiceImpl implements PlanService{
 		
 		ShortcutsData returnJSON= new ShortcutsData();
 		returnJSON.setData(result);
-		returnJSON.setPages(getNormalPageDetails(limit, offset, result.size()));
+		returnJSON.setPages(getNormalPageDetails(limit, offset, count));
 		returnJSON.setOffset(offset);
 		
 		return returnJSON;
@@ -1213,10 +1213,11 @@ public class PlanServiceImpl implements PlanService{
 			 .orderBy(builder.asc(root.get(GeneralShortcut_.generalShortcutCode)));
 		
 		List<Data> result= em.createQuery(query).setMaxResults(limit).setFirstResult(offset).getResultList();
+		long count= em.createQuery(query).getResultList().size();
 		
 		ShortcutsData returnJSON= new ShortcutsData();
 		returnJSON.setData(result);
-		returnJSON.setPages(getNormalPageDetails(limit, offset, result.size()));
+		returnJSON.setPages(getNormalPageDetails(limit, offset, count));
 		returnJSON.setOffset(offset);
 		
 		return returnJSON;
@@ -1426,11 +1427,11 @@ public class PlanServiceImpl implements PlanService{
 			Integer otherIns, Integer dxHandout, String dxCode, String codingsystem) {
 		
 		if(insStatus== true){
-			List<PatientAftercareData> list= getPatientAftercareData(patientId, encounterId, insId);
+			List<PatientAftercareData> list= getPatientAftercareData(patientId, encounterId, insId, dxCode, codingsystem);
 			deleteAftercareIns(list);
 			insertAftercareIns(insId, insName, insStatus, encounterId, patientId, otherIns, dxHandout, dxCode, codingsystem);
 		}else{
-			updateAftercareIns(insId, insName, insStatus, encounterId, patientId, otherIns, dxHandout, dxCode);
+			updateAftercareIns(insId, insName, insStatus, encounterId, patientId, otherIns, dxHandout, dxCode, codingsystem);
 		}
 		
 	}
@@ -1443,8 +1444,8 @@ public class PlanServiceImpl implements PlanService{
 	 * @return
 	 */
 	private List<PatientAftercareData> getPatientAftercareData(
-			Integer patientId, Integer encounterId, Integer insId) {
-		return patientAftercareDataRepository.findAll(PlanSpecification.getAftercareIns(patientId, encounterId, insId));
+			Integer patientId, Integer encounterId, Integer insId, String dxCode, String codingsystem) {
+		return patientAftercareDataRepository.findAll(PlanSpecification.getAftercareIns(patientId, encounterId, insId, dxCode.trim(), codingsystem));
 	}
 
 	/**
@@ -1468,10 +1469,9 @@ public class PlanServiceImpl implements PlanService{
 	 * @param dxCode
 	 */
 	private void updateAftercareIns(Integer insId, String insName, Boolean insStatus, Integer encounterId,
-			Integer patientId, Integer otherIns, Integer dxHandout, String dxCode) {
+			Integer patientId, Integer otherIns, Integer dxHandout, String dxCode, String codingSystem) {
 		
-		List<PatientAftercareData> list= getPatientAftercareData(patientId, encounterId, insId);
-		
+		List<PatientAftercareData> list= getPatientAftercareData(patientId, encounterId, insId, dxCode, codingSystem);
 		for(int i=0; i<list.size(); i++){
 			PatientAftercareData entity= list.get(i);
 			entity.setPatientAftercareDataStatus(insStatus);
@@ -1501,13 +1501,14 @@ public class PlanServiceImpl implements PlanService{
 			deleteAftercareInsMapping(insId, dxCode, 3);
 			AftercareInsMapping entity= new AftercareInsMapping();
 			entity.setAftercareInsMappingInsId(insId);
-			entity.setAftercareInsMappingCode(dxCode);
+			entity.setAftercareInsMappingCode(dxCode.trim());
 			entity.setAftercareInsMappingCodingSystem(codingsystem);
 			entity.setAftercareInsMappingInsType(3);			
 			aftercareInsMappingRepository.save(entity);
-			otherIns= 0;
+//			otherIns= 0;
 		}
 		
+//		deletePatientAftercareData(patientId, encounterId, insId, dxCode, codingsystem);
 		PatientAftercareData entity= new PatientAftercareData();
 		entity.setPatientAftercareDataId(maxId);
 		entity.setPatientAftercareDataPatientId(patientId);
@@ -1517,7 +1518,25 @@ public class PlanServiceImpl implements PlanService{
 		entity.setPatientAftercareDataName(insName);
 		entity.setPatientAftercareDataStatus(insStatus);
 		entity.setPatientAftercareDataCategory("FRMMED");
-		patientAftercareDataRepository.save(entity);
+		if(!dxCode.isEmpty())
+			entity.setPatientAftercareDataDxcode(dxCode.trim());
+		if(!codingsystem.isEmpty())
+			entity.setPatientAftercareDataDxcodesystem(codingsystem.trim());
+		patientAftercareDataRepository.saveAndFlush(entity);
+	}
+
+	/**
+	 * Deleting duplicate patient after care data
+	 * @param patientId
+	 * @param encounterId
+	 * @param insId
+	 * @param dxCode
+	 * @param codingsystem
+	 */
+	private void deletePatientAftercareData(Integer patientId,
+			Integer encounterId, Integer insId, String dxCode,
+			String codingsystem) {
+		patientAftercareDataRepository.deleteInBatch(getPatientAftercareData(patientId, encounterId, insId, dxCode, codingsystem));
 	}
 
 	/**
@@ -1552,7 +1571,7 @@ public class PlanServiceImpl implements PlanService{
 		Root<PatientAftercareData> root= query.from(PatientAftercareData.class);
 		
 		query.select(builder.coalesce(builder.max(root.get(PatientAftercareData_.patientAftercareDataId)),0));
-		return em.createQuery(query).getSingleResult();
+		return em.createQuery(query).getSingleResult()+1;
 	}
 
 	@Override

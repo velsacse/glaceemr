@@ -80,7 +80,10 @@ public class ImportDataController {
 			@RequestParam(value="encounterId") Integer encounterId,
 			@RequestParam(value="templateId") Integer templateId,
 			@RequestParam(value="tabId") Integer tabId,
-			@RequestParam(value="prevEncounterId") Integer prevEncounterId) throws Exception{
+			@RequestParam(value="prevEncounterId") Integer prevEncounterId,
+			@RequestParam(value="dxSpecific", required=false, defaultValue="f") String dxSpecific,
+			@RequestParam(value="dxCode", required=false, defaultValue="") String dxCode,
+			@RequestParam(value="userId", required=false, defaultValue="-1") Integer userId) throws Exception{
 
 		try{
 			patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
@@ -89,11 +92,12 @@ public class ImportDataController {
 			templateId=Integer.parseInt(Optional.fromNullable(templateId+"").or("-1"));
 			tabId=Integer.parseInt(Optional.fromNullable(tabId+"").or("-1"));
 			prevEncounterId=Integer.parseInt(Optional.fromNullable(prevEncounterId+"").or("-1"));
-			importDataService.importData(patientId,encounterId,templateId,chartId,tabId,prevEncounterId);
-			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Imported data from previous encounter", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId="+encounterId+"|templateId="+templateId+"|tabId="+tabId+"|prevEncounterId="+prevEncounterId, LogUserType.USER_LOGIN, "", "");
+			userId=Integer.parseInt(Optional.fromNullable(userId+"").or("-1"));
+			importDataService.importData(patientId,encounterId,templateId,chartId,tabId,prevEncounterId,dxSpecific,dxCode,userId);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.CREATE, 1, Log_Outcome.SUCCESS, "Imported data from previous encounter", userId, request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId="+encounterId+"|templateId="+templateId+"|tabId="+tabId+"|prevEncounterId="+prevEncounterId, LogUserType.USER_LOGIN, "", "");
 		}catch(Exception e){
 			e.printStackTrace();
-			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.CREATE, 1, Log_Outcome.EXCEPTION, "Imported data from previous encounter", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId="+encounterId+"|templateId="+templateId+"|tabId="+tabId+"|prevEncounterId="+prevEncounterId, LogUserType.USER_LOGIN, "", "");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.CREATE, 1, Log_Outcome.EXCEPTION, "Imported data from previous encounter", userId, request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId="+encounterId+"|templateId="+templateId+"|tabId="+tabId+"|prevEncounterId="+prevEncounterId, LogUserType.USER_LOGIN, "", "");
 		}
 	}
 

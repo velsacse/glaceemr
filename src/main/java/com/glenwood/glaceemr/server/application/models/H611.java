@@ -2,6 +2,8 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,6 +34,35 @@ public class H611 implements Serializable{
 		this.h611015= h611015;
 		this.h611016= h611016;
 		this.h611CodingSystemid= h611CodingSystemid;
+	}
+	
+	public H611(Integer h611001, Integer h611002, Integer h611003,
+			Date h611004, String h611005, String h611006, String h611007,
+			Boolean h611008, Integer h555555, Integer h611009, Integer h611010,
+			Date h611011, Integer h611012, Date h611013,
+			Integer h611014, String h611015, Integer h611016,
+			String h611CodingSystemid, String assessmentDxcodesystem,
+			String planNotes) {
+		this.h611001= h611001;
+		this.h611002= h611002;
+		this.h611003= h611003;
+		this.h611004= h611004!=null? new Timestamp(h611004.getTime()): null;
+		this.h611005= h611005;
+		this.h611006= h611006;
+		this.h611007= h611007;
+		this.h611008= h611008;
+		this.h555555= h555555;
+		this.h611009= h611009;
+		this.h611010= h611010;
+		this.h611011= h611011!=null? new Timestamp(h611011.getTime()): null;
+		this.h611012= h611012;
+		this.h611013= h611013!=null? new Timestamp(h611013.getTime()): null;
+		this.h611014= h611014;
+		this.h611015= h611015;
+		this.h611016= h611016;
+		this.h611CodingSystemid= h611CodingSystemid;
+		this.assessmentDxcodesystem= assessmentDxcodesystem;
+		this.planNotes= planNotes;
 	}
 	
 	@Id
