@@ -3,18 +3,24 @@ package com.glenwood.glaceemr.server.application.Bean;
 import java.util.Date;
 
 public class InvestigationQDM {
-
+	int labEntriesStatus;
+	int labEntriesConfirmTestStatus;
+	Integer labEntriesTestdetailId;
 	String code;
 	String codeDescription;
 	Integer status;
 	Integer companyId;
 	Date createdOn;
 	Date performeOn;
-
-	public InvestigationQDM(String code, String codeDescription, Integer status, Integer companyId, Date createdOn, Date performeOn) {
+	String resultValue;
+	public InvestigationQDM(Integer labEntriesStatus,Integer labEntriesConfirmTestStatus,Integer labEntriesTestdetailId,String code, String codeDescription, Integer status, Integer companyId, Date createdOn, Date performeOn) {
 		
 		super();
+		if(labEntriesStatus != null)
+			this.labEntriesStatus=labEntriesStatus;
 		
+		this.labEntriesConfirmTestStatus=labEntriesConfirmTestStatus;
+		this.labEntriesTestdetailId=labEntriesTestdetailId;
 		this.code = code;
 		this.codeDescription = codeDescription;
 		this.status = status;
@@ -27,6 +33,54 @@ public class InvestigationQDM {
 		
 	}
 	
+public InvestigationQDM(String resultValue,String code, String codeDescription, Integer status, Integer companyId, Date createdOn, Date performeOn) {
+		
+		super();
+		this.resultValue=resultValue;
+		this.code = code;
+		this.codeDescription = codeDescription;
+		this.status = status;
+		this.createdOn = createdOn;
+		this.companyId = companyId;
+		
+		if(performeOn!=null){
+			this.performeOn = performeOn;
+		}
+		
+	}
+
+	public int getLabEntriesStatus() {
+	return labEntriesStatus;
+}
+
+public void setLabEntriesStatus(int labEntriesStatus) {
+	this.labEntriesStatus = labEntriesStatus;
+}
+
+public int getLabEntriesConfirmTestStatus() {
+	return labEntriesConfirmTestStatus;
+}
+
+public void setLabEntriesConfirmTestStatus(int labEntriesConfirmTestStatus) {
+	this.labEntriesConfirmTestStatus = labEntriesConfirmTestStatus;
+}
+
+	public String getResultValue() {
+		return resultValue;
+	}
+
+	public void setResultValue(String resultValue) {
+		this.resultValue = resultValue;
+	}
+
+	public Integer getLabEntriesTestdetailId() {
+		return labEntriesTestdetailId;
+	}
+
+	public void setLabEntriesTestdetailId(Integer labEntriesTestdetailId) {
+		this.labEntriesTestdetailId = labEntriesTestdetailId;
+	}
+
 	public Integer getCompanyId() {
 		return companyId;
 	}

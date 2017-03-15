@@ -26,6 +26,7 @@ import com.glenwood.glaceemr.server.application.Bean.ImmunizationQDM;
 import com.glenwood.glaceemr.server.application.Bean.InvestigationQDM;
 import com.glenwood.glaceemr.server.application.Bean.MedicationOrderQDM;
 import com.glenwood.glaceemr.server.application.Bean.MedicationQDM;
+import com.glenwood.glaceemr.server.application.Bean.ParameterDetails;
 import com.glenwood.glaceemr.server.application.Bean.ReferralQDM;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.ActiveMedication;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Communication;
@@ -510,9 +511,13 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Join<LabEntries, LabDescription> labEntriesDescJoin = root.join(LabEntries_.labDescriptionTable, JoinType.INNER);
 		Join<LabDescription, Hl7ExternalTestmapping> labDescExtrnTestMappingJoin = labEntriesDescJoin.join(LabDescription_.hl7ExternalTestmappingTable, JoinType.INNER);
 		Join<Hl7ExternalTestmapping, Hl7ExternalTest> hl7ExtTestMappingJoin = labDescExtrnTestMappingJoin.join(Hl7ExternalTestmapping_.hl7ExternalTestTable, JoinType.INNER);
+		Expression<String> labCode = builder.<String>selectCase().when(labEntriesDescJoin.get(LabDescription_.labDescriptionLoinc).isNotNull(),labEntriesDescJoin.get(LabDescription_.labDescriptionLoinc)).otherwise(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestCode));
 		
 		Selection[] selections= new Selection[] {
-				hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestCode),
+				root.get(LabEntries_.labEntriesStatus),
+				root.get(LabEntries_.labEntriesConfirmTestStatus),
+				root.get(LabEntries_.labEntriesTestdetailId),
+				labCode,
 				labEntriesDescJoin.get(LabDescription_.labDescriptionTestDesc),
 				root.get(LabEntries_.labEntriesTestStatus),
 				hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid),
@@ -523,28 +528,28 @@ Root<Encounter> root = cq.from(Encounter.class);
 		cq.select(builder.construct(InvestigationQDM.class,selections));
 		Predicate[] restrictions=null;
 		if(considerProvider){
-		restrictions = new Predicate[] {
-				builder.equal(EncLabJoin.get(Encounter_.encounter_service_doctor), providerId),
-				builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientID),
-				builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
-				builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
-				builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
-				hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
-		};
-		}
-		else
 			restrictions = new Predicate[] {
-				builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientID),
-				builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
-				builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
-				builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
-				hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
-		};
-			
+					builder.equal(EncLabJoin.get(Encounter_.encounter_service_doctor), providerId),
+					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientID),
+					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
+					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
+					builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
+					hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
+			};
+			}
+			else
+				restrictions = new Predicate[] {
+					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientID),
+					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
+					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
+					builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
+					hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
+			};
+		
 		cq.where(restrictions);
 		
 		List<InvestigationQDM> procedureForLabs = new ArrayList<InvestigationQDM>();
-
+		
 		try{
 			
 			procedureForLabs = em.createQuery(cq).getResultList();
@@ -552,10 +557,73 @@ Root<Encounter> root = cq.from(Encounter.class);
 		}catch(Exception e){
 			e.printStackTrace();			
 		}
-		return procedureForLabs;
+
+		List<Integer> labEntriesTestDetailId=new ArrayList<Integer>();
+		labEntriesTestDetailId.add(000000);
+		for(int i=0;i<procedureForLabs.size();i++){
+			labEntriesTestDetailId.add(procedureForLabs.get(i).getLabEntriesTestdetailId());
+		}
+		CriteriaBuilder builder1 = em.getCriteriaBuilder();
+		CriteriaQuery<ParameterDetails> cq1 = builder1.createQuery(ParameterDetails.class);
 		
+		Root<LabEntriesParameter> root1 = cq1.from(LabEntriesParameter.class);
+		Predicate byIsActive=builder.equal(root1.get(LabEntriesParameter_.labEntriesParameterIsactive), true);
+		Join<LabEntriesParameter, LabParameters> joinLabentriesparameterLabparameter = root1.join(LabEntriesParameter_.labParametersTable, JoinType.INNER);
+		Predicate byIsActive1=builder.equal(joinLabentriesparameterLabparameter.get(LabParameters_.labParametersIsactive), true);
+		joinLabentriesparameterLabparameter.on(byIsActive1);
+		Join<LabParameters, LabParameterCode> joinLabparametersLabparametercode=joinLabentriesparameterLabparameter.join(LabParameters_.labParamCode, JoinType.INNER);
+		Selection[] selection= new Selection[] {
+				root1.get(LabEntriesParameter_.labEntriesParameterTestdetailid),
+				joinLabparametersLabparametercode.get(LabParameterCode_.labParameterCodeValue),
+				root1.get(LabEntriesParameter_.labEntriesParameterValue)
+		};
+		cq1.select(builder1.construct(ParameterDetails.class,selection));
+		Predicate byCode=builder1.equal(joinLabparametersLabparametercode.get(LabParameterCode_.labParameterCodeSystem), builder1.literal("LOINC"));
+		joinLabparametersLabparametercode.on(byCode);
+		Predicate predicateForParameters=root1.get(LabEntriesParameter_.labEntriesParameterTestdetailid).in(labEntriesTestDetailId);
+		cq1.where(byIsActive,predicateForParameters);
+		List<ParameterDetails> parameterDetails=em.createQuery(cq1).getResultList();
+		List<InvestigationQDM> completeInvestigationDetails=new ArrayList<InvestigationQDM>();
+		String code="";
+		String codeDescription;
+		Integer status;
+		Integer companyId;
+		Date createdOn;
+		Date performeOn;
+		String resultValue;
+		InvestigationQDM investigationObj=null;
+		for(int i=0;i<procedureForLabs.size();i++){
+			for(int j=0;j<parameterDetails.size();j++){
+					
+					if(procedureForLabs.get(i).getLabEntriesTestdetailId()==parameterDetails.get(j).getLab_entries_parameter_testdetailid()){
+					if(parameterDetails.get(j).getLab_parameter_code_value()!=null)
+					code=parameterDetails.get(j).getLab_parameter_code_value();
+					}
+					else
+					code=procedureForLabs.get(i).getCode();
+					codeDescription=procedureForLabs.get(i).getCodeDescription();
+					status=procedureForLabs.get(i).getStatus();
+					companyId=procedureForLabs.get(i).getCompanyId();
+					createdOn=procedureForLabs.get(i).getCreatedOn();
+					performeOn=procedureForLabs.get(i).getPerformeOn();
+					if(procedureForLabs.get(i).getLabEntriesConfirmTestStatus()!=0)
+					resultValue=Integer.toString(procedureForLabs.get(i).getLabEntriesConfirmTestStatus());
+					else
+					resultValue=Integer.toString(procedureForLabs.get(i).getLabEntriesStatus());
+					if(procedureForLabs.get(i).getLabEntriesTestdetailId()==parameterDetails.get(j).getLab_entries_parameter_testdetailid())
+					resultValue=parameterDetails.get(j).getLab_entries_parameter_value();
+					investigationObj=new InvestigationQDM(resultValue, code, codeDescription, status, companyId, createdOn, performeOn);
+					
+					
+				
+				
+			}
+			completeInvestigationDetails.add(investigationObj);
+			
+		}
+		
+		return completeInvestigationDetails;
 	}
-	
 	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -661,7 +729,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 		cq.where(byPatient);
 		List<Object[]> result = em.createQuery(cq).setMaxResults(1).getResultList();
 		patientObj.setPatientId(Integer.parseInt((result.get(0)[0].toString())));
-		System.out.println("patient name is............"+patientObj.getPatientId());
 		patientObj.setFirstName(result.get(0)[1].toString());
 		patientObj.setLastName(result.get(0)[2].toString());
 		patientObj.setDob((Date)result.get(0)[3]);
@@ -963,7 +1030,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 	 */
 	
 	public List<MedicationQDM> getMedicationsReviewed(EntityManager em,Boolean considerProvider,int providerId,int patientId,Date date1,Date date2){
-	      System.out.println("consider provider ................"+considerProvider);    
 		CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
         Root<Encounter> root = cq.from(Encounter.class);

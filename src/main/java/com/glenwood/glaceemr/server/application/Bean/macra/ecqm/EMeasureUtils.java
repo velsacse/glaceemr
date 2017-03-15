@@ -415,7 +415,7 @@ public class EMeasureUtils {
 			if(codeList.contains(eachObj.getCode())){
 				
 				labTestObj.setCode(eachObj.getCode());
-				
+				labTestObj.setResultValue(eachObj.getResultValue());
 				if(eachObj.getCompanyId() == 54){
 					labTestObj.setCodeSystemOID("2.16.840.1.113883.6.96");
 				}else if(eachObj.getCompanyId() == 51){
@@ -466,7 +466,7 @@ public class EMeasureUtils {
 			if(codeList.contains(eachObj.getCode())){
 				
 				diagnosticStudyObj.setCode(eachObj.getCode());
-				
+				diagnosticStudyObj.setResultValue(eachObj.getResultValue());
 				if(eachObj.getCompanyId() == 54){
 					diagnosticStudyObj.setCodeSystemOID("2.16.840.1.113883.6.96");
 				}else if(eachObj.getCompanyId() == 51){
@@ -520,7 +520,7 @@ public class EMeasureUtils {
 			if(codeList.contains(eachObj.getCode())){
 				
 				interventionObj.setCode(eachObj.getCode());
-				
+				interventionObj.setCode(eachObj.getResultValue());
 				if(eachObj.getCompanyId() == 54){
 					interventionObj.setCodeSystemOID("2.16.840.1.113883.6.96");
 				}else if(eachObj.getCompanyId() == 51){
@@ -570,7 +570,7 @@ public class EMeasureUtils {
 			if(codeList.contains(eachObj.getCode())){
 
 				procedureObj.setCode(eachObj.getCode());
-
+				procedureObj.setResultValue(eachObj.getResultValue());
 				if(eachObj.getCompanyId() == 54){
 					procedureObj.setCodeSystemOID("2.16.840.1.113883.6.96");
 				}else if(eachObj.getCompanyId() == 51){
