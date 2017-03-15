@@ -166,7 +166,8 @@ public class QPPPerformanceController {
 		List<EPMeasureBean> epMeasureStatus = new ArrayList<EPMeasureBean>();
 		
 		Boolean isGroup=measureService.checkGroupOrIndividual(2017);
-		if(isGroup){
+		
+		if(!isGroup){
 			providerId=-1;
 			userId=-1;
 		}

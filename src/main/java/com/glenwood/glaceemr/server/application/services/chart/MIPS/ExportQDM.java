@@ -1379,7 +1379,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
 		cq.multiselect(root.get(Prescription_.rxname).alias("Medication"),
 				builder.coalesce(root.get(Prescription_.docPrescIsEPrescSent),0).alias("IsSentElectronically")).where(builder.equal(root.get(Prescription_.docPrescIsActive), true),builder.equal(root.get(Prescription_.docPrescEncounterId), encounterId));
-		if(!isGroup)
+		if(isGroup)
 			cq.where(byProvider);
 		List<Object[]> result=em.createQuery(cq).getResultList();
 		
@@ -1418,7 +1418,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Root<Encounter> root = cq.from(Encounter.class);
 		
 		cq.select(builder.coalesce(root.get(Encounter_.transitionOfCare),false));
-		if(!isGroup){
+		if(isGroup){
 			cq.where(builder.equal(root.get(Encounter_.encounterId), encounterId),builder.equal(root.get(Encounter_.encounter_service_doctor), providerId));
 		}
 		else
@@ -1493,7 +1493,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			};
 			
 			cq.multiselect(selections);
-			if(!isGroup)
+			if(isGroup)
 			cq.where(builder.equal(root.get(H413_.referralById), providerId),builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate));
 			else
 			cq.where(builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate));
@@ -1563,7 +1563,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			};
 			
 			cq.multiselect(selections);
-			if(!isGroup)
+			if(isGroup)
 			cq.where(builder.equal(root.get(PortalMessage_.messageBy), providerId), 
 					builder.between(builder.function("DATE", Date.class, root.get(PortalMessage_.mdate)), startDate, endDate),
 					builder.equal(root.get(PortalMessage_.messageTo), patientId));
@@ -1663,7 +1663,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			cq.multiselect(builder.function("to_char", String.class, directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn), builder.literal("MM/DD/YYYY HH:MI:SS am")));
 			
 			cq.orderBy(builder.desc(directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn)));
-			if(!isGroup)
+			if(isGroup)
 			cq.where(restrictions);
 			else
 			cq.where(restriction);
