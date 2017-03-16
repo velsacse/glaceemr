@@ -18,8 +18,9 @@ public class InvestigationQDM {
 		super();
 		if(labEntriesStatus != null)
 			this.labEntriesStatus=labEntriesStatus;
-		
+		if(labEntriesConfirmTestStatus != null)
 		this.labEntriesConfirmTestStatus=labEntriesConfirmTestStatus;
+		
 		this.labEntriesTestdetailId=labEntriesTestdetailId;
 		this.code = code;
 		this.codeDescription = codeDescription;
