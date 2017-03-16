@@ -2,12 +2,44 @@ package com.glenwood.glaceemr.server.application.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "patient_aftercare_data")
 public class PatientAftercareData {
+
+	public PatientAftercareData(){
+		super();
+	}
+	
+	public PatientAftercareData(Integer patientAftercareDataId,
+			Integer patientAftercareDataPatientId,
+			Integer patientAftercareDataEncounterId,
+			Integer patientAftercareDataAftercareId,
+			Integer patientAftercareDataUnknown1,
+			String patientAftercareDataName, Integer patientAftercareDataDirty,
+			Boolean patientAftercareDataStatus, String patientAftercareDataUrl,
+			String patientAftercareDataCategory,
+			String patientAftercareDataDxcode,
+			String patientAftercareDataDxcodesystem) {
+		super();
+		this.patientAftercareDataId = patientAftercareDataId;
+		this.patientAftercareDataPatientId = patientAftercareDataPatientId;
+		this.patientAftercareDataEncounterId = patientAftercareDataEncounterId;
+		this.patientAftercareDataAftercareId = patientAftercareDataAftercareId;
+		this.patientAftercareDataUnknown1 = patientAftercareDataUnknown1;
+		this.patientAftercareDataName = patientAftercareDataName;
+		this.patientAftercareDataDirty = patientAftercareDataDirty;
+		this.patientAftercareDataStatus = patientAftercareDataStatus;
+		this.patientAftercareDataUrl = patientAftercareDataUrl;
+		this.patientAftercareDataCategory = patientAftercareDataCategory;
+		this.patientAftercareDataDxcode = patientAftercareDataDxcode;
+		this.patientAftercareDataDxcodesystem = patientAftercareDataDxcodesystem;
+	}
 
 	@Id
 	@Column(name="patient_aftercare_data_id")
@@ -39,6 +71,24 @@ public class PatientAftercareData {
 
 	@Column(name="patient_aftercare_data_category")
 	private String patientAftercareDataCategory;
+
+	@Column(name="patient_aftercare_data_dxcode")
+	private String patientAftercareDataDxcode;
+	
+	@Column(name="patient_aftercare_data_dxcodesystem")
+	private String patientAftercareDataDxcodesystem;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="patient_aftercare_data_aftercare_id", referencedColumnName="aftercare_ins_id",insertable=false,updatable=false)
+	AftercareIns aftercareIns;
+	
+	public AftercareIns getAftercareIns() {
+		return aftercareIns;
+	}
+
+	public void setAftercareIns(AftercareIns aftercareIns) {
+		this.aftercareIns = aftercareIns;
+	}
 
 	public Integer getPatientAftercareDataId() {
 		return patientAftercareDataId;
@@ -122,5 +172,21 @@ public class PatientAftercareData {
 	public void setPatientAftercareDataCategory(String patientAftercareDataCategory) {
 		this.patientAftercareDataCategory = patientAftercareDataCategory;
 	}
-	
+
+	public String getPatientAftercareDataDxcode() {
+		return patientAftercareDataDxcode;
+	}
+
+	public void setPatientAftercareDataDxcode(String patientAftercareDataDxcode) {
+		this.patientAftercareDataDxcode = patientAftercareDataDxcode;
+	}
+
+	public String getPatientAftercareDataDxcodesystem() {
+		return patientAftercareDataDxcodesystem;
+	}
+
+	public void setPatientAftercareDataDxcodesystem(
+			String patientAftercareDataDxcodesystem) {
+		this.patientAftercareDataDxcodesystem = patientAftercareDataDxcodesystem;
+	}
 }

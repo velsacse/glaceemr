@@ -237,7 +237,7 @@ public class PlanController {
 		return emrResponseBean;
 	}
 	
-	@RequestMapping(value="/updateAftercareIns", method= RequestMethod.GET)
+	@RequestMapping(value="/updateAftercareIns", method= RequestMethod.POST)
 	public EMRResponseBean updateAftercareIns(
 		@RequestParam(value="insId", defaultValue="-1", required=true) Integer insId,
 		@RequestParam(value="insName", defaultValue="", required=true) String insName,

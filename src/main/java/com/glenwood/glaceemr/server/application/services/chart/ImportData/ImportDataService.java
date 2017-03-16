@@ -4,6 +4,8 @@ public interface ImportDataService {
 	
 	String getImportEncList(Integer patientId, Integer encounterId);
 
-	void importData(Integer patientId, Integer encounterId,Integer templateId, Integer chartId, Integer tabId,Integer prevEncounterId);
+	void importData(Integer patientId, Integer encounterId, Integer templateId,
+			Integer chartId, Integer tabId, Integer prevEncounterId,
+			String dxSpecific, String dxCode, Integer userId);
 	
 }

@@ -100,9 +100,9 @@ public class PastEncountersServiceImpl implements PastEncountersService{
 			Object[] resultRow= result.get(i);
 			int encounterId= Integer.parseInt(resultRow[0].toString());
 			encounter.put("encounterId", encounterId);
-			encounter.put("encounterCC", resultRow[1]);
+			encounter.put("encounterCC", resultRow[1]!=null? resultRow[1].toString(): "");
 			encounter.put("encounterDate", resultRow[2]);
-			encounter.put("serviceDoctor", resultRow[3]);
+			encounter.put("serviceDoctor", resultRow[3]!=null? resultRow[3].toString(): "");
 			JSONArray templateList= new JSONArray();
 			for(int j=i; j<result.size(); j++){				
 				Object[] row= result.get(j);
@@ -110,7 +110,7 @@ public class PastEncountersServiceImpl implements PastEncountersService{
 				if(encounterId== nxtEncId){
 					if(row[8]!=null){
 						JSONObject template= new JSONObject();
-						template.put("templatename", row[4]);
+						template.put("templatename", row[4]!=null? row[4]: "");
 						template.put("formId", row[5]);
 						template.put("templateId", row[6]);
 						template.put("isSigned", row[7]);
