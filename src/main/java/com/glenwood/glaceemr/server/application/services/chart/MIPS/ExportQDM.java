@@ -173,7 +173,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 	
 	@SuppressWarnings("rawtypes")
 	public List<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter> getEncounterQDM(EntityManager em, boolean considerProvider,int patientID, int providerId, HashMap<String, String> encounterCodeList){
-		
 		List<String> cptCodes = new ArrayList<String>(Arrays.asList(encounterCodeList.get("CPT").toString().split(",")));
 		if(cptCodes.size()==0)
 			cptCodes.add("000000");
@@ -264,6 +263,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
 				encObject.setCode("99213");
 				encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
+				if(encounterObj1.size()!=0)
 				encObject.setStartDate(encounterObj1.get(0).getStartDate());
 				encounterQDM.add(encObject);
 			}
@@ -1338,7 +1338,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	public Integer getMaxEncounterIdByPatient(int patientId, EntityManager em){
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Integer> cq = builder.createQuery(Integer.class);
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
 		Root<Encounter> root = cq.from(Encounter.class);
 		
 		Join<Encounter, Chart> encounterChartJoin = root.join(Encounter_.chart,JoinType.INNER);
@@ -1352,7 +1352,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		cq.orderBy(builder.desc(root.get(Encounter_.encounterId)));
 		
-		Integer maxEncId = em.createQuery(cq).getResultList().get(0);
+		List<Object> result = em.createQuery(cq).setMaxResults(1).getResultList();
+		Integer maxEncId=0;
+		if(result.size()!=0)
+			maxEncId=Integer.parseInt(result.get(0).toString());
 		
 		return maxEncId;
 		
@@ -1414,7 +1417,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	public boolean checkTransitionOfCareByEncId(Boolean isGroup,int encounterId, EntityManager em,int providerId){
 	
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Boolean> cq = builder.createQuery(Boolean.class);
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
 		Root<Encounter> root = cq.from(Encounter.class);
 		
 		cq.select(builder.coalesce(root.get(Encounter_.transitionOfCare),false));
@@ -1425,9 +1428,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 		cq.where(builder.equal(root.get(Encounter_.encounterId), encounterId));
 		
 		cq.orderBy(builder.desc(root.get(Encounter_.encounterId)));
-		
-		Boolean isTransitionOfCareChecked = em.createQuery(cq).getResultList().get(0);
-		
+		Boolean isTransitionOfCareChecked=false;
+		List<Object> result= em.createQuery(cq).setMaxResults(1).getResultList();
+		if(result.size()!=0)
+			isTransitionOfCareChecked=(Boolean)result.get(0);
 		return isTransitionOfCareChecked;
 		
 	}
