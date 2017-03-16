@@ -64,4 +64,29 @@ public class PastEncountersController {
 	    return emrResponseBean;
 	}
 	
+	/**
+	 * To Get visit summary details
+	 * @param patientId
+	 * @param chartId
+	 * @param encounterId
+	 * @return
+	 */
+	@RequestMapping(value="/getVisitSummary", method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getVisitSummary(
+			@RequestParam(value="patientId") Integer patientId,
+			@RequestParam(value="chartId") Integer chartId,
+			@RequestParam(value="encounterId") Integer encounterId){
+		
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
+		try{			
+			emrResponseBean.setData(pastEncountersService.getVisitSummary(patientId, chartId, encounterId));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PASTENCOUNTERS, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Past Encounter visit summary viewed @encounterId="+encounterId, sessionMap.getUserID(), request.getRemoteAddr(), patientId, "chartId="+chartId, LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PASTENCOUNTERS, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Past Encounters visit summary viewed @encounterId="+encounterId, sessionMap.getUserID(), request.getRemoteAddr(), patientId, "chartId="+chartId, LogUserType.USER_LOGIN, "", "");
+		}		
+		return emrResponseBean;
+	}
+	
 }
