@@ -20,7 +20,7 @@ public interface AddNewGroupService {
 	 * To get the data of providers,pos,groups
 	 * @return
 	 */
-	Map<String, Object> listDefaults();
+	Map<String, Object> listDefaults(Integer userId);
 
 	/**
 	 * To save new Group
@@ -43,7 +43,7 @@ public interface AddNewGroupService {
      * @throws JSONException
      * @throws Exception
      */
-	List<TherapySession> createTherapySession(String dataToSave) throws JSONException, Exception;
+	Map<String, Object>  createTherapySession(String dataToSave) throws JSONException, Exception;
 
 	/**
 	 * 
@@ -57,7 +57,7 @@ public interface AddNewGroupService {
 	 * @param groupId
 	 * @return
 	 */
-	Map<String, Object> getPatientData(String groupId);
+	 Map<String, Object> getPatientData(String dataToSearch) throws Exception;
 
 	/**
 	 * To get the therapy session log data
@@ -127,4 +127,15 @@ public interface AddNewGroupService {
 	 * to get complete data for print
 	 */
 	TherapyPrintBean fetchGrouptherapyPrintData(Integer groupId,Integer sessionId,Integer patientId,String gwids);
+
+	/**
+	 * to get selected group and sessions data
+	 */
+	Map<String, Object> listGroupandSessionData(Integer groupId);
+	
+	/**
+	 * to get complete open sessions
+	 */
+	List<TherapySessionBean> getOpenSessions(Integer groupId, Integer userId);
+
 }

@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -57,7 +59,25 @@ public class TherapySessionPatientDetails {
     ClinicalElements clinicalElements;
 	
 	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="therapy_session_patient_details_session_id",referencedColumnName="therapy_session_details_session_id",insertable=false, updatable=false)
+	@JsonBackReference
+	TherapySessionDetails therapySessionPatientDetails ;
 	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="therapy_session_patient_details_patient_id",referencedColumnName="patient_registration_id",insertable=false, updatable=false)
+	@JsonBackReference
+	PatientRegistration patientRegistration;
+	
+	public TherapySessionDetails getTherapySessionPatientDetails() {
+		return therapySessionPatientDetails;
+	}
+
+	public void setTherapySessionPatientDetails(
+			TherapySessionDetails therapySessionPatientDetails) {
+		this.therapySessionPatientDetails = therapySessionPatientDetails;
+	}
+
 	public Integer getTherapySessionPatientDetailsId() {
 		return therapySessionPatientDetailsId;
 	}

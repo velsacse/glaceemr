@@ -110,7 +110,22 @@ public class TherapySession {
 	@JsonManagedReference
 	List<TherapySessionDetails> therapySessionDetails;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="therapy_session_supervisor_id", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
+	private EmployeeProfile empProfileSupervisor;
 	
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="therapy_session_leader_id", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
+	private EmployeeProfile empProfileLeader;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="therapy_session_group_id", referencedColumnName="therapy_group_patient_mapping_group_id" , insertable=false, updatable=false)
+	private TherapyGroupPatientMapping therapyGroupPatientMapping;
 
 	public List<TherapySessionDetails> getTherapySessionDetails() {
 		return therapySessionDetails;
@@ -131,6 +146,15 @@ public class TherapySession {
 
 	public TherapyGroup getTherapyGroup() {
 		return therapyGroup;
+	}
+
+	public TherapyGroupPatientMapping getTherapyGroupPatientMapping() {
+		return therapyGroupPatientMapping;
+	}
+
+	public void setTherapyGroupPatientMapping(
+			TherapyGroupPatientMapping therapyGroupPatientMapping) {
+		this.therapyGroupPatientMapping = therapyGroupPatientMapping;
 	}
 
 	public void setTherapyGroup(TherapyGroup therapyGroup) {

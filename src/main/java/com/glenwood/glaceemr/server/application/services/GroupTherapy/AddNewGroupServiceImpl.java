@@ -44,6 +44,7 @@ import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.PosTable_;
 import com.glenwood.glaceemr.server.application.models.TherapyGroup;
 import com.glenwood.glaceemr.server.application.models.TherapyGroupPatientMapping;
+import com.glenwood.glaceemr.server.application.models.TherapyGroupPatientMapping_;
 import com.glenwood.glaceemr.server.application.models.TherapyGroup_;
 import com.glenwood.glaceemr.server.application.models.TherapySession;
 import com.glenwood.glaceemr.server.application.models.TherapySessionDetails;
@@ -92,10 +93,11 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	 * To get the data of providers,pos,groups
 	 */
 	@Override
-	public Map<String, Object> listDefaults() {
+	public Map<String, Object> listDefaults(Integer userId) {
 		Map<String, Object> mapObject=new HashMap<String,Object>();
 		List<PosTable>  posValue=posTableRepository.findAll(GroupTherapySpecification.getAllPosValue());
 		List<TherapyGroup> groups=therapyGroupRepository.findAll(GroupTherapySpecification.getActiveGroups());
+		List<TherapySessionBean> openSessions=getOpenSessions(userId,-1);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
@@ -118,9 +120,52 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	  	mapObject.put("doctors",phisicianList);
 		mapObject.put("pos",posValue);
 		mapObject.put("therapy groups",groups);
+		mapObject.put("therapy sessions",openSessions);
 		return mapObject;
 	}
-   
+	
+	/**
+	 * To get open sessions
+	 */
+	@Override
+	public List<TherapySessionBean> getOpenSessions(Integer userId, Integer groupId) {
+		// TODO Auto-generated method stub
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<TherapySessionBean> cq = builder.createQuery(TherapySessionBean.class);
+		Root<TherapySession> root = cq.from(TherapySession.class);
+		Join<TherapySession,EmployeeProfile> supervisorJoin = root.join(TherapySession_.empProfileSupervisor,JoinType.INNER);
+		Join<TherapySession,EmployeeProfile> leaderJoin = root.join(TherapySession_.empProfileLeader,JoinType.INNER);
+		Join<TherapySession,TherapyGroup> groupJoin=root.join(TherapySession_.therapyGroup,JoinType.INNER);
+		List<Predicate> predicateByOpenSession = new ArrayList<>();
+		predicateByOpenSession.add(builder.equal(root.get(TherapySession_.therapySessionStatus), 1));
+		if(groupId!=-1)
+			predicateByOpenSession.add(builder.equal(root.get(TherapySession_.therapySessionGroupId), groupId));
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.equal(root.get(TherapySession_.therapySessionStatus), 1));
+		if(userId!=-1) {
+			predicates.add(builder.equal(root.get(TherapySession_.therapySessionProviderId), userId));
+			predicates.add(builder.equal(root.get(TherapySession_.therapySessionLeaderId), userId));
+			predicates.add(builder.equal(root.get(TherapySession_.therapySessionSupervisorId), userId));
+		}
+		Selection[] selections= new Selection[] {
+				root.get(TherapySession_.therapySessionGroupId),
+				root.get(TherapySession_.therapySessionId),
+				root.get(TherapySession_.therapySessionDateValue),
+				builder.function("to_char",String.class, root.get(TherapySession_.therapySessionDate),builder.literal("HH12:MI am")),
+				groupJoin.get(TherapyGroup_.therapyGroupName),
+				root.get(TherapySession_.therapySessionTopic),
+				supervisorJoin.get(EmployeeProfile_.empProfileEmpid),
+				supervisorJoin.get(EmployeeProfile_.empProfileFullname),
+				leaderJoin.get(EmployeeProfile_.empProfileEmpid),
+				leaderJoin.get(EmployeeProfile_.empProfileFullname),
+		};
+		cq.select(builder.construct(TherapySessionBean.class, selections));
+		cq.where(builder.and(predicateByOpenSession.toArray(new Predicate[predicateByOpenSession.size()])),builder.or(predicates.toArray(new Predicate[predicates.size()]))).orderBy(builder.desc(root.get(TherapySession_.therapySessionDateValue)));
+		List<TherapySessionBean> openSessionObj=new ArrayList<TherapySessionBean>();
+		openSessionObj=em.createQuery(cq).getResultList();
+		return openSessionObj;
+	}
+
 	/**
 	 * To save new Group
 	 */
@@ -212,6 +257,19 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	}
 
 	/**
+	 * To get group and sessions data
+	 */
+	@Override
+	public Map<String,Object> listGroupandSessionData(Integer groupId) {
+		Map<String, Object> mapObject=new HashMap<String,Object>();
+		List<TherapyGroup> getGroupData = listGroupData(groupId.toString());
+		List<TherapySessionBean> getOpenSessions = getOpenSessions(-1,groupId);
+		mapObject.put("groupData", getGroupData);
+		mapObject.put("sessionData", getOpenSessions);
+		return mapObject;
+	}
+	
+	/**
 	 * To add patient to selected group
 	 */
 	@Override
@@ -242,7 +300,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
      * To create therapy session
      */
     @Override
-    public List<TherapySession> createTherapySession(String dataToSave) throws Exception {
+    public Map<String, Object>  createTherapySession(String dataToSave) throws Exception {
         JSONObject therapyData= new JSONObject(dataToSave);
         int providerId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("providerId").toString())).or("-1"));
         int posId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("posId").toString())).or("-1"));
@@ -258,7 +316,8 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
         if(therapySessionId.trim().equalsIgnoreCase("")  ||therapySessionId.trim().equalsIgnoreCase("0") ){
         TherapySession therapySession=new TherapySession();
         therapySession.setTherapySessionGroupId(groupId);
-        therapySession.setTherapySessionProviderId(providerId);
+        if(providerId!=-1)
+        	therapySession.setTherapySessionProviderId(providerId);
         therapySession.setTherapySessionPosId(posId);
         therapySession.setTherapySessionTopic(sessionTopic);
         therapySession.setTherapySessionLeaderId(leaderList);
@@ -273,6 +332,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
         therapySession = therapySessionRepository.saveAndFlush(therapySession);
         therapyId=therapySession.getTherapySessionId();
         String[] patientsSplit=patientIds.split("~");
+        if(!patientsSplit.equals("-1")) {
         for(int i=0;i<patientsSplit.length;i++){
             TherapySessionDetails therapyDetails = new TherapySessionDetails();
             therapyDetails.setTherapySessionDetailsPatientId(Integer.parseInt(patientsSplit[i]));
@@ -281,31 +341,103 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
             else
                 therapyDetails.setTherapySessionDetailsSessionId(therapyId);
             therapySessionDetailsRepository.saveAndFlush(therapyDetails);
+        } }
         }
+        List<TherapyPatientsBean> patientData;
+        TherapySessionBean sessionData;
+        if(therapyId==0) {
+        	patientData = getPatientData(groupId,Integer.parseInt(therapySessionId));
+        	sessionData = fetchSessionDataForPrint(Integer.parseInt(therapySessionId),groupId);
         }
-        return therapySessionRepository.findAll(GroupTherapySpecification.byTherapyId(therapyId));
+        else {
+        	 patientData = getPatientData(groupId,therapyId);
+    		 sessionData = fetchSessionDataForPrint(therapyId,groupId);
+        }
+		
+/*		List<TherapySession> sessionData = therapySessionRepository.findAll(GroupTherapySpecification.byTherapyId(therapyId));
+*/		Map<String, Object> mapObject=new HashMap<String,Object>();
+		mapObject.put("patientData",patientData);
+		mapObject.put("sessionData",sessionData);
+		return mapObject;
     }
 	
     /**
 	 * To get the patient data by groupid
 	 */
 	@Override
-	public Map<String, Object> getPatientData(String groupId) {
+	public Map<String, Object> getPatientData(String dataToSearch) throws Exception {
 		Map<String, Object> mapObject=new HashMap<String,Object>();
-		int therapyGroupId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(groupId)).or("-1"));
-		List<TherapyGroup> data=therapyGroupRepository.findAll(GroupTherapySpecification.getGroupData(therapyGroupId));
-		List<TherapyGroupPatientMapping> patData=therapyGroupPatientMappingRepository.findAll(GroupTherapySpecification.getPatDataBygroup(therapyGroupId));
-		List<TherapySession> sessionData=therapySessionRepository.findAll(GroupTherapySpecification.byGroupId(therapyGroupId));
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-	    CriteriaQuery<TherapyLogBean> cq = builder.createQuery(TherapyLogBean.class);
-		Root<TherapySession> root = cq.from(TherapySession.class);
-		Join<TherapySession,TherapySessionDetails> sessionJoin=root.join(TherapySession_.therapySessionDetails,JoinType.INNER);
-
-		mapObject.put("groupData",data);
-		mapObject.put("patientData",patData);
+		JSONObject therapyData= new JSONObject(dataToSearch);
+		int therapyGroupId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("groupId").toString())).or("-1"));
+		int therapySessionId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("sessionId").toString())).or("-1"));
+		List<TherapyPatientsBean> patientData = getPatientData(therapyGroupId,therapySessionId);
+		TherapySessionBean sessionData = fetchSessionDataForPrint(therapySessionId,therapyGroupId);
+		mapObject.put("patientData",patientData);
 		mapObject.put("sessionData",sessionData);
 		return mapObject;
 	}
+
+	/*
+	 * To get Patient data
+	 */
+	private List<TherapyPatientsBean> getPatientData(int therapyGroupId,
+			int therapySessionId) {
+		// TODO Auto-generated method stub
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+	    CriteriaQuery<TherapyPatientsBean> cq = builder.createQuery(TherapyPatientsBean.class);
+		Root<TherapySessionDetails> root = cq.from(TherapySessionDetails.class);
+		Join<TherapySessionDetails,TherapySession> sessionJoin=root.join(TherapySessionDetails_.therapySession,JoinType.INNER);
+		Join<TherapySession,TherapyGroupPatientMapping> groupJoin=sessionJoin.join(TherapySession_.therapyGroupPatientMapping,JoinType.INNER);
+		Join<TherapySessionDetails,PatientRegistration> patientJoin=root.join(TherapySessionDetails_.patientRegistration,JoinType.INNER);
+	    Join<PatientRegistration,TherapySessionPatientDetails> sessionDetailsJoin=patientJoin.join(PatientRegistration_.therapySessionPatientId,JoinType.LEFT);
+	    Predicate predicateByGroupId=builder.equal(groupJoin.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingGroupId), therapyGroupId);
+		Predicate predicateBySessionId=builder.equal(root.get(TherapySessionDetails_.therapySessionDetailsSessionId), therapySessionId);
+		Selection[] selections= new Selection[] {
+				builder.count(sessionDetailsJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsId)),
+				groupJoin.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingGroupId),
+				sessionJoin.get(TherapySession_.therapySessionId),
+				patientJoin.get(PatientRegistration_.patientRegistrationId),
+				patientJoin.get(PatientRegistration_.patientRegistrationAccountno),
+				builder.concat(patientJoin.get(PatientRegistration_.patientRegistrationLastName),builder.concat(" ,",patientJoin.get(PatientRegistration_.patientRegistrationFirstName))),
+				patientJoin.get(PatientRegistration_.patientRegistrationDob),
+				sessionJoin.get(TherapySession_.therapySessionDateValue),
+				builder.concat(builder.concat(builder.concat(builder.concat(builder.concat(builder.coalesce(root.get(TherapySessionDetails_.therapySessionDetailsDx1),""),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx2)),"")),
+						builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx3)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx4)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx5)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx6)),""))	,
+				builder.concat(builder.concat(builder.concat(builder.concat(builder.concat(builder.coalesce(root.get(TherapySessionDetails_.therapySessionDetailsDx1desc),""),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx2desc)),"")),
+						builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx3desc)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx4desc)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx5desc)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx6desc)),""))
+					
+		};
+		cq.distinct(true);
+		cq.select(builder.construct(TherapyPatientsBean.class, selections));
+		cq.where(predicateByGroupId,predicateBySessionId).groupBy(groupJoin.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingGroupId),
+				sessionJoin.get(TherapySession_.therapySessionId),
+				patientJoin.get(PatientRegistration_.patientRegistrationId),
+				patientJoin.get(PatientRegistration_.patientRegistrationAccountno),
+				patientJoin.get(PatientRegistration_.patientRegistrationLastName),
+				patientJoin.get(PatientRegistration_.patientRegistrationFirstName),
+				patientJoin.get(PatientRegistration_.patientRegistrationDob),
+				sessionJoin.get(TherapySession_.therapySessionDateValue),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx1),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx2),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx3),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx4),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx5),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx6),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx1desc),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx2desc),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx3desc),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx4desc),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx5desc),
+				root.get(TherapySessionDetails_.therapySessionDetailsDx6desc)					
+		);
+		List<TherapyPatientsBean> patientData=new ArrayList<TherapyPatientsBean>();
+
+		patientData=em.createQuery(cq).getResultList();
+		return patientData;
+	}
+
+
+
 
 	/**
 	 * To get the therapy session log data
@@ -314,6 +446,8 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	public List<TherapyLogBean> therapySearchLog(String dataToSearch) throws Exception {
 		JSONObject therapyData= new JSONObject(dataToSearch);
 		int providerId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("providerId").toString())).or("-1"));
+		int leaderId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("leaderId").toString())).or("-1"));
+		int supervisorId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("supervisorId").toString())).or("-1"));
 		int groupId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("groupId").toString())).or("-1"));
 		String fromDate=Optional.fromNullable(Strings.emptyToNull(therapyData.get("fromDate").toString())).or("");
 		String toDate=Optional.fromNullable(Strings.emptyToNull(therapyData.get("toDate").toString())).or("");
@@ -321,7 +455,9 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 	    CriteriaQuery<TherapyLogBean> cq = builder.createQuery(TherapyLogBean.class);
 		Root<TherapySession> root = cq.from(TherapySession.class);
-		Join<TherapySession,EmployeeProfile> docJoin=root.join(TherapySession_.empProfile,JoinType.INNER);
+		Join<TherapySession,EmployeeProfile> docJoin=root.join(TherapySession_.empProfile,JoinType.LEFT);
+		Join<TherapySession,EmployeeProfile> leaderJoin=root.join(TherapySession_.empProfileLeader,JoinType.LEFT);
+		Join<TherapySession,EmployeeProfile> supervisorJoin=root.join(TherapySession_.empProfileSupervisor,JoinType.LEFT);
 		Join<TherapySession,PosTable> posJoin=root.join(TherapySession_.posTable,JoinType.INNER);
 		Join<TherapySession,TherapySessionDetails> sessionJoin=root.join(TherapySession_.therapySessionDetails,JoinType.INNER);
 		Join<TherapySession,TherapyGroup> groupJoin=root.join(TherapySession_.therapyGroup,JoinType.INNER);
@@ -330,6 +466,10 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionGroupId), groupId));
 		if(providerId!=-1)
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionProviderId), providerId));
+		if(leaderId!=-1)
+			predicates.add(builder.equal(root.get(TherapySession_.therapySessionLeaderId), providerId));
+		if(supervisorId!=-1)
+			predicates.add(builder.equal(root.get(TherapySession_.therapySessionSupervisorId), providerId));
 		if(!fromDate.equals("")){
 			Date frdate = (Date)  ft.parse(fromDate);
 			predicates.add(builder.greaterThanOrEqualTo(root.get(TherapySession_.therapySessionDateValue),frdate));
@@ -342,11 +482,15 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 			    root.get((TherapySession_.therapySessionId)),
 			    root.get((TherapySession_.therapySessionDateValue)),
 				docJoin.get(EmployeeProfile_.empProfileFullname),
+				leaderJoin.get(EmployeeProfile_.empProfileFullname),
+			    supervisorJoin.get(EmployeeProfile_.empProfileFullname),
 				groupJoin.get(TherapyGroup_.therapyGroupName),
 				posJoin.get(PosTable_.posTableFacilityComments),
 			    builder.count(sessionJoin.get(TherapySessionDetails_.therapySessionDetailsPatientId)),
 			    groupJoin.get(TherapyGroup_.therapyGroupId),
 			    docJoin.get(EmployeeProfile_.empProfileEmpid),
+			    leaderJoin.get(EmployeeProfile_.empProfileEmpid),
+			    supervisorJoin.get(EmployeeProfile_.empProfileEmpid),
 			    posJoin.get(PosTable_.posTableRelationId),
 			    root.get((TherapySession_.therapySessionEndTime)),
 			    root.get(TherapySession_.therapySessionDate),
@@ -354,7 +498,9 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 				
 		};
 		cq.select(builder.construct(TherapyLogBean.class, selections));
-		cq.where(predicates.toArray(new Predicate[predicates.size()])).groupBy(root.get((TherapySession_.therapySessionId)),root.get(TherapySession_.therapySessionDateValue),docJoin.get(EmployeeProfile_.empProfileFullname),groupJoin.get(TherapyGroup_.therapyGroupName),posJoin.get(PosTable_.posTableFacilityComments),groupJoin.get(TherapyGroup_.therapyGroupId),docJoin.get(EmployeeProfile_.empProfileEmpid),posJoin.get(PosTable_.posTableRelationId),root.get((TherapySession_.therapySessionEndTime)),root.get(TherapySession_.therapySessionDate),root.get(TherapySession_.therapySessionStatus));
+		cq.where(predicates.toArray(new Predicate[predicates.size()])).groupBy(root.get((TherapySession_.therapySessionId)),root.get(TherapySession_.therapySessionDateValue),docJoin.get(EmployeeProfile_.empProfileFullname),groupJoin.get(TherapyGroup_.therapyGroupName),posJoin.get(PosTable_.posTableFacilityComments),groupJoin.get(TherapyGroup_.therapyGroupId),docJoin.get(EmployeeProfile_.empProfileEmpid),posJoin.get(PosTable_.posTableRelationId),root.get((TherapySession_.therapySessionEndTime)),root.get(TherapySession_.therapySessionDate),root.get(TherapySession_.therapySessionStatus),leaderJoin.get(EmployeeProfile_.empProfileFullname),
+			    supervisorJoin.get(EmployeeProfile_.empProfileFullname),leaderJoin.get(EmployeeProfile_.empProfileEmpid),
+			    supervisorJoin.get(EmployeeProfile_.empProfileEmpid));
 		List<TherapyLogBean> confData=new ArrayList<TherapyLogBean>();
 
 		 confData=em.createQuery(cq).getResultList();
@@ -604,7 +750,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<TherapySessionBean> cq = builder.createQuery(TherapySessionBean.class);
 		Root<TherapySession> root = cq.from(TherapySession.class);
-		Join<TherapySession,EmployeeProfile> docJoin=root.join(TherapySession_.empProfile,JoinType.INNER);
+		Join<TherapySession,EmployeeProfile> docJoin=root.join(TherapySession_.empProfile,JoinType.LEFT);
 		Join<TherapySession,PosTable> posJoin=root.join(TherapySession_.posTable,JoinType.INNER);
 		
 		Selection[] selections= new Selection[] {

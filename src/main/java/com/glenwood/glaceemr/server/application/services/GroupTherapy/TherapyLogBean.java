@@ -5,23 +5,39 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class TherapyLogBean {
-    int therapyId;
+	Long count;
+	Integer groupId;
+	Integer providerId;
+	Integer posId;
+    Integer therapyId;
+    Integer status;
+	Integer leaderId;
+	Integer supervisorId;
 	String date;
 	String docName;
 	String pos;
 	String groupName;
-	Long count;
-	int groupId;
-	int providerId;
-	int posId;
 	String endTime="";
 	String therapyStartDate="";
-	int status;
+	String leaderName = "";
+	String supervisorName = "";
 	
-	public TherapyLogBean(int therapyId,Date date,String docName,String groupName,String pos,Long count,int groupId,int providerId,int posId,String endTime,Date therapyStartDate,int status){
-		
+	
+	public TherapyLogBean(Integer therapyId,Date date,String docName,String leaderName,String supervisorName,String groupName,String pos,Long count,Integer groupId,Integer providerId,Integer leaderId,Integer supervisorId,Integer posId,String endTime,Date therapyStartDate,Integer status){
+		super();
 		this.therapyId=therapyId;
-		this.docName=docName;
+		if(docName!=null)
+			this.docName=docName;
+		else
+			this.docName="";
+		if(leaderName!=null)
+			this.leaderName=leaderName;
+		else
+			this.leaderName="";
+		if(supervisorName!=null)
+			this.supervisorName=supervisorName;
+		else
+			this.supervisorName="";
 		this.count=count;
 		this.pos=pos;
 		DateFormat mmformat=new SimpleDateFormat("MM/dd/yyyy");
@@ -29,15 +45,56 @@ public class TherapyLogBean {
         this.groupName=groupName;
         this.groupId=groupId;
         this.posId=posId;
-        this.providerId=providerId;
+        if(providerId!=null)
+        	this.providerId=providerId;
+        else 
+        	providerId=-1;
+        if(leaderId!=null)
+			this.leaderId=leaderId;
+		else
+			this.leaderId=-1;
+        if(supervisorId!=null)
+        	this.supervisorId=supervisorId;
+        else
+        	this.supervisorId=-1;
         this.endTime=endTime;
         DateFormat timeFormat=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
         this.therapyStartDate=timeFormat.format(therapyStartDate);
         this.status=status;
 	}
-
-
 	
+	public String getLeaderName() {
+		return leaderName;
+	}
+
+	public void setLeaderName(String leaderName) {
+		this.leaderName = leaderName;
+	}
+
+	public String getSupervisorName() {
+		return supervisorName;
+	}
+
+	public void setSupervisorName(String supervisorName) {
+		this.supervisorName = supervisorName;
+	}
+
+	public int getLeaderId() {
+		return leaderId;
+	}
+
+	public void setLeaderId(int leaderId) {
+		this.leaderId = leaderId;
+	}
+
+	public int getSupervisorId() {
+		return supervisorId;
+	}
+
+	public void setSupervisorId(int supervisorId) {
+		this.supervisorId = supervisorId;
+	}
+
 	public int getStatus() {
 		return status;
 	}

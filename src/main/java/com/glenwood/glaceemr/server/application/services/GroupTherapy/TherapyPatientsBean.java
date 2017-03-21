@@ -28,9 +28,76 @@ public class TherapyPatientsBean {
 	String dx7Desc="";
 	String dx8="";
 	String dx8Desc="";
+	String lastSession;
+	Integer groupId;
+	String fullName;
+	String Dx;
+	String Dxdesc;
+	long count;
     
-    
-
+    public TherapyPatientsBean(long count,Integer groupId,Integer sessionId,Integer patientId,String accountNo,String fullName,Date dob,Date lastSession,String Dx,String Dxdesc) {
+    	if(count !=  0) {
+    		this.count=count;
+    	}
+    	else {
+    		this.count=-1;
+    	}
+    	if(groupId != null){
+        	this.groupId=groupId;
+    	}
+    	else{
+    		this.groupId=-1;
+    	}
+    	if(sessionId != null){
+        	this.sessionId=sessionId;
+    	}
+    	else{
+    		this.sessionId=-1;
+    	}
+    	if(patientId != null){
+        	this.patientId=patientId;
+    	}
+    	else{
+    		this.patientId=-1;
+    	}
+    	if(accountNo!=null){
+    		this.accountNo=accountNo;
+    	}
+    	else{
+    		this.accountNo="";
+    	}
+    	if(fullName!=null){
+    		this.fullName=fullName;
+    	}
+    	else{
+    		this.fullName="";
+    	}
+    	DateFormat mmformat=new SimpleDateFormat("MM/dd/yyyy");
+    	if(dob!=null){
+    		this.dob=mmformat.format(dob);
+    	}
+    	else{
+    		this.dob="";
+    	}
+    	if(lastSession!=null){
+    		this.lastSession=mmformat.format(lastSession);
+    	}
+    	else{
+    		this.lastSession="";
+    	}
+    	if(Dx!=null){
+    		this.Dx=Dx;
+    	}
+    	else{
+    		this.Dx="";
+    	}
+    	if(Dxdesc!=null){
+    		this.Dxdesc=Dxdesc;
+    	}
+    	else{
+    		this.Dxdesc="";
+    	}
+    }
     public TherapyPatientsBean(Integer patientId,String accountNo,String lastName,String firstName,Date dob,Integer sessionId,String stopTime,String dx1,String dx1Desc,String dx2, String dx2Desc,String dx3,String dx3Desc,String dx4,String dx4Desc,String dx5,String dx5Desc,String dx6,String dx6Desc,String dx7,String dx7Desc,String dx8,String dx8Desc){
     	if(patientId != null){
         	this.patientId=patientId;
@@ -259,6 +326,45 @@ public class TherapyPatientsBean {
 	}
 
 
+	public String getLastSession() {
+		return lastSession;
+	}
+	public void setLastSession(String lastSession) {
+		this.lastSession = lastSession;
+	}
+	public Integer getGroupId() {
+		return groupId;
+	}
+	public void setGroupId(Integer groupId) {
+		this.groupId = groupId;
+	}
+	public String getFullName() {
+		return fullName;
+	}
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+	public String getDx() {
+		return Dx;
+	}
+	public void setDx(String dx) {
+		Dx = dx;
+	}
+	public String getDxdesc() {
+		return Dxdesc;
+	}
+	public void setDxdesc(String dxdesc) {
+		Dxdesc = dxdesc;
+	}
+	public void setSessionId(Integer sessionId) {
+		this.sessionId = sessionId;
+	}
+	public long getCount() {
+		return count;
+	}
+	public void setCount(long count) {
+		this.count = count;
+	}
 	public void setDx2(String dx2) {
 		this.dx2 = dx2;
 	}

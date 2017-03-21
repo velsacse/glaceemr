@@ -11,13 +11,17 @@ public class TherapySessionBean {
 	Integer sessionProviderId;
 	String sessionProviderName;
 	Integer sessionLeaderId;
+	String sessionLeaderName;
 	Integer sessionSupervisorId;
+	String sessionSupervisorName;
 	String sessionTopic;	
 	Integer sessionPosId;
 	String sessionPOSName;
 	String sessionDateValue;
 	Integer sessionStatus;
 	String sessionEndTime;
+	Integer groupId;
+	String groupName;
 
 	
 	
@@ -98,6 +102,70 @@ public class TherapySessionBean {
 		}
 	}
 	
+	public TherapySessionBean(Integer groupId,Integer sessionId,Date sessionDateValue,String sessionStartTime,String groupName,String sessionTopic,Integer sessionSupervisorId,String sessionSupervisorName,Integer sessionLeaderId,String sessionLeaderName){
+		super();
+		DateFormat timeFormat=new SimpleDateFormat("MM/dd/yyyy");
+		if(groupId!=null) {
+			this.groupId=groupId;
+		}
+		else {
+			this.groupId= -1;
+		}
+		if(sessionId!=null) {
+			this.sessionId=sessionId;
+		}
+		else {
+			this.sessionId= -1;
+		}
+		if(sessionDateValue!=null){
+			this.sessionDateValue = timeFormat.format(sessionDateValue);
+		}
+		else{
+			this.sessionDateValue = "";
+		}
+		if(sessionStartTime!=null){
+			this.sessionStartTime = sessionStartTime;
+		}
+		else{
+			this.sessionStartTime = "";
+		}
+		if(groupName!=null){
+			this.groupName = groupName;
+		}
+		else{
+			this.groupName = "";
+		}
+		if(sessionTopic!=null){
+			this.sessionTopic = sessionTopic;
+		}
+		else{
+			this.sessionTopic = "";
+		}
+		if(sessionSupervisorId!=null){
+			this.sessionSupervisorId = sessionSupervisorId;
+		}
+		else{
+			this.sessionSupervisorId = -1;
+		}
+		if(sessionSupervisorName!=null){
+			this.sessionSupervisorName = sessionSupervisorName;
+		}
+		else{
+			this.sessionSupervisorName = "";
+		}
+		if(sessionLeaderId!=null){
+			this.sessionLeaderId = sessionLeaderId;
+		}
+		else{
+			this.sessionLeaderId = -1;
+		}
+		if(sessionLeaderName!=null){
+			this.sessionLeaderName = sessionLeaderName;
+		}
+		else{
+			this.sessionLeaderName = "";
+		}
+	}
 	
 	public Integer getSessionId() {
 		return sessionId;
@@ -171,6 +239,38 @@ public class TherapySessionBean {
 
 	public String getSessionPOSName() {
 		return sessionPOSName;
+	}
+
+	public String getSessionLeaderName() {
+		return sessionLeaderName;
+	}
+
+	public void setSessionLeaderName(String sessionLeaderName) {
+		this.sessionLeaderName = sessionLeaderName;
+	}
+
+	public String getSessionSupervisorName() {
+		return sessionSupervisorName;
+	}
+
+	public void setSessionSupervisorName(String sessionSupervisorName) {
+		this.sessionSupervisorName = sessionSupervisorName;
+	}
+
+	public Integer getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Integer groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 
 	public void setSessionPOSName(String sessionPOSName) {

@@ -2,6 +2,8 @@ package com.glenwood.glaceemr.server.application.models;
 
 
 
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -309,6 +312,19 @@ public class TherapySessionDetails {
 	public void setTherapySessionDetailsPatientXmlNote(
 			String therapySessionDetailsPatientXmlNote) {
 		this.therapySessionDetailsPatientXmlNote = therapySessionDetailsPatientXmlNote;
+	}
+	
+	@OneToMany(mappedBy="therapySessionPatientDetails", fetch=FetchType.LAZY)
+	@JsonManagedReference
+	List<TherapySessionPatientDetails> therapySessionDetails;
+
+
+	public List<TherapySessionPatientDetails> getTherapySessionDetails() {
+		return therapySessionDetails;
+	}
+
+	public void setTherapySessionDetails(List<TherapySessionPatientDetails> therapySessionDetails) {
+		this.therapySessionDetails = therapySessionDetails;
 	}
 	
 	

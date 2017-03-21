@@ -63,8 +63,8 @@ public class GroupTherapyController {
 	@RequestMapping(value ="/ListDefaultValues", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public EMRResponseBean getDefaultValues()throws Exception{
-		Map<String, Object> lists=addNewGroupService.listDefaults();
+	public EMRResponseBean getDefaultValues(@RequestParam(value="userId",required=false,defaultValue="-1")Integer userId)throws Exception{
+		Map<String, Object> lists=addNewGroupService.listDefaults(userId);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(lists);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved providers,pos,groups data", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
@@ -150,7 +150,7 @@ public class GroupTherapyController {
 	
 	public EMRResponseBean createTherapy(@RequestParam(value="dataToSave",required=false,defaultValue="-1")String dataToSave)throws Exception{
 		logger.debug("In createTherapySession - creating therapy session");
-		List<TherapySession> therapy=addNewGroupService.createTherapySession(dataToSave);
+		Map<String, Object>  therapy=addNewGroupService.createTherapySession(dataToSave);
 		logger.debug("In createTherapySession - therapy session created");
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(therapy);
@@ -167,8 +167,8 @@ public class GroupTherapyController {
 	@RequestMapping(value ="/listPatientDataByGroup", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public EMRResponseBean listPatientDataByGroup(@RequestParam(value="groupId",required=false,defaultValue="-1")String groupId)throws Exception{
-		Map<String, Object> lists=addNewGroupService.getPatientData(groupId);
+	public EMRResponseBean listPatientDataByGroup(@RequestParam(value="dataToSearch",required=false,defaultValue="-1")String dataToSearch)throws Exception{
+		Map<String, Object> lists=addNewGroupService.getPatientData(dataToSearch);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(lists);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved list patient data by Group", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
@@ -343,6 +343,23 @@ public class GroupTherapyController {
 			data.set(i,data.get(i));
 		}
 		return data;
+	}
+	
+	/**
+	 * To get the list of all open sessions 
+	 * @param groupId
+	 * @return
+	 * @throws Exception
+	 */
+	
+	@RequestMapping(value ="/ListGroupDataandSessionData", method = RequestMethod.GET) 
+	@ResponseBody
+	
+	public EMRResponseBean getGroupandSessionData(@RequestParam(value="groupId",required=false,defaultValue="-1")Integer groupId)throws Exception{
+		Map<String,Object> lists=addNewGroupService.listGroupandSessionData(groupId);
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(lists);
+		return emrResponseBean;
 	}
 	
 }
