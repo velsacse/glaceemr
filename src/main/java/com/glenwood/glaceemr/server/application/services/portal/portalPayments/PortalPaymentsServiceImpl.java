@@ -379,7 +379,7 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
                  stmtPath=stmtPath.replace(".xml", "_"+stmntBean.getBatchNo()+".xml");
              //stmtPath = sharedPath + fileName;
              stmtPath = stmtPath.replaceAll("\\\\","/");
-             String stmtImage = SharedFolderUtil.getSharedFolderPath()+"/ensptstmt.png";
+             String stmtImage = SharedFolderUtil.getSharedFolderPath()+"/images/bills/ensptstmt.png";
 
              //call stmnt preview model here
              //GlaceOutLoggingStream.console("path->" + stmtPath);
