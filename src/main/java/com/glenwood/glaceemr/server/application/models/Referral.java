@@ -210,6 +210,15 @@ public class Referral {
 	@Column(name="summary_care_record_provided_electronic")
 	private Integer summaryCareRecordProvidedElectronic;
 	
+	@Column(name="referral_critical_status")
+	private Integer criticalStatus;
+	
+	@Column(name="referral_delinquency_days")
+	private Integer delinquencyDays;
+	
+	@Column(name="referral_expect_result_date")
+	private Timestamp referralExpectResultDate;
+	
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -221,11 +230,7 @@ public class Referral {
 	@JoinColumn(name="h413035",referencedColumnName="patient_registration_id",insertable=false,updatable=false)
 	PatientRegistration patientRegistrationTable;
 	
-	@Column(name="referral_critical_status")
-	private Integer criticalStatus;
 	
-	@Column(name="referral_delinquency_days")
-	private Integer delinquencyDays;
 	
 	public Integer getH413001() {
 		return h413001;
@@ -718,4 +723,11 @@ public class Referral {
 			PatientRegistration patientRegistrationTable) {
 		this.patientRegistrationTable = patientRegistrationTable;
 	}
+	public Timestamp getReferralExpectResultDate() {
+		return referralExpectResultDate;
+	}
+	public void setReferralExpectResultDate(Timestamp referralExpectResultDate) {
+		this.referralExpectResultDate = referralExpectResultDate;
+	}
+	
 }

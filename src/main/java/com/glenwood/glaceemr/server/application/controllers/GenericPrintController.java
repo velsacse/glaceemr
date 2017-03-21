@@ -93,7 +93,7 @@ public class GenericPrintController {
 	@RequestMapping(value = "/saveGenericPrintStyle",method = RequestMethod.POST)
 	public EMRResponseBean saveGenericPrintStyle(@RequestParam(value="styleName") String styleName,@RequestParam(value="letterHeaderId") Integer letterHeaderId,
 			@RequestParam(value="patientHeaderId") Integer patientHeaderId,@RequestParam(value="footerId") Integer footerId,
-			@RequestParam(value="isDefault") Boolean isDefault,@RequestParam(value="signId") Integer signId) throws Exception{
+			@RequestParam(value="isDefault") Boolean isDefault,@RequestParam(value="signId", defaultValue="-1", required=false) Integer signId) throws Exception{
 		
 		logger.debug("Begin of request to Save generic print style.");
 		
@@ -123,7 +123,7 @@ public class GenericPrintController {
 	public EMRResponseBean updateGenericPrintStyle(@RequestParam(value="styleName") String styleName,@RequestParam(value="letterHeaderId") Integer letterHeaderId,
 			@RequestParam(value="patientHeaderId") Integer patientHeaderId,@RequestParam(value="footerId") Integer footerId,@RequestParam(value="styleId") Integer styleId,
 			@RequestParam(value="isDefault") Boolean isDefault,@RequestParam(value="isActive") Boolean isActive
-			,@RequestParam(value="signId") Integer signId) throws Exception{
+			,@RequestParam(value="signId", defaultValue="-1", required=false) Integer signId) throws Exception{
 		
 		logger.debug("Begin of request to Update generic print style.");
 		

@@ -162,7 +162,7 @@ public class ReferralServiceImpl implements ReferralService{
 	 * @see com.glenwood.glaceemr.server.application.services.referral.ReferralService#saveReferralPlan(java.lang.Integer, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void saveReferralPlan(Integer referralID, String reason, String notes, String dx,Integer criticalstatus) {
+	public void saveReferralPlan(Integer referralID, String reason, String notes, String dx,Integer criticalstatus,String expdate) {
 		
 		Integer referralId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(referralID.toString())).or("-1"));
 		Iterable<Referral> referralList = referralRepository.findAll(ReferralSpecification.findByRefId(referralId));
@@ -177,6 +177,14 @@ public class ReferralServiceImpl implements ReferralService{
 			refUpdate.setH413013(notes);
 			refUpdate.setH413011(dx);
 			refUpdate.setCriticalStatus(criticalstatus);
+			
+			SimpleDateFormat sourceformatter = new SimpleDateFormat("MM/dd/yyyy");			
+			try {
+				refUpdate.setReferralExpectResultDate(new Timestamp(sourceformatter.parse(expdate).getTime()));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			
 			referral = refUpdate;
 			referralRepository.saveAndFlush(referral);
 		}

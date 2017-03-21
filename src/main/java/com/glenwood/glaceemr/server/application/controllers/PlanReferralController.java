@@ -156,12 +156,13 @@ public class PlanReferralController {
 			  @RequestParam(value="reason",required = false) String reason,
 			  @RequestParam(value="notes",required = false) String notes,
 			  @RequestParam(value="criticalstatus",required = false) Integer criticalstatus,
-			  @RequestParam(value="diagnosis",required = false, defaultValue="") String diagnosis) throws JSONException {
+			  @RequestParam(value="diagnosis",required = false, defaultValue="") String diagnosis,
+			  @RequestParam(value="exprespdate",required = false, defaultValue="") String exprespdate) throws JSONException {
 		
 		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			logger.debug("Saving referral::referralId"+referralId+" reason"+reason+" notes"+notes+"criticalstatus"+criticalstatus);
-			referralService.saveReferralPlan(referralId,reason,notes,diagnosis,criticalstatus);
+			referralService.saveReferralPlan(referralId,reason,notes,diagnosis,criticalstatus,exprespdate);
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.REFERRAL, LogActionType.UPDATE, 1, Log_Outcome.SUCCESS, "Referral details updated in plan", sessionMap.getUserID(), request.getRemoteAddr(), -1, "refId="+referralId, LogUserType.USER_LOGIN, "", "");
 			emrResponseBean.setData("success");
 		}catch(Exception e){
