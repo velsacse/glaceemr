@@ -379,7 +379,8 @@ public class PortalAppointmentsSpecification {
 
 
 
-				Predicate schTemplateDetailPredicate=cq.where(cb.equal(root.get(SchedulerTemplateDetail_.schTemplateDetailIslocked), false),root.get(SchedulerTemplateDetail_.schTemplateDetailId).in(templateIdList)).getRestriction();
+				//Predicate schTemplateDetailPredicate=cq.where(cb.equal(root.get(SchedulerTemplateDetail_.schTemplateDetailIslocked), false),root.get(SchedulerTemplateDetail_.schTemplateDetailId).in(templateIdList)).getRestriction();
+				Predicate schTemplateDetailPredicate=cq.where(root.get(SchedulerTemplateDetail_.schTemplateDetailId).in(templateIdList)).getRestriction();
 
 				return schTemplateDetailPredicate;
 			}
