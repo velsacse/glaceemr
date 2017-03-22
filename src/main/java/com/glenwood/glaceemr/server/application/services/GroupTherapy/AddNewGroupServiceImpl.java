@@ -389,11 +389,12 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		Join<TherapySessionDetails,TherapySession> sessionJoin=root.join(TherapySessionDetails_.therapySession,JoinType.INNER);
 		Join<TherapySession,TherapyGroupPatientMapping> groupJoin=sessionJoin.join(TherapySession_.therapyGroupPatientMapping,JoinType.INNER);
 		Join<TherapySessionDetails,PatientRegistration> patientJoin=root.join(TherapySessionDetails_.patientRegistration,JoinType.INNER);
-	    Join<PatientRegistration,TherapySessionPatientDetails> sessionDetailsJoin=patientJoin.join(PatientRegistration_.therapySessionPatientId,JoinType.LEFT);
+	    Join<TherapySessionDetails,TherapySessionPatientDetails> patientDetailsJoin=root.join(TherapySessionDetails_.therapySessionPatientDetails,JoinType.LEFT);
+	    patientDetailsJoin.on(builder.equal(patientDetailsJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId), therapySessionId));
 	    Predicate predicateByGroupId=builder.equal(groupJoin.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingGroupId), therapyGroupId);
 		Predicate predicateBySessionId=builder.equal(root.get(TherapySessionDetails_.therapySessionDetailsSessionId), therapySessionId);
 		Selection[] selections= new Selection[] {
-				builder.count(sessionDetailsJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsId)),
+				builder.count(patientDetailsJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsId)),
 				groupJoin.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingGroupId),
 				sessionJoin.get(TherapySession_.therapySessionId),
 				patientJoin.get(PatientRegistration_.patientRegistrationId),

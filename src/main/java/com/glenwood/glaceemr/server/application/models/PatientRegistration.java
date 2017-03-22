@@ -2328,16 +2328,4 @@ public class PatientRegistration implements Serializable {
 	public PatientRegistration(){
 		
 	}
-	@OneToMany(cascade=CascadeType.ALL,mappedBy="patientRegistration")
-	@JsonManagedReference
-	List<TherapySessionPatientDetails> therapySessionPatientId;
-
-	public List<TherapySessionPatientDetails> getTherapySessionPatientId() {
-		return therapySessionPatientId;
-	}
-
-	public void setTherapySessionPatientId(
-			List<TherapySessionPatientDetails> therapySessionPatientId) {
-		this.therapySessionPatientId = therapySessionPatientId;
-	}
 }

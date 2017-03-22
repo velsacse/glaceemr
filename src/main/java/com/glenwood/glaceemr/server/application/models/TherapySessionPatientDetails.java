@@ -65,10 +65,20 @@ public class TherapySessionPatientDetails {
 	TherapySessionDetails therapySessionPatientDetails ;
 	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
-	@JoinColumn(name="therapy_session_patient_details_patient_id",referencedColumnName="patient_registration_id",insertable=false, updatable=false)
+	@JoinColumn(name="therapy_session_patient_details_patient_id",referencedColumnName="therapy_session_details_patient_id",insertable=false, updatable=false)
 	@JsonBackReference
-	PatientRegistration patientRegistration;
+	TherapySessionDetails therapySessionDetailsPatientId;
 	
+	
+	public TherapySessionDetails getTherapySessionDetailsPatientId() {
+		return therapySessionDetailsPatientId;
+	}
+
+	public void setTherapySessionDetailsPatientId(
+			TherapySessionDetails therapySessionDetailsPatientId) {
+		this.therapySessionDetailsPatientId = therapySessionDetailsPatientId;
+	}
+
 	public TherapySessionDetails getTherapySessionPatientDetails() {
 		return therapySessionPatientDetails;
 	}

@@ -323,9 +323,24 @@ public class TherapySessionDetails {
 		return therapySessionDetails;
 	}
 
-	public void setTherapySessionDetails(List<TherapySessionPatientDetails> therapySessionDetails) {
+	public void setTherapySessionDetails(
+			List<TherapySessionPatientDetails> therapySessionDetails) {
 		this.therapySessionDetails = therapySessionDetails;
 	}
+
+
+	public List<TherapySessionPatientDetails> getTherapySessionPatientDetails() {
+		return therapySessionPatientDetails;
+	}
+
+	public void setTherapySessionPatientDetails(
+			List<TherapySessionPatientDetails> therapySessionPatientDetails) {
+		this.therapySessionPatientDetails = therapySessionPatientDetails;
+	}
+
+	@OneToMany(mappedBy="therapySessionDetailsPatientId", fetch=FetchType.LAZY)
+	@JsonManagedReference
+	List<TherapySessionPatientDetails> therapySessionPatientDetails;
 	
 	
 }
