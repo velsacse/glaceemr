@@ -350,7 +350,15 @@ public  class DocumentsServiceImpl implements DocumentsService{
 		List<FileName> fileName=null;
 		FileDetails fileDetails=null;
 		if(alertPatientDocMapping.size()>0){
-			Integer fileNameId=Integer.parseInt(alertPatientDocMapping.get(0).getForwardedFiledetailsId());
+			Integer fileNameId;
+			if(alertPatientDocMapping.get(0).getForwardedFiledetailsId().contains(","))
+			{
+				fileNameId = Integer.parseInt(alertPatientDocMapping.get(0).getForwardedFiledetailsId().split(",")[0]);
+			}
+			else
+			{
+				fileNameId = Integer.parseInt(alertPatientDocMapping.get(0).getForwardedFiledetailsId());
+			}
 			fileName=getInfo(fileNameId);
 			for(int i=0;i<fileName.size();i++)	{
 				String scanid=fileName.get(0).getFilenameScanid().toString();
