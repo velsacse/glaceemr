@@ -3,6 +3,7 @@ package com.glenwood.glaceemr.server.application.services.referral;
 import java.util.List;
 
 import org.json.JSONException;
+
 import com.glenwood.glaceemr.server.application.models.Referral;
 
 /**
@@ -17,7 +18,7 @@ public interface ReferralService {
 	
 	public Referral getReferralPlan(Integer referralId);
 	
-	public void saveReferralPlan(Integer patientId, String reason, String notes, String dx,Integer criticalstatus);
+	public void saveReferralPlan(Integer patientId, String reason, String notes, String dx,Integer criticalstatus, String expdate);
 	
 	public ReferralListBean getListOfReferrals(Integer chartId);
 	
