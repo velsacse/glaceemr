@@ -6,6 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,11 +166,12 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		cq.select(builder.construct(AlertCountBean.class, builder.count(joinAcAI.get(AlertEvent_.alertEventId)),
 				rootAlertCategory.get(AlertCategory_.alertCategoryId),
 				rootAlertCategory.get(AlertCategory_.alertCategoryName),
+				builder.selectCase().when(builder.equal(joinAcAI.get(AlertEvent_.alertEventRead), false), builder.count(joinAcAI.get(AlertEvent_.alertEventId))).otherwise(builder.literal(0)),
 				rootAlertCategory.get(AlertCategory_.alertCategoryDisplayOrder)));
 		cq.groupBy(rootAlertCategory.get(AlertCategory_.alertCategoryId),
 				rootAlertCategory.get(AlertCategory_.alertCategoryName),
-				//				joinAcAI.get(AlertEvent_.alertEventRead),
-				rootAlertCategory.get(AlertCategory_.alertCategoryDisplayOrder)
+				rootAlertCategory.get(AlertCategory_.alertCategoryDisplayOrder),
+				joinAcAI.get(AlertEvent_.alertEventRead)
 				//				,rootAlertCategory.get(AlertCategory_.alertCategoryGroup)
 				);
 		cq.orderBy(builder.asc(rootAlertCategory.get(AlertCategory_.alertCategoryId)));
@@ -175,7 +179,6 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		List<Object> getAlertCounts=em.createQuery(cq).getResultList();
 
 		List<AlertCountBean> alertCountList=parseCategories(getAlertCounts);
-
 		return alertCountList;
 	}
 
@@ -185,71 +188,87 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 	 * @return
 	 */
 	private List<AlertCountBean> parseCategories(List<Object> getAlertCounts) {
-
-		List<Long> alertUnreadList=new ArrayList<Long>();
 		List<String> categoryIdList=new ArrayList<String>();
 		List<String> categoryOrderList=new ArrayList<String>();
 		List<String> categoryNameList=new ArrayList<String>();
 		List<AlertCountBean> alertCountList=new ArrayList<AlertCountBean>();
-
-
+		HashMap<String, Long> totalCountMap= new HashMap<String, Long>();
+		HashMap<String, Long> unReadCountMap = new HashMap<String, Long>();
 		try {
-
 			for(int i=0;i<getAlertCounts.size();i++){
 				AlertCountBean sib=(AlertCountBean) getAlertCounts.get(i);
-
-				long unReadCount=sib.getTotalCount();
 				String categoryId=sib.getCategoryId();
 				String categoryName=sib.getCategoryName();
 				String categoryOrder=sib.getCategoryorder();
-
-				alertUnreadList.add(unReadCount);
 				categoryIdList.add(categoryId);
 				categoryOrderList.add(categoryOrder);
 				categoryNameList.add(categoryName);
 			}
-
 			for(int i=0;i<getAlertCounts.size();i++){
 				AlertCountBean sib=(AlertCountBean) getAlertCounts.get(i);
-
-				Long unReadCount=(long) 0;
-				Long totalCount=alertUnreadList.get(i);
-				String categoryId=categoryIdList.get(i);
-				String categoryName=categoryNameList.get(i);
-				String categoryOrder=categoryOrderList.get(i);
-
-				//				System.out.println("Category Id>>"+categoryId+"\tCategory Name>>"+categoryName+"\tCount>>"+totalCount);
-				categoryNameList.set(i, "-1");
-
-				for(int j=0;j<categoryNameList.size();j++){
-					String tempCategoryName=categoryNameList.get(j);
-					Long temp=alertUnreadList.get(j);
-					if(categoryName.equals(tempCategoryName)&&!(tempCategoryName.equals("-1"))){
-						unReadCount=temp;
-						totalCount+=unReadCount;
-						categoryNameList.set(j, "-1");
-						break;
-					}
+				if(totalCountMap.containsKey(sib.getCategoryId()))
+				{
+					Long prevTotalCount = totalCountMap.get(sib.getCategoryId());
+					totalCountMap.put(sib.getCategoryId(), prevTotalCount+sib.getTotalCount());
 				}
-
-				if(!categoryName.equals("-1")){
-					sib.setTotalCount(totalCount);
-					sib.setCategoryId(categoryId);
-					sib.setCategoryName(categoryName);
-					sib.setCategoryorder(categoryOrder);
-					sib.setUnReadCount(unReadCount);
-
-					alertCountList.add(sib);
+				else
+				{
+					totalCountMap.put(sib.getCategoryId(), sib.getTotalCount());
+				}
+				if(unReadCountMap.containsKey(sib.getCategoryId()))
+				{
+					Long prevUnreadCount = unReadCountMap.get(sib.getCategoryId());
+					unReadCountMap.put(sib.getCategoryId(), prevUnreadCount+sib.getReadCountSum());
+				}
+				else
+				{
+					unReadCountMap.put(sib.getCategoryId(), sib.getReadCountSum());
 				}
 			}
+			List<String> uniqueCategoryId = findDuplicatesList(categoryIdList);
+			List<String> uniqueCategoryName = findDuplicatesList(categoryNameList);
+			List<String> uniqueCategoryOrder = findDuplicatesList(categoryOrderList);
+			for(int i=0;i<uniqueCategoryId.size();i++){
+				AlertCountBean sib=(AlertCountBean) getAlertCounts.get(i);
+				sib.setTotalCount(totalCountMap.get(uniqueCategoryId.get(i)));
+				sib.setCategoryId(uniqueCategoryId.get(i));
+				sib.setCategoryName(uniqueCategoryName.get(i));
+				sib.setCategoryorder(uniqueCategoryOrder.get(i));
+				sib.setUnReadCount(unReadCountMap.get(uniqueCategoryId.get(i)));
 
+				alertCountList.add(sib);
+			}
+				
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		return alertCountList;
 	}
+	
+	public List<String> findDuplicatesList(List<String> duplicateList) {
+		Set<String> stringsSet = new LinkedHashSet<String>();//A Linked hash set 
+		//prevents the adding order of the elements
+		for (String string: duplicateList) {
+		    stringsSet.add(string);
+		}
+		return new ArrayList<String>(stringsSet);
+	}
 
+	public Set<String> findDuplicates(List<String> listContainingDuplicates)
+	{ 
+	  final Set<String> setToReturn = new HashSet(); 
+	  final Set<String> set1 = new HashSet();
+
+	  for (String yourInt : listContainingDuplicates)
+	  {
+	   if (!set1.add(yourInt))
+	   {
+	    setToReturn.add(yourInt);
+	   }
+	  }
+	  return setToReturn;
+	}
 
 	/**
 	 * To modify and rebuild the shortcut result list
@@ -268,12 +287,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		logger.debug("Modifying shortcuts result list.");
 		System.out.println("sh list "+getShortCutList.size());
 
-		List<Long> shortUnreadList=new ArrayList<Long>();
 		List<String> shortCategoryIdList=new ArrayList<String>();
-		List<String> categoryorderList=new ArrayList<String>();
-		List<String> shortNameList=new ArrayList<String>();
-		List<Object> shortcutList=new ArrayList<Object>();
-
 		List<Map<String, List<Map<String, List<Object>>>>> alertsArray=new ArrayList<Map<String, List<Map<String, List<Object>>>>>();
 		Map map=new HashMap();
 		List<Map<String, List<Object>>> alertList=new ArrayList<Map<String,List<Object>>>();
@@ -282,51 +296,9 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 
 			for(int i=0;i<getShortCutList.size();i++){
 				AlertCountBean sib= getShortCutList.get(i);
-
-				long shortUnread=sib.getTotalCount();
 				String shortCategoryId=sib.getCategoryId();
-				String shortName=sib.getCategoryName();
-				String categoryorder=sib.getCategoryorder();
-
-				shortUnreadList.add(shortUnread);
 				shortCategoryIdList.add(shortCategoryId);
-				categoryorderList.add(categoryorder);
-				shortNameList.add(shortName);
 			}
-
-			for(int i=0;i<getShortCutList.size();i++){
-				AlertCountBean sib=(AlertCountBean) getShortCutList.get(i);
-
-				Long shortUnread=(long) 0;
-				Long shortTotal=shortUnreadList.get(i);
-				String shortCategoryId=shortCategoryIdList.get(i);
-				String shortName=shortNameList.get(i);
-				String categoryorder=categoryorderList.get(i);
-
-				shortNameList.set(i, "-1");
-
-				for(int j=0;j<shortNameList.size();j++){
-					String tempShortName=shortNameList.get(j);
-					Long tempCount=shortUnreadList.get(j);
-					if(shortName.equals(tempShortName)&&!(tempShortName.equals("-1"))){
-						shortUnread=tempCount;
-						shortTotal+=shortUnread;
-						shortNameList.set(j, "-1");
-						break;
-					}
-				}
-
-				if(!shortName.equals("-1")){
-					sib.setTotalCount(shortTotal);
-					sib.setCategoryId(shortCategoryId);
-					sib.setCategoryName(shortName);
-					sib.setCategoryorder(categoryorder);
-					sib.setUnReadCount(shortUnread);
-
-					shortcutList.add(sib);
-				}
-			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -342,7 +314,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			alertList=buildAlertsJsn(categoryIdListTemp,userIdList,pageno,pagesize);
 			System.out.println(" ho "+ alertList.toString());
 			map.put("alerts", alertList);
-			map.put("shortcutinfo", shortcutList);
+			map.put("shortcutinfo", getShortCutList);
 
 			alertsArray.add(map);
 		}
@@ -368,7 +340,15 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		logger.debug("Getting category based alerts and modifying the bean.");
 
 		List<Map<String, List<Object>>> arrayAlertList=new ArrayList<Map<String,List<Object>>>();
-
+		if(shortCategoryIdList.get(0).equalsIgnoreCase("-1"))
+		{
+			shortCategoryIdList.clear();
+			List<AlertCountBean> totalShortCategory = getAlertCount(userIdList.get(1).toString());
+			for(int i=0;i<totalShortCategory.size();i++)
+			{
+				shortCategoryIdList.add(totalShortCategory.get(i).getCategoryId());
+			}
+		}
 
 		for(int i=0;i<shortCategoryIdList.size();i++){
 
@@ -377,7 +357,6 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			Integer categoryId=new Integer(shortCategoryIdList.get(i));
 			List<Object> alertsByCategories=getAlertsByCategories(categoryId,userIdList);
 			int unreadalerts=0;
-
 			for(int j=0;j<alertsByCategories.size();j++){
 
 				AlertInboxBean aib=(AlertInboxBean) alertsByCategories.get(j);
@@ -477,7 +456,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 					aib.setReceivedto("Admin");
 				}
 
-				if(aib.getRead().equals("false")){
+				if(!aib.getRead()){
 					unreadalerts++;
 				}
 
@@ -542,7 +521,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		joinAcAe.on(predicateCateIdStatus);
 		Join<Join<AlertCategory,AlertEvent>,Room> joinAcAeR=joinAcAe.join("roomTable",JoinType.LEFT);
 		Join<AlertCategory,AlertPrivilege> joinAcAp=rootAlCate.join("alertPrivilegeTable",JoinType.INNER);
-		Predicate predicateApUserId=builder.equal(joinAcAp.get(AlertPrivilege_.alert_privilege_user_id), new Integer(49));
+		Predicate predicateApUserId=builder.equal(joinAcAp.get(AlertPrivilege_.alert_privilege_user_id), userIdList.get(1));
 		joinAcAp.on(predicateApUserId);
 		Join<Join<AlertEvent,AlertCategory>,Chart> joinAeChart=joinAcAe.join("chartTable",JoinType.LEFT);
 		Join<Join<AlertEvent,AlertCategory>,EmployeeProfile> joinAeEmpFrom=joinAcAe.join("empProfileTableFrom",JoinType.LEFT);
@@ -698,8 +677,8 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 
 		Query query=em.createQuery(cq);
 		if(pagesize != -1){
-			query.setFirstResult((pageno-1)*20);	// Page no (offset)
-			query.setMaxResults(20);		// Page size (No of results)
+			query.setFirstResult((pageno-1)*pagesize);	// Page no (offset)
+			query.setMaxResults(pagesize);		// Page size (No of results)
 		}
 		List<Object> alertsResultList=query.getResultList();
 
@@ -723,7 +702,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 
 				AlertInboxBean aib=(AlertInboxBean) object;
 				String createdDateParsed="",createdDateTime="";
-
+				
 				//HH converts hour in 24 hours format (0-23), day calculation
 				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -921,7 +900,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			AlertEvent ae=alertEvent;
 			//Un highlight the alert
 			ae.setAlertEventRead(false);
-			ae.setAlertEventReadby(0);
+			ae.setAlertEventReadby(null);
 			ae.setAlertEventModifiedby(userId);
 			ae.removeAlertEventReadDate();
 			//Set modified date
@@ -1310,6 +1289,335 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 
 		deleteAlert(alertIdList, userId);
 		return alerts;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public List<Map<String, List<Object>>> getAlertsBasedOnSearch(String userId,
+			List<String> categoryIdList, String patientNameSearchValue,
+			String senderNameSearchValue, String receiverNameSearchValue,
+			String messageSearchValue, String fromDateSearchValue,
+			String toDateSearchValue) {
+		List<Map<String, List<Object>>> arrayAlertList=new ArrayList<Map<String,List<Object>>>();
+		
+		if(categoryIdList.get(0).equalsIgnoreCase("-1"))
+		{
+			List<AlertCountBean> totalShortCategory = getAlertCount(userId.toString());
+			for(int i=0;i<totalShortCategory.size();i++)
+			{
+				categoryIdList.add(totalShortCategory.get(i).getCategoryId());
+			}
+		}
+
+		for(int i=0;i<categoryIdList.size();i++){
+
+			List<Object> alertList=new ArrayList<Object>();
+			Integer categoryId=new Integer(categoryIdList.get(i));
+			List<Object> alertsByCategories=getAlertsBySearch(categoryId,userId,patientNameSearchValue,
+					senderNameSearchValue,receiverNameSearchValue,messageSearchValue,fromDateSearchValue,
+					toDateSearchValue);
+			int unreadalerts=0;
+			
+			//mapAlertsObject.put("alertcategory",new ArrayList<>());
+			if(alertsByCategories.size()>0)
+			{
+				Map mapAlertsObject=new HashMap();
+				for(int j=0;j<alertsByCategories.size();j++){
+	
+					AlertInboxBean aib=(AlertInboxBean) alertsByCategories.get(j);
+					String createdDateParsed="",createdDateTime="";
+	
+					//HH converts hour in 24 hours format (0-23), day calculation
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
+					Date dateFromDb = null;
+	
+					final String OLD_FORMAT3 =  "yyyy-MM-dd HH:mm:ss";
+	
+					SimpleDateFormat sdf = new SimpleDateFormat(OLD_FORMAT3);
+					Date currentDate = null;
+					try {
+						currentDate = sdf.parse(aib.getCurrentmilliseconds()+"");
+						dateFromDb = format.parse(aib.getCreateddate()+"");
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+	
+					//in milliseconds
+					long diff = currentDate.getTime() - dateFromDb.getTime();
+	
+					long diffSeconds = diff / 1000 % 60;
+					long diffMinutes = diff / (60 * 1000) % 60;
+					long diffHours = diff / (60 * 60 * 1000) % 24;
+					long diffDays = diff / (24 * 60 * 60 * 1000);
+	
+					String timeBuffer="";
+	
+					if(diffDays==0){
+						if(diffHours==0){
+							if(diffMinutes==0){
+								timeBuffer=diffSeconds+" secs";
+							}
+							else{
+								if(diffSeconds==0)
+									timeBuffer=diffMinutes+" mins ";
+								else
+									timeBuffer=diffMinutes+" mins "+diffSeconds+" secs";
+							}
+						}
+						else{
+							if(diffMinutes==0)
+								timeBuffer=diffHours+" hrs ";
+							else
+								timeBuffer=diffHours+" hrs "+diffMinutes+" mins ";
+						}
+					}
+					else{
+						if(diffHours==0)
+							timeBuffer=diffDays+" days ";
+						else
+							timeBuffer=diffDays+" days "+diffHours+" hrs ";
+					}
+	
+					createdDateTime=timeBuffer;		
+	
+					final String OLD_FORMAT = "yyyy-MM-dd";
+					final String NEW_FORMAT = "MM/dd/yyyy";
+	
+					// 2015-11-29
+					String oldDateString = aib.getCreateddate()+"";
+	
+					SimpleDateFormat sdf1 = new SimpleDateFormat(OLD_FORMAT);
+					Date d = null;
+					try {
+						d = sdf1.parse(oldDateString);
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+					sdf1.applyPattern(NEW_FORMAT);
+					createdDateParsed = sdf1.format(d);		//29/11/2015
+	
+	
+					if(aib.getFromid()==-100){
+						aib.setForwardedby("Patient");
+					}
+	
+					if(aib.getModifiedbyid()==-100){
+						aib.setModifiedbyname("Patient");
+					}
+	
+					if(aib.getToid()==0){
+						aib.setReceivedto("All");
+					}
+					else if(aib.getToid()==-1){
+						aib.setReceivedto("Doctors");
+					}
+					else if(aib.getToid()==-10){
+						aib.setReceivedto("Nurse Practitioner");
+					}
+					else if(aib.getToid()==-6){
+						aib.setReceivedto("MA");
+					}
+					else if(aib.getToid()==-7){
+						aib.setReceivedto("Office Manager");
+					}
+					else if(aib.getToid()==-2){
+						aib.setReceivedto("Nurse");
+					}
+					else if(aib.getToid()==-3){
+						aib.setReceivedto("Front Desk");
+					}
+					else if(aib.getToid()==-5){
+						aib.setReceivedto("Admin");
+					}
+	
+					if(!aib.getRead()){
+						unreadalerts++;
+					}
+	
+					aib.setCreateddate(createdDateParsed);
+					aib.setCreateddatetime(createdDateTime);
+	
+					if(j==0){
+						List<Object> alertCategoryDetailList=new ArrayList<Object>();
+						AlertCategoryBean acb=new AlertCategoryBean(
+								aib.getAlerttype(), 
+								aib.getQrflag(), 
+								aib.getSubpage(), 
+								aib.getStatus(), 
+								aib.getAlertgroup(), 
+								aib.getCategoryid(), 
+								aib.getDisplayname(), 
+								aib.getExpanded(), 
+								aib.getAlertsection(), 
+								aib.getActionmap(), 
+								aib.getCategoryorder(), 
+								aib.getCategoryname(), 
+								aib.getNeeddatewisegrouping(),
+								aib.getQrurl());
+						alertCategoryDetailList.add(acb);
+						mapAlertsObject.put("alertcategory",alertCategoryDetailList);
+					}
+					
+					alertList.add(aib);
+				}
+				mapAlertsObject.put("categorydetail", alertList);
+				mapAlertsObject.put("totalalerts",alertList.size());
+				mapAlertsObject.put("unreadalerts",unreadalerts);
+				arrayAlertList.add(mapAlertsObject);
+			}
+		}
+
+		return arrayAlertList;
+	}
+
+	
+	@SuppressWarnings("unchecked")
+	public List<Object> getAlertsBySearch(Integer categoryId, String userId, 
+			String patientNameSearchValue, String senderNameSearchValue, 
+			String receiverNameSearchValue, String messageSearchValue, 
+			String fromDateSearchValue, String toDateSearchValue) {
+		logger.trace("Creating alerts query.");
+		List<Integer> userIdList=constructUserList(userId);
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<AlertCategory> rootAlCate = cq.from(AlertCategory.class);
+		Join<AlertCategory,AlertEvent> joinAcAe=rootAlCate.join("alertEventCategoryId",JoinType.INNER);
+		Predicate[] predicateCateIdStatus = new Predicate[] {
+				joinAcAe.get(AlertEvent_.alertEventTo).in(userIdList),
+				builder.equal(joinAcAe.get(AlertEvent_.alertEventStatus), new Integer(1))
+		};
+		joinAcAe.on(predicateCateIdStatus);
+		Join<Join<AlertCategory,AlertEvent>,Room> joinAcAeR=joinAcAe.join("roomTable",JoinType.LEFT);
+		Join<AlertCategory,AlertPrivilege> joinAcAp=rootAlCate.join("alertPrivilegeTable",JoinType.INNER);
+		Predicate predicateApUserId=builder.equal(joinAcAp.get(AlertPrivilege_.alert_privilege_user_id), Integer.parseInt(userId));
+		joinAcAp.on(predicateApUserId);
+		Join<Join<AlertEvent,AlertCategory>,Chart> joinAeChart=joinAcAe.join("chartTable",JoinType.LEFT);
+		Join<Join<AlertEvent,AlertCategory>,EmployeeProfile> joinAeEmpFrom=joinAcAe.join("empProfileTableFrom",JoinType.LEFT);
+		Join<Join<AlertEvent,AlertCategory>,EmployeeProfile> joinAeEmpTo=joinAcAe.join("empProfileTableTo",JoinType.LEFT);
+		Join<Join<AlertEvent,AlertCategory>,EmployeeProfile> joinAeEmpReadBy=joinAcAe.join("empProfileTableReadBy",JoinType.LEFT);
+		Join<Join<AlertEvent,AlertCategory>,EmployeeProfile> joinAeEmpModBy=joinAcAe.join("empProfileTableModifiedBy",JoinType.LEFT);
+		Join<Join<AlertEvent,AlertCategory>,Encounter> joinAeEncId=joinAcAe.join("encounterTableId",JoinType.LEFT);
+		Join<Chart,PatientRegistration> joinChartPatReg=joinAeChart.join("patientRegistrationTable",JoinType.LEFT);
+		Join<Encounter,EmployeeProfile> joinEncEmp=joinAeEncId.join("empProfileEmpId",JoinType.LEFT);
+		
+		List<Predicate> predList = new LinkedList<Predicate>();
+		if(!patientNameSearchValue.equalsIgnoreCase("-1"))
+		{
+			Predicate patientNameSearchPred = builder.equal(joinAcAe.get(AlertEvent_.alertEventPatientId), Integer.parseInt(patientNameSearchValue));
+			predList.add(patientNameSearchPred);
+		}
+		if(!senderNameSearchValue.equalsIgnoreCase("-1"))
+		{
+			Predicate senderNameSearchPred = builder.equal(joinAeEmpFrom.get(EmployeeProfile_.empProfileEmpid), Integer.parseInt(senderNameSearchValue));
+			predList.add(senderNameSearchPred);
+		}
+		if(!receiverNameSearchValue.equalsIgnoreCase("-1"))
+		{
+			Predicate receiverNameSearchPred = builder.equal(joinAeEmpTo.get(EmployeeProfile_.empProfileEmpid), Integer.parseInt(receiverNameSearchValue));
+			predList.add(receiverNameSearchPred);
+		}
+		if(!messageSearchValue.equalsIgnoreCase("-1"))
+		{
+			Predicate messageSearchPred = builder.like(builder.lower(joinAcAe.get(AlertEvent_.alertEventMessage)), getLikePattern(messageSearchValue));
+			predList.add(messageSearchPred);
+		}
+		if((!fromDateSearchValue.equalsIgnoreCase("-1")))
+		{
+			Date fromDate = null;
+			try {
+				fromDate=new SimpleDateFormat("MM/dd/yyyy").parse(fromDateSearchValue);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			Predicate fromSearchPred = builder.greaterThanOrEqualTo(joinAcAe.get(AlertEvent_.alertEventCreatedDate), fromDate);
+			predList.add(fromSearchPred);
+		} 
+		if((!toDateSearchValue.equalsIgnoreCase("-1")))
+		{
+			Date toDate = null;
+			try {
+				toDate=new SimpleDateFormat("MM/dd/yyyy").parse(toDateSearchValue);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			Predicate toSearchPred = builder.lessThanOrEqualTo(joinAcAe.get(AlertEvent_.alertEventCreatedDate), toDate);
+			predList.add(toSearchPred);
+		}
+		Predicate searchCond = builder.and(predList.toArray(new Predicate[] {}));
+		Expression<Integer> exprCategoryId=joinAcAe.get(AlertEvent_.alertEventId);
+
+		cq.select(builder.construct(AlertInboxBean.class, 
+				joinAcAe.get(AlertEvent_.alertEventId).alias("eventId"),
+				rootAlCate.get(AlertCategory_.alertCategoryId),
+				joinAeChart.get(Chart_.chartId),
+				joinChartPatReg.get(PatientRegistration_.patientRegistrationAccountno).alias("accNo"),
+				joinAcAe.get(AlertEvent_.alertEventPatientName).alias("patientname"),
+				builder.coalesce(joinAcAeR.get(Room_.roomName),"-"),
+				rootAlCate.get(AlertCategory_.alertCategoryName),
+				rootAlCate.get(AlertCategory_.alertCategoryUrl),
+				rootAlCate.get(AlertCategory_.alertCategoryDisplayName),
+				rootAlCate.get(AlertCategory_.alertCategoryGroup),
+				rootAlCate.get(AlertCategory_.alertCategoryType),	
+				joinAcAe.get(AlertEvent_.alertEventFrom),
+				joinAcAe.get(AlertEvent_.alertEventTo),
+				joinAcAe.get(AlertEvent_.alertEventRefId),
+				joinAcAe.get(AlertEvent_.alertEventPatientId),
+				builder.coalesce(joinAcAe.get(AlertEvent_.alertEventParentalertid),0),
+				joinAcAe.get(AlertEvent_.alertEventEncounterId),
+				joinAcAe.get(AlertEvent_.alertEventMessage),
+				joinAcAe.get(AlertEvent_.alertEventModifiedby),
+				builder.function("to_char", String.class, joinAcAe.get(AlertEvent_.alertEventCreatedDate),builder.literal("yyyy-MM-dd HH:mm:ss")),
+				joinAeEmpFrom.get(EmployeeProfile_.empProfileFullname).alias("from"),
+				joinAeEmpTo.get(EmployeeProfile_.empProfileFullname).alias("to"),
+				joinAeEmpReadBy.get(EmployeeProfile_.empProfileFullname).alias("readBy"),
+				joinAeEmpModBy.get(EmployeeProfile_.empProfileFullname).alias("modifiedBy"),
+				builder.coalesce(joinAcAe.get(AlertEvent_.alertEventRead),true),
+				rootAlCate.get(AlertCategory_.alertCategoryUrlCaption),
+				rootAlCate.get(AlertCategory_.alertCategorySubpage),
+				builder.function("to_char", String.class, joinAcAe.get(AlertEvent_.alertEventModifiedDate),builder.literal("MM/dd/yyyy HH:MI:ss am")),
+				builder.coalesce(joinAcAe.get(AlertEvent_.alertEventHighlight),false),
+				rootAlCate.get(AlertCategory_.alertCategorySection),
+				rootAlCate.get(AlertCategory_.alertCategoryQrUrl),	
+				joinAcAe.get(AlertEvent_.alertEventStatus),
+				joinAcAp.get(AlertPrivilege_.alert_privilege_expanded),
+				rootAlCate.get(AlertCategory_.alertCategoryActionMap),
+				rootAlCate.get(AlertCategory_.alertCategoryDisplayOrder),
+				joinAcAp.get(AlertPrivilege_.alert_privilege_date_grouping_needed),
+				rootAlCate.get(AlertCategory_.alertCategoryQrFlag),
+				joinEncEmp.get(EmployeeProfile_.empProfileFullname),
+				builder.function("to_char", String.class, joinAcAe.get(AlertEvent_.alertEventCreatedDate),builder.literal("MM/dd/yyyy HH:MI:ss am")),
+				builder.currentTimestamp(),
+				builder.function("to_char", String.class, joinAcAe.get(AlertEvent_.alertEventCreatedDate),builder.literal("HH:MI am")),
+				joinChartPatReg.get(PatientRegistration_.patientRegistrationPhoneNo),
+				builder.coalesce(joinAcAe.get(AlertEvent_.alertEventReadby),0)
+				))
+				
+				.where(builder.isNotNull(exprCategoryId),
+						builder.equal(rootAlCate.get(AlertCategory_.alertCategoryId),categoryId),
+						searchCond)
+						.orderBy(builder.desc(joinAcAe.get(AlertEvent_.alertEventCreatedDate)));
+
+		Query query=em.createQuery(cq);
+
+		List<Object> alertsResultList=query.setMaxResults(10).getResultList();
+		System.out.println("sizxx "+alertsResultList.size());
+
+		return alertsResultList;
+	}
+	
+	/**
+	 * Returns the formatted the pattern
+	 * @param searchTerm
+	 * @return
+	 */
+	private static String getLikePattern(final String searchTerm) {
+		StringBuilder pattern = new StringBuilder();
+		pattern.append("%");
+		pattern.append(searchTerm.toLowerCase());
+		pattern.append("%");
+		return pattern.toString();
 	}
 
 }

@@ -105,6 +105,52 @@ public class AlertInboxController {
 		return alertsLists;
 	}
 
+	/**
+	 * To get the alerts based on the offset and limits.
+	 * @param userId
+	 * @param categoryIds
+	 * @param pageno
+	 * @param pagesize
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/getalertsBasedOnSearch", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getalertsBasedOnSearch(
+			 @RequestParam(value="userid", required=false, defaultValue="true") String userId, 
+			 @RequestParam(value="categoryids", required=false, defaultValue="-1") String categoryIds, 
+			 @RequestParam(value="patientNameSearchValue", required=false, defaultValue="") String patientNameSearchValue,
+			 @RequestParam(value="senderNameSearchValue", required=false, defaultValue="") String senderNameSearchValue,
+			 @RequestParam(value="receiverNameSearchValue", required=false, defaultValue="") String receiverNameSearchValue,
+			 @RequestParam(value="messageSearchValue", required=false, defaultValue="") String messageSearchValue,
+			 @RequestParam(value="fromDateSearchValue", required=false, defaultValue="") String fromDateSearchValue,
+			 @RequestParam(value="toDateSearchValue", required=false, defaultValue="") String toDateSearchValue) throws Exception{
+
+		logger.debug("Enters into get alerts");
+
+		List<String> categoryIdList=new ArrayList<String>();
+		String[] categoryIdArray = {"-1"};
+
+		List<Map<String, List<Object>>> alertsList;
+
+		if(!categoryIds.equals("-1")){
+			categoryIdArray=categoryIds.split(",");
+		}
+
+		for (String s : categoryIdArray) {
+			categoryIdList.add(s);
+		}
+
+		alertsList = alertInboxService.getAlertsBasedOnSearch(userId,categoryIdList,patientNameSearchValue,
+				senderNameSearchValue,receiverNameSearchValue,messageSearchValue,
+				fromDateSearchValue,toDateSearchValue);
+		
+		EMRResponseBean alertsLists=new EMRResponseBean();
+		alertsLists.setData(alertsList);
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+
+		return alertsLists;
+	}
 
 	/**
 	 * Get the category list with count based on the user id
@@ -137,7 +183,7 @@ public class AlertInboxController {
 			 @RequestParam(value="userid", required=false, defaultValue="") String userId, 
 			 @RequestParam(value="categoryid", required=false, defaultValue="-1") String categoryId, 
 			 @RequestParam(value="pageno", required=false, defaultValue="1") int pageno, 
-			 @RequestParam(value="pagesize", required=false, defaultValue="10") int pagesize){
+			 @RequestParam(value="pagesize", required=false, defaultValue="20") int pagesize){
 		logger.debug("Getting alerts by category id "+categoryId);
 		List<AlertInboxBean> alertInboxBeans=alertInboxService.getAlertsByCategory(userId,categoryId,pageno,pagesize);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");

@@ -3,11 +3,12 @@ package com.glenwood.glaceemr.server.application.services.alertinbox;
 public class AlertCountBean {
 
 	public AlertCountBean(long totalCount, int categoryId,
-			String categoryName, int categoryorder) {
+			String categoryName,long readCountValue,int categoryorder) {
 		super();
 		this.totalCount = totalCount;
 		this.categoryId = categoryId+"";
 		this.categoryName = categoryName;
+		this.UnReadCount = readCountValue;
 		this.categoryorder = categoryorder+"";
 	}
 
@@ -15,7 +16,7 @@ public class AlertCountBean {
 	String categoryId;
 	String categoryName;
 	String categoryorder;
-	Long unReadCount;
+	Long UnReadCount;
 	
 	public long getTotalCount() {
 		return totalCount;
@@ -42,11 +43,18 @@ public class AlertCountBean {
 		this.categoryorder = categoryorder;
 	}
 	public Long getUnReadCount() {
-		return unReadCount;
+		return UnReadCount;
 	}
 	public void setUnReadCount(Long unReadCount) {
-		this.unReadCount = unReadCount;
+		this.UnReadCount = unReadCount;
 	}
+	public Long getReadCountSum() {
+		return UnReadCount;
+	}
+	public void setReadCountSum(Long readCountSum) {
+		this.UnReadCount = readCountSum;
+	}
+	
 	
 
 }

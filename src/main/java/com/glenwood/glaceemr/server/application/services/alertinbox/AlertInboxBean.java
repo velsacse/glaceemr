@@ -4,42 +4,42 @@ import java.util.Date;
 
 public class AlertInboxBean {
 	
-	int alertid;
+	Integer alertid;
 	String roomname;
-	int alertgroup;
-	int parentid;
-	int modifiedbyid;
-	int readbyid;
+	Integer alertgroup;
+	Integer parentid;
+	Integer modifiedbyid;
+	Integer readbyid;
 	String redirecturl;
-	int chartid;
-	int fromid;
+	Integer chartid;
+	Integer fromid;
 	Boolean read;
 	String modifiedbyname;
-	int encounterid;
-	int toid;
+	Integer encounterid;
+	Integer toid;
 	String alert_category_url_caption;
 	String forwardedby;
-	int alerttype;
-	int subpage;
+	Integer alerttype;
+	Integer subpage;
 	String modifiedon;
 	String createddate;
 	String msg;
-	int categoryid;
+	Integer categoryid;
 	String readbyname;
 	String patientname;
-	int patientid;
+	Integer patientid;
 	String receivedto;
 	Boolean highprivilage;
 	String patientphnum;
-	int refid;
-	int alertsection;
+	Integer refid;
+	Integer alertsection;
 	String patientaccnum;
-	int qrflag;
+	Integer qrflag;
 	String displayname;
-	int status;
+	Integer status;
 	Boolean expanded;
-	int actionmap;
-	int categoryorder;
+	Integer actionmap;
+	Integer categoryorder;
 	String categoryname;
 	Boolean needdatewisegrouping;
 	String qrurl;
@@ -49,14 +49,16 @@ public class AlertInboxBean {
 	String createdtime;
 	String createddatetime;
 	
-
+	public AlertInboxBean(){
+		
+	}
 	
-	public AlertInboxBean(int alertid, int categoryid, int chartid, String patientaccnum, String patientname, String roomname, String categoryname,
-			String redirecturl, String displayname, int alertgroup, int alerttype, int fromid, int toid, int refid, int patientid, int parentid,
-			int encounterid, String msg, int modifiedbyid, String createddate, String forwardedby, String receivedto,String readbyname, String modifiedbyname,
-			boolean read, String alert_category_url_caption, int subpage, String modifiedon, boolean highprivilage, int alertsection, String qrurl, 
-			int status, boolean expanded, int actionmap, int categoryorder, boolean needdatewisegrouping, int qrflag, String servicedoctor, String readon, 
-			Date currentmilliseconds, String createdtime, String patientphnum, int readbyid) {
+	public AlertInboxBean(Integer alertid, Integer categoryid, Integer chartid, String patientaccnum, String patientname, String roomname, String categoryname,
+			String redirecturl, String displayname, Integer alertgroup, Integer alerttype, Integer fromid, Integer toid, Integer refid, Integer patientid, Integer parentid,
+			Integer encounterid, String msg, Integer modifiedbyid, String createddate, String forwardedby, String receivedto,String readbyname, String modifiedbyname,
+			boolean read, String alert_category_url_caption, Integer subpage, String modifiedon, boolean highprivilage, Integer alertsection, String qrurl, 
+			Integer status, boolean expanded, Integer actionmap, Integer categoryorder, boolean needdatewisegrouping, Integer qrflag, String servicedoctor, String readon, 
+			Date currentmilliseconds, String createdtime, String patientphnum, Integer readbyid) {
 		this.alertid = alertid;
 		this.roomname = roomname;
 		this.alertgroup = alertgroup;
@@ -102,10 +104,10 @@ public class AlertInboxBean {
 		this.createdtime = createdtime;
 	}
 	
-	public int getAlertid() {
+	public Integer getAlertid() {
 		return alertid;
 	}
-	public void setAlertid(int alertid) {
+	public void setAlertid(Integer alertid) {
 		this.alertid = alertid;
 	}
 	public String getRoomname() {
@@ -114,28 +116,28 @@ public class AlertInboxBean {
 	public void setRoomname(String roomname) {
 		this.roomname = roomname;
 	}
-	public int getAlertgroup() {
+	public Integer getAlertgroup() {
 		return alertgroup;
 	}
-	public void setAlertgroup(int alertgroup) {
+	public void setAlertgroup(Integer alertgroup) {
 		this.alertgroup = alertgroup;
 	}
-	public int getParentid() {
+	public Integer getParentid() {
 		return parentid;
 	}
-	public void setParentid(int parentid) {
+	public void setParentid(Integer parentid) {
 		this.parentid = parentid;
 	}
-	public int getModifiedbyid() {
+	public Integer getModifiedbyid() {
 		return modifiedbyid;
 	}
-	public void setModifiedbyid(int modifiedbyid) {
+	public void setModifiedbyid(Integer modifiedbyid) {
 		this.modifiedbyid = modifiedbyid;
 	}
-	public int getReadbyid() {
+	public Integer getReadbyid() {
 		return readbyid;
 	}
-	public void setReadbyid(int readbyid) {
+	public void setReadbyid(Integer readbyid) {
 		this.readbyid = readbyid;
 	}
 	public String getRedirecturl() {
@@ -144,16 +146,16 @@ public class AlertInboxBean {
 	public void setRedirecturl(String redirecturl) {
 		this.redirecturl = redirecturl;
 	}
-	public int getChartid() {
+	public Integer getChartid() {
 		return chartid;
 	}
-	public void setChartid(int chartid) {
+	public void setChartid(Integer chartid) {
 		this.chartid = chartid;
 	}
-	public int getFromid() {
+	public Integer getFromid() {
 		return fromid;
 	}
-	public void setFromid(int fromid) {
+	public void setFromid(Integer fromid) {
 		this.fromid = fromid;
 	}
 	public Boolean getRead() {
@@ -168,16 +170,16 @@ public class AlertInboxBean {
 	public void setModifiedbyname(String modifiedbyname) {
 		this.modifiedbyname = modifiedbyname;
 	}
-	public int getEncounterid() {
+	public Integer getEncounterid() {
 		return encounterid;
 	}
-	public void setEncounterid(int encounterid) {
+	public void setEncounterid(Integer encounterid) {
 		this.encounterid = encounterid;
 	}
-	public int getToid() {
+	public Integer getToid() {
 		return toid;
 	}
-	public void setToid(int toid) {
+	public void setToid(Integer toid) {
 		this.toid = toid;
 	}
 	public String getAlert_category_url_caption() {
@@ -192,16 +194,16 @@ public class AlertInboxBean {
 	public void setForwardedby(String forwardedby) {
 		this.forwardedby = forwardedby;
 	}
-	public int getAlerttype() {
+	public Integer getAlerttype() {
 		return alerttype;
 	}
-	public void setAlerttype(int alerttype) {
+	public void setAlerttype(Integer alerttype) {
 		this.alerttype = alerttype;
 	}
-	public int getSubpage() {
+	public Integer getSubpage() {
 		return subpage;
 	}
-	public void setSubpage(int subpage) {
+	public void setSubpage(Integer subpage) {
 		this.subpage = subpage;
 	}
 	public String getModifiedon() {
@@ -222,10 +224,10 @@ public class AlertInboxBean {
 	public void setMsg(String msg) {
 		this.msg = msg;
 	}
-	public int getCategoryid() {
+	public Integer getCategoryid() {
 		return categoryid;
 	}
-	public void setCategoryid(int categoryid) {
+	public void setCategoryid(Integer categoryid) {
 		this.categoryid = categoryid;
 	}
 	public String getReadbyname() {
@@ -240,10 +242,10 @@ public class AlertInboxBean {
 	public void setPatientname(String patientname) {
 		this.patientname = patientname;
 	}
-	public int getPatientid() {
+	public Integer getPatientid() {
 		return patientid;
 	}
-	public void setPatientid(int patientid) {
+	public void setPatientid(Integer patientid) {
 		this.patientid = patientid;
 	}
 	public String getReceivedto() {
@@ -264,16 +266,16 @@ public class AlertInboxBean {
 	public void setPatientphnum(String patientphnum) {
 		this.patientphnum = patientphnum;
 	}
-	public int getRefid() {
+	public Integer getRefid() {
 		return refid;
 	}
-	public void setRefid(int refid) {
+	public void setRefid(Integer refid) {
 		this.refid = refid;
 	}
-	public int getAlertsection() {
+	public Integer getAlertsection() {
 		return alertsection;
 	}
-	public void setAlertsection(int alertsection) {
+	public void setAlertsection(Integer alertsection) {
 		this.alertsection = alertsection;
 	}
 	public String getPatientaccnum() {
@@ -282,10 +284,10 @@ public class AlertInboxBean {
 	public void setPatientaccnum(String patientaccnum) {
 		this.patientaccnum = patientaccnum;
 	}
-	public int getQrflag() {
+	public Integer getQrflag() {
 		return qrflag;
 	}
-	public void setQrflag(int qrflag) {
+	public void setQrflag(Integer qrflag) {
 		this.qrflag = qrflag;
 	}
 	public String getDisplayname() {
@@ -294,10 +296,10 @@ public class AlertInboxBean {
 	public void setDisplayname(String displayname) {
 		this.displayname = displayname;
 	}
-	public int getStatus() {
+	public Integer getStatus() {
 		return status;
 	}
-	public void setStatus(int status) {
+	public void setStatus(Integer status) {
 		this.status = status;
 	}
 	public Boolean getExpanded() {
@@ -306,16 +308,16 @@ public class AlertInboxBean {
 	public void setExpanded(Boolean expanded) {
 		this.expanded = expanded;
 	}
-	public int getActionmap() {
+	public Integer getActionmap() {
 		return actionmap;
 	}
-	public void setActionmap(int actionmap) {
+	public void setActionmap(Integer actionmap) {
 		this.actionmap = actionmap;
 	}
-	public int getCategoryorder() {
+	public Integer getCategoryorder() {
 		return categoryorder;
 	}
-	public void setCategoryorder(int categoryorder) {
+	public void setCategoryorder(Integer categoryorder) {
 		this.categoryorder = categoryorder;
 	}
 	public String getCategoryname() {
@@ -361,7 +363,7 @@ public class AlertInboxBean {
 		this.createdtime = createdtime;
 	}
 	public String getCreateddatetime() {
-		return createdtime;
+		return createddatetime;
 	}
 	public void setCreateddatetime(String createddatetime) {
 		this.createddatetime = createddatetime;

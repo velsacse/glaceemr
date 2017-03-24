@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PatientRegistrationSearchBean;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chartcenter.ChartcenterService;
@@ -47,4 +50,17 @@ public class ChartcenterController {
 		result.setData(patients);
 			return result;
 	}
+	
+	@RequestMapping(value = "/searchByPatientName",method = RequestMethod.GET)
+	public EMRResponseBean   getSearchByPatientName(
+			@RequestParam(value="toSearchData",required = false)String toSearchData) throws Exception{
+		logger.debug("This is an info log entry");
+        
+		List<PatientRegistrationSearchBean> patients = patientSearchService.getPatientNameBySearch(toSearchData);
+		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		EMRResponseBean result=new EMRResponseBean();
+		result.setData(patients);
+			return result;
+	}
+	
 }
