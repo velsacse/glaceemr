@@ -126,7 +126,7 @@ public class TherapyLogBean {
 
 
 
-	public int getProviderId() {
+	public Integer getProviderId() {
 		return providerId;
 	}
 
@@ -144,7 +144,7 @@ public class TherapyLogBean {
 
 
 
-	public void setProviderId(int providerId) {
+	public void setProviderId(Integer providerId) {
 		this.providerId = providerId;
 	}
 

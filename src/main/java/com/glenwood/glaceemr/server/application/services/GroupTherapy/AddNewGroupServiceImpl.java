@@ -141,11 +141,13 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		if(groupId!=-1)
 			predicateByOpenSession.add(builder.equal(root.get(TherapySession_.therapySessionGroupId), groupId));
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(builder.equal(root.get(TherapySession_.therapySessionStatus), 1));
 		if(userId!=-1) {
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionProviderId), userId));
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionLeaderId), userId));
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionSupervisorId), userId));
+		}
+		else {
+			predicates.add(builder.equal(root.get(TherapySession_.therapySessionStatus), 1));
 		}
 		Selection[] selections= new Selection[] {
 				root.get(TherapySession_.therapySessionGroupId),
@@ -218,7 +220,16 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	@Override
 	public void saveNotes(List<AddNoteBean> data) throws Exception {
 		for(int i=0;i<data.size();i++){
-			if(data.get(i).getPatientDetailsId()==-1){
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+			Root<TherapySessionPatientDetails> rootCheck = cq.from(TherapySessionPatientDetails.class);
+			cq.multiselect(rootCheck.get(TherapySessionPatientDetails_.therapySessionPatientDetailsId));
+			Predicate predicateByPatientId=builder.equal(rootCheck.get(TherapySessionPatientDetails_.therapySessionDetailsPatientId), Integer.parseInt(data.get(i).getPatientId()));
+			Predicate predicateBySessionId=builder.equal(rootCheck.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId),data.get(i).getSessionId());
+			Predicate predicateByGwid=builder.equal(rootCheck.get(TherapySessionPatientDetails_.therapySessionPatientDetailsGwid),data.get(i).getGwid());
+			cq.where(predicateByPatientId,predicateBySessionId,predicateByGwid);
+			List<Object> resultset = em.createQuery(cq).getResultList();
+			if(data.get(i).getPatientDetailsId()==-1 && resultset.size() < 1){
 				 TherapySessionPatientDetails therapySessionPatientDetails = new TherapySessionPatientDetails();
 				 therapySessionPatientDetails.setTherapySessionPatientDetailsEnteredBy(data.get(i).getPatientDetailsModifiedBy());
 			     therapySessionPatientDetails.setTherapySessionPatientDetailsEnteredOn(therapyGroupRepository.findCurrentTimeStamp());
@@ -323,6 +334,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
         therapySession.setTherapySessionLeaderId(leaderList);
         therapySession.setTherapySessionSupervisorId(supervisorList);
         SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/yyyy kk:mm:ss");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         Date date = (Date) ft.parse(therapyDate);
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
         DateFormat mmformat=new SimpleDateFormat("yyyy-MM-dd");
@@ -336,6 +348,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
         for(int i=0;i<patientsSplit.length;i++){
             TherapySessionDetails therapyDetails = new TherapySessionDetails();
             therapyDetails.setTherapySessionDetailsPatientId(Integer.parseInt(patientsSplit[i]));
+            therapyDetails.setTherapySessionDetailsStartTime(timeFormat.format(date));
             if(therapyId==0)
                 therapyDetails.setTherapySessionDetailsSessionId(Integer.parseInt(therapySessionId));
             else

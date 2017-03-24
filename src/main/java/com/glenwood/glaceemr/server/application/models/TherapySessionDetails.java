@@ -94,7 +94,13 @@ public class TherapySessionDetails {
 	private String therapySessionDetailsDx8desc;
 	
 	@Column(name="therapy_session_details_end_reason")
-	private String therapysessiondetailsleftearlyreason;
+	private String therapySessionDetailsLeftEarlyReason;
+	
+	@Column(name="therapy_session_details_start_time")
+	private String therapySessionDetailsStartTime;
+	
+	@Column(name="therapy_session_details_start_late_reason")
+	private String therapySessionDetailsStartLateReason;
 	
 	
 	public String getTherapySessionDetailsDx1() {
@@ -225,13 +231,13 @@ public class TherapySessionDetails {
 		this.therapySessionDetailsDx8desc = therapySessionDetailsDx8desc;
 	}
 
-	public String getTherapysessiondetailsleftearlyreason() {
-		return therapysessiondetailsleftearlyreason;
+	public String getTherapySessionDetailsLeftEarlyReason() {
+		return therapySessionDetailsLeftEarlyReason;
 	}
 
-	public void setTherapysessiondetailsleftearlyreason(
-			String therapysessiondetailsleftearlyreason) {
-		this.therapysessiondetailsleftearlyreason = therapysessiondetailsleftearlyreason;
+	public void setTherapySessionDetailsLeftEarlyReason(
+			String therapySessionDetailsLeftEarlyReason) {
+		this.therapySessionDetailsLeftEarlyReason = therapySessionDetailsLeftEarlyReason;
 	}
 
 	public String getTherapySessionEndTime() {
@@ -342,5 +348,22 @@ public class TherapySessionDetails {
 	@JsonManagedReference
 	List<TherapySessionPatientDetails> therapySessionPatientDetails;
 	
-	
+
+	public String getTherapySessionDetailsStartTime() {
+		return therapySessionDetailsStartTime;
+	}
+
+	public void setTherapySessionDetailsStartTime(
+			String therapySessionDetailsStartTime) {
+		this.therapySessionDetailsStartTime = therapySessionDetailsStartTime;
+	}
+
+	public String getTherapySessionDetailsStartLateReason() {
+		return therapySessionDetailsStartLateReason;
+	}
+
+	public void setTherapySessionDetailsStartLateReason(
+			String therapySessionDetailsStartLateReason) {
+		this.therapySessionDetailsStartLateReason = therapySessionDetailsStartLateReason;
+	}
 }
