@@ -114,7 +114,7 @@ public class AlertInboxController {
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/getalertsBasedOnSearch", method = RequestMethod.GET)
+	@RequestMapping(value = "/search", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getalertsBasedOnSearch(
 			 @RequestParam(value="userid", required=false, defaultValue="true") String userId, 
@@ -141,7 +141,7 @@ public class AlertInboxController {
 			categoryIdList.add(s);
 		}
 
-		alertsList = alertInboxService.getAlertsBasedOnSearch(userId,categoryIdList,patientNameSearchValue,
+		alertsList = alertInboxService.searchAlerts(userId,categoryIdList,patientNameSearchValue,
 				senderNameSearchValue,receiverNameSearchValue,messageSearchValue,
 				fromDateSearchValue,toDateSearchValue);
 		

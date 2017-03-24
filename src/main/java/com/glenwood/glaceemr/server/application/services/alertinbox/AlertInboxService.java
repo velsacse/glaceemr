@@ -144,7 +144,7 @@ public interface AlertInboxService {
 	List<AlertEvent> forwardIcmAlert(Integer alertid, Integer userId, Integer encounterid,Integer patientid, Integer categoryid,
 			Integer forwardto, String message, Integer parentalertid);
 
-	List<Map<String, List<Object>>> getAlertsBasedOnSearch(String userId, List<String> categoryIdList,
+	List<Map<String, List<Object>>> searchAlerts(String userId, List<String> categoryIdList,
 			String patientNameSearchValue, String senderNameSearchValue,
 			String receiverNameSearchValue, String messageSearchValue,
 			String fromDateSearchValue, String toDateSearchValue);
