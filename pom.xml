@@ -263,11 +263,18 @@
 			<version>${postgresqljdbc.version}</version>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>commons-dbcp</groupId>
 			<artifactId>commons-dbcp</artifactId>
 			<version>${dbcp.version}</version>
-		</dependency>
+		</dependency> -->
+
+	<dependency>
+		<groupId>org.apache.tomcat</groupId>
+		<artifactId>tomcat-jdbc</artifactId>
+		<version>7.0.35</version>
+		<scope>provided</scope>
+	</dependency>
 
 		<!-- Jackson JSON Mapper -->
 		<dependency>
