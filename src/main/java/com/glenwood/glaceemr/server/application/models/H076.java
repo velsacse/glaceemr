@@ -21,6 +21,12 @@ public class H076 {
 		this.h076021= h076021;
 	}
 	
+	public H076(Integer h076001, String h076003, String h076005){
+		this.h076001= h076001;
+		this.h076003= h076003;
+		this.h076005= h076005;
+	}
+	
 	@Id
 	@Column(name="h076001")
 	private Integer h076001;

@@ -390,217 +390,152 @@ public class GenerateHeaderBean {
 		phoneList.clear();
 		faxList.clear();
 		mailList.clear();
-		address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'><tr>");
-		if(letterHeaderContent.getLetterHeaderContentFlag() == 1){				     // Default Practice
-			DefaultPracticeBean practiceBean =  genericPrintBean.getPracticeBean();
-			address.append("<td>");
-			if(practiceBean != null){				
-				if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1'|| addressFormat.charAt(4)=='1'|| addressFormat.charAt(5)=='1')
-					address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
-				if(addressFormat.charAt(1)=='1'){
-					address.append(generateField("",practiceBean.getPracticeStreet(),style));
-					String secondAddress=parseAddress(practiceBean.getPracticeCity(), practiceBean.getPracticeState(), practiceBean.getPracticeZip());
-					address.append(generateField("",secondAddress,style));
-				}
-				if(addressFormat.charAt(2)=='1'){					
-					String finalPhNum = practiceBean.getPracticePhoneNum();
-					try{
-						if(finalPhNum.indexOf("-")!=-1){
-							String[] arr= 	finalPhNum.split("-");
-							if(arr.length == 3)
-							finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
-						}
-					}catch(Exception e){
-						finalPhNum = practiceBean.getPracticePhoneNum();
-					}
-					address.append(generateField("Phone: ",finalPhNum,style));
-				}
-				if(addressFormat.charAt(3)=='1'){
-					String finalFaxNum = practiceBean.getPracticeFaxNum();
-					try{
-						if(finalFaxNum.indexOf("-")!=-1){
-							String[] arr= 	finalFaxNum.split("-");
-							if(arr.length == 3)
-								finalFaxNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
-						}
-					}catch(Exception e){
-						finalFaxNum = practiceBean.getPracticeFaxNum();
-					}
-					address.append(generateField("Fax: ",finalFaxNum,style));
-				}
-				if(addressFormat.charAt(4)=='1')
-				address.append(generateField("Email: ",practiceBean.getPracticeEmail(),style));
-				if(addressFormat.charAt(5)=='1')
-				address.append(generateField("Web: ",practiceBean.getPracticeWebAddress(),style));
-				if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1'|| addressFormat.charAt(4)=='1'|| addressFormat.charAt(5)=='1')
-					address.append("</table>");
-			}
-			address.append("</td>");
-		}
-		if(letterHeaderContent.getLetterHeaderContentFlag() == 2){				     // Place of Service
-			PatientDataBean patientBean=genericPrintBean.getPatientBean();
-			List<PosDataBean> posBean=patientBean.getPosDetails();
-			address.append("<td>");
-			if(posBean != null && posBean.size()>0 && posBean.get(0) != null){
-				if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1')
-					address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
-				if(addressFormat.charAt(1)=='1'){
-					address.append(generateField("",posBean.get(0).getPosAddress(),style));
-					address.append(generateField("",parseAddress(posBean.get(0).getPosCity(), posBean.get(0).getPosState(), posBean.get(0).getPosZip()),style));
-				}
-				if(addressFormat.charAt(2)=='1'){
-					String finalPhNum= posBean.get(0).getPosPhNum();
-					try{
-						if(finalPhNum.indexOf("-")!=-1){
-							String[] arr= 	finalPhNum.split("-");
-							if(arr.length == 3)
-								finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
-						}
-					}catch(Exception e){
-						finalPhNum = posBean.get(0).getPosPhNum();
-					}
-					address.append(generateField("Phone: ",finalPhNum,style));
-				}
-				if(addressFormat.charAt(3)=='1'){
-					String finalFaxNum= posBean.get(0).getPosFaxNum();
-					try{
-						if(finalFaxNum.indexOf("-")!=-1){
-							String[] arr= 	finalFaxNum.split("-");
-							if(arr.length == 3)
-								finalFaxNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
-						}
-					}catch(Exception e){
-						finalFaxNum = posBean.get(0).getPosFaxNum();
-					}
-					address.append(generateField("Fax: ",finalFaxNum,style));
-				}
-				if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1')
-					address.append("</table>");
-			}
-			address.append("</td>");
-		}
-		if(letterHeaderContent.getLetterHeaderContentFlag() == 3){					// All Practices
-			if(posList.size()<=0)
+		if(letterHeaderContent.getLetterHeaderContentFlag()!=7){	
+			address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'><tr>");
+			if(letterHeaderContent.getLetterHeaderContentFlag() == 1){				     // Default Practice
+				DefaultPracticeBean practiceBean =  genericPrintBean.getPracticeBean();
 				address.append("<td>");
-			for(int i=0; i< posList.size(); i++){
-				float width= (float)100/posList.size();
-				address.append("<td width='"+width+"%'>");
-				if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1')					
-					address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
-				PosDataBean posBean = genericPrintService.parsePOSDetail(posList.get(i).getPosTable());
-				if(addressFormat.charAt(1)=='1'){
-					address.append(generateField("",posBean.getPosAddress(),style));
-					address.append(generateField("",parseAddress(posBean.getPosCity(),posBean.getPosState(),posBean.getPosZip()),style));
-				}
-				if(addressFormat.charAt(2)=='1'){
-					String finalPhNum= posBean.getPosPhNum();
-					try{
-						if(finalPhNum.indexOf("-")!=-1){
-							String[] arr= 	finalPhNum.split("-");
-							if(arr.length == 3)
-								finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
-						}
-					}catch(Exception e){
-						finalPhNum = posBean.getPosPhNum();
-					}
-					address.append(generateField("Phone: ",finalPhNum,style));
-				}
-				if(addressFormat.charAt(3)=='1'){
-					String finalFaxNum= posBean.getPosFaxNum();
-					try{
-						if(finalFaxNum.indexOf("-")!=-1){
-							String[] arr= 	finalFaxNum.split("-");
-							if(arr.length == 3)
-								finalFaxNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
-						}
-					}catch(Exception e){
-						finalFaxNum = posBean.getPosFaxNum();
-					}
-					address.append(generateField("Fax: ",finalFaxNum,style));
-				}
-				if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1')
-					address.append("</table>");
-				address.append("</td>");
-			}
-			if(posList.size()<=0)
-				address.append("</td>");
-
-		}
-		if(letterHeaderContent.getLetterHeaderContentFlag() == 4){					// Principal Doctor Address
-			address.append("<td>");
-			EmployeeDataBean empBean =  genericPrintBean.getPatientBean().getPrincipalDr();				
-			if(empBean != null){
-				if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1')
-					address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
-				if(addressFormat.charAt(1)=='1'){
-					address.append(generateField("",empBean.getEmpAddress(),style));
-					address.append(generateField("",parseAddress(empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()),style));
-				}
-				if(addressFormat.charAt(2)=='1'){
-					String finalPhNum= empBean.getEmpPhNum();
-					try{
-						if(finalPhNum.indexOf("-")!=-1){
-							String[] arr= 	finalPhNum.split("-");
-							if(arr.length == 3)
-								finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
-						}
-					}catch(Exception e){
-						finalPhNum = empBean.getEmpPhNum();
-					}
-					address.append(generateField("Phone: ",finalPhNum,style));
-				}
-				if(addressFormat.charAt(4)=='1')
-				address.append(generateField("Email: ",empBean.getEmpMailId(),style));
-				if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1')
-					address.append("</table>");				
-			}
-			address.append("</td>");
-		}
-		if(letterHeaderContent.getLetterHeaderContentFlag() == 5){					// Service Doctor Address
-			address.append("<td>");
-			EmployeeDataBean empBean =  genericPrintBean.getPatientBean().getServiceDr();				
-			if(empBean != null){
-				if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1')
-					address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
-				if(addressFormat.charAt(1)=='1'){
-					address.append(generateField("",empBean.getEmpAddress(),style));
-					address.append(generateField("",parseAddress(empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()),style));
-				}
-				if(addressFormat.charAt(2)=='1'){
-					String finalPhNum= empBean.getEmpPhNum();
-					try{
-						if(finalPhNum.indexOf("-")!=-1){
-							String[] arr= 	finalPhNum.split("-");
-							if(arr.length == 3)
-								finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
-						}
-					}catch(Exception e){
-						finalPhNum = empBean.getEmpPhNum();
-					}
-					address.append(generateField("Phone: ",finalPhNum,style));
-				}
-				if(addressFormat.charAt(4)=='1')
-				address.append(generateField("Email: ",empBean.getEmpMailId(),style));
-				if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1')
-					address.append("</table>");
-			}
-			address.append("</td>");
-		}
-
-		if(letterHeaderContent.getLetterHeaderContentFlag() == 6){					// All Doctors Address
-			if(empList.size()<=0)
-				address.append("<td>");
-			for(int i=0; i< empList.size(); i++){				
-				EmployeeDataBean empBean = genericPrintService.parseEmployeeDetail1(empList.get(i));
-				if(empBean != null){
-					float width= (float)100/empList.size();
-					address.append("<td width='"+width+"%'>");
-					if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1'){						
+				if(practiceBean != null){				
+					if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1'|| addressFormat.charAt(4)=='1'|| addressFormat.charAt(5)=='1')
 						address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
-					}
 					if(addressFormat.charAt(1)=='1'){
-					address.append(generateField("",empBean.getEmpAddress(),style));
-					address.append(generateField("",parseAddress(empBean.getEmpCity(),empBean.getEmpState(),empBean.getEmpZip()),style));
+						address.append(generateField("",practiceBean.getPracticeStreet(),style));
+						String secondAddress=parseAddress(practiceBean.getPracticeCity(), practiceBean.getPracticeState(), practiceBean.getPracticeZip());
+						address.append(generateField("",secondAddress,style));
+					}
+					if(addressFormat.charAt(2)=='1'){					
+						String finalPhNum = practiceBean.getPracticePhoneNum();
+						try{
+							if(finalPhNum.indexOf("-")!=-1){
+								String[] arr= 	finalPhNum.split("-");
+								if(arr.length == 3)
+									finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+							}
+						}catch(Exception e){
+							finalPhNum = practiceBean.getPracticePhoneNum();
+						}
+						address.append(generateField("Phone: ",finalPhNum,style));
+					}
+					if(addressFormat.charAt(3)=='1'){
+						String finalFaxNum = practiceBean.getPracticeFaxNum();
+						try{
+							if(finalFaxNum.indexOf("-")!=-1){
+								String[] arr= 	finalFaxNum.split("-");
+								if(arr.length == 3)
+									finalFaxNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+							}
+						}catch(Exception e){
+							finalFaxNum = practiceBean.getPracticeFaxNum();
+						}
+						address.append(generateField("Fax: ",finalFaxNum,style));
+					}
+					if(addressFormat.charAt(4)=='1')
+						address.append(generateField("Email: ",practiceBean.getPracticeEmail(),style));
+					if(addressFormat.charAt(5)=='1')
+						address.append(generateField("Web: ",practiceBean.getPracticeWebAddress(),style));
+					if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1'|| addressFormat.charAt(4)=='1'|| addressFormat.charAt(5)=='1')
+						address.append("</table>");
+				}
+				address.append("</td>");
+			}
+			if(letterHeaderContent.getLetterHeaderContentFlag() == 2){				     // Place of Service
+				PatientDataBean patientBean=genericPrintBean.getPatientBean();
+				List<PosDataBean> posBean=patientBean.getPosDetails();
+				address.append("<td>");
+				if(posBean != null && posBean.size()>0 && posBean.get(0) != null){
+					if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1')
+						address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
+					if(addressFormat.charAt(1)=='1'){
+						address.append(generateField("",posBean.get(0).getPosAddress(),style));
+						address.append(generateField("",parseAddress(posBean.get(0).getPosCity(), posBean.get(0).getPosState(), posBean.get(0).getPosZip()),style));
+					}
+					if(addressFormat.charAt(2)=='1'){
+						String finalPhNum= posBean.get(0).getPosPhNum();
+						try{
+							if(finalPhNum.indexOf("-")!=-1){
+								String[] arr= 	finalPhNum.split("-");
+								if(arr.length == 3)
+									finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+							}
+						}catch(Exception e){
+							finalPhNum = posBean.get(0).getPosPhNum();
+						}
+						address.append(generateField("Phone: ",finalPhNum,style));
+					}
+					if(addressFormat.charAt(3)=='1'){
+						String finalFaxNum= posBean.get(0).getPosFaxNum();
+						try{
+							if(finalFaxNum.indexOf("-")!=-1){
+								String[] arr= 	finalFaxNum.split("-");
+								if(arr.length == 3)
+									finalFaxNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+							}
+						}catch(Exception e){
+							finalFaxNum = posBean.get(0).getPosFaxNum();
+						}
+						address.append(generateField("Fax: ",finalFaxNum,style));
+					}
+					if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1')
+						address.append("</table>");
+				}
+				address.append("</td>");
+			}
+			if(letterHeaderContent.getLetterHeaderContentFlag() == 3){					// All Practices
+				if(posList.size()<=0)
+					address.append("<td>");
+				for(int i=0; i< posList.size(); i++){
+					float width= (float)100/posList.size();
+					address.append("<td width='"+width+"%'>");
+					if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1')					
+						address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
+					PosDataBean posBean = genericPrintService.parsePOSDetail(posList.get(i).getPosTable());
+					if(addressFormat.charAt(1)=='1'){
+						address.append(generateField("",posBean.getPosAddress(),style));
+						address.append(generateField("",parseAddress(posBean.getPosCity(),posBean.getPosState(),posBean.getPosZip()),style));
+					}
+					if(addressFormat.charAt(2)=='1'){
+						String finalPhNum= posBean.getPosPhNum();
+						try{
+							if(finalPhNum.indexOf("-")!=-1){
+								String[] arr= 	finalPhNum.split("-");
+								if(arr.length == 3)
+									finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+							}
+						}catch(Exception e){
+							finalPhNum = posBean.getPosPhNum();
+						}
+						address.append(generateField("Phone: ",finalPhNum,style));
+					}
+					if(addressFormat.charAt(3)=='1'){
+						String finalFaxNum= posBean.getPosFaxNum();
+						try{
+							if(finalFaxNum.indexOf("-")!=-1){
+								String[] arr= 	finalFaxNum.split("-");
+								if(arr.length == 3)
+									finalFaxNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+							}
+						}catch(Exception e){
+							finalFaxNum = posBean.getPosFaxNum();
+						}
+						address.append(generateField("Fax: ",finalFaxNum,style));
+					}
+					if(addressFormat.charAt(1)=='1'|| addressFormat.charAt(2)=='1'|| addressFormat.charAt(3)=='1')
+						address.append("</table>");
+					address.append("</td>");
+				}
+				if(posList.size()<=0)
+					address.append("</td>");
+
+			}
+			if(letterHeaderContent.getLetterHeaderContentFlag() == 4){					// Principal Doctor Address
+				address.append("<td>");
+				EmployeeDataBean empBean =  genericPrintBean.getPatientBean().getPrincipalDr();				
+				if(empBean != null){
+					if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1')
+						address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
+					if(addressFormat.charAt(1)=='1'){
+						address.append(generateField("",empBean.getEmpAddress(),style));
+						address.append(generateField("",parseAddress(empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()),style));
 					}
 					if(addressFormat.charAt(2)=='1'){
 						String finalPhNum= empBean.getEmpPhNum();
@@ -608,9 +543,7 @@ public class GenerateHeaderBean {
 							if(finalPhNum.indexOf("-")!=-1){
 								String[] arr= 	finalPhNum.split("-");
 								if(arr.length == 3)
-									finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];								
-							}else if(finalPhNum.trim().length()==10){
-								finalPhNum = "("+ finalPhNum.substring(0, 3) + ") " + finalPhNum.substring(3, 6) + "-" + finalPhNum.substring(6, 10);
+									finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
 							}
 						}catch(Exception e){
 							finalPhNum = empBean.getEmpPhNum();
@@ -618,17 +551,86 @@ public class GenerateHeaderBean {
 						address.append(generateField("Phone: ",finalPhNum,style));
 					}
 					if(addressFormat.charAt(4)=='1')
-					address.append(generateField("Email: ",empBean.getEmpMailId(),style));
+						address.append(generateField("Email: ",empBean.getEmpMailId(),style));
+					if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1')
+						address.append("</table>");				
+				}
+				address.append("</td>");
+			}
+			if(letterHeaderContent.getLetterHeaderContentFlag() == 5){					// Service Doctor Address
+				address.append("<td>");
+				EmployeeDataBean empBean =  genericPrintBean.getPatientBean().getServiceDr();				
+				if(empBean != null){
+					if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1')
+						address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
+					if(addressFormat.charAt(1)=='1'){
+						address.append(generateField("",empBean.getEmpAddress(),style));
+						address.append(generateField("",parseAddress(empBean.getEmpCity(), empBean.getEmpState(), empBean.getEmpZip()),style));
+					}
+					if(addressFormat.charAt(2)=='1'){
+						String finalPhNum= empBean.getEmpPhNum();
+						try{
+							if(finalPhNum.indexOf("-")!=-1){
+								String[] arr= 	finalPhNum.split("-");
+								if(arr.length == 3)
+									finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];
+							}
+						}catch(Exception e){
+							finalPhNum = empBean.getEmpPhNum();
+						}
+						address.append(generateField("Phone: ",finalPhNum,style));
+					}
+					if(addressFormat.charAt(4)=='1')
+						address.append(generateField("Email: ",empBean.getEmpMailId(),style));
 					if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1')
 						address.append("</table>");
-					address.append("</td>");
 				}
-			}
-			if(empList.size()<=0)
 				address.append("</td>");
+			}
+
+			if(letterHeaderContent.getLetterHeaderContentFlag() == 6){					// All Doctors Address
+				if(empList.size()<=0)
+					address.append("<td>");
+				for(int i=0; i< empList.size(); i++){				
+					EmployeeDataBean empBean = genericPrintService.parseEmployeeDetail1(empList.get(i));
+					if(empBean != null){
+						float width= (float)100/empList.size();
+						address.append("<td width='"+width+"%'>");
+						if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1'){						
+							address.append("<table width='100%' style='text-align: center;' cellspacing='0' cellpadding='0'>");
+						}
+						if(addressFormat.charAt(1)=='1'){
+							address.append(generateField("",empBean.getEmpAddress(),style));
+							address.append(generateField("",parseAddress(empBean.getEmpCity(),empBean.getEmpState(),empBean.getEmpZip()),style));
+						}
+						if(addressFormat.charAt(2)=='1'){
+							String finalPhNum= empBean.getEmpPhNum();
+							try{
+								if(finalPhNum.indexOf("-")!=-1){
+									String[] arr= 	finalPhNum.split("-");
+									if(arr.length == 3)
+										finalPhNum = "("+ arr[0] + ") " + arr[1] + "-" + arr[2];								
+								}else if(finalPhNum.trim().length()==10){
+									finalPhNum = "("+ finalPhNum.substring(0, 3) + ") " + finalPhNum.substring(3, 6) + "-" + finalPhNum.substring(6, 10);
+								}
+							}catch(Exception e){
+								finalPhNum = empBean.getEmpPhNum();
+							}
+							address.append(generateField("Phone: ",finalPhNum,style));
+						}
+						if(addressFormat.charAt(4)=='1')
+							address.append(generateField("Email: ",empBean.getEmpMailId(),style));
+						if(addressFormat.charAt(1)=='1' || addressFormat.charAt(2)=='1' || addressFormat.charAt(4)=='1')
+							address.append("</table>");
+						address.append("</td>");
+					}
+				}
+				if(empList.size()<=0)
+					address.append("</td>");
+			}
+
+			address.append("</tr></table>");
 		}
-		
-		address.append("</tr></table>");
 		return address.toString();
 	}
 	

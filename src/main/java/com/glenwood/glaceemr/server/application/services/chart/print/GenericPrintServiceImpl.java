@@ -1232,54 +1232,56 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		String headerHTML="",patientHeaderHTML="",leftHeaderHTML="",footerHTML="";
 		String patientHeaderPage1="";
 		int pageVariant=0;
-
+		int headerRowCount=0;
 		try{
 
 			int encounterId=databean.getEncounterId();
 			GenericPrintBean genericPrintBean = getCompleteDetails(patientId, encounterId);
 
 			GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
-			int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
-			int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
-			int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
-			PatientDataBean patientDataBean=genericPrintBean.getPatientBean(); 
-			String[] patientDetailsArr=generatePatentDetailsArr(patientDataBean);
-
-			//Header row count is used to get the height of top margin for PDF
-			int headerRowCount=generateHeaderBean.getPatientHeaderAttributeCount(patientHeaderId, 1);
-
-			//Generate Letter header HTML
-			if(letterHeaderId>0){
-				headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedFolderPath, genericPrintBean);
-				if(!headerHTML.equalsIgnoreCase("")){
-					headerHTML=headerHTML.replaceAll("cellpadding='0'", "");
-					headerHTML="<head><style type='text/css' media='all'>td{padding-top:5px;}</style></head><body>"+headerHTML+"</body>";
-				}
-			}
-
-			//Generate Patient header HTML
-			patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
-			if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
-				patientHeaderPage1 = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
-			}else{
-				patientHeaderPage1 = patientHeaderHTML;
-			}
-
-			//Generate footer HTML along with page number style
-			if(footerId>0){
-				footerHTML=generateFooterBean.generateFooter(footerId);
-				pageVariant=generateFooterBean.getPageFormatForFooter(footerId);
-			}
-
-			//Generate Left side header HTML			
-			if(letterHeaderId>0){
-				leftHeaderHTML=generateHeaderBean.generateLeftHeader(letterHeaderId,genericPrintBean);
-				if(!leftHeaderHTML.equalsIgnoreCase("")){
-					leftHeaderHTML=leftHeaderHTML.replaceAll("cellpadding='0'", "");
-					leftHeaderHTML="<head><style type='text/css' media='all'>td{padding-top:7px;}</style></head><body>"+leftHeaderHTML+"</body>";
-				}
-			}
 			
+			if(genericPrintStyle!=null){
+				int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
+				int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
+				int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
+				PatientDataBean patientDataBean=genericPrintBean.getPatientBean(); 
+				String[] patientDetailsArr=generatePatentDetailsArr(patientDataBean);
+
+				//Header row count is used to get the height of top margin for PDF
+				headerRowCount=generateHeaderBean.getPatientHeaderAttributeCount(patientHeaderId, 1);
+
+				//Generate Letter header HTML
+				if(letterHeaderId>0){
+					headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedFolderPath, genericPrintBean);
+					if(!headerHTML.equalsIgnoreCase("")){
+						headerHTML=headerHTML.replaceAll("cellpadding='0'", "");
+						headerHTML="<head><style type='text/css' media='all'>td{padding-top:5px;}</style></head><body>"+headerHTML+"</body>";
+					}
+				}
+
+				//Generate Patient header HTML
+				patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
+				if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
+					patientHeaderPage1 = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
+				}else{
+					patientHeaderPage1 = patientHeaderHTML;
+				}
+
+				//Generate footer HTML along with page number style
+				if(footerId>0){
+					footerHTML=generateFooterBean.generateFooter(footerId);
+					pageVariant=generateFooterBean.getPageFormatForFooter(footerId);
+				}
+
+				//Generate Left side header HTML			
+				if(letterHeaderId>0){
+					leftHeaderHTML=generateHeaderBean.generateLeftHeader(letterHeaderId,genericPrintBean);
+					if(!leftHeaderHTML.equalsIgnoreCase("")){
+						leftHeaderHTML=leftHeaderHTML.replaceAll("cellpadding='0'", "");
+						leftHeaderHTML="<head><style type='text/css' media='all'>td{padding-top:7px;}</style></head><body>"+leftHeaderHTML+"</body>";
+					}
+				}
+			}
 			// Content of PDF
 			String contentHTML=URLDecoder.decode(databean.getHtmlData(),"UTF-8");
 
