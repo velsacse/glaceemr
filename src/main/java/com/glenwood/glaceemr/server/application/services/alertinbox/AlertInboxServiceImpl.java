@@ -1293,7 +1293,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public List<Map<String, List<Object>>> getAlertsBasedOnSearch(String userId,
+	public List<Map<String, List<Object>>> searchAlerts(String userId,
 			List<String> categoryIdList, String patientNameSearchValue,
 			String senderNameSearchValue, String receiverNameSearchValue,
 			String messageSearchValue, String fromDateSearchValue,
