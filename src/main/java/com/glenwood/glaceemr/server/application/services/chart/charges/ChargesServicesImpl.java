@@ -345,6 +345,7 @@ public class ChargesServicesImpl implements ChargesServices{
 				serviceInformation.setServiceDetailAnesEndtime(saveServicesBean.getAnesEndtime());
 				serviceInformation.setServiceDetailDontbill(1);
 				serviceInformation.setServiceDetailBillingReason(Integer.parseInt(defaultBillingReason));
+				serviceInformation.setServiceDetailDualinsStatus(-1);
 				serviceInformation.setServiceDetailDx1(saveServicesBean.getDx1());
 				serviceInformation.setServiceDetailDx2(saveServicesBean.getDx2());
 				serviceInformation.setServiceDetailDx3(saveServicesBean.getDx3());
