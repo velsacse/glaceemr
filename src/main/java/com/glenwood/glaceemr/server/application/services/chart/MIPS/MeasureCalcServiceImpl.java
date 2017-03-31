@@ -1,5 +1,8 @@
 package com.glenwood.glaceemr.server.application.services.chart.MIPS;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Procedure;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.QDM;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
+import com.glenwood.glaceemr.server.application.Bean.mailer.GlaceMailer;
 import com.glenwood.glaceemr.server.application.models.MacraConfiguration;
 import com.glenwood.glaceemr.server.application.models.MacraConfiguration_;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEntries;
@@ -169,6 +173,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	public Request getQDMRequestObject(Boolean considerProvider,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM) {
 		
 		Request finalReqObject = new Request();
+		
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
+		
 		try{
 
 			ExportQDM qdmData = new ExportQDM();
@@ -276,9 +284,53 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		}
 		catch(Exception e){
-			e.printStackTrace();
+			
+			try {
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = buildMailContentFormat("glace", patientID,"Error occurred while generating QDM Object",writer.toString());
+				
+				GlaceMailer.SendFaxReport(responseMsg,"glace");
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+
+			}
+			
 		}
+		
 		return finalReqObject;
+	}
+	
+	private String buildMailContentFormat(String accId, int patientId, String responseString, String exceptionTrace){
+		
+		String mailContent = "";
+		
+		mailContent += "<html><body><table border='1' cellspacing='10' cellpadding='10'>";
+		
+		mailContent += "<tr><td><b>Account Id: </b></td><td>"+accId+"</td></tr>";
+		
+		if(patientId!=-1){
+			mailContent += "<tr><td><b>Patient Id: </b></td><td>"+patientId+"</td></tr>";
+		}
+		
+		mailContent += "<tr><td><b>Error Message: </b></td><td>"+responseString+"</td></tr>";
+		
+		mailContent += "<tr><td><b>Exception Trace: </b></td><td>"+exceptionTrace+"</td></tr>";
+		
+		mailContent += "</table></body></html>";
+		
+		return mailContent;
+		
 	}
 
 	@Override
