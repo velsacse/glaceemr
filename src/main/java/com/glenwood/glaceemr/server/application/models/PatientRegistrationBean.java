@@ -245,7 +245,7 @@ public class PatientRegistrationBean {
 
 	private String patientRegistrationRace;
 
-	private Integer patientRegistrationEthnicity;
+	private String patientRegistrationEthnicity;
 
 	private String patientRegistrationPreferredLan;
 
@@ -1362,11 +1362,11 @@ public class PatientRegistrationBean {
 		this.patientRegistrationRace = patientRegistrationRace;
 	}
 
-	public Integer getPatientRegistrationEthnicity() {
+	public String getPatientRegistrationEthnicity() {
 		return patientRegistrationEthnicity;
 	}
 
-	public void setPatientRegistrationEthnicity(Integer patientRegistrationEthnicity) {
+	public void setPatientRegistrationEthnicity(String patientRegistrationEthnicity) {
 		this.patientRegistrationEthnicity = patientRegistrationEthnicity;
 	}
 
