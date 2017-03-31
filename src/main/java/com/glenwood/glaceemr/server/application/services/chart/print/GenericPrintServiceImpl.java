@@ -458,7 +458,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		String refPhyName = null;
 		String serviceRefName = null;
 		String ethinicity = isNull(patientDetails.getPatientRegistrationEthnicity());
-		String race = patientDetails.getPatientRegistrationRace();
+		String race = isNull(patientDetails.getPatientRegistrationRace());
 		String prefLang = patientDetails.getPatientRegistrationPreferredLan();
 
 		if(encounter != null) {
@@ -506,19 +506,21 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		//		List<Billinglookup> billingEthinicity = billinglookupRepository.findAll(BillingLookupSpecification.getDetails(ethinicity, race, prefLang));
 		if(ethinicity.isEmpty())
 			ethinicity="-1";
+		if(race.isEmpty())
+			race="-1";
 		JSONArray billingEthinicity = getLookupDetails(ethinicity, race, prefLang);
 
-		ethinicity = "-1";
+		ethinicity = "";
 		race = "";
 		prefLang = "";
 		if(billingEthinicity != null) {
 			for(int i=0; i<billingEthinicity.length(); i++) {
 				JSONObject bill = billingEthinicity.getJSONObject(i);
 				if(bill.get("group") != null && bill.getInt("group") == 251) {
-					ethinicity = bill.getString("name");
+					ethinicity = ethinicity + bill.getString("name");
 				}
 				if(bill.get("group") != null && bill.getInt("group") == 250) {
-					race = bill.getString("name");
+					race = race + bill.getString("name");
 				}
 				if(bill.get("group") != null && bill.getInt("group") == 253) {
 					prefLang = bill.getString("name");
@@ -561,10 +563,10 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
 		Root<Billinglookup> root= query.from(Billinglookup.class);
 
-		Predicate ethinPred= builder.equal(root.get(Billinglookup_.blookIntid), ethinicity);
+		Predicate ethinPred= root.get(Billinglookup_.blookIntid).in(ethinicity);
 		Predicate groupPred1 = builder.equal(root.get(Billinglookup_.blookGroup), 251);
 
-		Predicate racePred= builder.equal(root.get(Billinglookup_.blookIntid), race);
+		Predicate racePred= root.get(Billinglookup_.blookIntid).in(race);
 		Predicate groupPred2 = builder.equal(root.get(Billinglookup_.blookGroup), 250);
 
 		Predicate prefLangPred= builder.equal(root.get(Billinglookup_.blookIntid), prefLang);
@@ -1241,46 +1243,46 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
 			
 			if(genericPrintStyle!=null){
-				int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
-				int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
-				int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
-				PatientDataBean patientDataBean=genericPrintBean.getPatientBean(); 
-				String[] patientDetailsArr=generatePatentDetailsArr(patientDataBean);
+			int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
+			int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
+			int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
+			PatientDataBean patientDataBean=genericPrintBean.getPatientBean(); 
+			String[] patientDetailsArr=generatePatentDetailsArr(patientDataBean);
 
-				//Header row count is used to get the height of top margin for PDF
+			//Header row count is used to get the height of top margin for PDF
 				headerRowCount=generateHeaderBean.getPatientHeaderAttributeCount(patientHeaderId, 1);
 
-				//Generate Letter header HTML
-				if(letterHeaderId>0){
-					headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedFolderPath, genericPrintBean);
-					if(!headerHTML.equalsIgnoreCase("")){
-						headerHTML=headerHTML.replaceAll("cellpadding='0'", "");
-						headerHTML="<head><style type='text/css' media='all'>td{padding-top:5px;}</style></head><body>"+headerHTML+"</body>";
-					}
+			//Generate Letter header HTML
+			if(letterHeaderId>0){
+				headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedFolderPath, genericPrintBean);
+				if(!headerHTML.equalsIgnoreCase("")){
+					headerHTML=headerHTML.replaceAll("cellpadding='0'", "");
+					headerHTML="<head><style type='text/css' media='all'>td{padding-top:5px;}</style></head><body>"+headerHTML+"</body>";
 				}
+			}
 
-				//Generate Patient header HTML
-				patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
-				if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
-					patientHeaderPage1 = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
-				}else{
-					patientHeaderPage1 = patientHeaderHTML;
-				}
+			//Generate Patient header HTML
+			patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
+			if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
+				patientHeaderPage1 = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
+			}else{
+				patientHeaderPage1 = patientHeaderHTML;
+			}
 
-				//Generate footer HTML along with page number style
-				if(footerId>0){
-					footerHTML=generateFooterBean.generateFooter(footerId);
-					pageVariant=generateFooterBean.getPageFormatForFooter(footerId);
-				}
+			//Generate footer HTML along with page number style
+			if(footerId>0){
+				footerHTML=generateFooterBean.generateFooter(footerId);
+				pageVariant=generateFooterBean.getPageFormatForFooter(footerId);
+			}
 
-				//Generate Left side header HTML			
-				if(letterHeaderId>0){
-					leftHeaderHTML=generateHeaderBean.generateLeftHeader(letterHeaderId,genericPrintBean);
-					if(!leftHeaderHTML.equalsIgnoreCase("")){
-						leftHeaderHTML=leftHeaderHTML.replaceAll("cellpadding='0'", "");
-						leftHeaderHTML="<head><style type='text/css' media='all'>td{padding-top:7px;}</style></head><body>"+leftHeaderHTML+"</body>";
-					}
+			//Generate Left side header HTML			
+			if(letterHeaderId>0){
+				leftHeaderHTML=generateHeaderBean.generateLeftHeader(letterHeaderId,genericPrintBean);
+				if(!leftHeaderHTML.equalsIgnoreCase("")){
+					leftHeaderHTML=leftHeaderHTML.replaceAll("cellpadding='0'", "");
+					leftHeaderHTML="<head><style type='text/css' media='all'>td{padding-top:7px;}</style></head><body>"+leftHeaderHTML+"</body>";
 				}
+			}
 			}
 			// Content of PDF
 			String contentHTML=URLDecoder.decode(databean.getHtmlData(),"UTF-8");
