@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.models;
 
 
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -97,7 +98,7 @@ public class TherapySessionDetails {
 	private String therapySessionDetailsLeftEarlyReason;
 	
 	@Column(name="therapy_session_details_start_time")
-	private String therapySessionDetailsStartTime;
+	private Timestamp therapySessionDetailsStartTime;
 	
 	@Column(name="therapy_session_details_start_late_reason")
 	private String therapySessionDetailsStartLateReason;
@@ -349,12 +350,12 @@ public class TherapySessionDetails {
 	List<TherapySessionPatientDetails> therapySessionPatientDetails;
 	
 
-	public String getTherapySessionDetailsStartTime() {
+	public Timestamp getTherapySessionDetailsStartTime() {
 		return therapySessionDetailsStartTime;
 	}
 
 	public void setTherapySessionDetailsStartTime(
-			String therapySessionDetailsStartTime) {
+			Timestamp therapySessionDetailsStartTime) {
 		this.therapySessionDetailsStartTime = therapySessionDetailsStartTime;
 	}
 
