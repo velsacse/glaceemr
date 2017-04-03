@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GlaceMailer {
 
-	public static void SendFaxReport(String url_response, String accId) throws IOException {
+	public static void sendFailureReport(String url_response, String accId) throws IOException {
 
 		String URL ="https://mailer1.glaceemr.com/Mailer/sendMail";
 
@@ -27,7 +27,7 @@ public class GlaceMailer {
 
 		String subject = "MIPSPerformance Job Report failed for "+accId;
 
-		String[] toids = {"harikrishna@glenwoodsystems.com"};
+		String[] toids = {"harikrishna@glenwoodsystems.com","ranjitha@glenwoodsystems.com"};
 
 		String[] ccids = {""};
 

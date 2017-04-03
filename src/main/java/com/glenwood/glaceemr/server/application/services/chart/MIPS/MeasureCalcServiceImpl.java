@@ -291,7 +291,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = buildMailContentFormat("glace", patientID,"Error occurred while generating QDM Object",writer.toString());
 				
-				GlaceMailer.SendFaxReport(responseMsg,"glace");
+				GlaceMailer.sendFailureReport(responseMsg,"glace");
 				
 			} catch (Exception e1) {
 				

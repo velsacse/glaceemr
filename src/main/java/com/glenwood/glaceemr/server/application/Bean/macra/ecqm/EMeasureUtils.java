@@ -9,6 +9,9 @@ package com.glenwood.glaceemr.server.application.Bean.macra.ecqm;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -30,6 +33,7 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.LabTest;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Negation;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.PhysicalExam;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Procedure;
+import com.glenwood.glaceemr.server.application.Bean.mailer.GlaceMailer;
 
 public class EMeasureUtils {
 
@@ -163,18 +167,69 @@ public class EMeasureUtils {
 	}
 	
 	public List<EMeasure> getMeasureBeanDetails(String measureIds, String sharedPath) throws Exception{
-		
+
 		List<EMeasure> measureInfo = new ArrayList<EMeasure>();
-	    
-	    for(int i=0;i<measureIds.split(",").length;i++){
-	    	
-	    	int measureId = Integer.parseInt(measureIds.split(",")[i]);
-	    	
-	    	measureInfo.add(getMeasureInfo(measureId, sharedPath));
-	    	
-	    }
-	    
-	    return measureInfo;
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
+
+		try{
+
+			for(int i=0;i<measureIds.split(",").length;i++){
+
+				int measureId = Integer.parseInt(measureIds.split(",")[i]);
+
+				measureInfo.add(getMeasureInfo(measureId, sharedPath));
+
+			}
+
+		}catch(Exception e){
+			
+			try {
+
+				e.printStackTrace(printWriter);
+
+				String responseMsg = buildMailContentFormat("glace", -1,"Error occurred while getting codelist",writer.toString());
+
+				GlaceMailer.sendFailureReport(responseMsg,"glace");
+
+			} catch (Exception e1) {
+
+				e1.printStackTrace();
+
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+
+				e.printStackTrace();
+
+			}
+			
+		}
+
+		return measureInfo;
+
+	}
+	
+	private String buildMailContentFormat(String accId, int patientId, String responseString, String exceptionTrace){
+		
+		String mailContent = "";
+		
+		mailContent += "<html><body><table border='1' cellspacing='10' cellpadding='10'>";
+		
+		mailContent += "<tr><td><b>Account Id: </b></td><td>"+accId+"</td></tr>";
+		
+		if(patientId!=-1){
+			mailContent += "<tr><td><b>Patient Id: </b></td><td>"+patientId+"</td></tr>";
+		}
+		
+		mailContent += "<tr><td><b>Error Message: </b></td><td>"+responseString+"</td></tr>";
+		
+		mailContent += "<tr><td><b>Exception Trace: </b></td><td>"+exceptionTrace+"</td></tr>";
+		
+		mailContent += "</table></body></html>";
+		
+		return mailContent;
 		
 	}
 	

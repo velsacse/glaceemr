@@ -364,15 +364,9 @@ Root<Encounter> root = cq.from(Encounter.class);
             cal.add(Calendar.YEAR, range);
             Date startDate = cal.getTime();
             Predicate dateRange=builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate);
-            if(considerProvider)
-            cq.where(builder.and(patId,status,dateRange,byProvider));
-            else
-            	cq.where(builder.and(patId,status,dateRange));
+           	cq.where(builder.and(patId,status,dateRange));
         }
         else{
-        	if(considerProvider)
-        	cq.where(builder.and(patId,status,byProvider));
-        	else
             cq.where(builder.and(patId,status));
         }
         
@@ -453,15 +447,9 @@ Root<Encounter> root = cq.from(Encounter.class);
 			cal.add(Calendar.YEAR, range);
 			Date startDate = cal.getTime();
 			Predicate dateRange=builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate);
-			if(considerProvider)
-			cq.where(builder.and(patId,status,dateRange,activeMed,byProvider));
-			else
 			cq.where(builder.and(patId,status,dateRange,activeMed));	
 		}
 		else{
-			if(considerProvider)
-			cq.where(builder.and(patId,status,activeMed,byProvider));
-			else
 			cq.where(builder.and(patId,status,activeMed));
 		}
 
@@ -526,19 +514,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		};
 		
 		cq.select(builder.construct(InvestigationQDM.class,selections));
-		Predicate[] restrictions=null;
-		if(considerProvider){
-			restrictions = new Predicate[] {
-					builder.equal(EncLabJoin.get(Encounter_.encounter_service_doctor), providerId),
-					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientID),
-					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
-					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
-					builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
-					hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
-			};
-			}
-			else
-				restrictions = new Predicate[] {
+		Predicate[] restrictions= new Predicate[] {
 					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientID),
 					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
 					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
@@ -618,7 +594,12 @@ Root<Encounter> root = cq.from(Encounter.class);
 				
 				
 			}
-			completeInvestigationDetails.add(investigationObj);
+			
+			if(parameterDetails.size() == 0){
+				completeInvestigationDetails = procedureForLabs;
+			}else{
+				completeInvestigationDetails.add(investigationObj);
+			}
 			
 		}
 		
@@ -816,9 +797,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Predicate predicateBytestStatus1=builder.notEqual(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),7);
 		Predicate byProvider=builder.equal(EncLabJoin.get(Encounter_.encounter_service_doctor), providerId);
 		
-		if(considerProvider)
-		cq.where(predicateBytestStatus,predicateBytestStatus1,byProvider);
-		else
 		cq.where(predicateBytestStatus,predicateBytestStatus1);
 		
 		cq.distinct(true);
@@ -1109,38 +1087,14 @@ Root<Encounter> root = cq.from(Encounter.class);
 					root.get(PatientClinicalElements_.patientClinicalElementsValue).alias("patientResult")
 			};
 
-			Predicate[] restrictions=null;
-			if(considerProvider)
-			 restrictions = new Predicate[] {
-					builder.equal(EncElementJoin.get(Encounter_.encounter_service_doctor), providerId),
+			Predicate[] restrictions = new Predicate[] {
 					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
 					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),            
 					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),  
 					builder.or((clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).in(snomedCodeList)),(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).in(snomedCodeList))),  
 
 			};
-			else
-				restrictions = new Predicate[] {
-					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
-					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),            
-					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),  
-					builder.or((clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).in(snomedCodeList)),(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).in(snomedCodeList))),  
-
-			};
-			Predicate[] restrictionsWithDate=null;
-			if(considerProvider)
-					restrictionsWithDate = new Predicate[] {
-					builder.equal(EncElementJoin.get(Encounter_.encounter_service_doctor), providerId),
-					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
-					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),              
-					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),      
-					builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,EncElementJoin.get(Encounter_.encounterDate)),startDate),
-					builder.lessThanOrEqualTo(builder.function("DATE", Date.class,EncElementJoin.get(Encounter_.encounterDate)),endDate),                                                
-					builder.or((clinicalElementsJoin.get(ClinicalElements_.clinicalElementsSnomed).in(snomedCodeList)),(codeSystemJoin.get(CNMCodeSystem_.cnmCodeSystemCode).in(snomedCodeList)))  
-
-			};
-			else
-				restrictionsWithDate = new Predicate[] {
+			Predicate[] restrictionsWithDate = new Predicate[] {
 					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientId),
 					builder.equal(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsIsactive), true),              
 					builder.or(builder.and(checkCodeNotNull,checkCodeNotEmpty),builder.and(checkSnomedCodeNotNull,checkSnomedCodeNotEmpty)),      
