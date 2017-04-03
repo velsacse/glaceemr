@@ -104,7 +104,7 @@ public class FileDetails {
 	@OneToMany(mappedBy="fileNameDetails")
 	@JsonManagedReference
 	private List<FileName> fileName;
-
+	
 	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="filedetails_categoryid", referencedColumnName="patient_doc_category_id", insertable=false,updatable=false)

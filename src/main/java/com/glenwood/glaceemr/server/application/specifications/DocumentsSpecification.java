@@ -12,6 +12,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
@@ -85,7 +86,7 @@ public class DocumentsSpecification {
 
 	/**
 	 * To get the list of files 
-	 * @param fileDetailsId
+	 * @param scanid
 	 * @return
 	 */
 	public static Specification<FileDetails> getFileList(final String fileDetailsId){
@@ -107,17 +108,23 @@ public class DocumentsSpecification {
 
 	/**
 	 * To get Info about documents
-	 * @param fileNameId
+	 * @param fileIds
 	 * @return
 	 */
-	public static Specification<FileName> getInfo(final int fileNameId){
+	public static Specification<FileName> getInfo(final String fileIds){
 		return new Specification<FileName>() {
 
 			@Override
 			public Predicate toPredicate(Root<FileName> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				root.fetch(FileName_.createdByEmpProfileTable,JoinType.LEFT);
-				Predicate fileId=root.get(FileName_.filenameId).in(fileNameId);
+				String list[]=fileIds.split(",");
+				List<Integer> fileDetailsIdl=new ArrayList<Integer>();
+				for(int i=0;i<list.length;i++){
+					fileDetailsIdl.add(Integer.parseInt(list[i].trim()));	
+				}
+				
+				Predicate fileId=root.get(FileName_.filenameId).in(fileDetailsIdl);
 				return query.where(fileId).getRestriction();
 			}	
 		};
@@ -418,6 +425,51 @@ public class DocumentsSpecification {
 				return query.getRestriction();
 			}
 			
+		};
+	}
+	
+	/**
+	 * To review a single file by fileNameId
+	 * @param fileNameId
+	 * @return
+	 */
+	public static Specification<FileName> byfileNameIds(final List<String> fileNameId){
+		return new Specification<FileName>() {
+
+			@Override
+			public Predicate toPredicate(Root<FileName> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate predicate=root.get(FileName_.filenameId).in(fileNameId);
+				Join<FileName, FileDetails> fileDetailsJoin = root.join(FileName_.fileNameDetails,JoinType.INNER);
+				Join<FileDetails, PatientDocumentsCategory> patDocCatJoin = fileDetailsJoin.join(FileDetails_.patientDocCategory,JoinType.INNER);
+				
+				root.fetch(FileName_.fileNameDetails,JoinType.INNER);
+				fileDetailsJoin.fetch(FileDetails_.patientDocCategory,JoinType.INNER);
+				return predicate;
+			}
+
+		};
+
+	}
+
+	public static Specification<AlertPatientDocMapping> getalertsByFileId(final Integer filenameId) {
+		return new Specification<AlertPatientDocMapping>() {
+
+			@Override
+			public Predicate toPredicate(Root<AlertPatientDocMapping> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate p1 = root.get(AlertPatientDocMapping_.forwardedFiledetailsId).in(filenameId.toString());
+				Predicate p2 = cb.like(root.get(AlertPatientDocMapping_.forwardedFiledetailsId), filenameId+",%");
+				Predicate p3 = cb.like(root.get(AlertPatientDocMapping_.forwardedFiledetailsId), "%,"+filenameId+",%");
+				Predicate p4 = cb.like(root.get(AlertPatientDocMapping_.forwardedFiledetailsId), "%,"+filenameId);
+				/*cb.or(root.get(AlertPatientDocMapping_.forwardedFiledetailsId).in(filenameId),
+						cb.or(cb.like(root.get(AlertPatientDocMapping_.forwardedFiledetailsId), filenameId+",%"), 
+						cb.like(root.get(AlertPatientDocMapping_.forwardedFiledetailsId), "%,"+filenameId+",%")));
+				*/
+				query.where(cb.or(p1,p2,p3,p4));
+				return query.getRestriction();
+			}
+
 		};
 	}
 

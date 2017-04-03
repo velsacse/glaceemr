@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.Bean.DocumentsCategoryBean;
+import com.glenwood.glaceemr.server.application.Bean.FileNameDetailsBean;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.AlertPatientDocMapping;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
@@ -102,7 +103,7 @@ public class DocumentsController {
 	@RequestMapping(value="/getFileList",method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getFileList(@RequestParam(value="fileDetailsId", required= true, defaultValue="-1")String fileDetailsId) throws Exception{
-		FileDetails fileDetails=documentsService.getFileList(fileDetailsId);
+		List<FileDetails> fileDetails=documentsService.getFileList(fileDetailsId);
 		EMRResponseBean result= new EMRResponseBean();
 		result.setData(fileDetails);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.DOCUMENT, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting documents file list.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "fileDetailsId="+fileDetailsId, LogUserType.USER_LOGIN, "", "");
@@ -120,7 +121,7 @@ public class DocumentsController {
 	@ResponseBody
 	public EMRResponseBean getInfo(@RequestParam(value="fileNameId", required= true, defaultValue="-1") Integer fileNameId
 			) throws Exception{
-		List<FileName> fileName=documentsService.getInfo(fileNameId);
+		List<FileName> fileName=documentsService.getInfo(fileNameId.toString());
 		EMRResponseBean result= new EMRResponseBean();
 		result.setData(fileName);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.DOCUMENT, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting documents file info.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "fileNameId="+fileNameId, LogUserType.USER_LOGIN, "", "");
@@ -245,7 +246,7 @@ public class DocumentsController {
 	public EMRResponseBean alertByCategory(
 			@RequestParam(value="alertId",required=true)String alertId,
 			@RequestParam(value="patientId",required= false, defaultValue="-1") Integer patientId){
-		FileDetails alertPatientDocMapping=documentsService.alertByCategory(alertId,patientId);
+		List<FileNameDetailsBean> alertPatientDocMapping=documentsService.alertByCategory(alertId,patientId);
 		EMRResponseBean result= new EMRResponseBean();
 		result.setData(alertPatientDocMapping);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.DOCUMENT, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting documents file by alert id.", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "alertId="+alertId, LogUserType.USER_LOGIN, "", "");
@@ -330,5 +331,5 @@ public class DocumentsController {
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CONSENTFORM, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Saving consent forms", sessionMap.getUserID(), request.getRemoteAddr(), -1,"patientId="+patientId, LogUserType.USER_LOGIN, "", "");
 		return result;
 	}
-
+	
 }

@@ -3,7 +3,9 @@ package com.glenwood.glaceemr.server.application.services.Documents;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -26,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 
 
 import com.glenwood.glaceemr.server.application.Bean.DocumentsCategoryBean;
+import com.glenwood.glaceemr.server.application.Bean.FileNameDetailsBean;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.AlertEvent_;
 import com.glenwood.glaceemr.server.application.models.AlertPatientDocMapping;
@@ -52,6 +55,7 @@ import com.glenwood.glaceemr.server.application.repositories.FileNameRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientDocumentsCategoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientSignatureRepository;
+import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxService;
 import com.glenwood.glaceemr.server.application.specifications.DocumentsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -115,6 +119,9 @@ public  class DocumentsServiceImpl implements DocumentsService{
 
 	@Autowired
 	HttpServletRequest request;
+	
+	@Autowired
+	AlertInboxService alertInboxService;
 
 	JSONObject result=null;
 
@@ -176,32 +183,32 @@ public  class DocumentsServiceImpl implements DocumentsService{
 
 	/**
 	 * To get the list of files 
-	 * @param fileDetailsId
+	 * @param scanid
 	 * @return
 	 * @throws Exception
 	 */
 	@Override
-	public FileDetails getFileList(String fileDetailsId) {
+	public List<FileDetails> getFileList(String scanid) {
 		List<FileDetails> fileDetails=null;
-		fileDetails=fileDetailsRepository.findAll(DocumentsSpecification.getFileList(fileDetailsId));
-		FileDetails fileDetail=null;
+		fileDetails=fileDetailsRepository.findAll(DocumentsSpecification.getFileList(scanid));
+		/*FileDetails fileDetail=null;
 		if(fileDetails.size()>0){
 			fileDetail=fileDetails.get(0);
-		}
+		}*/
 
-		return fileDetail;
+		return fileDetails;
 	}
 
 	/**
 	 * To get Info about documents
-	 * @param fileNameId
+	 * @param fileIds
 	 * @return
 	 * @throws Exception
 	 */
 	@Override
-	public List<FileName> getInfo(int fileNameId) {
+	public List<FileName> getInfo(String fileIds) {
 		List<FileName> fileName=null;
-		fileName = fileNameRepository.findAll(DocumentsSpecification.getInfo(fileNameId));
+		fileName = fileNameRepository.findAll(DocumentsSpecification.getInfo(fileIds));
 		return fileName;
 	}
 
@@ -300,6 +307,7 @@ public  class DocumentsServiceImpl implements DocumentsService{
 	@Override
 	public List<FileDetails> reviewGroupOfDocs(String fileDetailsId,
 			int categoryId, int patientId, int userId) {
+		List<Integer> fileNameId = new ArrayList<Integer>();
 		List<FileDetails> fileDetails=fileDetailsRepository.findAll(DocumentsSpecification.byFileDetailsId(fileDetailsId,categoryId,patientId,userId));
 		Date date= new Date();
 		for(int i=0;i<fileDetails.size();i++){
@@ -310,12 +318,72 @@ public  class DocumentsServiceImpl implements DocumentsService{
 				fileName.setFilenameReviewedby(userId);
 				fileName.setFilenameReviewedon(new Timestamp(date.getTime()));
 				fileNameRepository.saveAndFlush(fileName);
+				fileNameId.add(fileName.getFilenameId());
 			}
-
 		}
-
+		
+		Set<Integer> stringsSet = new LinkedHashSet<Integer>();//A Linked hash set 
+		//prevents the adding order of the elements
+		for (Integer value: fileNameId) {
+		    stringsSet.add(value);
+		}
+		List<Integer> dupList = new ArrayList<Integer>(stringsSet);
+		
+		checkReviewed(dupList,userId);
 		return fileDetails;
 	}
+
+	public void checkReviewed(List<Integer> filenameId,int userId) {
+		for(int i=0;i<filenameId.size();i++)
+		{
+			List<AlertPatientDocMapping> alertPatientDocMapping= alertPatientDocMappingRepository.findAll(DocumentsSpecification.getalertsByFileId(filenameId.get(i)));
+			if(alertPatientDocMapping.size()>0)
+			{
+				for(int j=0;j<alertPatientDocMapping.size();j++)
+				{
+					List<Boolean> isReviewDetails = new ArrayList<Boolean>();
+					AlertPatientDocMapping alertpatDocMap = alertPatientDocMapping.get(j);
+					int alertId = alertpatDocMap.getAlertId();
+					String fileDetailsIds = alertpatDocMap.getForwardedFiledetailsId();
+					if(fileDetailsIds.contains(","))
+					{
+						String fileNameId[] = fileDetailsIds.split(",");
+						for(int k=0;k<fileNameId.length;k++)
+						{
+							String fileId = fileNameId[k];
+							if(!filenameId.contains(fileId))
+							{
+								List<FileName> fileNameList=fileNameRepository.findAll(DocumentsSpecification.byfileNameId(Integer.parseInt(fileId.trim())));
+								isReviewDetails.add(fileNameList.get(0).getFilenameIsreviewed());
+							}
+						}
+					}
+					else
+					{
+						List<FileName> fileNameList=fileNameRepository.findAll(DocumentsSpecification.byfileNameId(Integer.parseInt(fileDetailsIds.trim())));
+						isReviewDetails.add(fileNameList.get(0).getFilenameIsreviewed());
+					}
+					
+					if(!isReviewDetails.contains(false))
+					{
+						deleteAlertInPatDocMap(alertId);
+						List<Integer> alertIdList = new ArrayList<Integer>();
+						alertIdList.add(alertId);
+						alertInboxService.deleteAlert(alertIdList, userId);
+					}
+				}
+			}
+		}
+	}
+
+
+
+	public void deleteAlertInPatDocMap(int alertId) {
+		List<AlertPatientDocMapping> alertPatientDocMapping= alertPatientDocMappingRepository.findAll(DocumentsSpecification.getalertByCategory(Integer.toString(alertId)));
+		alertPatientDocMappingRepository.deleteInBatch(alertPatientDocMapping);
+	}
+
+
 
 	/**
 	 * To review a single file
@@ -334,7 +402,9 @@ public  class DocumentsServiceImpl implements DocumentsService{
 			fileName.setFilenameReviewedon(new Timestamp(date.getTime()));
 			fileNameRepository.saveAndFlush(fileName);
 		}
-
+		List<Integer> fileList = new ArrayList<Integer>();
+		fileList.add(fileNameList.get(0).getFilenameId());
+		checkReviewed(fileList,userId);
 		return fileNameList;
 	}
 
@@ -345,28 +415,48 @@ public  class DocumentsServiceImpl implements DocumentsService{
 	 * @return
 	 */
 	@Override
-	public FileDetails alertByCategory(String alertId,int patientId) {
+	public List<FileNameDetailsBean> alertByCategory(String alertId,int patientId) {
 		List<AlertPatientDocMapping> alertPatientDocMapping= alertPatientDocMappingRepository.findAll(DocumentsSpecification.getalertByCategory(alertId));
-		List<FileName> fileName=null;
-		FileDetails fileDetails=null;
+		List<FileNameDetailsBean> fileName=null;
 		if(alertPatientDocMapping.size()>0){
-			Integer fileNameId;
-			if(alertPatientDocMapping.get(0).getForwardedFiledetailsId().contains(","))
-			{
-				fileNameId = Integer.parseInt(alertPatientDocMapping.get(0).getForwardedFiledetailsId().split(",")[0]);
-			}
-			else
-			{
-				fileNameId = Integer.parseInt(alertPatientDocMapping.get(0).getForwardedFiledetailsId());
-			}
-			fileName=getInfo(fileNameId);
-			for(int i=0;i<fileName.size();i++)	{
-				String scanid=fileName.get(0).getFilenameScanid().toString();
-				fileDetails=getFileList(scanid);
-			}
+			fileName=getFileInfo(alertPatientDocMapping.get(0).getForwardedFiledetailsId());
 		}
-		return fileDetails;
+		return fileName;
 	}
+
+	public List<FileNameDetailsBean> getFileInfo(String forwardedFiledetailsId) {
+		String list[]=forwardedFiledetailsId.split(",");
+		List<Integer> fileDetailsIdl=new ArrayList<Integer>();
+		for(int i=0;i<list.length;i++){
+			fileDetailsIdl.add(Integer.parseInt(list[i].trim()));	
+		}
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+		Root<FileName> root = cq.from(FileName.class);
+		Join<FileName, FileDetails> fdjoin = root.join(FileName_.fileNameDetails,JoinType.LEFT);
+		Predicate fileId=root.get(FileName_.filenameId).in(fileDetailsIdl);
+		
+		cq.select(builder.construct(FileNameDetailsBean.class, 
+				root.get(FileName_.filenameId),
+				root.get(FileName_.filenameScanid),
+				root.get(FileName_.filenameName),
+				fdjoin.get(FileDetails_.filedetailsId),
+				fdjoin.get(FileDetails_.filedetailsFlag),
+				fdjoin.get(FileDetails_.filedetailsDescription)));
+		
+		cq.where(fileId);
+		List<Object> fileName = em.createQuery(cq).getResultList();
+		List<FileNameDetailsBean> fileNameBean = new ArrayList<FileNameDetailsBean>();
+		for(int i=0;i<fileName.size();i++)
+		{
+			FileNameDetailsBean fileNamedetails = (FileNameDetailsBean) fileName.get(i);
+			fileNameBean.add(fileNamedetails);
+		}
+		return fileNameBean;
+	}
+
+
 
 	/**
 	 * To forward the documents using alerts
@@ -506,7 +596,6 @@ public  class DocumentsServiceImpl implements DocumentsService{
 		getForms=em.createQuery(cq).getResultList();
 		return getForms;
 	}
-
 }
 
 

@@ -16,6 +16,8 @@ import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -94,7 +96,8 @@ public class FileName {
 	public void setCreatedByEmpProfileTable(EmployeeProfile createdByEmpProfileTable) {
 		this.createdByEmpProfileTable = createdByEmpProfileTable;
 	}
-
+	
+	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="filename_createdby", referencedColumnName="emp_profile_empid", insertable=false,updatable=false)
 	@JsonManagedReference
@@ -105,7 +108,7 @@ public class FileName {
 	@JoinColumn(name="filename_scanid", referencedColumnName="filedetails_id",  insertable=false, updatable=false)
 	@JsonBackReference
 	FileDetails fileNameDetails;
-
+	
 	public EmployeeProfile getEmpProfile() {
 		return empProfile;
 	}
