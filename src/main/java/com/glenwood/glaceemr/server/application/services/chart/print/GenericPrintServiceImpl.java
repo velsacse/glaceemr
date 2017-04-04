@@ -504,11 +504,9 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		}
 
 		//		List<Billinglookup> billingEthinicity = billinglookupRepository.findAll(BillingLookupSpecification.getDetails(ethinicity, race, prefLang));
-		if(ethinicity.isEmpty())
-			ethinicity="-1";
-		if(race.isEmpty())
-			race="-1";
-		JSONArray billingEthinicity = getLookupDetails(ethinicity, race, prefLang);
+		List<String> ethniArr = getList(ethinicity);
+		List<String> raceArr = getList(race);		
+		JSONArray billingEthinicity = getLookupDetails(ethniArr, raceArr, prefLang);
 
 		ethinicity = "";
 		race = "";
@@ -517,17 +515,22 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			for(int i=0; i<billingEthinicity.length(); i++) {
 				JSONObject bill = billingEthinicity.getJSONObject(i);
 				if(bill.get("group") != null && bill.getInt("group") == 251) {
-					ethinicity = ethinicity + bill.getString("name");
+					ethinicity = ethinicity + bill.getString("name") + ", ";
 				}
 				if(bill.get("group") != null && bill.getInt("group") == 250) {
-					race = race + bill.getString("name");
+					race = race + bill.getString("name") + ", ";
 				}
 				if(bill.get("group") != null && bill.getInt("group") == 253) {
 					prefLang = bill.getString("name");
 				}
 			}
 		}
+		if(ethinicity.lastIndexOf(",")!=-1)
+			ethinicity= ethinicity.substring(0, ethinicity.lastIndexOf(","));
+		if(race.lastIndexOf(",")!=-1)
+			race= race.substring(0, race.lastIndexOf(","));
 
+		
 		EmployeeDataBean serviceDrData = null;
 		if(encounter != null) {
 			EmployeeProfile emp = getEmpDetails(encounter.getEncounterServiceDoctor());
@@ -554,8 +557,22 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		return bean;
 	}
 
-	private JSONArray getLookupDetails(String ethinicity,
-			String race, String prefLang) throws Exception {
+	private List<String> getList(String value) {
+		
+		List<String> list= new ArrayList<String>();
+		if(value== null || value.trim().isEmpty())
+			list.add("-1");
+		else{
+			String arr[]= value.split(",");		
+			for(int i=0; i<arr.length; i++){
+				list.add(arr[i]);
+			}
+		}
+		return list;
+	}
+
+	private JSONArray getLookupDetails(List<String> ethniArr,
+			List<String> raceArr, String prefLang) throws Exception {
 
 		JSONArray returnList= new JSONArray();
 
@@ -563,10 +580,10 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
 		Root<Billinglookup> root= query.from(Billinglookup.class);
 
-		Predicate ethinPred= root.get(Billinglookup_.blookIntid).in(ethinicity);
+		Predicate ethinPred= root.get(Billinglookup_.blookIntid).in(ethniArr);
 		Predicate groupPred1 = builder.equal(root.get(Billinglookup_.blookGroup), 251);
 
-		Predicate racePred= root.get(Billinglookup_.blookIntid).in(race);
+		Predicate racePred= root.get(Billinglookup_.blookIntid).in(raceArr);
 		Predicate groupPred2 = builder.equal(root.get(Billinglookup_.blookGroup), 250);
 
 		Predicate prefLangPred= builder.equal(root.get(Billinglookup_.blookIntid), prefLang);
