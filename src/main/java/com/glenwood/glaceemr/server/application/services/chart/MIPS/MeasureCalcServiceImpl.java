@@ -509,8 +509,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
         cq.select(root.get(MacraConfiguration_.macraConfigurationType));
         cq.where(yearPredicate);
         List<Object> result=em.createQuery(cq).getResultList();
-        if(Integer.parseInt(result.get(0).toString())==0){
-        	return true;}
+        if(result.size()!=0){
+        if(Integer.parseInt(result.get(0).toString())==0)
+        	return true;
+        else
+        	return false;
+        }
         else{
         	return false;
         }
