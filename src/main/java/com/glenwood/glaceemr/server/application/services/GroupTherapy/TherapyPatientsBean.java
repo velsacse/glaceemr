@@ -34,6 +34,7 @@ public class TherapyPatientsBean {
 	String Dx;
 	String Dxdesc;
 	long count;
+	String startTime;
     
     public TherapyPatientsBean(long count,Integer groupId,Integer sessionId,Integer patientId,String accountNo,String fullName,Date dob,Date lastSession,String Dx,String Dxdesc) {
     	if(count !=  0) {
@@ -98,7 +99,7 @@ public class TherapyPatientsBean {
     		this.Dxdesc="";
     	}
     }
-    public TherapyPatientsBean(Integer patientId,String accountNo,String lastName,String firstName,Date dob,Integer sessionId,String stopTime,String dx1,String dx1Desc,String dx2, String dx2Desc,String dx3,String dx3Desc,String dx4,String dx4Desc,String dx5,String dx5Desc,String dx6,String dx6Desc,String dx7,String dx7Desc,String dx8,String dx8Desc){
+    public TherapyPatientsBean(Integer patientId,String accountNo,String lastName,String firstName,Date dob,Integer sessionId,String startTime,String stopTime,String dx1,String dx1Desc,String dx2, String dx2Desc,String dx3,String dx3Desc,String dx4,String dx4Desc,String dx5,String dx5Desc,String dx6,String dx6Desc,String dx7,String dx7Desc,String dx8,String dx8Desc){
     	if(patientId != null){
         	this.patientId=patientId;
     	}
@@ -135,6 +136,12 @@ public class TherapyPatientsBean {
     	}
     	else{
     		this.sessionId=-1;
+    	}
+    	if(startTime!=null) {
+    		this.startTime=startTime;
+    	}
+    	else {
+    		this.startTime="";
     	}
     	if(stopTime!=null){
     		this.stopTime=stopTime;
@@ -495,6 +502,12 @@ public class TherapyPatientsBean {
 
 	public void setDx8Desc(String dx8Desc) {
 		this.dx8Desc = dx8Desc;
+	}
+	public String getStartTime() {
+		return startTime;
+	}
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
 	}
 	
 }

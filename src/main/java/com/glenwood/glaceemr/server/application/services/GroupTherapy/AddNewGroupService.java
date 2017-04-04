@@ -49,8 +49,9 @@ public interface AddNewGroupService {
 	 * 
 	 * @param dataToSave
 	 * @throws JSONException
+	 * @throws Exception 
 	 */
-	void addPatientToTherapyGroup(String dataToSave) throws JSONException;
+	void addPatientToTherapyGroup(String dataToSave) throws JSONException, Exception;
 
 	/**
 	 * To get the patient data by groupid

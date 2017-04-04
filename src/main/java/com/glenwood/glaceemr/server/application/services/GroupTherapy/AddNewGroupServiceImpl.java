@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaBuilder.Trimspec;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Join;
@@ -153,7 +154,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 				root.get(TherapySession_.therapySessionGroupId),
 				root.get(TherapySession_.therapySessionId),
 				root.get(TherapySession_.therapySessionDateValue),
-				builder.function("to_char",String.class, root.get(TherapySession_.therapySessionDate),builder.literal("HH12:MI am")),
+				builder.function("to_char",String.class, root.get(TherapySession_.therapySessionDate),builder.literal("HH12:MI AM")),
 				groupJoin.get(TherapyGroup_.therapyGroupName),
 				root.get(TherapySession_.therapySessionTopic),
 				supervisorJoin.get(EmployeeProfile_.empProfileEmpid),
@@ -282,26 +283,42 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	
 	/**
 	 * To add patient to selected group
+	 * @throws Exception 
 	 */
 	@Override
-	public void addPatientToTherapyGroup(String dataToSave) throws JSONException {
+	public void addPatientToTherapyGroup(String dataToSave) throws JSONException,Exception {
 		JSONObject patientData= new JSONObject(dataToSave);
 		String patientIds = Optional.fromNullable(Strings.emptyToNull(patientData.get("patientIds").toString())).or("-1");
 		int groupId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(patientData.get("groupId").toString())).or("-1"));
 		String sessionId = Optional.fromNullable(Strings.emptyToNull(patientData.get("sessionId").toString())).or("");
+        String therapyDate=Optional.fromNullable(Strings.emptyToNull(patientData.get("sessionDate").toString())).or("");
+		String lateReason = Optional.fromNullable(Strings.emptyToNull(patientData.get("lateReason").toString())).or("");
 		int addToGroup= Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(patientData.get("addToGroup").toString())).or("-1"));
 		String[] patientsSplit=patientIds.split("~");
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+		Root<TherapyGroupPatientMapping> root = cq.from(TherapyGroupPatientMapping.class);
+		cq.multiselect(root.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingPatientId));
 		for(int i=0;i<patientsSplit.length;i++){
-			if(addToGroup==1){
+		Predicate predicateByPatientId=builder.equal(root.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingPatientId), Integer.parseInt(patientsSplit[i]));
+		Predicate predicateByGroupId=builder.equal(root.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingGroupId),groupId);
+		cq.where(predicateByPatientId,predicateByGroupId);
+		List<Object> resultset = em.createQuery(cq).getResultList();
+		if(addToGroup==1 && resultset.size() < 1){
 		TherapyGroupPatientMapping therapyGroupPatientMapping=new TherapyGroupPatientMapping();
         therapyGroupPatientMapping.setTherapyGroupPatientMappingGroupId(groupId);
         therapyGroupPatientMapping.setTherapyGroupPatientMappingPatientId(Integer.parseInt(patientsSplit[i]));
         therapyGroupPatientMappingRepository.saveAndFlush(therapyGroupPatientMapping);
         }
+        SimpleDateFormat ft = new SimpleDateFormat ("yyyy-mm-dd kk:mm:ss");
+        Date date = (Date) ft.parse(therapyDate);
         if(!sessionId.equalsIgnoreCase("")){
         	TherapySessionDetails therapyDetails = new TherapySessionDetails();
         	therapyDetails.setTherapySessionDetailsPatientId(Integer.parseInt(patientsSplit[i]));
         	therapyDetails.setTherapySessionDetailsSessionId(Integer.parseInt(sessionId));
+            therapyDetails.setTherapySessionDetailsStartTime(new Timestamp(date.getTime()));
+        	if(!(lateReason.equalsIgnoreCase("")))
+            	therapyDetails.setTherapySessionDetailsStartLateReason(lateReason);
         	therapySessionDetailsRepository.saveAndFlush(therapyDetails);
         }
 		}
@@ -333,22 +350,22 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
         therapySession.setTherapySessionTopic(sessionTopic);
         therapySession.setTherapySessionLeaderId(leaderList);
         therapySession.setTherapySessionSupervisorId(supervisorList);
-        SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/yyyy kk:mm:ss");
+        SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/YYYY kk:mm:ss");
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-        Date date = (Date) ft.parse(therapyDate);
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+        Date date = (Date) ft.parse(therapyDate);
         DateFormat mmformat=new SimpleDateFormat("yyyy-MM-dd");
         therapySession.setTherapySessionDate(new Timestamp(date.getTime()));
         therapySession.setTherapySessionDateValue(java.sql.Date.valueOf(mmformat.format(date)));
         therapySession.setTherapySessionStatus(therapySessionStatus);
         therapySession = therapySessionRepository.saveAndFlush(therapySession);
         therapyId=therapySession.getTherapySessionId();
+        if(!patientIds.equals("-1")) {
         String[] patientsSplit=patientIds.split("~");
-        if(!patientsSplit.equals("-1")) {
         for(int i=0;i<patientsSplit.length;i++){
             TherapySessionDetails therapyDetails = new TherapySessionDetails();
             therapyDetails.setTherapySessionDetailsPatientId(Integer.parseInt(patientsSplit[i]));
-            therapyDetails.setTherapySessionDetailsStartTime(timeFormat.format(date));
+            therapyDetails.setTherapySessionDetailsStartTime(new Timestamp(date.getTime()));
             if(therapyId==0)
                 therapyDetails.setTherapySessionDetailsSessionId(Integer.parseInt(therapySessionId));
             else
@@ -403,7 +420,9 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		Join<TherapySession,TherapyGroupPatientMapping> groupJoin=sessionJoin.join(TherapySession_.therapyGroupPatientMapping,JoinType.INNER);
 		Join<TherapySessionDetails,PatientRegistration> patientJoin=root.join(TherapySessionDetails_.patientRegistration,JoinType.INNER);
 	    Join<TherapySessionDetails,TherapySessionPatientDetails> patientDetailsJoin=root.join(TherapySessionDetails_.therapySessionPatientDetails,JoinType.LEFT);
-	    patientDetailsJoin.on(builder.equal(patientDetailsJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId), therapySessionId));
+	    patientDetailsJoin.on(builder.equal(patientDetailsJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId), therapySessionId),builder.notEqual(patientDetailsJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsGwid), "0000100210104111000")
+	    		,builder.notEqual(builder.trim(Trimspec.BOTH,patientDetailsJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue)),"")
+	    		,builder.notEqual(builder.trim(Trimspec.BOTH,patientDetailsJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue)), "-1"));
 	    Predicate predicateByGroupId=builder.equal(groupJoin.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingGroupId), therapyGroupId);
 		Predicate predicateBySessionId=builder.equal(root.get(TherapySessionDetails_.therapySessionDetailsSessionId), therapySessionId);
 		Selection[] selections= new Selection[] {
@@ -444,6 +463,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 				root.get(TherapySessionDetails_.therapySessionDetailsDx5desc),
 				root.get(TherapySessionDetails_.therapySessionDetailsDx6desc)					
 		);
+		cq.orderBy(builder.asc(patientJoin.get(PatientRegistration_.patientRegistrationId)));
 		List<TherapyPatientsBean> patientData=new ArrayList<TherapyPatientsBean>();
 
 		patientData=em.createQuery(cq).getResultList();
@@ -561,6 +581,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 				patientJoin.get(PatientRegistration_.patientRegistrationFirstName),
 				patientJoin.get(PatientRegistration_.patientRegistrationDob),
 				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsSessionId),
+				builder.function("to_char",String.class, sessionJoin.get(TherapySessionDetails_.therapySessionDetailsStartTime),builder.literal("HH12:MI AM")),
 				sessionJoin.get(TherapySessionDetails_.therapySessionEndTime),
 				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx1),
 				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx1desc),
@@ -769,7 +790,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		
 		Selection[] selections= new Selection[] {
 				root.get(TherapySession_.therapySessionId),
-				builder.function("to_char",String.class, root.get(TherapySession_.therapySessionDate),builder.literal("HH:MI am")),
+				builder.function("to_char",String.class, root.get(TherapySession_.therapySessionDate),builder.literal("HH:MI AM")),
 				root.get(TherapySession_.therapySessionProviderId),
 				docJoin.get(EmployeeProfile_.empProfileFullname),
 				root.get(TherapySession_.therapySessionLeaderId),
@@ -814,6 +835,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 				patientJoin.get(PatientRegistration_.patientRegistrationFirstName),
 				patientJoin.get(PatientRegistration_.patientRegistrationDob),
 				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsSessionId),
+				builder.function("to_char",String.class, sessionJoin.get(TherapySessionDetails_.therapySessionDetailsStartTime),builder.literal("HH12:MI AM")),
 				sessionJoin.get(TherapySessionDetails_.therapySessionEndTime),
 				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx1),
 				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsDx1desc),
