@@ -78,7 +78,7 @@ public class DocumentsSpecification {
 				root.fetch(FileDetails_.patientDocCategory,JoinType.INNER);
 				Predicate catpredicate=cb.equal(root.get(FileDetails_.filedetailsCategoryid),categoryId);
 				Predicate patpredicate=cb.equal(root.get(FileDetails_.filedetailsPatientid),patientId);
-				return query.where(cb.and(catpredicate,patpredicate)).getRestriction();
+				return query.where(cb.and(catpredicate,patpredicate)).orderBy(cb.desc(root.get(FileDetails_.filedetailsCreationdate))).getRestriction();
 			}
 		};
 
