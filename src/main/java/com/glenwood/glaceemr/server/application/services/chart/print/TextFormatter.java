@@ -262,16 +262,16 @@ public class TextFormatter {
 
 		StringBuffer result = new StringBuffer("");
 
-		result.append(getFirstLetterCapsText(fName)).append(" ");
+		result.append(getFirstLetterCapsText(fName).trim()).append(" ");
 
 		if (mName != null && !mName.trim().isEmpty())
 			if (mName.length() == 1)
-				result.append(mName.toUpperCase()).append(". ");
+				result.append(mName.toUpperCase().trim()).append(". ");
 			else if (mName.length() > 1)
-				result.append(getFirstLetterCapsText(mName)).append(" ");
+				result.append(getFirstLetterCapsText(mName).trim()).append(" ");
 
 		if (lName != null && !lName.trim().isEmpty())
-			result.append(getFirstLetterCapsText(lName)).append(" ");
+			result.append(getFirstLetterCapsText(lName).trim());
 
 		if (credentials != null && !credentials.trim().isEmpty()) {
 			for (int i = 0; i < credentials.length(); i++) {
@@ -281,10 +281,11 @@ public class TextFormatter {
 				else
 					break;
 			}
-			result.append(credentials.toUpperCase());
+			result.append(", ");
+			result.append(credentials.trim().toUpperCase());
 		}
 
-		return result.toString();
+		return result.toString().trim();
 	}
 	
 	/**
