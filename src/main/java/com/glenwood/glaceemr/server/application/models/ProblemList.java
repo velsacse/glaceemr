@@ -269,4 +269,9 @@ public class ProblemList {
 		this.problemListCodingSystemid = problemListCodingSystemid;
 	}	
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="problem_list_patient_id", referencedColumnName="patient_registration_id", insertable=false, updatable=false)
+	@JsonBackReference
+	PatientRegistration patientRegistration1;
+	
 }

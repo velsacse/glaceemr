@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.Bean.EPMeasureBean;
+import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
+import com.glenwood.glaceemr.server.application.Bean.MIPSPerformanceBean;
 import com.glenwood.glaceemr.server.application.Bean.MIPSResponse;
 import com.glenwood.glaceemr.server.application.Bean.MacraProviderQDM;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
@@ -82,7 +85,9 @@ public class QPPPerformanceController {
 		
 		String hub_url = "http://test.glaceemr.com/glacecds/ECQMServices/validateECQM";
 		
-		Boolean isIndividual=measureService.checkGroupOrIndividual(2017);
+		Boolean isIndividual=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
+		
+		int savedUser = userId; //used to store logged userId to store the details in patient entries
 		
 		if(!isIndividual){
 			providerId=-1;
@@ -136,7 +141,7 @@ public class QPPPerformanceController {
 				
 			}
 			
-			measureService.saveMeasureDetails(providerId, patientID, responseToSave);
+			measureService.saveMeasureDetails(savedUser, patientID, responseToSave);
 			
 		}else{
 			
@@ -165,7 +170,7 @@ public class QPPPerformanceController {
 		
 		List<EPMeasureBean> epMeasureStatus = new ArrayList<EPMeasureBean>();
 		
-		Boolean isGroup=measureService.checkGroupOrIndividual(2017);
+		Boolean isGroup=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
 		
 		if(!isGroup){
 			providerId=-1;
@@ -183,6 +188,74 @@ public class QPPPerformanceController {
 		}
 		
 		response.setData(epMeasureStatus);
+		
+		return response;
+		
+	}
+	
+	@RequestMapping(value = "/getMIPSPerformanceRate", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getMIPSPerformanceRate(
+			@RequestParam(value="providerId", required=true) int providerId,
+			@RequestParam(value="accountId", required=true) String accountId,
+			@RequestParam(value="measureId", required=false, defaultValue="") String measureId) throws Exception{
+		
+		EMRResponseBean response = new EMRResponseBean();
+
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+		
+		String configuredMeasures = providerInfo.get(0).getMeasures();
+		
+//		List<MIPSPerformanceBean> performanceObj = measureService.getPerformanceCount(providerId, measureId, configuredMeasures,accountId);
+		
+		List<MIPSPerformanceBean> performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures);
+		
+		response.setData(performanceObj);
+		
+		return response;
+		
+	}
+	
+	@RequestMapping(value = "/getPatientDetails", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getPatientDetails(
+			@RequestParam(value="patientId", required=true) String patientsList){
+		
+		EMRResponseBean response = new EMRResponseBean();
+
+		List<MIPSPatientInformation> patientInfo = measureService.getPatientInformation(patientsList);
+		
+		response.setData(patientInfo);
+		
+		return response;
+		
+	}
+	
+	@RequestMapping(value = "/getFilterData", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getFilterData(){
+		
+		EMRResponseBean response = new EMRResponseBean();
+
+		HashMap<String, Object> filtersInfo = measureService.generateFilterContents();
+		
+		response.setData(filtersInfo);
+		
+		return response;
+		
+	}
+	
+	@RequestMapping(value = "/getPatient", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getPatient(
+			@RequestParam(value="patientId", required=true) String patientId,
+			@RequestParam(value="measureId", required=true) String measureId){
+		
+		EMRResponseBean response = new EMRResponseBean();
+
+		List<MIPSPatientInformation> filtersInfo = measureService.getPatient(patientId,measureId);
+		
+		response.setData(filtersInfo);
 		
 		return response;
 		

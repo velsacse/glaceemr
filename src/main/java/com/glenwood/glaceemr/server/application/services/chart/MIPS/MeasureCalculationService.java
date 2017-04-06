@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.glenwood.glaceemr.server.application.Bean.EPMeasureBean;
+import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
+import com.glenwood.glaceemr.server.application.Bean.MIPSPerformanceBean;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 
@@ -17,5 +19,15 @@ public interface MeasureCalculationService {
 	List<EPMeasureBean> getEPMeasuresResponseObject(Boolean isGroup,int patientID, int providerId, Date startDate, Date endDate);
 	
 	Boolean checkGroupOrIndividual(int year);
+	
+	List<MIPSPerformanceBean> getMeasureRateReport(int providerId, String accountId, String configuredMeasures);
+	
+	List<MIPSPerformanceBean> getPerformanceCount(int providerId, String measureId, String configuredMeasures, String accountId);
+
+	HashMap<String, Object> generateFilterContents();
+
+	List<MIPSPatientInformation> getPatient(String patientId, String measureId);
+
+	List<MIPSPatientInformation> getPatientInformation(String patientsList);
 	
 }

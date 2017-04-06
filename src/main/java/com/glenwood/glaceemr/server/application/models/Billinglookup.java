@@ -42,6 +42,17 @@ public class Billinglookup {
 
 	@Column(name="billinglookup_keycode")
 	private String billinglookupKeycode;
+	
+	@Column(name="blook_code_value")
+	private String blookcodevalue;
+	
+	public String getBlookcodevalue() {
+		return blookcodevalue;
+	}
+
+	public void setBlookcodevalue(String blookcodevalue) {
+		this.blookcodevalue = blookcodevalue;
+	}
 
 	public Integer getBlookId() {
 		return blookId;

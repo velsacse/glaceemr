@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.glenwood.glaceemr.server.application.Bean.DiagnosisList;
+import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
@@ -74,4 +77,55 @@ public class QPPConfigurationController {
 			@RequestParam(value = "providerId", required = true) Integer providerId)throws Exception {
 		QppConfigurationService.addMeasuresToProvider(measureIds,providerId);
 	}
+	
+	@RequestMapping(value = "/getFilterDetails", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getFilterDetails()throws Exception {
+		EMRResponseBean result=new EMRResponseBean();
+		HashMap<String,Object> filterDetails=QppConfigurationService.getFilterDetails();
+		result.setData(filterDetails);
+		return result;
+	}
+	
+	@RequestMapping(value = "/getFilteredDetails", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getFilteredDetails(
+			@RequestParam(value = "ageFrom", required = false, defaultValue = "-1") Integer ageFrom,
+			@RequestParam(value = "ageTo", required = false, defaultValue = "-1") Integer ageTo,
+			@RequestParam(value = "raceCode", required = false, defaultValue = "-1") String raceCode,
+			@RequestParam(value = "ethnicityCode", required = false, defaultValue = "-1") String ethnicityCode,
+			@RequestParam(value = "gender", required = false, defaultValue = "-1") String gender,
+			@RequestParam(value = "patientId", required = true) String patientId,
+			@RequestParam(value = "insCompanyId", required = false, defaultValue = "-1") Integer insCompanyId,
+			@RequestParam(value = "ageCriteria", required = false, defaultValue = "-1") Integer ageCriteria,
+			@RequestParam(value = "currMeasureId", required = true) String currMeasureId,
+			@RequestParam(value = "dxCodes", required = false,defaultValue = "-1")String dxCodes
+			)throws Exception {
+		EMRResponseBean result=new EMRResponseBean();
+		List<MIPSPatientInformation> filteredDetails=QppConfigurationService.getFilteredDetails(patientId,ageFrom,ageTo,ageCriteria,raceCode,ethnicityCode,gender,insCompanyId,currMeasureId,dxCodes);
+		result.setData(filteredDetails);
+		return result;
+	}
+	@RequestMapping(value = "/getDXList", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getDXList(
+			@RequestParam(value = "measureId", required = false, defaultValue = "-1")String measureId,
+			@RequestParam(value="sharedFolder", required=true) String sharedPath)throws Exception {
+		EMRResponseBean result=new EMRResponseBean();
+		DiagnosisList DXList=QppConfigurationService.getDXList(measureId,sharedPath); 
+		result.setData(DXList);
+		return result;
+	}
+	
+	@RequestMapping(value = "/getPatientBasedOnDX", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getPatientBasedOnDX(
+			@RequestParam(value = "patientId", required = true)String patientId,
+			@RequestParam(value="dxCodes", required=true) String dxCodes)throws Exception {
+		EMRResponseBean result=new EMRResponseBean();
+		List<MIPSPatientInformation> DXList=QppConfigurationService.getPatientBasedOnDX(patientId,dxCodes); 
+		result.setData(DXList);
+		return result;
+	}
+	
 }

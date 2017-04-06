@@ -1,20 +1,12 @@
 package com.glenwood.glaceemr.server.application.models;
 
-import java.sql.Timestamp;
-
-import java.sql.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
-
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "h478")
@@ -118,4 +110,9 @@ public class H478 {
 
 	@Column(name="h478009")
 	private String h478009;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "h478001", referencedColumnName = "macra_provider_configuration_provider_id", insertable = false, updatable = false)
+    private MacraProviderConfiguration macraProviderConfiguration;
+	
 }

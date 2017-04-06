@@ -133,7 +133,11 @@ public class Chart implements Serializable{
 	
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="chart1")
 	@JsonManagedReference
-	List<LabEntriesParameter> labEntriesParameter; 
+	List<LabEntriesParameter> labEntriesParameter;
+	
+	@OneToMany(mappedBy="chart")
+    @JsonManagedReference
+    List<ChartcenterEncounter> chartCenterEncounter;
 
 	public List<DirectEmailLog> getDirectEmailLogTable() {
 		return directEmailLogTable;

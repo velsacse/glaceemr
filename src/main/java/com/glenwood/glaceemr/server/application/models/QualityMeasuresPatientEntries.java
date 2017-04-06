@@ -4,12 +4,16 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -200,5 +204,15 @@ public class QualityMeasuresPatientEntries {
 			Integer qualityMeasuresPatientEntriesProviderId) {
 		this.qualityMeasuresPatientEntriesProviderId = qualityMeasuresPatientEntriesProviderId;
 	}
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="quality_measures_patient_entries_patient_id", referencedColumnName="patient_registration_id", insertable=false, updatable=false)
+	@JsonBackReference
+	PatientRegistration patientRegistration;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="quality_measures_patient_entries_provider_id", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
+	@JsonBackReference
+	EmployeeProfile empProfile;
 	
 }

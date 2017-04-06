@@ -24,5 +24,7 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
             registerFunction("split_part",  new StandardSQLFunction("split_part", StandardBasicTypes.STRING));
             registerFunction("formatphoneno",  new StandardSQLFunction("formatphoneno", StandardBasicTypes.STRING));
             registerFunction("string_agg",new StandardSQLFunction("string_agg",StandardBasicTypes.STRING));
+            registerFunction("age",new StandardSQLFunction("age",StandardBasicTypes.STRING));
+            registerFunction("date_part",new StandardSQLFunction("date_part",StandardBasicTypes.INTEGER));
         }
 }

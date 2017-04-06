@@ -17,9 +17,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.JoinColumnOrFormula;
-import org.hibernate.annotations.JoinColumnsOrFormulas;
-import org.hibernate.annotations.JoinFormula;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
@@ -610,6 +607,28 @@ public class PatientRegistration implements Serializable {
 	@Column(name="patient_registration_state_name")
 	private String patientRegistrationStateName;
 	
+	@Column(name="patient_registration_granular_race_code")
+	private String patientRegistrationGranularRaceCode;
+	
+	@Column(name="patient_registration_granular_ethnicity_code")
+	private String patientRegistrationGranularEthnicityCode;
+	
+	public String getPatientRegistrationGranularRaceCode() {
+		return patientRegistrationGranularRaceCode;
+	}
+
+	public void setPatientRegistrationGranularRaceCode(String patientRegistrationGranularRaceCode) {
+		this.patientRegistrationGranularRaceCode = patientRegistrationGranularRaceCode;
+	}
+
+	public String getPatientRegistrationGranularEthnicityCode() {
+		return patientRegistrationGranularEthnicityCode;
+	}
+
+	public void setPatientRegistrationGranularEthnicityCode(String patientRegistrationGranularEthnicityCode) {
+		this.patientRegistrationGranularEthnicityCode = patientRegistrationGranularEthnicityCode;
+	}
+
 	public String getPatientRegistrationStateName() {
 		return patientRegistrationStateName;
 	}
@@ -2328,4 +2347,13 @@ public class PatientRegistration implements Serializable {
 	public PatientRegistration(){
 		
 	}
+	
+	@OneToMany(mappedBy="patientRegistration")
+	@JsonManagedReference
+	List<QualityMeasuresPatientEntries> qualityMeasuresPatientEntries;
+
+	@OneToMany(mappedBy="patientRegistration1")
+	@JsonManagedReference
+	List<ProblemList> problemList;
+	
 }
