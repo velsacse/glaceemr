@@ -12,9 +12,7 @@ public class PatientClinicalElementsBean {
 	
 	private Long patientClinicalElementsId;
 
-	
-	
-	
+	private Integer patientClinicalElementsHistoryId;
 	
 	public PatientClinicalElementsBean(String patientClinicalElementsGwid,
 			String patientClinicalElementsValue,
@@ -24,6 +22,16 @@ public class PatientClinicalElementsBean {
 		this.patientClinicalElementsValue = patientClinicalElementsValue;
 		this.clinicalElementsDatatype = clinicalElementsDatatype;
 		this.patientClinicalElementsId = patientClinicalElementsId;
+	}
+	
+	public PatientClinicalElementsBean(String patientClinicalElementsGwid,
+			String patientClinicalElementsValue,
+			Integer clinicalElementsDatatype, Integer patientClinicalElementsHistoryId) {
+		super();
+		this.patientClinicalElementsGwid = patientClinicalElementsGwid;
+		this.patientClinicalElementsValue = patientClinicalElementsValue;
+		this.clinicalElementsDatatype = clinicalElementsDatatype;
+		this.patientClinicalElementsHistoryId = patientClinicalElementsHistoryId;
 	}
 
 	public String getPatientClinicalElementsGwid() {
@@ -58,7 +66,13 @@ public class PatientClinicalElementsBean {
 		this.patientClinicalElementsId = patientClinicalElementsId;
 	}
 	
-	
-	
+	public Integer getPatientClinicalElementsHistoryId() {
+		return patientClinicalElementsHistoryId;
+	}
 
+	public void setPatientClinicalElementsHistoryId(
+			Integer patientClinicalElementsHistoryId) {
+		this.patientClinicalElementsHistoryId = patientClinicalElementsHistoryId;
+	}
+	
 }

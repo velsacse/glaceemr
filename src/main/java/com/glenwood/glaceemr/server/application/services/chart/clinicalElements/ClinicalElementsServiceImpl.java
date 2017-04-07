@@ -1,10 +1,13 @@
 package com.glenwood.glaceemr.server.application.services.chart.clinicalElements;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -21,20 +24,29 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMapping;
+import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMapping_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsCondition;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsCondition_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions_;
+import com.glenwood.glaceemr.server.application.models.ClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
+import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.EncounterPlan;
 import com.glenwood.glaceemr.server.application.models.LeafLibrary;
+import com.glenwood.glaceemr.server.application.models.LeafLibrary_;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
+import com.glenwood.glaceemr.server.application.models.LeafPatient_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
+import com.glenwood.glaceemr.server.application.models.RosElement;
+import com.glenwood.glaceemr.server.application.models.cnm.history.PatientClinicalElementsBean;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementTemplateMappingRepository;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsOptionsRepository;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsRepository;
@@ -54,6 +66,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEn
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.chart.HPI.ClinicalElementsOptionBean;
+import com.glenwood.glaceemr.server.application.services.chart.ros.ROSElementBean;
 import com.glenwood.glaceemr.server.application.specifications.ClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
@@ -236,7 +249,7 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 			e.printStackTrace();
 		}
 	}
-
+	
 	public List<ClinicalElements> setClinicalDataBean(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String gwidPattern){
 
 		getPatientDetails(patientId);
@@ -269,13 +282,313 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		clinicalDataBean.setPatientClinicalData(patientData);
 		clinicalDataBean.setHistoryDatatoPatElementBean(patientHistoryData);
 
+		return clinicalelements;
+	}
 
+	public List<ClinicalElementBean> setClinicalDataBeans(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String gwidPattern){
+
+		getPatientDetails(patientId);
+		
+		List<LeafLibrary> leafDetails=getLeafDetailsByTemplateId(templateId);
+		String leafPatientCreatedDate=getPatLeafByLeafIdAndEncId(leafDetails.get(0)==null?-1:leafDetails.get(0).getLeafLibraryId(),encounterId);
+		boolean isAgeBased=leafDetails.get(0).getLeafLibraryIsagebased()==null?false:leafDetails.get(0).getLeafLibraryIsagebased();
+
+		List<ClinicalElementBean> clinicalelements=getClinicalElements(templateId, patientSex, tabType,leafPatientCreatedDate==null?"-1":leafPatientCreatedDate, ageinDay,isAgeBased);
+		clinicalDataBean.setClinicalDataBean(clinicalelements);
+		if(encounterId==-1){
+			clinicalelements=getPatClinicalHistoryData(clinicalDataBean.clientId,isAgeBased, patientId, patientSex, gwidPattern, ageinDay);
+		}else{
+			clinicalelements=getEncPatientClinicalData(clinicalDataBean.clientId,isAgeBased, encounterId, patientSex, gwidPattern, ageinDay);
+		}
+		clinicalDataBean.setClinicalDataBean(clinicalelements);
+
+		List<PatientClinicalElementsBean> patientData=getNonHistoryElemPatientData(clinicalDataBean.clientId,patientId,encounterId,gwidPattern);
+		List<PatientClinicalElementsBean> patientHistoryData=getHistoryElemPatientData(clinicalDataBean.clientId,patientId, gwidPattern);
+		clinicalDataBean.setPatientClinicalDataBean(patientData);
+		clinicalDataBean.setHistoryDatatoPatElement(patientHistoryData);
 
 		return clinicalelements;
 	}
 
 
 
+
+	private List<ClinicalElementBean> getEncPatientClinicalData(
+			final String clientId, final boolean isAgeBased,
+			final Integer encounterId, final Short patientSex,
+			final String gwidPattern, final Integer ageInDay) {
+
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<ClinicalElementBean> query= cb.createQuery(ClinicalElementBean.class);
+		Root<ClinicalElements> root= query.from(ClinicalElements.class);
+		
+
+		Join<ClinicalElements,PatientClinicalElements> paramJoin=root.join(ClinicalElements_.patientClinicalElements,JoinType.INNER);
+		Predicate encounterPred=cb.equal(paramJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
+		
+		Predicate gwidPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),clientId+gwidPattern);
+		Predicate clientIdPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),clientId+gwidPattern);
+		Predicate finalgwidPred=cb.or(gwidPred,clientIdPred);
+		
+		Predicate genderPred=root.get(ClinicalElements_.clinicalElementsGender).in(patientSex,0);
+		Predicate finalPred=cb.and(encounterPred,finalgwidPred,genderPred);
+
+		if(isAgeBased==true){
+			Join<ClinicalElements,ClinicalElementsCondition> condParamJoin=root.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
+			Predicate defaultstartAge=cb.isNull(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage));
+			Predicate defaultendAge=cb.isNull(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage));
+			Predicate startAge=cb.lessThan(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageInDay);
+			Predicate endAge=cb.greaterThanOrEqualTo(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage),ageInDay);
+			Predicate defAgePred=cb.and(defaultstartAge,defaultendAge);
+			Predicate agePred=cb.and(startAge,endAge);
+			Predicate age =cb.or(defAgePred,agePred);
+			finalPred=cb.and(finalPred,age);
+		}
+		
+		query.select(cb.construct(ClinicalElementBean.class,
+				root.get(ClinicalElements_.clinicalElementsName),
+				root.get(ClinicalElements_.clinicalElementsGwid),
+				root.get(ClinicalElements_.clinicalElementsNotes),
+				root.get(ClinicalElements_.clinicalElementsDatatype),
+				root.get(ClinicalElements_.clinicalElementsCptcode),
+				root.get(ClinicalElements_.clinicalElementsIcd9code),
+				root.get(ClinicalElements_.clinicalElementsSnomed),
+				root.get(ClinicalElements_.clinicalElementsIsactive),
+				root.get(ClinicalElements_.clinicalElementsIsglobal),
+				root.get(ClinicalElements_.clinicalElementsIshistory),
+				root.get(ClinicalElements_.clinicalElementsIsepisode),
+				root.get(ClinicalElements_.clinicalElementsTextDimension),
+				root.get(ClinicalElements_.clinicalElementsGender),
+				root.get(ClinicalElements_.clinicalElementsIsselect),
+				root.get(ClinicalElements_.clinicalTextMappings)));
+		
+		query.where(finalPred);
+	
+		
+		return null;
+	}
+
+	private List<ClinicalElementBean> getPatClinicalHistoryData(
+			final String clientId, final boolean isAgeBased,
+			final Integer patientId, final Short patientSex,
+			final String gwidPattern, final Integer ageInDay) {
+
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<ClinicalElementBean> query= cb.createQuery(ClinicalElementBean.class);
+		Root<ClinicalElements> root= query.from(ClinicalElements.class);
+
+
+		Join<ClinicalElements,PatientClinicalHistory> paramJoin=root.join(ClinicalElements_.patientClinicalHistory,JoinType.INNER);
+		Predicate patientPred=cb.equal(paramJoin.get(PatientClinicalHistory_.patientClinicalHistoryPatientid),patientId);
+		Predicate defGWIDPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),"000"+gwidPattern);
+		Predicate clientGWIDPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),clientId+gwidPattern);
+		Predicate finalGWIDPred=cb.or(defGWIDPred,clientGWIDPred);
+		Predicate genderPred=root.get(ClinicalElements_.clinicalElementsGender).in(patientSex,0);
+		Predicate finalPred=cb.and(patientPred,finalGWIDPred,genderPred);
+
+		if(isAgeBased==true){
+			Join<ClinicalElements, ClinicalElementsCondition> condParamJoin=root.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
+			Predicate defaultstartAge=cb.isNull(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage));
+			Predicate defaultendAge=cb.isNull(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage));
+			Predicate startAge=cb.lessThan(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageInDay);
+			Predicate endAge=cb.greaterThanOrEqualTo(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage),ageInDay);
+			Predicate defAgePred=cb.and(defaultstartAge,defaultendAge);
+			Predicate agePred=cb.and(startAge,endAge);
+			Predicate age =cb.or(defAgePred,agePred);
+			finalPred=cb.and(finalPred,age);
+		}
+
+		query.select(cb.construct(ClinicalElementBean.class,
+				root.get(ClinicalElements_.clinicalElementsName),
+				root.get(ClinicalElements_.clinicalElementsGwid),
+				root.get(ClinicalElements_.clinicalElementsNotes),
+				root.get(ClinicalElements_.clinicalElementsDatatype),
+				root.get(ClinicalElements_.clinicalElementsCptcode),
+				root.get(ClinicalElements_.clinicalElementsIcd9code),
+				root.get(ClinicalElements_.clinicalElementsSnomed),
+				root.get(ClinicalElements_.clinicalElementsIsactive),
+				root.get(ClinicalElements_.clinicalElementsIsglobal),
+				root.get(ClinicalElements_.clinicalElementsIshistory),
+				root.get(ClinicalElements_.clinicalElementsIsepisode),
+				root.get(ClinicalElements_.clinicalElementsTextDimension),
+				root.get(ClinicalElements_.clinicalElementsGender),
+				root.get(ClinicalElements_.clinicalElementsIsselect),
+				root.get(ClinicalElements_.clinicalTextMappings)));
+		
+		query.where(finalPred);
+		
+		try{
+			return em.createQuery(query).getResultList();
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	
+	}
+
+	private List<PatientClinicalElementsBean> getHistoryElemPatientData(
+			String clientId, Integer patientId, String gwidPattern) {
+
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<PatientClinicalElementsBean> query= cb.createQuery(PatientClinicalElementsBean.class);
+		Root<PatientClinicalHistory> root= query.from(PatientClinicalHistory.class);
+
+		Join<PatientClinicalHistory,ClinicalElements> paramJoin=root.join(PatientClinicalHistory_.clinicalElement,JoinType.INNER);
+		Predicate gwidPred=cb.like(root.get(PatientClinicalHistory_.patientClinicalHistoryGwid),"000"+gwidPattern);
+		Predicate clientIdPred=cb.like(root.get(PatientClinicalHistory_.patientClinicalHistoryGwid),clientId+gwidPattern);
+		Predicate elementPred=cb.or(gwidPred,clientIdPred);
+		Predicate patientPred=cb.equal(root.get(PatientClinicalHistory_.patientClinicalHistoryPatientid),patientId);
+		Predicate isHistoryPred=cb.equal(paramJoin.get(ClinicalElements_.clinicalElementsIshistory),true);
+		
+		query.select(cb.construct(PatientClinicalElementsBean.class,
+				root.get(PatientClinicalHistory_.patientClinicalHistoryGwid),
+				root.get(PatientClinicalHistory_.patientClinicalHistoryValue),
+				paramJoin.get(ClinicalElements_.clinicalElementsDatatype),
+				root.get(PatientClinicalHistory_.patientClinicalHistoryId)));
+		
+		query.where(cb.and(elementPred,patientPred,isHistoryPred));
+	
+		try{
+			return em.createQuery(query).getResultList();
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private List<PatientClinicalElementsBean> getNonHistoryElemPatientData(
+			String clientId, Integer patientId, Integer encounterId,
+			String gwidPattern) {
+		
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<PatientClinicalElementsBean> query= cb.createQuery(PatientClinicalElementsBean.class);
+		Root<PatientClinicalElements> root= query.from(PatientClinicalElements.class);
+		
+
+		Join<PatientClinicalElements,ClinicalElements> paramJoin=root.join(PatientClinicalElements_.clinicalElement,JoinType.INNER);
+		Predicate encounterPred=null;
+		if(encounterId!=-1)
+			encounterPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
+		Predicate patientPred=cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId);
+		Predicate gwidPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),"000"+gwidPattern);
+		Predicate clientIdPred=cb.like(root.get(PatientClinicalElements_.patientClinicalElementsGwid),clientId+gwidPattern);
+		Predicate elementPred=cb.or(gwidPred,clientIdPred);
+		Predicate isHistoryPred=cb.equal(paramJoin.get(ClinicalElements_.clinicalElementsIshistory),false);
+		Predicate finalPred=null;
+		if(encounterId!=-1)
+			finalPred= cb.and(encounterPred,patientPred,elementPred,isHistoryPred);
+		else
+			finalPred= cb.and(patientPred,elementPred,isHistoryPred);
+
+		query.select(cb.construct(PatientClinicalElementsBean.class,
+				root.get(PatientClinicalElements_.patientClinicalElementsGwid),
+				root.get(PatientClinicalElements_.patientClinicalElementsValue),
+				paramJoin.get(ClinicalElements_.clinicalElementsDatatype),
+				root.get(PatientClinicalElements_.patientClinicalElementsId)));
+		
+		query.where(finalPred);
+
+		try{
+			return em.createQuery(query).getResultList();
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private List<ClinicalElementBean> getClinicalElements(
+			final Integer templateID, final Short patientSex,
+			final Integer tabType, final String leafCreatedDate,
+			final Integer ageinDay, final boolean isAgeBased) {
+
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<ClinicalElementBean> query= cb.createQuery(ClinicalElementBean.class);
+		Root<ClinicalElements> root= query.from(ClinicalElements.class);
+		
+		Join<ClinicalElements,ClinicalElementTemplateMapping> paramJoin=root.join(ClinicalElements_.clinicalElementTemplateMapping,JoinType.INNER);
+		Predicate tempPredicate = cb.equal(paramJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingTemplateid),templateID);
+		Predicate tabTypePred = cb.equal(paramJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingType),tabType);
+		Predicate genderPred =root.get(ClinicalElements_.clinicalElementsGender).in(0,patientSex);
+		Predicate timePred=null;
+		
+		Predicate finalPred=cb.and(tempPredicate,tabTypePred,genderPred);
+		if(!leafCreatedDate.toString().equalsIgnoreCase("-1")){
+			Predicate timeStampPred=cb.lessThanOrEqualTo(paramJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingTimestamp),Timestamp.valueOf(leafCreatedDate));
+			Predicate nullPred=cb.isNull(paramJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingTimestamp));
+			timePred=cb.or(timeStampPred,nullPred);
+		}
+		Predicate age=null;
+		if(isAgeBased==true){
+			Join<ClinicalElements, ClinicalElementsCondition> condParamJoin=root.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
+			Predicate defaultstartAge=cb.isNull(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage));
+			Predicate defaultendAge=cb.isNull(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage));
+			Predicate startAge=cb.lessThan(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionStartage),ageinDay);
+			Predicate endAge=cb.greaterThanOrEqualTo(condParamJoin.get(ClinicalElementsCondition_.clinicalElementsConditionEndage),ageinDay);
+			Predicate defAgePred=cb.and(defaultstartAge,defaultendAge);
+			Predicate agePred=cb.and(startAge,endAge);
+			age=cb.or(defAgePred,agePred);
+		}
+	
+		if(!leafCreatedDate.toString().equalsIgnoreCase("-1")){
+			finalPred=cb.and(finalPred,timePred);
+		}
+		if(isAgeBased==true){
+			finalPred=cb.and(finalPred,age);
+		}
+		
+		query.select(cb.construct(ClinicalElementBean.class,
+				root.get(ClinicalElements_.clinicalElementsName),
+				root.get(ClinicalElements_.clinicalElementsGwid),
+				root.get(ClinicalElements_.clinicalElementsNotes),
+				root.get(ClinicalElements_.clinicalElementsDatatype),
+				root.get(ClinicalElements_.clinicalElementsCptcode),
+				root.get(ClinicalElements_.clinicalElementsIcd9code),
+				root.get(ClinicalElements_.clinicalElementsSnomed),
+				root.get(ClinicalElements_.clinicalElementsIsactive),
+				root.get(ClinicalElements_.clinicalElementsIsglobal),
+				root.get(ClinicalElements_.clinicalElementsIshistory),
+				root.get(ClinicalElements_.clinicalElementsIsepisode),
+				root.get(ClinicalElements_.clinicalElementsTextDimension),
+				root.get(ClinicalElements_.clinicalElementsGender),
+				root.get(ClinicalElements_.clinicalElementsIsselect)));
+		
+		query.where(finalPred);
+		
+		try{
+			return em.createQuery(query).getResultList();
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	
+	}
+
+	private String getPatLeafByLeafIdAndEncId(int leafId,
+			Integer encounterId) {
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<Object> query= cb.createQuery(Object.class);
+		Root<LeafPatient> root= query.from(LeafPatient.class);
+		
+		query.select(root.get(LeafPatient_.leafPatientCreatedDate));
+		
+		query.where(cb.equal(root.get(LeafPatient_.leafPatientLeafLibraryId),leafId),
+				cb.equal(root.get(LeafPatient_.leafPatientEncounterId),encounterId));
+		
+		List<Object> result= em.createQuery(query).getResultList();
+		if(result != null && result.size()>0)
+			return result.get(0).toString();
+		else
+			return "-1";		
+	}
+
+	private List<LeafLibrary> getLeafDetailsByTemplateId(Integer templateId) {
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<LeafLibrary> query= cb.createQuery(LeafLibrary.class);
+		Root<LeafLibrary> root= query.from(LeafLibrary.class);
+		
+		query.where(cb.equal(root.get(LeafLibrary_.leafLibrarySoaptemplateId),templateId));
+		return em.createQuery(query).getResultList();
+	}
 
 	public List<ClinicalElements> setHistoryClinicalDataBean(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String gwidPattern){
 
@@ -318,19 +631,50 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 
 
 	@Override
-	public List<String> delPatientElementByEncID(Integer patientId,Integer encounterId, Integer tabId,Integer templateId) {
+	public List<String> delPatientElementByEncID(Integer patientId,Integer encounterId, Integer tabId,Integer templateId,Integer prevEncounterId) {
 		List<ClinicalElementTemplateMapping> mappedClinicalElementsList=clinicalElementTemplateMappingRepository.findAll(ClinicalElementsSpecification.getclinicalElementByTabAndTempId(tabId, templateId));
 		ArrayList<String> mappedGwids=new ArrayList<String>();
 		mappedGwids.add("-1");
 		for (ClinicalElementTemplateMapping mapping : mappedClinicalElementsList) {
 			mappedGwids.add(mapping.getClinicalElementTemplateMappingGwid());
 		}
+		/*List<String> associateGwids= getAssociateGwids(tabId, templateId, prevEncounterId);
+		Set<String> gwids= new HashSet<String>();
+		gwids.addAll(mappedGwids);
+		gwids.addAll(associateGwids);
+		mappedGwids.clear();
+		mappedGwids.addAll(gwids);*/
+		
 		patientClinicalElementsRepository.deleteInBatch(patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinicalDataByGWID(patientId, encounterId, mappedGwids)));
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "clinical data deleted @encounterId="+encounterId+" @templateId="+templateId+" @tabId="+tabId, sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
 		return mappedGwids;
 	}
 
 
+
+	private List<String> getAssociateGwids(Integer tabId, Integer templateId, Integer encounterId) {
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<String> cq = builder.createQuery(String.class);
+		Root<ClinicalElementTemplateMapping> root = cq.from(ClinicalElementTemplateMapping.class);
+		Join<ClinicalElementTemplateMapping, ClinicalElements> clinicalJoin= root.join(ClinicalElementTemplateMapping_.clinicalElement, JoinType.INNER);		
+		Join<ClinicalElements, PatientClinicalElements> patientJoin= clinicalJoin.join(ClinicalElements_.patientClinicalElements, JoinType.LEFT);
+		Join<ClinicalElements, ClinicalTextMapping> textJoin= clinicalJoin.join(ClinicalElements_.clinicalTextMappings, JoinType.INNER);
+		patientJoin.on(builder.equal(patientJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid), encounterId));
+		
+		cq.select(textJoin.get(ClinicalTextMapping_.clinicalTextMappingTextboxGwid));
+		
+		cq.where(builder.equal(root.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingType),tabId),
+				  builder.equal(root.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingTemplateid),templateId));
+		
+		List<String> result= new ArrayList<String>();
+		try{
+			result= em.createQuery(cq).getResultList();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return result;
+	}
 
 	@Override
 	public void deleteNotesData(Integer patientId, Integer encounterId,Integer tabId, Integer templateId) {

@@ -15,7 +15,8 @@ public interface ClinicalElementsService {
 	public ClinicalTextMapping getClinicalTextMapping(String gwid);
 	public ClinicalElements getClinicalElement(String gwid);
 	public List<ClinicalElements> setClinicalDataBean(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String gwidPattern);
-	public List<String> delPatientElementByEncID(Integer patientId,Integer encounterId, Integer tabId,Integer templateId);
+	public List<ClinicalElementBean> setClinicalDataBeans(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String gwidPattern);
+	public List<String> delPatientElementByEncID(Integer patientId,Integer encounterId, Integer tabId,Integer templateId, Integer prevEncounterId);
 	public void deleteNotesData(Integer patientId, Integer encounterId,Integer tabId, Integer templateId);
 	public void insertDataForImport(Integer patientId,Integer encounterId,Integer prevEncounterId, Integer tabId, Integer templateId,List<String> mappedGwids);
 	public List<ClinicalElements> setHistoryClinicalDataBean(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String gwidPattern);

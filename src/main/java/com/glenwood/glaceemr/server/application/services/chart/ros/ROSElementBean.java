@@ -11,6 +11,19 @@ public class ROSElementBean {
 	private String associatedGWID;
 	private ROSElementAssociateBean associateElement;
 		
+	public ROSElementBean(String elementGWID, String elementName,
+			String elementPrintText, Integer dataType, String associatedGWID) {
+		super();
+		this.elementGWID = elementGWID;
+		this.elementName = elementName;
+		this.elementPrintText = elementPrintText;
+		this.dataType = dataType;
+		this.associatedGWID = associatedGWID;
+	}
+
+	public ROSElementBean() {
+	}
+
 	public Integer getDataType() {
 		return dataType;
 	}

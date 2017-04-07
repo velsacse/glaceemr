@@ -12,6 +12,17 @@ public class ROSSystemBean {
 	private String deferredGWID;
 	private List<ROSElementBean> rosElements=new ArrayList<ROSElementBean>();
 	
+	public ROSSystemBean(){}
+	
+	public ROSSystemBean(int systemId, String systemName, String eandMType,
+			String deferredGWID) {
+		super();
+		this.systemId = systemId;
+		this.systemName = systemName;
+		EandMType = eandMType;
+		this.deferredGWID = deferredGWID;
+	}
+
 	public int getSystemId(){
 		return systemId;
 	}

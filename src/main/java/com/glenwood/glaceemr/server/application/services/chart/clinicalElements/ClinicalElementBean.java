@@ -1,12 +1,9 @@
 package com.glenwood.glaceemr.server.application.services.chart.clinicalElements;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
-
-
 
 
 public class ClinicalElementBean {
@@ -17,23 +14,49 @@ public class ClinicalElementBean {
 	private String clinicalElementCPT;
 	private String clinicalElementICD9;
 	private String clinicalElementSNOMED;
-	private boolean clinicalElementIsActive;
-	private boolean clinicalElementIsGlobal;
-	private boolean clinicalElementIsHistory;
-	private boolean clinicalElementIsEpisode;
+	private Boolean clinicalElementIsActive;
+	private Boolean clinicalElementIsGlobal;
+	private Boolean clinicalElementIsHistory;
+	private Boolean clinicalElementIsEpisode;
 	private String clinicalElementTextDimension;
 	private Integer clinicalElementGender;
 	private Integer clinicalElementIsSelect;
 	private List<ClinicalTextMapping> clinicalTextMappings;
 	
-	
+	public ClinicalElementBean(String clinicalElementName,
+			String clinicalElementGWID, String clinicalElementNotes,
+			Integer clinicalElementDataType, String clinicalElementCPT,
+			String clinicalElementICD9, String clinicalElementSNOMED,
+			Boolean clinicalElementIsActive, Boolean clinicalElementIsGlobal,
+			Boolean clinicalElementIsHistory, Boolean clinicalElementIsEpisode,
+			String clinicalElementTextDimension, Integer clinicalElementGender,
+			Integer clinicalElementIsSelect,
+			List<ClinicalTextMapping> clinicalTextMappings) {
+		super();
+		this.clinicalElementName = clinicalElementName;
+		this.clinicalElementGWID = clinicalElementGWID;
+		this.clinicalElementNotes = clinicalElementNotes;
+		this.clinicalElementDataType = clinicalElementDataType;
+		this.clinicalElementCPT = clinicalElementCPT;
+		this.clinicalElementICD9 = clinicalElementICD9;
+		this.clinicalElementSNOMED = clinicalElementSNOMED;
+		this.clinicalElementIsActive = clinicalElementIsActive;
+		this.clinicalElementIsGlobal = clinicalElementIsGlobal;
+		this.clinicalElementIsHistory = clinicalElementIsHistory;
+		this.clinicalElementIsEpisode = clinicalElementIsEpisode;
+		this.clinicalElementTextDimension = clinicalElementTextDimension;
+		this.clinicalElementGender = clinicalElementGender;
+		this.clinicalElementIsSelect = clinicalElementIsSelect;
+		this.clinicalTextMappings = clinicalTextMappings;
+	}
+
 	
 	public ClinicalElementBean(String clinicalElementName,
 			String clinicalElementGWID, String clinicalElementNotes,
 			Integer clinicalElementDataType, String clinicalElementCPT,
 			String clinicalElementICD9, String clinicalElementSNOMED,
-			boolean clinicalElementIsActive, boolean clinicalElementIsGlobal,
-			boolean clinicalElementIsHistory, boolean clinicalElementIsEpisode,
+			Boolean clinicalElementIsActive, Boolean clinicalElementIsGlobal,
+			Boolean clinicalElementIsHistory, Boolean clinicalElementIsEpisode,
 			String clinicalElementTextDimension, Integer clinicalElementGender,
 			Integer clinicalElementIsSelect) {
 		this.clinicalElementName = clinicalElementName;
@@ -51,7 +74,6 @@ public class ClinicalElementBean {
 		this.clinicalElementGender = clinicalElementGender;
 		this.clinicalElementIsSelect = clinicalElementIsSelect;
 	}
-
 
 	public ClinicalElementBean(){
 		clinicalElementName="";
@@ -122,25 +144,25 @@ public class ClinicalElementBean {
 	public Boolean getClinicalElementIsActive() {
 		return clinicalElementIsActive;
 	}
-	public void setClinicalElementIsActive(boolean clinicalElementIsActive) {
+	public void setClinicalElementIsActive(Boolean clinicalElementIsActive) {
 		this.clinicalElementIsActive = clinicalElementIsActive;
 	}
-	public boolean getClinicalElementIsGlobal() {
+	public Boolean getClinicalElementIsGlobal() {
 		return clinicalElementIsGlobal;
 	}
-	public void setClinicalElementIsGlobal(boolean clinicalElementIsGlobal) {
+	public void setClinicalElementIsGlobal(Boolean clinicalElementIsGlobal) {
 		this.clinicalElementIsGlobal = clinicalElementIsGlobal;
 	}
-	public boolean getClinicalElementIsHistory() {
+	public Boolean getClinicalElementIsHistory() {
 		return clinicalElementIsHistory;
 	}
-	public void setClinicalElementIsHistory(boolean clinicalElementIsHistory) {
+	public void setClinicalElementIsHistory(Boolean clinicalElementIsHistory) {
 		this.clinicalElementIsHistory = clinicalElementIsHistory;
 	}
-	public boolean getClinicalElementIsEpisode() {
+	public Boolean getClinicalElementIsEpisode() {
 		return clinicalElementIsEpisode;
 	}
-	public void setClinicalElementIsEpisode(boolean clinicalElementIsEpisode) {
+	public void setClinicalElementIsEpisode(Boolean clinicalElementIsEpisode) {
 		this.clinicalElementIsEpisode = clinicalElementIsEpisode;
 	}
 	public Integer getClinicalElementGender() {

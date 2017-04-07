@@ -119,7 +119,7 @@ public class ImportDataServiceImpl implements ImportDataService{
 			Integer userId) {
 		
 		
-		List<String> mappedGwids=clinicalElementsService.delPatientElementByEncID(patientId,encounterId,tabId,templateId);
+		List<String> mappedGwids=clinicalElementsService.delPatientElementByEncID(patientId,encounterId,tabId,templateId,prevEncounterId);
 		clinicalElementsService.deleteNotesData(patientId,encounterId,tabId,templateId);
 		clinicalElementsService.insertDataForImport(patientId,encounterId,prevEncounterId,tabId,templateId,mappedGwids);
 		if(tabId==7 && dxSpecific.equalsIgnoreCase("t")){

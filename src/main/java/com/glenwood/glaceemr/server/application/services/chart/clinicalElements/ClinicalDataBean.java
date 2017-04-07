@@ -73,6 +73,7 @@ public class ClinicalDataBean {
 			clinicalElementBean.setClinicalElementIsSelect(Integer.parseInt(HUtil.Nz(element.getClinicalElementsIsselect(),"-1")));
 			
 		
+			if(element.getClinicalTextMappings() != null)
 			for (ClinicalTextMapping clinicalTextMapping : element.getClinicalTextMappings()) {
 				ClinicalTextMapping mapping = new ClinicalTextMapping();	
 				mapping.setClinicalTextMappingAssociatedElement(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingAssociatedElement(),""));
@@ -87,6 +88,47 @@ public class ClinicalDataBean {
 		
 		}
 	}
+	
+	/**
+	 * Sets clinical element details to {@link ClinicalElementBean} 
+	 * 
+	 * @param elementList
+	 * 
+	 */
+	public void setClinicalDataBean(List<ClinicalElementBean> elementList) {
+		if(elementList != null)
+		for (ClinicalElementBean element : elementList) {
+			ClinicalElementBean clinicalElementBean=new ClinicalElementBean();
+			clinicalElementBean.setClinicalElementName(HUtil.Nz(element.getClinicalElementName(),""));
+			clinicalElementBean.setClinicalElementNotes(HUtil.Nz(element.getClinicalElementNotes(),""));
+			clinicalElementBean.setClinicalElementDataType(Integer.parseInt(HUtil.Nz(element.getClinicalElementDataType(),"-1")));
+			clinicalElementBean.setClinicalElementCPT(HUtil.Nz(element.getClinicalElementCPT(),""));
+			clinicalElementBean.setClinicalElementICD9(HUtil.Nz(element.getClinicalElementICD9(),""));
+			clinicalElementBean.setClinicalElementSNOMED(HUtil.Nz(element.getClinicalElementSNOMED(),""));
+			clinicalElementBean.setClinicalElementIsActive(Boolean.parseBoolean(HUtil.Nz(element.getClinicalElementIsActive(),"false")));
+			clinicalElementBean.setClinicalElementIsGlobal(Boolean.parseBoolean(HUtil.Nz(element.getClinicalElementIsGlobal(),"false")));
+			clinicalElementBean.setClinicalElementIsHistory(Boolean.parseBoolean(HUtil.Nz(element.getClinicalElementIsHistory(),"false")));
+			clinicalElementBean.setClinicalElementIsEpisode(Boolean.parseBoolean(HUtil.Nz(element.getClinicalElementIsEpisode(),"false")));
+			clinicalElementBean.setClinicalElementTextDimension(HUtil.Nz(element.getClinicalElementTextDimension(),""));
+			clinicalElementBean.setClinicalElementGender(Integer.parseInt(HUtil.Nz(element.getClinicalElementGender(),"false")));
+			clinicalElementBean.setClinicalElementIsSelect(Integer.parseInt(HUtil.Nz(element.getClinicalElementIsSelect(),"-1")));
+			
+		
+			if(element.getClinicalTextMappings() != null)
+			for (ClinicalTextMapping clinicalTextMapping : element.getClinicalTextMappings()) {
+				ClinicalTextMapping mapping = new ClinicalTextMapping();	
+				mapping.setClinicalTextMappingAssociatedElement(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingAssociatedElement(),""));
+				mapping.setClinicalTextMappingId(Integer.parseInt(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingId(),"-1")));
+				mapping.setClinicalTextMappingIsdate(Boolean.parseBoolean(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingIsdate(),"false")));
+				mapping.setClinicalTextMappingPopupType(Integer.parseInt(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingPopupType(),"-1")));
+				mapping.setClinicalTextMappingTextboxGwid(HUtil.Nz(clinicalTextMapping.getClinicalTextMappingTextboxGwid(),""));
+				clinicalElementBean.getClinicalTextMappings().add(clinicalTextMapping);
+			}
+			
+			this.setClinicalElements(HUtil.Nz(element.getClinicalElementGWID(),"-1"), clinicalElementBean);
+		
+		}
+	}
 
 
 	/**
@@ -96,10 +138,29 @@ public class ClinicalDataBean {
 	 * @param patientElementData
 	 */
 	public void setPatientClinicalData(List<PatientClinicalElements> patientElementData) {
+		if(patientElementData!=null)
 		for (PatientClinicalElements patData : patientElementData) {
 			PatientElementBean patElmtBean=new PatientElementBean();
 			String clinicalElementGWId=HUtil.Nz(patData.getPatientClinicalElementsGwid(),"-1");
 			int clinicalElementDataType=Integer.parseInt(HUtil.Nz(patData.getClinicalElement().getClinicalElementsDatatype(),"-1"));
+			patElmtBean.setPatientClinicalElementId(Integer.parseInt(HUtil.Nz(patData.getPatientClinicalElementsId(),"-1")));
+			String elementData=HUtil.Nz(patData.getPatientClinicalElementsValue(),"-1").trim();
+			setPatientElementBeanData(clinicalElementDataType,patElmtBean,elementData,clinicalElementGWId);
+		}
+	}
+	
+	/**
+	 * 
+	 * Sets Patient Clinical Data to {@link PatientElementBean}
+	 * 
+	 * @param patientElementData
+	 */
+	public void setPatientClinicalDataBean(List<PatientClinicalElementsBean> patientElementData) {
+		if(patientElementData!=null)
+		for (PatientClinicalElementsBean patData : patientElementData) {
+			PatientElementBean patElmtBean=new PatientElementBean();
+			String clinicalElementGWId=HUtil.Nz(patData.getPatientClinicalElementsGwid(),"-1");
+			int clinicalElementDataType=Integer.parseInt(HUtil.Nz(patData.getClinicalElementsDatatype(),"-1"));
 			patElmtBean.setPatientClinicalElementId(Integer.parseInt(HUtil.Nz(patData.getPatientClinicalElementsId(),"-1")));
 			String elementData=HUtil.Nz(patData.getPatientClinicalElementsValue(),"-1").trim();
 			setPatientElementBeanData(clinicalElementDataType,patElmtBean,elementData,clinicalElementGWId);
@@ -133,13 +194,31 @@ public class ClinicalDataBean {
 	 * @param patientHistoryData
 	 */
 	public void setHistoryDatatoPatElementBean(List<PatientClinicalHistory> patientHistoryData) {
-
+		if(patientHistoryData != null)
 		for (PatientClinicalHistory patHisData : patientHistoryData) {
 			PatientElementBean patElmtBean=new PatientElementBean();
 			String clinicalElementGWId=HUtil.Nz(patHisData.getPatientClinicalHistoryGwid(),"-1");
 			int clinicalElementDataType=Integer.parseInt(HUtil.Nz(patHisData.getClinicalElement().getClinicalElementsDatatype(),"-1"));
 			patElmtBean.setPatientClinicalElementId(Integer.parseInt(HUtil.Nz(patHisData.getPatientClinicalHistoryId(),"-1")));
 			String elementData=HUtil.Nz(patHisData.getPatientClinicalHistoryValue(),"-1").trim();
+			setPatientElementBeanData(clinicalElementDataType,patElmtBean,elementData,clinicalElementGWId);
+		}
+	}
+
+	/**
+	 * 
+	 * Sets Patient History Data to {@link PatientElementBean}
+	 * 
+	 * @param patientHistoryData
+	 */
+	public void setHistoryDatatoPatElement(List<PatientClinicalElementsBean> patientHistoryData) {
+		if(patientHistoryData != null)
+		for (PatientClinicalElementsBean patHisData : patientHistoryData) {
+			PatientElementBean patElmtBean=new PatientElementBean();
+			String clinicalElementGWId=HUtil.Nz(patHisData.getPatientClinicalElementsGwid(),"-1");
+			int clinicalElementDataType=Integer.parseInt(HUtil.Nz(patHisData.getClinicalElementsDatatype(),"-1"));
+			patElmtBean.setPatientClinicalElementId(Integer.parseInt(HUtil.Nz(patHisData.getPatientClinicalElementsHistoryId(),"-1")));
+			String elementData=HUtil.Nz(patHisData.getPatientClinicalElementsValue(),"-1").trim();
 			setPatientElementBeanData(clinicalElementDataType,patElmtBean,elementData,clinicalElementGWId);
 		}
 	}

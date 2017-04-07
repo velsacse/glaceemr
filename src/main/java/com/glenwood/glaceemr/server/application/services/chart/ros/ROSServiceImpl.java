@@ -8,14 +8,29 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalSystem;
+import com.glenwood.glaceemr.server.application.models.ClinicalSystemOrder;
+import com.glenwood.glaceemr.server.application.models.ClinicalSystemOrder_;
+import com.glenwood.glaceemr.server.application.models.ClinicalSystem_;
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
+import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.RosElement;
+import com.glenwood.glaceemr.server.application.models.RosElement_;
 import com.glenwood.glaceemr.server.application.models.SoapElementDatalist;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsRepository;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalSystemRepository;
@@ -30,7 +45,6 @@ import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.PatientDetailsBean;
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.PatientElementBean;
 import com.glenwood.glaceemr.server.application.specifications.PatientClinicalElementsSpecification;
-import com.glenwood.glaceemr.server.application.specifications.ROSSpecification;
 import com.glenwood.glaceemr.server.application.specifications.ShortcutsSpecification;
 import com.glenwood.glaceemr.server.utils.HUtil;
 import com.google.common.base.Optional;
@@ -69,7 +83,8 @@ public class ROSServiceImpl implements ROSService {
 	@Autowired
 	ShortcutsRepository shortcutsRepository;
 	
-	
+	@PersistenceContext
+	EntityManager em;
 
 	@Override
 	public List<ROSSystemBean> getROSElements(String clientId,Integer patientId, Integer chartId,Integer encounterId, Integer templateId, Integer tabId) {
@@ -167,16 +182,17 @@ public class ROSServiceImpl implements ROSService {
 
 
 	public  void getROSElements(Integer templateId) {
-		List<ClinicalSystem> rosSystems=clinicalSystemRepository.findAll(ROSSpecification.getActiveROSSystems(templateId));
+//		List<ClinicalSystem> rosSystems=clinicalSystemRepository.findAll(ROSSpecification.getActiveROSSystems(templateId));
+		List<ROSSystemBean> rosSystems= getActiveROSSystems(templateId);
 		List<String> activeRosSystemIds = new ArrayList<String>();
 		activeRosSystemIds.add("-1");
 		for(int i=0; i<rosSystems.size(); i++){
 			ROSSystemBean rosSystemBean=new ROSSystemBean();
 			if(rosSystems.get(i)!=null){
-			rosSystemBean.setSytemId(Integer.parseInt(HUtil.Nz(rosSystems.get(i).getClinicalSystemRosGwid(),"-1")));
-			rosSystemBean.setSystemName(HUtil.Nz(rosSystems.get(i).getClinicalSystemName(),"-1"));
-			rosSystemBean.setEandMType(HUtil.Nz(rosSystems.get(i).getClinicalSystemRosEandmtype(),"-1"));
-			rosSystemBean.setDeferredGWID(HUtil.Nz(rosSystems.get(i).getClinicalSystemRosDeferredGwid(),""));
+			rosSystemBean.setSytemId(Integer.parseInt(HUtil.Nz(rosSystems.get(i).getSystemId(),"-1")));
+			rosSystemBean.setSystemName(HUtil.Nz(rosSystems.get(i).getSystemName(),"-1"));
+			rosSystemBean.setEandMType(HUtil.Nz(rosSystems.get(i).getEandMType(),"-1"));
+			rosSystemBean.setDeferredGWID(HUtil.Nz(rosSystems.get(i).getDeferredGWID(),""));
 			activeRosSystemIds.add(rosSystemBean.getSystemId()+"");
 			rosBean.getROS().put(rosSystemBean.getSystemId(), rosSystemBean);
 		}
@@ -185,37 +201,101 @@ public class ROSServiceImpl implements ROSService {
 	}
 
 
+	private List<ROSSystemBean> getActiveROSSystems(Integer templateId) {
+
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<ROSSystemBean> query= cb.createQuery(ROSSystemBean.class);
+		Root<ClinicalSystem> root= query.from(ClinicalSystem.class);
+		Join<ClinicalSystem,ClinicalSystemOrder> paramJoin=root.join(ClinicalSystem_.clinicalSystemOrders,JoinType.LEFT);	
+		paramJoin.on(cb.equal(paramJoin.get(ClinicalSystemOrder_.clinicalSystemOrderTemplateid),templateId));
+		
+		query.select(cb.construct(ROSSystemBean.class, 
+				root.get(ClinicalSystem_.clinicalSystemRosGwid),
+				root.get(ClinicalSystem_.clinicalSystemName),
+				root.get(ClinicalSystem_.clinicalSystemRosEandmtype),
+				root.get(ClinicalSystem_.clinicalSystemRosDeferredGwid)));
+		
+		query.where(cb.equal(root.get(ClinicalSystem_.clinicalSystemIsactive),true),
+				cb.isNotNull(root.get(ClinicalSystem_.clinicalSystemRosGwid)));
+		
+		query.orderBy(cb.asc(paramJoin.get(ClinicalSystemOrder_.clinicalSystemOrderRos)));
+		
+		return em.createQuery(query).getResultList();
+	}
+
 	public void getROSActiveElementBySystem(List<String> activeRosSystemIds){
-		List<RosElement> activeROSElements=rosElementRepository.findAll(ROSSpecification.getActiveROSElementBySystem(activeRosSystemIds));
+//		List<RosElement> activeROSElements=rosElementRepository.findAll(ROSSpecification.getActiveROSElementBySystem(activeRosSystemIds));
+		
+		List<ROSElementBean> activeROSElements= getSystemElements(activeRosSystemIds);
 		for(int j=0; j<activeROSElements.size(); j++){
 			ROSElementBean rosElementBean = new ROSElementBean();
-			RosElement rosList = activeROSElements.get(j);
-			rosElementBean.setElementGWID(HUtil.Nz(rosList.getRosElementGwid(),"0000000000000000000"));
-			rosElementBean.setElementName(HUtil.Nz(rosList.getRosElementName(),"-1"));
-			rosElementBean.setElementPrintText(HUtil.Nz(rosList.getRosElementPrinttext(),"-1"));
+			ROSElementBean rosList = activeROSElements.get(j);
+			rosElementBean.setElementGWID(HUtil.Nz(rosList.getElementGWID(),"0000000000000000000"));
+			rosElementBean.setElementName(HUtil.Nz(rosList.getElementName(),"-1"));
+			rosElementBean.setElementPrintText(HUtil.Nz(rosList.getElementPrintText(),"-1"));
 			String associateGwid = "0000000000000000000";
-			if(rosList.getClinicalTextMapping() != null){
-				List<ClinicalTextMapping> associateList = rosList.getClinicalTextMapping();
-				if(associateList != null && associateList.size()>0){
-					associateGwid = associateList.get(0).getClinicalTextMappingTextboxGwid();
-				}
+			if(rosList.getAssociatedGWID() != null && !rosList.getAssociatedGWID().trim().isEmpty()){
+					associateGwid = rosList.getAssociatedGWID(); 
 			}
 			rosElementBean.setAssociatedGWID(associateGwid);
-			rosBean.getROS().get(rosList.getRosElementSystemId()).getROSElements().add(rosElementBean);
+			rosBean.getROS().get(rosList.getDataType()).getROSElements().add(rosElementBean);
 		}
 	}
 
-	public List<ClinicalElements> setClinicalDataBean(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String clientId){
-		clinicalDataBean.setClientId(clientId);
-		return clinicalElementService.setClinicalDataBean(patientId, encounterId, templateId, tabType,"01004%");
+	private List<ROSElementBean> getSystemElements(List<String> activeRosSystemIds) {
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<ROSElementBean> query= cb.createQuery(ROSElementBean.class);
+		Root<RosElement> root= query.from(RosElement.class);
+		
+		Join<RosElement, ClinicalTextMapping> textJoin= root.join(RosElement_.clinicalTextMapping, JoinType.LEFT);
+		
+		query.multiselect(root.get(RosElement_.rosElementGwid), 
+				root.get(RosElement_.rosElementName),
+				root.get(RosElement_.rosElementPrinttext),
+				root.get(RosElement_.rosElementSystemId),
+				textJoin.get(ClinicalTextMapping_.clinicalTextMappingTextboxGwid));
+		
+		query.where(root.get(RosElement_.rosElementSystemId).in(activeRosSystemIds),
+					cb.equal(root.get(RosElement_.rosElementIsactive),true));
+		
+		query.orderBy(cb.asc(root.get(RosElement_.rosElementOrderby)));
+		
+		return em.createQuery(query).getResultList();
+	}
 
+	public List<ClinicalElementBean> setClinicalDataBean(Integer patientId,Integer encounterId,Integer templateId,Integer tabType,String clientId){
+		clinicalDataBean.setClientId(clientId);
+		return clinicalElementService.setClinicalDataBeans(patientId, encounterId, templateId, tabType,"01004%");
 	}
 
 	@Override
 	public String getROSNotes(Integer patientId, Integer encounterId) {
-		List<PatientClinicalElements> notesDataList=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(encounterId,patientId,"0000100400000000001"));
-		return notesDataList.size()>0 ? notesDataList.get(0).getPatientClinicalElementsValue() : "" ;
+		return getPatClinEleByGWID(encounterId,patientId,"0000100400000000001");
+	}
 
+	private String getPatClinEleByGWID(
+			Integer encounterId, Integer patientId, String gwid) {
+		
+		CriteriaBuilder cb= em.getCriteriaBuilder();
+		CriteriaQuery<String> query= cb.createQuery(String.class);
+		Root<PatientClinicalElements> root= query.from(PatientClinicalElements.class);
+
+		query.select(cb.coalesce(root.get(PatientClinicalElements_.patientClinicalElementsValue),""));
+		
+		query.where(cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId),
+				cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId),
+				cb.equal(root.get(PatientClinicalElements_.patientClinicalElementsGwid),gwid));
+	
+		try{
+			List<String> result= em.createQuery(query).getResultList();
+			if(result != null && result.size()>0)
+				return result.get(0);
+			else
+				return "";
+		}catch(Exception e){
+			e.printStackTrace();
+			return "";
+		}
 	}
 
 	public List<SoapElementDatalist> getSoapElementDataList(Integer tabId, String elementId) {
