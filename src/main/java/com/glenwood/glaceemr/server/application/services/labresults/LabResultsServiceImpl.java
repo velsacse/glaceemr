@@ -15,6 +15,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
@@ -237,7 +238,12 @@ public class LabResultsServiceImpl implements LabResultsService {
 				rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxPlacedDate)));
 		cqry.distinct(true);
 		cqry.orderBy(cbuilder.desc(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxPlacedDate)));
-		List<Object> obj=em.createQuery(cqry).getResultList();
+		Query query=em.createQuery(cqry);
+		if(pageSize != -1){
+			query.setFirstResult((pageNo-1)*pageSize);	// Page no (offset)
+			query.setMaxResults(pageSize);		// Page size (No of results)
+		}
+		List<Object> obj=query.getResultList();
 		
 		List<Hl7ResultInbox> resultInboxList = new ArrayList<Hl7ResultInbox>();
 		for(int i=0;i<obj.size();i++){
