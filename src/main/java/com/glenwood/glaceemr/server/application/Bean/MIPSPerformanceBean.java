@@ -5,6 +5,7 @@ public class MIPSPerformanceBean {
 	String cmsId;
 	String title;
 	String measureId;
+	int criteria;
 	int reportingYear;
 	
 	long ippCount;
@@ -35,7 +36,7 @@ public class MIPSPerformanceBean {
 		
 	}
 	
-	public MIPSPerformanceBean(String measureId, int reportingYear,
+	public MIPSPerformanceBean(String measureId, int criteria, int reportingYear,
 			int ippCount, String ippPatientsList, int denominatorCount,
 			String denominatorPatientsList, int denominatorExclusionCount,
 			String denominatorExclusionPatientsList, int numeratorCount,
@@ -46,6 +47,7 @@ public class MIPSPerformanceBean {
 			double reportingRate) {
 		
 		this.measureId = measureId;
+		this.criteria = criteria;
 		this.reportingYear = reportingYear;
 		this.ippCount = ippCount;
 		this.ippPatientsList = ippPatientsList;
@@ -64,12 +66,13 @@ public class MIPSPerformanceBean {
 		
 	}
 
-	public MIPSPerformanceBean(String measureId, int reportingYear,
+	public MIPSPerformanceBean(String measureId, int criteria,int reportingYear,
 			long ippCount, long denominatorCount,
 			long denominatorExclusionCount, long numeratorCount,
 			long numeratorExclusionCount, long denominatorExceptionCount) {
 		
 		this.measureId = measureId;
+		this.criteria = criteria;
 		this.reportingYear = reportingYear;
 		this.ippCount = ippCount;
 		this.denominatorCount = denominatorCount;
@@ -78,6 +81,14 @@ public class MIPSPerformanceBean {
 		this.numeratorExclusionCount = numeratorExclusionCount;
 		this.denominatorExceptionCount = denominatorExceptionCount;
 		
+	}
+
+	public int getCriteria() {
+		return criteria;
+	}
+
+	public void setCriteria(int criteria) {
+		this.criteria = criteria;
 	}
 
 	public double getReportingRate() {

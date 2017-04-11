@@ -167,13 +167,39 @@ Root<Encounter> root = cq.from(Encounter.class);
 			procedureObj.setEndDate(encounterObj.get(i).getEndDate());
 			procedureObj.setStatus(2);
 			procedureList.add(i, procedureObj);
+			
 		}
 		return procedureList;
 	}
 	
 	@SuppressWarnings("rawtypes")
 	public List<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter> getEncounterQDM(EntityManager em, boolean considerProvider,int patientID, int providerId, HashMap<String, String> encounterCodeList){
-		List<String> cptCodes = new ArrayList<String>(Arrays.asList(encounterCodeList.get("CPT").toString().split(",")));
+		
+		List<String> cptCodes = new ArrayList<String>();
+		
+		String cptCodeListString = "", hcpcsCodeListString = ""; 
+		
+		if(encounterCodeList.get("CPT").length() > 0){
+			
+			cptCodeListString = encounterCodeList.get("CPT").toString();
+			
+			cptCodes = Arrays.asList(cptCodeListString.split(","));
+			
+		}
+		
+		if(encounterCodeList.get("HCPCS").length() > 0){
+			
+			hcpcsCodeListString = encounterCodeList.get("HCPCS").toString();
+			
+			if(cptCodes.size() == 0){
+				cptCodes = Arrays.asList(hcpcsCodeListString.split(","));
+			}else{
+				String completeCodeList = encounterCodeList.get("CPT").toString().concat(",".concat(hcpcsCodeListString));
+				cptCodes = Arrays.asList(completeCodeList.split(","));
+			}
+			
+		}
+		
 		if(cptCodes.size()==0)
 			cptCodes.add("000000");
 		CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -250,7 +276,13 @@ Root<Encounter> root = cq.from(Encounter.class);
 				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
 				
 				encObject.setCode(encounterObj.get(i).getCode());
-				encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
+				
+				if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(encounterObj.get(i).getCode())) {
+					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
+				}else{
+					encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
+				}
+				
 				encObject.setStartDate(encounterObj.get(i).getStartDate());
 				encObject.setEndDate(encounterObj.get(i).getEndDate());
 				

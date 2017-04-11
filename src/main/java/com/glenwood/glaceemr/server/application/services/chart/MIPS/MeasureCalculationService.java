@@ -16,7 +16,7 @@ public interface MeasureCalculationService {
 
 	Request getQDMRequestObject(Boolean isIndividual,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM);
 
-	List<EPMeasureBean> getEPMeasuresResponseObject(Boolean isGroup,int patientID, int providerId, Date startDate, Date endDate);
+	List<EPMeasureBean> getEPMeasuresResponseObject(String accountId,Boolean isGroup,int patientID, int providerId, Date startDate, Date endDate);
 	
 	Boolean checkGroupOrIndividual(int year);
 	
@@ -26,7 +26,7 @@ public interface MeasureCalculationService {
 
 	HashMap<String, Object> generateFilterContents();
 
-	List<MIPSPatientInformation> getPatient(String patientId, String measureId);
+	List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria);
 
 	List<MIPSPatientInformation> getPatientInformation(String patientsList);
 	

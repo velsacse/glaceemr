@@ -19,7 +19,7 @@ public class QualityMeasuresPatientEntriesHistory {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="quality_measures_patient_entr_quality_measures_patient_ent_seq1")
-	@SequenceGenerator(name ="quality_measures_patient_entr_quality_measures_patient_ent_seq1", sequenceName="quality_measures_patient_entr_quality_measures_patient_ent_seq1", allocationSize=1)
+	@SequenceGenerator(name = "quality_measures_patient_entr_quality_measures_patient_ent_seq1", sequenceName="quality_measures_patient_entr_quality_measures_patient_ent_seq1", allocationSize=1)
 	@Column(name="quality_measures_patient_entries_id")
 	private Integer qualityMeasuresPatientEntriesId;
 
@@ -65,6 +65,9 @@ public class QualityMeasuresPatientEntriesHistory {
 
 	@Column(name="quality_measures_patient_entries_provider_id")
 	private Integer qualityMeasuresPatientEntriesProviderId;
+
+	@Column(name="quality_measures_patient_entries_history_criteria")
+	private Integer qualityMeasuresPatientEntriesHistoryCriteria;
 
 	public Integer getQualityMeasuresPatientEntriesId() {
 		return qualityMeasuresPatientEntriesId;
@@ -199,6 +202,15 @@ public class QualityMeasuresPatientEntriesHistory {
 	public void setQualityMeasuresPatientEntriesProviderId(
 			Integer qualityMeasuresPatientEntriesProviderId) {
 		this.qualityMeasuresPatientEntriesProviderId = qualityMeasuresPatientEntriesProviderId;
+	}
+
+	public Integer getQualityMeasuresPatientEntriesHistoryCriteria() {
+		return qualityMeasuresPatientEntriesHistoryCriteria;
+	}
+
+	public void setQualityMeasuresPatientEntriesHistoryCriteria(
+			Integer qualityMeasuresPatientEntriesHistoryCriteria) {
+		this.qualityMeasuresPatientEntriesHistoryCriteria = qualityMeasuresPatientEntriesHistoryCriteria;
 	}
 	
 }

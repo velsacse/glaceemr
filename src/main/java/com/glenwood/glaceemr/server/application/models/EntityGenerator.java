@@ -31,7 +31,7 @@ public class EntityGenerator {
 	public EntityGenerator() {
 		try {
 			Class.forName("org.postgresql.Driver");
-			con = DriverManager.getConnection("jdbc:postgresql://192.168.2.3:5432/localversion", "postgres", "glacenxt");
+			con = DriverManager.getConnection("jdbc:postgresql://192.168.2.3:5432/developer_db", "glace", "glacenxt");
 			stmt = con.createStatement();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -39,7 +39,7 @@ public class EntityGenerator {
 	}
 
 	public static void main(String[] args) throws Exception {
-		listOfTables = "\'hmr_category_url\'";
+		listOfTables = "\'macra_measures_rate\'";
 		EntityGenerator entityGenerator = new EntityGenerator();
 //		entityGenerator.getTablesList();
 		entityGenerator.createEntityFiles(listOfTables);

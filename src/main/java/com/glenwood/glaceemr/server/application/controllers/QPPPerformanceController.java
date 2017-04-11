@@ -1,5 +1,8 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -25,10 +28,10 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.HttpConnecti
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Response;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
+import com.glenwood.glaceemr.server.application.Bean.mailer.GlaceMailer;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.MeasureCalculationService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
-
 
 @RestController
 @Transactional
@@ -85,69 +88,97 @@ public class QPPPerformanceController {
 		
 		String hub_url = "http://test.glaceemr.com/glacecds/ECQMServices/validateECQM";
 		
-		Boolean isIndividual=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
-		
 		int savedUser = userId; //used to store logged userId to store the details in patient entries
 		
-		if(!isIndividual){
-			providerId=-1;
-			userId=-1;
-		}
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
 		
-		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
-		if(providerInfo!=null){
+		try{
 			
-			String[] measureIds = providerInfo.get(0).getMeasures().split(",");
-			
-			for(int i=0;i<measureIds.length;i++){
-				cqmMeasures.add(Integer.parseInt(measureIds[i]));
-			}
-			
-			HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedPath));
-			finalResponse.setMeasureInfo(utils.getMeasureInfo());
-			requestObj = measureService.getQDMRequestObject(isIndividual,patientID, userId, codeListForQDM);
+			Boolean isIndividual=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
 
-			requestObj.setAccountId(accountId);
-			requestObj.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
-			requestObj.setStartDate(providerInfo.get(0).getMacraProviderConfigurationReportingStart());
-			requestObj.setEndDate(providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
-			requestObj.setMeasureIds(cqmMeasures);
+			if(!isIndividual){
+				providerId=-1;
+				userId=-1;
+			}
+
+			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+			if(providerInfo!=null){
+
+				String[] measureIds = providerInfo.get(0).getMeasures().split(",");
+
+				for(int i=0;i<measureIds.length;i++){
+					cqmMeasures.add(Integer.parseInt(measureIds[i]));
+				}
+
+				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedPath));
+				finalResponse.setMeasureInfo(utils.getMeasureInfo());
+				requestObj = measureService.getQDMRequestObject(isIndividual,patientID, userId, codeListForQDM);
+
+				requestObj.setAccountId(accountId);
+				requestObj.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
+				requestObj.setStartDate(providerInfo.get(0).getMacraProviderConfigurationReportingStart());
+				requestObj.setEndDate(providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
+				requestObj.setMeasureIds(cqmMeasures);
+
+				response.setData(utils.getMeasureDetails().toString());
+
+				ObjectMapper objectMapper = new ObjectMapper();
+				String requestString = objectMapper.writeValueAsString(requestObj);
+
+				String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
+
+				responseFromCentralServer = objectMapper.readValue(responseStr, Response.class);
+
+				Map<String,MeasureStatus> measureStatus = responseFromCentralServer.getMeasureStatus();
+
+				responseFromCentralServer.setMeasureStatus(measureStatus);
+
+				finalResponse.setDataFromResponse(responseFromCentralServer);
+
+				List<MeasureStatus> responseToSave = new ArrayList<MeasureStatus>();
+
+				for(int i=0;i<measureIds.length;i++){
+
+					String measureID = measureStatus.keySet().toArray()[i].toString();
+					
+					measureStatus.get(measureID).setReportingYear(""+providerInfo.get(0).getMacraProviderConfigurationReportingYear());
+					responseToSave.add(measureStatus.get(measureID));
+
+				}
+
+				measureService.saveMeasureDetails(savedUser, patientID, responseToSave);
+
+			}else{
+
+			}
+
+			response.setData(finalResponse);
+
+		}catch(Exception e){
 			
-			response.setData(utils.getMeasureDetails().toString());
-			
-			ObjectMapper objectMapper = new ObjectMapper();
-			String requestString = objectMapper.writeValueAsString(requestObj);
-			
-			System.out.println("request string is...................."+requestString.toString());
-			
-			String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
-			
-			System.out.println("response string is...................."+responseStr.toString());
-			
-			responseFromCentralServer = objectMapper.readValue(responseStr, Response.class);
-			
-			Map<String,MeasureStatus> measureStatus = responseFromCentralServer.getMeasureStatus();
-			
-			responseFromCentralServer.setMeasureStatus(measureStatus);
-			
-			finalResponse.setDataFromResponse(responseFromCentralServer);
-			
-			List<MeasureStatus> responseToSave = new ArrayList<MeasureStatus>();
-			
-			for(int i=0;i<measureIds.length;i++){
+			try {
 				
-				measureStatus.get(measureIds[i]).setReportingYear(""+providerInfo.get(0).getMacraProviderConfigurationReportingYear());
-				responseToSave.add(measureStatus.get(measureIds[i]));
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while getting ECQM status",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
 				
 			}
 			
-			measureService.saveMeasureDetails(savedUser, patientID, responseToSave);
-			
-		}else{
-			
 		}
-		
-		response.setData(finalResponse);
 		
 		return response;
 		
@@ -170,24 +201,54 @@ public class QPPPerformanceController {
 		
 		List<EPMeasureBean> epMeasureStatus = new ArrayList<EPMeasureBean>();
 		
-		Boolean isGroup=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
 		
-		if(!isGroup){
-			providerId=-1;
-			userId=-1;
+		try{
+			
+			Boolean isGroup=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
+
+			if(!isGroup){
+				providerId=-1;
+				userId=-1;
+			}
+
+			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+
+			if(providerInfo!=null){
+
+				epMeasureStatus = measureService.getEPMeasuresResponseObject(accountId,isGroup,patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
+
+			}else{
+
+			}
+
+			response.setData(epMeasureStatus);
+
+		}catch(Exception e){
+			
+			try {
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while getting EP Measure status",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+				
+			}
+			
 		}
-		
-		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
-		
-		if(providerInfo!=null){
-			
-			epMeasureStatus = measureService.getEPMeasuresResponseObject(isGroup,patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
-			
-		}else{
-			
-		}
-		
-		response.setData(epMeasureStatus);
 		
 		return response;
 		
@@ -201,7 +262,12 @@ public class QPPPerformanceController {
 			@RequestParam(value="measureId", required=false, defaultValue="") String measureId) throws Exception{
 		
 		EMRResponseBean response = new EMRResponseBean();
+		
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
 
+		try{
+		
 		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 		
 		String configuredMeasures = providerInfo.get(0).getMeasures();
@@ -209,37 +275,33 @@ public class QPPPerformanceController {
 //		List<MIPSPerformanceBean> performanceObj = measureService.getPerformanceCount(providerId, measureId, configuredMeasures,accountId);
 		
 		List<MIPSPerformanceBean> performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures);
-		
+
 		response.setData(performanceObj);
 		
-		return response;
-		
-	}
-	
-	@RequestMapping(value = "/getPatientDetails", method = RequestMethod.GET)
-	@ResponseBody
-	public EMRResponseBean getPatientDetails(
-			@RequestParam(value="patientId", required=true) String patientsList){
-		
-		EMRResponseBean response = new EMRResponseBean();
+		}catch(Exception e){
+			
+			try {
+				
+				e.printStackTrace(printWriter);
 
-		List<MIPSPatientInformation> patientInfo = measureService.getPatientInformation(patientsList);
-		
-		response.setData(patientInfo);
-		
-		return response;
-		
-	}
-	
-	@RequestMapping(value = "/getFilterData", method = RequestMethod.GET)
-	@ResponseBody
-	public EMRResponseBean getFilterData(){
-		
-		EMRResponseBean response = new EMRResponseBean();
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while getting MIPSPerformance Report",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
 
-		HashMap<String, Object> filtersInfo = measureService.generateFilterContents();
-		
-		response.setData(filtersInfo);
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+				
+			}
+			
+		}
 		
 		return response;
 		
@@ -249,13 +311,45 @@ public class QPPPerformanceController {
 	@ResponseBody
 	public EMRResponseBean getPatient(
 			@RequestParam(value="patientId", required=true) String patientId,
-			@RequestParam(value="measureId", required=true) String measureId){
+			@RequestParam(value="measureId", required=true) String measureId,
+			@RequestParam(value="criteria", required=true) int criteria,
+			@RequestParam(value="accountId", required=true) String accountId){
 		
 		EMRResponseBean response = new EMRResponseBean();
+		
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
 
-		List<MIPSPatientInformation> filtersInfo = measureService.getPatient(patientId,measureId);
+		try{
+		
+		List<MIPSPatientInformation> filtersInfo = measureService.getPatient(patientId,measureId,criteria);
 		
 		response.setData(filtersInfo);
+		
+		}catch(Exception e){
+			
+			try {
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while getting filtered patients list",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+				
+			}
+			
+		}
 		
 		return response;
 		

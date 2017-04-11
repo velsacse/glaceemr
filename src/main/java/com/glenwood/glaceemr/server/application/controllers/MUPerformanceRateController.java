@@ -146,7 +146,7 @@ public class MUPerformanceRateController {
 				
 				e.printStackTrace(printWriter);
 
-				responseMsg = buildMailContentFormat(accountID, -1,responseMsg,writer.toString());
+				responseMsg = GlaceMailer.buildMailContentFormat(accountID, -1,responseMsg,writer.toString());
 				
 				GlaceMailer.sendFailureReport(responseMsg,accountID);
 				
@@ -235,8 +235,10 @@ public class MUPerformanceRateController {
 
 				for(int i=0;i<measureIds.length;i++){
 
-					measureStatus.get(measureIds[i]).setReportingYear(""+providerInfo.get(0).getMacraProviderConfigurationReportingYear());
-					responseToSave.add(measureStatus.get(measureIds[i]));
+					String measureID = measureStatus.keySet().toArray()[i].toString();
+					
+					measureStatus.get(measureID).setReportingYear(""+providerInfo.get(0).getMacraProviderConfigurationReportingYear());
+					responseToSave.add(measureStatus.get(measureID));
 
 				}
 
@@ -250,7 +252,7 @@ public class MUPerformanceRateController {
 				
 				e.printStackTrace(printWriter);
 
-				String responseMsg = buildMailContentFormat(accountId, patientID,"Error occurred while QDM validation",writer.toString());
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while QDM validation",writer.toString());
 				
 				GlaceMailer.sendFailureReport(responseMsg,accountId);
 				
@@ -319,7 +321,7 @@ public class MUPerformanceRateController {
 				
 				e.printStackTrace(printWriter);
 
-				String responseMsg = buildMailContentFormat(accountID, -1,"Error occurred while calculating performance",writer.toString());
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountID, -1,"Error occurred while calculating performance",writer.toString());
 				
 				GlaceMailer.sendFailureReport(responseMsg,accountID);
 				
@@ -362,28 +364,6 @@ public class MUPerformanceRateController {
 	    calendar.set(Calendar.MINUTE, 59);
 	    calendar.set(Calendar.SECOND, 59);
 	    calendar.set(Calendar.MILLISECOND, 999);
-	}
-	
-	private String buildMailContentFormat(String accId, int patientId, String responseString, String exceptionTrace){
-		
-		String mailContent = "";
-		
-		mailContent += "<html><body><table border='1'>";
-		
-		mailContent += "<tr><td><b>Account Id: </b></td><td>"+accId+"</td></tr>";
-		
-		if(patientId!=-1){
-			mailContent += "<tr><td><b>Patient Id: </b></td><td>"+patientId+"</td></tr>";
-		}
-		
-		mailContent += "<tr><td><b>Error Message: </b></td><td>"+responseString+"</td></tr>";
-		
-		mailContent += "<tr><td><b>Exception Trace: </b></td><td>"+exceptionTrace+"</td></tr>";
-		
-		mailContent += "</table></body></html>";
-		
-		return mailContent;
-		
 	}
 	
 }

@@ -23,7 +23,7 @@ public class QualityMeasuresPatientEntries {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="quality_measures_patient_entr_quality_measures_patient_entr_seq")
-	@SequenceGenerator(name ="quality_measures_patient_entr_quality_measures_patient_entr_seq", sequenceName="quality_measures_patient_entr_quality_measures_patient_entr_seq", allocationSize=1)
+	@SequenceGenerator(name = "quality_measures_patient_entr_quality_measures_patient_entr_seq", sequenceName="quality_measures_patient_entr_quality_measures_patient_entr_seq", allocationSize=1)
 	@Column(name="quality_measures_patient_entries_id")
 	private Integer qualityMeasuresPatientEntriesId;
 
@@ -69,6 +69,9 @@ public class QualityMeasuresPatientEntries {
 
 	@Column(name="quality_measures_patient_entries_provider_id")
 	private Integer qualityMeasuresPatientEntriesProviderId;
+
+	@Column(name="quality_measures_patient_entries_criteria")
+	private Integer qualityMeasuresPatientEntriesCriteria;
 
 	public Integer getQualityMeasuresPatientEntriesId() {
 		return qualityMeasuresPatientEntriesId;
@@ -204,7 +207,16 @@ public class QualityMeasuresPatientEntries {
 			Integer qualityMeasuresPatientEntriesProviderId) {
 		this.qualityMeasuresPatientEntriesProviderId = qualityMeasuresPatientEntriesProviderId;
 	}
-	
+
+	public Integer getQualityMeasuresPatientEntriesCriteria() {
+		return qualityMeasuresPatientEntriesCriteria;
+	}
+
+	public void setQualityMeasuresPatientEntriesCriteria(
+			Integer qualityMeasuresPatientEntriesCriteria) {
+		this.qualityMeasuresPatientEntriesCriteria = qualityMeasuresPatientEntriesCriteria;
+	}
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="quality_measures_patient_entries_patient_id", referencedColumnName="patient_registration_id", insertable=false, updatable=false)
 	@JsonBackReference

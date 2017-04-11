@@ -182,7 +182,7 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 			
 			MIPSPerformanceBean performanceByMeasure = providerPerformance.get(i);
 
-			measureRate = measuresRepo.findOne(Specifications.where(QPPPerformanceSpecification.isRecordExisting(providerId, reportingYear, startDate, endDate, performanceByMeasure.getMeasureId())));
+			measureRate = measuresRepo.findOne(Specifications.where(QPPPerformanceSpecification.isRecordExisting(providerId, reportingYear, startDate, endDate, performanceByMeasure.getMeasureId(), performanceByMeasure.getCriteria())));
 			
 			if(measureRate == null){
 			
@@ -191,6 +191,7 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 			}
 			
 			measureRate.setMacraMeasuresRateMeasureId(performanceByMeasure.getMeasureId());
+			measureRate.setMacraMeasuresRateCriteria(performanceByMeasure.getCriteria());
 			measureRate.setMacraMeasuresRateMeasureType(1);
 			measureRate.setMacraMeasuresRatePerformance(performanceByMeasure.getPerformanceRate());
 			measureRate.setMacraMeasuresRatePeriodEnd(endDate);

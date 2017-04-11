@@ -80,6 +80,6 @@ public class QDM implements Comparable<QDM>
 	@Override
 	public int compareTo(QDM o)
 	{
-		return this.getStartDate().compareTo(o.getStartDate());
+		return o.getStartDate().compareTo(this.getStartDate());
 	}	
 }

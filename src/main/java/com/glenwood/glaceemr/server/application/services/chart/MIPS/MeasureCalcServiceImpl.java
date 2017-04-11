@@ -120,9 +120,11 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			
 			String measureId = ""+patientObj.getMeasureId();
 			
+			measureId = measureId.split("-")[0];
+			
 			patientLogObj = new QualityMeasuresPatientEntriesHistory();
 			
-			QualityMeasuresPatientEntries patientData = patientDataRepo.findOne(Specifications.where(QPPPerformanceSpecification.isPatientExisting(measureId, patientId, patientObj.getReportingYear())));
+			QualityMeasuresPatientEntries patientData = patientDataRepo.findOne(Specifications.where(QPPPerformanceSpecification.isPatientExisting(providerId, measureId, patientId, patientObj.getReportingYear(),patientObj.getCriteria())));
 			
 			if(patientData == null || patientData.equals(null)){
 				
@@ -130,6 +132,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 				patientData.setQualityMeasuresPatientEntriesPatientId(patientId);
 				patientData.setQualityMeasuresPatientEntriesMeasureId(measureId);
+				patientData.setQualityMeasuresPatientEntriesCriteria(patientObj.getCriteria());
 				patientData.setQualityMeasuresPatientEntriesProviderId(providerId);
 				patientData.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(patientObj.getReportingYear()));
 				patientData.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
@@ -143,28 +146,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				patientData.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
 				patientData.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
 
-				patientDataRepo.saveAndFlush(patientData);
-				
-				patientLogObj.setQualityMeasuresPatientEntriesPatientId(patientId);
-				patientLogObj.setQualityMeasuresPatientEntriesMeasureId(measureId);
-				patientLogObj.setQualityMeasuresPatientEntriesProviderId(providerId);
-				patientLogObj.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(patientObj.getReportingYear()));
-				patientLogObj.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
-				patientLogObj.setQualityMeasuresPatientEntriesIpp(patientObj.getIpp());
-				patientLogObj.setQualityMeasuresPatientEntriesDenominator(patientObj.getDenominator());
-				patientLogObj.setQualityMeasuresPatientEntriesDenominatorExclusion(patientObj.getDenominatorExclusion());
-				patientLogObj.setQualityMeasuresPatientEntriesNumerator(patientObj.getNumerator());
-				patientLogObj.setQualityMeasuresPatientEntriesNumeratorExclusion(patientObj.getNumeratorExclusion());
-				patientLogObj.setQualityMeasuresPatientEntriesDenominatorException(patientObj.getDenominatorException());
-				patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
-				patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
-				patientLogObj.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
-				
-				patientLogRepo.saveAndFlush(patientLogObj);
-				
 			}else{
 				
-				patientData.setQualityMeasuresPatientEntriesProviderId(providerId);
 				patientData.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
 				patientData.setQualityMeasuresPatientEntriesIpp(patientObj.getIpp());
 				patientData.setQualityMeasuresPatientEntriesDenominator(patientObj.getDenominator());
@@ -176,26 +159,27 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				patientData.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
 				patientData.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
 				
-				patientDataRepo.saveAndFlush(patientData);
-
-				patientLogObj.setQualityMeasuresPatientEntriesPatientId(patientId);
-				patientLogObj.setQualityMeasuresPatientEntriesMeasureId(measureId);
-				patientLogObj.setQualityMeasuresPatientEntriesProviderId(providerId);
-				patientLogObj.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(patientObj.getReportingYear()));
-				patientLogObj.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
-				patientLogObj.setQualityMeasuresPatientEntriesIpp(patientObj.getIpp());
-				patientLogObj.setQualityMeasuresPatientEntriesDenominator(patientObj.getDenominator());
-				patientLogObj.setQualityMeasuresPatientEntriesDenominatorExclusion(patientObj.getDenominatorExclusion());
-				patientLogObj.setQualityMeasuresPatientEntriesNumerator(patientObj.getNumerator());
-				patientLogObj.setQualityMeasuresPatientEntriesNumeratorExclusion(patientObj.getNumeratorExclusion());
-				patientLogObj.setQualityMeasuresPatientEntriesDenominatorException(patientObj.getDenominatorException());
-				patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
-				patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
-				patientLogObj.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
-				
-				patientLogRepo.saveAndFlush(patientLogObj);
-				
 			}
+			
+			patientDataRepo.saveAndFlush(patientData);
+
+			patientLogObj.setQualityMeasuresPatientEntriesPatientId(patientId);
+			patientLogObj.setQualityMeasuresPatientEntriesMeasureId(measureId);
+			patientLogObj.setQualityMeasuresPatientEntriesHistoryCriteria(patientObj.getCriteria());
+			patientLogObj.setQualityMeasuresPatientEntriesProviderId(providerId);
+			patientLogObj.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(patientObj.getReportingYear()));
+			patientLogObj.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
+			patientLogObj.setQualityMeasuresPatientEntriesIpp(patientObj.getIpp());
+			patientLogObj.setQualityMeasuresPatientEntriesDenominator(patientObj.getDenominator());
+			patientLogObj.setQualityMeasuresPatientEntriesDenominatorExclusion(patientObj.getDenominatorExclusion());
+			patientLogObj.setQualityMeasuresPatientEntriesNumerator(patientObj.getNumerator());
+			patientLogObj.setQualityMeasuresPatientEntriesNumeratorExclusion(patientObj.getNumeratorExclusion());
+			patientLogObj.setQualityMeasuresPatientEntriesDenominatorException(patientObj.getDenominatorException());
+			patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
+			patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
+			patientLogObj.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
+			
+			patientLogRepo.saveAndFlush(patientLogObj);
 			
 		}
 		
@@ -321,7 +305,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 				e.printStackTrace(printWriter);
 
-				String responseMsg = buildMailContentFormat("glace", patientID,"Error occurred while generating QDM Object",writer.toString());
+				String responseMsg = GlaceMailer.buildMailContentFormat("glace", patientID,"Error occurred while generating QDM Object",writer.toString());
 				
 				GlaceMailer.sendFailureReport(responseMsg,"glace");
 				
@@ -343,189 +327,378 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		return finalReqObject;
 	}
 	
-	private String buildMailContentFormat(String accId, int patientId, String responseString, String exceptionTrace){
-		
-		String mailContent = "";
-		
-		mailContent += "<html><body><table border='1' cellspacing='10' cellpadding='10'>";
-		
-		mailContent += "<tr><td><b>Account Id: </b></td><td>"+accId+"</td></tr>";
-		
-		if(patientId!=-1){
-			mailContent += "<tr><td><b>Patient Id: </b></td><td>"+patientId+"</td></tr>";
-		}
-		
-		mailContent += "<tr><td><b>Error Message: </b></td><td>"+responseString+"</td></tr>";
-		
-		mailContent += "<tr><td><b>Exception Trace: </b></td><td>"+exceptionTrace+"</td></tr>";
-		
-		mailContent += "</table></body></html>";
-		
-		return mailContent;
-		
-	}
-
 	@Override
-	public List<EPMeasureBean> getEPMeasuresResponseObject(Boolean isGroup,int patientID, int providerId, Date startDate, Date endDate) {
+	public List<EPMeasureBean> getEPMeasuresResponseObject(String accountId,Boolean isGroup,int patientID, int providerId, Date startDate, Date endDate) {
 		
 		List<EPMeasureBean> epMeasureInfo = new ArrayList<EPMeasureBean>();
 		
-		ExportQDM qdmData = new ExportQDM(); 
+		ExportQDM qdmData = new ExportQDM();
 		
-		int encounterId = qdmData.getMaxEncounterIdByPatient(patientID, em);
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
 		
-		epMeasureInfo.add(setEPrescriptionDetails(isGroup,qdmData, encounterId, providerId));
-		
-		epMeasureInfo.add(setMedicationReconcilatonDetails(isGroup,qdmData, encounterId, providerId));
-		
-		epMeasureInfo.add(setReferralExchangeInfo(isGroup,qdmData, patientID, providerId, startDate, endDate));
-		
-		epMeasureInfo.add(setSecureMessageInfoDetails(isGroup,qdmData, patientID, providerId, startDate, endDate));
-		
-		epMeasureInfo.add(setPatientElectronicAccessInfo(isGroup,qdmData, patientID, providerId, startDate, endDate));
-		
-		epMeasureInfo.add(setPatientAccessInfoForPortal(qdmData, patientID, providerId, startDate, endDate));
+		try{
+
+			int encounterId = qdmData.getMaxEncounterIdByPatient(patientID, em);
+
+			epMeasureInfo.add(setEPrescriptionDetails(accountId,isGroup,qdmData, patientID,encounterId, providerId));
+
+			epMeasureInfo.add(setMedicationReconcilatonDetails(accountId,isGroup,qdmData, patientID,encounterId, providerId));
+
+			epMeasureInfo.add(setReferralExchangeInfo(accountId,isGroup,qdmData, patientID, providerId, startDate, endDate));
+
+			epMeasureInfo.add(setSecureMessageInfoDetails(accountId,isGroup,qdmData, patientID, providerId, startDate, endDate));
+
+			epMeasureInfo.add(setPatientElectronicAccessInfo(accountId,isGroup,qdmData, patientID, providerId, startDate, endDate));
+
+			epMeasureInfo.add(setPatientAccessInfoForPortal(accountId,qdmData, patientID, providerId, startDate, endDate));
+
+		}catch(Exception e){
+			
+			try {
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while generating EP Measures Object",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+
+			}
+			
+		}
 		
 		return epMeasureInfo;
 		
-	}
-	
-	private EPMeasureBean setEPrescriptionDetails(Boolean isGroup,ExportQDM qdmData, int encounterId, int providerId){
-		
-		String ePrescResult = qdmData.getEPrescribingDetails(isGroup,encounterId,em,providerId);
-		
-		EPMeasureBean epObject = new EPMeasureBean();
-		
-		epObject.setMeasureId("C202");
-		epObject.setMeasureTitle("Electronic Prescribing");
-		epObject.setDescription(ePrescResult.split("&&&&")[0]);
-		
-		if(Integer.parseInt(ePrescResult.split("&&&&")[1]) == -1){
-			epObject.setStatus("Not Completed");
-		}else if(Integer.parseInt(ePrescResult.split("&&&&")[1]) == 0){
-			epObject.setStatus("Not Completed");
-		}else{
-			epObject.setStatus("Completed");
-		}
-		
-		return epObject;
 		
 	}
 	
-	private EPMeasureBean setMedicationReconcilatonDetails(Boolean isGroup,ExportQDM qdmData, int encounterId, int providerId){
-		
-		boolean isTransitionOfCare = qdmData.checkTransitionOfCareByEncId(isGroup,encounterId, em,providerId);
+	private EPMeasureBean setEPrescriptionDetails(String accountId,Boolean isGroup,ExportQDM qdmData, int patientID,int encounterId, int providerId){
 		
 		EPMeasureBean epObject = new EPMeasureBean();
 		
-		epObject.setMeasureId("C214");
-		epObject.setMeasureTitle("Medication Reconciliation");
-		if(!isTransitionOfCare){
-			epObject.setDescription("Transition of Care not checked for current encounter");
-			epObject.setStatus("Not Completed");
-		}else{
-			
-			boolean medReconcilationResult = qdmData.getReconcilationStatusByEncId(isGroup,encounterId,em,providerId);
-			
-			if(medReconcilationResult){
-				epObject.setStatus("Completed");
-			}else{
-				epObject.setDescription("Reconcile medications to complete this measure");
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
+
+		try{
+
+			String ePrescResult = qdmData.getEPrescribingDetails(isGroup,encounterId,em,providerId);
+
+			epObject.setMeasureId("C202");
+			epObject.setMeasureTitle("Electronic Prescribing");
+			epObject.setDescription(ePrescResult.split("&&&&")[0]);
+
+			if(Integer.parseInt(ePrescResult.split("&&&&")[1]) == -1){
+				epObject.setStatus("Not Applicable");
+			}else if(Integer.parseInt(ePrescResult.split("&&&&")[1]) == 0){
 				epObject.setStatus("Not Completed");
+			}else{
+				epObject.setStatus("Completed");
+			}
+
+		}catch(Exception e){
+			
+			try{
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while getting e-prescribing details",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+
 			}
 			
-		} 
+		}
 		
 		return epObject;
 		
 	}
 	
-	private EPMeasureBean setReferralExchangeInfo(Boolean isGroup,ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
+	private EPMeasureBean setMedicationReconcilatonDetails(String accountId,Boolean isGroup,ExportQDM qdmData, int patientID,int encounterId, int providerId){
 		
 		EPMeasureBean epObject = new EPMeasureBean();
 		
-		String result = qdmData.getReferralInfoExchangeByProvider(isGroup,providerId, patientId, startDate, endDate,em);
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
 		
-		epObject.setMeasureId("C217");
-		epObject.setMeasureTitle("Health Information Exchange");
-		epObject.setDescription(result);
-		
-		if(Integer.parseInt(result.split("\n")[1].split(":")[1].replace(" ","")) == 0){
-			epObject.setStatus("Not Completed");
-		}else{
+		try{
+
+			boolean isTransitionOfCare = qdmData.checkTransitionOfCareByEncId(isGroup,encounterId, em,providerId);
 			
-			if(Integer.parseInt(result.split("\n")[0].split(":")[1].replace(" ","")) >= 1){
+			epObject.setMeasureId("C214");
+			epObject.setMeasureTitle("Medication Reconciliation");
+			if(!isTransitionOfCare){
+				epObject.setDescription("Transition of Care not checked for current encounter");
+				epObject.setStatus("Not Applicable");
+			}else{
+
+				boolean medReconcilationResult = qdmData.getReconcilationStatusByEncId(isGroup,encounterId,em,providerId);
+
+				if(medReconcilationResult){
+					epObject.setStatus("Completed");
+				}else{
+					epObject.setDescription("Reconcile medications to complete this measure");
+					epObject.setStatus("Not Completed");
+				}
+
+			} 
+
+		}catch(Exception e){
+			
+			try{
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while getting medication reconcilation details",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+
+			}
+			
+		}
+		
+		return epObject;
+		
+	}
+	
+	private EPMeasureBean setReferralExchangeInfo(String accountId,Boolean isGroup,ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
+		
+		EPMeasureBean epObject = new EPMeasureBean();
+		
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
+		
+		try{
+
+			String result = qdmData.getReferralInfoExchangeByProvider(isGroup,providerId, patientId, startDate, endDate,em);
+
+			epObject.setMeasureId("C217");
+			epObject.setMeasureTitle("Health Information Exchange");
+			epObject.setDescription(result);
+
+			if(Integer.parseInt(result.split("\n")[1].split(":")[1].replace(" ","")) == 0){
+				epObject.setStatus("Not Applicable");
+			}else{
+
+				if(Integer.parseInt(result.split("\n")[0].split(":")[1].replace(" ","")) >= 1){
+					epObject.setStatus("Completed");
+				}else{
+					epObject.setStatus("Not Completed");
+				}
+			}
+
+		}catch(Exception e){
+			
+			try{
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientId,"Error occurred while getting referral details",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+
+			}
+			
+		}
+		
+		return epObject;
+		
+	}
+	
+	private EPMeasureBean setSecureMessageInfoDetails(String accountId,Boolean isGroup,ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
+		
+		EPMeasureBean epObject = new EPMeasureBean();
+		
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
+		
+		try{
+
+			String result = qdmData.getSecureMessagingInfo(isGroup,providerId, patientId, startDate, endDate,em);
+
+			epObject.setMeasureId("C213");
+			epObject.setMeasureTitle("Secure Messaging");
+			epObject.setDescription(result);
+
+			if( (Integer.parseInt(result.split("\n")[0].split(":")[1].replace(" ","")) == 0) && (Integer.parseInt(result.split("\n")[1].split(":")[1].replace(" ","")) == 0) ){
+				epObject.setStatus("Not Applicable");
+			}else{
+
+				if( (Integer.parseInt(result.split("\n")[0].split(":")[1].replace(" ","")) >= 1) || (Integer.parseInt(result.split("\n")[1].split(":")[1].replace(" ","")) >= 1)){
+					epObject.setStatus("Completed");
+				}else{
+					epObject.setStatus("Not Completed");
+				}
+			}
+
+		}catch(Exception e){
+			
+			try{
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientId,"Error occurred while getting messaging details",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+
+			}
+			
+		}
+		
+		return epObject;
+		
+	}
+	
+	private EPMeasureBean setPatientElectronicAccessInfo(String accountId,Boolean isGroup,ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
+		
+		EPMeasureBean epObject = new EPMeasureBean();
+		
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
+		
+		try{
+
+			String patientCount = qdmData.getPatientElectronicAccessInfo(isGroup,providerId, patientId, startDate, endDate, em);
+
+			epObject.setMeasureId("C207");
+			epObject.setMeasureTitle("Patient Electronic Access (VDT)");
+
+			if(Integer.parseInt(patientCount.split("&")[1]) > 0){
+				epObject.setDescription("Last Accessed On: "+patientCount.split("&")[0]);
 				epObject.setStatus("Completed");
 			}else{
+				epObject.setDescription("Not an active portal user");
 				epObject.setStatus("Not Completed");
 			}
+
+		}catch(Exception e){
+			
+			try{
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientId,"Error occurred while getting patient VDT info",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+
+			}
+			
 		}
 		
 		return epObject;
 		
 	}
 	
-	private EPMeasureBean setSecureMessageInfoDetails(Boolean isGroup,ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
+	private EPMeasureBean setPatientAccessInfoForPortal(String accountId,ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
 		
 		EPMeasureBean epObject = new EPMeasureBean();
 		
-		String result = qdmData.getSecureMessagingInfo(isGroup,providerId, patientId, startDate, endDate,em);
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
 		
-		epObject.setMeasureId("C213");
-		epObject.setMeasureTitle("Secure Messaging");
-		epObject.setDescription(result);
-		
-		if( (Integer.parseInt(result.split("\n")[0].split(":")[1].replace(" ","")) == 0) && (Integer.parseInt(result.split("\n")[1].split(":")[1].replace(" ","")) == 0) ){
-			epObject.setStatus("Not Completed");
-		}else{
-			
-			if( (Integer.parseInt(result.split("\n")[0].split(":")[1].replace(" ","")) >= 1) || (Integer.parseInt(result.split("\n")[1].split(":")[1].replace(" ","")) >= 1)){
+		try{
+
+			String portalLastAccessed = qdmData.getPatientAccessInfoForPortal(providerId, patientId, startDate, endDate, em);
+
+			epObject.setMeasureId("C207");
+			epObject.setMeasureTitle("Patient Access");
+
+			if(portalLastAccessed!=""){
 				epObject.setStatus("Completed");
+				epObject.setDescription("Last Accessed Portal on: "+portalLastAccessed);
 			}else{
 				epObject.setStatus("Not Completed");
+				epObject.setDescription("Not an active portal user");
 			}
-		}
-		
-		return epObject;
-		
-	}
-	
-	private EPMeasureBean setPatientElectronicAccessInfo(Boolean isGroup,ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
-		
-		EPMeasureBean epObject = new EPMeasureBean();
-		
-		String patientCount = qdmData.getPatientElectronicAccessInfo(isGroup,providerId, patientId, startDate, endDate, em);
-		
-		epObject.setMeasureId("C207");
-		epObject.setMeasureTitle("Patient Electronic Access (VDT)");
-		
-		if(Integer.parseInt(patientCount.split("&")[1]) > 0){
-			epObject.setDescription("Last Accessed On: "+patientCount.split("&")[0]);
-			epObject.setStatus("Completed");
-		}else{
-			epObject.setDescription("Not an active portal user");
-			epObject.setStatus("Not Completed");
-		}
-		
-		return epObject;
-		
-	}
-	
-	private EPMeasureBean setPatientAccessInfoForPortal(ExportQDM qdmData, int patientId, int providerId, Date startDate, Date endDate){
-		
-		EPMeasureBean epObject = new EPMeasureBean();
-		
-		String portalLastAccessed = qdmData.getPatientAccessInfoForPortal(providerId, patientId, startDate, endDate, em);
-		
-		epObject.setMeasureId("C207");
-		epObject.setMeasureTitle("Patient Access");
-		
-		if(portalLastAccessed!=""){
-			epObject.setStatus("Completed");
-			epObject.setDescription("Last Accessed Portal on: "+portalLastAccessed);
-		}else{
-			epObject.setStatus("Not Completed");
-			epObject.setDescription("Not an active portal user");
+
+		}catch(Exception e){
+			
+			try{
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientId,"Error occurred while getting portal access info",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+
+			}
+			
 		}
 		
 		return epObject;
@@ -548,10 +721,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
         }
 	}
 	
-	/**
-	 * 
-	 */
-	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<MIPSPerformanceBean> getMeasureRateReport(int providerId, String accountId, String configuredMeasures){
@@ -571,6 +740,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 		Selection[] selections= new Selection[] {
 			root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
+			root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
 			root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
 			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateIpp),0),
 			root.get(MacraMeasuresRate_.macraMeasuresRateIpplist),
@@ -621,94 +791,128 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	@Override
 	public List<MIPSPerformanceBean> getPerformanceCount(int providerId, String measureId, String configuredMeasures, String accountId){
 		
-		Calendar now = Calendar.getInstance();
-		int reportingYear = now.get(Calendar.YEAR);
+		List<MIPSPerformanceBean> results = new ArrayList<MIPSPerformanceBean>();
 		
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<MIPSPerformanceBean> cq = builder.createQuery(MIPSPerformanceBean.class);
-		Root<QualityMeasuresPatientEntries> root = cq.from(QualityMeasuresPatientEntries.class);
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
+		
+		try{
 
-		Predicate byProviderId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), providerId);
-		Predicate byReportingYear = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear), reportingYear);		
-		Predicate byConfiguredMeasures = root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId).in(Arrays.asList(configuredMeasures.split(",")));
-		
-		if(!measureId.equals("")){
-			Predicate byMeasureId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), measureId);
-			cq.where(builder.and(byProviderId, byMeasureId, byReportingYear, byConfiguredMeasures));
-		}else{
-			cq.where(builder.and(byProviderId, byReportingYear, byConfiguredMeasures));
-		}
-		
-		cq.groupBy(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId),
-				root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId),
-				root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear));
-		
-		Selection[] selections= new Selection[] {
-				root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId),
-				root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear),
-				builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesIpp)),0),
-				builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator)),0),
-				builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion)),0),
-				builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator)),0),
-				builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion)),0),
-				builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException)),0)
-		};
-		
-		cq.multiselect(selections);
-		
-		List<MIPSPerformanceBean> results = em.createQuery(cq).getResultList();
-		
-		for(int i=0;i<results.size();i++){
+			Calendar now = Calendar.getInstance();
+			int reportingYear = now.get(Calendar.YEAR);
+
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<MIPSPerformanceBean> cq = builder.createQuery(MIPSPerformanceBean.class);
+			Root<QualityMeasuresPatientEntries> root = cq.from(QualityMeasuresPatientEntries.class);
+
+			Predicate byProviderId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), providerId);
+			Predicate byReportingYear = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear), reportingYear);		
+			Predicate byConfiguredMeasures = root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId).in(Arrays.asList(configuredMeasures.split(",")));
+
+			if(!measureId.equals("")){
+				Predicate byMeasureId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), measureId);
+				cq.where(builder.and(byProviderId, byMeasureId, byReportingYear, byConfiguredMeasures));
+			}else{
+				cq.where(builder.and(byProviderId, byReportingYear, byConfiguredMeasures));
+			}
+
+			cq.groupBy(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId),
+					root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId),
+					root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesCriteria),
+					root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear));
+
+			Selection[] selections= new Selection[] {
+					root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId),
+					root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesCriteria),
+					root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear),
+					builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesIpp)),0),
+					builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator)),0),
+					builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion)),0),
+					builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator)),0),
+					builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion)),0),
+					builder.coalesce(builder.sum(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException)),0)
+			};
+
+			cq.multiselect(selections);
+
+			results = em.createQuery(cq).getResultList();
+
+			for(int i=0;i<results.size();i++){
+
+				MIPSPerformanceBean resultObject = results.get(i);
+
+				measureId = resultObject.getMeasureId();
+
+				String cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+
+				DecimalFormat newFormat = new DecimalFormat("#0.00");
+
+				double performanceRate = 0;
+				double reportingRate = 0;
+
+				long numeratorCount = resultObject.getNumeratorCount();
+				long denominatorCount = resultObject.getDenominatorCount();
+				long denominatorExclusionCount = resultObject.getDenominatorExclusionCount();
+				long denominatorExceptionCount = resultObject.getDenominatorExceptionCount();
+
+				try{
+
+					if(numeratorCount != 0 || denominatorExceptionCount != 0 || denominatorExclusionCount!=0){
+
+						reportingRate =  Double.valueOf(""+numeratorCount+denominatorExceptionCount+denominatorExclusionCount) / denominatorCount;
+						reportingRate =  Double.valueOf(newFormat.format(reportingRate));
+
+					}
+
+					if(numeratorCount > 0){
+
+						denominatorCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
+
+						performanceRate =  Double.valueOf(""+numeratorCount) / denominatorCount;
+						performanceRate =  Double.valueOf(newFormat.format(performanceRate));
+
+					}
+
+				}catch(Exception e){
+					performanceRate = 0;
+					reportingRate = 0;
+				}
+
+				resultObject.setPerformanceRate(performanceRate);
+				resultObject.setReportingRate(reportingRate);
+				resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
+				resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
+				resultObject.setIppPatientsList(getPatientListByCriteria(1, providerId, measureId));
+				resultObject.setDenominatorPatientsList(getPatientListByCriteria(2, providerId, measureId));
+				resultObject.setDenominatorExclusionPatientsList(getPatientListByCriteria(3, providerId, measureId));
+				resultObject.setDenominatorExceptionPatientsList(getPatientListByCriteria(4, providerId, measureId));
+				resultObject.setNumeratorPatientsList(getPatientListByCriteria(5, providerId, measureId));
+				resultObject.setNumeratorExclusionPatientsList(getPatientListByCriteria(6, providerId, measureId));
+
+			}
+
+		}catch(Exception e){
 			
-			MIPSPerformanceBean resultObject = results.get(i);
-			
-			measureId = resultObject.getMeasureId();
-			
-			String cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
-			
-			DecimalFormat newFormat = new DecimalFormat("#0.00");
-			
-			double performanceRate = 0;
-			double reportingRate = 0;
-			
-			long numeratorCount = resultObject.getNumeratorCount();
-			long denominatorCount = resultObject.getDenominatorCount();
-			long denominatorExclusionCount = resultObject.getDenominatorExclusionCount();
-			long denominatorExceptionCount = resultObject.getDenominatorExceptionCount();
-						
 			try{
 				
-				if(numeratorCount != 0 || denominatorExceptionCount != 0 || denominatorExclusionCount!=0){
-					
-					reportingRate =  Double.valueOf(""+numeratorCount+denominatorExceptionCount+denominatorExclusionCount) / denominatorCount;
-					reportingRate =  Double.valueOf(newFormat.format(reportingRate));
-					
-				}
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while calculating MIPS performance",writer.toString());
 				
-				if(numeratorCount > 0){
-					
-					denominatorCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
-					
-					performanceRate =  Double.valueOf(""+numeratorCount) / denominatorCount;
-					performanceRate =  Double.valueOf(newFormat.format(performanceRate));
-					
-				}
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
 				
-			}catch(Exception e){
-				performanceRate = 0;
-				reportingRate = 0;
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+
 			}
-			
-			resultObject.setPerformanceRate(performanceRate);
-			resultObject.setReportingRate(reportingRate);
-			resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
-			resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
-			resultObject.setIppPatientsList(getPatientListByCriteria(1, providerId, measureId));
-			resultObject.setDenominatorPatientsList(getPatientListByCriteria(2, providerId, measureId));
-			resultObject.setDenominatorExclusionPatientsList(getPatientListByCriteria(3, providerId, measureId));
-			resultObject.setDenominatorExceptionPatientsList(getPatientListByCriteria(4, providerId, measureId));
-			resultObject.setNumeratorPatientsList(getPatientListByCriteria(5, providerId, measureId));
-			resultObject.setNumeratorExclusionPatientsList(getPatientListByCriteria(6, providerId, measureId));
 			
 		}
 		
@@ -835,8 +1039,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 		cq.multiselect(selections);
 		
-		System.out.println("patient list: "+patientsList);
-		
 		Predicate byPatientId = root.get(PatientRegistration_.patientRegistrationId).in(Arrays.asList(patientsList.split(",")));
 		
 		cq.where(byPatientId);
@@ -904,14 +1106,18 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MIPSPatientInformation> getPatient(String patientId, String measureId) {
+	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MIPSPatientInformation> cq = builder.createQuery(MIPSPatientInformation.class);
 		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
 		Join<PatientRegistration,QualityMeasuresPatientEntries> joinQualityMeasuresPatientEntries=root.join(PatientRegistration_.qualityMeasuresPatientEntries,JoinType.INNER);
+		
 		Predicate byPatientId = root.get(PatientRegistration_.patientRegistrationId).in(Arrays.asList(patientId.split(",")));
 		Predicate byMeasureId=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), measureId);
-		joinQualityMeasuresPatientEntries.on(byMeasureId);
+		Predicate byCriteria=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesCriteria), criteria);
+		
+		joinQualityMeasuresPatientEntries.on(byMeasureId, byCriteria);
+		
 		Selection[] selections= new Selection[] {
 				root.get(PatientRegistration_.patientRegistrationId),
 				root.get(PatientRegistration_.patientRegistrationAccountno),
@@ -935,6 +1141,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 		};
 		cq.where(byPatientId);
+		cq.orderBy(builder.asc(root.get(PatientRegistration_.patientRegistrationLastName)),builder.asc(root.get(PatientRegistration_.patientRegistrationFirstName)));
 		cq.select(builder.construct(MIPSPatientInformation.class,selections));
 		List<MIPSPatientInformation> patientDetailsWithResults = em.createQuery(cq).getResultList();
 		return patientDetailsWithResults;

@@ -52,4 +52,26 @@ public class GlaceMailer {
 
 	}
 	
+	public static String buildMailContentFormat(String accId, int patientId, String responseString, String exceptionTrace){
+		
+		String mailContent = "";
+		
+		mailContent += "<html><body><table border='1'>";
+		
+		mailContent += "<tr><td><b>Account Id: </b></td><td>"+accId+"</td></tr>";
+		
+		if(patientId!=-1){
+			mailContent += "<tr><td><b>Patient Id: </b></td><td>"+patientId+"</td></tr>";
+		}
+		
+		mailContent += "<tr><td><b>Error Message: </b></td><td>"+responseString+"</td></tr>";
+		
+		mailContent += "<tr><td><b>Exception Trace: </b></td><td>"+exceptionTrace+"</td></tr>";
+		
+		mailContent += "</table></body></html>";
+		
+		return mailContent;
+		
+	}
+	
 }
