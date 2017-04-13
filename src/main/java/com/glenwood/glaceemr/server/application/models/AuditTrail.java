@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
@@ -16,12 +17,13 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 /**
  * @author Aparna
- *
+ *	Last Modified by Jagadeeswar
  */
 
 @Entity
@@ -115,6 +117,12 @@ public class AuditTrail {
 	 */
 	@Transient
 	private Boolean verifyCheckSum;
+	@Transient
+	private Integer accountNo;
+	@Transient
+	private String patientName;
+	@Transient
+	private Date dob;
 
 	public Integer getLogId() {
 		return logId;
@@ -128,7 +136,7 @@ public class AuditTrail {
 		return parentID;
 	}
 
-	public void setParentID(int parentID) {
+	public void setParentID(Integer parentID) {
 		this.parentID = parentID;
 	}
 
@@ -292,19 +300,51 @@ public class AuditTrail {
 		this.checkSum = checkSum;
 	}
 
+	@JsonProperty
 	public Boolean getVerifyCheckSum() {
 		return verifyCheckSum;
 	}
 
+	@JsonProperty
 	public void setVerifyCheckSum(Boolean verifyCheckSum) {
 		this.verifyCheckSum = verifyCheckSum;
+	}
+	
+	@JsonProperty
+	public Integer getAccountNo() {
+		return accountNo;
+	}
+
+	@JsonProperty
+	public void setAccountNo(Integer accountNo) {
+		this.accountNo = accountNo;
+	}
+
+	@JsonProperty
+	public String getPatientName() {
+		return patientName;
+	}
+
+	@JsonProperty
+	public void setPatientName(String patientName) {
+		this.patientName = patientName;
+	}
+
+	@JsonProperty
+	public Date getDob() {
+		return dob;
+	}
+
+	@JsonProperty
+	public void setDob(Date dob) {
+		this.dob = dob;
 	}
 
 	@Override
 	public String toString() {
 		return "AuditTrail [logId=" + logId + ",parentID=" + parentID + ",logType=" + logType + ",userId=" + userId + ",patientId=" + patientId + ",logOn=" + logOn + ", module=" + module + ", action=" + action + ", outcome=" + outcome + ",clientIp="
 				+ clientIp + ", serverIp=" + serverIp + ",serverHostname=" + serverHostname + " sessionId=" + sessionId + ",relevantIds=" + relevantIds + ", desc=" + desc + ",loginType=" + loginType + ", requestedUrl=" + requestedUrl
-				+ ", referenceUrl=" + referenceUrl + ",phiDescription=" + phiDescription + ", relevantIds=" + relevantIds + ", verifyCheckSum=" + verifyCheckSum + "]";
+				+ ", referenceUrl=" + referenceUrl + ",phiDescription=" + phiDescription + ", relevantIds=" + relevantIds + ", verifyCheckSum=" + verifyCheckSum + ", accountNo="+ accountNo +", patientName="+patientName+", dob="+dob+"]";
 
 	}
 }
