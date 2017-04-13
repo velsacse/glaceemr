@@ -1106,7 +1106,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria) {
+	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MIPSPatientInformation> cq = builder.createQuery(MIPSPatientInformation.class);
 		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
@@ -1115,8 +1115,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		Predicate byPatientId = root.get(PatientRegistration_.patientRegistrationId).in(Arrays.asList(patientId.split(",")));
 		Predicate byMeasureId=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), measureId);
 		Predicate byCriteria=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesCriteria), criteria);
-		
-		joinQualityMeasuresPatientEntries.on(byMeasureId, byCriteria);
+		Predicate byProvider=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), provider);
+		joinQualityMeasuresPatientEntries.on(byMeasureId, byCriteria,byProvider);
 		
 		Selection[] selections= new Selection[] {
 				root.get(PatientRegistration_.patientRegistrationId),
@@ -1141,6 +1141,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 		};
 		cq.where(byPatientId);
+		cq.distinct(true);
 		cq.orderBy(builder.asc(root.get(PatientRegistration_.patientRegistrationLastName)),builder.asc(root.get(PatientRegistration_.patientRegistrationFirstName)));
 		cq.select(builder.construct(MIPSPatientInformation.class,selections));
 		List<MIPSPatientInformation> patientDetailsWithResults = em.createQuery(cq).getResultList();

@@ -26,7 +26,7 @@ public interface MeasureCalculationService {
 
 	HashMap<String, Object> generateFilterContents();
 
-	List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria);
+	List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider);
 
 	List<MIPSPatientInformation> getPatientInformation(String patientsList);
 	

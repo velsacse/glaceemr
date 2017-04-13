@@ -313,7 +313,8 @@ public class QPPPerformanceController {
 			@RequestParam(value="patientId", required=true) String patientId,
 			@RequestParam(value="measureId", required=true) String measureId,
 			@RequestParam(value="criteria", required=true) int criteria,
-			@RequestParam(value="accountId", required=true) String accountId){
+			@RequestParam(value="accountId", required=true) String accountId,
+			@RequestParam(value="provider", required=true) Integer provider){
 		
 		EMRResponseBean response = new EMRResponseBean();
 		
@@ -322,7 +323,7 @@ public class QPPPerformanceController {
 
 		try{
 		
-		List<MIPSPatientInformation> filtersInfo = measureService.getPatient(patientId,measureId,criteria);
+		List<MIPSPatientInformation> filtersInfo = measureService.getPatient(patientId,measureId,criteria,provider);
 		
 		response.setData(filtersInfo);
 		
