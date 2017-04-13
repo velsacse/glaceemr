@@ -120,7 +120,7 @@ public class ExaminationServiceImpl implements ExaminationService{
 
 	@Override
 	public List<CustomPESystem> getActiveSystems(String clientId,Integer patientId, Integer chartId,Integer encounterId,Integer templateId) {
-
+		clearClinicalData();
 		List<ClinicalSystem> activePESystems = clinicalSystemRepository.findAll(ExaminationSpecification.getActiveExaminationSystems(templateId));
 		ArrayList<Integer> sytemIds = new ArrayList<Integer>();
 
