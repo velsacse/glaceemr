@@ -103,8 +103,7 @@ public class QPPPerformanceController {
 			}
 
 			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
-			if(providerInfo!=null){
-
+			if(providerInfo.size()!=0){
 				String[] measureIds = providerInfo.get(0).getMeasures().split(",");
 
 				for(int i=0;i<measureIds.length;i++){
@@ -120,14 +119,12 @@ public class QPPPerformanceController {
 				requestObj.setStartDate(providerInfo.get(0).getMacraProviderConfigurationReportingStart());
 				requestObj.setEndDate(providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 				requestObj.setMeasureIds(cqmMeasures);
-
+				
 				response.setData(utils.getMeasureDetails().toString());
-
+				
 				ObjectMapper objectMapper = new ObjectMapper();
 				String requestString = objectMapper.writeValueAsString(requestObj);
-
 				String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
-
 				responseFromCentralServer = objectMapper.readValue(responseStr, Response.class);
 
 				Map<String,MeasureStatus> measureStatus = responseFromCentralServer.getMeasureStatus();

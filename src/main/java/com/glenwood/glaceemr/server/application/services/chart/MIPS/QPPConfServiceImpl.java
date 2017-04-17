@@ -145,7 +145,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		return measureIds;
 	}
 	@Override
-	public void addMeasuresToProvider(String measureIds, Integer providerId) {
+	public void addMeasuresToProvider(String measureIds, Integer providerId,Integer prgmYear) {
 		List<QualityMeasuresProviderMapping> objectsToDelete=qualityMeasuresProviderMappingRepository.findAll(Specifications.where(QPPConfigurationSpecification.getMeasureIds(providerId)));
 		if(objectsToDelete!=null && !(objectsToDelete.equals(null))){
 			qualityMeasuresProviderMappingRepository.deleteInBatch(objectsToDelete);
@@ -158,6 +158,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 
 			qmpmObj.setQualityMeasuresProviderMappingProviderId(providerId);
 		qmpmObj.setQualityMeasuresProviderMappingMeasureId(measureid[i]);
+		qmpmObj.setQualityMeasuresProviderMappingReportingYear(prgmYear);
 		qualityMeasuresProviderMappingRepository.saveAndFlush(qmpmObj);
 		}
 	}

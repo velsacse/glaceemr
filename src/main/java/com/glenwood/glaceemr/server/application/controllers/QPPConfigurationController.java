@@ -74,8 +74,9 @@ public class QPPConfigurationController {
 	@ResponseBody
 	public void addMeasuresToProvider(
 			@RequestParam(value = "measureIds", required = true) String measureIds,
-			@RequestParam(value = "providerId", required = true) Integer providerId)throws Exception {
-		QppConfigurationService.addMeasuresToProvider(measureIds,providerId);
+			@RequestParam(value = "providerId", required = true) Integer providerId,
+			@RequestParam(value = "prgmYear", required = true) Integer prgmYear)throws Exception {
+		QppConfigurationService.addMeasuresToProvider(measureIds,providerId,prgmYear);
 	}
 	
 	@RequestMapping(value = "/getFilterDetails", method = RequestMethod.GET)

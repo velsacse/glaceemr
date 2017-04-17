@@ -18,7 +18,7 @@ public interface QPPConfigurationService {
 	Integer getProviderId(String provider)throws Exception;	
 	List<MacraProviderConfiguration> getProviderInfo(Integer providerId)throws Exception;
 	List<QualityMeasuresProviderMapping> getMeasureIds(Integer providerId)throws Exception;
-	void addMeasuresToProvider(String measureIds,Integer providerId);
+	void addMeasuresToProvider(String measureIds,Integer providerId,Integer prgmYear);
 	List<Chart>getLabDetails(Integer patientId)throws Exception;
 	List<MacraProviderQDM> getCompleteProviderInfo(Integer providerId)throws Exception;
 	List<MacraProviderQDM> getProviderReportingInfo(Integer reportingYear);
