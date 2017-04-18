@@ -17,4 +17,6 @@ public interface SchedulerService {
 
 	String getDefaultResource(String userId);
 
+	Object getTemplates(int userId, Date date);
+
 }

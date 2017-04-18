@@ -1,7 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -46,7 +45,7 @@ public class SchedulerTemplateDetail {
 	private String schTemplateDetailNotes;
 	
 	@Column(name="sch_template_detail_samedayslot")
-	private int schTemplateDetailSameDaySlot;
+	private Integer schTemplateDetailSameDaySlot;
 	
 	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
 	@JoinColumn(name="sch_template_detail_secowner_id", referencedColumnName="sch_resource_id", insertable=false, updatable=false)
@@ -120,11 +119,11 @@ public class SchedulerTemplateDetail {
 		this.schTemplateDetailNotes = schTemplateDetailNotes;
 	}
 
-	public int getSchTemplateDetailSameDaySlot() {
+	public Integer getSchTemplateDetailSameDaySlot() {
 		return schTemplateDetailSameDaySlot;
 	}
 
-	public void setSchTemplateDetailSameDaySlot(int schTemplateDetailSameDaySlot) {
+	public void setSchTemplateDetailSameDaySlot(Integer schTemplateDetailSameDaySlot) {
 		this.schTemplateDetailSameDaySlot = schTemplateDetailSameDaySlot;
 	}
 
@@ -143,5 +142,5 @@ public class SchedulerTemplateDetail {
 	public void setSchApptDoctor(SchedulerResource schApptDoctor) {
 		this.schApptDoctor = schApptDoctor;
 	}
-	
+
 }
