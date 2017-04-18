@@ -35,13 +35,32 @@ public class TherapyPatientsBean {
 	String Dxdesc;
 	long count;
 	String startTime;
+	Integer status;
     
-    public TherapyPatientsBean(long count,Integer groupId,Integer sessionId,Integer patientId,String accountNo,String fullName,Date dob,Date lastSession,String Dx,String Dxdesc) {
+    public TherapyPatientsBean(long count,String startTime,String stopTime,Integer status,Integer groupId,Integer sessionId,Integer patientId,String accountNo,String fullName,Date dob,Date lastSession,String Dx,String Dxdesc) {
     	if(count !=  0) {
     		this.count=count;
     	}
     	else {
     		this.count=-1;
+    	}
+    	if(status != 0) {
+    		this.status=status;
+    	}
+    	else {
+    		this.status=-1;
+    	}
+    	if(startTime!=null) {
+    		this.startTime=startTime;
+    	}
+    	else {
+    		this.startTime="";
+    	}
+    	if(stopTime!=null){
+    		this.stopTime=stopTime;
+    	}
+    	else{
+    		this.stopTime="";
     	}
     	if(groupId != null){
         	this.groupId=groupId;
@@ -327,55 +346,65 @@ public class TherapyPatientsBean {
 		this.dx1Desc = dx1Desc;
 	}
 
-
 	public String getDx2() {
 		return dx2;
 	}
 
-
 	public String getLastSession() {
 		return lastSession;
 	}
+	
 	public void setLastSession(String lastSession) {
 		this.lastSession = lastSession;
 	}
+	
 	public Integer getGroupId() {
 		return groupId;
 	}
+	
 	public void setGroupId(Integer groupId) {
 		this.groupId = groupId;
 	}
+	
 	public String getFullName() {
 		return fullName;
 	}
+	
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
 	}
+	
 	public String getDx() {
 		return Dx;
 	}
+	
 	public void setDx(String dx) {
 		Dx = dx;
 	}
+	
 	public String getDxdesc() {
 		return Dxdesc;
 	}
+	
 	public void setDxdesc(String dxdesc) {
 		Dxdesc = dxdesc;
 	}
+	
 	public void setSessionId(Integer sessionId) {
 		this.sessionId = sessionId;
 	}
+	
 	public long getCount() {
 		return count;
 	}
+	
 	public void setCount(long count) {
 		this.count = count;
 	}
+	
 	public void setDx2(String dx2) {
 		this.dx2 = dx2;
 	}
-
 
 	public String getDx2Desc() {
 		return dx2Desc;
@@ -499,15 +528,24 @@ public class TherapyPatientsBean {
 		return dx8Desc;
 	}
 
-
 	public void setDx8Desc(String dx8Desc) {
 		this.dx8Desc = dx8Desc;
 	}
+	
 	public String getStartTime() {
 		return startTime;
 	}
+	
 	public void setStartTime(String startTime) {
 		this.startTime = startTime;
+	}
+	
+	public Integer getStatus() {
+		return status;
+	}
+	
+	public void setStatus(Integer status) {
+		this.status = status;
 	}
 	
 }

@@ -17,6 +17,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.Trimspec;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Join;
@@ -139,6 +140,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		Join<TherapySession,TherapyGroup> groupJoin=root.join(TherapySession_.therapyGroup,JoinType.INNER);
 		List<Predicate> predicateByOpenSession = new ArrayList<>();
 		predicateByOpenSession.add(builder.equal(root.get(TherapySession_.therapySessionStatus), 1));
+		predicateByOpenSession.add(builder.equal(groupJoin.get(TherapyGroup_.therapyGroupIsActive), true));
 		if(groupId!=-1)
 			predicateByOpenSession.add(builder.equal(root.get(TherapySession_.therapySessionGroupId), groupId));
 		List<Predicate> predicates = new ArrayList<>();
@@ -290,6 +292,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		JSONObject patientData= new JSONObject(dataToSave);
 		String patientIds = Optional.fromNullable(Strings.emptyToNull(patientData.get("patientIds").toString())).or("-1");
 		int groupId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(patientData.get("groupId").toString())).or("-1"));
+		int absentStatus = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(patientData.get("absentStatus").toString())).or("-1"));
 		String sessionId = Optional.fromNullable(Strings.emptyToNull(patientData.get("sessionId").toString())).or("");
         String therapyDate=Optional.fromNullable(Strings.emptyToNull(patientData.get("sessionDate").toString())).or("");
 		String lateReason = Optional.fromNullable(Strings.emptyToNull(patientData.get("lateReason").toString())).or("");
@@ -313,13 +316,27 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
         SimpleDateFormat ft = new SimpleDateFormat ("yyyy-mm-dd kk:mm:ss");
         Date date = (Date) ft.parse(therapyDate);
         if(!sessionId.equalsIgnoreCase("")){
-        	TherapySessionDetails therapyDetails = new TherapySessionDetails();
-        	therapyDetails.setTherapySessionDetailsPatientId(Integer.parseInt(patientsSplit[i]));
-        	therapyDetails.setTherapySessionDetailsSessionId(Integer.parseInt(sessionId));
-            therapyDetails.setTherapySessionDetailsStartTime(new Timestamp(date.getTime()));
-        	if(!(lateReason.equalsIgnoreCase("")))
-            	therapyDetails.setTherapySessionDetailsStartLateReason(lateReason);
-        	therapySessionDetailsRepository.saveAndFlush(therapyDetails);
+        	if(absentStatus==2) {
+        		CriteriaBuilder cb = em.getCriteriaBuilder();
+    			CriteriaUpdate<TherapySessionDetails> cu = cb.createCriteriaUpdate(TherapySessionDetails.class);
+                Root<TherapySessionDetails> rootCriteria = cu.from(TherapySessionDetails.class);
+                cu.set(rootCriteria.get(TherapySessionDetails_.therapySessionDetailsStatus), 1);
+                cu.set(rootCriteria.get(TherapySessionDetails_.therapySessionDetailsStartTime), new Timestamp(date.getTime()));
+                cu.set(rootCriteria.get(TherapySessionDetails_.therapySessionDetailsStartLateReason),lateReason);
+                cu.where(cb.equal(rootCriteria.get(TherapySessionDetails_.therapySessionDetailsSessionId),sessionId),
+                		cb.equal(rootCriteria.get(TherapySessionDetails_.therapySessionDetailsPatientId),patientsSplit[i]));
+                this.em.createQuery(cu).executeUpdate();
+        	}
+        	else {
+        		TherapySessionDetails therapyDetails = new TherapySessionDetails();
+            	therapyDetails.setTherapySessionDetailsPatientId(Integer.parseInt(patientsSplit[i]));
+            	therapyDetails.setTherapySessionDetailsSessionId(Integer.parseInt(sessionId));
+            	therapyDetails.setTherapySessionDetailsStatus(1);
+                therapyDetails.setTherapySessionDetailsStartTime(new Timestamp(date.getTime()));
+            	if(!(lateReason.equalsIgnoreCase("")))
+                	therapyDetails.setTherapySessionDetailsStartLateReason(lateReason);
+            	therapySessionDetailsRepository.saveAndFlush(therapyDetails);
+        	}
         }
 		}
 	}
@@ -350,7 +367,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
         therapySession.setTherapySessionTopic(sessionTopic);
         therapySession.setTherapySessionLeaderId(leaderList);
         therapySession.setTherapySessionSupervisorId(supervisorList);
-        SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/YYYY kk:mm:ss");
+        SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/yyyy HH:mm:ss");
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
         Date date = (Date) ft.parse(therapyDate);
@@ -366,6 +383,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
             TherapySessionDetails therapyDetails = new TherapySessionDetails();
             therapyDetails.setTherapySessionDetailsPatientId(Integer.parseInt(patientsSplit[i]));
             therapyDetails.setTherapySessionDetailsStartTime(new Timestamp(date.getTime()));
+            therapyDetails.setTherapySessionDetailsStatus(1);
             if(therapyId==0)
                 therapyDetails.setTherapySessionDetailsSessionId(Integer.parseInt(therapySessionId));
             else
@@ -427,6 +445,9 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		Predicate predicateBySessionId=builder.equal(root.get(TherapySessionDetails_.therapySessionDetailsSessionId), therapySessionId);
 		Selection[] selections= new Selection[] {
 				builder.count(patientDetailsJoin.get(TherapySessionPatientDetails_.therapySessionPatientDetailsId)),
+				builder.function("to_char",String.class, root.get(TherapySessionDetails_.therapySessionDetailsStartTime),builder.literal("HH12:MI AM")),
+				root.get(TherapySessionDetails_.therapySessionEndTime),
+				root.get(TherapySessionDetails_.therapySessionDetailsStatus),
 				groupJoin.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingGroupId),
 				sessionJoin.get(TherapySession_.therapySessionId),
 				patientJoin.get(PatientRegistration_.patientRegistrationId),
@@ -438,11 +459,13 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 						builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx3)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx4)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx5)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx6)),""))	,
 				builder.concat(builder.concat(builder.concat(builder.concat(builder.concat(builder.coalesce(root.get(TherapySessionDetails_.therapySessionDetailsDx1desc),""),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx2desc)),"")),
 						builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx3desc)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx4desc)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx5desc)),"")),builder.coalesce(builder.concat(",",root.get(TherapySessionDetails_.therapySessionDetailsDx6desc)),""))
-					
 		};
 		cq.distinct(true);
 		cq.select(builder.construct(TherapyPatientsBean.class, selections));
 		cq.where(predicateByGroupId,predicateBySessionId).groupBy(groupJoin.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingGroupId),
+				root.get(TherapySessionDetails_.therapySessionDetailsStatus),
+				root.get(TherapySessionDetails_.therapySessionDetailsStartTime),
+				root.get(TherapySessionDetails_.therapySessionEndTime),
 				sessionJoin.get(TherapySession_.therapySessionId),
 				patientJoin.get(PatientRegistration_.patientRegistrationId),
 				patientJoin.get(PatientRegistration_.patientRegistrationAccountno),
@@ -496,6 +519,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		Join<TherapySession,TherapySessionDetails> sessionJoin=root.join(TherapySession_.therapySessionDetails,JoinType.INNER);
 		Join<TherapySession,TherapyGroup> groupJoin=root.join(TherapySession_.therapyGroup,JoinType.INNER);
 	    List<Predicate> predicates = new ArrayList<>();
+	    predicates.add(builder.notEqual(sessionJoin.get(TherapySessionDetails_.therapySessionDetailsStatus),2));
 		if(groupId!=-1)
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionGroupId), groupId));
 		if(providerId!=-1)
@@ -560,9 +584,10 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		Join<TherapySession,TherapySessionDetails> sessionJoin=root.join(TherapySession_.therapySessionDetails,JoinType.INNER);
 		Join<TherapySessionDetails,PatientRegistration> patientJoin=sessionJoin.join(TherapySessionDetails_.patientRegistration,JoinType.INNER);
 	    List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.notEqual(sessionJoin.get(TherapySessionDetails_.therapySessionDetailsStatus),2));
 		if(groupId!=-1)
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionGroupId), groupId));
-		if(providerId!=-1)
+		/*if(providerId!=-1)
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionProviderId), providerId));
 		if(!fromDate.equals("")){
 			Date frdate = (Date)  ft.parse(fromDate);
@@ -570,7 +595,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		}
 		if(posId!=-1){
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionPosId),posId));
-		}
+		}*/
 		if(therapyId!=-1) {
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionId),therapyId));
 		}
@@ -642,12 +667,49 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		int groupId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("groupId").toString())).or("-1"));
 		int sessionId=Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("sessionId").toString())).or("-1"));
 		int groupFlag=Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("groupFlag").toString())).or("-1"));
+		String absentReason = Optional.fromNullable(Strings.emptyToNull(therapyData.get("absentReason").toString())).or("-1");
+
+		
 		if(groupFlag==1){
-			therapyGroupPatientMappingRepository.delete(therapyGroupPatientMappingRepository.findAll(GroupTherapySpecification.getPatientFromGroup(patientId, groupId)));
-		}
-		if(sessionId!=-1){
-		    therapySessionDetailsRepository.delete(therapySessionDetailsRepository.findAll(GroupTherapySpecification.getPatientFromSession(patientId, sessionId)));	
-		}
+			 	CriteriaBuilder cb = em.getCriteriaBuilder();
+	            CriteriaDelete<TherapyGroupPatientMapping> delete = cb.createCriteriaDelete(TherapyGroupPatientMapping.class);
+	            Root<TherapyGroupPatientMapping> rootCriteria = delete.from(TherapyGroupPatientMapping.class);
+	            delete.where(cb.equal(rootCriteria.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingGroupId),groupId),
+	            		cb.equal(rootCriteria.get(TherapyGroupPatientMapping_.therapyGroupPatientMappingPatientId),patientId));
+	            this.em.createQuery(delete).executeUpdate();
+	            
+	            CriteriaBuilder cbSession = em.getCriteriaBuilder();
+	            CriteriaDelete<TherapySessionDetails> deleteSession = cbSession.createCriteriaDelete(TherapySessionDetails.class);
+	            Root<TherapySessionDetails> rootCriteriaSession = deleteSession.from(TherapySessionDetails.class);
+	            deleteSession.where(cbSession.equal(rootCriteriaSession.get(TherapySessionDetails_.therapySessionDetailsSessionId),sessionId),
+	            		cbSession.equal(rootCriteriaSession.get(TherapySessionDetails_.therapySessionDetailsPatientId),patientId));
+	            this.em.createQuery(deleteSession).executeUpdate();
+	            
+	            
+						
+/*			therapyGroupPatientMappingRepository.delete(therapyGroupPatientMappingRepository.findAll(GroupTherapySpecification.getPatientFromGroup(patientId, groupId)));
+*/		}
+		else {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaUpdate<TherapySessionDetails> cu = cb.createCriteriaUpdate(TherapySessionDetails.class);
+            Root<TherapySessionDetails> rootCriteria = cu.from(TherapySessionDetails.class);
+            cu.set(rootCriteria.get(TherapySessionDetails_.therapySessionDetailsStatus), 2);
+            cu.set(rootCriteria.get(TherapySessionDetails_.therapySessionDetailsAbsentReason), absentReason);
+            cu.where(cb.equal(rootCriteria.get(TherapySessionDetails_.therapySessionDetailsSessionId),sessionId),
+            		cb.equal(rootCriteria.get(TherapySessionDetails_.therapySessionDetailsPatientId),patientId));
+            this.em.createQuery(cu).executeUpdate();
+            
+			/*CriteriaUpdate<TherapySessionPatientDetails> cu=cb.createCriteriaUpdate(TherapySessionPatientDetails.class);
+			Root<TherapySessionPatientDetails> root = cu.from(TherapySessionPatientDetails.class);
+			cu.set(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsValue), data.get(i).getValue());
+			cu.where(cb.and(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsGwid).in(data.get(i).getGwid()),
+					cb.equal(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsSessionId),data.get(i).getSessionId()),
+					cb.equal(root.get(TherapySessionPatientDetails_.therapySessionPatientDetailsPatientId),data.get(i).getPatientId())));
+					this.em.createQuery(cu).executeUpdate();
+					*/
+					
+/*		    therapySessionDetailsRepository.delete(therapySessionDetailsRepository.findAll(GroupTherapySpecification.getPatientFromSession(patientId, sessionId)));	
+*/		}
 	}
 	
 	/**
@@ -823,6 +885,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		Join<TherapySession,TherapySessionDetails> sessionJoin=root.join(TherapySession_.therapySessionDetails,JoinType.INNER);
 		Join<TherapySessionDetails,PatientRegistration> patientJoin=sessionJoin.join(TherapySessionDetails_.patientRegistration,JoinType.INNER);
 	    List<Predicate> predicates = new ArrayList<>();
+	    predicates.add(builder.notEqual(sessionJoin.get(TherapySessionDetails_.therapySessionDetailsStatus), 2));
 		if(groupId!=-1)
 			predicates.add(builder.equal(root.get(TherapySession_.therapySessionGroupId), groupId));
 		if(sessionId!=-1)
