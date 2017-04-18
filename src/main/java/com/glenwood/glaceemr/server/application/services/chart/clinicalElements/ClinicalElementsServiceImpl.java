@@ -1,14 +1,10 @@
 package com.glenwood.glaceemr.server.application.services.chart.clinicalElements;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -45,7 +41,6 @@ import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
-import com.glenwood.glaceemr.server.application.models.RosElement;
 import com.glenwood.glaceemr.server.application.models.cnm.history.PatientClinicalElementsBean;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementTemplateMappingRepository;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsOptionsRepository;
@@ -66,7 +61,6 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEn
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.chart.HPI.ClinicalElementsOptionBean;
-import com.glenwood.glaceemr.server.application.services.chart.ros.ROSElementBean;
 import com.glenwood.glaceemr.server.application.specifications.ClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
@@ -326,7 +320,7 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		Join<ClinicalElements,PatientClinicalElements> paramJoin=root.join(ClinicalElements_.patientClinicalElements,JoinType.INNER);
 		Predicate encounterPred=cb.equal(paramJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
 		
-		Predicate gwidPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),clientId+gwidPattern);
+		Predicate gwidPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),"000"+gwidPattern);
 		Predicate clientIdPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),clientId+gwidPattern);
 		Predicate finalgwidPred=cb.or(gwidPred,clientIdPred);
 		
@@ -359,13 +353,16 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 				root.get(ClinicalElements_.clinicalElementsIsepisode),
 				root.get(ClinicalElements_.clinicalElementsTextDimension),
 				root.get(ClinicalElements_.clinicalElementsGender),
-				root.get(ClinicalElements_.clinicalElementsIsselect),
-				root.get(ClinicalElements_.clinicalTextMappings)));
+				root.get(ClinicalElements_.clinicalElementsIsselect)));
 		
 		query.where(finalPred);
 	
-		
-		return null;
+		try{
+			return em.createQuery(query).getResultList();
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	private List<ClinicalElementBean> getPatClinicalHistoryData(
@@ -412,8 +409,7 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 				root.get(ClinicalElements_.clinicalElementsIsepisode),
 				root.get(ClinicalElements_.clinicalElementsTextDimension),
 				root.get(ClinicalElements_.clinicalElementsGender),
-				root.get(ClinicalElements_.clinicalElementsIsselect),
-				root.get(ClinicalElements_.clinicalTextMappings)));
+				root.get(ClinicalElements_.clinicalElementsIsselect)));
 		
 		query.where(finalPred);
 		
@@ -512,11 +508,11 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		Predicate timePred=null;
 		
 		Predicate finalPred=cb.and(tempPredicate,tabTypePred,genderPred);
-		if(!leafCreatedDate.toString().equalsIgnoreCase("-1")){
+		/*if(!leafCreatedDate.toString().equalsIgnoreCase("-1")){
 			Predicate timeStampPred=cb.lessThanOrEqualTo(paramJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingTimestamp),Timestamp.valueOf(leafCreatedDate));
 			Predicate nullPred=cb.isNull(paramJoin.get(ClinicalElementTemplateMapping_.clinicalElementTemplateMappingTimestamp));
 			timePred=cb.or(timeStampPred,nullPred);
-		}
+		}*/
 		Predicate age=null;
 		if(isAgeBased==true){
 			Join<ClinicalElements, ClinicalElementsCondition> condParamJoin=root.join(ClinicalElements_.clinicalElementsConditions,JoinType.LEFT);
@@ -529,9 +525,9 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 			age=cb.or(defAgePred,agePred);
 		}
 	
-		if(!leafCreatedDate.toString().equalsIgnoreCase("-1")){
+		/*if(!leafCreatedDate.toString().equalsIgnoreCase("-1")){
 			finalPred=cb.and(finalPred,timePred);
-		}
+		}*/
 		if(isAgeBased==true){
 			finalPred=cb.and(finalPred,age);
 		}

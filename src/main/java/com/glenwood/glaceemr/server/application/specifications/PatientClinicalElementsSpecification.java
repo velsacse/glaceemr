@@ -350,7 +350,7 @@ public class PatientClinicalElementsSpecification {
 				Join<ClinicalElements,PatientClinicalElements> paramJoin=root.join(ClinicalElements_.patientClinicalElements,JoinType.INNER);
 				Predicate encounterPred=cb.equal(paramJoin.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId);
 				
-				Predicate gwidPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),clientId+gwidPattern);
+				Predicate gwidPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),"000"+gwidPattern);
 				Predicate clientIdPred=cb.like(root.get(ClinicalElements_.clinicalElementsGwid),clientId+gwidPattern);
 				Predicate finalgwidPred=cb.or(gwidPred,clientIdPred);
 				
