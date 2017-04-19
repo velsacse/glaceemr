@@ -103,6 +103,11 @@ public class TherapySessionDetails {
 	@Column(name="therapy_session_details_start_late_reason")
 	private String therapySessionDetailsStartLateReason;
 	
+	@Column(name="therapy_session_details_status")
+	private Integer therapySessionDetailsStatus;
+	
+	@Column(name="therapy_session_details_absent_reason")
+	private String 	therapySessionDetailsAbsentReason;
 	
 	public String getTherapySessionDetailsDx1() {
 		return therapySessionDetailsDx1;
@@ -367,4 +372,23 @@ public class TherapySessionDetails {
 			String therapySessionDetailsStartLateReason) {
 		this.therapySessionDetailsStartLateReason = therapySessionDetailsStartLateReason;
 	}
+
+	public Integer getTherapySessionDetailsStatus() {
+		return therapySessionDetailsStatus;
+	}
+
+	public void setTherapySessionDetailsStatus(Integer therapySessionDetailsStatus) {
+		this.therapySessionDetailsStatus = therapySessionDetailsStatus;
+	}
+	
+	public String getTherapySessionDetailsAbsentReason() {
+		return therapySessionDetailsAbsentReason;
+	}
+
+	public void setTherapySessionDetailsAbsentReason(
+			String therapySessionDetailsAbsentReason) {
+		this.therapySessionDetailsAbsentReason = therapySessionDetailsAbsentReason;
+	}
+
+	
 }
