@@ -103,6 +103,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	SharedFolderBean sharedFolderBean;
 	
 	RestTemplate restTemplate = new RestTemplate();
+
 	
 	@Override
 	public void saveMeasureDetails(int providerId, int patientId, List<MeasureStatus> measureStatus) {
@@ -780,6 +781,271 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	}
 	
 	/**
+	 * Function to return NPI value for provider
+	 * @param providerId
+	 * @return
+	 */
+	
+	private String getNPIForProvider(int providerId){
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+		Root<H478> root = cq.from(H478.class);
+		
+		cq.select(root.get(H478_.h478006));
+		cq.where(builder.equal(root.get(H478_.h478001), providerId));
+		
+		List<Object> results = em.createQuery(cq).getResultList();
+		
+		String npi = "";
+		
+		if(results.size() > 0){
+			npi = results.get(0).toString();
+		}
+		
+		return npi;
+		
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public List<MIPSPerformanceBean> getMeasureRateReportByNPI(int providerId, String accountId, String configuredMeasures){
+		
+		Calendar now = Calendar.getInstance();
+		int reportingYear = now.get(Calendar.YEAR);
+		
+		String npiId = getNPIForProvider(providerId);
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<MIPSPerformanceBean> cq = builder.createQuery(MIPSPerformanceBean.class);
+		Root<MacraMeasuresRate> root = cq.from(MacraMeasuresRate.class);
+
+		Predicate byNpiId = builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateNpi), npiId);
+		Predicate byReportingYear = builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear), reportingYear);		
+		Predicate byConfiguredMeasures = root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId).in(Arrays.asList(configuredMeasures.split(",")));
+		
+		cq.where(builder.and(byNpiId, byReportingYear, byConfiguredMeasures));
+		
+		cq.groupBy(root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
+				root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
+				root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear));
+		
+		Selection[] selections= new Selection[] {
+				
+			root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
+			root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
+			root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
+			builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateIpp),0)),
+			builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateIpplist),builder.literal(",")),
+			builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominator),0)),
+			builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorlist),builder.literal(",")),
+			builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExclusion),0)),
+			builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExclusionlist),builder.literal(",")),
+			builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumerator),0)),
+			builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorlist),builder.literal(",")),
+			builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusion),0)),
+			builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusionlist),builder.literal(",")),
+			builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorException),0)),
+			builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExceptionlist),builder.literal(",")),
+
+		};
+		
+		cq.multiselect(selections);
+		
+		List<MIPSPerformanceBean> results = em.createQuery(cq).getResultList();
+		
+		for(int i=0;i<results.size();i++){
+			
+			MIPSPerformanceBean resultObject = results.get(i);
+			
+			String measureId = resultObject.getMeasureId();
+			
+			String cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+			
+			DecimalFormat newFormat = new DecimalFormat("#0.00");
+
+			double performanceRate = 0;
+			double reportingRate = 0;
+
+			long numeratorCount = resultObject.getNumeratorCount();
+			long denominatorCount = resultObject.getDenominatorCount();
+			long denominatorExclusionCount = resultObject.getDenominatorExclusionCount();
+			long denominatorExceptionCount = resultObject.getDenominatorExceptionCount();
+
+			try{
+
+				if(numeratorCount != 0 || denominatorExceptionCount != 0 || denominatorExclusionCount!=0){
+
+					reportingRate =  Double.valueOf(""+numeratorCount+denominatorExceptionCount+denominatorExclusionCount) / denominatorCount;
+					reportingRate =  Double.valueOf(newFormat.format(reportingRate));
+
+				}
+
+				if(numeratorCount > 0){
+
+					denominatorCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
+
+					performanceRate =  Double.valueOf(""+numeratorCount) / denominatorCount;
+					performanceRate =  Double.valueOf(newFormat.format(performanceRate));
+
+				}
+
+			}catch(Exception e){
+				performanceRate = 0;
+				reportingRate = 0;
+			}
+			
+			resultObject.setReportingRate(reportingRate);
+			resultObject.setPerformanceRate(performanceRate);
+			resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
+			resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
+			
+		}
+		
+		return results;
+		
+	}
+	
+	/**
+	 * Function to calculate performance of group of providers based on TIN value
+	 * @param configuredMeasures
+	 * @param accountId
+	 * @return
+	 * MIPSPerformanceBean to save entries in macra_measures_rate table
+	 */
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public List<MIPSPerformanceBean> getGroupPerformanceCount(String tinValue, String configuredMeasures, String accountId){
+		
+		List<MIPSPerformanceBean> results = new ArrayList<MIPSPerformanceBean>();
+		
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
+		
+		try{
+		
+			Calendar now = Calendar.getInstance();
+			int reportingYear = now.get(Calendar.YEAR);
+
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<MIPSPerformanceBean> cq = builder.createQuery(MIPSPerformanceBean.class);
+			Root<MacraMeasuresRate> root = cq.from(MacraMeasuresRate.class);
+			
+			Predicate byEmpTin = builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateTin), tinValue);
+			Predicate byReportingYear = builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear), reportingYear);		
+			Predicate byConfiguredMeasures = root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId).in(Arrays.asList(configuredMeasures.split(",")));
+			
+			cq.where(builder.and(byEmpTin,byReportingYear, byConfiguredMeasures));
+			
+			cq.groupBy(root.get(MacraMeasuresRate_.macraMeasuresRateTin),
+					root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
+					root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
+					root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear));
+			
+			Selection[] selections= new Selection[] {
+
+				root.get(MacraMeasuresRate_.macraMeasuresRateTin),
+				root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
+				root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
+				root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
+				builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateIpp),0)),
+				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateIpplist),builder.literal(",")),
+				builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominator),0)),
+				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorlist),builder.literal(",")),
+				builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExclusion),0)),
+				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExclusionlist),builder.literal(",")),
+				builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumerator),0)),
+				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorlist),builder.literal(",")),
+				builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusion),0)),
+				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusionlist),builder.literal(",")),
+				builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorException),0)),
+				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExceptionlist),builder.literal(",")),
+
+			};
+			
+			cq.multiselect(selections);
+			
+			results = em.createQuery(cq).getResultList();
+			
+			for(int i=0;i<results.size();i++){
+				
+				MIPSPerformanceBean resultObject = results.get(i);
+				
+				String measureId = resultObject.getMeasureId();
+				
+				String cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+				
+				DecimalFormat newFormat = new DecimalFormat("#0.00");
+
+				double performanceRate = 0;
+				double reportingRate = 0;
+
+				long numeratorCount = resultObject.getNumeratorCount();
+				long denominatorCount = resultObject.getDenominatorCount();
+				long denominatorExclusionCount = resultObject.getDenominatorExclusionCount();
+				long denominatorExceptionCount = resultObject.getDenominatorExceptionCount();
+
+				try{
+
+					if(numeratorCount != 0 || denominatorExceptionCount != 0 || denominatorExclusionCount!=0){
+
+						reportingRate =  Double.valueOf(""+numeratorCount+denominatorExceptionCount+denominatorExclusionCount) / denominatorCount;
+						reportingRate =  Double.valueOf(newFormat.format(reportingRate));
+
+					}
+
+					if(numeratorCount > 0){
+
+						denominatorCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
+
+						performanceRate =  Double.valueOf(""+numeratorCount) / denominatorCount;
+						performanceRate =  Double.valueOf(newFormat.format(performanceRate));
+
+					}
+
+				}catch(Exception e){
+					performanceRate = 0;
+					reportingRate = 0;
+				}
+				
+				resultObject.setReportingRate(reportingRate);
+				resultObject.setPerformanceRate(performanceRate);
+				resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
+				resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
+				
+			}
+			
+		}catch(Exception e){
+			
+			try{
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while calculating MIPS performance",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+
+			}
+			
+		}
+		
+		return results;
+		
+	}
+	
+	/**
 	 * Function to calculate measure performance  
 	 * 
 	 * @param providerId
@@ -926,8 +1192,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 		try{
 			
-			System.out.println("accountId: "+accountId);
-			
 			String sharedFolderPath = sharedFolderBean.getSharedFolderPath().get(accountId).toString();
 			
 			String jsonFolder = sharedFolderPath+File.separator+"ECQM"+File.separator;
@@ -937,8 +1201,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/eCQMServices/getECQMInfoById?ids="+measureId;
 			
 			if(file.exists()){
-				
-				System.out.println("measure id: "+measureId);
 				
 				String jsonContent = FileUtils.readFileToString(file);
 				
@@ -1106,17 +1368,29 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider) {
+	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode) {
+		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MIPSPatientInformation> cq = builder.createQuery(MIPSPatientInformation.class);
 		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
 		Join<PatientRegistration,QualityMeasuresPatientEntries> joinQualityMeasuresPatientEntries=root.join(PatientRegistration_.qualityMeasuresPatientEntries,JoinType.INNER);
 		
+		String npiValue = getNPIForProvider(provider);
+		
 		Predicate byPatientId = root.get(PatientRegistration_.patientRegistrationId).in(Arrays.asList(patientId.split(",")));
-		Predicate byMeasureId=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), measureId);
-		Predicate byCriteria=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesCriteria), criteria);
-		Predicate byProvider=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), provider);
-		joinQualityMeasuresPatientEntries.on(byMeasureId, byCriteria,byProvider);
+		Predicate byMeasureId = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), measureId);
+		Predicate byCriteria = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesCriteria), criteria);
+		Predicate byProvider = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), provider);
+		Predicate byNpi = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNpi), npiValue);
+		Predicate byEmpTin=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesTin), empTin);
+		
+		if(mode == 0){
+			joinQualityMeasuresPatientEntries.on(byMeasureId, byCriteria,byNpi);
+		}else if(mode == 1){
+			joinQualityMeasuresPatientEntries.on(byMeasureId, byCriteria,byProvider);
+		}else{
+			joinQualityMeasuresPatientEntries.on(byMeasureId, byCriteria, byEmpTin);
+		}
 		
 		Selection[] selections= new Selection[] {
 				root.get(PatientRegistration_.patientRegistrationId),
@@ -1146,6 +1420,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		cq.select(builder.construct(MIPSPatientInformation.class,selections));
 		List<MIPSPatientInformation> patientDetailsWithResults = em.createQuery(cq).getResultList();
 		return patientDetailsWithResults;
+		
 	}
 	
 }

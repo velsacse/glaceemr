@@ -22,11 +22,15 @@ public interface MeasureCalculationService {
 	
 	List<MIPSPerformanceBean> getMeasureRateReport(int providerId, String accountId, String configuredMeasures);
 	
+	List<MIPSPerformanceBean> getMeasureRateReportByNPI(int providerId, String accountId, String configuredMeasures);
+	
 	List<MIPSPerformanceBean> getPerformanceCount(int providerId, String measureId, String configuredMeasures, String accountId);
+	
+	List<MIPSPerformanceBean> getGroupPerformanceCount(String tinValue, String configuredMeasures, String accountId);
 
 	HashMap<String, Object> generateFilterContents();
 
-	List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider);
+	List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode);
 
 	List<MIPSPatientInformation> getPatientInformation(String patientsList);
 	

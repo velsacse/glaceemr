@@ -69,6 +69,12 @@ public class QualityMeasuresPatientEntriesHistory {
 	@Column(name="quality_measures_patient_entries_history_criteria")
 	private Integer qualityMeasuresPatientEntriesHistoryCriteria;
 
+	@Column(name="quality_measures_patient_entries_history_npi")
+	private String qualityMeasuresPatientEntriesHistoryNpi;
+
+	@Column(name="quality_measures_patient_entries_history_tin")
+	private String qualityMeasuresPatientEntriesHistoryTin;
+
 	public Integer getQualityMeasuresPatientEntriesId() {
 		return qualityMeasuresPatientEntriesId;
 	}
@@ -211,6 +217,24 @@ public class QualityMeasuresPatientEntriesHistory {
 	public void setQualityMeasuresPatientEntriesHistoryCriteria(
 			Integer qualityMeasuresPatientEntriesHistoryCriteria) {
 		this.qualityMeasuresPatientEntriesHistoryCriteria = qualityMeasuresPatientEntriesHistoryCriteria;
+	}
+
+	public String getQualityMeasuresPatientEntriesHistoryNpi() {
+		return qualityMeasuresPatientEntriesHistoryNpi;
+	}
+
+	public void setQualityMeasuresPatientEntriesHistoryNpi(
+			String qualityMeasuresPatientEntriesHistoryNpi) {
+		this.qualityMeasuresPatientEntriesHistoryNpi = qualityMeasuresPatientEntriesHistoryNpi;
+	}
+
+	public String getQualityMeasuresPatientEntriesHistoryTin() {
+		return qualityMeasuresPatientEntriesHistoryTin;
+	}
+
+	public void setQualityMeasuresPatientEntriesHistoryTin(
+			String qualityMeasuresPatientEntriesHistoryTin) {
+		this.qualityMeasuresPatientEntriesHistoryTin = qualityMeasuresPatientEntriesHistoryTin;
 	}
 	
 }

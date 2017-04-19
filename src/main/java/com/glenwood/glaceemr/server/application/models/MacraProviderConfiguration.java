@@ -111,5 +111,9 @@ public class MacraProviderConfiguration implements Serializable{
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="macraProviderConfiguration")
 	@JsonManagedReference
 	List<QualityMeasuresProviderMapping> qualityMeasuresProviderMappingTable;
+
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="macraProviderConfiguration")
+	@JsonManagedReference
+	private List<EmployeeProfile> employeeProfileTable;
 	
 }

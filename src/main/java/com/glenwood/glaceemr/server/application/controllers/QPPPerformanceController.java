@@ -103,7 +103,8 @@ public class QPPPerformanceController {
 			}
 
 			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
-			if(providerInfo.size()!=0){
+			if(providerInfo!=null){
+
 				String[] measureIds = providerInfo.get(0).getMeasures().split(",");
 
 				for(int i=0;i<measureIds.length;i++){
@@ -119,12 +120,14 @@ public class QPPPerformanceController {
 				requestObj.setStartDate(providerInfo.get(0).getMacraProviderConfigurationReportingStart());
 				requestObj.setEndDate(providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 				requestObj.setMeasureIds(cqmMeasures);
-				
+
 				response.setData(utils.getMeasureDetails().toString());
-				
+
 				ObjectMapper objectMapper = new ObjectMapper();
 				String requestString = objectMapper.writeValueAsString(requestObj);
+
 				String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
+
 				responseFromCentralServer = objectMapper.readValue(responseStr, Response.class);
 
 				Map<String,MeasureStatus> measureStatus = responseFromCentralServer.getMeasureStatus();
@@ -256,6 +259,8 @@ public class QPPPerformanceController {
 	public EMRResponseBean getMIPSPerformanceRate(
 			@RequestParam(value="providerId", required=true) int providerId,
 			@RequestParam(value="accountId", required=true) String accountId,
+			@RequestParam(value="mode", required=false, defaultValue="1") int mode,
+			@RequestParam(value="tinValue", required=false, defaultValue="") String tinValue,
 			@RequestParam(value="measureId", required=false, defaultValue="") String measureId) throws Exception{
 		
 		EMRResponseBean response = new EMRResponseBean();
@@ -263,18 +268,34 @@ public class QPPPerformanceController {
 		Writer writer = new StringWriter();
 		PrintWriter printWriter = new PrintWriter(writer);
 
+		String configuredMeasures = "";
+		
 		try{
-		
-		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
-		
-		String configuredMeasures = providerInfo.get(0).getMeasures();
-		
-//		List<MIPSPerformanceBean> performanceObj = measureService.getPerformanceCount(providerId, measureId, configuredMeasures,accountId);
-		
-		List<MIPSPerformanceBean> performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures);
 
-		response.setData(performanceObj);
-		
+			Calendar now = Calendar.getInstance();
+			int reportingYear = now.get(Calendar.YEAR);	
+
+			List<MacraProviderQDM> providerInfo = new ArrayList<MacraProviderQDM>();
+
+			if(mode!=2){
+				providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+				configuredMeasures = providerInfo.get(0).getMeasures();
+			}else{
+				configuredMeasures = providerConfService.getCompleteTinInfo(tinValue, reportingYear);
+			}
+
+			List<MIPSPerformanceBean> performanceObj = null;
+
+			if(mode == 0){
+				performanceObj = measureService.getMeasureRateReportByNPI(providerId, accountId, configuredMeasures);
+			}else if(mode == 1){
+				performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures);
+			}else{
+				performanceObj = measureService.getGroupPerformanceCount(tinValue,configuredMeasures, accountId);
+			}
+
+			response.setData(performanceObj);
+
 		}catch(Exception e){
 			
 			try {
@@ -310,6 +331,8 @@ public class QPPPerformanceController {
 			@RequestParam(value="patientId", required=true) String patientId,
 			@RequestParam(value="measureId", required=true) String measureId,
 			@RequestParam(value="criteria", required=true) int criteria,
+			@RequestParam(value="mode", required=true) int mode,
+			@RequestParam(value="empTIN", required=false, defaultValue="") String empTIN,
 			@RequestParam(value="accountId", required=true) String accountId,
 			@RequestParam(value="provider", required=true) Integer provider){
 		
@@ -320,7 +343,7 @@ public class QPPPerformanceController {
 
 		try{
 		
-		List<MIPSPatientInformation> filtersInfo = measureService.getPatient(patientId,measureId,criteria,provider);
+		List<MIPSPatientInformation> filtersInfo = measureService.getPatient(patientId,measureId,criteria,provider,empTIN, mode);
 		
 		response.setData(filtersInfo);
 		
@@ -331,6 +354,57 @@ public class QPPPerformanceController {
 				e.printStackTrace(printWriter);
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while getting filtered patients list",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+				
+			}
+			
+		}
+		
+		return response;
+		
+	}
+	
+	@RequestMapping(value = "/getMIPSPerformanceRateByNPI", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getMIPSPerformanceRateByNPI(
+			@RequestParam(value="providerId", required=true) int providerId,
+			@RequestParam(value="accountId", required=true) String accountId,
+			@RequestParam(value="measureId", required=false, defaultValue="") String measureId) throws Exception{
+		
+		EMRResponseBean response = new EMRResponseBean();
+		
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
+
+		try{
+		
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+		
+		String configuredMeasures = providerInfo.get(0).getMeasures();
+		
+		List<MIPSPerformanceBean> performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures);
+
+		response.setData(performanceObj);
+		
+		}catch(Exception e){
+			
+			try {
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while getting MIPSPerformance Report",writer.toString());
 				
 				GlaceMailer.sendFailureReport(responseMsg,accountId);
 				

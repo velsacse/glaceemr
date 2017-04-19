@@ -29,6 +29,9 @@ public class MIPSPerformanceBean {
 	double performanceRate;
 	double reportingRate;
 	
+	String npi;
+	String tin;
+	
 	/*long notMetPatients;
 	String notMetPatientsList;*/
 	
@@ -65,6 +68,61 @@ public class MIPSPerformanceBean {
 		this.reportingRate = reportingRate;
 		
 	}
+	
+	public MIPSPerformanceBean(String tin,String measureId, int criteria, int reportingYear,
+			long ippCount, String ippPatientsList, long denominatorCount,
+			String denominatorPatientsList, long denominatorExclusionCount,
+			String denominatorExclusionPatientsList, long numeratorCount,
+			String numeratorPatientsList, long numeratorExclusionCount,
+			String numeratorExclusionPatientsList,
+			long denominatorExceptionCount,
+			String denominatorExceptionPatientsList) {
+		
+		this.tin = tin;
+		this.measureId = measureId;
+		this.criteria = criteria;
+		this.reportingYear = reportingYear;
+		this.ippCount = ippCount;
+		this.ippPatientsList = ippPatientsList;
+		this.denominatorCount = denominatorCount;
+		this.denominatorPatientsList = denominatorPatientsList;
+		this.denominatorExclusionCount = denominatorExclusionCount;
+		this.denominatorExclusionPatientsList = denominatorExclusionPatientsList;
+		this.numeratorCount = numeratorCount;
+		this.numeratorPatientsList = numeratorPatientsList;
+		this.numeratorExclusionCount = numeratorExclusionCount;
+		this.numeratorExclusionPatientsList = numeratorExclusionPatientsList;
+		this.denominatorExceptionCount = denominatorExceptionCount;
+		this.denominatorExceptionPatientsList = denominatorExceptionPatientsList;
+		
+	}
+	
+	public MIPSPerformanceBean(String measureId, int criteria, int reportingYear,
+			long ippCount, String ippPatientsList, long denominatorCount,
+			String denominatorPatientsList, long denominatorExclusionCount,
+			String denominatorExclusionPatientsList, long numeratorCount,
+			String numeratorPatientsList, long numeratorExclusionCount,
+			String numeratorExclusionPatientsList,
+			long denominatorExceptionCount,
+			String denominatorExceptionPatientsList) {
+		
+		this.measureId = measureId;
+		this.criteria = criteria;
+		this.reportingYear = reportingYear;
+		this.ippCount = ippCount;
+		this.ippPatientsList = ippPatientsList;
+		this.denominatorCount = denominatorCount;
+		this.denominatorPatientsList = denominatorPatientsList;
+		this.denominatorExclusionCount = denominatorExclusionCount;
+		this.denominatorExclusionPatientsList = denominatorExclusionPatientsList;
+		this.numeratorCount = numeratorCount;
+		this.numeratorPatientsList = numeratorPatientsList;
+		this.numeratorExclusionCount = numeratorExclusionCount;
+		this.numeratorExclusionPatientsList = numeratorExclusionPatientsList;
+		this.denominatorExceptionCount = denominatorExceptionCount;
+		this.denominatorExceptionPatientsList = denominatorExceptionPatientsList;
+		
+	}
 
 	public MIPSPerformanceBean(String measureId, int criteria,int reportingYear,
 			long ippCount, long denominatorCount,
@@ -81,6 +139,22 @@ public class MIPSPerformanceBean {
 		this.numeratorExclusionCount = numeratorExclusionCount;
 		this.denominatorExceptionCount = denominatorExceptionCount;
 		
+	}
+
+	public String getNpi() {
+		return npi;
+	}
+
+	public void setNpi(String npi) {
+		this.npi = npi;
+	}
+
+	public String getTin() {
+		return tin;
+	}
+
+	public void setTin(String tin) {
+		this.tin = tin;
 	}
 
 	public int getCriteria() {

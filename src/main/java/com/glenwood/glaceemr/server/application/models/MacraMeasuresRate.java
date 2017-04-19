@@ -91,6 +91,12 @@ public class MacraMeasuresRate {
 	@Column(name="macra_measures_rate_criteria")
 	private Integer macraMeasuresRateCriteria;
 
+	@Column(name="macra_measures_rate_npi")
+	private String macraMeasuresRateNpi;
+
+	@Column(name="macra_measures_rate_tin")
+	private String macraMeasuresRateTin;
+
 	public Integer getMacraMeasuresRateId() {
 		return macraMeasuresRateId;
 	}
@@ -282,6 +288,22 @@ public class MacraMeasuresRate {
 
 	public void setMacraMeasuresRateCriteria(Integer macraMeasuresRateCriteria) {
 		this.macraMeasuresRateCriteria = macraMeasuresRateCriteria;
+	}
+
+	public String getMacraMeasuresRateNpi() {
+		return macraMeasuresRateNpi;
+	}
+
+	public void setMacraMeasuresRateNpi(String macraMeasuresRateNpi) {
+		this.macraMeasuresRateNpi = macraMeasuresRateNpi;
+	}
+
+	public String getMacraMeasuresRateTin() {
+		return macraMeasuresRateTin;
+	}
+
+	public void setMacraMeasuresRateTin(String macraMeasuresRateTin) {
+		this.macraMeasuresRateTin = macraMeasuresRateTin;
 	}
 	
 }

@@ -73,6 +73,12 @@ public class QualityMeasuresPatientEntries {
 	@Column(name="quality_measures_patient_entries_criteria")
 	private Integer qualityMeasuresPatientEntriesCriteria;
 
+	@Column(name="quality_measures_patient_entries_npi")
+	private String qualityMeasuresPatientEntriesNpi;
+
+	@Column(name="quality_measures_patient_entries_tin")
+	private String qualityMeasuresPatientEntriesTin;
+
 	public Integer getQualityMeasuresPatientEntriesId() {
 		return qualityMeasuresPatientEntriesId;
 	}
@@ -215,6 +221,24 @@ public class QualityMeasuresPatientEntries {
 	public void setQualityMeasuresPatientEntriesCriteria(
 			Integer qualityMeasuresPatientEntriesCriteria) {
 		this.qualityMeasuresPatientEntriesCriteria = qualityMeasuresPatientEntriesCriteria;
+	}
+
+	public String getQualityMeasuresPatientEntriesNpi() {
+		return qualityMeasuresPatientEntriesNpi;
+	}
+
+	public void setQualityMeasuresPatientEntriesNpi(
+			String qualityMeasuresPatientEntriesNpi) {
+		this.qualityMeasuresPatientEntriesNpi = qualityMeasuresPatientEntriesNpi;
+	}
+
+	public String getQualityMeasuresPatientEntriesTin() {
+		return qualityMeasuresPatientEntriesTin;
+	}
+
+	public void setQualityMeasuresPatientEntriesTin(
+			String qualityMeasuresPatientEntriesTin) {
+		this.qualityMeasuresPatientEntriesTin = qualityMeasuresPatientEntriesTin;
 	}
 
 	@ManyToOne(fetch=FetchType.LAZY)

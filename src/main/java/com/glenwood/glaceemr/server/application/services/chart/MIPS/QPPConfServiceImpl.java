@@ -37,6 +37,7 @@ import com.glenwood.glaceemr.server.application.models.Billinglookup_;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr_;
 import com.glenwood.glaceemr.server.application.models.InsCompany;
@@ -145,7 +146,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		return measureIds;
 	}
 	@Override
-	public void addMeasuresToProvider(String measureIds, Integer providerId,Integer prgmYear) {
+	public void addMeasuresToProvider(String measureIds, Integer providerId, Integer reportingYear) {
 		List<QualityMeasuresProviderMapping> objectsToDelete=qualityMeasuresProviderMappingRepository.findAll(Specifications.where(QPPConfigurationSpecification.getMeasureIds(providerId)));
 		if(objectsToDelete!=null && !(objectsToDelete.equals(null))){
 			qualityMeasuresProviderMappingRepository.deleteInBatch(objectsToDelete);
@@ -153,12 +154,13 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 			
 		String[] measureid;
 		measureid=measureIds.split(",");
+		
 		for(int i=0;i<measureid.length;i++){
 			QualityMeasuresProviderMapping qmpmObj=new QualityMeasuresProviderMapping();
 
+			qmpmObj.setQualityMeasuresProviderMappingReportingYear(reportingYear);
 			qmpmObj.setQualityMeasuresProviderMappingProviderId(providerId);
-		qmpmObj.setQualityMeasuresProviderMappingMeasureId(measureid[i]);
-		qmpmObj.setQualityMeasuresProviderMappingReportingYear(prgmYear);
+			qmpmObj.setQualityMeasuresProviderMappingMeasureId(measureid[i]);
 		qualityMeasuresProviderMappingRepository.saveAndFlush(qmpmObj);
 		}
 	}
@@ -222,6 +224,34 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		List<MacraProviderQDM> providerInfo=em.createQuery(cq).getResultList();
 		return providerInfo;
 		
+	}
+	
+	@Override
+	public String getCompleteTinInfo(String empTin, int reportingYear){
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<String> cq = builder.createQuery(String.class);
+		Root<MacraProviderConfiguration> root = cq.from(MacraProviderConfiguration.class);
+		
+		Join<MacraProviderConfiguration,QualityMeasuresProviderMapping> joinProviderConfigurationProviderMapping=root.join(MacraProviderConfiguration_.qualityMeasuresProviderMappingTable,JoinType.INNER);
+		Join<MacraProviderConfiguration,EmployeeProfile> joinProviderEmployee = root.join(MacraProviderConfiguration_.employeeProfileTable, JoinType.INNER);
+
+		Predicate bySSN = builder.equal(joinProviderEmployee.get(EmployeeProfile_.empProfileSsn), empTin);
+		Predicate byReportingYear = builder.equal(root.get(MacraProviderConfiguration_.macraProviderConfigurationReportingYear), reportingYear);
+
+		cq.where(builder.and(bySSN, byReportingYear));
+		
+		cq.groupBy(joinProviderEmployee.get(EmployeeProfile_.empProfileSsn));
+		
+		cq.multiselect(builder.function("string_agg",String.class,joinProviderConfigurationProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId) ,builder.literal(","))).distinct(true);
+	
+		List<String> providerInfo=em.createQuery(cq).getResultList();
+		
+		if(providerInfo.size() > 0){
+			return providerInfo.get(0).toString();
+		}
+		
+		return "";
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -335,8 +365,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		raceResultCodes+="00000,";
 		ethnicityResultCodes+="00000,";
 		if(!raceCode.equals("-1"))
-		{System.out.println("race codes.............."+raceCode);
-			System.out.println("coming.............");
+		{
 		CriteriaBuilder builder1 = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq1 = builder1.createQuery();
 		Root<Billinglookup> rootBillinglookup = cq1.from(Billinglookup.class);
@@ -353,7 +382,6 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		}
 		}
 		raceResultCodes=raceResultCodes.substring(0,raceResultCodes.length()-1);
-		System.out.println("raceResultCodes is..........."+raceResultCodes.toString());
 		if(!ethnicityCode.equals("-1")){
 		CriteriaBuilder builder2 = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq2 = builder2.createQuery();
@@ -371,7 +399,6 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		}
 		ethnicityResultCodes=ethnicityResultCodes.substring(0,ethnicityResultCodes.length()-1);
 		}
-		System.out.println("ethnicityResultCodes is..................."+ethnicityResultCodes.toString());
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MIPSPatientInformation> cq = builder.createQuery(MIPSPatientInformation.class);
 		Root<PatientRegistration> rootPatientRegistration = cq.from(PatientRegistration.class);
@@ -442,12 +469,10 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 			predicates.add(byRaceEthnicity);
 		}
 		else if(!raceCode.equals("-1") && ethnicityCode.equals("-1")){
-			System.out.println("correct came");
 			byRaceEthnicity=builder.or(rootPatientRegistration.get(PatientRegistration_.patientRegistrationGranularRaceCode).in(Arrays.asList(raceCode.split(","))),rootPatientRegistration.get(PatientRegistration_.patientRegistrationRace).in(Arrays.asList(raceResultCodes.split(","))));
 			predicates.add(byRaceEthnicity);
 		}
 		else if(raceCode.equals("-1") && !ethnicityCode.equals("-1")){
-			System.out.println("correct came 2");
 			byRaceEthnicity=builder.or(rootPatientRegistration.get(PatientRegistration_.patientRegistrationGranularEthnicityCode).in(Arrays.asList(ethnicityCode.split(","))),rootPatientRegistration.get(PatientRegistration_.patientRegistrationEthnicity).in(Arrays.asList(ethnicityResultCodes.split(","))));
 			predicates.add(byRaceEthnicity);
 		}
