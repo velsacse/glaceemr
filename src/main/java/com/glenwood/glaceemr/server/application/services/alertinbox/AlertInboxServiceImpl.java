@@ -1608,6 +1608,62 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 	}
 	
 	/**
+	 * Method which is used to update the existing status with the new status for List of given AlertEventId's
+	 * @return List of AlertEvents
+	 */
+	@Override
+	public List<AlertEvent> updateStatusbyAlertEventIds(List<Integer> alertEventIds,
+			String alertstatus,String userId) {
+		List<AlertEvent> alertevents= alertInboxRepository.findAll(AlertInboxSpecification.byAlertId(alertEventIds));
+		for(AlertEvent alertevent: alertevents){
+			AlertEvent ae=alertevent;
+			ae.setAlertEventStatus(Integer.parseInt(alertstatus));	
+			ae.setAlertEventRead(true);
+			ae.setAlertEventReadby(Integer.parseInt(userId));
+			ae.setAlertEventModifiedby(Integer.parseInt(userId));
+			Date date= new Date();
+			ae.setAlertEventReadDate(new Timestamp(date.getTime()));
+			ae.setAlertEventModifiedDate(new Timestamp(date.getTime()));
+			
+			alertInboxRepository.saveAndFlush(ae);
+			
+			AlertArchive aa=new AlertArchive();//insert row in alert_archive from alert_event
+			aa.setAlertEventCategoryId(alertevent.getAlertEventCategoryId());
+			aa.setAlertEventChartId(ae.getAlertEventChartId());
+			aa.setAlertEventClosedDate(ae.getAlertEventClosedDate()==null?new Timestamp(0000,00,00,00,00,00,00): ae.getAlertEventClosedDate());
+			aa.setAlertEventCreatedDate(ae.getAlertEventCreatedDate());
+			aa.setAlertEventEncounterId(ae.getAlertEventEncounterId());
+			aa.setAlertEventFrom(ae.getAlertEventFrom());
+			aa.setAlertEventFrompage(ae.getAlertEventFrompage());
+			aa.setAlertEventHighlight(ae.getAlertEventHighlight());
+			aa.setAlertEventId(ae.getAlertEventId());
+			aa.setAlertEventIsgroupalert(ae.getAlertEventIsgroupalert());
+			aa.setAlertEventMessage(ae.getAlertEventMessage());
+			aa.setAlertEventModifiedby(ae.getAlertEventModifiedby());
+			if(ae.getAlertEventModifiedDate()!=null)
+				aa.setAlertEventModifiedDate(ae.getAlertEventModifiedDate());
+			aa.setAlertEventParentalertid(ae.getAlertEventParentalertid());
+			aa.setAlertEventPatientId(ae.getAlertEventPatientId());
+			aa.setAlertEventPatientName(ae.getAlertEventPatientName());
+			aa.setAlertEventRead(ae.getAlertEventRead());
+			aa.setAlertEventReadby(ae.getAlertEventReadby());
+			if(ae.getAlertEventReadDate()!=null)
+				aa.setAlertEventReadDate(ae.getAlertEventReadDate());
+			aa.setAlertEventRefId(ae.getAlertEventRefId());
+			aa.setAlertEventRoomId(ae.getAlertEventRoomId());
+			aa.setAlertEventStatus(ae.getAlertEventStatus());
+			aa.setAlertEventStatus1(ae.getAlertEventStatus1());
+			aa.setAlertEventTo(ae.getAlertEventTo());
+			aa.setAlertEventUnknown(ae.getAlertEventUnknown());
+			alertArchiveRepository.saveAndFlush(aa);
+			
+			alertInboxRepository.delete(ae); //delete a row from alert_event table
+			
+		}
+    	return alertevents;
+	}
+	
+	/**
 	 * Returns the formatted the pattern
 	 * @param searchTerm
 	 * @return

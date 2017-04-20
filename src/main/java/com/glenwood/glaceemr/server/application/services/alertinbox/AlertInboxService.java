@@ -148,4 +148,6 @@ public interface AlertInboxService {
 			String patientNameSearchValue, String senderNameSearchValue,
 			String receiverNameSearchValue, String messageSearchValue,
 			String fromDateSearchValue, String toDateSearchValue);
+	List<AlertEvent> updateStatusbyAlertEventIds(List<Integer> alertEventIds,
+			String alertStatus, String userId);
 }

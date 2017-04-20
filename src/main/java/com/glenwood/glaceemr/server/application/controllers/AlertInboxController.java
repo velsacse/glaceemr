@@ -104,7 +104,33 @@ public class AlertInboxController {
 
 		return alertsLists;
 	}
-
+	/**
+	 * Update the status based on the list of AlertEventId's.
+	 * @param alerteventid		    AlertEvent id's are separated by ","
+	 * @param alertEventStatus		status of an alert.
+	 * @return				        List of modified entities.
+	 */
+	@RequestMapping(value = "/updateStatus", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean updateStatusbyAlerEventId(
+			 @RequestParam(value="statusId", required=false, defaultValue="0") String statusId,
+			 @RequestParam(value="alertIds",required=true) String alertEventIds,
+			 @RequestParam(value="userId",required=true) String userId){
+		List<Integer> alertEventIdList=new ArrayList<Integer>();
+		String[] alertEventIdsArray = {"-1"};
+		List<Map<String, List<Map<String, List<Object>>>>> alertsList;
+		if(!alertEventIds.equals("-1")){
+			alertEventIdsArray=alertEventIds.split(",");
+		}
+		for (String alertEvent : alertEventIdsArray) {
+			alertEventIdList.add(Integer.parseInt(alertEvent));
+		}
+		List<AlertEvent> alertEventLists= alertInboxService.updateStatusbyAlertEventIds(alertEventIdList,statusId,userId);
+		EMRResponseBean alertsLists=new EMRResponseBean();
+		alertsLists.setData(alertEventLists);
+		 return alertsLists;
+	}
+	
 	/**
 	 * To get the alerts based on the offset and limits.
 	 * @param userId
@@ -125,33 +151,24 @@ public class AlertInboxController {
 			 @RequestParam(value="messageSearchValue", required=false, defaultValue="") String messageSearchValue,
 			 @RequestParam(value="fromDateSearchValue", required=false, defaultValue="") String fromDateSearchValue,
 			 @RequestParam(value="toDateSearchValue", required=false, defaultValue="") String toDateSearchValue) throws Exception{
-
 		logger.debug("Enters into get alerts");
-
 		List<String> categoryIdList=new ArrayList<String>();
 		String[] categoryIdArray = {"-1"};
-
 		List<Map<String, List<Object>>> alertsList;
-
 		if(!categoryIds.equals("-1")){
 			categoryIdArray=categoryIds.split(",");
 		}
-
 		for (String s : categoryIdArray) {
 			categoryIdList.add(s);
 		}
-
 		alertsList = alertInboxService.searchAlerts(userId,categoryIdList,patientNameSearchValue,
 				senderNameSearchValue,receiverNameSearchValue,messageSearchValue,
 				fromDateSearchValue,toDateSearchValue);
-		
 		EMRResponseBean alertsLists=new EMRResponseBean();
 		alertsLists.setData(alertsList);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-
 		return alertsLists;
 	}
-
 	/**
 	 * Get the category list with count based on the user id
 	 * @param userId 	User Id to get the list of categories with count
@@ -168,7 +185,6 @@ public class AlertInboxController {
 		shortcutInfoBean.setData(shortcutInfoBeans);
 		return shortcutInfoBean;
 	}
-
 	/**
 	 * Gets the alerts by categories (Pagination)
 	 * @param userId		Logged in user Id
@@ -191,8 +207,6 @@ public class AlertInboxController {
 		alertInboxBean.setData(alertInboxBeans);
 		return alertInboxBean;
 	}
-
-
 	/**
 	 * Highlights the alerts
 	 * @param alertids 		Alert id's are separated by ","
@@ -204,12 +218,9 @@ public class AlertInboxController {
 	public EMRResponseBean highlight(
 			 @RequestParam(value="alertid",required=true) String alertids, 
 			 @RequestParam(value="userid",required=true) Integer userId){
-
 		logger.debug("Highlighting the alert with id "+alertids);
-
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertids.split(",");
-
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
@@ -219,8 +230,6 @@ public class AlertInboxController {
 		alertEvents.setData(alertEvent);
 		return alertEvents;
 	}
-
-
 	/**
 	 * Un Highlights the alerts
 	 * @param alertids 		Alert id's are separated by ","
@@ -232,12 +241,9 @@ public class AlertInboxController {
 	public EMRResponseBean unHighlight(
 			@RequestParam(value="alertid",required=true) String alertids,
 			 @RequestParam(value="userid",required=true) Integer userId){
-
 		logger.debug("Un Highlighting the alert with id "+alertids);
-
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertids.split(",");
-
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
@@ -247,8 +253,6 @@ public class AlertInboxController {
 		alertEvents.setData(alertEvent);
 		return alertEvents;
 	}
-
-
 	/**
 	 * Marks the list of alerts to read 
 	 * @param alertids		Alert id's are separated by ","
@@ -260,24 +264,18 @@ public class AlertInboxController {
 	public EMRResponseBean markRead(
 			 @RequestParam(value="alertid",required=true) String alertids, 
 			 @RequestParam(value="userid",required=true) Integer userId){
-
 		logger.debug("Read the alert with id "+alertids);
-
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertids.split(",");
-
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
 		List<AlertEvent> alertEvent=alertInboxService.markReadAlert(alertIdList,userId);
-
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
 		return alertEvents;
 	}
-
-
 	/**
 	 * Marks the list of alerts to unread 
 	 * @param alertids		Alert id's are separated by ","
@@ -289,12 +287,9 @@ public class AlertInboxController {
 	public EMRResponseBean markUnRead(
 			 @RequestParam(value="alertid",required=true) String alertids, 
 			 @RequestParam(value="userid",required=false) Integer userId){
-
 		logger.debug("Un Read the alert with id "+alertids);
-
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertids.split(",");
-
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
@@ -302,11 +297,8 @@ public class AlertInboxController {
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-
 		return alertEvents;
 	}
-
-
 	/**
 	 * Gets the list of categories based on the category id
 	 * @param categoryIds 	Category id's are separated by ","
@@ -316,12 +308,9 @@ public class AlertInboxController {
 	@ResponseBody
 	public EMRResponseBean getCategories(
 			 @RequestParam(value="categoryid",required=true) String categoryIds){
-
 		logger.debug("Getting the categories with id "+categoryIds);
-
 		List<Integer> categoryIdList=new ArrayList<Integer>();
 		String[] categoryIdArray=categoryIds.split(",");
-
 		for (String s : categoryIdArray) {
 			categoryIdList.add(Integer.parseInt(s));
 		}
@@ -329,11 +318,8 @@ public class AlertInboxController {
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-
 		return alertEvents;
 	}
-
-
 	/**
 	 * Forward one or more alerts based on the alert id
 	 * @param categoryIds 	Category id's are separated by ","
@@ -348,12 +334,9 @@ public class AlertInboxController {
 			 @RequestParam(value="message",required=true) String message, 
 			 @RequestParam(value="forwardto",required=true) String forwardTo, 
 			 @RequestParam(value="ishighpriority",required=false) String ishighpriority){
-
 		logger.debug("Forwarding the alerts with id "+alertIds);
-
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertIds.split(",");
-
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
@@ -361,11 +344,8 @@ public class AlertInboxController {
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-
 		return alertEvents;
 	}
-
-
 	/**
 	 * Delete the alerts
 	 * @param alertids 		Alert id's are separated by ","
@@ -377,28 +357,20 @@ public class AlertInboxController {
 	public EMRResponseBean deleteAlerts(
 			 @RequestParam(value="alertid",required=true) String alertids,
 			 @RequestParam(value="userid",required=true) Integer userId){
-
 		logger.debug("Deleting the alert with id "+alertids);
-
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertids.split(",");
-
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
-		
 		List<AlertEvent> alertEvent=null;
 		if(userId!=null)
 			alertEvent=alertInboxService.deleteAlert(alertIdList,userId);
-		
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-
 		return alertEvents;
 	}
-
-
 	/**
 	 * Delete the alerts by encounter id.
 	 * @param encounterIds 	Encounter id's are separated by ","
@@ -410,12 +382,9 @@ public class AlertInboxController {
 	public EMRResponseBean deleteByEncounterId(
 			 @RequestParam(value="encounterid",required=true) String encounterIds,
 			 @RequestParam(value="userid",required=true) Integer userId){
-
 		logger.debug("Deleting the alert with encounter id "+encounterIds);
-
 		List<Integer> encounterIdList=new ArrayList<Integer>();
 		String[] alertIdArray=encounterIds.split(",");
-
 		for (String s : alertIdArray) {
 			encounterIdList.add(Integer.parseInt(s));
 		}
@@ -423,11 +392,8 @@ public class AlertInboxController {
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-
 		return alertEvents;
 	}
-
-
 	/**
 	 * Get alerts by encounter id.
 	 * @param encounterId 	Encounter id's are separated by ","
@@ -437,10 +403,8 @@ public class AlertInboxController {
 	@ResponseBody
 	public EMRResponseBean byEncounterId(
 			@RequestParam(value="encounterid",required=true) String encounterId){
-
 		List<Integer> encounterIdList=new ArrayList<Integer>();
 		String[] alertIdArray=encounterId.split(",");
-
 		for (String s : alertIdArray) {
 			encounterIdList.add(Integer.parseInt(s));
 		}
@@ -448,11 +412,8 @@ public class AlertInboxController {
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
 		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
-
 		return alertEvents;
 	}
-
-
 	/**
 	 * Creates alert in AlertEvent Table.
 	 * @param fromid required employee fromId
@@ -476,7 +437,6 @@ public class AlertInboxController {
 			 @RequestParam(value="chartid",required=true, defaultValue="-1") String chartid,
 			 @RequestParam(value="roomid",required=true, defaultValue="-1") String roomid,
 			 @RequestParam(value="parentid",required=true, defaultValue="-1") String parentid){
-		
 		List<Integer> toIdList=new ArrayList<Integer>();
 		String[] toIdArray=toid.split(",");
 		for (String s : toIdArray) {
@@ -488,18 +448,15 @@ public class AlertInboxController {
 		alertEvents.setData(alertEvent);
 		return alertEvents;
 	}
-	
 	@RequestMapping(value = "/getConversation", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getConversation(
 			 @RequestParam(value="alertid",required=true) String alertid){
-		
 		List<AlertEvent> alerts=alertInboxService.getConversion(alertid);
 		EMRResponseBean alert=new EMRResponseBean();
 		alert.setData(alerts);
 		return alert;
 	}
-	
 	@RequestMapping(value = "/forwardIcmAlert", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean forwardIcmAlert(
@@ -511,7 +468,6 @@ public class AlertInboxController {
 			@RequestParam(value="forwardto",required=true) Integer forwardto,
 			 @RequestParam(value="message",required=true, defaultValue="") String message,
 			 @RequestParam(value="parentalertid",required=true, defaultValue="-1" ) Integer parentalertid){
-	
 		List<AlertEvent> alerts=alertInboxService.forwardIcmAlert(alertid,userId,encounterid,patientid,categoryid,forwardto,message,parentalertid);
 		EMRResponseBean alert=new EMRResponseBean();
 		alert.setData(alerts);
