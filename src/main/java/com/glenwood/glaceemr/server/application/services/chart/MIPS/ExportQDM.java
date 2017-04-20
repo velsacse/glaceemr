@@ -173,7 +173,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public List<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter> getEncounterQDM(EntityManager em, boolean considerProvider,int patientID, int providerId, HashMap<String, String> encounterCodeList){
+	public List<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter> getEncounterQDM(Date startDate, Date endDate, EntityManager em, boolean considerProvider,int patientID, int providerId, HashMap<String, String> encounterCodeList){
 		
 		List<String> cptCodes = new ArrayList<String>();
 		
@@ -227,6 +227,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					builder.equal(encounterChartJoin.get(Chart_.chartPatientid), patientID),
 					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
 					builder.equal(chartServiceJoin.get(ServiceDetail_.sdoctors), providerId),
+					builder.between(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)), startDate, endDate),
 					builder.equal(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)),builder.function("DATE", Date.class,chartServiceJoin.get(ServiceDetail_.serviceDetailDos))),
 			};
 			
@@ -235,6 +236,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			restrictions = new Predicate[] {
 					builder.equal(encounterChartJoin.get(Chart_.chartPatientid), patientID),
 					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
+					builder.between(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)), startDate, endDate),
 					builder.equal(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)),builder.function("DATE", Date.class,chartServiceJoin.get(ServiceDetail_.serviceDetailDos))),
 			};
 			
@@ -290,7 +292,9 @@ Root<Encounter> root = cq.from(Encounter.class);
 				
 			}
 			
-			if(cptThere==false){
+			int encCount = getEncounterCountForPatient(em, patientID, providerId, startDate, endDate);
+			
+			if(cptThere==false && encCount > 0){
 				
 				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
 				encObject.setCode("99213");
@@ -298,6 +302,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				if(encounterObj1.size()!=0)
 				encObject.setStartDate(encounterObj1.get(0).getStartDate());
 				encounterQDM.add(encObject);
+				
 			}
 			
 		}catch(Exception e){
@@ -305,6 +310,38 @@ Root<Encounter> root = cq.from(Encounter.class);
 		}
 		
 		return encounterQDM;
+		
+	}
+	
+	/**
+	 * Function to get total no of encounters for the patient for the given provider in reporting year
+	 * 
+	 * @param patientId
+	 * @param providerId
+	 * @return
+	 */
+	
+	private int getEncounterCountForPatient(EntityManager em, int patientId, int providerId, Date startDate, Date endDate){
+		
+		int count = 0;
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Integer> cq = builder.createQuery(Integer.class);
+		Root<Encounter> root = cq.from(Encounter.class);
+		
+		Join<Encounter, Chart> encounterChartJoin = root.join(Encounter_.chart,JoinType.INNER);
+		
+		cq.where(
+				builder.between(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)), startDate, endDate),
+				builder.equal(root.get(Encounter_.encounter_service_doctor), providerId),
+				builder.equal(encounterChartJoin.get(Chart_.chartId), patientId)
+				);
+
+		cq.multiselect(root.get(Encounter_.encounterId));
+		
+		count = em.createQuery(cq).getResultList().size();
+		
+		return count;
 		
 	}
 	

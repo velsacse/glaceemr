@@ -38,10 +38,6 @@ import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
-import com.glenwood.glaceemr.server.application.models.InsCompAddr;
-import com.glenwood.glaceemr.server.application.models.InsCompAddr_;
-import com.glenwood.glaceemr.server.application.models.InsCompany;
-import com.glenwood.glaceemr.server.application.models.InsCompany_;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
 import com.glenwood.glaceemr.server.application.models.LabParameterCode;
@@ -51,8 +47,6 @@ import com.glenwood.glaceemr.server.application.models.LabParameters_;
 import com.glenwood.glaceemr.server.application.models.MacraConfiguration;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration_;
-import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
-import com.glenwood.glaceemr.server.application.models.PatientInsDetail_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
@@ -405,15 +399,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		Join<PatientRegistration,QualityMeasuresPatientEntries> joinQualityMeasuresPatientEntries=rootPatientRegistration.join(PatientRegistration_.qualityMeasuresPatientEntries,JoinType.INNER);
 		Predicate byMeasureId=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), currMeasureId);
 		joinQualityMeasuresPatientEntries.on(byMeasureId);
-		/*Join<PatientRegistration,QualityMeasuresPatientEntries> joinQualityMeasuresPatientEntries=rootPatientRegistration.join(PatientRegistration_.qualityMeasuresPatientEntries,JoinType.INNER);
-		Join<QualityMeasuresPatientEntries,EmployeeProfile> joinEmployeeProfile=joinQualityMeasuresPatientEntries.join(QualityMeasuresPatientEntries_.empProfile,JoinType.INNER);
-		Join<EmployeeProfile,H478> joinH478=joinEmployeeProfile.join(EmployeeProfile_.empProfile,JoinType.INNER);
-		*/
 		Join<PatientRegistration,ProblemList> joinProblemList=rootPatientRegistration.join(PatientRegistration_.problemList,JoinType.INNER);
-		Join<PatientRegistration,PatientInsDetail> joinPatientInsDetail=rootPatientRegistration.join(PatientRegistration_.patientInsuranceTable,JoinType.INNER);
-		Join<PatientInsDetail,InsCompAddr> joinInsCompAddr=joinPatientInsDetail.join(PatientInsDetail_.insCompAddr,JoinType.INNER);
-		Join<InsCompAddr,InsCompany> joinInsCompany=joinInsCompAddr.join(InsCompAddr_.insCompany,JoinType.INNER);
-		
 		
 		Selection[] selections= new Selection[] {
 				rootPatientRegistration.get(PatientRegistration_.patientRegistrationId),
@@ -454,11 +440,6 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		//Predicate byGender;
 		if(!gender.equals("-1")){
 			predicates.add(rootPatientRegistration.get(PatientRegistration_.patientRegistrationSex).in(Arrays.asList(gender.split(","))));
-		}
-		//Predicate byIns;
-		if(!insCompanyId.equals(-1)){
-			Predicate byInsCompany=builder.equal(joinInsCompany.get(InsCompany_.insCompanyId), insCompanyId);
-			joinInsCompany.on(byInsCompany);
 		}
 		
 		//Predicate byAge=builder.between(rootPatientRegistration.get(PatientRegistration_.), x, y)

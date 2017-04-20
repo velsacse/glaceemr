@@ -115,6 +115,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		Date d = new Date();
 		Timestamp curr_time = new Timestamp(d.getTime());
 		
+		String npi = getNPIForProvider(providerId);
+		
+		String tin = getTINForProvider(providerId);
+		
 		for(int i=0;i<measureStatus.size();i++){
 			
 			patientObj = measureStatus.get(i);
@@ -146,7 +150,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				patientData.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
 				patientData.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
 				patientData.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
-
+				patientData.setQualityMeasuresPatientEntriesNpi(npi);
+				patientData.setQualityMeasuresPatientEntriesTin(tin);
+				
 			}else{
 				
 				patientData.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
@@ -159,6 +165,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				patientData.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
 				patientData.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
 				patientData.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
+				patientData.setQualityMeasuresPatientEntriesNpi(npi);
+				patientData.setQualityMeasuresPatientEntriesTin(tin);
 				
 			}
 			
@@ -179,6 +187,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
 			patientLogObj.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
 			patientLogObj.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
+			patientLogObj.setQualityMeasuresPatientEntriesHistoryNpi(npi);
+			patientLogObj.setQualityMeasuresPatientEntriesHistoryTin(tin);
 			
 			patientLogRepo.saveAndFlush(patientLogObj);
 			
@@ -217,7 +227,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 			List<MedicationQDM> medicationsReviewed = qdmData.getMedicationsReviewed(em,considerProvider,providerId,patientID,date1,date2);
 
-			requestObj.setEncounterList(qdmData.getEncounterQDM(em, considerProvider, patientID, providerId, codeListForQDM.get("Encounter")));
+			requestObj.setEncounterList(qdmData.getEncounterQDM(date1, date2, em, considerProvider, patientID, providerId, codeListForQDM.get("Encounter")));
 
 			requestObj.setDxList(qdmData.getPatientDiagnosisQDM(diagnosisRepo, patientID));
 
@@ -804,6 +814,36 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		}
 		
 		return npi;
+		
+	}
+	
+	/**
+	 * Function to get TIN number based on selected providerId
+	 * 
+	 * @param providerId
+	 * @param accountId
+	 * @param configuredMeasures
+	 * @return
+	 */
+	
+	public String getTINForProvider(int providerId){
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
+		
+		cq.select(root.get(EmployeeProfile_.empProfileSsn));
+		cq.where(builder.equal(root.get(EmployeeProfile_.empProfileEmpid), providerId));
+		
+		List<Object> results = em.createQuery(cq).getResultList();
+		
+		String ssn = "";
+		
+		if(results.size() > 0){
+			ssn = results.get(0).toString();
+		}
+		
+		return ssn;
 		
 	}
 	

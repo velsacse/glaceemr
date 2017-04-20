@@ -29,7 +29,7 @@ public class GlaceMailer {
 
 		String[] toids = {"harikrishna@glenwoodsystems.com","ranjitha@glenwoodsystems.com"};
 
-		String[] ccids = {""};
+		String[] ccids = {"ganesh@glenwoodsystems.com"};
 
 		String[] bccid={""};
 
