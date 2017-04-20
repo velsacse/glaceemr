@@ -2,19 +2,24 @@ package com.glenwood.glaceemr.server.application.services.scheduler;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,16 +36,25 @@ import com.glenwood.glaceemr.server.application.models.SchedulerAppointmentBean;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointmentParameter;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointmentParameter_;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointment_;
+import com.glenwood.glaceemr.server.application.models.SchedulerLock;
+import com.glenwood.glaceemr.server.application.models.SchedulerLock_;
 import com.glenwood.glaceemr.server.application.models.SchedulerResource;
 import com.glenwood.glaceemr.server.application.models.SchedulerResourceCategory;
 import com.glenwood.glaceemr.server.application.models.SchedulerResource_;
+import com.glenwood.glaceemr.server.application.models.SchedulerTemplate;
+import com.glenwood.glaceemr.server.application.models.SchedulerTemplateDetail;
+import com.glenwood.glaceemr.server.application.models.SchedulerTemplateDetail_;
+import com.glenwood.glaceemr.server.application.models.SchedulerTemplateTimeMapping;
+import com.glenwood.glaceemr.server.application.models.SchedulerTemplateTimeMapping_;
 import com.glenwood.glaceemr.server.application.models.SchedulerUserDefault;
 import com.glenwood.glaceemr.server.application.models.Workflow;
 import com.glenwood.glaceemr.server.application.models.Workflow_;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerAppointmentRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerResourceCategoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerResourcesRepository;
+import com.glenwood.glaceemr.server.application.repositories.SchedulerTemplateRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerUserDefaultRepository;
+import com.glenwood.glaceemr.server.application.specifications.PortalAppointmentsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.SchedulerSpecification;
 /**
  * 
@@ -62,6 +76,9 @@ public class SchedulerServiceImpl implements SchedulerService{
 	
 	@Autowired
 	SchedulerUserDefaultRepository schedulerUserDefaultRepository;
+	
+	@Autowired
+	SchedulerTemplateRepository schedulerTemplateRepository;
 
 	@PersistenceContext
 	EntityManager em;
@@ -190,5 +207,111 @@ public class SchedulerServiceImpl implements SchedulerService{
 		}
 		
 		return defaultResource;
+	}
+
+	/**
+	 * Frame template and lock details
+	 */
+	@Override
+	public Object getTemplates(int userId, Date date) {
+		/**
+		 * To get template details
+		 */
+		List<Object> templateList= getTemplateData(userId, date);
+		
+		/**
+		 * To get lock data
+		 * it will fetch latest lock id for the particular time slot
+		 */
+		List<Object> lockResultList=getLockData(userId, date);
+		
+		/**
+		 * Extracting ids alone to get sch_lock details
+		 */
+		List<Integer> maxLockIds=new ArrayList<Integer>();
+		for (Object obj: lockResultList) {
+			try {
+				JSONArray ja=new JSONArray(obj);
+				maxLockIds.add(ja.getInt(0));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		Map<String, List<Object>> tlMap=new HashMap<String, List<Object>>();	// Template and lock objects
+		List<Object> locksList=getLocksById(maxLockIds);
+		tlMap.put("lockdetails", locksList==null?new ArrayList<Object>():locksList);
+		tlMap.put("templatedetails", templateList);
+		
+		return	tlMap;
+	}
+	
+	/**
+	 * Get template details
+	 * @param userId
+	 * @param date
+	 * @return
+	 */
+	public List<Object> getTemplateData(int userId, Date date) {
+		SchedulerTemplate schedulerTemplate=schedulerTemplateRepository.findOne(PortalAppointmentsSpecification.getSchTemplateId(userId, date));
+		
+		CriteriaBuilder cb=em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq=cb.createQuery();
+		Root<SchedulerTemplateTimeMapping> root=cq.from(SchedulerTemplateTimeMapping.class);
+		Join<SchedulerTemplateTimeMapping, SchedulerTemplateDetail>	joinSttmStd=root.join("schedulerTemplateDetail",JoinType.INNER);
+		Predicate predicateStdSttm = cb.equal(root.get(SchedulerTemplateTimeMapping_.schTemplateTimeMappingTemplateId), cb.literal(schedulerTemplate.getSchTemplateId()));
+		cq.multiselect(cb.construct(SchedulerTemplateDetailBean.class,
+				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailId),
+				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailStarttime),
+				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailEndtime),
+				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailInterval),
+				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailApptType),
+				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailSecownerId),
+				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailIslocked),
+				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailNotes),
+				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailSameDaySlot)));
+		cq.where(predicateStdSttm);
+		
+		return em.createQuery(cq).getResultList();
+	}
+
+	/**
+	 * For single slot there may be more than one entry, this piece of code will take the latest entry for the particular slot. 
+	 * @param userId
+	 * @param date
+	 * @return
+	 */
+	public List<Object> getLockData(int userId, Date date) {
+		
+		CriteriaBuilder cb=em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq=cb.createQuery();
+		Root<SchedulerLock> root=cq.from(SchedulerLock.class);
+		Predicate predicateResource=cb.equal(root.get(SchedulerLock_.schLockResourceId), cb.literal(userId));
+		Expression<Date> exprLockedDate=cb.function("date", Date.class, root.get(SchedulerLock_.schLockDate));
+		Predicate predicateLockedDate=cb.equal(exprLockedDate, date);
+		cq.select(cb.tuple(cb.max(root.get(SchedulerLock_.schLockId)),root.get(SchedulerLock_.schLockStarttime),root.get(SchedulerLock_.schLockEndtime)));
+		cq.where(predicateResource,predicateLockedDate).groupBy(root.get(SchedulerLock_.schLockStarttime),root.get(SchedulerLock_.schLockEndtime));
+		
+		return em.createQuery(cq).getResultList();
+	}
+
+	/**
+	 * Get locks details based on id
+	 * @param lockIdList
+	 * @return
+	 */
+	public List<Object> getLocksById(List<Integer> lockIdList) {
+		
+		if(lockIdList.size()<1)	
+			return null;
+		
+		CriteriaBuilder cb=em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq=cb.createQuery();
+		Root<SchedulerLock> root=cq.from(SchedulerLock.class);
+		cq.where(root.get(SchedulerLock_.schLockId).in(lockIdList));
+		cq.select(root);
+		
+		List<Object> locksList=em.createQuery(cq).getResultList();
+		return (locksList.size()>0) ? locksList:null;
 	}
 }
