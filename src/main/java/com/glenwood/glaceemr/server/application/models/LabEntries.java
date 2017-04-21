@@ -421,6 +421,9 @@ public class LabEntries {
 	@OneToMany(mappedBy="labEntries")
 	private List<FileDetails> fileDetails;
 	
+	
+	
+	
 	public List<LabEntriesParameter> getParameters() {
 		return parameters;
 	}
@@ -1380,6 +1383,11 @@ public class LabEntries {
 	public LabEntries(Integer labEntriesTestdetailId){
 		this.labEntriesTestdetailId=labEntriesTestdetailId;
 	}
+	public LabEntries(Integer labEntriesTestId,String labEntriesTestDesc){
+
+		this.labEntriesTestId=labEntriesTestId;
+		this.labEntriesTestDesc=labEntriesTestDesc;
+		}
 	
 	public LabEntries(Integer labEntriesTestdetailId,String labEntriesTestDesc,
 			Integer labEntriesEncounterId,Integer labEntriesTestId,
@@ -1392,6 +1400,28 @@ public class LabEntries {
 		this.labEntriesGroupid=labEntriesGroupid;
 		this.labEntriesIsBillable=labEntriesIsBillable;
 		this.labEntriesCpt=labEntriesCpt;
+	}
+	
+	
+	//logsheetparams
+	//Timestamp labEntriesOrdOn,Timestamp labEntriesPerfOn,String labEntriesDrugxml,
+	public LabEntries(Integer labEntriesTestId,String labEntriesTestDesc, Integer labEntriesConfirmTestStatus,
+			Integer labEntriesPrelimTestStatus,Integer labEntriesStatus,String labEntriesDrugxml,
+			Integer labEntriesTestStatus,String labEntriesOrdOn,String labEntriesPerfOn,
+			Integer labEntriesEncounterId, Integer labEntriesTestdetailId, String labEntriesResultNotes){
+		this.labEntriesTestId=labEntriesTestId;
+		this.labEntriesTestDesc=labEntriesTestDesc;
+		this.labEntriesConfirmTestStatus=labEntriesConfirmTestStatus;
+		this.labEntriesPrelimTestStatus=labEntriesPrelimTestStatus;
+		this.labEntriesStatus=labEntriesStatus;
+		this.labEntriesDrugxml=labEntriesDrugxml;
+		this.labEntriesTestStatus=labEntriesTestStatus;
+		this.labEntriesReminderComments=labEntriesOrdOn;
+		this.labEntriesScangroupId=labEntriesPerfOn;
+		this.labEntriesEncounterId=labEntriesEncounterId;
+		this.labEntriesTestdetailId=labEntriesTestdetailId;
+		this.labEntriesResultNotes=labEntriesResultNotes;
+	
 	}
 	
 }

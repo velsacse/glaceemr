@@ -101,6 +101,7 @@ import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PatientVisEntries;
 import com.glenwood.glaceemr.server.application.models.PatientVisEntries_;
+import com.glenwood.glaceemr.server.application.models.ProblemList_;
 import com.glenwood.glaceemr.server.application.models.Specimen;
 import com.glenwood.glaceemr.server.application.models.VaccinationConsentForm;
 import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails;
@@ -1876,7 +1877,6 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 
 	private String getPatientRegistrationPrincipalDoctor(int patReg) {
 	
-		System.out.println("employeeId in getemployeeName"+patReg);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
@@ -3941,17 +3941,24 @@ private int getPatientIdinChart(int chartId2) {
 		LS_Bean lsBean = new LS_Bean();
 		List<LabEntries> labEntriesList = null;
 		if( fromDate != null ) {
-			labEntriesList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.checkDate(fromDate,toDate)));
+			  labEntriesList=getLabEntriesDataForLogsheetFromDate(chartId,fromDate,toDate);
+		//	labEntriesList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.checkDate(fromDate,toDate)));
 		} else {
-			labEntriesList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)));
+            labEntriesList=getLabEntriesDataForLogsheet(chartId);
+			//labEntriesList = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)));
 		}
+
 		ArrayList<Integer> testIds = new ArrayList<Integer>();
+
 		for(int i=0;i < labEntriesList.size();i++) {
+
 			if( !testIds.contains(labEntriesList.get(i).getLabEntriesTestId()) ) {
 				testIds.add(labEntriesList.get(i).getLabEntriesTestId());
 			}
+
 			HashMap<String, String> temp = new HashMap<String, String>();
 			LabDescription labDescription = labDescriptionRepository.findOne(InvestigationSpecification.labByTestId(labEntriesList.get(i).getLabEntriesTestId()));
+
 			if(labDescription!=null)
 				temp.put("testCategory", Optional.fromNullable(labDescription.getLabDescriptionTestcategoryType()).or(4)+"");
 			else
@@ -3975,15 +3982,107 @@ private int getPatientIdinChart(int chartId2) {
 			lsBean.setExternalLabsResult(new ArrayList<LS_External>());
 		}
 		lsBean.setChartId(chartId);
-		lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
+		//lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
+		lsBean.setPatientId(getChartpatientId(chartId));
+
 		return lsBean;
+	}
+
+	private List<LabEntries> getLabEntriesDataForLogsheetFromDate(
+			Integer chartId, Timestamp fromDate, Timestamp toDate) {
+		List<LabEntries>values=new ArrayList<LabEntries>();
+
+	      CriteriaBuilder cb=em.getCriteriaBuilder();
+		CriteriaQuery<LabEntries> cq=cb.createQuery(LabEntries.class);
+		Root<LabEntries>root=cq.from(LabEntries.class);
+		
+		Selection[] selections=new Selection[]{
+				root.get(LabEntries_.labEntriesTestId),
+				root.get(LabEntries_.labEntriesTestDesc),
+				
+		};
+		cq.select(cb.construct(LabEntries.class,selections));
+		Predicate[] predications=new Predicate[]{
+	        cb.equal(root.get(LabEntries_.labEntriesChartid),chartId),
+		cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus),2),
+		cb.lessThan(root.get(LabEntries_.labEntriesTestStatus),7),
+		cb.greaterThan(root.get(LabEntries_.labEntriesPerfOn), fromDate),
+		cb.lessThan(root.get(LabEntries_.labEntriesPerfOn), toDate),
+		};
+		cq.distinct(true);
+		cq.where (predications);
+		
+
+
+		try{
+			values= em.createQuery(cq).getResultList();	
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}	
+	      return values;
+		}
+
+
+	private Integer getChartpatientId(Integer chartId) {
+		// TODO Auto-generated method stub
+		//return null;
+		Integer patId = -1;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Chart> root = cq.from(Chart.class);
+		cq.select(root.get(Chart_.chartPatientid));
+		cq.where(builder.equal(root.get(Chart_.chartId), chartId));
+		try{
+			patId = (Integer)em.createQuery(cq).getSingleResult();
+		}catch(Exception e){
+			e.printStackTrace();
+			patId=-1;
+		}
+		return patId;
+
+	}
+
+	private List<LabEntries> getLabEntriesDataForLogsheet(Integer chartId) {
+		// TODO Auto-generated method stub
+		//return null;
+		List<LabEntries>values=new ArrayList<LabEntries>();
+
+      CriteriaBuilder cb=em.getCriteriaBuilder();
+	CriteriaQuery<LabEntries> cq=cb.createQuery(LabEntries.class);
+	Root<LabEntries>root=cq.from(LabEntries.class);
+	
+	Selection[] selections=new Selection[]{
+			root.get(LabEntries_.labEntriesTestId),
+			root.get(LabEntries_.labEntriesTestDesc),
+			
+	};
+	cq.select(cb.construct(LabEntries.class,selections));
+	Predicate[] predications=new Predicate[]{
+        cb.equal(root.get(LabEntries_.labEntriesChartid),chartId),
+	cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus),2),
+	cb.lessThan(root.get(LabEntries_.labEntriesTestStatus),7),
+	};
+	cq.distinct(true);
+	cq.where (predications);
+	
+
+
+	try{
+		values= em.createQuery(cq).getResultList();	
+
+	}catch(Exception e){
+		e.printStackTrace();
+	}	
+      return values;
 	}
 
 	public LS_Bean getLabDataTestId(Integer chartId,Integer testId){
 		LS_Bean lsBean=new LS_Bean();
 		lsBean.setParamData(labAndParamData(chartId,new ArrayList<Integer>(Arrays.asList(testId))));
 		lsBean.setChartId(chartId);
-		lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
+		//lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
+		lsBean.setPatientId(getChartpatientId(chartId));
 		return lsBean;
 	}
 
@@ -4010,11 +4109,13 @@ private int getPatientIdinChart(int chartId2) {
 			lsBean.setParamData(groupName);
 		}
 		lsBean.setChartId(chartId);
-		lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
+		//lsBean.setPatientId(chartRepository.findOne(ChartSpecification.findByChartId(chartId)).getChartPatientid());
+		lsBean.setPatientId(getChartpatientId(chartId));
 		return lsBean;
 	}
 	
 	public GroupName labAndParamData(Integer chartId,ArrayList<Integer> testIds){
+
 		GroupName labs = new GroupName();
 		List<LS_Lab> radiology = new ArrayList<LS_Lab>();
 		List<LS_Lab> laboratories = new ArrayList<LS_Lab>();
@@ -4024,7 +4125,9 @@ private int getPatientIdinChart(int chartId2) {
 			LS_Lab labData = new LS_Lab();
 			Integer testId = -1;
 			String testCategory = "4", labName = "";
-			List<LabEntries> paramData = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.getTestLog(testIds.get(i))));
+                List<LabEntries>paramData=getParamlogsheet(chartId,testIds.get(i));
+		//	List<LabEntries> paramData = labEntriesRepository.findAll(Specifications.where(InvestigationSpecification.chartIdLog(chartId)).and(InvestigationSpecification.statusGreaterThan(2)).and(InvestigationSpecification.statusLessThan(7)).and(InvestigationSpecification.getTestLog(testIds.get(i))));
+
 			List<ParamData> labParamDetails = new ArrayList<ParamData>();
 			for (int j = 0; j < paramData.size(); j++) {				
 				LabEntries paramDetails = paramData.get(j);
@@ -4043,11 +4146,24 @@ private int getPatientIdinChart(int chartId2) {
 				labParam.setDrugxml(paramDetails.getLabEntriesDrugxml());
 				labParam.setLabStatus(paramDetails.getLabEntriesTestStatus());
 				DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
-				labParam.setOrderedDate(formatter.format(paramDetails.getLabEntriesOrdOn()));
-				if( paramDetails.getLabEntriesPerfOn() != null )
-					labParam.setPerformedDate(formatter.format(paramDetails.getLabEntriesPerfOn()));
+				labParam.setOrderedDate(paramDetails.getLabEntriesReminderComments());
+				if( paramDetails.getLabEntriesScangroupId() != null )
+					labParam.setPerformedDate(paramDetails.getLabEntriesScangroupId());
 				else
 					labParam.setPerformedDate("");
+				/*try
+				{
+					System.out.println("drugxml in if "+paramDetails.getLabEntriesReminderComments());
+				labParam.setOrderedDate(formatter.format(formatter.parse(paramDetails.getLabEntriesReminderComments())));
+				System.out.println("drugxml in if "+formatter.format(formatter.parse(paramDetails.getLabEntriesReminderComments())));
+				if( paramDetails.getLabEntriesScangroupId() != null )
+					labParam.setPerformedDate(formatter.format(formatter.parse(paramDetails.getLabEntriesScangroupId())));
+				else
+					labParam.setPerformedDate("");
+				}
+				catch(Exception e){
+					
+				}*/
 				labParam.setEncounterId(paramDetails.getLabEntriesEncounterId());
 				labParam.setTestDetailId(paramDetails.getLabEntriesTestdetailId());
 				labParam.setResultNotes(paramDetails.getLabEntriesResultNotes());
@@ -4061,6 +4177,7 @@ private int getPatientIdinChart(int chartId2) {
 							rstList.add(lsParameter);
 						}
 					}
+
 					if( testCategory.equalsIgnoreCase("2")) {
 						labData.setParameters(rstList);
 					} else {
@@ -4071,6 +4188,7 @@ private int getPatientIdinChart(int chartId2) {
 				}
 				this.chartId = chartId;
 				this.patientId = getPatientId();
+
 				List<Object> docId = getFileScanIds(testdetailId, this.patientId, 2);
 				ArrayList<String> fileNameList = new ArrayList<String>();
 				for (int l = 0; l < docId.size(); l++) {
@@ -4094,6 +4212,7 @@ private int getPatientIdinChart(int chartId2) {
 			labData.setTestId(testId);
 			labData.setTestCategory(testCategory);
 			labData.setLabParamDetails(labParamDetails);
+
 			switch( labData.getTestCategory() ) {
 			case "1": radiology.add(labData);
 			break;
@@ -4112,6 +4231,56 @@ private int getPatientIdinChart(int chartId2) {
 		return labs;
 	}
 	
+	private List<LabEntries> getParamlogsheet(Integer chartId, Integer testId) {
+		// TODO Auto-generated method stub
+		//return null;
+		
+		List<LabEntries>values=new ArrayList<LabEntries>();
+
+	      CriteriaBuilder cb=em.getCriteriaBuilder();
+		CriteriaQuery<LabEntries> cq=cb.createQuery(LabEntries.class);
+		Root<LabEntries>root=cq.from(LabEntries.class);
+		
+		Selection[] selections=new Selection[]{
+				root.get(LabEntries_.labEntriesTestId),
+				root.get(LabEntries_.labEntriesTestDesc),
+				root.get(LabEntries_.labEntriesConfirmTestStatus),
+				root.get(LabEntries_.labEntriesPrelimTestStatus),
+				root.get(LabEntries_.labEntriesStatus),
+				root.get(LabEntries_.labEntriesDrugxml),
+				root.get(LabEntries_.labEntriesTestStatus),
+				//root.get(LabEntries_.labEntriesOrdOn),
+			    cb.function("to_char", String.class, root.get(LabEntries_.labEntriesOrdOn),cb.literal("MM/dd/yyyy hh:mm:ss")),
+			    cb.function("to_char", String.class, root.get(LabEntries_.labEntriesPerfOn),cb.literal("MM/dd/yyyy hh:mm:ss")),
+
+				//root.get(LabEntries_.labEntriesPerfOn),
+				root.get(LabEntries_.labEntriesEncounterId),
+				root.get(LabEntries_.labEntriesTestdetailId),
+				root.get(LabEntries_.labEntriesResultNotes),
+				
+		};
+		cq.select(cb.construct(LabEntries.class,selections));
+		Predicate[] predications=new Predicate[]{
+	        cb.equal(root.get(LabEntries_.labEntriesChartid),chartId),
+		cb.greaterThan(root.get(LabEntries_.labEntriesTestStatus),2),
+		cb.lessThan(root.get(LabEntries_.labEntriesTestStatus),7),
+		cb.equal(root.get(LabEntries_.labEntriesTestId),testId),
+		};
+		cq.where (predications);
+		
+
+
+		try{
+			values= em.createQuery(cq).getResultList();	
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}	
+	      return values;
+		}
+
+	
+
 	private List<Object> getFileName(Integer scanId) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
@@ -4179,6 +4348,7 @@ private int getPatientIdinChart(int chartId2) {
 		LS_Parameter parameterData = new LS_Parameter();
 		Integer paramId = -1;
 		String displayName = "";
+		
 		List<LabEntriesParameter> labDetailsList = labEntriesParameterRepository.findAll(InvestigationSpecification.getParamLog(paramMapId, chartId));
 		List<ParamValues> paramValuesList = new ArrayList<ParamValues>();
 		for (int k = 0; k < labDetailsList.size(); k++) {
@@ -4213,6 +4383,7 @@ private int getPatientIdinChart(int chartId2) {
 			paramValuesList.add(paramValues);
 		}
 		if( paramValuesList.size() > 0 && paramId != -1) {
+
 			parameterData.setDisplayName(displayName);
 			parameterData.setParamId(paramId);
 			parameterData.setParamValuesList(paramValuesList);
