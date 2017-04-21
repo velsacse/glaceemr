@@ -1,6 +1,8 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertCountBean;
@@ -23,6 +27,7 @@ import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxSe
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.RestDispatcherTemplate;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 
 /**
@@ -62,6 +67,9 @@ public class AlertInboxController {
 
 	@Autowired
 	HttpServletRequest request;
+	
+	@Autowired
+	RestDispatcherTemplate requestDispatcher;
 
 	private Logger logger = Logger.getLogger(AlertInboxController.class);
 
@@ -472,5 +480,30 @@ public class AlertInboxController {
 		EMRResponseBean alert=new EMRResponseBean();
 		alert.setData(alerts);
 		return alert;
+	}
+	
+	/**
+	 * Method to get session variables using rest template
+	 * @return
+	 */
+	@RequestMapping(value="/getSessionVariables", method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getSessionVariables(){
+		EMRResponseBean emrResponseBean = null;
+		try {
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("ajax", "1");
+			params.put("GlaceAjaxRequest", "true");
+			emrResponseBean = requestDispatcher.sendGet(request, "SessionVariableJson.Action", params);
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return emrResponseBean;
+		
 	}
 }
