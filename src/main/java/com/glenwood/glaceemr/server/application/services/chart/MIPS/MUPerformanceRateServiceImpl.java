@@ -24,8 +24,12 @@ import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.ChartcenterEncounter;
 import com.glenwood.glaceemr.server.application.models.ChartcenterEncounter_;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
+import com.glenwood.glaceemr.server.application.models.H478;
+import com.glenwood.glaceemr.server.application.models.H478_;
 import com.glenwood.glaceemr.server.application.models.MacraMeasuresRate;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
@@ -218,6 +222,9 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 			measureRate.setMacraMeasuresRateNumeratorExclusion(Integer.parseInt(performanceByMeasure.getNumeratorExclusionCount()+""));
 			measureRate.setMacraMeasuresRateNumeratorExclusionlist(performanceByMeasure.getNumeratorExclusionPatientsList());
 			
+			measureRate.setMacraMeasuresRateNpi(getNPIForProvider(providerId));
+			measureRate.setMacraMeasuresRateTin(getTINForProvider(providerId));
+			
 			d = new Date();
 			curr_time = new Timestamp(d.getTime());
 			
@@ -229,6 +236,61 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 		
 	}
 
+	/**
+	 * Function to return NPI value for provider
+	 * @param providerId
+	 * @return
+	 */
 	
+	public String getNPIForProvider(int providerId){
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+		Root<H478> root = cq.from(H478.class);
+		
+		cq.select(root.get(H478_.h478006));
+		cq.where(builder.equal(root.get(H478_.h478001), providerId));
+		
+		List<Object> results = em.createQuery(cq).getResultList();
+		
+		String npi = "";
+		
+		if(results.size() > 0){
+			npi = results.get(0).toString();
+		}
+		
+		return npi;
+		
+	}
+	
+	/**
+	 * Function to get TIN number based on selected providerId
+	 * 
+	 * @param providerId
+	 * @param accountId
+	 * @param configuredMeasures
+	 * @return
+	 */
+	
+	public String getTINForProvider(int providerId){
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
+		
+		cq.select(root.get(EmployeeProfile_.empProfileSsn));
+		cq.where(builder.equal(root.get(EmployeeProfile_.empProfileEmpid), providerId));
+		
+		List<Object> results = em.createQuery(cq).getResultList();
+		
+		String ssn = "";
+		
+		if(results.size() > 0){
+			ssn = results.get(0).toString();
+		}
+		
+		return ssn;
+		
+	}
 	
 }

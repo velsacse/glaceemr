@@ -295,7 +295,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			int encCount = getEncounterCountForPatient(em, patientID, providerId, startDate, endDate);
 			
 			if(cptThere==false && encCount > 0){
-				
+			
 				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
 				encObject.setCode("99213");
 				encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
@@ -334,7 +334,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		cq.where(
 				builder.between(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)), startDate, endDate),
 				builder.equal(root.get(Encounter_.encounter_service_doctor), providerId),
-				builder.equal(encounterChartJoin.get(Chart_.chartId), patientId)
+				builder.equal(encounterChartJoin.get(Chart_.chartPatientid), patientId)
 				);
 
 		cq.multiselect(root.get(Encounter_.encounterId));
