@@ -2,7 +2,6 @@ package com.glenwood.glaceemr.server.utils;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -13,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -27,7 +27,7 @@ public class RestDispatcherTemplate {
 	@Autowired
 	ObjectMapper objectMapper;
 
-	public EMRResponseBean sendGet(HttpServletRequest request, String connectionPath,Map<String, String> params) throws JsonParseException, JsonMappingException, IOException{
+	public EMRResponseBean sendGet(HttpServletRequest request, String connectionPath,MultiValueMap<String, String> params) throws JsonParseException, JsonMappingException, IOException{
 		
 		EMRResponseBean responseBean=new EMRResponseBean();
 		
@@ -37,8 +37,10 @@ public class RestDispatcherTemplate {
 
 	        HttpHeaders headers = new HttpHeaders();
 	        
-	        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(connectionPath)
-	                .queryParam("isFromSprings", "true");
+	        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(connectionPath);
+	        
+	        
+	        builder.queryParams(params);
 	                
 	        setAndCheckJSESSIONIDCookie(request, headers);
 	        
@@ -71,9 +73,6 @@ public class RestDispatcherTemplate {
 			HttpHeaders headers) {
 			
 			String EMRJSESSIONID=request.getHeader("EMRJSESSIONID");
-			
-			if(EMRJSESSIONID==null)
-				EMRJSESSIONID=request.getParameter("EMRID");
 			
 	        headers.set("Cookie", "JSESSIONID="+EMRJSESSIONID);
 	        

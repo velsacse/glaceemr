@@ -1,17 +1,15 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.http.client.methods.RequestBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,7 +23,7 @@ import com.glenwood.glaceemr.server.utils.RestDispatcherTemplate;
 
 @RestController
 @Transactional
-@RequestMapping(value="/user/Connect")
+@RequestMapping(value="/user/connect")
 public class LegacyRequestController {
 	
 	@Autowired
@@ -41,20 +39,21 @@ public class LegacyRequestController {
 	 * Method to contact legacy using rest template
 	 * @return
 	 */
-	@RequestMapping(value="/connectToLegacy", method=RequestMethod.GET)
+	@RequestMapping(value="/legacy", method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean connectToLegacy(
 			 @RequestParam(value="url", required=true, defaultValue="true") String urlPrefix, 
 			 @RequestParam(value="method", required=true, defaultValue="GET") String httpMethod, 
 			 @RequestParam(value="params", required=false, defaultValue="") String params){
 
-		Map<String,String> paramMap=new HashMap<String, String>();
+		MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<String, String>();
 		String startTime = ""; //emrResponseBean.getStartTime();
 		try {
-			String[] paramNames=JSONObject.getNames(params);
 			JSONObject paramsObj = new JSONObject(params);
+			String[] paramNames=JSONObject.getNames(paramsObj);
+			
 			for(String param: paramNames){
-				paramMap.put(param, paramsObj.getString(param));
+				paramMap.set(param, paramsObj.getString(param));
 			}
 		
 			if(httpMethod.equalsIgnoreCase("GET")){

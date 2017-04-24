@@ -481,29 +481,4 @@ public class AlertInboxController {
 		alert.setData(alerts);
 		return alert;
 	}
-	
-	/**
-	 * Method to get session variables using rest template
-	 * @return
-	 */
-	@RequestMapping(value="/getSessionVariables", method=RequestMethod.GET)
-	@ResponseBody
-	public EMRResponseBean getSessionVariables(){
-		EMRResponseBean emrResponseBean = null;
-		try {
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("ajax", "1");
-			params.put("GlaceAjaxRequest", "true");
-			emrResponseBean = requestDispatcher.sendGet(request, "SessionVariableJson.Action", params);
-		} catch (JsonParseException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		return emrResponseBean;
-		
-	}
 }
