@@ -190,7 +190,7 @@ public class EMeasureUtils {
 
 				String responseMsg = buildMailContentFormat("glace", -1,"Error occurred while getting codelist",writer.toString());
 
-				GlaceMailer.sendFailureReport(responseMsg,"glace");
+				GlaceMailer.sendFailureReport(responseMsg,"glace",GlaceMailer.Configure.MU);
 
 			} catch (Exception e1) {
 

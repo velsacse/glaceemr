@@ -6,10 +6,67 @@ import java.net.HttpURLConnection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GlaceMailer {
+	
+	public enum Configure{MU,GWT}
+	
+	static String URL ="https://mailer1.glaceemr.com/Mailer/sendMail";
+	
+	public static void sendFailureReport(String url_response, String accId, Configure mu) throws Exception {
 
-	public static void sendFailureReport(String url_response, String accId) throws IOException {
+		if(mu == Configure.MU){
+			
+			sendFailueMuReport(url_response,accId);
+		}
+		else{
+			configureGWT(url_response,accId);
+		}
+	}
+	
+	private static void configureGWT(String url_response,
+			String accId) throws IOException {
+	
+		String charSet = "UTF-8";
 
-		String URL ="https://mailer1.glaceemr.com/Mailer/sendMail";
+		String boundary = "===" + System.currentTimeMillis() + "===";
+
+		MultipartUtility multipartUtility=new MultipartUtility(URL, charSet, boundary);
+
+		HttpURLConnection httpURLConnection;
+
+		String accountId=accId;
+
+		String mailpassword="demopwd0";
+
+		int mailtype=1;		
+
+		String subject = "GWT::Performance";
+
+		String[] toids = {"manikandan.n@glenwoodsystems.com","bhagyalakshmi@glenwoodsystems.com"};
+
+		String[] ccids = {"vasanth@glenwoodsystems.com"};
+
+		String[] bccid={""};
+
+		String htmlbody=url_response;
+
+		String plaintext="GWT Performance Report";
+
+		MailerResponse rb=new MailerResponse(mailtype,"donotreply@glenwoodsystems.com"
+				,toids,ccids,bccid,subject,htmlbody,plaintext,accountId,mailpassword);
+
+		ObjectMapper mapper=new ObjectMapper();
+
+		String jsonInString = mapper.writeValueAsString(rb);
+
+		multipartUtility.addFormField("mailerResp", jsonInString.toString());
+
+		httpURLConnection = multipartUtility.execute();
+
+		httpURLConnection.connect();
+
+	}
+
+	private static void sendFailueMuReport(String url_response, String accId) throws Exception {
 
 		String charSet = "UTF-8";
 
@@ -49,9 +106,8 @@ public class GlaceMailer {
 		httpURLConnection = multipartUtility.execute();
 
 		httpURLConnection.connect();
-
 	}
-	
+
 	public static String buildMailContentFormat(String accId, int patientId, String responseString, String exceptionTrace){
 		
 		String mailContent = "";

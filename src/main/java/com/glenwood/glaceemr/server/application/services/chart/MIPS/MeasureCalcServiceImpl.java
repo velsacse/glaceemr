@@ -318,7 +318,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = GlaceMailer.buildMailContentFormat("glace", patientID,"Error occurred while generating QDM Object",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,"glace");
+				GlaceMailer.sendFailureReport(responseMsg,"glace",GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -372,7 +372,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while generating EP Measures Object",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -425,7 +425,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while getting e-prescribing details",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -483,7 +483,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while getting medication reconcilation details",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -538,7 +538,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientId,"Error occurred while getting referral details",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -593,7 +593,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientId,"Error occurred while getting messaging details",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -644,7 +644,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientId,"Error occurred while getting patient VDT info",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -695,7 +695,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientId,"Error occurred while getting portal access info",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -1064,7 +1064,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while calculating MIPS performance",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -1205,7 +1205,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while calculating MIPS performance",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				

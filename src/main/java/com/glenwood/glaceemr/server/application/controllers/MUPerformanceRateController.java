@@ -148,7 +148,7 @@ public class MUPerformanceRateController {
 
 				responseMsg = GlaceMailer.buildMailContentFormat(accountID, -1,responseMsg,writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountID);
+				GlaceMailer.sendFailureReport(responseMsg,accountID,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -254,7 +254,7 @@ public class MUPerformanceRateController {
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while QDM validation",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -323,7 +323,7 @@ public class MUPerformanceRateController {
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountID, -1,"Error occurred while calculating performance",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountID);
+				GlaceMailer.sendFailureReport(responseMsg,accountID,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				

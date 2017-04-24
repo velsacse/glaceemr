@@ -163,7 +163,7 @@ public class QPPPerformanceController {
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while getting ECQM status",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -233,7 +233,7 @@ public class QPPPerformanceController {
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while getting EP Measure status",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -304,7 +304,7 @@ public class QPPPerformanceController {
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while getting MIPSPerformance Report",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -355,7 +355,7 @@ public class QPPPerformanceController {
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while getting filtered patients list",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -406,7 +406,7 @@ public class QPPPerformanceController {
 
 				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while getting MIPSPerformance Report",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
