@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.utils;
 
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -8,6 +9,7 @@ public class EMRResponseBean {
 	public Boolean success;
 	public Boolean isAuthorizationPresent;
 	public Boolean canUserAccess;
+	public String startTime;
 	public Object data;
 	
 	
@@ -35,6 +37,13 @@ public class EMRResponseBean {
 	}
 	public void setCanUserAccess(Boolean canUserAccess) {
 		this.canUserAccess = canUserAccess;
+	}
+	
+	public String getStartTime() {
+		return startTime;
+	}
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
 	}
 	public Object getData() {
 		return data;

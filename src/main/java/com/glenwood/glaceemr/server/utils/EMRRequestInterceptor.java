@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
-
 /**
  * @author Anupama
  * all the requests and responses are assumed to be controllers
@@ -43,6 +41,10 @@ public class EMRRequestInterceptor implements HandlerInterceptor{
 //		System.out.println("dbname -->"+tennantId);
 	
 		System.out.println(">>>>In EMR Requestor>>>>>"+request.getRequestURI());
+		if(request.getHeader("STARTSAT") != null)
+		{
+			emrResponseBean.setStartTime(request.getHeader("STARTSAT"));
+		}
 		
 		String[] splitURl = request.getRequestURI().split(request.getServletPath()+"/");
 		String formattedURl= splitURl[1].substring(1, splitURl[1].length());
