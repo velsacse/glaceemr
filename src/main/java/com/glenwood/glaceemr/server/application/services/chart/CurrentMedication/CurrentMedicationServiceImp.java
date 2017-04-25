@@ -167,18 +167,18 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 		
 		for(Object[] details : allergies){
 			PatientAllergiesBean eachObj=new PatientAllergiesBean();
-			eachObj.setId(details[0]==null?-1:(Integer)details[0]);
-			eachObj.setSeverity(details[1]==null?-1:(Integer)details[1]);
-			eachObj.settypeId(details[2]==null?-1:(Integer)details[2]);
-			eachObj.settypeName(details[3]==null?"":details[3].toString());
-			eachObj.setallergyName(details[4]==null?"":details[4].toString());
-			eachObj.setallergyCode(details[5]==null?"":details[5].toString());
-			eachObj.setcodeSystem(details[6]==null?"":details[6].toString());
-			eachObj.setdrugCategory(details[7]==null?"":details[7].toString());
-			eachObj.setreactionTo(details[8]==null?"":details[8].toString());
-			eachObj.setModifiedon(details[9]==null?"":details[9].toString());
-			eachObj.setonsetDate(details[10]==null?"":details[10].toString());
-			eachObj.setcreatedOn(details[11]==null?"":details[11].toString());
+			eachObj.setPatAllergId(details[0]==null?-1:(Integer)details[0]);
+			eachObj.setPatAllergSeverity(details[1]==null?-1:(Integer)details[1]);
+			eachObj.setPatAllergTypeId(details[2]==null?-1:(Integer)details[2]);
+			eachObj.setPatAllergName(details[3]==null?"":details[3].toString());
+			eachObj.setPatAllergAllergicTo(details[4]==null?"":details[4].toString());
+			eachObj.setPatAllergAllergyCode(details[5]==null?"":details[5].toString());
+			eachObj.setPatAllergCodeSystem(details[6]==null?"":details[6].toString());
+			eachObj.setPatAllergDrugCategory(details[7]==null?"":details[7].toString());
+			eachObj.setPatAllergReactionTo(details[8]==null?"":details[8].toString());
+			eachObj.setPatAllergModifiedOn(details[9]==null?"":details[9].toString());
+			eachObj.setPatAllergOnsetDate(details[10]==null?"":details[10].toString());
+			eachObj.setPatAllergCreatedOn(details[11]==null?"":details[11].toString());
 			beanList.add(eachObj);
 		}
 		}catch(Exception e){
@@ -890,4 +890,3 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 	}
 	
 }
-

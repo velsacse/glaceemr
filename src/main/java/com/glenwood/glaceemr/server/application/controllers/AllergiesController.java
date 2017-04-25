@@ -23,6 +23,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSa
 import com.glenwood.glaceemr.server.application.services.chart.Allergies.AllergiesService;
 import com.glenwood.glaceemr.server.application.services.chart.Allergies.AllergiesTypeBean;
 import com.glenwood.glaceemr.server.application.services.chart.Allergies.AllergyBean;
+import com.glenwood.glaceemr.server.application.services.chart.CurrentMedication.PatientAllergiesBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
 /**
@@ -48,14 +49,32 @@ public class AllergiesController {
 	private Logger logger = Logger.getLogger(AllergiesController.class);
 	
 	/**
+	 *  
+	 * @return Getting patient allergies data
+	 * @param chartId
+	 * @throws Exception
+	 */
+	@RequestMapping(value ="/allergyData", method = RequestMethod.GET)
+    @ResponseBody
+	public EMRResponseBean getAllergyDetails( @RequestParam(value="chartId",required=false,defaultValue="-1")int chartId,
+			@RequestParam(value="encounterId",required=false,defaultValue="-1")int encounterId,
+			@RequestParam(value="statusList",required=false,defaultValue="-1")String statusList,
+			@RequestParam(value="fromSoap",required=false,defaultValue="-1")int fromSoap)throws Exception
+	{
+		List<PatientAllergiesBean> allergies=AllergiesService.getAllergies(chartId,encounterId,statusList,fromSoap);
+		EMRResponseBean allergyList = new EMRResponseBean();
+		allergyList.setData(allergies);
+		return allergyList;
+	}
+	
+	/**
 	 * Method to retrieve allergy types
 	 * @param gender
 	 * @return
-	 * @throws Exception
 	 */
 	@RequestMapping(value ="/retrievingAllergyType", method = RequestMethod.GET)
     @ResponseBody
-	public EMRResponseBean getAllergyData(@RequestParam(value="gender",required=false,defaultValue="-1")int gender)throws Exception
+	public EMRResponseBean getAllergyData(@RequestParam(value="gender",required=false,defaultValue="-1")Integer gender)
 	{
 		List<AllergiesTypeBean> allergyTypes=AllergiesService.retrievingAllergyType(gender);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
@@ -279,10 +298,11 @@ public class AllergiesController {
 	@RequestMapping(value ="/RetrieveInActiveAllergData", method = RequestMethod.GET)
     @ResponseBody
     public EMRResponseBean RetrieveInActiveAllergData(
-    		 @RequestParam(value="chartId",required=false,defaultValue="-1")String chartId)throws Exception
+    		 @RequestParam(value="chartId",required=false,defaultValue="-1")String chartId,
+    		 @RequestParam(value="statusList",required=false,defaultValue="-1")String statusList)throws Exception
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
-		emrResponseBean.setData(AllergiesService.retrieveInActiveAllerg(chartId));
+		emrResponseBean.setData(AllergiesService.retrieveInActiveAllerg(chartId,statusList));
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "Successful retrieval of in active Allergy data", -1, request.getRemoteAddr(), -1, "chartId="+chartId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
@@ -301,6 +321,31 @@ public class AllergiesController {
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(AllergiesService.lastReviewDetails(chartId).toString());
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "Successful retrieval of last review details", -1, request.getRemoteAddr(), -1, "chartId="+chartId, LogUserType.USER_LOGIN, "", "");
+		return emrResponseBean;
+	}
+	
+	/**
+	 * Method to edit or add new allergies
+	 * @param chartId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value ="/SaveAllergies", method = RequestMethod.POST)
+    @ResponseBody
+    public void saveAllergies(@RequestParam(value="allergData",required=false,defaultValue="-1")String allergData)throws Exception
+	{
+		AllergiesService.saveAllergies(allergData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "successful insertion of new allergies", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+		return;
+	}
+	
+	@RequestMapping(value ="/PatientAllergiesHistory", method = RequestMethod.GET)
+    @ResponseBody
+    public EMRResponseBean PatientAllergiesHistory(
+    		@RequestParam(value="chartId",required=false,defaultValue="-1")String chartId)throws Exception
+	{
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(AllergiesService.patientAllergiesHistory(chartId));
 		return emrResponseBean;
 	}
 }

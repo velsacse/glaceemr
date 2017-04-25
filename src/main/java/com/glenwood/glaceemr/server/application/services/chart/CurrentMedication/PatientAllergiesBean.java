@@ -1,115 +1,173 @@
 package com.glenwood.glaceemr.server.application.services.chart.CurrentMedication;
 
 public class PatientAllergiesBean {
-	Integer id;
-	Integer severity;
-	Integer typeId;
-	String typeName;
-	String allergyName;
-	String allergyCode;
-	String codeSystem;
-	String drugCategory;
-	String reactionTo;
-	String modifiedon;
-	String onsetDate;
-	String createdOn;
 	
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public Integer getSeverity() {
-		return severity;
-	}
-
-	public void setSeverity(Integer severity) {
-		this.severity = severity;
-	}
-
-	public Integer gettypeId() {
-		return typeId;
-	}
-
-	public void settypeId(Integer typeId) {
-		this.typeId = typeId;
-	}
-
-	public String gettypeName() {
-		return typeName;
-	}
-
-	public void settypeName(String typeName) {
-		this.typeName = typeName;
-	}
-
-	public String getallergyName() {
-		return allergyName;
-	}
-
-	public void setallergyName(String allergyName) {
-		this.allergyName = allergyName;
-	}
-
-	public String getallergyCode() {
-		return allergyCode;
-	}
-
-	public void setallergyCode(String allergyCode) {
-		this.allergyCode = allergyCode;
-	}
-
-	public String getcodeSystem() {
-		return codeSystem;
-	}
-
-	public void setcodeSystem(String codeSystem) {
-		this.codeSystem = codeSystem;
-	}
-
-	public String getdrugCategory() {
-		return drugCategory;
-	}
-
-	public void setdrugCategory(String drugCategory) {
-		this.drugCategory = drugCategory;
-	}
-
-	public String getreactionTo() {
-		return reactionTo;
-	}
-
-	public void setreactionTo(String reactionTo) {
-		this.reactionTo = reactionTo;
-	}
-
-	public String getModifiedon() {
-		return modifiedon;
-	}
-
-	public void setModifiedon(String modifiedon) {
-		this.modifiedon = modifiedon;
-	}
-
-	public String getonsetDate() {
-		return onsetDate;
-	}
-
-	public void setonsetDate(String onsetDate) {
-		this.onsetDate = onsetDate;
-	}
-
-	public String getcreatedOn() {
-		return createdOn;
-	}
-
-	public void setcreatedOn(String createdOn) {
-		this.createdOn = createdOn;
-	}
-
+	public Integer patAllergId;
+	public String patAllergName;
+	public Integer patAllergChartId;
+	public Integer patAllergEncounterId;
+	public Integer patAllergTypeId;
+	public String patAllergAllergicTo;
+	public String patAllergReactionTo;
+	public String patAllergOnsetDate;
+	public String patAllergStatus;
+	public String patAllergResolvedDate;
+	public String patAllergCreatedBy;
+	public String patAllergCreatedOn;
+	public String patAllergModifiedBy;
+	public String patAllergModifiedOn;
+	public String patAllergDrugCategory;
+	public Integer patAllergSeverity;
+	public String patAllergAllergyCode;
+	public String patAllergInteractionXml;
+	public String patAllergResolvedBy;
+	public String patAllergInactiveBy;
+	public String patAllergInactiveOn;
+	public String patAllergInactiveReason;
+	public String patAllergCodeSystem;
 	
+	/**
+	 * Getters and Setters
+	 */
+	
+	public Integer getPatAllergId() {
+		return patAllergId;
+	}
+	public void setPatAllergId(Integer patAllergId) {
+		this.patAllergId = patAllergId;
+	}
+	
+	public String getPatAllergName() {
+		return patAllergName;
+	}
+	public void setPatAllergName(String patAllergName) {
+		this.patAllergName = patAllergName;
+	}
+	public Integer getPatAllergChartId() {
+		return patAllergChartId;
+	}
+	public void setPatAllergChartId(Integer patAllergChartId) {
+		this.patAllergChartId = patAllergChartId;
+	}
+	public Integer getPatAllergEncounterId() {
+		return patAllergEncounterId;
+	}
+	public void setPatAllergEncounterId(Integer patAllergEncounterId) {
+		this.patAllergEncounterId = patAllergEncounterId;
+	}
+	public Integer getPatAllergTypeId() {
+		return patAllergTypeId;
+	}
+	public void setPatAllergTypeId(Integer patAllergTypeId) {
+		this.patAllergTypeId = patAllergTypeId;
+	}
+	public String getPatAllergAllergicTo() {
+		return patAllergAllergicTo;
+	}
+	public void setPatAllergAllergicTo(String patAllergAllergicTo) {
+		this.patAllergAllergicTo = patAllergAllergicTo;
+	}
+	public String getPatAllergReactionTo() {
+		return patAllergReactionTo;
+	}
+	public void setPatAllergReactionTo(String patAllergReactionTo) {
+		this.patAllergReactionTo = patAllergReactionTo;
+	}
+	public String getPatAllergOnsetDate() {
+		return patAllergOnsetDate;
+	}
+	public void setPatAllergOnsetDate(String patAllergOnsetDate) {
+		this.patAllergOnsetDate = patAllergOnsetDate;
+	}
+	public String getPatAllergStatus() {
+		return patAllergStatus;
+	}
+	public void setPatAllergStatus(String patAllergStatus) {
+		this.patAllergStatus = patAllergStatus;
+	}
+	public String getPatAllergResolvedDate() {
+		return patAllergResolvedDate;
+	}
+	public void setPatAllergResolvedDate(String patAllergResolvedDate) {
+		this.patAllergResolvedDate = patAllergResolvedDate;
+	}
+	public String getPatAllergCreatedBy() {
+		return patAllergCreatedBy;
+	}
+	public void setPatAllergCreatedBy(String patAllergCreatedBy) {
+		this.patAllergCreatedBy = patAllergCreatedBy;
+	}
+	public String getPatAllergCreatedOn() {
+		return patAllergCreatedOn;
+	}
+	public void setPatAllergCreatedOn(String patAllergCreatedOn) {
+		this.patAllergCreatedOn = patAllergCreatedOn;
+	}
+	public String getPatAllergModifiedBy() {
+		return patAllergModifiedBy;
+	}
+	public void setPatAllergModifiedBy(String patAllergModifiedBy) {
+		this.patAllergModifiedBy = patAllergModifiedBy;
+	}
+	public String getPatAllergModifiedOn() {
+		return patAllergModifiedOn;
+	}
+	public void setPatAllergModifiedOn(String patAllergModifiedOn) {
+		this.patAllergModifiedOn = patAllergModifiedOn;
+	}
+	public String getPatAllergDrugCategory() {
+		return patAllergDrugCategory;
+	}
+	public void setPatAllergDrugCategory(String patAllergDrugCategory) {
+		this.patAllergDrugCategory = patAllergDrugCategory;
+	}
+	public Integer getPatAllergSeverity() {
+		return patAllergSeverity;
+	}
+	public void setPatAllergSeverity(Integer patAllergSeverity) {
+		this.patAllergSeverity = patAllergSeverity;
+	}
+	public String getPatAllergAllergyCode() {
+		return patAllergAllergyCode;
+	}
+	public void setPatAllergAllergyCode(String patAllergAllergyCode) {
+		this.patAllergAllergyCode = patAllergAllergyCode;
+	}
+	public String getPatAllergInteractionXml() {
+		return patAllergInteractionXml;
+	}
+	public void setPatAllergInteractionXml(String patAllergInteractionXml) {
+		this.patAllergInteractionXml = patAllergInteractionXml;
+	}
+	public String getPatAllergResolvedBy() {
+		return patAllergResolvedBy;
+	}
+	public void setPatAllergResolvedBy(String patAllergResolvedBy) {
+		this.patAllergResolvedBy = patAllergResolvedBy;
+	}
+	public String getPatAllergInactiveBy() {
+		return patAllergInactiveBy;
+	}
+	public void setPatAllergInactiveBy(String patAllergInactiveBy) {
+		this.patAllergInactiveBy = patAllergInactiveBy;
+	}
+	public String getPatAllergInactiveOn() {
+		return patAllergInactiveOn;
+	}
+	public void setPatAllergInactiveOn(String patAllergInactiveOn) {
+		this.patAllergInactiveOn = patAllergInactiveOn;
+	}
+	public String getPatAllergInactiveReason() {
+		return patAllergInactiveReason;
+	}
+	public void setPatAllergInactiveReason(String patAllergInactiveReason) {
+		this.patAllergInactiveReason = patAllergInactiveReason;
+	}
+	public String getPatAllergCodeSystem() {
+		return patAllergCodeSystem;
+	}
+	public void setPatAllergCodeSystem(String patAllergCodeSystem) {
+		this.patAllergCodeSystem = patAllergCodeSystem;
+	}
 
 }
