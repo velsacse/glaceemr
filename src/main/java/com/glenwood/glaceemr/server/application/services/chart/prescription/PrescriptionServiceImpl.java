@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.services.chart.prescription;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -156,6 +157,7 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	       int prescId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medPlanData.get("prescId").toString())).or("-1"));
 	       int userId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medPlanData.get("loginId").toString())).or("-1"));
 	       String planTime =  Optional.fromNullable(Strings.emptyToNull(medPlanData.get("planTimeList").toString())).or("-1");
+	       String shortcut =  Optional.fromNullable(Strings.emptyToNull(medPlanData.get("shortcut").toString())).or("-1");
 	       String planTimeList[] = null;
 			try {
 				if(planTime!=null&&planTime!=null) {
@@ -175,6 +177,7 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 			    newPlan.setMedsAdminPlanModifiedOn(medAdminLogRepository.findCurrentTimeStamp());
 			    newPlan.setMedsAdminPlanModifiedBy(userId);
 			    newPlan.setMedsAdminPlanIsActive(true);
+			    newPlan.setShortcut(shortcut);
 			    medAdminPlanRepository.saveAndFlush(newPlan);
 			}
 	}
@@ -189,6 +192,12 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	    int planId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medAdminLogData.get("planId").toString())).or("-1"));
 	    int administeredBy = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(medAdminLogData.get("administeredBy").toString())).or("-1"));
 	    String actualplanDate = Optional.fromNullable(Strings.emptyToNull(medAdminLogData.get("actualplanDate").toString())).or("");
+	    String adminDate = Optional.fromNullable(Strings.emptyToNull(medAdminLogData.get("adminDate").toString().replace("text", " "))).or("");
+	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	    Date parsedDate = dateFormat.parse(adminDate);
+	    
+	   
+	    Timestamp timestamp = new java.sql.Timestamp(parsedDate.getTime());
 	    int logId = -1;
 	    boolean isDuplicate = Boolean.parseBoolean(Optional.fromNullable(Strings.emptyToNull(medAdminLogData.get("isDuplicate").toString())).or("false"));
 	    if(isDuplicate) 
@@ -204,12 +213,13 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		newAdminLog.setMedsAdminLogPlanId(planId);
 		newAdminLog.setMedsAdminLogActualPlanDate(actualplanDate);
 		newAdminLog.setMedsAdminLogAdministeredBy(administeredBy);
-		newAdminLog.setMedsAdminLogAdministrationDate(medAdminLogRepository.findCurrentTimeStamp());
+		newAdminLog.setMedsAdminLogAdministrationDate(adminDate);
 		newAdminLog.setMedsAdminLogModifiedBy(administeredBy);
 		newAdminLog.setMedsAdminLogModifiedDate(medAdminLogRepository.findCurrentTimeStamp());
 		newAdminLog.setMedsAdminLogIsDeleted(false);
 		newAdminLog.setMedsAdminLogAdminCategory(medAdminCategory);
 		newAdminLog.setMedsAdminLogAdminNotes(adminNotes);
+//		newAdminLog.setShortcut(shortcut);
 		MedsAdminLog savedLog = medAdminLogRepository.saveAndFlush(newAdminLog);
 		if(logId==-1) {
 			int logRouteId = savedLog.getMedsAdminLogId();
@@ -275,6 +285,7 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		for(Prescription obj:prescmedlist) {
 			obj.setMedsAdminPlan(medAdminPlanRepository.findAll(PrescripitonSpecification.getMedsPlanIds(obj.getDocPrescId())));
 		}
+		
 		Map<String, Object> mapobject=new HashMap<String,Object>();
 		mapobject.put("currentmed", currentmedlist);
 		mapobject.put("prescmed", prescmedlist);

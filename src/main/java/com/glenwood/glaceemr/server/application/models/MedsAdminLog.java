@@ -55,9 +55,8 @@ public class MedsAdminLog {
 	@Column(name="meds_admin_log_actual_plan_date")
 	private String medsAdminLogActualPlanDate;
 	
-	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="meds_admin_log_administration_date")
-	private Timestamp medsAdminLogAdministrationDate;
+	private String medsAdminLogAdministrationDate;
 
 	@Column(name="meds_admin_log_administered_by")
 	private Integer medsAdminLogAdministeredBy;
@@ -120,12 +119,12 @@ public class MedsAdminLog {
 		this.medsAdminLogActualPlanDate = medsAdminLogActualPlanDate;
 	}
 
-	public Timestamp getMedsAdminLogAdministrationDate() {
+	public String getMedsAdminLogAdministrationDate() {
 		return medsAdminLogAdministrationDate;
 	}
 
 	public void setMedsAdminLogAdministrationDate(
-			Timestamp medsAdminLogAdministrationDate) {
+			String medsAdminLogAdministrationDate) {
 		this.medsAdminLogAdministrationDate = medsAdminLogAdministrationDate;
 	}
 

@@ -63,6 +63,18 @@ public class MedsAdminPlan {
 	@Column(name="meds_admin_plan_deleted_on")
 	private Timestamp medsAdminPlanDeletedOn;
 	
+	
+	@Column(name="shortcut")
+	private String shortcut;
+	
+	public String getShortcut() {
+		return shortcut;
+	}
+
+	public void setShortcut(String shortcut) {
+		this.shortcut = shortcut;
+	}
+	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="meds_admin_plan_medication_id",referencedColumnName="doc_presc_id",insertable=false, updatable=false)
 	@JsonBackReference
