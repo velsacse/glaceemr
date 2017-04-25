@@ -1,7 +1,9 @@
 package com.glenwood.glaceemr.server.application.services.chart.Allergies;
 
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,12 +41,15 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.LabDescription;
 import com.glenwood.glaceemr.server.application.models.LabDescription_;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
+import com.glenwood.glaceemr.server.application.models.PatientAllergiesHistory;
+import com.glenwood.glaceemr.server.application.models.PatientAllergiesHistory_;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies_;
 import com.glenwood.glaceemr.server.application.models.Unii;
 import com.glenwood.glaceemr.server.application.models.Unii_;
 import com.glenwood.glaceemr.server.application.repositories.AllergiesEncountermapRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientAllergiesRepository;
 import com.glenwood.glaceemr.server.application.repositories.UniiRepository;
+import com.glenwood.glaceemr.server.application.services.chart.CurrentMedication.PatientAllergiesBean;
 import com.glenwood.glaceemr.server.application.services.chart.print.TextFormatter;
 import com.glenwood.glaceemr.server.application.specifications.AllergiesSpecification;
 import com.glenwood.glaceemr.server.utils.HUtil;
@@ -73,7 +78,82 @@ public class AllergiesServiceImpl implements AllergiesService{
 	@PersistenceContext
 	EntityManager em;
 	
-
+	/**
+	 *Getting patient allergies data
+	 */
+	
+	@Override
+	public List<PatientAllergiesBean> getAllergies(int chartId,int encounterId,String statusStr,int fromSoap) {
+		List<Integer> statusList = new ArrayList<Integer>();
+		String[] statusSplit = statusStr.split(",");
+		System.out.println(">>>>>"+statusSplit.length);
+		for(int i=0;i<statusSplit.length;i++)
+		{
+			statusList.add(Integer.parseInt(statusSplit[i]));
+		}
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+		Root<PatientAllergies> root = cq.from(PatientAllergies.class);
+		List<PatientAllergiesBean> beanList=new ArrayList<PatientAllergiesBean>();
+		try{
+		Join<PatientAllergies, AllergiesType> patAllerTypeJoin=root.join(PatientAllergies_.allergiesType,JoinType.INNER);
+		Join<PatientAllergies,EmployeeProfile> AllerEmpModifyJoin=root.join(PatientAllergies_.empProfileAllgModifiedByTable,JoinType.LEFT);
+		Join<PatientAllergies,EmployeeProfile> AllerEmpCreateJoin=root.join(PatientAllergies_.empProfileAllgCreatedByTable,JoinType.LEFT);
+		Predicate status=root.get(PatientAllergies_.patAllergStatus).in(statusList);
+		Predicate patChart=builder.equal(root.get(PatientAllergies_.patAllergChartId), chartId);
+		Predicate typeId=builder.greaterThanOrEqualTo(root.get(PatientAllergies_.patAllergTypeId), 0);
+		Predicate encounterIdPred=builder.lessThanOrEqualTo(root.get(PatientAllergies_.patAllergEncounterId), encounterId);
+		cq.multiselect(root.get(PatientAllergies_.patAllergId),
+				root.get(PatientAllergies_.patAllergSeverity),
+				root.get(PatientAllergies_.patAllergTypeId),
+				patAllerTypeJoin.get(AllergiesType_.allergtypeName),
+				root.get(PatientAllergies_.patAllergAllergicTo),
+				root.get(PatientAllergies_.patAllergAllergyCode),
+				root.get(PatientAllergies_.patAllergCodeSystem),
+				root.get(PatientAllergies_.patAllergDrugCategory),
+				root.get(PatientAllergies_.patAllergReactionTo),
+				root.get(PatientAllergies_.patAllergModifiedOn),
+				root.get(PatientAllergies_.patAllergOnsetDate),
+				root.get(PatientAllergies_.patAllergCreatedOn),
+				root.get(PatientAllergies_.patAllergStatus),
+				root.get(PatientAllergies_.patAllergResolvedDate));
+				
+		if(fromSoap == 0)
+		{
+			cq.where(typeId,status,patChart).orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));
+		}
+		else if(fromSoap == 1)
+		{
+			cq.where(typeId,status,patChart,encounterIdPred).orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));
+		}
+		List<Object[]> allergies=em.createQuery(cq).getResultList();
+		
+		for(Object[] details : allergies){
+			PatientAllergiesBean eachObj=new PatientAllergiesBean();
+			eachObj.setPatAllergId(details[0]==null?-1:(Integer)details[0]);
+			eachObj.setPatAllergSeverity(details[1]==null?-1:(Integer)details[1]);
+			eachObj.setPatAllergTypeId(details[2]==null?-1:(Integer)details[2]);
+			eachObj.setPatAllergName(details[3]==null?"":details[3].toString());
+			eachObj.setPatAllergAllergicTo(details[4]==null?"":details[4].toString());
+			eachObj.setPatAllergAllergyCode(details[5]==null?"":details[5].toString());
+			eachObj.setPatAllergCodeSystem(details[6]==null?"":details[6].toString());
+			eachObj.setPatAllergDrugCategory(details[7]==null?"":details[7].toString());
+			eachObj.setPatAllergReactionTo(details[8]==null?"":details[8].toString());
+			eachObj.setPatAllergModifiedOn(details[9]==null?"":details[9].toString());
+			eachObj.setPatAllergOnsetDate(details[10]==null?"":details[10].toString());
+			eachObj.setPatAllergCreatedOn(details[11]==null?"":details[11].toString());
+			eachObj.setPatAllergStatus(details[12]==null?"":details[12].toString());
+			eachObj.setPatAllergResolvedDate(details[13]==null?"":details[13].toString());
+			beanList.add(eachObj);
+		}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return beanList;
+	}
+	
+	
 	/**
 	 * Method to retrieve allergy types
 	 */
@@ -585,6 +665,7 @@ public class AllergiesServiceImpl implements AllergiesService{
 		Integer status = null;
 		try {
 			String editDataDecode=HUtil.Nz(URLDecoder.decode(editData,"UTF-8"),"");
+			System.out.println("editDataDecode"+editDataDecode);
 			jsonParameters = new JSONObject(editDataDecode);
 			chartId = jsonParameters.getString("chartId").toString();
 			encounterId = jsonParameters.getString("encounterId");
@@ -941,7 +1022,7 @@ public class AllergiesServiceImpl implements AllergiesService{
 	 * Method to retrieve details for edit Allergies
 	 */
 	@Override
-	public List<PatientAllergies> retrieveDataForEditAllerg(String chartId,String patId)
+	public List<PatientAllergiesBean> retrieveDataForEditAllerg(String chartId,String patId)
 	{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
@@ -966,19 +1047,19 @@ public class AllergiesServiceImpl implements AllergiesService{
 				builder.equal(root.get(PatientAllergies_.patAllergId), Integer.parseInt(patId))));
 		
 		List<Object[]> editData = em.createQuery(cq).getResultList();
-		List<PatientAllergies> patAllergBean = new ArrayList<PatientAllergies>();
+		List<PatientAllergiesBean> patAllergBean = new ArrayList<PatientAllergiesBean>();
 		for(Object[] values : editData)
 		{
-			PatientAllergies patAllerg = new PatientAllergies();
+			PatientAllergiesBean patAllerg = new PatientAllergiesBean();
 			AllergiesType allergTypeBean = new AllergiesType();
 			patAllerg.setPatAllergTypeId(Integer.parseInt(values[0]==null?"-1":values[0].toString()));
 			patAllerg.setPatAllergAllergicTo(values[1]==null?"":values[1].toString());
 			allergTypeBean.setAllergtypeName(values[2]==null?"":values[2].toString());
-			patAllerg.setAllergiesType(allergTypeBean);
+			patAllerg.setPatAllergName(values[2]==null?"":values[2].toString());
 			patAllerg.setPatAllergDrugCategory(values[3]==null?"":values[3].toString());
 			patAllerg.setPatAllergReactionTo(values[4]==null?"":values[4].toString());
 			patAllerg.setPatAllergOnsetDate(values[5]==null?"":values[5].toString());
-			patAllerg.setPatAllergStatus(Integer.parseInt(values[6]==null?"-1":values[6].toString()));
+			patAllerg.setPatAllergStatus(values[6]==null?"-1":values[6].toString());
 			patAllerg.setPatAllergSeverity(Integer.parseInt(values[7]==null?"":values[7].toString()));
 			patAllerg.setPatAllergResolvedDate(values[8]==null?"":values[8].toString());
 			patAllerg.setPatAllergAllergyCode(values[9]==null?"":values[9].toString());
@@ -992,12 +1073,22 @@ public class AllergiesServiceImpl implements AllergiesService{
 	 * Method to retrieve details for In active Allergies
 	 */
 	@Override
-	public List<PatientAllergies> retrieveInActiveAllerg(String chartId)
+	public List<PatientAllergiesBean> retrieveInActiveAllerg(String chartId,String statusStr)
 	{
+		List<Integer> statusList = new ArrayList<Integer>();
+		String[] statusSplit = statusStr.split(",");
+		System.out.println(">>>>>"+statusSplit.length);
+		for(int i=0;i<statusSplit.length;i++)
+		{
+			statusList.add(Integer.parseInt(statusSplit[i]));
+		}
+		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<PatientAllergies> root = cq.from(PatientAllergies.class);
 		Join<PatientAllergies, AllergiesType> allergType = root.join(PatientAllergies_.allergiesType,JoinType.INNER);
+		Join<PatientAllergies, EmployeeProfile> empProfileCreatedJoin = root.join(PatientAllergies_.empProfileAllgCreatedByTable,JoinType.LEFT);
+		Join<PatientAllergies, EmployeeProfile> empProfileInactiveCreatedJoin = root.join(PatientAllergies_.empProfileAllgInactiveByTable,JoinType.LEFT);
 		
 		cq.multiselect(root.get(PatientAllergies_.patAllergId),
 				root.get(PatientAllergies_.patAllergTypeId),
@@ -1008,30 +1099,59 @@ public class AllergiesServiceImpl implements AllergiesService{
 				root.get(PatientAllergies_.patAllergOnsetDate),
 				root.get(PatientAllergies_.patAllergStatus),
 				root.get(PatientAllergies_.patAllergSeverity),
-				root.get(PatientAllergies_.patAllergResolvedDate)
+				root.get(PatientAllergies_.patAllergResolvedDate),
+				root.get(PatientAllergies_.patAllergInactiveReason),
+				builder.function("format_name", String.class, builder.coalesce(empProfileInactiveCreatedJoin.get(EmployeeProfile_.empProfileFname), ""),
+						builder.coalesce(empProfileInactiveCreatedJoin.get(EmployeeProfile_.empProfileLname),""),
+						builder.coalesce(empProfileInactiveCreatedJoin.get(EmployeeProfile_.empProfileMi), ""),
+						builder.coalesce(empProfileInactiveCreatedJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
+				//root.get(PatientAllergies_.patAllergInactiveBy),
+				builder.function("glace_timezone", String.class, 
+						root.get(PatientAllergies_.patAllergInactiveOn),
+						builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")),
+				//root.get(PatientAllergies_.patAllergInactiveOn),
+				builder.function("format_name", String.class, builder.coalesce(empProfileCreatedJoin.get(EmployeeProfile_.empProfileFname), ""),
+						builder.coalesce(empProfileCreatedJoin.get(EmployeeProfile_.empProfileLname),""),
+						builder.coalesce(empProfileCreatedJoin.get(EmployeeProfile_.empProfileMi), ""),
+						builder.coalesce(empProfileCreatedJoin.get(EmployeeProfile_.empProfileCredentials), ""),builder.literal(1)),
+				//root.get(PatientAllergies_.patAllergCreatedBy),
+				builder.function("glace_timezone", String.class, 
+								root.get(PatientAllergies_.patAllergCreatedOn),
+								builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am"))
+				//root.get(PatientAllergies_.patAllergCreatedOn),
 				);
-		cq.where(builder.and((root.get(PatientAllergies_.patAllergStatus).in(2,3)),
+		cq.where(builder.and((root.get(PatientAllergies_.patAllergStatus).in(statusList)),
 				builder.equal(root.get(PatientAllergies_.patAllergChartId), Integer.parseInt(chartId)),
 				builder.greaterThan(root.get(PatientAllergies_.patAllergTypeId), 0)
 				));
-		cq.orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));
+		if(statusStr.equalsIgnoreCase("3"))
+		{
+			cq.orderBy(builder.desc(root.get(PatientAllergies_.patAllergInactiveOn)));
+		}
+		else
+		{
+			cq.orderBy(builder.asc(root.get(PatientAllergies_.patAllergId)));
+		}
 		List<Object[]> editData = em.createQuery(cq).getResultList();
-		List<PatientAllergies> patAllergBean = new ArrayList<PatientAllergies>();
+		List<PatientAllergiesBean> patAllergBean = new ArrayList<PatientAllergiesBean>();
 		for(Object[] values : editData)
 		{
-			PatientAllergies patAllerg = new PatientAllergies();
-			AllergiesType allergTypeBean = new AllergiesType();
+			PatientAllergiesBean patAllerg = new PatientAllergiesBean();
 			patAllerg.setPatAllergId(Integer.parseInt(values[0]==null?"-1":values[0].toString()));
 			patAllerg.setPatAllergTypeId(Integer.parseInt(values[1]==null?"-1":values[1].toString()));
-			allergTypeBean.setAllergtypeName(values[2]==null?"":values[2].toString());
-			patAllerg.setAllergiesType(allergTypeBean);
+			patAllerg.setPatAllergName(values[2]==null?"":values[2].toString());
 			patAllerg.setPatAllergAllergicTo(values[3]==null?"":values[3].toString());
 			patAllerg.setPatAllergDrugCategory(values[4]==null?"":values[4].toString());
 			patAllerg.setPatAllergReactionTo(values[5]==null?"":values[5].toString());
 			patAllerg.setPatAllergOnsetDate(values[6]==null?"":values[6].toString());
-			patAllerg.setPatAllergStatus(Integer.parseInt(values[7]==null?"-1":values[7].toString()));
+			patAllerg.setPatAllergStatus(values[7]==null?"-1":values[7].toString());
 			patAllerg.setPatAllergSeverity(Integer.parseInt(values[8]==null?"":values[8].toString()));
 			patAllerg.setPatAllergResolvedDate(values[9]==null?"":values[9].toString());
+			patAllerg.setPatAllergInactiveReason(values[10]==null?"":values[10].toString());
+			patAllerg.setPatAllergInactiveBy(values[11]==null?"":values[11].toString());
+			patAllerg.setPatAllergInactiveOn(values[12]==null?"":values[12].toString());
+			patAllerg.setPatAllergCreatedBy(values[13]==null?"":values[13].toString());
+			patAllerg.setPatAllergCreatedOn(values[14]==null?"":values[14].toString());
 			patAllergBean.add(patAllerg);
 		}
 		return patAllergBean;
@@ -1050,7 +1170,8 @@ public class AllergiesServiceImpl implements AllergiesService{
 				builder.coalesce(empJoin.get(EmployeeProfile_.empProfileLname),""),
 				builder.coalesce(empJoin.get(EmployeeProfile_.empProfileMi), ""),
 				builder.coalesce(empJoin.get(EmployeeProfile_.empProfileCredentials), ""),
-				builder.function("glace_timezone", String.class, root.get(AllergiesEncountermap_.allergencmapReviewedon),builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("reviewOn")
+				builder.function("glace_timezone", String.class, root.get(AllergiesEncountermap_.allergencmapReviewedon),builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("reviewOn"),
+				root.get(AllergiesEncountermap_.allergencmapReviewedon)
 				);
 		cq.where(builder.and(builder.equal(root.get(AllergiesEncountermap_.allergencmapChartid), chartId),
 				builder.equal(root.get(AllergiesEncountermap_.allergencmapReviewed), true)));
@@ -1068,6 +1189,9 @@ public class AllergiesServiceImpl implements AllergiesService{
 			try {
 				String empName = textFormatter.getFormattedName(fName, mName, lName, credentials);
 				allergEncMapObj.put("reviewby", textFormatter.getCamelCaseText(empName));
+				SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+				String a= dateFormat.format(values[5]);
+				System.out.println("date >>>"+a);
 				allergEncMapObj.put("reviewon", values[4]==null?"":values[4].toString());
 				allergEncMapArray.put(i, allergEncMapObj);
 			} catch (Exception e) {
@@ -1121,5 +1245,286 @@ public class AllergiesServiceImpl implements AllergiesService{
 			}
 		});
 		return jsonValues;
+	}
+	
+	@Override
+	public List<PatientAllergiesHistoryBean> patientAllergiesHistory(String chartId) {
+		List<PatientAllergiesHistoryBean> patAllergHistory = getPatAllergHistory(chartId);
+		List<PatientAllergiesHistoryBean> patAllerg = getPatAllerg(chartId);
+		patAllergHistory.addAll(patAllerg);
+		List<PatientAllergiesHistoryBean> patAllergHistorySort = sortByHistoryBean(patAllergHistory);
+		return patAllergHistorySort;
+	}
+
+	public List<PatientAllergiesHistoryBean> getPatAllerg(String chartId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+		Root<PatientAllergies> root = cq.from(PatientAllergies.class);
+		Join<PatientAllergies, AllergiesType> allergType = root.join(PatientAllergies_.allergiesType,JoinType.INNER);
+		Join<PatientAllergies, EmployeeProfile> empProf = root.join(PatientAllergies_.empProfileAllgModifiedByTable,JoinType.LEFT);
+		cq.multiselect(root.get(PatientAllergies_.patAllergId).alias("Id"),
+						builder.literal(1).alias("status"),
+						builder.literal(0).alias("IsActive"),
+						allergType.get(AllergiesType_.allergtypeName).alias("Type"),
+						builder.coalesce(root.get(PatientAllergies_.patAllergDrugCategory),"-").alias("drugCategory"),
+						builder.coalesce(root.get(PatientAllergies_.patAllergAllergicTo),"-").alias("allergen"),
+						builder.coalesce(root.get(PatientAllergies_.patAllergReactionTo),"-").alias("Reaction"),
+						builder.coalesce(root.get(PatientAllergies_.patAllergOnsetDate),"-").alias("OnsetDate"),
+						root.get(PatientAllergies_.patAllergStatus),
+						builder.coalesce(root.get(PatientAllergies_.patAllergResolvedDate),"-").alias("ResolvedDate"),
+						builder.coalesce(empProf.get(EmployeeProfile_.empProfileFname), ""),
+						builder.coalesce(empProf.get(EmployeeProfile_.empProfileLname),""),
+						builder.coalesce(empProf.get(EmployeeProfile_.empProfileMi), ""),
+						builder.coalesce(empProf.get(EmployeeProfile_.empProfileCredentials), ""),
+						builder.function("glace_timezone", String.class, root.get(PatientAllergies_.patAllergModifiedOn),builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("modifiedOn")
+						);
+		cq.where(builder.equal(root.get(PatientAllergies_.patAllergChartId),chartId));
+		List<Object[]> patAllerg = em.createQuery(cq).getResultList();
+		List<PatientAllergiesHistoryBean> patAllergiesHistory = new ArrayList<PatientAllergiesHistoryBean>();
+		for(Object[] patAllergDetails : patAllerg)
+		{
+			String fName=patAllergDetails[10]==null?"":patAllergDetails[10].toString();
+			String lName=patAllergDetails[11]==null?"":patAllergDetails[11].toString();
+			String mName=patAllergDetails[12]==null?"":patAllergDetails[12].toString();
+			String credentials=patAllergDetails[13]==null?"":patAllergDetails[13].toString();
+			String empName = "";
+			try
+			{
+				empName = textFormatter.getFormattedName(fName, mName, lName, credentials);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			
+			PatientAllergiesHistoryBean patAllergBean = new PatientAllergiesHistoryBean();
+			patAllergBean.setId(patAllergDetails[0]==null?-1:(Integer)patAllergDetails[0]);
+			patAllergBean.setStatus(patAllergDetails[1]==null?-1:(Integer)patAllergDetails[1]);
+			patAllergBean.setIsActive(patAllergDetails[2]==null?-1:(Integer)patAllergDetails[2]);
+			patAllergBean.setType(patAllergDetails[3]==null?"":patAllergDetails[3].toString());
+			patAllergBean.setDrugCategory(patAllergDetails[4]==null?"":patAllergDetails[4].toString());
+			patAllergBean.setAllergen(patAllergDetails[5]==null?"":patAllergDetails[5].toString());
+			patAllergBean.setReaction(patAllergDetails[6]==null?"":patAllergDetails[6].toString());
+			patAllergBean.setOnsetDate(patAllergDetails[7]==null?"":patAllergDetails[7].toString());
+			if(patAllergDetails[8] != null)
+			{
+				patAllergBean.setAllergyStatus((Integer)patAllergDetails[8] == 1?"Active":((Integer)patAllergDetails[8] == 2?"Resolved":"Inactive"));
+			}
+			else
+			{
+				patAllergBean.setAllergyStatus("");
+			}
+			patAllergBean.setResolvedDate(patAllergDetails[9]==null?"":patAllergDetails[9].toString());
+			patAllergBean.setModifiedBy(empName);
+			patAllergBean.setModifiedOn(patAllergDetails[14]==null?"":patAllergDetails[14].toString());
+			patAllergiesHistory.add(patAllergBean);
+		}
+		return patAllergiesHistory;
+	}
+
+	public List<PatientAllergiesHistoryBean> getPatAllergHistory(String chartId) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+		Root<PatientAllergiesHistory> root = cq.from(PatientAllergiesHistory.class);
+		Join<PatientAllergiesHistory, AllergiesType> allergType = root.join(PatientAllergiesHistory_.allergiesType,JoinType.INNER);
+		Join<PatientAllergiesHistory, EmployeeProfile> empProf = root.join(PatientAllergiesHistory_.empProfileAllgModifiedByTable,JoinType.INNER);
+		cq.multiselect(root.get(PatientAllergiesHistory_.patallergId).alias("Id"),
+						builder.literal(0).alias("status"),
+						builder.literal(0).alias("IsActive"),
+						allergType.get(AllergiesType_.allergtypeName).alias("Type"),
+						builder.coalesce(root.get(PatientAllergiesHistory_.patallergDrugcategory),"-").alias("drugCategory"),
+						builder.coalesce(root.get(PatientAllergiesHistory_.patallergAllergicto),"-").alias("allergen"),
+						builder.coalesce(root.get(PatientAllergiesHistory_.patallergReactionto),"-").alias("Reaction"),
+						builder.coalesce(root.get(PatientAllergiesHistory_.patallergOnsetdate),"-").alias("OnsetDate"),
+						root.get(PatientAllergiesHistory_.patallergStatus),
+						builder.coalesce(root.get(PatientAllergiesHistory_.patallergResolveddate),"-").alias("ResolvedDate"),
+						builder.coalesce(empProf.get(EmployeeProfile_.empProfileFname), ""),
+						builder.coalesce(empProf.get(EmployeeProfile_.empProfileLname),""),
+						builder.coalesce(empProf.get(EmployeeProfile_.empProfileMi), ""),
+						builder.coalesce(empProf.get(EmployeeProfile_.empProfileCredentials), ""),
+						builder.function("glace_timezone", String.class, root.get(PatientAllergiesHistory_.patallergModifiedon),builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("modifiedOn")
+						);
+		cq.where(builder.equal(root.get(PatientAllergiesHistory_.patallergChartid),chartId));
+		List<Object[]> patAllergHis = em.createQuery(cq).getResultList();
+		List<PatientAllergiesHistoryBean> patAllergiesHistory = new ArrayList<PatientAllergiesHistoryBean>();
+		for(Object[] patAllergDetails : patAllergHis)
+		{
+			String fName=patAllergDetails[10]==null?"":patAllergDetails[10].toString();
+			String lName=patAllergDetails[11]==null?"":patAllergDetails[11].toString();
+			String mName=patAllergDetails[12]==null?"":patAllergDetails[12].toString();
+			String credentials=patAllergDetails[13]==null?"":patAllergDetails[13].toString();
+			String empName = "";
+			try
+			{
+				empName = textFormatter.getFormattedName(fName, mName, lName, credentials);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			
+			PatientAllergiesHistoryBean patAllergBean = new PatientAllergiesHistoryBean();
+			patAllergBean.setId(patAllergDetails[0]==null?-1:(Integer)patAllergDetails[0]);
+			patAllergBean.setStatus(patAllergDetails[1]==null?-1:(Integer)patAllergDetails[1]);
+			patAllergBean.setIsActive(patAllergDetails[2]==null?-1:(Integer)patAllergDetails[2]);
+			patAllergBean.setType(patAllergDetails[3]==null?"":patAllergDetails[3].toString());
+			patAllergBean.setDrugCategory(patAllergDetails[4]==null?"":patAllergDetails[4].toString());
+			patAllergBean.setAllergen(patAllergDetails[5]==null?"":patAllergDetails[5].toString());
+			patAllergBean.setReaction(patAllergDetails[6]==null?"":patAllergDetails[6].toString());
+			patAllergBean.setOnsetDate(patAllergDetails[7]==null?"":patAllergDetails[7].toString());
+			if(patAllergDetails[8] != null)
+			{
+				patAllergBean.setAllergyStatus((Integer)patAllergDetails[8] == 1?"Active":((Integer)patAllergDetails[8] == 2?"Resolved":"Inactive"));
+			}
+			else
+			{
+				patAllergBean.setAllergyStatus("");
+			}
+			patAllergBean.setResolvedDate(patAllergDetails[9]==null?"":patAllergDetails[9].toString());
+			patAllergBean.setModifiedBy(empName);
+			patAllergBean.setModifiedOn(patAllergDetails[14]==null?"":patAllergDetails[14].toString());
+			patAllergiesHistory.add(patAllergBean);
+		}
+		return patAllergiesHistory;
+	}
+	
+	public List<PatientAllergiesHistoryBean> sortByHistoryBean(List<PatientAllergiesHistoryBean> jsonValues) {
+		Collections.sort(jsonValues, new Comparator<PatientAllergiesHistoryBean>() {
+			@Override
+			public int compare(PatientAllergiesHistoryBean arg0, PatientAllergiesHistoryBean arg1) {
+				try {
+					if (arg0.getId().equals(null) && arg1.getId().equals(null)) {
+	                    return 0;
+	                }
+	                if (arg0.getId().equals(null)) {
+	                    return 1;
+	                }
+	                if (arg1.getId().equals(null)) {
+	                    return -1;
+	                }
+	                if(!((arg0.getId().equals(null) && arg1.getId().equals(null)) || arg0.getId().equals(null) || arg1.getId().equals(null)))
+	                {
+							return arg0.getId().compareTo(arg1.getId());
+	                }
+					return arg1.getId().compareTo(arg0.getId());
+				} catch (Exception e) {
+					e.printStackTrace();
+					return 0;
+				}
+			}
+		});
+		
+		System.out.println("after 1st sorting>>>>>>"+jsonValues);
+		Collections.sort(jsonValues, new Comparator<PatientAllergiesHistoryBean>() {
+			@Override
+			public int compare(PatientAllergiesHistoryBean arg0, PatientAllergiesHistoryBean arg1) {
+				if(arg0.getId().equals(arg1.getId()))
+				{
+				try {
+					if (arg0.getModifiedOn().equalsIgnoreCase(null) && arg1.getModifiedOn().equalsIgnoreCase(null)) {
+	                    return 0;
+	                }
+	                if (arg0.getModifiedOn().equalsIgnoreCase(null)) {
+	                    return 1;
+	                }
+	                if (arg1.getModifiedOn().equalsIgnoreCase(null)) {
+	                    return -1;
+	                }
+	                if(!((arg0.getModifiedOn().equalsIgnoreCase(null) && arg1.getModifiedOn().equalsIgnoreCase(null)) || arg0.getModifiedOn().equalsIgnoreCase(null) || arg1.getModifiedOn().equalsIgnoreCase(null)))
+	                {
+	                	/*SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy HH:MM:ss");
+	                	System.out.println("arg0.getId()"+arg0.getId());
+	                	Date m1 = formatter.parse(arg0.getModifiedOn());
+	                	System.out.println("m1---"+m1);
+	                	Date m2 = formatter.parse(arg1.getModifiedOn());
+	                	System.out.println("m2---"+m2);*/
+							return arg1.getModifiedOn().compareTo(arg0.getModifiedOn());
+	                }
+					return arg1.getId().compareTo(arg0.getId());
+				} catch (Exception e) {
+					e.printStackTrace();
+					return 0;
+				}
+			}
+				return 0;
+			}
+		});
+		
+		System.out.println("after second sorting"+jsonValues);
+		
+		Collections.sort(jsonValues, new Comparator<PatientAllergiesHistoryBean>() {
+			@Override
+			public int compare(PatientAllergiesHistoryBean arg0, PatientAllergiesHistoryBean arg1) {
+				if(arg0.getId().equals(arg1.getId()))
+				{
+					if(arg0.getModifiedOn().equals(arg1.getModifiedOn()))
+					{
+						try {
+							if (arg0.getStatus().equals(null) && arg1.getStatus().equals(null)) {
+			                    return 0;
+			                }
+			                if (arg0.getStatus().equals(null)) {
+			                    return 1;
+			                }
+			                if (arg1.getStatus().equals(null)) {
+			                    return -1;
+			                }
+			                if(!((arg0.getStatus().equals(null) && arg1.getStatus().equals(null)) || arg0.getStatus().equals(null) || arg1.getStatus().equals(null)))
+			                {
+									return arg1.getStatus().compareTo(arg0.getStatus());
+			                }
+							return arg1.getStatus().compareTo(arg0.getStatus());
+						} catch (Exception e) {
+							e.printStackTrace();
+							return 0;
+						}
+					}
+				}
+			return 0;
+			}
+		});
+		return jsonValues;
+	}
+
+	@Override
+	public void saveAllergies(String allergData) {
+		// TODO Auto-generated method stub
+		JSONArray jsonParametersArray = null;
+		try
+		{
+			String editDataDecode=HUtil.Nz(URLDecoder.decode(allergData,"UTF-8"),"");
+			jsonParametersArray = new JSONArray(editDataDecode);
+			for(int i=0;i<jsonParametersArray.length();i++)
+			{
+				JSONObject jsonParameters = jsonParametersArray.getJSONObject(i);
+				if(jsonParameters.has("id"))
+				{
+					editAllergies(URLEncoder.encode(jsonParameters.toString(), "UTF-8").toString());
+				}
+				else
+				{
+					String status = jsonParameters.getString("stat");
+					String charset = URLEncoder.encode(jsonParameters.toString(), "UTF-8").toString();
+					System.out.println("charset"+charset);
+					if(status.trim().equalsIgnoreCase("3")) {    //Inactive
+
+						saveNewAllergies(5, charset);
+
+					}else if(status.trim().equalsIgnoreCase("2")) {	//Resolved
+						
+						saveNewAllergies(4, charset);
+
+					} else if (status.trim().equalsIgnoreCase("1")) {	//Active
+						
+						saveNewAllergies(1, charset);
+
+					}
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

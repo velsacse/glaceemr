@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.json.JSONArray;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
+import com.glenwood.glaceemr.server.application.services.chart.CurrentMedication.PatientAllergiesBean;
 
 public interface AllergiesService {
 
@@ -33,10 +34,16 @@ public interface AllergiesService {
 
 	void nkauncheck(String nkaData);
 
-	List<PatientAllergies> retrieveDataForEditAllerg(String chartId, String patId);
+	List<PatientAllergiesBean> retrieveDataForEditAllerg(String chartId, String patId);
 
 	JSONArray lastReviewDetails(String chartId);
 
-	List<PatientAllergies> retrieveInActiveAllerg(String chartId);
+	List<PatientAllergiesBean> retrieveInActiveAllerg(String chartId, String statusList);
+	
+	List<PatientAllergiesHistoryBean> patientAllergiesHistory(String chartId);
+
+	void saveAllergies(String allergData);
+
+	List<PatientAllergiesBean> getAllergies(int chartId,int encounterId,String statusList,int fromSoap);
 
 }

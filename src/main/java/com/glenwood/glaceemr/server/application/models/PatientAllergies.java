@@ -100,7 +100,7 @@ public class PatientAllergies {
 	EmployeeProfile empProfileAllgResolvedByTable;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="patallerg_inactiveby", referencedColumnName="emp_profile_empid", insertable=false, updatable=false)
+	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula= @JoinFormula(value="patallerg_inactiveby::integer" , referencedColumnName="emp_profile_empid"))})
 	EmployeeProfile empProfileAllgInactiveByTable;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
