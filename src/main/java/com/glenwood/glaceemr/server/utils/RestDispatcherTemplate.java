@@ -37,7 +37,28 @@ public class RestDispatcherTemplate {
 
 	        HttpHeaders headers = new HttpHeaders();
 	        
-	        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(connectionPath);
+	        String baseURL=request.getHeader("URL");
+	        
+	        if(baseURL.contains(".com"))
+			{
+				String fromPort[] = baseURL.split(".com");
+				String port = fromPort[1];
+				String p[] = port.split("/");
+				String portNum = p[0];
+				baseURL = baseURL.replace(portNum, "");
+			}
+			else if(baseURL.contains(".net"))
+			{
+				String s[] = baseURL.split(".net");
+				String port = s[1];
+				String p[] = port.split("/");
+				String portNum = p[0];
+				baseURL = baseURL.replace(portNum, "");
+			}
+	        
+	        System.out.println("URL :::::: "+baseURL+connectionPath);
+	        
+	        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseURL+connectionPath);
 	        
 	        
 	        builder.queryParams(params);
