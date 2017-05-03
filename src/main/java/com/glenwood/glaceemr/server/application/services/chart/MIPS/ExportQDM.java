@@ -271,24 +271,29 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 			for(int i=0;i<encounterObj.size();i++){
 				
-				if(encounterObj.get(i).getCode().equals("99213")){
-					cptThere=true;
-				}
-				
 				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
 				
-				encObject.setCode(encounterObj.get(i).getCode());
-				
 				if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(encounterObj.get(i).getCode())) {
+					
+					encObject.setCode(encounterObj.get(i).getCode());
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
-				}else{
+					encObject.setStartDate(encounterObj.get(i).getStartDate());
+					encObject.setEndDate(encounterObj.get(i).getEndDate());
+					encounterQDM.add(i, encObject);
+					
+					cptThere=true;
+					
+				}else if(cptCodeListString.length() > 0 && cptCodeListString.contains( encounterObj.get(i).getCode() )){
+					
+					encObject.setCode(encounterObj.get(i).getCode());
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
+					encObject.setStartDate(encounterObj.get(i).getStartDate());
+					encObject.setEndDate(encounterObj.get(i).getEndDate());
+					encounterQDM.add(i, encObject);
+					
+					cptThere=true;
+					
 				}
-				
-				encObject.setStartDate(encounterObj.get(i).getStartDate());
-				encObject.setEndDate(encounterObj.get(i).getEndDate());
-				
-				encounterQDM.add(i, encObject);
 				
 			}
 			

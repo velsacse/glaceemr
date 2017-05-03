@@ -622,7 +622,8 @@ public class EMeasureUtils {
 
 			eachObj = patientInvestigationData.get(i);
 			procedureObj = new Procedure();
-			if(codeList.contains(eachObj.getCode())){
+			
+			if(codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null){
 
 				procedureObj.setCode(eachObj.getCode());
 				procedureObj.setResultValue(eachObj.getResultValue());
