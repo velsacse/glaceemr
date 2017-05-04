@@ -612,7 +612,7 @@ public class EMeasureUtils {
 		
 	}
 	
-	public List<Procedure> getProcedureQDM(List<InvestigationQDM> patientInvestigationData, String codeList,List<MedicationQDM> obj,List<Procedure> ProcedureObj,List<Procedure> ProcBasedOnCPT){
+	public List<Procedure> getProcedureQDM(List<InvestigationQDM> patientInvestigationData, String codeList,List<Procedure> obj,List<Procedure> ProcedureObj,List<Procedure> ProcBasedOnCPT){
 
 		InvestigationQDM eachObj = null;
 		Procedure procedureObj;
@@ -623,7 +623,11 @@ public class EMeasureUtils {
 			eachObj = patientInvestigationData.get(i);
 			procedureObj = new Procedure();
 			
-			if(codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null){
+			System.out.println("eachObj code: "+eachObj.getCode());
+			
+			System.out.println("eachObj length: "+eachObj.getCode().length());
+			
+			if(codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
 
 				procedureObj.setCode(eachObj.getCode());
 				procedureObj.setResultValue(eachObj.getResultValue());
@@ -659,7 +663,7 @@ public class EMeasureUtils {
 
 
 		}if(obj!=null)
-			procedureQDM.addAll(setMedicationObj(obj));
+			procedureQDM.addAll(obj);
 
 		if(ProcedureObj!=null){
 			procedureQDM.addAll(ProcedureObj);
@@ -745,6 +749,7 @@ public class EMeasureUtils {
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			procedureObj =new Procedure();
+			
 			if(codeList.contains(eachObj.getCode())){
 				procedureObj.setCode(eachObj.getCode());
 				procedureObj.setCodeSystem(eachObj.getCodeSystem());

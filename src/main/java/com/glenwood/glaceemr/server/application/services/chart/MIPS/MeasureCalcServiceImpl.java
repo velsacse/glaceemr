@@ -197,7 +197,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	}
 
 	@Override
-	public Request getQDMRequestObject(Boolean considerProvider,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM) {
+	public Request getQDMRequestObject(Boolean considerProvider,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM, Date repStartDate, Date repEndDate) {
 		
 		Request finalReqObject = new Request();
 		
@@ -225,9 +225,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 			requestObj = qdmData.getRequestQDM(em,patientInfoRepo, diagnosisRepo, patientID, providerId);
 				
-			List<MedicationQDM> medicationsReviewed = qdmData.getMedicationsReviewed(em,considerProvider,providerId,patientID,date1,date2);
+			List<Procedure> medicationsReviewed = qdmData.getMedicationsReviewed(em,considerProvider,providerId,patientID,repStartDate,repEndDate);
 
-			requestObj.setEncounterList(qdmData.getEncounterQDM(date1, date2, em, considerProvider, patientID, providerId, codeListForQDM.get("Encounter")));
+			requestObj.setEncounterList(qdmData.getEncounterQDM(repStartDate,repEndDate, em, considerProvider, patientID, providerId, codeListForQDM.get("Encounter")));
 
 			requestObj.setDxList(qdmData.getPatientDiagnosisQDM(diagnosisRepo, patientID));
 

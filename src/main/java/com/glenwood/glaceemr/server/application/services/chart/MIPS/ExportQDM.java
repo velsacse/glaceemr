@@ -278,7 +278,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					encObject.setCode(encounterObj.get(i).getCode());
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
 					encObject.setStartDate(encounterObj.get(i).getStartDate());
-					encObject.setEndDate(encounterObj.get(i).getEndDate());
+					encObject.setEndDate(encounterObj.get(i).getStartDate());
 					encounterQDM.add(i, encObject);
 					
 					cptThere=true;
@@ -288,7 +288,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					encObject.setCode(encounterObj.get(i).getCode());
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
 					encObject.setStartDate(encounterObj.get(i).getStartDate());
-					encObject.setEndDate(encounterObj.get(i).getEndDate());
+					encObject.setEndDate(encounterObj.get(i).getStartDate());
 					encounterQDM.add(i, encObject);
 					
 					cptThere=true;
@@ -297,7 +297,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				
 			}
 			
-			int encCount = getEncounterCountForPatient(em, patientID, providerId, startDate, endDate);
+			/*int encCount = getEncounterCountForPatient(em, patientID, providerId, startDate, endDate);
 			
 			if(cptThere==false && encCount > 0){
 			
@@ -308,7 +308,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				encObject.setStartDate(encounterObj1.get(0).getStartDate());
 				encounterQDM.add(encObject);
 				
-			}
+			}*/
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -594,6 +594,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
 					builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
 					hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
+					labCode.isNotNull(),
 			};
 		
 		cq.where(restrictions);
@@ -1085,7 +1086,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	 * 
 	 */
 	
-	public List<MedicationQDM> getMedicationsReviewed(EntityManager em,Boolean considerProvider,int providerId,int patientId,Date date1,Date date2){
+	/*public List<MedicationQDM> getMedicationsReviewed(EntityManager em,Boolean considerProvider,int providerId,int patientId,Date date1,Date date2){
 		CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
         Root<Encounter> root = cq.from(Encounter.class);
@@ -1115,7 +1116,65 @@ Root<Encounter> root = cq.from(Encounter.class);
         }
        
         return attestList;
-    }
+    }*/
+	
+	public List<Procedure> getMedicationsReviewed(EntityManager em,Boolean considerProvider,int providerId,int patientId,Date date1,Date date2){
+		
+		List<Procedure> reviewedVisits = new ArrayList<Procedure>();
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+        Root<Encounter> root = cq.from(Encounter.class);
+        
+        Join<Encounter, Chart> encChartJoin=root.join(Encounter_.chartTable,JoinType.INNER);
+        encChartJoin.on(builder.equal(encChartJoin.get(Chart_.chartPatientid),patientId));
+        
+        Predicate date = builder.between(root.get(Encounter_.encounterDate), date1, date2);
+        Predicate byProvider = builder.equal(root.get(Encounter_.encounter_service_doctor), providerId);
+        Predicate attest = builder.gt(builder.length(builder.trim(root.get(Encounter_.medicationAttestationStatus))), 0);
+        
+        cq.multiselect(root.get(Encounter_.encounterDate),root.get(Encounter_.medicationAttestationStatus));
+        
+        if(considerProvider)
+        	cq.where(date,attest,byProvider);
+        else
+        	cq.where(date,attest);
+        
+        List<Object[]> result=em.createQuery(cq).getResultList();
+        
+        for(int i=0;i<result.size();i++){
+        	
+        	Procedure proc = new Procedure();
+        	
+        	if((result.get(i)[1].toString()).equals("428191000124101")){
+        		
+        		proc.setCode("428191000124101");
+        		proc.setDescription("Documentation of current medications (procedure)");
+        		proc.setCodeSystemOID("2.16.840.1.113883.6.96");
+        		proc.setStatus(2);
+        		proc.setStartDate((Date)result.get(i)[0]);
+        		proc.setEndDate((Date)result.get(i)[0]);
+        		
+        		reviewedVisits.add(proc);
+        		
+        	}else if((result.get(i)[1].toString()).equals("183932001")){
+        		
+        		proc.setCode("183932001");
+        		proc.setDescription("Documentation of current medications (procedure)");
+        		proc.setCodeSystemOID("2.16.840.1.113883.6.96");
+        		proc.setStatus(2);
+        		proc.setStartDate((Date)result.get(i)[0]);
+        		proc.setEndDate((Date)result.get(i)[0]);
+        		
+        		reviewedVisits.add(proc);
+        		
+        	}
+        	
+        }
+        
+        return reviewedVisits;
+        
+	}
 	
 	@SuppressWarnings("rawtypes")
 	public List<ClinicalDataQDM> getClinicalDataQDM(EntityManager em,Boolean considerProvider,int providerId,int patientId, String snomedCodes,String loincCodes,Boolean range, Date startDate, Date endDate)    {     

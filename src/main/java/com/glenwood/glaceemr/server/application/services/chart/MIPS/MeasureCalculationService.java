@@ -14,7 +14,7 @@ public interface MeasureCalculationService {
 
 	void saveMeasureDetails(int providerId, int patientId, List<MeasureStatus> measureStatus);
 
-	Request getQDMRequestObject(Boolean isIndividual,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM);
+	Request getQDMRequestObject(Boolean isIndividual,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM, Date startDate, Date endDate);
 
 	List<EPMeasureBean> getEPMeasuresResponseObject(String accountId,Boolean isGroup,int patientID, int providerId, Date startDate, Date endDate);
 	

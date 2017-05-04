@@ -113,7 +113,7 @@ public class QPPPerformanceController {
 
 				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedPath));
 				finalResponse.setMeasureInfo(utils.getMeasureInfo());
-				requestObj = measureService.getQDMRequestObject(isIndividual,patientID, userId, codeListForQDM);
+				requestObj = measureService.getQDMRequestObject(isIndividual,patientID, userId, codeListForQDM, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 
 				requestObj.setAccountId(accountId);
 				requestObj.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());

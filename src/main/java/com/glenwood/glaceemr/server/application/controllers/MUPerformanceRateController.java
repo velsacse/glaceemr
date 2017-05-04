@@ -210,7 +210,7 @@ public class MUPerformanceRateController {
 
 				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString()));
 				finalResponse.setMeasureInfo(utils.getMeasureInfo());
-				requestObj = measureService.getQDMRequestObject(isIndividual,patientID, providerId, codeListForQDM);
+				requestObj = measureService.getQDMRequestObject(isIndividual,patientID, providerId, codeListForQDM, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 
 				requestObj.setAccountId(accountId);
 				requestObj.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
