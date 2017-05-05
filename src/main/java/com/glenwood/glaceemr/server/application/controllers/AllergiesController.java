@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,8 +45,6 @@ public class AllergiesController {
 	@Autowired
 	HttpServletRequest request;
 
-	private Logger logger = Logger.getLogger(AllergiesController.class);
-	
 	/**
 	 *  
 	 * @return Getting patient allergies data
@@ -64,6 +61,7 @@ public class AllergiesController {
 		List<PatientAllergiesBean> allergies=AllergiesService.getAllergies(chartId,encounterId,statusList,fromSoap);
 		EMRResponseBean allergyList = new EMRResponseBean();
 		allergyList.setData(allergies);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved patient allergies", -1, request.getRemoteAddr(), -1, "chartId="+chartId, LogUserType.USER_LOGIN, "", "");
 		return allergyList;
 	}
 	
@@ -346,6 +344,7 @@ public class AllergiesController {
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(AllergiesService.patientAllergiesHistory(chartId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALLERGY, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved patient allergy history", -1, request.getRemoteAddr(), -1, "chartId="+chartId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 }

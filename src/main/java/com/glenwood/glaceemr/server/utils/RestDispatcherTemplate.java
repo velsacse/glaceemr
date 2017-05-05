@@ -108,36 +108,49 @@ public class RestDispatcherTemplate {
 	        	return true;
 	}
 
-	public EMRResponseBean sendPost(HttpServletRequest request, String connectionPath,Object requestObj) throws JsonParseException, JsonMappingException, IOException{
-		
-		EMRResponseBean responseBean=new EMRResponseBean();
-		
-		try {
-			
-			RestTemplate restTemplate = new RestTemplate();
+	public EMRResponseBean sendPost(HttpServletRequest request, String connectionPath,MultiValueMap<String, String> requestObj) throws JsonParseException, JsonMappingException, IOException{EMRResponseBean responseBean=new EMRResponseBean();
+	
+	try {RestTemplate restTemplate = new RestTemplate();
 
-			HttpHeaders headers = new HttpHeaders();
-
-			setAndCheckJSESSIONIDCookie(request, headers);
-	        
-			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-			headers.setContentType(MediaType.APPLICATION_JSON);
-
-			HttpEntity<String> entity = new HttpEntity<String>(objectMapper.writeValueAsString(requestObj), headers);
-			
-			responseBean = restTemplate.postForObject(connectionPath, entity, EMRResponseBean.class);
-
-			return responseBean;
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			responseBean.setSuccess(false);
-			responseBean.setLogin(false);
-			responseBean.setIsAuthorizationPresent(false);
-			responseBean.setData("Error in glaceemr data api !");
-			responseBean.setCanUserAccess(false);
-			return responseBean;
-		}
-		
+	HttpHeaders headers = new HttpHeaders();
+	
+	headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+	headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+	
+	String baseURL=request.getHeader("URL");
+    
+    if(baseURL.contains(".com"))
+	{
+		String fromPort[] = baseURL.split(".com");
+		String port = fromPort[1];
+		String p[] = port.split("/");
+		String portNum = p[0];
+		baseURL = baseURL.replace(portNum, "");
 	}
+	else if(baseURL.contains(".net"))
+	{
+		String s[] = baseURL.split(".net");
+		String port = s[1];
+		String p[] = port.split("/");
+		String portNum = p[0];
+		baseURL = baseURL.replace(portNum, "");
+	}
+    
+	 
+	setAndCheckJSESSIONIDCookie(request, headers);
+    
+
+	HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<MultiValueMap<String, String>>(requestObj, headers);
+	
+	responseBean = restTemplate.postForObject(baseURL+connectionPath, entity, EMRResponseBean.class);
+
+	return responseBean;} catch (Exception e) {
+		e.printStackTrace();
+		responseBean.setSuccess(false);
+		responseBean.setLogin(false);
+		responseBean.setIsAuthorizationPresent(false);
+		responseBean.setData("Error in glaceemr data api ! Connection Path:"+connectionPath);
+		responseBean.setCanUserAccess(false);
+		return responseBean;
+	}}
 }
