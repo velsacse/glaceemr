@@ -156,7 +156,7 @@ public class SchedulerController {
 		}
 		emrResponseBean.setData(resultObject);
 
-//		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting Scheduler default resource.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId, LogUserType.USER_LOGIN, "", "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting templates", sessionMap.getUserID(), request.getRemoteAddr(), -1, "resourceId="+userIds, LogUserType.USER_LOGIN, "", "");
 
 		return emrResponseBean;
 	}

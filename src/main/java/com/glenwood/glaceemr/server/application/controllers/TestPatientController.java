@@ -3,6 +3,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.TesttablePtn;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.patient.PatientService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 
 
 
@@ -33,7 +42,17 @@ public class TestPatientController {
 	EMRResponseBean responseBean;
 	
 	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	SessionMap sessionMap;
+	
+	@Autowired
+	HttpServletRequest request;
+	
+	@Autowired
 	ObjectMapper objectmapper;
+	
 	private Logger logger = Logger.getLogger(TestPatientController.class);
 	
 	/**
@@ -54,11 +73,13 @@ public class TestPatientController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(patientInfoService.findPatientByLastName(lastName));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved list of patients by last name of patient", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Data retrieval failure");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		}
 				
@@ -81,11 +102,13 @@ public class TestPatientController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(patientInfoService.findPatientByLastNameAndDob(lastName, dob));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved list of patients by patient last name and dob", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Data retrieval failure");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		}
 		
@@ -107,11 +130,13 @@ public class TestPatientController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(patientInfoService.findPatientByinsuranceName(insuranceName));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved list of patients by insurance name", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Data retrieval failure");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		}
 		
@@ -133,11 +158,13 @@ public class TestPatientController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(patientInfoService.findPatintByLastNameHavingInsuranceByName(lastName, insuranceName));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved list of patients by last name and insurance name", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Data retrieval failure");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		}
 		
@@ -153,11 +180,13 @@ public class TestPatientController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(patientInfoService.findEncounterByPatientId(patientId));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved encounter details by patientId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Data retrieval failure");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		}
 		
@@ -173,11 +202,13 @@ public class TestPatientController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(patientInfoService.findInsuranceByPatientId(patientId));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved insurance details by patientId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Data retrieval failure");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		}
 		
@@ -194,11 +225,13 @@ public class TestPatientController {
 		try {
 			responseBean.setSuccess(true);
 			responseBean.setData(patientInfoService.findLatestEncounterDateAndPatientNameByPatientId(patientId));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved max encounterId and patient name by patientId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Data retrieval failure");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		}
 		
@@ -220,11 +253,13 @@ public class TestPatientController {
 			for(int i=0;i<array.length();i++)
 				patientIdList.add((Integer)array.get(i));
 			responseBean.setData(patientInfoService.findEncountersbyPatientID(patientIdList));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved encounter details by list of patientId's", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Data retrieval failure");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		}
 		
@@ -244,11 +279,13 @@ public class TestPatientController {
 			for(int i=0;i<array.length();i++)
 				patientIdList.add((Integer)array.get(i));
 			responseBean.setData(patientInfoService.findLatestEncountersbyPatientIDs(patientIdList));
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved latest encounter details by list of patientId's", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Data retrieval failure");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			return responseBean;
 		}
 		
@@ -266,11 +303,13 @@ public class TestPatientController {
 			try {
 				responseBean.setSuccess(true);
 				responseBean.setData(patientInfoService.findPatientByPatientId(patientId));
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "Getting patient details by patientId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 				return responseBean;
 			} catch (Exception e) {
 				e.printStackTrace();
 				responseBean.setSuccess(false);
 				responseBean.setData("Data retrieval failure");
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.VIEW, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 				return responseBean;
 			}
 			
@@ -291,11 +330,13 @@ public class TestPatientController {
 				System.out.println("In update By patientId>>"+patient);
 				updatepatient = objectmapper.readValue(patient, TesttablePtn.class);
 				responseBean.setData(patientInfoService.updateByPatient(updatepatient));
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "Updated patient details in PatientTable", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 				return responseBean;
 			} catch (Exception e) {
 				e.printStackTrace();
 				responseBean.setSuccess(false);
 				responseBean.setData("Data retrieval failure");
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.UPDATE, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 				return responseBean;
 			}
 				
@@ -315,11 +356,13 @@ public class TestPatientController {
 				try {
 					responseBean.setSuccess(true);
 					responseBean.setData(patientInfoService.updateByAddress(address));
+					auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "Updated patient details by address", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 					return responseBean;
 				} catch (Exception e) {
 					e.printStackTrace();
 					responseBean.setSuccess(false);
 					responseBean.setData("Data retrieval failure");
+					auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.UPDATE, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 					return responseBean;
 				}
 			 
@@ -335,6 +378,8 @@ public class TestPatientController {
 				 
 				 patientInfoService.deleteById(patientId);
 				 
+				 auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.DELETE, 0, Log_Outcome.SUCCESS, "Deleted patient details by patientId", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+				 
 				 System.out.println(" After  Executing  delete By patientId>>"+patientId);
 					
 			    }
@@ -348,7 +393,9 @@ public class TestPatientController {
 				 System.out.println("In delete By lastName>>"+lastName);
 				
 				 patientInfoService.deleteByLastname(lastName);
-					
+				
+				 auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.DELETE, 0, Log_Outcome.SUCCESS, "Deleted patient details by patient last name and insurance Name", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+				 
 				 System.out.println(" After  Executing  delete By lastName>>"+lastName);
 			    }
 	
@@ -360,7 +407,9 @@ public class TestPatientController {
 				 System.out.println("In delete By All Addresses>>");
 				
 				 patientInfoService.deleteAllAddress();
-					
+				
+				 auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.DELETE, 0, Log_Outcome.SUCCESS, "Deleted patient details by address", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+				 
 				 System.out.println(" After  Executing  delete By all Address>>");
 			    }
 			 
@@ -381,11 +430,13 @@ public class TestPatientController {
 					patientInfoService.deleteByPatient(updatepatient);
 					System.out.println(" Afte Executing delete By patient>>"+patient);
 					responseBean.setData("success");
+					auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.DELETE, 0, Log_Outcome.SUCCESS, "Deleted patient details by patientId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 					return responseBean;
 				} catch (Exception e) {
 					e.printStackTrace();
 					responseBean.setSuccess(false);
 					responseBean.setData("failure");
+					auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.DELETE, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 					return responseBean;
 				}
 					
@@ -406,11 +457,13 @@ public class TestPatientController {
 					System.out.println("In insert By patient>>"+patient);
 					updatepatient = objectmapper.readValue(patient, TesttablePtn.class);
 					responseBean.setData(patientInfoService.insertByPatient(updatepatient));
+					auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "Successful insertion of patient details", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 					return responseBean;
 				} catch (Exception e) {
 					e.printStackTrace();
 					responseBean.setSuccess(false);
 					responseBean.setData("Data retrieval failure");
+					auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PATIENT_REGISTRATION, LogActionType.CREATE, 0, Log_Outcome.FAILURE, "Data retrieval failure", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 					return responseBean;
 				}
 			    }

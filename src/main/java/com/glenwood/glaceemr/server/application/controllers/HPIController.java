@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Relavant_Id;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.chart.HPI.HPIService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.HUtil;
@@ -26,6 +35,12 @@ public class HPIController {
 	
 	@Autowired
 	HPIService HPIService;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
 
 	private Logger logger = Logger.getLogger(HPIController.class);
 	
@@ -55,6 +70,7 @@ public class HPIController {
 		templateId=Integer.parseInt(Optional.fromNullable(templateId+"").or("-1"));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(HPIService.getSymptomData(clientId,patientId,chartId,encounterId,templateId,symptomGWId,symptomId,isFollowUp,tabId).toString());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved HPI System Details", -1, request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId"+encounterId+"|templateId="+templateId+"|symptomId="+symptomId+"|tabId="+tabId+"|clientId="+clientId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -80,6 +96,7 @@ public class HPIController {
 		String symptomGWId=HUtil.Nz(symptomToRemoveGWID,"-1");
 		symptomGWId=symptomGWId.substring(0, 14)+"%";
 		HPIService.deleteSymptomDetails(symptomGWId,patientId,encounterId);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.DELETE, 0, Log_Outcome.SUCCESS, "successful deletion of HPI Symptom details", -1, request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId"+encounterId+"|templateId="+templateId, LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -101,6 +118,7 @@ public class HPIController {
 		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(HPIService.fetchCCData(patientId,chartId,encounterId).toString().replaceAll("\\\\", ""));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of HPI Chief Complaints Data", -1, request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId"+encounterId+"|templateId="+Log_Relavant_Id.TEMPLATE_ID, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 
@@ -121,6 +139,7 @@ public class HPIController {
 		encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(HPIService.fetchPatientHPINotesData(patientId,chartId,encounterId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of Patient HPI Notes", -1, request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId"+encounterId+"|templateId="+Log_Relavant_Id.TEMPLATE_ID, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 
@@ -136,6 +155,7 @@ public class HPIController {
 		mode=Integer.parseInt(Optional.fromNullable(mode+"").or("-1"));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(HPIService.fetchDefaultShortcutData(mode).toString());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of HPI default shortcut", -1, request.getRemoteAddr(), -1, "encounterId="+Log_Relavant_Id.ENCOUNTER_ID+"|templateId="+Log_Relavant_Id.TEMPLATE_ID, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 
@@ -151,6 +171,7 @@ public class HPIController {
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(HPIService.fetchShortcutData(shortcutId).toString());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of HPI Shortcut Data", -1, request.getRemoteAddr(), -1, "encounterId="+Log_Relavant_Id.ENCOUNTER_ID+"|templateId="+Log_Relavant_Id.TEMPLATE_ID+"|shortcutId="+shortcutId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -171,6 +192,7 @@ public class HPIController {
 	{
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(HPIService.fetchShortCutListBasedOnSearchString(mode,searchStr,limit,offset).toString());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of HPI Shortcut list based on search string", -1, request.getRemoteAddr(), -1, "encounterId="+Log_Relavant_Id.ENCOUNTER_ID+"|templateId="+Log_Relavant_Id.TEMPLATE_ID+"|searchString="+searchStr, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	
@@ -184,6 +206,7 @@ public class HPIController {
 	public void AddShorctutInCCAndNote(@RequestParam(value="complaint") String complaint){
 		complaint=Optional.fromNullable(complaint+"").or("-1");
 		HPIService.addShorctutInCC(complaint);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "successful insertion of shortcut in HPI chief complaints", -1, request.getRemoteAddr(), -1, "encounterId="+Log_Relavant_Id.ENCOUNTER_ID+"|templateId="+Log_Relavant_Id.TEMPLATE_ID+"|complaint="+complaint, LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -205,6 +228,7 @@ public class HPIController {
 		Description=Optional.fromNullable(Description+"").or("-1");
 		categoryId=Optional.fromNullable(categoryId+"").or("-1");
 		HPIService.addShorctutInNotes(Id,ShortCutCode,Description,categoryId);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "successful insertion of shortcut in HPI Notes", -1, request.getRemoteAddr(), -1, "encounterId="+Log_Relavant_Id.ENCOUNTER_ID+"|templateId="+Log_Relavant_Id.TEMPLATE_ID+"|ShortCutCode="+ShortCutCode+"categoryId"+categoryId, LogUserType.USER_LOGIN, "", "");
 		return;
 	}
 	
@@ -237,6 +261,7 @@ public class HPIController {
 		templateId=Integer.parseInt(Optional.fromNullable(templateId+"").or("-1"));
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(HPIService.fetchSymptom(patientId,chartId,encounterId,templateId,isCompleted,symptomTypeList,isFollowUp,clientId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.TEMPLATE, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of HPI All Symptoms and Data", -1, request.getRemoteAddr(), patientId, "chartId="+chartId+"|encounterId"+encounterId+"|templateId="+templateId+"|clientId="+clientId, LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	

@@ -1,8 +1,6 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,15 +15,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertCountBean;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxBean;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxService;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.RestDispatcherTemplate;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -60,9 +60,6 @@ public class AlertInboxController {
 	AlertInboxService alertInboxService;
 
 	@Autowired
-	AuditTrailService auditTrailService;
-
-	@Autowired
 	SessionMap sessionMap;
 
 	@Autowired
@@ -70,6 +67,9 @@ public class AlertInboxController {
 	
 	@Autowired
 	RestDispatcherTemplate requestDispatcher;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
 
 	private Logger logger = Logger.getLogger(AlertInboxController.class);
 
@@ -108,7 +108,8 @@ public class AlertInboxController {
 		alertsList=alertInboxService.getAlerts(userId,categoryIdList,pageno,pagesize);
 		EMRResponseBean alertsLists=new EMRResponseBean();
 		alertsLists.setData(alertsList);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved all alerts based on list of categoty id's", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"categoryIds="+categoryIds, LogUserType.USER_LOGIN, "", "");
 
 		return alertsLists;
 	}
@@ -136,7 +137,10 @@ public class AlertInboxController {
 		List<AlertEvent> alertEventLists= alertInboxService.updateStatusbyAlertEventIds(alertEventIdList,statusId,userId);
 		EMRResponseBean alertsLists=new EMRResponseBean();
 		alertsLists.setData(alertEventLists);
-		 return alertsLists;
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully updation of alert list status", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"statusId="+statusId, LogUserType.USER_LOGIN, "", "");
+		
+		return alertsLists;
 	}
 	
 	/**
@@ -174,7 +178,9 @@ public class AlertInboxController {
 				fromDateSearchValue,toDateSearchValue);
 		EMRResponseBean alertsLists=new EMRResponseBean();
 		alertsLists.setData(alertsList);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved alerts based on search criteria", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId, LogUserType.USER_LOGIN, "", "");
+		
 		return alertsLists;
 	}
 	/**
@@ -188,9 +194,11 @@ public class AlertInboxController {
 			 @RequestParam(value="userid", required=false, defaultValue="") String userId){
 		logger.debug("Getting alert counts");
 		List<AlertCountBean> shortcutInfoBeans=alertInboxService.getAlertCount(userId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		EMRResponseBean shortcutInfoBean=new EMRResponseBean();
 		shortcutInfoBean.setData(shortcutInfoBeans);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved alerts count based on user", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId, LogUserType.USER_LOGIN, "", "");
+		
 		return shortcutInfoBean;
 	}
 	/**
@@ -210,9 +218,11 @@ public class AlertInboxController {
 			 @RequestParam(value="pagesize", required=false, defaultValue="20") int pagesize){
 		logger.debug("Getting alerts by category id "+categoryId);
 		List<AlertInboxBean> alertInboxBeans=alertInboxService.getAlertsByCategory(userId,categoryId,pageno,pagesize);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		EMRResponseBean alertInboxBean=new EMRResponseBean();
 		alertInboxBean.setData(alertInboxBeans);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved alerts based on categoryId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"categoryId="+categoryId, LogUserType.USER_LOGIN, "", "");
+		
 		return alertInboxBean;
 	}
 	/**
@@ -233,9 +243,11 @@ public class AlertInboxController {
 			alertIdList.add(Integer.parseInt(s));
 		}
 		List<AlertEvent> alertEvent=alertInboxService.hightlightAlert(alertIdList,userId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully highlighted list of alerts", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"alertid="+alertids, LogUserType.USER_LOGIN, "", "");
+		
 		return alertEvents;
 	}
 	/**
@@ -256,9 +268,11 @@ public class AlertInboxController {
 			alertIdList.add(Integer.parseInt(s));
 		}
 		List<AlertEvent> alertEvent=alertInboxService.unHightlightAlert(alertIdList,userId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully upadated list of alerts with unhighlighted option", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"alertid="+alertids, LogUserType.USER_LOGIN, "", "");
+		
 		return alertEvents;
 	}
 	/**
@@ -279,9 +293,11 @@ public class AlertInboxController {
 			alertIdList.add(Integer.parseInt(s));
 		}
 		List<AlertEvent> alertEvent=alertInboxService.markReadAlert(alertIdList,userId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully upadated list of alerts with read option", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"alertid="+alertids, LogUserType.USER_LOGIN, "", "");
+		
 		return alertEvents;
 	}
 	/**
@@ -304,7 +320,7 @@ public class AlertInboxController {
 		List<AlertEvent> alertEvent=alertInboxService.markUnReadAlert(alertIdList,userId);
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully updated list of alerts with unread option", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"alertid="+alertids, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
 	/**
@@ -325,7 +341,7 @@ public class AlertInboxController {
 		List<AlertCategory> alertEvent=alertInboxService.getCategories(categoryIdList);
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved category details based on categoryId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "categoryIds="+categoryIds, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
 	/**
@@ -351,7 +367,7 @@ public class AlertInboxController {
 		List<AlertEvent> alertEvent=alertInboxService.forwardAlerts(alertIdList,categoryId, message, userId, forwardTo, ishighpriority);
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully forwarded list of alerts to "+forwardTo, sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"categoryId="+categoryId, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
 	/**
@@ -376,7 +392,7 @@ public class AlertInboxController {
 			alertEvent=alertInboxService.deleteAlert(alertIdList,userId);
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully deleted list of alerts", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"alertids="+alertids, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
 	/**
@@ -399,7 +415,7 @@ public class AlertInboxController {
 		List<AlertEvent> alertEvent=alertInboxService.deleteAlertByEncounter(encounterIdList,userId);
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully deleted the alerts by encounterId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"encounterId="+encounterIds, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
 	/**
@@ -419,7 +435,7 @@ public class AlertInboxController {
 		List<AlertEvent> alertEvent=alertInboxService.alertByEncounter(encounterIdList);
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved alerts by encounterId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
 	/**
@@ -454,6 +470,9 @@ public class AlertInboxController {
 		List<AlertEvent> alertEvent=alertInboxService.composeAlert(Integer.parseInt(fromid),toIdList,Integer.parseInt(status),Integer.parseInt(categoryid),Integer.parseInt(refid),Integer.parseInt(patientid),Integer.parseInt(encounterid),msg,Integer.parseInt(chartid),Integer.parseInt(roomid),Integer.parseInt(parentid));
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.CREATE, 0, Log_Outcome.SUCCESS, "successfully created alert", sessionMap.getUserID(), request.getRemoteAddr(), Integer.parseInt(patientid), "encounterid="+encounterid+"chartid="+chartid, LogUserType.USER_LOGIN, "", "");
+		
 		return alertEvents;
 	}
 	@RequestMapping(value = "/getConversation", method = RequestMethod.GET)
@@ -463,6 +482,9 @@ public class AlertInboxController {
 		List<AlertEvent> alerts=alertInboxService.getConversion(alertid);
 		EMRResponseBean alert=new EMRResponseBean();
 		alert.setData(alerts);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved conversation message for particular alert", sessionMap.getUserID(), request.getRemoteAddr(), -1, "alertid="+alertid, LogUserType.USER_LOGIN, "", "");
+		
 		return alert;
 	}
 	@RequestMapping(value = "/forwardIcmAlert", method = RequestMethod.GET)
@@ -479,6 +501,9 @@ public class AlertInboxController {
 		List<AlertEvent> alerts=alertInboxService.forwardIcmAlert(alertid,userId,encounterid,patientid,categoryid,forwardto,message,parentalertid);
 		EMRResponseBean alert=new EMRResponseBean();
 		alert.setData(alerts);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully forwarded internal communication message alert(updation)", sessionMap.getUserID(), request.getRemoteAddr(), patientid, "userId="+userId+"alertid="+alertid, LogUserType.USER_LOGIN, "", "");
+		
 		return alert;
 	}
 }
