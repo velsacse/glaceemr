@@ -9,14 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.DoctorSign;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.print.SignaturePrint;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.chart.print.signature.SignaturePrintService;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -32,7 +36,7 @@ public class SignaturePrintController {
 	EmployeeService employeeService;
 
 	@Autowired
-	AuditTrailService auditTrailService;
+	AuditTrailSaveService auditTrailSaveService;
 
 	@Autowired
 	SessionMap sessionMap;
@@ -52,7 +56,7 @@ public class SignaturePrintController {
 	public List<SignaturePrint> fetchSignaturePrintStyleList() throws Exception{
 		logger.debug("Begin request processing - to get the list of all Signature print styles.");
 		List<SignaturePrint> signaturePrintStyleList = signaturePrintService.getSignaturePrintStyleList();
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded signature list for configuration",sessionMap.getUserID(),"",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded signature list for configuration");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully loaded signature list for configuration",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to get the list of all Signature print styles.");
 		return signaturePrintStyleList;
 
@@ -88,7 +92,7 @@ public class SignaturePrintController {
 		newSignaturePrint.setIsCosignTimestampReq(isCosignTimestampReq);
 		newSignaturePrint.setIsEvaluationTimeReq(isEvaluationTimeReq);
 		SignaturePrint signaturePrint = signaturePrintService.saveSignaturePrint(newSignaturePrint);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved signature print style",sessionMap.getUserID(),"",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved signature print style");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.UPDATE,1,Log_Outcome.SUCCESS,"Successfully saved signature print style",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to Save signature print.");
 		return signaturePrint;
 		
@@ -126,7 +130,7 @@ public class SignaturePrintController {
 		updateSignaturePrint.setIsCosignTimestampReq(isCosignTimestampReq);
 		updateSignaturePrint.setIsEvaluationTimeReq(isEvaluationTimeReq);
 		SignaturePrint signaturePrint = signaturePrintService.saveSignaturePrint(updateSignaturePrint);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.UPDATE,"Successfully updated signature print style",sessionMap.getUserID(),"",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully updated signature print style");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.UPDATE,1,Log_Outcome.SUCCESS,"Successfully updated signature print style",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to Update signature print.");
 		return signaturePrint;
 		
@@ -141,7 +145,7 @@ public class SignaturePrintController {
 	public SignaturePrint getSignaturePrint(@RequestParam(value="signId") Integer signaturePrintId) throws Exception{
 		logger.debug("Begin request processing - to Fetch signature print.");
 		SignaturePrint signaturePrint = signaturePrintService.getSignaturePrint(signaturePrintId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.UPDATE,"Successfully fetched signature print",sessionMap.getUserID(),"",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully fetched signature print");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully fetched signature print",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to Fetch signature print.");
 		return signaturePrint;
 		
@@ -156,7 +160,7 @@ public class SignaturePrintController {
 	public DoctorSign getUserSignDetails(@RequestParam(value="loginId") Integer loginId) throws Exception{
 		logger.debug("Begin request processing - to Fetch user signature details.");
 		DoctorSign signaturedetails = signaturePrintService.getUserSignDetails(loginId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.UPDATE,"Successfully fetched user sign details print",sessionMap.getUserID(),"",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully fetched user sign details");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully fetched user sign details print",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to fetch user signature details.");
 		return signaturedetails;
 		
@@ -170,7 +174,7 @@ public class SignaturePrintController {
 	public List<EmployeeProfile> fetchEmployeeList() throws Exception{
 		logger.debug("Begin request processing - to get the list of all employee.");
 		List<EmployeeProfile> employeeList= employeeService.getEmployeeDetails("all", "asc");
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.VIEWED,1,AuditLogConstants.SUCCESS,"Successfully loaded employee list for configuration",sessionMap.getUserID(),"",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully loaded employee list for configuration");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully loaded employee list for configuration",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to get the list of all employee.");
 		return employeeList;
 
@@ -203,7 +207,7 @@ public class SignaturePrintController {
 			newDoctorSign.setSignatureid(loginId);
 		}
 		DoctorSign doctorSign = signaturePrintService.saveUserSignDetails(newDoctorSign);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.PrintingAndReporting,AuditLogConstants.CREATED,1,AuditLogConstants.SUCCESS,"Successfully saved user sign details",sessionMap.getUserID(),"",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.PrintingAndReporting,request,"Successfully saved user sign details");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.UPDATE,1,Log_Outcome.SUCCESS,"Successfully saved user sign details",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to Save user sign details.");
 		return doctorSign;
 		

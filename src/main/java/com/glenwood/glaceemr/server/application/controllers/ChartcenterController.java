@@ -15,7 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistrationSearchBean;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.chartcenter.ChartcenterService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -28,7 +33,7 @@ public class ChartcenterController {
 	private ChartcenterService patientSearchService;
 
 	@Autowired
-	AuditTrailService auditTrailService;
+	AuditTrailSaveService auditTrailSaveService;
 	
 	@Autowired
 	SessionMap sessionMap;
@@ -45,7 +50,7 @@ public class ChartcenterController {
 		logger.debug("This is an info log entry");
         
 		Page<PatientRegistration> patients = patientSearchService.getPatientSearchResult(toSearchData,searchTypeParam);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PATIENT_REGISTRATION,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+")",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		EMRResponseBean result=new EMRResponseBean();
 		result.setData(patients);
 			return result;
@@ -57,7 +62,7 @@ public class ChartcenterController {
 		logger.debug("This is an info log entry");
         
 		List<PatientRegistrationSearchBean> patients = patientSearchService.getPatientNameBySearch(toSearchData);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PATIENT_REGISTRATION,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+")",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		EMRResponseBean result=new EMRResponseBean();
 		result.setData(patients);
 			return result;

@@ -21,7 +21,12 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.services.HospitalSuperBill.HospitalSuperbillService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 
@@ -33,7 +38,7 @@ public class HospitalSuperBillController {
 	HospitalSuperbillService hospitalSuperBillService;
 	
 	@Autowired
-	AuditTrailService auditTrailService;
+	AuditTrailSaveService auditTrailSaveService;
 	
 	@Autowired
 	SessionMap sessionMap;
@@ -73,7 +78,7 @@ public class HospitalSuperBillController {
 	public EMRResponseBean getCptCodes(@RequestParam(value="selectedPosType", required=false)String posTypeId) throws Exception{
 		logger.info("Get list of frequently used cpt codes for both hospital and nursing home superbill");
 		List<Cpt> cptValue=hospitalSuperBillService.getCptCodes(posTypeId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+") and the list of frequently used cpt codes for both hospital and nursing home superbill",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		EMRResponseBean cpt=new EMRResponseBean();
 		   cpt.setData(cptValue);
 		return cpt;
@@ -97,7 +102,7 @@ public class HospitalSuperBillController {
 		List<Admission> dischargePatient=hospitalSuperBillService.updateDischargeDate(patientId,dischargeDate,admissionId);
 		EMRResponseBean discharge=new EMRResponseBean();
 		discharge.setData(dischargePatient);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.UPDATE,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+") and Discharge the patient from Hospital/NursingHome",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		return discharge;
 	}
 	
@@ -115,7 +120,7 @@ public class HospitalSuperBillController {
 		List<ServiceDetail> previousDxCodes=hospitalSuperBillService.getPreviousVisitDxCodes(patientId);
 		EMRResponseBean previousDx=new EMRResponseBean();
 		previousDx.setData(previousDxCodes);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+") and the previous Dx codes",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		return previousDx;
 	}
 	
@@ -131,7 +136,7 @@ public class HospitalSuperBillController {
 		List<EmployeeProfile> providersList=hospitalSuperBillService.getProviderList();
 		EMRResponseBean providers=new EMRResponseBean();
 		providers.setData(providersList);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+") and the list of Provider information ",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		return providers;
 	}
 	
@@ -149,7 +154,7 @@ public class HospitalSuperBillController {
 		List<ServiceDetail> getServices=hospitalSuperBillService.getServicesList(patientId,admissionDate);
 		EMRResponseBean services=new EMRResponseBean();
 		services.setData(getServices);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+") and the list of services information for a patient",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		return services;
 	}
 	

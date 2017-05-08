@@ -13,7 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.chart.flowsheet.FlowsheetGroupSaveBean;
 import com.glenwood.glaceemr.server.application.services.chart.flowsheet.FlowsheetManagementSaveBean;
 import com.glenwood.glaceemr.server.application.services.chart.flowsheet.FlowsheetService;
@@ -28,7 +33,7 @@ public class FlowsheetManagementController {
 	private FlowsheetService flowsheetService;
 
 	@Autowired
-	AuditTrailService auditTrailService;
+	AuditTrailSaveService auditTrailSaveService;
 	
 	@Autowired
 	SessionMap sessionMap;
@@ -53,7 +58,7 @@ public class FlowsheetManagementController {
 			@RequestParam(value="flowsheetTypeId", required=false, defaultValue="-1") Integer flowsheetTypeId) throws Exception{
 		logger.debug("Begin of request to get the flowsheets basic details for configuration.");
 //		FS_Management flowsheetsManagementDetails = flowsheetService.getFlowsheetsManagementDetails(loadFromFlowsheet,flowsheetId,flowsheetTypeId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully loaded data flowsheet basic details for configuration",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully loaded data flowsheet basic details for configuration");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FLOWSHEET,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully loaded data flowsheet basic details for configuration",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to get the flowsheets basic details for configuration.");
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(flowsheetService.getFlowsheetsManagementDetails(loadFromFlowsheet,flowsheetId,flowsheetTypeId));
@@ -73,7 +78,7 @@ public class FlowsheetManagementController {
 			 @RequestParam(value="flowsheetId", required=true, defaultValue="-1") Integer flowsheetId) throws Exception{
 		logger.debug("Begin of request to get the configured details of flowsheet.");
 //		FS_ConfiguredDetails flowsheetsManagementDetails = flowsheetService.getFlowsheetsConfiguredDetails(flowsheetId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully loaded configured details of flowsheet for flowsheet id="+flowsheetId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully loaded configured details of flowsheet for flowsheet id="+flowsheetId);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FLOWSHEET,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully loaded configured details of flowsheet for flowsheet id="+flowsheetId,-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to get the configured details of flowsheet.");
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(flowsheetService.getFlowsheetsConfiguredDetails(flowsheetId));
@@ -91,7 +96,7 @@ public class FlowsheetManagementController {
 			 @RequestParam(value="isStandardLab", required=true, defaultValue="-1") Integer isStandardLab) throws Exception{
 		logger.debug("Begin of request to get group details of lab and params.");
 //		FS_ConfiguredDetails flowsheetsManagementDetails = flowsheetService.getFlowsheetsStandardGroupDetails(isStandardLab);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully loaded standard group details of flowsheet",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully loaded standard group details of flowsheet");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FLOWSHEET,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully loaded standard group details of flowsheet",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to get group details of lab and params.");
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(flowsheetService.getFlowsheetsStandardGroupDetails(isStandardLab));
@@ -108,7 +113,7 @@ public class FlowsheetManagementController {
 	public EMRResponseBean saveFlowsheetsStandardGroupDetails(@RequestBody FlowsheetGroupSaveBean saveData) throws Exception{
 		logger.debug("Begin of request to save group details of lab and params.");
 //		FS_ConfiguredDetails flowsheetsManagementDetails = flowsheetService.saveFlowsheetsStandardGroupDetails(saveData.getIsStandardLab(),URLDecoder.decode(saveData.getGroupData(), "UTF-8"));
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully saved standard group details of flowsheet",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully saved standard group details of flowsheet");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FLOWSHEET,LogActionType.UPDATE,1,Log_Outcome.SUCCESS,"Successfully saved standard group details of flowsheet",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to save group details of lab and params.");
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(flowsheetService.saveFlowsheetsStandardGroupDetails(saveData.getIsStandardLab(),URLDecoder.decode(saveData.getGroupData(), "UTF-8")));
@@ -125,7 +130,7 @@ public class FlowsheetManagementController {
 	public EMRResponseBean saveFlowsheetsDetails(@RequestBody FlowsheetManagementSaveBean saveData) throws Exception{
 		logger.debug("Begin of request to save group details of lab and params.");
 //		FS_Management flowsheetsManagementDetails = flowsheetService.saveFlowsheetsManagmentDetails(saveData.getSheetId(),saveData.getSheetTypeId(),saveData.getSheetName(),URLDecoder.decode(saveData.getDataToSave(), "UTF-8"));
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Flowsheet,AuditLogConstants.Flowsheet,1,AuditLogConstants.SUCCESS,"Successfully saved standard group details of flowsheet",-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Flowsheet,request,"Successfully saved standard group details of flowsheet");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FLOWSHEET,LogActionType.UPDATE,1,Log_Outcome.SUCCESS,"Successfully saved standard group details of flowsheet",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to save group details of lab and params.");
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(flowsheetService.saveFlowsheetsManagmentDetails(saveData.getSheetId(),saveData.getSheetTypeId(),saveData.getSheetName(),URLDecoder.decode(saveData.getDataToSave(), "UTF-8")));
@@ -144,7 +149,7 @@ public class FlowsheetManagementController {
 			@RequestParam(value="flowsheetElementType", required=true, defaultValue="-1") Integer flowsheetElementType) throws Exception{
 		logger.debug("Begin of request to get the HMR details.");
 //		HmrRuleBean flowsheetData = flowsheetService.getFlowSheetRuleQuery(groupId,flowsheetElementType);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.HMR,AuditLogConstants.HMR,1,AuditLogConstants.SUCCESS,"Successfully loaded data for request to get the HMR details having groupIds="+groupId+" and flowsheet element type="+flowsheetElementType,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.HMR,request,"Successfully loaded data for request to get the HMR details having groupIds="+groupId+" and flowsheet element type="+flowsheetElementType);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.HMR,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully loaded data for request to get the HMR details having groupIds="+groupId+" and flowsheet element type="+flowsheetElementType,-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to get the HMR details.");
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(flowsheetService.getFlowSheetRuleQuery(groupId,flowsheetElementType));
