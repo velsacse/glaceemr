@@ -10,13 +10,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.chart.reports.OverrideAlertsService;
 import com.glenwood.glaceemr.server.application.services.chart.reports.OverrideBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
@@ -56,7 +55,7 @@ public class OverrideAlertsController {
 	public EMRResponseBean getFlowsheets(@RequestBody OverrideBean overrideBean) throws Exception{
 		logger.debug("Begin of request to override the Flowsheet data(includes vitals, clinical elements and medication section overriding functionality.)");
 		String overrideAlertMessage = overrideAlertsService.insertAlert(overrideBean.getElementids(),overrideBean.getPatientid(),overrideBean.getFsElementType(),overrideBean.getFlowsheetId(),overrideBean.getUserId(),overrideBean.getReason(),overrideBean.getData());
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FLOWSHEET,LogActionType.CREATE,1,Log_Outcome.SUCCESS,"Successfully overridden test from flowsheet view (elementids="+overrideBean.getElementids()+", PatientID="+overrideBean.getPatientid()+",InstanceId=-100 )",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.HMR,LogActionType.CREATE,1,Log_Outcome.SUCCESS,"Successfully overridden test from flowsheet view (elementids="+overrideBean.getElementids()+", PatientID="+overrideBean.getPatientid()+",InstanceId=-100 )",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to override the Flowsheet data(includes vitals, clinical elements and medication section overriding functionality.)");
 		EMRResponseBean alertMessage=new EMRResponseBean();
 		alertMessage.setData(overrideAlertMessage);
