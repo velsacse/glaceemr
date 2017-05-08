@@ -3,6 +3,8 @@ package com.glenwood.glaceemr.server.application.services.chart.print;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import org.jsoup.Jsoup;
 import org.springframework.stereotype.Component;
 
 import com.itextpdf.text.Document;
@@ -56,6 +58,11 @@ public class GeneratePDFBean {
 			}
 		}
 
+		org.jsoup.nodes.Document xhtmldoc = Jsoup.parseBodyFragment(contentHTML);
+		xhtmldoc.outputSettings().syntax(org.jsoup.nodes.Document.OutputSettings.Syntax.xml); //This will ensure the validity
+		xhtmldoc.outputSettings().charset("UTF-8");
+		contentHTML=xhtmldoc.toString();
+		
 		if(!leftHeader.equals("")){
 
 			PdfPTable table=new PdfPTable(2);

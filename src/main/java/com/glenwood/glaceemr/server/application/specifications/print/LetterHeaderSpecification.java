@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.specifications.print;
 
+import java.util.List;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Fetch;
@@ -36,6 +38,21 @@ public class LetterHeaderSpecification {
 		};
 	}
 
+	public static Specification<LetterHeaderContent> getLetterHeaderContent(final Integer headerId, final List<Integer> variantId){
+
+		return new Specification<LetterHeaderContent>(){
+
+			@Override
+			public Predicate toPredicate(Root<LetterHeaderContent> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				query.where(cb.equal(root.get(LetterHeaderContent_.letterHeaderContentStyleMapId),headerId), 
+					root.get(LetterHeaderContent_.letterHeaderContentVariant).in(variantId),
+					root.get(LetterHeaderContent_.letterHeaderContentFlag).isNotNull(),
+					cb.notEqual(root.get(LetterHeaderContent_.letterHeaderContentFlag),-1));
+				return query.getRestriction();
+			}
+		};
+	}
+	
 	public static Specification<LetterHeaderEmp> getEmpDetails(final Integer headerId, final Integer variantId){
 
 		return new Specification<LetterHeaderEmp>(){

@@ -253,7 +253,7 @@ public class GenerateHeaderBean {
 		try{
 			StringBuilder header=new StringBuilder();			
 			String customText=letterHeaderContent.getLetterHeaderContentCustom().replace("\n", "<br/>");
-			if(letterHeaderContent.getLetterHeaderContentFlag()==1){	
+			if(letterHeaderContent.getLetterHeaderContentFlag()==1){						// Default Practice
 				DefaultPracticeBean practiceBean = genericPrintBean.getPracticeBean();
 				
 				if((practiceBean != null && practiceBean.getPracticeName() != null && !practiceBean.getPracticeName().trim().isEmpty())||(customText != null && !customText.trim().isEmpty()))				
@@ -264,7 +264,7 @@ public class GenerateHeaderBean {
 					header.append("<tr><td style='"+style+"'>"+customText+"</td></tr>");
 				if((practiceBean != null && practiceBean.getPracticeName() != null && !practiceBean.getPracticeName().trim().isEmpty())||(customText != null && !customText.trim().isEmpty()))				
 					header.append("</table>");
-			}else if(letterHeaderContent.getLetterHeaderContentFlag()==2){
+			}else if(letterHeaderContent.getLetterHeaderContentFlag()==2){					// Place of Service
 				PatientDataBean patientBean = genericPrintBean.getPatientBean();
 				List<PosDataBean> posBean = patientBean.getPosDetails();
 				if((posBean != null && posBean.size()>0 && posBean.get(0) != null) || (customText != null && !customText.trim().isEmpty()))
@@ -277,7 +277,7 @@ public class GenerateHeaderBean {
 					header.append("<tr><td style='"+style+"'>"+customText+"</td></tr>");
 				if((posBean != null && posBean.size()>0 && posBean.get(0) != null) || (customText != null && !customText.trim().isEmpty()))
 					header.append("</table>");
-			}else if(letterHeaderContent.getLetterHeaderContentFlag()==3){
+			}else if(letterHeaderContent.getLetterHeaderContentFlag()==3){					// All Practices
 
 				if(posList != null){
 					if(posList.size()>0){
@@ -297,7 +297,7 @@ public class GenerateHeaderBean {
 					}
 				}
 				//				header.append("<tr><td style='"+style+"'>Practice Name 1</td><td style='"+style+"'>Practice Name 2</td><td style='"+style+"'>Practice Name 3</td></tr><tr><td colspan='3' style='"+style+"'>"+customText+"</td></tr>");
-			}else if(letterHeaderContent.getLetterHeaderContentFlag()==4){
+			}else if(letterHeaderContent.getLetterHeaderContentFlag()==4){					// Principal Doctor
 				PatientDataBean patientBean = genericPrintBean.getPatientBean();
 				String principalDr = "";
 				if(patientBean != null){
@@ -314,7 +314,7 @@ public class GenerateHeaderBean {
 					header.append("<tr><td style='"+style+"'>"+customText+"</td></tr>");
 				if((principalDr!=null && !principalDr.trim().isEmpty() || (customText != null && !customText.trim().isEmpty())))
 					header.append("</table>");
-			}else if(letterHeaderContent.getLetterHeaderContentFlag()==5){
+			}else if(letterHeaderContent.getLetterHeaderContentFlag()==5){					// Service Doctor
 				PatientDataBean patientBean = genericPrintBean.getPatientBean();
 				String serviceDr = "";
 				if(patientBean != null){
@@ -331,7 +331,7 @@ public class GenerateHeaderBean {
 					header.append("<tr><td style='"+style+"'>"+customText+"</td></tr>");
 				if((serviceDr!=null && !serviceDr.trim().isEmpty() || (customText != null && !customText.trim().isEmpty())))
 					header.append("</table>");
-			}else if(letterHeaderContent.getLetterHeaderContentFlag()==6){
+			}else if(letterHeaderContent.getLetterHeaderContentFlag()==6){					// All Doctors
 				
 				if(empList != null) {
 					if(empList.size()>0){
@@ -352,7 +352,7 @@ public class GenerateHeaderBean {
 				}
 				
 				//			header.append("<tr><td style='"+style+"'>Doctor Name 1</td><td style='"+style+"'>Doctor Name 2</td><td style='"+style+"'>Doctor Name 3</td></tr><tr><td colspan='3' style='"+style+"'>"+customText+"</td></tr>");
-			}else if(letterHeaderContent.getLetterHeaderContentFlag()==7){
+			}else if(letterHeaderContent.getLetterHeaderContentFlag()==7){					// Custom
 				if(customText != null && !customText.trim().isEmpty()){
 					header.append("<table width='100%' style='text-align:center;' cellspacing='0' cellpadding='0'>");
 					header.append("<tr><td style='"+style+"'>"+customText+"</td></tr>");
@@ -362,6 +362,7 @@ public class GenerateHeaderBean {
 			
 			return header.toString();
 		}catch(Exception e){
+			e.printStackTrace();
 			return "";
 		}
 	}
@@ -755,7 +756,7 @@ public class GenerateHeaderBean {
 	}
 	public String generateStyleString(String styleData){
 		StringBuilder style=new StringBuilder();
-		if(!styleData.equals("")){
+		if(styleData!=null && !styleData.equals("")){
 
 			String[] styleDataArr=styleData.split("#~#");
 			if(styleDataArr.length>=6){
@@ -773,12 +774,15 @@ public class GenerateHeaderBean {
 				style.append("font-family:"+styleDataArr[3]+";");
 				style.append("font-size:"+styleDataArr[4]+"px;");
 				style.append("color:#"+styleDataArr[5]+";");
-				if(styleDataArr.length>6)
+				if(styleDataArr.length>7)
+					style.append("text-transform:"+styleDataArr[7]+";");
+				else if(styleDataArr.length>6)
 					style.append("text-align:"+styleDataArr[6]+";");
 				else
 					style.append("text-align: center;");
 			}
-		}
+		}else
+			return "";
 		return style.toString();
 	}
 
@@ -951,17 +955,24 @@ public class GenerateHeaderBean {
 	 */
 	public String getTextOnlyHeaderHTML(GenericLetterHeader genericLetterheader, List<LetterHeaderContent> letterHeaderContentList, GenericPrintBean genericPrintBean) throws Exception{		
 		StringBuffer headerHTML = new StringBuffer();
-		
-		List<LetterHeaderPos> posList = letterHeaderService.fetchLetterHeaderPOSList(genericLetterheader.getGenericLetterHeaderId(), 1);
-		List<EmployeeDataBean> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), 1);
+				
 //		List<InitialSettings> initialList= initialSettingsRepository.findAll(Specifications.where(InitialSettingsSpecification.optionType(4)).and(InitialSettingsSpecification.optionVisible(true)));
 		if(letterHeaderContentList.size()>0)
 			headerHTML.append("<table width='100%' cellpadding='1'>");
 		for(int i=0;i<letterHeaderContentList.size();i++){			
-			if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==2){
-				headerHTML.append("<tr><td style='width:100%;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
-				headerHTML.append(drawTextHeaderData(letterHeaderContentList.get(i),generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle()),genericPrintBean,posList,empList));
-				headerHTML.append("</td></tr>");
+			if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==2||
+				letterHeaderContentList.get(i).getLetterHeaderContentVariant()==11){
+				int mode=1; 
+				if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==11)
+					mode=3;
+				List<LetterHeaderPos> posList = letterHeaderService.fetchLetterHeaderPOSList(genericLetterheader.getGenericLetterHeaderId(), mode);
+				List<EmployeeDataBean> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), mode);
+				String data=drawTextHeaderData(letterHeaderContentList.get(i),generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle()),genericPrintBean,posList,empList);
+				if(data!=null && !data.trim().isEmpty()){
+					headerHTML.append("<tr><td style='width:100%;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
+					headerHTML.append(data);
+					headerHTML.append("</td></tr>");
+				}
 			}else if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==3){
 				if(letterHeaderContentList.get(i).getLetterHeaderContentCustom()!=null && !letterHeaderContentList.get(i).getLetterHeaderContentCustom().isEmpty()){
 					headerHTML.append("<tr><td style='width:100%;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
@@ -970,6 +981,8 @@ public class GenerateHeaderBean {
 				}
 			}else if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==4){
 				if(letterHeaderContentList.get(i).getLetterHeaderContentFlag()!=4){
+					List<LetterHeaderPos> posList = letterHeaderService.fetchLetterHeaderPOSList(genericLetterheader.getGenericLetterHeaderId(), 1);
+					List<EmployeeDataBean> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), 1);
 					headerHTML.append("<tr><td style='width:100%;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
 					headerHTML.append(drawAddressData(letterHeaderContentList.get(i),genericLetterheader.getGenericLetterHeaderAddress().toString(),generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle()),genericPrintBean,posList,empList,getHeaderFlag(letterHeaderContentList,2)));
 					headerHTML.append("</td></tr>");
@@ -992,14 +1005,18 @@ public class GenerateHeaderBean {
 	 */
 	public String getTextOnlyHeaderHTML2(GenericLetterHeader genericLetterheader, List<LetterHeaderContent> letterHeaderContentList, GenericPrintBean genericPrintBean) throws Exception{
 		
-		StringBuffer headerHTML = new StringBuffer();		
-		List<LetterHeaderPos> posList = letterHeaderService.fetchLetterHeaderPOSList(genericLetterheader.getGenericLetterHeaderId(), 1);
-		List<EmployeeDataBean> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), 1);
+		StringBuffer headerHTML = new StringBuffer();				
 		if(letterHeaderContentList.size()>0)
 			headerHTML.append("<table width='100%' cellpadding='1'>");
 		for(int i=0;i<letterHeaderContentList.size();i++){
 			
-			if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==5){
+			if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==5||
+				letterHeaderContentList.get(i).getLetterHeaderContentVariant()==12){
+				int mode=1;
+				if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==12)
+					mode=4;
+				List<LetterHeaderPos> posList = letterHeaderService.fetchLetterHeaderPOSList(genericLetterheader.getGenericLetterHeaderId(), mode);
+				List<EmployeeDataBean> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), mode);
 				headerHTML.append("<tr><td style='width:100%;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
 				headerHTML.append(drawTextHeaderData(letterHeaderContentList.get(i),generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle()),genericPrintBean,posList,empList));
 				headerHTML.append("</td></tr>");
@@ -1009,6 +1026,8 @@ public class GenerateHeaderBean {
 				headerHTML.append("</td></tr>");
 			}else if(letterHeaderContentList.get(i).getLetterHeaderContentVariant()==7){
 				if(letterHeaderContentList.get(i).getLetterHeaderContentFlag()!=4){
+					List<LetterHeaderPos> posList = letterHeaderService.fetchLetterHeaderPOSList(genericLetterheader.getGenericLetterHeaderId(), 1);
+					List<EmployeeDataBean> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), 1);
 					headerHTML.append("<tr><td style='width:100%;"+generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle())+"'>");
 					headerHTML.append(drawAddressData(letterHeaderContentList.get(i),genericLetterheader.getGenericLetterHeaderAddress().toString(),generateStyleString(letterHeaderContentList.get(i).getLetterHeaderContentStyle()),genericPrintBean,posList,empList,getHeaderFlag(letterHeaderContentList,5)));
 					headerHTML.append("</td></tr>");
@@ -1030,14 +1049,41 @@ public class GenerateHeaderBean {
 	 */
 	public String generateLeftHeader(int headerId, GenericPrintBean genericPrintBean) throws Exception {
 	
-		GenericLetterHeader genericLetterheader=letterHeaderService.getLetterHeaderDetails(headerId);
+		GenericLetterHeader genericLetterheader=letterHeaderService.getLetterHeaderDetails(headerId);		
 		List<LetterHeaderPos> posList = letterHeaderService.fetchLetterHeaderPOSList(genericLetterheader.getGenericLetterHeaderId(), 2);
-		List<EmployeeDataBean> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), 2);						
+		List<EmployeeDataBean> empList = letterHeaderService.fetchLetterHeaderEmpList(genericLetterheader.getGenericLetterHeaderId(), 2);
+		List<Integer> variantIds= new ArrayList<Integer>();		
+		variantIds.add(13);
+		variantIds.add(14);
 		
 		String leftHeaderHTML="";
-		Integer leftIndex = genericLetterheader.getGenericLetterHeaderLeft();
-		Integer leftAddressIndex = genericLetterheader.getGenericLetterHeaderLeftAddress();
+		Integer leftIndex=-1;
+		Integer leftAddressIndex=-1;
 		String addressFormat = genericLetterheader.getGenericLetterHeaderAddress().toString();
+		String leftHeaderStyle="";
+		String leftAddrStyle="";
+		
+		if(letterHeaderService.getLetterHeaderContentCount(genericLetterheader.getGenericLetterHeaderId(),variantIds)>0){
+			List<LetterHeaderContent> list= letterHeaderService.getLetterHeaderContentList(genericLetterheader.getGenericLetterHeaderId(),variantIds);
+			for(int i=0; i<list.size(); i++){
+				if(list.get(i).getLetterHeaderContentVariant()==13){
+					leftIndex= list.get(i).getLetterHeaderContentFlag();
+					leftHeaderStyle= generateStyleString(list.get(i).getLetterHeaderContentStyle());
+				}
+				else if(list.get(i).getLetterHeaderContentVariant()==14){
+					leftAddressIndex= list.get(i).getLetterHeaderContentFlag();
+					leftAddrStyle= generateStyleString(list.get(i).getLetterHeaderContentStyle());
+				}
+			}
+		}else{
+			leftIndex= genericLetterheader.getGenericLetterHeaderLeft();
+			leftAddressIndex= genericLetterheader.getGenericLetterHeaderLeftAddress();
+		}
+		
+		if(leftHeaderStyle.isEmpty())
+			leftHeaderStyle="font-size: 12px; font-weight: bold; font-family: Perpetua;";
+		if(leftAddrStyle.isEmpty())
+			leftAddrStyle="font-size: 12px;font-family:Times New Roman;";
 		
 		List<String> addressList = new ArrayList<String>();
 		List<String> namesList = new ArrayList<String>();
@@ -1088,19 +1134,19 @@ public class GenerateHeaderBean {
 				countLeftAddress = posList.size();
 		}
 		
-		if(leftIndex ==0){												// Default Practice Name
+		if(leftIndex ==0){												// Default Practice Name			
 			DefaultPracticeBean defaultPracticeBean = genericPrintBean.getPracticeBean();
-			leftHeaderHTML += "<table width='100%' style='font-size: 12px; font-weight: bold; font-family: Perpetua;' cellspacing='0' cellpadding='0'>";
+			leftHeaderHTML += "<table width='100%' style='"+leftHeaderStyle+"' cellspacing='0' cellpadding='0'>";
 			leftHeaderHTML += "<tr><td>"+defaultPracticeBean.getPracticeName()+"</td></tr>";
 			leftHeaderHTML += "</table>";
 			leftHeaderHTML += "<br/><br/>";
 		}
 		else if(leftIndex ==1 || leftIndex ==2){						// 1)Doctors Name 2)Practices Name
 			if(countLeft >0){
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px; font-weight: bold;font-family: Perpetua;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<table width='100%' style='"+leftHeaderStyle+"' cellspacing='0' cellpadding='0'>";
 				for(int i=0; i<countLeft; i++){
 					if(!namesList.get(i).trim().isEmpty())
-						leftHeaderHTML += "<tr><td>"+namesList.get(i)+"<br/><br/></td></tr>";
+						leftHeaderHTML += "<tr><td>"+namesList.get(i)+"<br/><br/><br/></td></tr>";
 				}
 				leftHeaderHTML += "</table>";
 				leftHeaderHTML += "<br/><br/>";
@@ -1109,7 +1155,7 @@ public class GenerateHeaderBean {
 		else if(leftIndex ==3){											// Principal Doctor Name
 			EmployeeDataBean employeeDataBean = genericPrintBean.getPatientBean().getPrincipalDr();
 			if(employeeDataBean != null){
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px; font-weight: bold;font-family: Perpetua;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<table width='100%' style='"+leftHeaderStyle+"' cellspacing='0' cellpadding='0'>";
 				leftHeaderHTML += "<tr><td>"+employeeDataBean.getEmpFullname()+"</td></tr>";
 				leftHeaderHTML += "</table>";
 				leftHeaderHTML += "<br/><br/>";
@@ -1118,7 +1164,7 @@ public class GenerateHeaderBean {
 		else if(leftIndex ==4){											// Service Doctor Name
 			EmployeeDataBean employeeDataBean = genericPrintBean.getPatientBean().getServiceDr();
 			if(employeeDataBean != null){
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px; font-weight: bold; font-family: Perpetua;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<table width='100%' style='"+leftHeaderStyle+"' cellspacing='0' cellpadding='0'>";
 				leftHeaderHTML += "<tr><td>"+employeeDataBean.getEmpFullname()+"</td></tr>";
 				leftHeaderHTML += "</table>";
 				leftHeaderHTML += "<br/><br/>";
@@ -1127,7 +1173,7 @@ public class GenerateHeaderBean {
 		else if(leftIndex ==5){											// Place Of Service Name
 			List<PosDataBean> posDataBean = genericPrintBean.getPatientBean().getPosDetails();
 			if(posDataBean != null && posDataBean.size()>0 && posDataBean.get(0) != null && posDataBean.get(0).getPosName() != null && !posDataBean.get(0).getPosName().isEmpty()){
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px; font-weight: bold; font-family: Perpetua;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<table width='100%' style='"+leftHeaderStyle+"' cellspacing='0' cellpadding='0'>";
 				leftHeaderHTML += "<tr><td>"+posDataBean.get(0).getPosName()+"</td></tr>";
 				leftHeaderHTML += "</table>";
 				leftHeaderHTML += "<br/><br/>";
@@ -1137,7 +1183,7 @@ public class GenerateHeaderBean {
 		if(leftAddressIndex ==0){										// Default Practice Address
 			DefaultPracticeBean defaultPracticeBean = genericPrintBean.getPracticeBean();
 			if(defaultPracticeBean != null){
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px; font-family:Times New Roman;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<table width='100%' style='"+leftAddrStyle+"' cellspacing='0' cellpadding='0'>";
 				leftHeaderHTML += "<tr><td>Offices:<br/><br/></td></tr>";
 				leftHeaderHTML += "<tr><td>"+parseAddress(defaultPracticeBean.getPracticeStreet(), defaultPracticeBean.getPracticeCity(), defaultPracticeBean.getPracticeState(), defaultPracticeBean.getPracticeZip())+"</td></tr>";
 				if(addressFormat.charAt(1)=='1' && defaultPracticeBean.getPracticePhoneNum() != null && !defaultPracticeBean.getPracticePhoneNum().trim().isEmpty())
@@ -1153,13 +1199,13 @@ public class GenerateHeaderBean {
 		}
 		else if(leftAddressIndex ==1 || leftAddressIndex ==2){			// 1)Doctors Address 2) Practices Address
 			if(countLeftAddress >0){
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px; font-family:Times New Roman;' cellspacing='0' cellpadding='0'><tr><td>";
+				leftHeaderHTML += "<table width='100%' style='"+leftAddrStyle+"' cellspacing='0' cellpadding='0'><tr><td>";
 				if(leftAddressIndex == 1)
 					leftHeaderHTML += "Address:<br/><br/></td></tr><tr><td>";
 				else
 					leftHeaderHTML += "Offices:<br/><br/></td></tr><tr><td>";
 				for(int i=0; i<countLeftAddress; i++){
-					leftHeaderHTML += "<table width='100%' style='font-size:12px;' cellpadding='0' cellspacing='0'>";
+					leftHeaderHTML += "<table width='100%' style='"+leftAddrStyle+"' cellpadding='0' cellspacing='0'>";
 					if(!addressList.get(i).isEmpty())
 						leftHeaderHTML += "<tr><td>"+addressList.get(i)+"</td></tr>";
 					if(!phoneList.get(i).trim().isEmpty())
@@ -1181,9 +1227,9 @@ public class GenerateHeaderBean {
 			EmployeeDataBean employeeDataBean = genericPrintBean.getPatientBean().getPrincipalDr();
 			if(employeeDataBean != null){
 
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px;font-family:Times New Roman;' cellspacing='0' cellpadding='0'><tr><td>";
+				leftHeaderHTML += "<table width='100%' style='"+leftAddrStyle+"' cellspacing='0' cellpadding='0'><tr><td>";
 				leftHeaderHTML += "Address:<br/><br/></td></tr><tr><td>";
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px;font-family:Times New Roman;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<table width='100%' style='"+leftAddrStyle+"' cellspacing='0' cellpadding='0'>";
 				if(employeeDataBean.getEmpAddress() != null && !employeeDataBean.getEmpAddress().trim().isEmpty())
 					leftHeaderHTML += "<tr><td>"+parseAddress(employeeDataBean.getEmpAddress(), employeeDataBean.getEmpCity(), employeeDataBean.getEmpState(), employeeDataBean.getEmpZip())+"</td></tr>";
 				if(!employeeDataBean.getEmpPhNum().trim().isEmpty())
@@ -1200,9 +1246,9 @@ public class GenerateHeaderBean {
 			EmployeeDataBean employeeDataBean = genericPrintBean.getPatientBean().getServiceDr();
 			if(employeeDataBean != null){
 
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px;font-family:Times New Roman;' cellspacing='0' cellpadding='0'><tr><td>";
+				leftHeaderHTML += "<table width='100%' style='"+leftAddrStyle+"' cellspacing='0' cellpadding='0'><tr><td>";
 				leftHeaderHTML += "Address:<br/><br/></td></tr><tr><td>";
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px;font-family:Times New Roman;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<table width='100%' style='"+leftAddrStyle+"' cellspacing='0' cellpadding='0'>";
 				if(employeeDataBean.getEmpAddress() != null && !employeeDataBean.getEmpAddress().trim().isEmpty())
 					leftHeaderHTML += "<tr><td>"+parseAddress(employeeDataBean.getEmpAddress(), employeeDataBean.getEmpCity(), employeeDataBean.getEmpState(), employeeDataBean.getEmpZip())+"</td></tr>";
 				if(!employeeDataBean.getEmpPhNum().trim().isEmpty())
@@ -1219,9 +1265,9 @@ public class GenerateHeaderBean {
 			List<PosDataBean> posDataBean = genericPrintBean.getPatientBean().getPosDetails();
 			if(posDataBean != null && posDataBean.size()>0){
 
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px;font-family:Times New Roman;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<table width='100%' style='"+leftAddrStyle+"' cellspacing='0' cellpadding='0'>";
 				leftHeaderHTML += "<tr><td>Offices:<br/><br/></td></tr><tr><td>";
-				leftHeaderHTML += "<table width='100%' style='font-size: 12px;font-family:Times New Roman;' cellspacing='0' cellpadding='0'>";
+				leftHeaderHTML += "<table width='100%' style='"+leftAddrStyle+"' cellspacing='0' cellpadding='0'>";
 				if(posDataBean.get(0).getPosAddress() != null && !posDataBean.get(0).getPosAddress().trim().isEmpty())
 					leftHeaderHTML += "<tr><td>"+parseAddress(posDataBean.get(0).getPosAddress(), posDataBean.get(0).getPosCity(), posDataBean.get(0).getPosState(), posDataBean.get(0).getPosZip())+"</td></tr>";
 				if(posDataBean.get(0).getPosPhNum() != null && !posDataBean.get(0).getPosPhNum().trim().isEmpty())
