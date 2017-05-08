@@ -20,6 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.LegacyConnectorBean;
 import com.glenwood.glaceemr.server.utils.RestDispatcherTemplate;
@@ -37,6 +43,9 @@ public class LegacyRequestController {
 	
 	@Autowired
 	EMRResponseBean emrResponseBean;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
 	
 	/**
 	 * Method to contact legacy using rest template
@@ -65,14 +74,10 @@ public class LegacyRequestController {
 			else if(httpMethod.equalsIgnoreCase("POST")){
 				emrResponseBean = requestDispatcher.sendPost(request, urlPrefix, paramMap);
 			}
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.LegacyRequest, LogActionType.SEND, 0, Log_Outcome.SUCCESS, "successfully retrieved "+urlPrefix+" action data from legacy", -1, request.getRemoteAddr(), -1, "params="+params, LogUserType.USER_LOGIN, "", "");
 //			emrResponseBean.setStartTime(startTime);
-		} catch (JsonParseException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
+		} catch (Exception e){
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.LegacyRequest, LogActionType.SEND, 0, Log_Outcome.FAILURE, "failure in getting "+urlPrefix+" action data from legacy", -1, request.getRemoteAddr(), -1, "params="+params, LogUserType.USER_LOGIN, "", "");
 			e.printStackTrace();
 		}
 		
@@ -105,14 +110,10 @@ public class LegacyRequestController {
 			else if(bean.getMethod().equalsIgnoreCase("POST")){
 				emrResponseBean = requestDispatcher.sendPost(request, bean.getUrl(), paramMap);
 			}
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.LegacyRequest, LogActionType.SEND, 0, Log_Outcome.SUCCESS, "successfully retrieved "+bean.getUrl()+" action data from legacy", -1, request.getRemoteAddr(), -1, "params="+bean.getParams(), LogUserType.USER_LOGIN, "", "");
 //			emrResponseBean.setStartTime(startTime);
-		} catch (JsonParseException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
+		} catch (Exception e){
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.LegacyRequest, LogActionType.SEND, 0, Log_Outcome.FAILURE, "failure in getting "+bean.getUrl()+" action data from legacy", -1, request.getRemoteAddr(), -1, "params="+bean.getParams(), LogUserType.USER_LOGIN, "", "");
 			e.printStackTrace();
 		}
 		
