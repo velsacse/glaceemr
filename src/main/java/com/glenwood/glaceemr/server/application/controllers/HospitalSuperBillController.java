@@ -20,6 +20,7 @@ import com.glenwood.glaceemr.server.application.models.Cpt;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.services.HospitalSuperBill.HospitalSuperbillService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
@@ -58,10 +59,11 @@ public class HospitalSuperBillController {
 	@RequestMapping(value="/getAdmittedPatientsList",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getAdmittedPatientsList(@RequestParam(value="posId",required=false)Integer posId,@RequestParam(value="date",required=false)String date,@RequestParam(value="doctorId",required=false)Integer doctorId) throws Exception{
-	List<AdmissionInfoBean> admittedList=hospitalSuperBillService.getAdmittedPatientsList(posId,doctorId,date);
-   EMRResponseBean admission=new EMRResponseBean();
-   admission.setData(admittedList);
-	return admission;
+		List<AdmissionInfoBean> admittedList=hospitalSuperBillService.getAdmittedPatientsList(posId,doctorId,date);
+		EMRResponseBean admission=new EMRResponseBean();
+		admission.setData(admittedList);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.VIEW, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"success in getting submit status type information" , -1, request.getRemoteAddr(),-1,"posId="+posId+"|doctorId="+doctorId.toString()+"|date="+date.toString(),LogUserType.USER_LOGIN , "", "");
+		return admission;
 	}
 	
 	/**
@@ -79,7 +81,7 @@ public class HospitalSuperBillController {
 		List<Cpt> cptValue=hospitalSuperBillService.getCptCodes(posTypeId);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+") and the list of frequently used cpt codes for both hospital and nursing home superbill",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		EMRResponseBean cpt=new EMRResponseBean();
-		   cpt.setData(cptValue);
+		cpt.setData(cptValue);
 		return cpt;
 	}
 	
@@ -101,7 +103,7 @@ public class HospitalSuperBillController {
 		List<Admission> dischargePatient=hospitalSuperBillService.updateDischargeDate(patientId,dischargeDate,admissionId);
 		EMRResponseBean discharge=new EMRResponseBean();
 		discharge.setData(dischargePatient);
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.UPDATE,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+") and Discharge the patient from Hospital/NursingHome",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SUPERBILL, LogActionType.UPDATE,-1, Log_Outcome.SUCCESS,"successfully deleted the patient from the admitted pos",-1,request.getRemoteAddr(), patientId,"admissionId="+admissionId+"|dischargeDate="+dischargeDate, LogUserType.USER_LOGIN,"","");
 		return discharge;
 	}
 	
@@ -119,7 +121,7 @@ public class HospitalSuperBillController {
 		List<ServiceDetail> previousDxCodes=hospitalSuperBillService.getPreviousVisitDxCodes(patientId);
 		EMRResponseBean previousDx=new EMRResponseBean();
 		previousDx.setData(previousDxCodes);
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+") and the previous Dx codes",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SUPERBILL, LogActionType.VIEW,-1, Log_Outcome.SUCCESS,"successfully retrieved recently used Dx codes",-1,request.getRemoteAddr(), patientId,"", LogUserType.USER_LOGIN,"","");
 		return previousDx;
 	}
 	
@@ -135,7 +137,7 @@ public class HospitalSuperBillController {
 		List<EmployeeProfile> providersList=hospitalSuperBillService.getProviderList();
 		EMRResponseBean providers=new EMRResponseBean();
 		providers.setData(providersList);
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+") and the list of Provider information ",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SUPERBILL, LogActionType.VIEW,-1, Log_Outcome.SUCCESS, "success in getting provider information",-1,request.getRemoteAddr(),-1,"", LogUserType.USER_LOGIN,"","");
 		return providers;
 	}
 	
@@ -153,7 +155,7 @@ public class HospitalSuperBillController {
 		List<ServiceDetail> getServices=hospitalSuperBillService.getServicesList(patientId,admissionDate);
 		EMRResponseBean services=new EMRResponseBean();
 		services.setData(getServices);
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.SUPERBILL,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Sucessfull login User Name(" +1+") and the list of services information for a patient",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SUPERBILL, LogActionType.VIEW,-1, Log_Outcome.SUCCESS,"success in getting all the services added to the patient",-1,request.getRemoteAddr(), patientId,"admissionDate="+admissionDate.toString(), LogUserType.USER_LOGIN,"","");
 		return services;
 	}
 	
