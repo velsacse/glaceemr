@@ -27,5 +27,8 @@ public interface LetterHeaderService {
 	void deleteLetterHeaderEmp(List<LetterHeaderEmp> letterHeaderContent);
 	List<LetterHeaderPos> fetchLetterHeaderPOSList(Integer headerId,Integer variantId);
 	List<EmployeeDataBean> fetchLetterHeaderEmpList(Integer headerId,Integer variantId);
+	long getLetterHeaderContentCount(Integer letterHeaderId, List<Integer> variantId);
+	List<LetterHeaderContent> getLetterHeaderContentList(Integer letterHeaderId,
+			List<Integer> variantId);
 
 }

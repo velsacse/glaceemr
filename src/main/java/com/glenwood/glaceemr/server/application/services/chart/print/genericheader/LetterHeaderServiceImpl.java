@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.glenwood.glaceemr.server.application.models.BillingConfigTable;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
-import com.glenwood.glaceemr.server.application.models.H076;
 import com.glenwood.glaceemr.server.application.models.H077;
 import com.glenwood.glaceemr.server.application.models.H077_;
 import com.glenwood.glaceemr.server.application.models.LetterHeaderEmp;
@@ -83,6 +81,19 @@ public class LetterHeaderServiceImpl implements LetterHeaderService{
 		return letterHeaderContentList;
 	}
 
+	
+	@Override
+	public List<LetterHeaderContent> getLetterHeaderContentList(Integer letterHeaderId, List<Integer> variantId) {
+		return letterContentRepository.findAll(LetterHeaderSpecification.getLetterHeaderContent(letterHeaderId,variantId));
+	}
+	
+	@Override
+	public long getLetterHeaderContentCount(Integer letterHeaderId, List<Integer> variantId) {
+		return letterContentRepository.count(LetterHeaderSpecification.getLetterHeaderContent(letterHeaderId,variantId));
+	}
+	
+	
+	
 	@Override
 	public GenericLetterHeader saveLetterHeader(GenericLetterHeader genericLetterHeader) {
 		GenericLetterHeader newgenericLetterHeader=genericHeaderRepository.save(genericLetterHeader);
