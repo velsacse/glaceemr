@@ -234,6 +234,7 @@ public class CoumadinFlowSheetController {
 	@ResponseBody
 	public Boolean checkConfiguration() throws Exception {
 		Boolean configure = coumadinflowsheetService.checkConfiguration();
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CoumadinFlowSheet, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully Configured Coumadin", sessionMap.getUserID(), request.getRemoteAddr(), -1,"-1", LogUserType.USER_LOGIN, "", "");
 		return configure;
 	}
 	/**
