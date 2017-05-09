@@ -51,7 +51,7 @@ public class QPPPerformanceController {
 			@RequestParam(value="patientID", required=true) int patientID,
 			@RequestParam(value="measureStatus", required=true) List<MeasureStatus> measureStatus)
 	{
-		measureService.saveMeasureDetails(userId, patientID, measureStatus);
+		measureService.saveMeasureDetails(userId, patientID, measureStatus, true);
 	}
 	
 	/**
@@ -147,7 +147,7 @@ public class QPPPerformanceController {
 
 				}
 
-				measureService.saveMeasureDetails(savedUser, patientID, responseToSave);
+				measureService.saveMeasureDetails(savedUser, patientID, responseToSave, true);
 
 			}else{
 
@@ -217,8 +217,8 @@ public class QPPPerformanceController {
 
 			if(providerInfo!=null){
 
-				epMeasureStatus = measureService.getEPMeasuresResponseObject(accountId,isGroup,patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
-
+				epMeasureStatus = measureService.getEPMeasuresResponseObject(accountId,isGroup,patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear());
+				
 			}else{
 
 			}
@@ -261,7 +261,8 @@ public class QPPPerformanceController {
 			@RequestParam(value="accountId", required=true) String accountId,
 			@RequestParam(value="mode", required=false, defaultValue="1") int mode,
 			@RequestParam(value="tinValue", required=false, defaultValue="") String tinValue,
-			@RequestParam(value="measureId", required=false, defaultValue="") String measureId) throws Exception{
+			@RequestParam(value="measureId", required=false, defaultValue="") String measureId,
+			@RequestParam(value="isACIReport", required=false, defaultValue="false") boolean isACIReport) throws Exception{
 		
 		EMRResponseBean response = new EMRResponseBean();
 		
@@ -277,21 +278,25 @@ public class QPPPerformanceController {
 
 			List<MacraProviderQDM> providerInfo = new ArrayList<MacraProviderQDM>();
 
-			if(mode!=2){
-				providerInfo = providerConfService.getCompleteProviderInfo(providerId);
-				configuredMeasures = providerInfo.get(0).getMeasures();
+			if(isACIReport){
+				configuredMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3";
 			}else{
-				configuredMeasures = providerConfService.getCompleteTinInfo(tinValue, reportingYear);
+				if(mode!=2){
+					providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+					configuredMeasures = providerInfo.get(0).getMeasures();
+				}else{
+					configuredMeasures = providerConfService.getCompleteTinInfo(tinValue, reportingYear);
+				}
 			}
-
+			
 			List<MIPSPerformanceBean> performanceObj = null;
 
 			if(mode == 0){
-				performanceObj = measureService.getMeasureRateReportByNPI(providerId, accountId, configuredMeasures);
+				performanceObj = measureService.getMeasureRateReportByNPI(providerId, accountId, configuredMeasures,isACIReport);
 			}else if(mode == 1){
-				performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures);
+				performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport);
 			}else{
-				performanceObj = measureService.getGroupPerformanceCount(tinValue,configuredMeasures, accountId);
+				performanceObj = measureService.getGroupPerformanceCount(tinValue,configuredMeasures, accountId,isACIReport);
 			}
 
 			response.setData(performanceObj);
@@ -324,6 +329,61 @@ public class QPPPerformanceController {
 		return response;
 		
 	}
+	
+	
+	@RequestMapping(value = "/getACIPerformanceRate", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getACIPerformanceRate(
+			@RequestParam(value="providerId", required=true) int providerId,
+			@RequestParam(value="accountId", required=true) String accountId,
+			@RequestParam(value="mode", required=false, defaultValue="1") int mode,
+			@RequestParam(value="tinValue", required=false, defaultValue="") String tinValue,
+			@RequestParam(value="measureId", required=false, defaultValue="") String measureId) throws Exception{
+		
+		EMRResponseBean response = new EMRResponseBean();
+		
+		Writer writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(writer);
+
+		String configuredMeasures = "";
+		
+		try{
+
+			configuredMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3";
+
+			List<MIPSPerformanceBean> performanceObj = measureService.getPerformanceCount(providerId, measureId, configuredMeasures, accountId);
+
+			response.setData(performanceObj);
+
+		}catch(Exception e){
+			
+			try {
+				
+				e.printStackTrace(printWriter);
+
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while getting MIPSPerformance Report",writer.toString());
+				
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
+				
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+				
+			}finally{
+
+				printWriter.flush();
+				printWriter.close();
+				
+				e.printStackTrace();
+				
+			}
+			
+		}
+		
+		return response;
+		
+	}
+	
 	
 	@RequestMapping(value = "/getPatient", method = RequestMethod.GET)
 	@ResponseBody
@@ -381,7 +441,8 @@ public class QPPPerformanceController {
 	public EMRResponseBean getMIPSPerformanceRateByNPI(
 			@RequestParam(value="providerId", required=true) int providerId,
 			@RequestParam(value="accountId", required=true) String accountId,
-			@RequestParam(value="measureId", required=false, defaultValue="") String measureId) throws Exception{
+			@RequestParam(value="measureId", required=false, defaultValue="") String measureId,
+			@RequestParam(value="isACIReport", required=false, defaultValue="false") boolean isACIReport) throws Exception{
 		
 		EMRResponseBean response = new EMRResponseBean();
 		
@@ -394,7 +455,7 @@ public class QPPPerformanceController {
 		
 		String configuredMeasures = providerInfo.get(0).getMeasures();
 		
-		List<MIPSPerformanceBean> performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures);
+		List<MIPSPerformanceBean> performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport);
 
 		response.setData(performanceObj);
 		

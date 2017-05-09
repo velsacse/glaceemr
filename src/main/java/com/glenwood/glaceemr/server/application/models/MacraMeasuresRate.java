@@ -1,15 +1,17 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
+
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -96,6 +98,9 @@ public class MacraMeasuresRate {
 
 	@Column(name="macra_measures_rate_tin")
 	private String macraMeasuresRateTin;
+
+	@Column(name="macra_measures_rate_points")
+	private Double macraMeasuresRatePoints;
 
 	public Integer getMacraMeasuresRateId() {
 		return macraMeasuresRateId;
@@ -304,6 +309,14 @@ public class MacraMeasuresRate {
 
 	public void setMacraMeasuresRateTin(String macraMeasuresRateTin) {
 		this.macraMeasuresRateTin = macraMeasuresRateTin;
+	}
+
+	public Double getMacraMeasuresRatePoints() {
+		return macraMeasuresRatePoints;
+	}
+
+	public void setMacraMeasuresRatePoints(Double macraMeasuresRatePoints) {
+		this.macraMeasuresRatePoints = macraMeasuresRatePoints;
 	}
 	
 }

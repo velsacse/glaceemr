@@ -82,6 +82,10 @@ public class PatientAftercareData {
 	@JoinColumn(name="patient_aftercare_data_aftercare_id", referencedColumnName="aftercare_ins_id",insertable=false,updatable=false)
 	AftercareIns aftercareIns;
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="patient_aftercare_data_encounter_id", referencedColumnName="encounter_id",insertable=false,updatable=false)
+	Encounter encounterTbl;
+	
 	public AftercareIns getAftercareIns() {
 		return aftercareIns;
 	}
