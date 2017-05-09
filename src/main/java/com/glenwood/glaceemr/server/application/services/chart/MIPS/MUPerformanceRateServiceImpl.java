@@ -176,7 +176,7 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 	
 	@Override
 	public void addToMacraMeasuresRate(Integer providerId, List<MIPSPerformanceBean> providerPerformance, int reportingYear,
-			Date startDate, Date endDate) {
+			Date startDate, Date endDate, boolean isACI) {
 		
 		MacraMeasuresRate measureRate = new MacraMeasuresRate();
 		Date d = new Date();
@@ -224,6 +224,10 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 			
 			measureRate.setMacraMeasuresRateNpi(getNPIForProvider(providerId));
 			measureRate.setMacraMeasuresRateTin(getTINForProvider(providerId));
+			
+			if(isACI){
+				measureRate.setMacraMeasuresRatePoints(performanceByMeasure.getPoints());
+			}
 			
 			d = new Date();
 			curr_time = new Timestamp(d.getTime());

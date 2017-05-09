@@ -10,6 +10,6 @@ public interface MUPerformanceRateService{
 	List<Integer> getPatientsSeen(int providerId, Date startDate, Date endDate);
 
 	void addToMacraMeasuresRate(Integer providerId, List<MIPSPerformanceBean> providerPerformance, int reportingYear, 
-			Date startDate, Date endDate);
+			Date startDate, Date endDate, boolean isACI);
 	
 }

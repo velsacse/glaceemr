@@ -24,6 +24,7 @@ import com.glenwood.glaceemr.server.application.Bean.ClinicalDataQDM;
 import com.glenwood.glaceemr.server.application.Bean.EncounterQDM;
 import com.glenwood.glaceemr.server.application.Bean.ImmunizationQDM;
 import com.glenwood.glaceemr.server.application.Bean.InvestigationQDM;
+import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
 import com.glenwood.glaceemr.server.application.Bean.MedicationOrderQDM;
 import com.glenwood.glaceemr.server.application.Bean.MedicationQDM;
 import com.glenwood.glaceemr.server.application.Bean.ParameterDetails;
@@ -54,7 +55,6 @@ import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping;
 import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping_;
 import com.glenwood.glaceemr.server.application.models.DirectEmailLog;
 import com.glenwood.glaceemr.server.application.models.DirectEmailLog_;
-import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.H413;
@@ -75,10 +75,14 @@ import com.glenwood.glaceemr.server.application.models.LabParameterCode;
 import com.glenwood.glaceemr.server.application.models.LabParameterCode_;
 import com.glenwood.glaceemr.server.application.models.LabParameters;
 import com.glenwood.glaceemr.server.application.models.LabParameters_;
+import com.glenwood.glaceemr.server.application.models.MeaningfuluseSettings;
+import com.glenwood.glaceemr.server.application.models.MeaningfuluseSettings_;
 import com.glenwood.glaceemr.server.application.models.MedStatus;
 import com.glenwood.glaceemr.server.application.models.MedStatus_;
 import com.glenwood.glaceemr.server.application.models.NdcPkgProduct;
 import com.glenwood.glaceemr.server.application.models.NdcPkgProduct_;
+import com.glenwood.glaceemr.server.application.models.PatientAftercareData;
+import com.glenwood.glaceemr.server.application.models.PatientAftercareData_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory;
@@ -100,10 +104,8 @@ import com.glenwood.glaceemr.server.application.models.XrefGenproductSynRxnorm;
 import com.glenwood.glaceemr.server.application.models.XrefGenproductSynRxnorm_;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
-import com.glenwood.glaceemr.server.application.services.chart.MIPS.CVXVaccineGroupMappingBean;
-import com.glenwood.glaceemr.server.application.services.chart.MIPS.ImmunizationDetailsBean;
-import com.glenwood.glaceemr.server.application.services.chart.MIPS.VaccReportBean;
 import com.glenwood.glaceemr.server.application.specifications.ProblemListSpecification;
+import com.google.common.eventbus.AllowConcurrentEvents;
 
 public class ExportQDM {
 
@@ -1414,63 +1416,168 @@ Root<Encounter> root = cq.from(Encounter.class);
 		return tobaccoStatus;
 	}
 	
-	/**
-	 * Function to return max encounter id for a given patient ID
-	 * 
-	 * @param patientId
-	 * @param em
-	 * @return
+	/*
+	 * 	* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 *  * * * * * * * * * * * * * * * * * * EP Measure Related Code Start * * * * * * * * * * * * * * * * * * * 
+	 *  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 	 */
 	
-	public Integer getMaxEncounterIdByPatient(int patientId, EntityManager em){
-		
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
-		Root<Encounter> root = cq.from(Encounter.class);
-		
-		Join<Encounter, Chart> encounterChartJoin = root.join(Encounter_.chart,JoinType.INNER);
-		
-		cq.select(root.get(Encounter_.encounterId));
-		
-		Predicate[] restrictions= new Predicate[] {
-				builder.equal(encounterChartJoin.get(Chart_.chartPatientid), patientId),
-		};
-		cq.where(restrictions);
-		
-		cq.orderBy(builder.desc(root.get(Encounter_.encounterId)));
-		
-		List<Object> result = em.createQuery(cq).setMaxResults(1).getResultList();
-		Integer maxEncId=0;
-		if(result.size()!=0)
-			maxEncId=Integer.parseInt(result.get(0).toString());
-		
-		return maxEncId;
-		
-	}
-	
 	/**
-	 * Function which gives the result to E-Prescribing EP Measure
+	 * 
+	 * Function to check whether a patient has been by the provider during reporting period or not
 	 * 
 	 * @param patientId
 	 * @param providerId
 	 * @param em
+	 * @param startDate
+	 * @param endDate
 	 * @return
 	 */
 	
-	public String getEPrescribingDetails(Boolean isGroup,Integer encounterId, EntityManager em,int providerId) {
-
+	public boolean checkIsVisited(boolean isGroup, int patientId, int providerId, EntityManager em, Date startDate, Date endDate){
+		
+		boolean result = false;
+		
+		try{
+			
+			CriteriaBuilder builder1 = em.getCriteriaBuilder();
+			CriteriaQuery<String> cq1 = builder1.createQuery(String.class);
+			Root<MeaningfuluseSettings> root1 = cq1.from(MeaningfuluseSettings.class);
+			
+			cq1.multiselect(builder1.coalesce(root1.get(MeaningfuluseSettings_.meaningfuluseSettingsOptionValue), "false"));
+			
+			cq1.where( builder1.equal(root1.get(MeaningfuluseSettings_.meaningfuluseSettingsType), "EP_RULES"), 
+					builder1.equal(root1.get(MeaningfuluseSettings_.meaningfuluseSettingsOptionId), 1));
+			
+			String allowOnlyOfficeVisits = em.createQuery(cq1).getResultList().get(0);
+			
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+			Root<Encounter> root = cq.from(Encounter.class);
+			
+			if(allowOnlyOfficeVisits.equals("t") || allowOnlyOfficeVisits.equals("true")){
+				
+				String cptCodes = "99201,99202,99203,99204,99205,99212,99213,99214,99215,99241,99242,99243,99244,99245,99324,99325,99326,99327,99328,99334,99335,99336,99337,99341,99342,99343,99344,99345,99347,99348,99349,99350,99401,99402,99403,99404,99406,99407,99408,99409,99411,99412,99420,99429,99381,99382,99383,99384,99385,99386,99387,99391,99392,99393,99394,99395,99396,99397,99212-MD,99213-MD,99214-MD,99215-MD,99212-RN,99213-RN,99214-RN,99215-RN";
+				
+				Join<Encounter, Chart> chartJoin = root.join(Encounter_.chartTable, JoinType.INNER);
+				Join<Chart, ServiceDetail> chartServiceDetailJoin = chartJoin.join(Chart_.serviceDetail, JoinType.INNER);
+				Join<ServiceDetail, Cpt> cptJoin = chartServiceDetailJoin.join(ServiceDetail_.cpt, JoinType.INNER);
+				cptJoin.on(builder.equal(chartServiceDetailJoin.get(ServiceDetail_.serviceDetailCptid), cptJoin.get(Cpt_.cptId)));
+				
+				cq.multiselect(builder.countDistinct(root.get(Encounter_.encounterId)));
+				
+				Predicate byEncDate = builder.between(root.get(Encounter_.encounterDate), startDate, endDate);
+				Predicate byProviderId = builder.equal(root.get(Encounter_.encounter_service_doctor), providerId);
+				Predicate byEncType = builder.equal(root.get(Encounter_.encounterType), 1);
+				Predicate byPatientId = builder.equal(chartJoin.get(Chart_.chartPatientid), patientId);
+				Predicate byCptType = builder.equal(cptJoin.get(Cpt_.cptCpttype), 1);
+				Predicate byDOS = builder.between(builder.function("DATE", Date.class, chartServiceDetailJoin.get(ServiceDetail_.serviceDetailDos)), startDate, endDate);				
+				Predicate byEnMCodes = cptJoin.in(Arrays.asList(cptCodes.split(",")));
+				
+				if(isGroup)
+					cq.where(byEncDate,byProviderId,byPatientId,byEncType,byCptType,byDOS,byEnMCodes);
+				else
+					cq.where(byEncDate,byPatientId,byEncType,byCptType,byDOS,byEnMCodes);
+				
+			}else{
+				
+				Join<Encounter, Chart> chartJoin = root.join(Encounter_.chartTable, JoinType.INNER);
+				
+				cq.multiselect(builder.countDistinct(root.get(Encounter_.encounterId)));
+				
+				Predicate byEncDate = builder.between(root.get(Encounter_.encounterDate), startDate, endDate);
+				Predicate byProviderId = builder.equal(root.get(Encounter_.encounter_service_doctor), providerId);
+				Predicate byEncType = builder.equal(root.get(Encounter_.encounterType), 1);
+				Predicate byPatientId = builder.equal(chartJoin.get(Chart_.chartPatientid), patientId);
+				
+				if(isGroup)
+					cq.where(byEncDate,byProviderId,byPatientId,byEncType);
+				else
+					cq.where(byEncDate,byPatientId,byEncType);
+				
+			}
+			
+			List<Long> encounterCount = em.createQuery(cq).getResultList();
+			
+			if(encounterCount.get(0) > 0){
+				
+				result = true;
+				
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return result;
+		
+	}
+	
+	/**
+	 * Function to get patient portal access for an active patient
+	 * 
+	 * @param patientId
+	 * @param em
+	 * @return
+	 */
+	
+	public boolean getPatientPortalAccess(int patientId, EntityManager em){
+		
+		boolean result = false;
+		
+		try{
+			
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Boolean> cq = builder.createQuery(Boolean.class);
+			Root<PatientRegistration> root = cq.from(PatientRegistration.class);
+			
+			cq.select(builder.coalesce(root.get(PatientRegistration_.patientRegistrationIspatientportal), false));
+			
+			cq.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId), 
+					builder.equal(root.get(PatientRegistration_.patientRegistrationActive), true));
+			
+			result = em.createQuery(cq).getResultList().get(0);
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return result;
+		
+	}
+	
+	/**
+	 * Function to get medications prescribed by a provider during reporting period for that patient
+	 * 
+	 * @param patientId
+	 * @param providerId
+	 * @param em
+	 * @param startDate
+	 * @param endDate
+	 * @param measureObj
+	 */
+	
+	public String getEPrescribingDetails(boolean isGroup, int patientId, int providerId, EntityManager em, Date startDate, Date endDate, MeasureStatus measureObj){
+		
+		int electronicallySentMedications = 0, ePrescStatus = -1, i = 0;
+		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<Prescription> root = cq.from(Prescription.class);
-
-		int ePrescStatus = -1, i = 0;
 		
-		int electronicallySentMedications = 0;
-		Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
+		Predicate byProviderId  = builder.equal(root.get(Prescription_.docPrescOrderedBy), providerId);
+		Predicate byOrderedDate = builder.between(root.get(Prescription_.docPrescOrderedDate), startDate, endDate);
+		Predicate byIsActive 	= builder.equal(root.get(Prescription_.docPrescIsActive), true);
+		Predicate byPatientId	= builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
+		
 		cq.multiselect(root.get(Prescription_.rxname).alias("Medication"),
-				builder.coalesce(root.get(Prescription_.docPrescIsEPrescSent),0).alias("IsSentElectronically")).where(builder.equal(root.get(Prescription_.docPrescIsActive), true),builder.equal(root.get(Prescription_.docPrescEncounterId), encounterId));
+				builder.coalesce(root.get(Prescription_.docPrescIsEPrescSent),0).alias("IsSentElectronically"));
+		
 		if(isGroup)
-			cq.where(byProvider);
+			cq.where(byProviderId,byOrderedDate,byPatientId,byIsActive);
+		else
+			cq.where(byOrderedDate,byPatientId,byIsActive);
+		
 		List<Object[]> result=em.createQuery(cq).getResultList();
 		
 		for(i=0;i<result.size();i++){
@@ -1489,154 +1596,30 @@ Root<Encounter> root = cq.from(Encounter.class);
 			}
 		}
 		
-		return "Medications sent electronically: "+electronicallySentMedications+"\n Total Medications prescribed: "+i+"&&&&"+ePrescStatus;
+		measureObj.setIpp(i);
+		measureObj.setDenominator(i);
+		measureObj.setNumerator(electronicallySentMedications);
+		
+		return electronicallySentMedications+" / "+i+"&&&& medications sent electronically &&&&"+ePrescStatus;
 		
 	}
 	
 	/**
-	 * Function to check and find whether transition of care is checked or not for particular encounter
 	 * 
-	 * @param encounterId
-	 * @param em
-	 * @return
-	 */
-	
-	public boolean checkTransitionOfCareByEncId(Boolean isGroup,int encounterId, EntityManager em,int providerId){
-	
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
-		Root<Encounter> root = cq.from(Encounter.class);
-		
-		cq.select(builder.coalesce(root.get(Encounter_.transitionOfCare),false));
-		if(isGroup){
-			cq.where(builder.equal(root.get(Encounter_.encounterId), encounterId),builder.equal(root.get(Encounter_.encounter_service_doctor), providerId));
-		}
-		else
-		cq.where(builder.equal(root.get(Encounter_.encounterId), encounterId));
-		
-		cq.orderBy(builder.desc(root.get(Encounter_.encounterId)));
-		Boolean isTransitionOfCareChecked=false;
-		List<Object> result= em.createQuery(cq).setMaxResults(1).getResultList();
-		if(result.size()!=0)
-			isTransitionOfCareChecked=(Boolean)result.get(0);
-		return isTransitionOfCareChecked;
-		
-	}
-	
-	/**
-	 * Function to get medication reconcilation status for given encounter id
+	 * Function to get total no of messages sent by the provider to that patient during calendar year
 	 * 
-	 * @param encounterId
-	 * @param em
-	 * @return
-	 */
-	
-	public boolean getReconcilationStatusByEncId(Boolean isGroup,int encounterId, EntityManager em,int providerId){
-
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Integer> cq = builder.createQuery(Integer.class);
-		Root<ReconciledMedication> root = cq.from(ReconciledMedication.class);			
-		
-		boolean isMedicationReconciled = false;
-		
-		cq.select(root.get(ReconciledMedication_.reconciledMedicationBy));
-		if(!isGroup)
-		cq.where(builder.equal(root.get(ReconciledMedication_.reconciledMedicationEncounterid), encounterId),builder.equal(root.get(ReconciledMedication_.reconciledMedicationBy), providerId));
-		else
-		cq.where(builder.equal(root.get(ReconciledMedication_.reconciledMedicationEncounterid), encounterId));
-		
-		List<Integer> reconciledBy = em.createQuery(cq).getResultList();
-		
-		if(reconciledBy.size() > 0){
-			isMedicationReconciled = true;
-		}
-		
-		return isMedicationReconciled;
-		
-	}
-	
-	/**
-	 * Function to get list of referrals transmitted by a physician electronically in given reporting period.
-	 * 
+	 * @param isGroup
 	 * @param providerId
+	 * @param patientId
 	 * @param startDate
 	 * @param endDate
 	 * @param em
+	 * @param measureObj
 	 * @return
 	 */
 	
 	@SuppressWarnings("rawtypes")
-	public String getReferralInfoExchangeByProvider(Boolean isGroup,int providerId, int patientId, Date startDate, Date endDate, EntityManager em){
-
-		String returnString = "";
-		
-		try{
-			
-			CriteriaBuilder builder = em.getCriteriaBuilder();
-			CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
-			Root<H413> root = cq.from(H413.class);
-			
-			Selection[] selections= new Selection[] {
-				
-				builder.coalesce(root.get(H413_.summaryCareRecordProvidedElectronic),0),
-				builder.count(root),
-								
-			};
-			
-			cq.multiselect(selections);
-			if(isGroup)
-			cq.where(builder.equal(root.get(H413_.referralById), providerId),builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate));
-			else
-			cq.where(builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate));
-			
-			cq.groupBy(root.get(H413_.summaryCareRecordProvidedElectronic));
-			
-			List<Object[]> result = em.createQuery(cq).getResultList();
-			
-			
-			if(result.size() == 2){
-			
-				int total = Integer.parseInt(result.get(0)[1].toString())+Integer.parseInt(result.get(1)[1].toString());
-				
-				returnString = "No. of referrals sent electronically: "+result.get(1)[1]+"\nNo. of referrals sent in total: "+total;
-				
-			}else if(result.size() == 1){
-				
-				if(result.get(0)[0].equals("1")){
-					returnString = "No. of referrals sent electronically: "+result.get(0)[1]+"\nNo. of referrals sent in total: "+result.get(0)[1];
-				}else{
-					returnString = "No. of referrals sent electronically: 0\nNo. of referrals sent in total: "+result.get(0)[1];
-				}
-				
-			}else{
-				
-				returnString = "No. of referrals sent electronically: 0\nNo. of referrals sent in total: 0";
-				
-			}
-			
-		}catch(Exception e){
-			
-			e.printStackTrace();
-			returnString = "0/0";
-			
-		}
-		
-		return returnString;
-		
-	}
-	
-	/**
-	 * Function to get count of messages sent/replied by a provider in given period of time
-	 * 
-	 * @param providerId
-	 * @param startDate
-	 * @param endDate
-	 * @param em
-	 * @return
-	 */
-	
-	@SuppressWarnings("rawtypes")
-	public String getSecureMessagingInfo(Boolean isGroup,int providerId, int patientId, Date startDate, Date endDate, EntityManager em){
+	public String getSecureMessagingInfo(Boolean isGroup,int providerId, int patientId, Date startDate, Date endDate, EntityManager em, MeasureStatus measureObj){
 		
 		String returnString = "";
 		
@@ -1654,42 +1637,55 @@ Root<Encounter> root = cq.from(Encounter.class);
 			};
 			
 			cq.multiselect(selections);
+			
+			Predicate byProviderId  = builder.equal(root.get(PortalMessage_.messageBy), providerId); 
+			Predicate byRepPeriod 	= builder.between(builder.function("DATE", Date.class, root.get(PortalMessage_.mdate)), startDate, endDate);
+			Predicate byPatientId	= builder.equal(root.get(PortalMessage_.messageTo), patientId);
+			
 			if(isGroup)
-			cq.where(builder.equal(root.get(PortalMessage_.messageBy), providerId), 
-					builder.between(builder.function("DATE", Date.class, root.get(PortalMessage_.mdate)), startDate, endDate),
-					builder.equal(root.get(PortalMessage_.messageTo), patientId));
+				cq.where(byProviderId,byRepPeriod, byPatientId);
 			else
-				cq.where(builder.between(builder.function("DATE", Date.class, root.get(PortalMessage_.mdate)), startDate, endDate),
-						builder.equal(root.get(PortalMessage_.messageTo), patientId));
+				cq.where(byRepPeriod, byPatientId);
+			
 			cq.groupBy(root.get(PortalMessage_.portalMessageHasreplied));
 			
 			List<Object[]> result = em.createQuery(cq).getResultList();
-			
 			
 			if(result.size() == 2){
 			
 				int total = Integer.parseInt(result.get(0)[1].toString())+Integer.parseInt(result.get(1)[1].toString());
 				
-				returnString = "No. of messages sent as reply: "+result.get(1)[1]+"\n No.of messages composed: "+total;
+				returnString = "No. of messages sent: "+total;
+				
+				measureObj.setIpp(1);
+				measureObj.setDenominator(1);
+				measureObj.setNumerator(1);
 				
 			}else if(result.size() == 1){
 				
+				measureObj.setIpp(1);
+				measureObj.setDenominator(1);
+				measureObj.setNumerator(1);
+				
 				if(result.get(0)[0].equals("t")){
-					returnString = "No. of messages sent as reply: "+result.get(0)[1]+"\n No.of messages composed: "+result.get(0)[1];
+					returnString = "No. of messages sent: "+result.get(0)[1];
 				}else{
-					returnString = "No. of messages sent as reply: 0\nNo.of messages composed: "+result.get(0)[1];
+					returnString = "No. of messages sent: "+result.get(0)[1];
 				}
 				
 			}else{
 				
-				returnString = "No. of messages sent as reply: 0\nNo.of messages composed: 0";
+				measureObj.setIpp(1);
+				measureObj.setDenominator(1);
+				
+				returnString = "No. of messages sent: 0";
 				
 			}
 			
 		}catch(Exception e){
 			
 			e.printStackTrace();
-			returnString = "0/0";
+			returnString = "No. of messages sent: 0";
 			
 		}
 		
@@ -1698,88 +1694,17 @@ Root<Encounter> root = cq.from(Encounter.class);
 	}
 	
 	/**
-	 * Function to get count of patients who have viewed/downloaded their clinical data from patient portal 
+	 * Function to get patient portal usage status for the patient during the calendar year
 	 * 
-	 * @param providerId
+	 * @param patientId
 	 * @param startDate
 	 * @param endDate
 	 * @param em
+	 * @param measureObj
 	 * @return
 	 */
 	
-	@SuppressWarnings("unused")
-	public String getPatientElectronicAccessInfo(Boolean isGroup,int providerId, int patientId, Date startDate, Date endDate, EntityManager em){
-		
-		long patientCount = 0;
-		
-		String lastAccessedTime = "";
-		
-		try{
-			
-			CriteriaBuilder builder = em.getCriteriaBuilder();
-			CriteriaQuery<String> cq = builder.createQuery(String.class);
-			Root<Chart> root = cq.from(Chart.class);
-			
-			Join<Chart, Encounter> encounterTable = root.join(Chart_.encounterTable, JoinType.INNER);
-			Join<Encounter, EmployeeProfile> empProfileTable = encounterTable.join(Encounter_.empProfileEmpId, JoinType.INNER);
-			Join<Chart, DirectEmailLog> directEmailLogTable = root.join(Chart_.directEmailLogTable, JoinType.INNER);
-			
-			List<Integer> encounterStatus = new ArrayList<Integer>();
-			encounterStatus.add(0, 1);
-			encounterStatus.add(1, 3);
-			
-			List<Integer> directEmailAction = new ArrayList<Integer>();
-			directEmailAction.add(0, 1);
-			directEmailAction.add(1, 2);
-			
-			Predicate[] restrictions= new Predicate[] {
-				
-				builder.equal(encounterTable.get(Encounter_.encounterType), 1),
-				encounterTable.get(Encounter_.encounterStatus).in(encounterStatus),
-				directEmailLogTable.get(DirectEmailLog_.directEmailLogActionType).in(directEmailAction),
-				builder.equal(encounterTable.get(Encounter_.encounter_service_doctor), providerId),
-				builder.between(builder.function("DATE", Date.class, encounterTable.get(Encounter_.encounterDate)), startDate, endDate),
-				builder.equal(root.get(Chart_.chartPatientid), patientId)
-				
-			};
-			Predicate[] restriction=new Predicate[] {
-					
-					builder.equal(encounterTable.get(Encounter_.encounterType), 1),
-					encounterTable.get(Encounter_.encounterStatus).in(encounterStatus),
-					directEmailLogTable.get(DirectEmailLog_.directEmailLogActionType).in(directEmailAction),
-					builder.between(builder.function("DATE", Date.class, encounterTable.get(Encounter_.encounterDate)), startDate, endDate),
-					builder.equal(root.get(Chart_.chartPatientid), patientId)
-					
-				};
-			cq.multiselect(builder.function("to_char", String.class, directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn), builder.literal("MM/DD/YYYY HH:MI:SS am")));
-			
-			cq.orderBy(builder.desc(directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn)));
-			if(isGroup)
-			cq.where(restrictions);
-			else
-			cq.where(restriction);
-			
-			List<String> queryResult = em.createQuery(cq).getResultList();
-			
-			patientCount = queryResult.size();
-			
-			if(patientCount > 0){
-				lastAccessedTime = queryResult.get(0);
-			}
-			
-		}catch(Exception e){
-			
-			e.printStackTrace();
-			patientCount = 0;
-			
-		}
-		
-		
-		return lastAccessedTime+"&"+patientCount;
-		
-	}
-	
-	public String getPatientAccessInfoForPortal(int providerId, int patientId, Date startDate, Date endDate, EntityManager em){
+	public String getPatientAccessInfoForPortal(int patientId, Date startDate, Date endDate, EntityManager em, MeasureStatus measureObj){
 		
 		String result = "";
 		
@@ -1802,18 +1727,305 @@ Root<Encounter> root = cq.from(Encounter.class);
 			List<String> accessedTime = em.createQuery(cq).getResultList();
 			
 			long count = accessedTime.size();
+
+			measureObj.setIpp(1);
+			measureObj.setDenominator(1);
+			measureObj.setNumerator(1);
 			
 			if(count > 0){
+				
 				result = accessedTime.get(0);
+				
 			}else{
+				
 				result = "";
+				
 			}
 			
 		}catch(Exception e){
 			e.printStackTrace();
+			result = "";
 		}
 		
 		return result;
+		
+	}	
+	
+	/**
+	 * Function to get count of patients who have viewed/downloaded their clinical data from patient portal 
+	 * 
+	 * @param providerId
+	 * @param startDate
+	 * @param endDate
+	 * @param em
+	 * @return
+	 */
+	
+	public String getPatientElectronicAccessInfo(Boolean isGroup, int patientId, Date startDate, Date endDate, EntityManager em, MeasureStatus measureObj){
+		
+		long patientCount = 0;
+		
+		String lastAccessedTime = "";
+		
+		try{
+			
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<String> cq = builder.createQuery(String.class);
+			Root<Chart> root = cq.from(Chart.class);
+			
+			Join<Chart, Encounter> encounterTable = root.join(Chart_.encounterTable, JoinType.INNER);
+			Join<Chart, DirectEmailLog> directEmailLogTable = root.join(Chart_.directEmailLogTable, JoinType.INNER);
+			
+			List<Integer> directEmailAction = new ArrayList<Integer>();
+			directEmailAction.add(0, 1);
+			directEmailAction.add(1, 2);
+			
+			Predicate[] restrictions= new Predicate[] {
+				
+				directEmailLogTable.get(DirectEmailLog_.directEmailLogActionType).in(directEmailAction),
+				builder.between(builder.function("DATE", Date.class, encounterTable.get(Encounter_.encounterDate)), startDate, endDate),
+				builder.equal(root.get(Chart_.chartPatientid), patientId)
+				
+			};
+			
+			Predicate[] restriction=new Predicate[] {
+					
+					directEmailLogTable.get(DirectEmailLog_.directEmailLogActionType).in(directEmailAction),
+					builder.between(builder.function("DATE", Date.class, encounterTable.get(Encounter_.encounterDate)), startDate, endDate),
+					builder.equal(root.get(Chart_.chartPatientid), patientId)
+					
+			};
+			
+			cq.multiselect(builder.function("to_char", String.class, directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn), builder.literal("MM/DD/YYYY HH:MI:SS am")));
+			
+			cq.orderBy(builder.desc(directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn)));
+			
+			if(isGroup)
+				cq.where(restrictions);
+			else
+				cq.where(restriction);
+			
+			List<String> queryResult = em.createQuery(cq).getResultList();
+			
+			patientCount = queryResult.size();
+			
+			measureObj.setIpp(1);
+			measureObj.setDenominator(1);
+			measureObj.setNumerator(1);
+			
+			if(patientCount > 0){
+				
+				lastAccessedTime = queryResult.get(0);
+				
+			}
+			
+		}catch(Exception e){
+			
+			e.printStackTrace();
+			patientCount = 0;
+			
+		}
+		
+		
+		return lastAccessedTime;
+		
+	}
+	
+	/**
+	 * Function to get list of referrals transmitted by a physician electronically in given reporting period.
+	 * 
+	 * @param providerId
+	 * @param startDate
+	 * @param endDate
+	 * @param em
+	 * @return
+	 */
+	
+	@SuppressWarnings("rawtypes")
+	public String getReferralInfoExchangeByProvider(Boolean isGroup,int providerId, int patientId, Date startDate, Date endDate, EntityManager em, MeasureStatus measureObj){
+
+		String returnString = "";
+		
+		try{
+			
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+			Root<H413> root = cq.from(H413.class);
+			
+			Selection[] selections= new Selection[] {
+				
+				builder.coalesce(root.get(H413_.summaryCareRecordProvidedElectronic),0),
+				builder.count(root),
+								
+			};
+			
+			cq.multiselect(selections);
+			
+			if(isGroup)
+				cq.where(builder.equal(root.get(H413_.referralById), providerId),builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate), builder.equal(root.get(H413_.h413035), patientId));
+			else
+				cq.where(builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate), builder.equal(root.get(H413_.h413035), patientId));
+			
+			cq.groupBy(root.get(H413_.summaryCareRecordProvidedElectronic));
+			
+			List<Object[]> result = em.createQuery(cq).getResultList();
+			
+			
+			if(result.size() == 2){
+			
+				int total = Integer.parseInt(result.get(0)[1].toString())+Integer.parseInt(result.get(1)[1].toString());
+				
+				measureObj.setIpp(total);
+				measureObj.setDenominator(total);
+				measureObj.setNumerator(Integer.parseInt(result.get(0)[1].toString()));
+				
+				returnString = result.get(0)[1]+" / "+total+" &&&& referrals sent electronically";
+				
+			}else if(result.size() == 1){
+				
+				System.out.println(" "+result.get(0)[0]+" and "+result.get(0)[1]);
+				
+				if(result.get(0)[0].toString().equals("1")){
+
+					returnString = result.get(0)[1]+" / "+result.get(0)[1]+" &&&& referrals sent electronically";
+					
+					measureObj.setIpp(Integer.parseInt(result.get(0)[1].toString()));
+					measureObj.setDenominator(Integer.parseInt(result.get(0)[1].toString()));
+					measureObj.setNumerator(Integer.parseInt(result.get(0)[1].toString()));
+					
+				}else{
+					
+					returnString = "0 / "+result.get(0)[1]+" &&&& referrals sent electronically";
+					
+					measureObj.setIpp(Integer.parseInt(result.get(0)[1].toString()));
+					measureObj.setDenominator(Integer.parseInt(result.get(0)[1].toString()));
+				}
+				
+			}else{
+				
+				returnString = "No referrals have been sent by provider";
+				
+			}
+			
+		}catch(Exception e){
+			
+			e.printStackTrace();
+			returnString = "No referrals have been sent by provider";
+			
+		}
+		
+		return returnString;
+		
+	}
+
+	public String getPatientEducationDetails(Boolean isGroup, int providerId, int patientId, Date startDate, Date endDate, EntityManager em, MeasureStatus measureObj) {
+		
+		String returnString = "";
+		
+		try{
+			
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+			Root<PatientAftercareData> root = cq.from(PatientAftercareData.class);
+			
+			Join<PatientAftercareData, Encounter> encounterJoin = root.join(PatientAftercareData_.encounterTbl, JoinType.INNER);
+			
+			cq.multiselect(root.get(PatientAftercareData_.patientAftercareDataPatientId));
+			
+			cq.where(builder.between(encounterJoin.get(Encounter_.encounterDate), startDate, endDate), 
+					builder.equal(root.get(PatientAftercareData_.patientAftercareDataPatientId), patientId));
+			
+			cq.groupBy(root.get(PatientAftercareData_.patientAftercareDataPatientId));
+			
+			List<Object> handoutsCount = em.createQuery(cq).getResultList();
+			
+			measureObj.setIpp(1);
+			measureObj.setDenominator(1);
+			
+			if(handoutsCount.size() > 0){
+				returnString = "Total handouts given by provider : "+handoutsCount.get(0);
+				measureObj.setNumerator(1);
+			}else{
+				returnString = "No handouts have been given by provider";
+			}
+			
+		}catch(Exception e){
+			
+			e.printStackTrace();
+			returnString = "No handouts have been given by provider";
+			
+		}
+		
+		return returnString;
+		
+	}
+	
+	public String getMedicationReconcilcationStatus(Boolean isGroup, int providerId, int patientId, Date startDate, Date endDate, EntityManager em, MeasureStatus measureObj){
+		
+		String resultString = "";
+
+		try{
+			
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Integer> cq = builder.createQuery(Integer.class);
+			Root<Chart> root = cq.from(Chart.class);
+			
+			Join<Chart, Encounter> chartJoin = root.join(Chart_.encounterTable, JoinType.INNER);
+			
+			Predicate byProvider  = builder.equal(chartJoin.get(Encounter_.encounter_service_doctor), providerId);
+			Predicate byPatientId = builder.equal(root.get(Chart_.chartPatientid), patientId);
+			Predicate byDateRange = builder.between(chartJoin.get(Encounter_.encounterDate), startDate, endDate);
+			Predicate isTransitionOfCareChecked = builder.equal(chartJoin.get(Encounter_.transitionOfCare), true);
+			
+			if(isGroup)
+				cq.where(byProvider, byPatientId, byDateRange, isTransitionOfCareChecked);
+			else
+				cq.where(byPatientId, byDateRange, isTransitionOfCareChecked);
+			
+			cq.multiselect(chartJoin.get(Encounter_.encounterId));
+			
+			List<Integer> encountersWithTransitionOfCare = em.createQuery(cq).getResultList();
+			
+			if(encountersWithTransitionOfCare.size() == 0){
+				
+				resultString = "No Encounters with Transition of Care marked";
+				
+			}else{
+				
+				CriteriaQuery<ReconciledMedication> cq1 = builder.createQuery(ReconciledMedication.class);
+				Root<ReconciledMedication> root1 = cq1.from(ReconciledMedication.class);
+				
+				cq1.where(root1.get(ReconciledMedication_.reconciledMedicationEncounterid).in(encountersWithTransitionOfCare));
+				
+				List<ReconciledMedication> finalCount =  em.createQuery(cq1).getResultList();
+				
+				if(finalCount.size() == 0){
+					
+					measureObj.setIpp(encountersWithTransitionOfCare.size());
+					measureObj.setDenominator(encountersWithTransitionOfCare.size());
+					
+					resultString = "0 / "+encountersWithTransitionOfCare.size()+" &&&& visits in which medication reconcilation is not performed";
+					
+				}else{
+					
+					measureObj.setIpp(encountersWithTransitionOfCare.size());
+					measureObj.setDenominator(encountersWithTransitionOfCare.size());
+					measureObj.setNumerator(finalCount.size());
+					
+					resultString = "0 / "+encountersWithTransitionOfCare.size()+" &&&& visits in which medication reconcilation is not performed";
+					
+				}
+				
+			}
+			
+		}catch(Exception e){
+			
+			e.printStackTrace();
+			resultString = "No Encounters with Transition of Care marked";
+			
+		}
+		
+		return resultString;
 		
 	}
 	

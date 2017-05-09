@@ -242,7 +242,9 @@ public class MUPerformanceRateController {
 
 				}
 
-				measureService.saveMeasureDetails(userIdForEntries, patientID, responseToSave);
+				measureService.saveMeasureDetails(userIdForEntries, patientID, responseToSave, true);
+				
+				measureService.getEPMeasuresResponseObject(accountId, isIndividual, patientID, userIdForEntries, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear());
 
 			}
 
@@ -311,7 +313,11 @@ public class MUPerformanceRateController {
 				
 				providerPerformance = measureService.getPerformanceCount(providerId, "", providerInfo.get(0).getMeasures(), accountID);
 
-				performanceService.addToMacraMeasuresRate(providerId,  providerPerformance, reportingYear, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
+				performanceService.addToMacraMeasuresRate(providerId,  providerPerformance, reportingYear, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), false);
+				
+				providerPerformance = measureService.getPerformanceCount(providerId, "", "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3", accountID);
+				
+				performanceService.addToMacraMeasuresRate(providerId,  providerPerformance, reportingYear, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), true);
 				
 			}
 			

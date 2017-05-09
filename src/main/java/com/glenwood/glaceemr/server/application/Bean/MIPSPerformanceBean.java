@@ -29,6 +29,8 @@ public class MIPSPerformanceBean {
 	double performanceRate;
 	double reportingRate;
 	
+	double points;
+	
 	String npi;
 	String tin;
 	
@@ -36,6 +38,37 @@ public class MIPSPerformanceBean {
 	String notMetPatientsList;*/
 	
 	public MIPSPerformanceBean(){
+		
+	}
+	
+	public MIPSPerformanceBean(String measureId, int criteria, int reportingYear,
+			int ippCount, String ippPatientsList, int denominatorCount,
+			String denominatorPatientsList, int denominatorExclusionCount,
+			String denominatorExclusionPatientsList, int numeratorCount,
+			String numeratorPatientsList, int numeratorExclusionCount,
+			String numeratorExclusionPatientsList,
+			int denominatorExceptionCount,
+			String denominatorExceptionPatientsList, double performanceRate,
+			double reportingRate, double points) {
+		
+		this.measureId = measureId;
+		this.criteria = criteria;
+		this.reportingYear = reportingYear;
+		this.ippCount = ippCount;
+		this.ippPatientsList = ippPatientsList;
+		this.denominatorCount = denominatorCount;
+		this.denominatorPatientsList = denominatorPatientsList;
+		this.denominatorExclusionCount = denominatorExclusionCount;
+		this.denominatorExclusionPatientsList = denominatorExclusionPatientsList;
+		this.numeratorCount = numeratorCount;
+		this.numeratorPatientsList = numeratorPatientsList;
+		this.numeratorExclusionCount = numeratorExclusionCount;
+		this.numeratorExclusionPatientsList = numeratorExclusionPatientsList;
+		this.denominatorExceptionCount = denominatorExceptionCount;
+		this.denominatorExceptionPatientsList = denominatorExceptionPatientsList;
+		this.performanceRate = performanceRate;
+		this.reportingRate = reportingRate;
+		this.points = points;
 		
 	}
 	
@@ -139,6 +172,14 @@ public class MIPSPerformanceBean {
 		this.numeratorExclusionCount = numeratorExclusionCount;
 		this.denominatorExceptionCount = denominatorExceptionCount;
 		
+	}
+	
+	public double getPoints() {
+		return points;
+	}
+
+	public void setPoints(double points) {
+		this.points = points;
 	}
 
 	public String getNpi() {

@@ -5,6 +5,7 @@ public class EPMeasureBean {
 	String measureId;
 	String measureTitle;
 	String status;
+	String shortDescription = "";
 	String description = "";
 
 	public String getDescription() {
@@ -38,5 +39,13 @@ public class EPMeasureBean {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	
+
+	public String getShortDescription() {
+		return shortDescription;
+	}
+
+	public void setShortDescription(String shortDescription) {
+		this.shortDescription = shortDescription;
+	}
+
 }
