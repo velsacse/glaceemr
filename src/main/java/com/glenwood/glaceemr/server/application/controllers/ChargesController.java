@@ -35,6 +35,12 @@ import com.glenwood.glaceemr.server.application.models.SaveServicesBean;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.models.SubmitStatus;
 import com.glenwood.glaceemr.server.application.models.UpdateServiceBean;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.charges.ChargesPageBasicDetailsBean;
 import com.glenwood.glaceemr.server.application.services.chart.charges.ChargesServices;
@@ -53,6 +59,9 @@ public class ChargesController {
 	
 	@Autowired
 	AuditTrailService auditTrailService;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
 	
 	@Autowired
 	SessionMap sessionMap;
@@ -77,6 +86,7 @@ public class ChargesController {
 		ChargesPageBasicDetailsBean posDataValue=chargesServices.findAllBasicDetails(patientId);
 		EMRResponseBean posData=new EMRResponseBean();
 		posData.setData(posDataValue);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FINANCE_CHARGE,LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"success in getting basic details related to charges" , -1,request.getRemoteAddr() , patientId, "",LogUserType.USER_LOGIN ,"","");
 		return posData;
 	}
 	
@@ -91,6 +101,7 @@ public class ChargesController {
 		List<Quickcpt> cptCodes=chargesServices.findAllQuickCptCodes();
 		EMRResponseBean cptCode=new EMRResponseBean();
 		cptCode.setData(cptCodes);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FINANCE_CHARGE,LogActionType.VIEW , -1,Log_Outcome.SUCCESS,"success in getting quick cpt codes", -1,request.getRemoteAddr(), -1, "",LogUserType.USER_LOGIN , "", "");
 		return cptCode;
 	}
 	
@@ -106,6 +117,7 @@ public class ChargesController {
 		List<ServiceDetail> servicesList=chargesServices.getAllServices(patientId);
 		EMRResponseBean serviceList=new EMRResponseBean();
 		serviceList.setData(servicesList);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FINANCE_CHARGE, LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"success in getting all the services of a patient" , -1,request.getRemoteAddr() , patientId, "",LogUserType.USER_LOGIN ,"","");
 		return serviceList;
 	}
 	
@@ -124,6 +136,7 @@ public class ChargesController {
 //		ServiceDetail returnValue=validateReturnEntity(serviceDetails);
 		EMRResponseBean serviceDetail=new EMRResponseBean();
 		serviceDetail.setData(serviceDetails);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FINANCE_CHARGE, LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"success in getting sevice details" , -1,request.getRemoteAddr() , patientId,"serviceId="+serviceId.toString(),LogUserType.USER_LOGIN ,"","");
 		return serviceDetail;
 	}
 	
@@ -147,6 +160,7 @@ public class ChargesController {
 		Boolean confirmation=chargesServices.deleteMentoinedServices(serviceIDs,patientId,modifiedDate,loginId,loginName);									
 		EMRResponseBean confirmations=new EMRResponseBean();
 		confirmations.setData(confirmation);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.FINANCE_CHARGE, LogActionType.DELETE,-1, Log_Outcome.SUCCESS,"successfully deleted the service",-1,request.getRemoteAddr(), patientId,"LoginName="+loginName+"|LoginId="+loginId.toString()+"|serviceIDs="+serviceIDs.toString()+"|modifiedDate="+modifiedDate.toString(), LogUserType.USER_LOGIN,"","");
 		return confirmations;
 	}
 	/**
@@ -161,6 +175,7 @@ public class ChargesController {
 		ServiceDetail dxDetails=chargesServices.getPreviousVisitDxCodes(patientId);								
 		EMRResponseBean dxDetail=new EMRResponseBean();
 		dxDetail.setData(dxDetails);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FINANCE_CHARGE, LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"success in getting previous visit Dx codes list" , -1,request.getRemoteAddr() , patientId,"",LogUserType.USER_LOGIN ,"","");
 		return dxDetail;
 	}
 	
@@ -178,6 +193,7 @@ public class ChargesController {
 		List<H611> dxDetails=chargesServices.getEMRDxCodes(patientId,dos);								
 		EMRResponseBean dxDetail=new EMRResponseBean();
 		dxDetail.setData(dxDetails);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FINANCE_CHARGE, LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"success in getting EMR diagnosis list" , -1,request.getRemoteAddr() , patientId,"Dos="+dos.toString(),LogUserType.USER_LOGIN ,"","");
 		return dxDetail;
 	}
 	
@@ -192,6 +208,7 @@ public class ChargesController {
 		List<SubmitStatus> statusInfo=chargesServices.getSubmitStausInfo();					
 		EMRResponseBean statusInformation=new EMRResponseBean();
 		statusInformation.setData(statusInfo);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FINANCE_CHARGE,LogActionType.VIEW , -1,Log_Outcome.SUCCESS ,"success in getting submit status type information" , -1, request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN , "", "");
 		return statusInformation;
 	}
 	/**
@@ -206,6 +223,7 @@ public class ChargesController {
 		Boolean confirmation=insertNewService(saveServicesBean);
 		EMRResponseBean confirmations=new EMRResponseBean();
 		confirmations.setData(confirmation);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.FINANCE_CHARGE, LogActionType.CREATE,-1, Log_Outcome.SUCCESS,"successfully saved the service",-1,request.getRemoteAddr(),-1,"", LogUserType.USER_LOGIN,"","");
 		return confirmations;
 	}
 	
@@ -221,6 +239,7 @@ public class ChargesController {
 		Boolean confirmation=chargesServices.updateServiceDetails(updateService);
 		EMRResponseBean confirmations=new EMRResponseBean();
 		confirmations.setData(confirmation);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.FINANCE_CHARGE, LogActionType.UPDATE, -1, Log_Outcome.SUCCESS,"success in updating the service", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return confirmations;
 	}
 	
