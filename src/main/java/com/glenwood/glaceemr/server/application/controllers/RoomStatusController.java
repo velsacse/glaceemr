@@ -3,6 +3,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.Room;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.roomStatus.ActivitiesData;
 import com.glenwood.glaceemr.server.application.services.roomStatus.OrderedData;
 import com.glenwood.glaceemr.server.application.services.roomStatus.PosRooms;
@@ -27,7 +35,13 @@ public class RoomStatusController {
 	
 	@Autowired
 	RoomStatusService roomStatusService;
-    
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
+	
 	/**
      * to get locations
      * @return locations
@@ -39,6 +53,7 @@ public class RoomStatusController {
 		List<PosTable> loc = roomStatusService.getPos(pos);
 		EMRResponseBean locations = new EMRResponseBean();
 		locations.setData(loc);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ROOMSTATUS, LogActionType.VIEW,-1, Log_Outcome.SUCCESS,"success in getting locations list",-1,request.getRemoteAddr(), -1,"", LogUserType.USER_LOGIN,"","");
 		return locations;
 	}
 	
@@ -67,6 +82,7 @@ public class RoomStatusController {
 		RoomInfoBean roomInfo = new RoomInfoBean(locations,providers,roomStatus,ordered,roomDetail,activities);
 		EMRResponseBean roomInformation = new EMRResponseBean();
 		roomInformation.setData(roomInfo);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ROOMSTATUS, LogActionType.VIEW,-1, Log_Outcome.SUCCESS,"success in getting room information",-1,request.getRemoteAddr(),-1,"", LogUserType.USER_LOGIN,"","");
 		return roomInformation;
 	}
 	
@@ -82,6 +98,7 @@ public class RoomStatusController {
 		List<PosRooms> patientsData = roomStatusService.getTodaysPatientsData(pos);
 		EMRResponseBean patientData = new EMRResponseBean();
 		patientData.setData(patientsData);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.ROOMSTATUS, LogActionType.VIEW,-1, Log_Outcome.SUCCESS,"Success in getting list of todays patients data based on pos",-1,request.getRemoteAddr(),-1,pos.toString(), LogUserType.USER_LOGIN,"","");
 		return patientData;
 	}
 	
@@ -99,6 +116,7 @@ public class RoomStatusController {
 		JSONObject encounterList = roomStatusService.updateRoomNo(pos,addPatientId,roomtoAdd);
 		EMRResponseBean roomNos = new EMRResponseBean();
 		roomNos.setData(encounterList.toString());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ROOMSTATUS, LogActionType.VIEW,-1, Log_Outcome.SUCCESS,"success in updating the room numbers",-1,request.getRemoteAddr(),-1,"", LogUserType.USER_LOGIN,"","");
 		return roomNos;
     }
 	
@@ -116,7 +134,8 @@ public class RoomStatusController {
 		JSONObject transferPat=roomStatusService.updateTransferRooms(toswap,withroom,pos);
 		EMRResponseBean transferPatient = new EMRResponseBean();
 		transferPatient.setData(transferPat.toString());
-	    return transferPatient;
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ROOMSTATUS, LogActionType.UPDATE,-1, Log_Outcome.SUCCESS,"successfully transferred the patients", -1,request.getRemoteAddr(), -1, "toswap="+toswap+"|withroom="+withroom+"|pos="+pos, LogUserType.USER_LOGIN,"","");
+		return transferPatient;
     }
 	
 	/**
@@ -132,6 +151,7 @@ public class RoomStatusController {
 		JSONObject swapPatients = roomStatusService.updateSwapPatients(toswap,withroom,pos);
 		EMRResponseBean swapPatient = new EMRResponseBean();
 		swapPatient.setData(swapPatients.toString());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ROOMSTATUS, LogActionType.UPDATE,-1, Log_Outcome.SUCCESS,"successfully swapped the patients within rooms",-1, request.getRemoteAddr(),-1,"withroom"+withroom+"|pos"+pos+"|toswap"+toswap, LogUserType.USER_LOGIN,"","");
 		return swapPatient;
     }
               
