@@ -249,12 +249,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				requestObj.setActiveMedicationsList(qdmData.getActiveMedications(em,considerProvider,providerId, codeListForQDM.get("Medication").get("RXNORM"), patientID, 2));
 			}
 
-			List<InvestigationQDM> investigationQDM = qdmData.getInvestigationQDM(em,considerProvider,patientID,providerId);
+			List<InvestigationQDM> investigationQDM = qdmData.getInvestigationQDM(em,considerProvider,patientID,providerId, date1, date2);
 
 			List<ClinicalDataQDM> clinicalDataQDM =qdmData.getClinicalDataQDM(em,considerProvider,providerId,patientID,snomedCodesForCNM,loincCodesForCNM,true,date1,date2);
 
 			if(codeListForQDM.containsKey("Immunization")){
-				requestObj.setImmunizationList(qdmData.getImmuDetails(em,considerProvider,providerId, patientID));
+				requestObj.setImmunizationList(qdmData.getImmuDetails(em,considerProvider,providerId, patientID, date1, date2));
 			}
 
 			if(codeListForQDM.containsKey("Diagnostic Study")){
@@ -300,7 +300,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 				if(codeListForQDM.containsKey("Communication")){
 					
-					List<ReferralQDM> referralObj = qdmData.getReferrals(em,considerProvider,providerId,patientID);
+					List<ReferralQDM> referralObj = qdmData.getReferrals(em,considerProvider,providerId,patientID, repStartDate, repEndDate);
 					
 					if(referralObj.size() > 0){
 						

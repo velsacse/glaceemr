@@ -564,7 +564,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public List<InvestigationQDM> getInvestigationQDM(EntityManager em,Boolean considerProvider, int patientID, int providerId) {
+	public List<InvestigationQDM> getInvestigationQDM(EntityManager em,Boolean considerProvider, int patientID, int providerId, Date startDate, Date endDate) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<InvestigationQDM> cq = builder.createQuery(InvestigationQDM.class);
 		
@@ -594,6 +594,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					builder.equal(EncChartJoin.get(Chart_.chartPatientid), patientID),
 					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 2),
 					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
+					builder.between(root.get(LabEntries_.labEntriesPerfOn), startDate, endDate),
 					builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
 					hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
 					labCode.isNotNull(),
@@ -633,8 +634,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 		cq1.select(builder1.construct(ParameterDetails.class,selection));
 		Predicate byCode=builder1.equal(joinLabparametersLabparametercode.get(LabParameterCode_.labParameterCodeSystem), builder1.literal("LOINC"));
 		joinLabparametersLabparametercode.on(byCode);
-		Predicate predicateForParameters=root1.get(LabEntriesParameter_.labEntriesParameterTestdetailid).in(labEntriesTestDetailId);
-		cq1.where(byIsActive,predicateForParameters);
+		
+		Predicate predicateForParameters = root1.get(LabEntriesParameter_.labEntriesParameterTestdetailid).in(labEntriesTestDetailId);
+		Predicate predicateForParametersByDate = builder.between(root1.get(LabEntriesParameter_.labEntriesParameterDate), startDate, endDate);
+		
+		cq1.where(byIsActive,predicateForParameters,predicateForParametersByDate);
 		List<ParameterDetails> parameterDetails=em.createQuery(cq1).getResultList();
 		List<InvestigationQDM> completeInvestigationDetails=new ArrayList<InvestigationQDM>();
 		String code="";
@@ -815,7 +819,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	 */
 	
 	@SuppressWarnings("rawtypes")
-	public List<ReferralQDM> getReferrals(EntityManager em,Boolean considerProvider,int providerId,Integer patientId) {
+	public List<ReferralQDM> getReferrals(EntityManager em,Boolean considerProvider,int providerId,Integer patientId, Date startDate, Date endDate) {
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<ReferralQDM> cq = builder.createQuery(ReferralQDM.class);
@@ -827,13 +831,18 @@ Root<Encounter> root = cq.from(Encounter.class);
 				rooth413.get(H413_.referralReviewedOn).alias("Reviewed On"),
 				rooth413.get(H413_.h413041).alias("Status")
 		};
+		
 		cq.select(builder.construct(ReferralQDM.class,selections));
+		
 		Predicate predicateByPatientId=builder.equal(rooth413.get(H413_.h413035),patientId);
 		Predicate byProvider=builder.equal(rooth413.get(H413_.referralOrderBy), providerId);
+		Predicate byDateRange = builder.between(rooth413.get(H413_.referralOrderOn), startDate, endDate);
+		
 		if(considerProvider)
-		cq.where(predicateByPatientId,byProvider);
+			cq.where(predicateByPatientId,byProvider,byDateRange);
 		else
-		cq.where(predicateByPatientId);
+			cq.where(predicateByPatientId,byDateRange);
+		
 		List<ReferralQDM> alertsResultList = em.createQuery(cq).getResultList();
 		return alertsResultList;
 		
@@ -849,7 +858,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	 * @return
 	 */
 	
-	public List<Immunization> getImmuDetails(EntityManager em,Boolean considerProvider,int providerId,Integer patientId)
+	public List<Immunization> getImmuDetails(EntityManager em,Boolean considerProvider,int providerId,Integer patientId, Date startDate, Date endDate)
 	{
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<ImmunizationDetailsBean> cq = builder.createQuery(ImmunizationDetailsBean.class);
@@ -873,8 +882,9 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Predicate predicateBytestStatus=builder.greaterThan(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),2);
 		Predicate predicateBytestStatus1=builder.notEqual(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),7);
 		Predicate byProvider=builder.equal(EncLabJoin.get(Encounter_.encounter_service_doctor), providerId);
+		Predicate byDateRange = builder.between(joinLabdescLabentries.get(LabEntries_.labEntriesPerfOn), startDate, endDate);
 		
-		cq.where(predicateBytestStatus,predicateBytestStatus1);
+		cq.where(predicateBytestStatus,predicateBytestStatus1,byDateRange);
 		
 		cq.distinct(true);
 		
@@ -1462,7 +1472,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 				Join<Encounter, Chart> chartJoin = root.join(Encounter_.chartTable, JoinType.INNER);
 				Join<Chart, ServiceDetail> chartServiceDetailJoin = chartJoin.join(Chart_.serviceDetail, JoinType.INNER);
 				Join<ServiceDetail, Cpt> cptJoin = chartServiceDetailJoin.join(ServiceDetail_.cpt, JoinType.INNER);
-				cptJoin.on(builder.equal(chartServiceDetailJoin.get(ServiceDetail_.serviceDetailCptid), cptJoin.get(Cpt_.cptId)));
 				
 				cq.multiselect(builder.countDistinct(root.get(Encounter_.encounterId)));
 				
@@ -1472,7 +1481,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				Predicate byPatientId = builder.equal(chartJoin.get(Chart_.chartPatientid), patientId);
 				Predicate byCptType = builder.equal(cptJoin.get(Cpt_.cptCpttype), 1);
 				Predicate byDOS = builder.between(builder.function("DATE", Date.class, chartServiceDetailJoin.get(ServiceDetail_.serviceDetailDos)), startDate, endDate);				
-				Predicate byEnMCodes = cptJoin.in(Arrays.asList(cptCodes.split(",")));
+				Predicate byEnMCodes = cptJoin.get(Cpt_.cptCptcode).in(Arrays.asList(cptCodes.split(",")));
 				
 				if(isGroup)
 					cq.where(byEncDate,byProviderId,byPatientId,byEncType,byCptType,byDOS,byEnMCodes);
@@ -1811,10 +1820,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 			measureObj.setIpp(1);
 			measureObj.setDenominator(1);
-			measureObj.setNumerator(1);
 			
 			if(patientCount > 0){
 				
+				measureObj.setNumerator(1);
 				lastAccessedTime = queryResult.get(0);
 				
 			}
@@ -1930,12 +1939,18 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 			Join<PatientAftercareData, Encounter> encounterJoin = root.join(PatientAftercareData_.encounterTbl, JoinType.INNER);
 			
-			cq.multiselect(root.get(PatientAftercareData_.patientAftercareDataPatientId));
+			cq.multiselect(encounterJoin.get(Encounter_.encounterDate));
 			
-			cq.where(builder.between(encounterJoin.get(Encounter_.encounterDate), startDate, endDate), 
+			if(isGroup){
+				cq.where(builder.between(encounterJoin.get(Encounter_.encounterDate), startDate, endDate),
+					builder.equal(encounterJoin.get(Encounter_.encounter_service_doctor), providerId),	
 					builder.equal(root.get(PatientAftercareData_.patientAftercareDataPatientId), patientId));
+			}else{
+				cq.where(builder.between(encounterJoin.get(Encounter_.encounterDate), startDate, endDate),
+						builder.equal(root.get(PatientAftercareData_.patientAftercareDataPatientId), patientId));
+			}
 			
-			cq.groupBy(root.get(PatientAftercareData_.patientAftercareDataPatientId));
+			cq.orderBy(builder.desc(encounterJoin.get(Encounter_.encounterDate)));
 			
 			List<Object> handoutsCount = em.createQuery(cq).getResultList();
 			
