@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +32,12 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Response;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
 import com.glenwood.glaceemr.server.application.Bean.mailer.GlaceMailer;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.MUPerformanceRateService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.MeasureCalculationService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
@@ -51,6 +59,12 @@ public class MUPerformanceRateController {
 	
 	@Autowired
 	SharedFolderBean sharedFolderBean;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+
+	@Autowired
+	HttpServletRequest request;
 	
 	/**
 	 * Get List of patients seen by provider based on selected mode value
@@ -140,6 +154,8 @@ public class MUPerformanceRateController {
 
 			}
 
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MUBatchPerformance,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting list of patients seen" , -1, request.getRemoteAddr(),-1,"reportingYear="+reportingYear+"&mode="+mode,LogUserType.GLACE_BATCH, "", "");
+			
 		}catch(Exception e){
 			
 			try {
@@ -158,6 +174,8 @@ public class MUPerformanceRateController {
 
 				printWriter.flush();
 				printWriter.close();
+				
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MUBatchPerformance,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Failure in getting list of patients seen" , -1, request.getRemoteAddr(),-1,"reportingYear="+reportingYear+"&mode="+mode,LogUserType.GLACE_BATCH, "", "");
 				
 				e.printStackTrace();
 				
@@ -247,6 +265,8 @@ public class MUPerformanceRateController {
 				measureService.getEPMeasuresResponseObject(accountId, isIndividual, patientID, userIdForEntries, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear());
 
 			}
+			
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MUBatchPerformance,LogActionType.UPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating and validating patient QDM" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.GLACE_BATCH, "patientId="+patientID, "");
 
 		}catch(Exception e){
 			
@@ -266,6 +286,8 @@ public class MUPerformanceRateController {
 
 				printWriter.flush();
 				printWriter.close();
+			
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MUBatchPerformance,LogActionType.UPDATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Failure in generating and validating patient QDM" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.GLACE_BATCH, "patientId="+patientID, "");
 				
 				e.printStackTrace();
 
@@ -321,6 +343,8 @@ public class MUPerformanceRateController {
 				
 			}
 			
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MUBatchPerformance,LogActionType.UPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in updating performance details of providers" , -1, request.getRemoteAddr(),-1,"reportingYear="+reportingYear,LogUserType.GLACE_BATCH, "", "");
+			
 		}catch(Exception e){
 			
 			try {
@@ -339,6 +363,8 @@ public class MUPerformanceRateController {
 
 				printWriter.flush();
 				printWriter.close();
+		
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MUBatchPerformance,LogActionType.UPDATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Success in updating performance details of providers" , -1, request.getRemoteAddr(),-1,"reportingYear="+reportingYear,LogUserType.GLACE_BATCH, "", "");
 				
 				e.printStackTrace();
 

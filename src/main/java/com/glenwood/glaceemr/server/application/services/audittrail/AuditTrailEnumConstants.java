@@ -12,7 +12,7 @@ public interface AuditTrailEnumConstants {
 				"Scheduler"), INVESTIGATION(34, "Investigation"), REFERRAL(35, "Referral"), FLOWSHEET(36, "Flowsheet"), INVENTORY(37, "Inventory"), ENCOUNTER(38, "Encounter"), MESSAGE(39, "Message"), DME(40, "DME"), DIRECT(41, "Direct"), GLACEMESSAGING_LETTER(
 				42, "GlaceMessaging/Letter"), ASSESSMENT(43, "Assessment"), AMENDMENT(44, "Amendment"), ALLERGY(45, "Allergy"), PATIENT_EDUCATION(46, "PatientEducation"), TEMPLATE(47, "Template"), LoginAndLogOut(48, "Login/LogOut"), ALERTS(49, "Alerts"),SUPERBILL(50,"SuperBill"), ROOMSTATUS(51,"RoomStatus"),CoumadinFlowSheet(52,"CoumadinFlowSheet"),
 				THERAPHYSESSION(53,"TheraphySession"), SKINTESTINGFORMS(54,"SkinTestingForms"), PHYSICALEXAMINATION(55,"PhysicalExamination"),
-				ROS(56,"ReviewOfSystems"),VITALS(57,"Vitals"),HISTORY(58,"History"),ADMISSION(59,"Admission"),SHORTCUTS(60,"QuickShortcuts"),PRINTINGANDREPORTING(61,"PrintingAndReporting"),PASTENCOUNTERS(62,"PastEncounters"),FOCALSHORTCUTS(63,"FocalShortcuts"),LegacyRequest(64,"LegacyRequest");
+				ROS(56,"ReviewOfSystems"),VITALS(57,"Vitals"),HISTORY(58,"History"),ADMISSION(59,"Admission"),SHORTCUTS(60,"QuickShortcuts"),PRINTINGANDREPORTING(61,"PrintingAndReporting"),PASTENCOUNTERS(62,"PastEncounters"),FOCALSHORTCUTS(63,"FocalShortcuts"),LegacyRequest(64,"LegacyRequest"),MUBatchPerformance(65,"MUBatchPerformance"),MU(66,"MU");
 		// semicolon needed when fields / methods follow
 
 		public final int Value;
@@ -111,7 +111,7 @@ public interface AuditTrailEnumConstants {
 
 	/* Login User */
 	public enum LogUserType {
-		USER_LOGIN(1, "User Login"), PATIENT_LOGIN(2, "Patient Login");
+		USER_LOGIN(1, "User Login"), PATIENT_LOGIN(2, "Patient Login"),GLACE_BATCH(3, "Glace Batch");
 		// semicolon needed when fields / methods follow
 		public final int Value;
 		private final String desc;

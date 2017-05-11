@@ -3,6 +3,9 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +19,12 @@ import com.glenwood.glaceemr.server.application.Bean.DiagnosisList;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
@@ -24,8 +33,15 @@ import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 @Transactional
 @RequestMapping(value = "/user/QPPConfiguration")
 public class QPPConfigurationController {
+
 	@Autowired
 	QPPConfigurationService QppConfigurationService;
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+
+	@Autowired
+	HttpServletRequest request;
 	
 	@RequestMapping(value = "/saveConfDetails", method = RequestMethod.GET)
 	@ResponseBody
@@ -35,30 +51,37 @@ public class QPPConfigurationController {
 			@RequestParam(value = "providerId", required = false, defaultValue = "-1") Integer providerId,
 			@RequestParam(value = "startDate", required = true) String startDate,
 			@RequestParam(value = "endDate", required = true) String endDate,
-			@RequestParam(value = "submissionMtd", required = true) Integer submissionMtd)
-			throws Exception {
+			@RequestParam(value = "submissionMtd", required = true) Integer submissionMtd)throws Exception {
 		
 			SimpleDateFormat originalFormat = new SimpleDateFormat("MM/dd/yyyy");
-			java.util.Date StartDate = originalFormat.parse(startDate);
-			java.util.Date EndDate = originalFormat.parse(endDate);
+			
+			Date StartDate = originalFormat.parse(startDate);
+			Date EndDate = originalFormat.parse(endDate);
+			
 			QppConfigurationService.saveConfDetails(programYear, type, providerId, StartDate, EndDate, submissionMtd);
-	
 
-}
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.CREATEORUPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in saving provider MACRA configuration details" , -1, request.getRemoteAddr(),-1,"providerId="+providerId+"&reportingYear="+programYear,LogUserType.USER_LOGIN, "", "");
+
+	}
 	
 	@RequestMapping(value = "/getProviderInfo", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getProviderInfo(
 			@RequestParam(value = "provider", required = true) Integer provider)throws Exception {
+
 		EMRResponseBean result=new EMRResponseBean();
+
 		if(!provider.equals(null)){
-		//	Integer providerId=QppConfigurationService.getProviderId(provider);
-		List<MacraProviderConfiguration> groupData=QppConfigurationService.getProviderInfo(provider);
-		
-		result.setData(groupData);
-		
+
+			List<MacraProviderConfiguration> groupData = QppConfigurationService.getProviderInfo(provider);
+			result.setData(groupData);
+
 		}
+
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting MACRA configuration details for provider" , -1, request.getRemoteAddr(),-1,"providerId="+provider,LogUserType.USER_LOGIN, "", "");
+		
 		return result;
+
 	}
 	
 	@RequestMapping(value = "/getMeasureIds", method = RequestMethod.GET)
@@ -70,21 +93,30 @@ public class QPPConfigurationController {
 		result.setData(indiMeasureids);
 		return result;
 	}
+	
 	@RequestMapping(value = "/addMeasuresToProvider", method = RequestMethod.GET)
 	@ResponseBody
 	public void addMeasuresToProvider(
 			@RequestParam(value = "measureIds", required = true) String measureIds,
 			@RequestParam(value = "providerId", required = true) Integer providerId,
 			@RequestParam(value = "prgmYear", required = true) Integer prgmYear)throws Exception {
+		
 		QppConfigurationService.addMeasuresToProvider(measureIds,providerId,prgmYear);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.CREATEORUPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in saving measure configuration for provider" , -1, request.getRemoteAddr(),-1,"measures="+measureIds,LogUserType.USER_LOGIN, "", "");
+		
 	}
 	
 	@RequestMapping(value = "/getFilterDetails", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getFilterDetails()throws Exception {
+		
 		EMRResponseBean result=new EMRResponseBean();
 		HashMap<String,Object> filterDetails=QppConfigurationService.getFilterDetails();
 		result.setData(filterDetails);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting filter details to search patients" , -1, request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
+		
 		return result;
 	}
 	
@@ -100,22 +132,31 @@ public class QPPConfigurationController {
 			@RequestParam(value = "insCompanyId", required = false, defaultValue = "-1") Integer insCompanyId,
 			@RequestParam(value = "ageCriteria", required = false, defaultValue = "-1") Integer ageCriteria,
 			@RequestParam(value = "currMeasureId", required = true) String currMeasureId,
-			@RequestParam(value = "dxCodes", required = false,defaultValue = "-1")String dxCodes
-			)throws Exception {
+			@RequestParam(value = "dxCodes", required = false,defaultValue = "-1")String dxCodes)throws Exception {
+		
 		EMRResponseBean result=new EMRResponseBean();
 		List<MIPSPatientInformation> filteredDetails=QppConfigurationService.getFilteredDetails(patientId,ageFrom,ageTo,ageCriteria,raceCode,ethnicityCode,gender,insCompanyId,currMeasureId,dxCodes);
 		result.setData(filteredDetails);
+
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting patients based on selected filters" , -1, request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
+		
 		return result;
+		
 	}
 	@RequestMapping(value = "/getDXList", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getDXList(
 			@RequestParam(value = "measureId", required = false, defaultValue = "-1")String measureId,
 			@RequestParam(value="sharedFolder", required=true) String sharedPath)throws Exception {
+		
 		EMRResponseBean result=new EMRResponseBean();
 		DiagnosisList DXList=QppConfigurationService.getDXList(measureId,sharedPath); 
 		result.setData(DXList);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting diagnosis codes based on selected measure details" , -1, request.getRemoteAddr(),-1,"measureId="+measureId,LogUserType.USER_LOGIN, "", "");
+		
 		return result;
+		
 	}
 	
 	@RequestMapping(value = "/getPatientBasedOnDX", method = RequestMethod.GET)
@@ -123,10 +164,15 @@ public class QPPConfigurationController {
 	public EMRResponseBean getPatientBasedOnDX(
 			@RequestParam(value = "patientId", required = true)String patientId,
 			@RequestParam(value="dxCodes", required=true) String dxCodes)throws Exception {
+		
 		EMRResponseBean result=new EMRResponseBean();
 		List<MIPSPatientInformation> DXList=QppConfigurationService.getPatientBasedOnDX(patientId,dxCodes); 
 		result.setData(DXList);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting patients list based on selected diagnosis codes" , -1, request.getRemoteAddr(),-1,"patientId="+patientId,LogUserType.USER_LOGIN, "patientId="+patientId, "");
+		
 		return result;
+		
 	}
 	
 }
