@@ -15,6 +15,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -56,6 +57,8 @@ import com.glenwood.glaceemr.server.application.repositories.PatientPortalMenuCo
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PlanTypeRepository;
 import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.portal.portalAppointments.PortalAppointmentsService;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.SharedFolderUtil;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalBillingConfigFields;
@@ -120,6 +123,11 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 	@Autowired
 	ObjectMapper objectMapper;
 
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
 	
 
 	@Override
@@ -238,6 +246,11 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 
 		PatientRegistration patientPersonalDetails= patientRegistrationRepository.findOne(PatientRegistrationSpecification.getPatientPersonalDetails(patientId));
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving patient's personal details with patientId:"+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving patient's personal details with patientId:"+patientId,"");
+		
 		return patientPersonalDetails;
 
 	}
@@ -278,6 +291,11 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 		detailsBeanList.add(detailsBean);
 		}
 		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving patient's plan of care with patientId:"+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving patient's plan of care with patientId:"+patientId,"");
+	
 		return detailsBeanList;
 	}
 	
@@ -309,6 +327,11 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 		
 		List<PatientClinicalElements> planTyleList=patientClinicalElementsRepository.findAll(PortalMedicalSummarySpecification.getPlanOfCareInstructionsByPatientId(patientId, encounterId));
 		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving patient's plan of care details with patientId:"+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving patient's plan of care details with patientId:"+patientId,"");
+	
 		return planTyleList;
 	}
 	
@@ -317,6 +340,11 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 
 		List<ProblemList> problemsList=problemListRepository.findAll(PortalMedicalSummarySpecification.getPatientProblemList(patientId, problemType)/*, PortalMedicalSummarySpecification.createPortalProblemsListPageRequest(pageOffset, pageOffset)*/)/*.getContent()*/;
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving patient's problem list with patientId:"+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving patient's problem list with patientId:"+patientId,"");
+	
 		return problemsList;
 
 	}
@@ -374,6 +402,11 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 		
 		PortalMedicalSummaryBean summaryBean=new PortalMedicalSummaryBean(totalActiveProblemsCount,totalResolvedProblemsCount,totalProblemsCount,totalAllergiesCount,totalPlanOfCareCount);
 		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving patient's medical summary details with patientId:"+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving patient's medical summary details with patientId:"+patientId,"");
+	
 		return summaryBean;
 	}
 	

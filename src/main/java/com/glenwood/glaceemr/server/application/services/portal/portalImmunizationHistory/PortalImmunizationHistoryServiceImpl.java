@@ -256,6 +256,12 @@ public class PortalImmunizationHistoryServiceImpl implements PortalImmunizationH
 		/*immunizationHistoryBean.setLabDescImmunizationHistoryList(labDescImmunizationHistoryList);
 		immunizationHistoryBean.setVaccineReportImmunizationHistoryList(vaccineReportImmunizationHistoryList);*/
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" requested for immunization history.",-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested for immunization history.","");
+
+		
 		return recordsList;
 	}
 
@@ -303,6 +309,7 @@ public class PortalImmunizationHistoryServiceImpl implements PortalImmunizationH
 			Vaccine vaccine=(Vaccine)resultList.get(i);
 			vaccineList.add(vaccine);
 		}
+		
 
 		return vaccineList;
 	}

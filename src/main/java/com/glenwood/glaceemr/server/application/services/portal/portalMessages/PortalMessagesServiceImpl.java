@@ -87,6 +87,10 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 
 		portalMessagesDetailsBean.setTotalSentMessages(totalSentMessages);
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving portal message details by Patient Id "+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving message details by Patient Id "+patientId,"");
 
 		return portalMessagesDetailsBean;
 
@@ -96,6 +100,12 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 	public List<PortalMessage> getMessagesByPatientId(int patientId, int offset, int pageIndex) {
 
 		List<PortalMessage> patientMessagesList=portalMessageRepository.findAll(PortalMessagesSpecification.getTotalMessagesByPatientId(patientId),PortalMessagesSpecification.createPortalMessagesPageRequestByDescDate(pageIndex, offset)).getContent();
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving patient messages by Patient Id "+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving patient messages by Patient Id "+patientId,"");
+
 		return patientMessagesList;
 	}
 
@@ -113,6 +123,11 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 			threadBean.setPatientId(patientId);
 			threadList.add(threadBean);
 		}
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving patient message threads by Patient Id "+patientId+"with thread list Id"+threadList,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving patient message threads by Patient Id "+patientId+"with thread list Id"+threadList,"");
 
 		return threadList;
 	}
@@ -148,6 +163,11 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 			threadIdList.add((Integer)resultList.get(i));
 		}
 		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving portal message thread list by Patient Id "+patientId+"with thread list Id"+threadIdList,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving portal message thread list by Patient Id "+patientId+"with thread list Id"+threadIdList ,"");
+
 		return threadIdList;
 	}
 
@@ -155,6 +175,11 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 	public List<PortalMessage> getInboxMessagesByPatientId(int patientId, int offset, int pageIndex) {
 
 		List<PortalMessage> patientInboxMessagesList=portalMessageRepository.findAll(PortalMessagesSpecification.getInboxMessagesListByPatientId(patientId),PortalMessagesSpecification.createPortalMessagesPageRequestByDescDate(pageIndex, offset)).getContent();
+
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving inbox messages list by Patient Id "+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving inbox messages list by Patient Id "+patientId ,"");
 
 		return patientInboxMessagesList;
 
@@ -164,6 +189,11 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 	public List<PortalMessage> getSentMessagesByPatientId(int patientId, int offset, int pageIndex) {
 
 		List<PortalMessage> patientSentMessagesList=portalMessageRepository.findAll(PortalMessagesSpecification.getSentMessagesListByPatientId(patientId),PortalMessagesSpecification.createPortalMessagesPageRequestByDescDate(pageIndex, offset)).getContent();
+
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving sent messages list by Patient Id "+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving sent messages list by Patient Id "+patientId ,"");
 
 		return patientSentMessagesList;
 

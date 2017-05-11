@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManagerFactory;
+import javax.servlet.http.HttpServletRequest;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -32,6 +33,8 @@ import com.glenwood.glaceemr.server.application.repositories.LabEntriesRepositor
 import com.glenwood.glaceemr.server.application.repositories.LabParameterCodeRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabParametersRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.SharedFolderUtil;
 import com.glenwood.glaceemr.server.application.specifications.PortalLabResultsSpecification;
 
@@ -78,10 +81,21 @@ public class PortalLabResultsServiceImpl implements PortalLabResultsService{
 	FileDetailsRepository fileDetailsRepository;
 	
 	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	HttpServletRequest request;
+	
 	@Override
 	public List<LabEntries> getPatientLabResultsList(int patientId, int chartId, int pageOffset, int pageIndex) {
 		
 		List<LabEntries> labResultsList=labEntriesRepository.findAll(PortalLabResultsSpecification.getPatientLabResults(patientId, chartId), PortalLabResultsSpecification.createPortalLabResultListRequestByDescDate(pageIndex, pageOffset)).getContent();
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with:"+patientId+"requested patient lab results list",-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested patient lab results list with patientId:"+patientId,"");
 		
 		return labResultsList;
 	}
@@ -125,6 +139,12 @@ public class PortalLabResultsServiceImpl implements PortalLabResultsService{
 		
 		portalLabResultBean.setLabParametersList(prametersList);
 		portalLabResultBean.setLabAttachments(getLabAttachmentsFileDetails(patientId, testDetailId));
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested patient lab results parameter list with patientId:"+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested patient lab results parameter list with patientId:"+patientId,"");
+		
 		return portalLabResultBean;
 	}
 	
@@ -140,6 +160,12 @@ public class PortalLabResultsServiceImpl implements PortalLabResultsService{
 	public FileDetails getLabAttachmentsFileDetails(int patientId, int fileDetailEntityId) throws IOException {
 		
 		FileDetails fileDetails=fileDetailsRepository.findOne(PortalLabResultsSpecification.getLabAttachmentsFileDetails(patientId, fileDetailEntityId));
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested patient lab attachment file details with patientId:"+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested patient lab attachment file details with patientId:"+patientId,"");
+		
 		return fileDetails;
 	}
 

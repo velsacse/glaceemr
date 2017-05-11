@@ -158,6 +158,13 @@ public class PortalCahpsSurveyServiceImpl implements PortalCahpsSurveyService{
 		Root<PatientCahpsSurvey> root = cq.from(PatientCahpsSurvey.class);
 		cq.select(cb.max(root.get(PatientCahpsSurvey_.surveyId))).where(cb.equal(root.get(PatientCahpsSurvey_.patientId), patientId));
 		int surveyId=(int) em.createQuery(cq).getSingleResult();
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Request last survey Id of patient with Id: "+patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested last survey Id of patient with Id: "+patientId,"");
+
+		
 		return surveyId;
 	}
 

@@ -146,6 +146,11 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 
 		List<SchedulerAppointment> apptList=schedulerAppointmentRepository.findAll(PortalAppointmentsSpecification.getPatientFutureAppointmentsByDate(patientId),PortalAppointmentsSpecification.createPortalApptListRequestByDescDate(pageIndex, pageOffset)).getContent();
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested future appointments",-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+"requested future appointments.","");
+		
 		return apptList;
 	}
 	
@@ -266,6 +271,11 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 				
 		List<PortalSchedulerAppointmentBean> schedulerAppointments=query.setMaxResults(pageOffset).setFirstResult(pageIndex * pageOffset).getResultList();
 		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with Id:"+patientId+"requested patient appointments",-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+"requested patient appointments.","");
+		
 		return schedulerAppointments;
 		
 		/*PortalAppointmentsSpecification.getPatientFutureAppointmentsByDate(patientId),PortalAppointmentsSpecification.createPortalApptListRequestByDescDate(pageIndex, pageOffset)*/
@@ -277,6 +287,11 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 
 		List<SchedulerAppointment> apptList=schedulerAppointmentRepository.findAll(PortalAppointmentsSpecification.getPatientPastAppointmentsByDate(patientId),PortalAppointmentsSpecification.createPortalApptListRequestByDescDate(pageIndex, pageOffset)).getContent();
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested past appointments",-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+"requested past appointments.","");
+		
 		return apptList;
 	}
 
@@ -285,6 +300,11 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 
 		List<SchedulerAppointment> apptList=schedulerAppointmentRepository.findAll(PortalAppointmentsSpecification.getPatientTodaysAppointmentsByDate(patientId),PortalAppointmentsSpecification.createPortalApptListRequestByDescDate(pageIndex, pageOffset)).getContent();
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested appointments of today",-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+"requested appointments of today.","");
+		
 		return apptList;
 	}
 	
@@ -293,6 +313,11 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 
 		List<SchedulerAppointment> apptList=schedulerAppointmentRepository.findAll(PortalAppointmentsSpecification.getPatientTotalAppointments(patientId),PortalAppointmentsSpecification.createPortalApptListRequestByDescDate(pageIndex, pageOffset)).getContent();
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested total appointments",-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+"requested total appointments.","");
+		
 		return apptList;
 	}
 
@@ -341,6 +366,12 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 	public List<PortalApptRequest> getPortalApptRequestList(int patientId, int pageOffset, int pageIndex) {
 		
 		List<PortalApptRequest> portalApptRequestList=portalApptRequestRepository.findAll(PortalAppointmentsSpecification.getPatientAppointmentRequests(patientId),PortalAppointmentsSpecification.createPortalRequestApptListRequestByDescDate(pageIndex, pageOffset)).getContent();
+		
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested patient appointment requests with patientId:" +patientId,-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested patient appointment requests with patientId: "+patientId,"");
 		
 		return portalApptRequestList;
 	}
@@ -802,6 +833,11 @@ public Integer getLatestPortalApptRequestId(int patientId) {
 	cq.select(builder.max(root.get(PortalApptRequest_.portalApptRequestId))).where(builder.equal(root.get(PortalApptRequest_.portalApptRequestPatientId), patientId));
 	Integer apptID=(Integer) em.createQuery(cq).getSingleResult();
 	
+	auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+			AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested latest portal appointment request Id",-1,
+			request.getRemoteAddr(),patientId,"",
+			AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested latest portal appointment request Id","");
+   
 	return apptID;
 }
 
