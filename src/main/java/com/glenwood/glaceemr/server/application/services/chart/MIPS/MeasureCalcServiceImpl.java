@@ -1732,7 +1732,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode) {
+	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode, boolean isNotMet) {
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MIPSPatientInformation> cq = builder.createQuery(MIPSPatientInformation.class);
@@ -1747,6 +1747,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		Predicate byProvider = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), provider);
 		Predicate byNpi = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNpi), npiValue);
 		Predicate byEmpTin=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesTin), empTin);
+		
+		Predicate isDenom = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator), 1);
+		Predicate isNotNumer = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator), 0);
+		Predicate isNotDenomExc = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion), 0);
+		Predicate isNotDenomExcep = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException), 0);
+		Predicate isNotNumerExc = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion), 0);
 		
 		if(mode == 0){
 			joinQualityMeasuresPatientEntries.on(byMeasureId, byCriteria,byNpi);
@@ -1778,7 +1784,13 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException)
 		
 		};
-		cq.where(byPatientId);
+		
+		if(isNotMet){
+			cq.where(isDenom,isNotNumer,isNotDenomExc,isNotDenomExcep,isNotNumerExc,byPatientId);
+		}else{
+			cq.where(byPatientId);
+		}
+		
 		cq.distinct(true);
 		cq.orderBy(builder.asc(root.get(PatientRegistration_.patientRegistrationLastName)),builder.asc(root.get(PatientRegistration_.patientRegistrationFirstName)));
 		cq.select(builder.construct(MIPSPatientInformation.class,selections));

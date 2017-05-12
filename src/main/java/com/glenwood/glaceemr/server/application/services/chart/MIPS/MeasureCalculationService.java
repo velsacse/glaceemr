@@ -30,7 +30,7 @@ public interface MeasureCalculationService {
 
 	HashMap<String, Object> generateFilterContents();
 
-	List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode);
+	List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode, boolean isNotMet);
 
 	List<MIPSPatientInformation> getPatientInformation(String patientsList);
 	

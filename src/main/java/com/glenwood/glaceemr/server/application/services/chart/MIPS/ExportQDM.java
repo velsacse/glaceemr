@@ -1799,9 +1799,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 			Predicate[] restriction=new Predicate[] {
 					
-					directEmailLogTable.get(DirectEmailLog_.directEmailLogActionType).in(directEmailAction),
-					builder.between(builder.function("DATE", Date.class, encounterTable.get(Encounter_.encounterDate)), startDate, endDate),
-					builder.equal(root.get(Chart_.chartPatientid), patientId)
+				directEmailLogTable.get(DirectEmailLog_.directEmailLogActionType).in(directEmailAction),
+				builder.between(builder.function("DATE", Date.class, encounterTable.get(Encounter_.encounterDate)), startDate, endDate),
+				builder.between(builder.function("DATE", Date.class, directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn)), startDate, endDate),
+				builder.equal(directEmailLogTable.get(DirectEmailLog_.directEmailLogSentBy), patientId),
+				builder.equal(directEmailLogTable.get(DirectEmailLog_.directEmailLogUserType), 2)
 					
 			};
 			
@@ -1927,6 +1929,19 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 	}
 
+	/**
+	 * Function provides the details of handouts given to patients by provider during reporting year
+	 * 
+	 * @param isGroup
+	 * @param providerId
+	 * @param patientId
+	 * @param startDate
+	 * @param endDate
+	 * @param em
+	 * @param measureObj
+	 * @return
+	 */
+	
 	public String getPatientEducationDetails(Boolean isGroup, int providerId, int patientId, Date startDate, Date endDate, EntityManager em, MeasureStatus measureObj) {
 		
 		String returnString = "";
@@ -1939,7 +1954,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 			Join<PatientAftercareData, Encounter> encounterJoin = root.join(PatientAftercareData_.encounterTbl, JoinType.INNER);
 			
-			cq.multiselect(encounterJoin.get(Encounter_.encounterDate));
+			cq.multiselect(builder.function("to_char", String.class, encounterJoin.get(Encounter_.encounterDate), builder.literal("MM/DD/YYYY HH:MI:SS am")));
 			
 			if(isGroup){
 				cq.where(builder.between(encounterJoin.get(Encounter_.encounterDate), startDate, endDate),
@@ -1958,7 +1973,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			measureObj.setDenominator(1);
 			
 			if(handoutsCount.size() > 0){
-				returnString = "Total handouts given by provider : "+handoutsCount.get(0);
+				returnString = "Handout provided to patient on : "+handoutsCount.get(0);
 				measureObj.setNumerator(1);
 			}else{
 				returnString = "No handouts have been given by provider";
@@ -1974,6 +1989,20 @@ Root<Encounter> root = cq.from(Encounter.class);
 		return returnString;
 		
 	}
+	
+	/**
+	 * 
+	 * Function provides the information regarding no. of visits marked as transition of care and no.of visits has reconciled medications
+	 * 
+	 * @param isGroup
+	 * @param providerId
+	 * @param patientId
+	 * @param startDate
+	 * @param endDate
+	 * @param em
+	 * @param measureObj
+	 * @return
+	 */
 	
 	public String getMedicationReconcilcationStatus(Boolean isGroup, int providerId, int patientId, Date startDate, Date endDate, EntityManager em, MeasureStatus measureObj){
 		
@@ -2007,12 +2036,14 @@ Root<Encounter> root = cq.from(Encounter.class);
 				
 			}else{
 				
-				CriteriaQuery<ReconciledMedication> cq1 = builder.createQuery(ReconciledMedication.class);
+				CriteriaQuery<Integer> cq1 = builder.createQuery(Integer.class);
 				Root<ReconciledMedication> root1 = cq1.from(ReconciledMedication.class);
 				
 				cq1.where(root1.get(ReconciledMedication_.reconciledMedicationEncounterid).in(encountersWithTransitionOfCare));
 				
-				List<ReconciledMedication> finalCount =  em.createQuery(cq1).getResultList();
+				cq1.multiselect(root1.get(ReconciledMedication_.reconciledMedicationEncounterid)).distinct(true);
+				
+				List<Integer> finalCount =  em.createQuery(cq1).getResultList();
 				
 				if(finalCount.size() == 0){
 					
@@ -2025,9 +2056,9 @@ Root<Encounter> root = cq.from(Encounter.class);
 					
 					measureObj.setIpp(encountersWithTransitionOfCare.size());
 					measureObj.setDenominator(encountersWithTransitionOfCare.size());
-					measureObj.setNumerator(finalCount.size());
+					measureObj.setNumerator(finalCount.get(0));
 					
-					resultString = "0 / "+encountersWithTransitionOfCare.size()+" &&&& visits in which medication reconcilation is not performed";
+					resultString = finalCount.get(0)+" / "+encountersWithTransitionOfCare.size()+" &&&& visits in which medication reconcilation is performed";
 					
 				}
 				
