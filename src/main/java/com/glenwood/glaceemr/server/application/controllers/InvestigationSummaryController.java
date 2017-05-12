@@ -17,8 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.LabDescription;
 import com.glenwood.glaceemr.server.application.models.VaccinationConsentForm;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.investigation.ConsentDetails;
 import com.glenwood.glaceemr.server.application.services.investigation.InvestigationSummaryService;
 import com.glenwood.glaceemr.server.application.services.investigation.SaveLabDetails;
@@ -40,7 +44,7 @@ import com.google.common.base.Strings;
 public class InvestigationSummaryController {
 
 	@Autowired
-	AuditTrailService auditTrailService;
+	AuditTrailSaveService auditTrailSaveService;
 
 	@Autowired
 	SessionMap sessionMap;
@@ -65,6 +69,8 @@ public class InvestigationSummaryController {
 	        long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findOrderSetData());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Success in getting order set details",sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN,"","");
 		System.out.println("After request  for orderset "+System.currentTimeMillis());
         System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
 		return emrResponseBean;
@@ -86,6 +92,8 @@ public class InvestigationSummaryController {
 //		List<LabEntries> labInfo = investigationService.findResultsLabs(chartId);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findResultsLabs(chartId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Success in in getting pending orders  chartId="+chartId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"chartId="+chartId,LogUserType.USER_LOGIN,"","");
 		 System.out.println("After request  for pendingresults "+System.currentTimeMillis());
 	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
@@ -105,6 +113,8 @@ public class InvestigationSummaryController {
 		 System.out.println("before request  for pendingorders "+System.currentTimeMillis());
 	        long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Success in  getting pending orders chartId="+chartId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"chartId="+chartId,LogUserType.USER_LOGIN,"","");
 		emrResponseBean.setData(investigationService.findPendingOrders(encounterId, chartId));
 		System.out.println("After request  for pendingorders "+System.currentTimeMillis());
         System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
@@ -127,12 +137,10 @@ public class InvestigationSummaryController {
 		System.out.println("before request  for performing delete lab "+System.currentTimeMillis());
 		long starttime=System.currentTimeMillis();
 		investigationService.performOrDeleteLab(testDetailIds , encounterId.split("@##@")[0], testStatus);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,
-				AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,
-				"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,
-				AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.UPDATE,-1,Log_Outcome.SUCCESS,"Success in updating test details chartId="+chartId+" testDetailIds="+testDetailIds,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"chartId="+chartId,LogUserType.USER_LOGIN,"","");
 		 System.out.println("After request  for flowsheet "+System.currentTimeMillis());
-	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
+	     System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
 //		List<LabEntries> labs = null;
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		if( encounterId.split("@##@")[1].equalsIgnoreCase("Pending")) {
@@ -171,6 +179,8 @@ public class InvestigationSummaryController {
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findBodySiteData(searchStr, limit, offset));
 		   long starttime=System.currentTimeMillis();
+		   auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Success in getting body site details searchStr="+searchStr,sessionMap.getUserID(),
+					request.getRemoteAddr(),-1,"searchStr="+searchStr,LogUserType.USER_LOGIN,"","");
 	         System.out.println("After request  for body site details "+System.currentTimeMillis());
 	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
@@ -192,6 +202,8 @@ public class InvestigationSummaryController {
 //		List<VaccineOrderDetails> lotDeatils = investigationService.findLotDetails(vaccineId,onLoad);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findLotDetails(vaccineId,onLoad));
+		  auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Success in getting lot number details vaccineId="+vaccineId,sessionMap.getUserID(),
+					request.getRemoteAddr(),-1,"vaccineId="+vaccineId,LogUserType.USER_LOGIN,"","");
 		 System.out.println("After request  for LotInfo "+System.currentTimeMillis());
 	       System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
@@ -210,7 +222,8 @@ public class InvestigationSummaryController {
 		long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findFrequentOrders(encounterId));
-		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Success in getting frequent orders list encounterId="+encounterId,sessionMap.getUserID(),
+					request.getRemoteAddr(),-1,"encounterId="+encounterId,LogUserType.USER_LOGIN,"","");
         System.out.println("After request  for frequentOrders "+System.currentTimeMillis());
        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
@@ -228,12 +241,10 @@ public class InvestigationSummaryController {
 		System.out.println("before request  for saveconsent "+System.currentTimeMillis());
 		long starttime=System.currentTimeMillis();
 		List<VaccinationConsentForm> consentList = investigationService.saveVaccineConsent(consentData);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.LoginAndLogOut,
-				AuditLogConstants.LOGIN,1,AuditLogConstants.SUCCESS,"Sucessfull login User Name(" +1+")",-1,
-				"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,
-				AuditLogConstants.USER_LOGIN,request,"User (" + sessionMap.getUserID()+ ") logged in through SSO");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.CREATE,-1,Log_Outcome.SUCCESS,"Success in saving consent details",sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN,"","");
 		 System.out.println("After request  for saveconsent "+System.currentTimeMillis());
-	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
+	     System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
 		return consentList;
 	}
 		
@@ -252,7 +263,8 @@ public class InvestigationSummaryController {
 		long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findCompleteTestDetails(testDetailId, testId, groupId));
-		   
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Success in getting complete test details testDetailId="+testDetailId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"testId="+testId,LogUserType.USER_LOGIN,"","");  
 	         System.out.println("After request  for TestDetails "+System.currentTimeMillis());
 	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
@@ -270,8 +282,9 @@ public class InvestigationSummaryController {
 //		List<LabEntries> labInfo = investigationService.findTodaysOrders(encounterId);
 		System.out.println("before request  for getting todaysorders "+System.currentTimeMillis());
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
-		
 		emrResponseBean.setData(investigationService.findTodaysOrders(encounterId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Success in getting todays orders encounterId="+encounterId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"encounterId="+encounterId,LogUserType.USER_LOGIN,"","");  
 	       long starttime=System.currentTimeMillis();
 	         System.out.println("After request  for todayOrders "+System.currentTimeMillis());
 	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
@@ -291,10 +304,8 @@ public class InvestigationSummaryController {
 		System.out.println("before request  for Investigation "+System.currentTimeMillis());
 		long starttime=System.currentTimeMillis();
 		investigationService.savelab(labDetails.getRequestToSave(), labDetails.getEncounterId(), labDetails.getPatientId(), labDetails.getChartId(), labDetails.getUserId(), labDetails.getFullData(), "-1", "-1", "false", "" + labDetails.getTestId());
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Investigations,AuditLogConstants.Investigations,
-				1,AuditLogConstants.SUCCESS,"Successfully save data for the patient having PatientId=" + labDetails.getPatientId(),
-				-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Investigations,request,
-				"Successfully save data for the patient having PatientId=" + labDetails.getPatientId());
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.CREATE,-1,Log_Outcome.SUCCESS,"Success in save the complete details chartId="+labDetails.getChartId(),sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"encounterId="+labDetails.getEncounterId()+" testId="+labDetails.getTestId(),LogUserType.USER_LOGIN,"","");  
 		logger.debug("End of save the complete details for a particular lab");
 		System.out.println("After request  for Investigation "+System.currentTimeMillis());
         System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
@@ -318,6 +329,8 @@ public class InvestigationSummaryController {
 	        System.out.println("before request  for saveneworder "+System.currentTimeMillis());
 	        long starttime1=System.currentTimeMillis();
 			investigationService.saveNewLab(testDetails, encounterId, Integer.parseInt(testIdArray[i]),userId, chartId, patientId);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.CREATE,-1,Log_Outcome.SUCCESS,"Success in save the complete details for lab chartId="+chartId,userId,
+					request.getRemoteAddr(),-1,"chartId="+chartId+" labTestIds="+labTestIds,LogUserType.USER_LOGIN,"","");  
 			System.out.println("After request  for saveneworder "+System.currentTimeMillis());
 	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime1));
 		}
@@ -328,9 +341,8 @@ public class InvestigationSummaryController {
 	public EMRResponseBean getLabDetailsByChart(@RequestParam(value="chartId", required=false, defaultValue="-1") Integer chartId) throws Exception {
 		logger.debug("Get the complete details for a patient");
 //		LS_Bean labInfo = investigationService.findPatientLabDataByChart(chartId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Investigations,AuditLogConstants.Investigations,
-				1,AuditLogConstants.SUCCESS,"Successfully loaded data for patient having chart id="+chartId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Investigations,request,
-				"Successfully loaded data for patient having chart id="+chartId);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Data succesfully loaded for chart id="+chartId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"chartId="+chartId,LogUserType.USER_LOGIN,"","");  
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findPatientLabDataByChart(chartId));
         return emrResponseBean;
@@ -341,10 +353,12 @@ public class InvestigationSummaryController {
 //		OrderLogGroups labInfo = investigationService.findOrdersSummary(chartId);
 		
 		 System.out.println("before request  for orderHistory "+System.currentTimeMillis());
-	        long starttime=System.currentTimeMillis();EMRResponseBean emrResponseBean=new EMRResponseBean();
+	     long starttime=System.currentTimeMillis();EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findOrdersSummary(chartId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Successfully loaded (OrdersLogByChart) data for patient having chart id="+chartId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"chartId="+chartId,LogUserType.USER_LOGIN,"","");  
 		 System.out.println("After request  for orderset "+System.currentTimeMillis());
-	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
+	     System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 	
@@ -355,8 +369,10 @@ public class InvestigationSummaryController {
 	        long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findReviewedSummary(chartId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Successfully loaded (getReviewedLogByChart) data for patient having chart id="+chartId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"chartId="+chartId,LogUserType.USER_LOGIN,"","");  
 		 System.out.println("After request  for ReviewedLogByChart "+System.currentTimeMillis());
-	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
+	     System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 	
@@ -368,8 +384,10 @@ public class InvestigationSummaryController {
 	        long starttime=System.currentTimeMillis();
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findPendingSummary(chartId));
-		 System.out.println("After request  for PendingLogByChart "+System.currentTimeMillis());
-	        System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Successfully loaded (getPendingLogByChart) data for patient having chart id="+chartId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"chartId="+chartId,LogUserType.USER_LOGIN,"","");   
+		System.out.println("After request  for PendingLogByChart "+System.currentTimeMillis());
+	    System.out.println("Final time taken::::::::"+(System.currentTimeMillis()-starttime));
         return emrResponseBean;
 	}
 	
@@ -381,6 +399,8 @@ public class InvestigationSummaryController {
 //		LS_Bean labInfo = investigationService.getResultsByDate(chartId, fromDate, toDate);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.getResultsByDate(chartId, fromDate, toDate));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Successfully loaded (getLabDetailsByDate) data for patient having chart id="+chartId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"chartId="+chartId,LogUserType.USER_LOGIN,"","");   
         return emrResponseBean;
 	}
 	
@@ -389,11 +409,10 @@ public class InvestigationSummaryController {
 			@RequestParam(value="categoryId", required=false, defaultValue="-1") Integer catetoryId) throws Exception {
 		logger.debug("Get the complete details for a patient");
 //		LS_Bean labInfo = investigationService.findPatientLabDataByCategory(chartId,catetoryId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Investigations,AuditLogConstants.Investigations,
-				1,AuditLogConstants.SUCCESS,"Successfully loaded data for patient having chart id="+chartId+" and category id="+catetoryId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Investigations,request,
-				"Successfully loaded data for patient having chart id="+chartId+" and category id="+catetoryId);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findPatientLabDataByCategory(chartId,catetoryId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Successfully loaded (OrdersHistoryByCategory) data for patient having chart id="+chartId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"categoryId="+catetoryId,LogUserType.USER_LOGIN,"","");   
         return emrResponseBean;
 	}
 	
@@ -402,11 +421,10 @@ public class InvestigationSummaryController {
 			@RequestParam(value="testId", required=false, defaultValue="-1") Integer testId) throws Exception {
 		logger.debug("Get the complete details for a patient");
 //		LS_Bean labInfo = investigationService.findPatientLabDataByTest(chartId, testId);
-		auditTrailService.LogEvent(AuditLogConstants.GLACE_LOG,AuditLogConstants.Investigations,AuditLogConstants.Investigations,
-				1,AuditLogConstants.SUCCESS,"Successfully loaded data for patient having chart id="+chartId+" and test id="+testId,-1,"127.0.0.1",request.getRemoteAddr(),-1,-1,-1,AuditLogConstants.Investigations,request,
-				"Successfully loaded data for patient having chart id="+chartId+" and test id="+testId);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findPatientLabDataByTest(chartId, testId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Successfully loaded (OrdersHistoryByTest) data for patient having chart id="+chartId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"testId="+testId,LogUserType.USER_LOGIN,"","");
         return emrResponseBean;
 	}
 	@RequestMapping(value = "/OrderByDateLogByChart",method = RequestMethod.GET)
@@ -414,6 +432,8 @@ public class InvestigationSummaryController {
 //		OrderLogGroups labInfo = investigationService.findReviewedSummary(chartId);
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
 		emrResponseBean.setData(investigationService.findOrderByDateSummary(chartId));
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.INVESTIGATION,LogActionType.VIEW,-1,Log_Outcome.SUCCESS,"Successfully loaded OrderByDateLogByChart) data for patient having chart id="+chartId,sessionMap.getUserID(),
+				request.getRemoteAddr(),-1,"chartId="+chartId,LogUserType.USER_LOGIN,"","");
         return emrResponseBean;
 	}
 }
