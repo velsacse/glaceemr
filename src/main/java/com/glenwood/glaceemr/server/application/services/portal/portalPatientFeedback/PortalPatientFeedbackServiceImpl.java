@@ -158,6 +158,13 @@ public class PortalPatientFeedbackServiceImpl implements PortalPatientFeedbackSe
 		Root<PatientFeedback> root = cq.from(PatientFeedback.class);
 		cq.select(cb.max(root.get(PatientFeedback_.feedbackId))).where(cb.equal(root.get(PatientFeedback_.patientId), patientId));
 		int feedbackId=(int) em.createQuery(cq).getSingleResult();
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" requested last feedback.",-1,
+				request.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested last feedback.","");
+		
+		
 		return feedbackId;
 	}
 

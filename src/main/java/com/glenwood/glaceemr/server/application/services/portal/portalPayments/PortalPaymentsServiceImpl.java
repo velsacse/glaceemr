@@ -129,7 +129,12 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
      public List<H093> getPatientStatementHistory(int patientId, int chartId,int pageOffset, int pageIndex) {
 
          List<H093> statementHistoryList=h093Repository.findAll(PortalPaymentsSpecification.getPatientStatementHistory(patientId, chartId), PortalPaymentsSpecification.createPortalStatementHistoryPageRequestByDescDate(pageIndex, pageOffset)).getContent();
-
+         
+         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" requested statement history.",-1,
+                 request.getRemoteAddr(),patientId,"",
+                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested statement history.","");
+         
          return statementHistoryList;
      }
 
@@ -138,6 +143,10 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 
          List<ReceiptDetail> paymentHistoryList=receiptDetailRepository.findAll(PortalPaymentsSpecification.getPatientPaymentHistory(patientId, chartId), PortalPaymentsSpecification.createPortalPaymentHistoryPageRequestByDescDate(pageIndex, pageOffset)).getContent();
 
+         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" requested payments history.",-1,
+                 request.getRemoteAddr(),patientId,"",
+                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested payments history.","");
          return paymentHistoryList;
      }
 
@@ -158,6 +167,11 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
              PortalPatientPaymentsSummary detailsBean=(PortalPatientPaymentsSummary)ptPaymentDetailsResultList.get(i);
              detailsBeanList.add(detailsBean);
          }
+
+         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" requested payments summary.",-1,
+                 request.getRemoteAddr(),patientId,"",
+                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested payments summary.","");
 
          return detailsBeanList.get(0);
      }
@@ -309,6 +323,11 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
      public PaymentService getPatientLastPaymentSummary(int patientId) {
 
          PaymentService paymentSummary=paymentServiceRepository.findOne(PortalPaymentsSpecification.getLastPaymentSummary(patientId));
+         
+         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" requested last payments summary.",-1,
+                 request.getRemoteAddr(),patientId,"",
+                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested last payments summary.","");
 
          return paymentSummary;
      }
@@ -317,6 +336,12 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
      public List<PatientInsDetail> getPatientInsDetails(int patientId) {
 
          List<PatientInsDetail> insList=patientInsDetailRepository.findAll(PortalPaymentsSpecification.getPatientInsDetails(patientId));
+         
+         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving insurance details of patient with id "+patientId,-1,
+                 request.getRemoteAddr(),patientId,"",
+                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving insurance details of patient with id "+patientId,"");
+
          return insList;
      }
 
@@ -409,6 +434,11 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 
              stmntBean.setStatementPath(stmtPath);
          }
+         
+         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving patient statement of patient with id "+patientId,-1,
+                 request.getRemoteAddr(),patientId,"",
+                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving patient statement of patient with id "+patientId,"");
 
          return stmntBean;
      }
@@ -416,6 +446,7 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 
      @Override
      public List<Billinglookup> getPaymentTypes(){
+    	 
 
          return billinglookupRepository.findAll(PortalSettingsSpecification.getPaymentMethod());
 

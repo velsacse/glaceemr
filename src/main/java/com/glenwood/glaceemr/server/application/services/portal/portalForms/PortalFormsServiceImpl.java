@@ -63,6 +63,8 @@ import com.glenwood.glaceemr.server.application.repositories.LeafXmlVersionRepos
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsQuestionsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalHistoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.TabLibraryRepository;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.ExportHTMLAsPdf;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.SharedFolderUtil;
 import com.glenwood.glaceemr.server.application.services.portal.portalMedicalSummary.PortalMedicalSummaryService;
@@ -138,8 +140,10 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 	
 	@Autowired
 	SessionMap sessionMap;
-
-
+	
+	@Autowired
+	AuditTrailSaveService auditTrailSaveService;
+	
 	LinkedHashMap <String, PatientClinicalIntakeBean> patientElementsBeanMap=null;
 
 	LinkedHashMap <String, PatientClinicalIntakeBean> patientOptionElementsBeanMap=null;
@@ -186,6 +190,11 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 		portalClinicalIntakeAndConsentFormsListBean.setClinicalIntakeFormsList(intakeFormsList);
 		portalClinicalIntakeAndConsentFormsListBean.setConsentFormsList(consentFormsList);
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested patient's clinical intake and consent forms with id:"+patientId,-1,
+				httpServletRequest.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested patient's clinical intake and consent forms with id:"+patientId,"");
+		
 		return portalClinicalIntakeAndConsentFormsListBean;
 	}
 
@@ -234,6 +243,11 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 		setClinicalIntakeElements(clinicalElementsQuestionsList);
 		System.out.println("questionnaireElements::::::::"+questionnaireElements.size());
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested clinical intake forms questions with id:"+patientId,-1,
+				httpServletRequest.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested clinical intake forms questions with id:"+patientId,"");
+		
 		return clinicalElementsQuestionsList;
 	}
 
@@ -445,6 +459,12 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 		xmlBean.setIntakeFormGroupId(groupId);
 		xmlBean.setXmlData(XMLTransformationFactory(clinicalIntakeXML,"portal/ClinicalIntake.xsl", httpServletRequest).toString());
 		xmlBean.setIntakeFormGroupName(groupName);
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested clinical intake forms",-1,
+				httpServletRequest.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with Id"+patientId+"requested clinical intake forms","");
+		
 		return xmlBean;
 
 	}
@@ -590,6 +610,11 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 
 		PatientClinicalHistory patientClinicalHistory=patientClinicalHistoryRepository.findOne(PortalFormsSpecification.getPatientClinicalHistory(patientId,isActive,optionValue,optsaveGwid));
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested patient's clinical history with patientId:"+patientId,-1,
+				httpServletRequest.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested patient's clinical history with patientId:"+patientId,"");
+		
 		return patientClinicalHistory;
 	}
 
@@ -650,6 +675,7 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 			throw e;
 		}finally{
 		}
+		
 		return clinicalIntakeXML;
 	}
 
@@ -1069,6 +1095,11 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 		patientDetailsBean.setPatientRegistrationEthnicity(patientEthnicity);
 		patientDetailsBean.setPatientRegistrationPreferredLan(patientLanguage);
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested complete patient details with patientId:"+patientId,-1,
+				httpServletRequest.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested complete patient details with patientId:"+patientId,"");
+		
 		return patientDetailsBean;
 
 	}
@@ -1119,6 +1150,11 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 
 		List<FileDetails> filesList=fileDetailsRepository.findAll(ConsentFormsSpecification.getPatientConsentFormsList(patientId, chartId, 0));
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested incomplete consent forms list with patientId:"+patientId,-1,
+				httpServletRequest.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested incomplete consent forms list with patientId:"+patientId,"");
+		
 		return filesList;
 	}
 
@@ -1127,6 +1163,11 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 
 		List<FileDetails> filesList=fileDetailsRepository.findAll(ConsentFormsSpecification.getPatientConsentFormsList(patientId, chartId, 0));
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested signed consent forms list with patientId:"+patientId,-1,
+				httpServletRequest.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested signed consent forms list with patientId:"+patientId,"");
+		
 		return filesList;
 	}
 
@@ -1135,6 +1176,11 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 
 		List<FileDetails> filesList=fileDetailsRepository.findAll(ConsentFormsSpecification.getPatientConsentFormsList(patientId, chartId, -1));
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested all consent forms list with patientId:"+patientId,-1,
+				httpServletRequest.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested all consent forms list with patientId:"+patientId,"");
+		
 		return filesList;
 	}
 
@@ -1233,6 +1279,12 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 		consentDetailsBean.setFormTemplateId(consentFormFileDetails.getFormsTemplate().getFormsTemplateId());
 		consentDetailsBean.setPatientId(patientId);
 		consentDetailsBean.setFileDetailsId(consentFormFileDetails.getFiledetailsId());
+		
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Requested incomplete consent forms details with patientId:"+patientId,-1,
+				httpServletRequest.getRemoteAddr(),patientId,"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Requested incomplete consent forms details with patientId:"+patientId,"");
+		
 		return consentDetailsBean;
 	}
 
@@ -1257,6 +1309,11 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 
 		formDetailsBean.setFormSaveName(formSavingName);
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.EXPORT,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Saved consent form details with patientId:"+formDetailsBean.getPatientId()+"as PDF",-1,
+				httpServletRequest.getRemoteAddr(),formDetailsBean.getPatientId(),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Saved consent form details with patientId:"+formDetailsBean.getPatientId(),"");
+		
 		return formDetailsBean;
 	}
 
@@ -1351,6 +1408,11 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 
 		alertEventRepository.saveAndFlush(alert);*/
 
+		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
+				AuditTrailEnumConstants.LogActionType.EXPORT,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Saved consent form with patientId:"+consentSaveBean.getPatientId()+"as PDF",-1,
+				httpServletRequest.getRemoteAddr(),consentSaveBean.getPatientId(),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Saved consent form with patientId:"+consentSaveBean.getPatientId(),"");
+		
 		return null;
 	}
 
