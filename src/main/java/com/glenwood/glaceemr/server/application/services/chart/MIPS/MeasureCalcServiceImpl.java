@@ -435,18 +435,27 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			String ePrescResult = qdmData.getEPrescribingDetails(isGroup, patientID, providerId, em, startDate, endDate, measureObj);
 
 			epObject.setMeasureId("ACI_EP_1");
-			epObject.setMeasureTitle("Electronic Prescribing");
-			epObject.setShortDescription(ePrescResult.split("&&&&")[0]);
-			epObject.setDescription(ePrescResult.split("&&&&")[0].concat(ePrescResult.split("&&&&")[1]));
-			
 			measureObj.setCmsId("ACI_EP_1");
+			epObject.setMeasureTitle("Electronic Prescribing");
+						
+			int doneCount  = Integer.parseInt(ePrescResult.split(" &&&& ")[0].split("/")[0].replaceAll(" ",""));
+			int totalCount = Integer.parseInt(ePrescResult.split(" &&&& ")[0].split("/")[1].replaceAll(" ",""));
 
-			if(Integer.parseInt(ePrescResult.split("&&&&")[2]) == -1){
+			if(Integer.parseInt(ePrescResult.split(" &&&& ")[2]) == -1){
 				epObject.setStatus("Not Applicable");
 			}else{
-				epObject.setStatus("Show Description");
-			}
 
+				if(doneCount!=totalCount){
+					epObject.setStatus("Show Description");
+					epObject.setDescription(ePrescResult.split(" &&&& ")[0].concat(" ".concat(ePrescResult.split(" &&&& ")[1])));
+					epObject.setShortDescription(ePrescResult.split(" &&&& ")[0]);
+				}else{
+					epObject.setStatus("Completed");
+					epObject.setDescription(ePrescResult.split(" &&&& ")[0].concat(" ".concat(ePrescResult.split(" &&&& ")[1])));
+				}
+
+			}
+			
 		}catch(Exception e){
 			
 			try{
@@ -642,7 +651,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 				if(qdmData.getPatientPortalAccess(patientId, em)){
 					
-					String portalLastAccessed = qdmData.getPatientElectronicAccessInfo(isGroup,patientId, startDate, endDate, em, measureObj);
+					String portalLastAccessed = qdmData.getPatientElectronicAccessInfo(isGroup,patientId, providerId, startDate, endDate, em, measureObj);
 					
 					if(portalLastAccessed.length() > 0){
 						epObject.setStatus("Completed");
@@ -711,12 +720,32 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			measureObj.setCmsId("ACI_HIE_1");
 			
 			if(result.equals("No referrals have been sent by provider")){
+				
 				epObject.setDescription("No referrals have been sent by provider");
 				epObject.setStatus("Not Applicable");
+				
 			}else{
-				epObject.setStatus("Show Description");
-				epObject.setDescription(result.split(" &&&& ")[0].concat(" ".concat(result.split(" &&&& ")[1])));
-				epObject.setShortDescription(result.split(" &&&& ")[0]);
+
+				int doneCount  = Integer.parseInt(result.split(" &&&& ")[0].split("/")[0].replaceAll(" ",""));
+				int totalCount = Integer.parseInt(result.split(" &&&& ")[0].split("/")[1].replaceAll(" ",""));
+				
+				if(totalCount!=0 && doneCount==0){
+					
+					epObject.setStatus("Not Completed");
+					epObject.setDescription(result.split(" &&&& ")[0].concat(" ".concat(result.split(" &&&& ")[1])));
+					
+				}else if(totalCount!=0 && doneCount!=0 && doneCount!=totalCount){
+					
+					epObject.setStatus("Show Description");
+					epObject.setDescription(result.split(" &&&& ")[0].concat(" ".concat(result.split(" &&&& ")[1])));
+					
+				}else{
+					
+					epObject.setStatus("Completed");
+					epObject.setDescription(result.split(" &&&& ")[0].concat(" ".concat(result.split(" &&&& ")[1])));
+					
+				}
+				
 			}
 
 		}catch(Exception e){
@@ -838,9 +867,19 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				epObject.setDescription("No Encounters with Transition of Care marked");
 				epObject.setStatus("Not Applicable");
 			}else{
-				epObject.setStatus("Show Description");
-				epObject.setDescription(result.split(" &&&& ")[0].concat(" ".concat(result.split(" &&&& ")[1])));
-				epObject.setShortDescription(result.split(" &&&& ")[0]);
+				
+				int doneCount  = Integer.parseInt(result.split(" &&&& ")[0].split("/")[0].replaceAll(" ",""));
+				int totalCount = Integer.parseInt(result.split(" &&&& ")[0].split("/")[1].replaceAll(" ",""));
+				
+				if(doneCount!=totalCount){
+					epObject.setStatus("Show Description");
+					epObject.setDescription(result.split(" &&&& ")[0].concat(" ".concat(result.split(" &&&& ")[1])));
+					epObject.setShortDescription(result.split(" &&&& ")[0]);
+				}else{
+					epObject.setStatus("Completed");
+					epObject.setDescription(result.split(" &&&& ")[0].concat(" ".concat(result.split(" &&&& ")[1])));
+				}
+				
 			}
 
 		}catch(Exception e){
@@ -1748,7 +1787,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		Predicate byNpi = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNpi), npiValue);
 		Predicate byEmpTin=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesTin), empTin);
 		
-		Predicate isDenom = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator), 1);
+		Predicate isDenom = builder.greaterThanOrEqualTo(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator), 1);
 		Predicate isNotNumer = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator), 0);
 		Predicate isNotDenomExc = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion), 0);
 		Predicate isNotDenomExcep = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException), 0);

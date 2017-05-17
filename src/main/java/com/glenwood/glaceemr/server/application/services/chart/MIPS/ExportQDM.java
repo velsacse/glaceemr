@@ -105,7 +105,6 @@ import com.glenwood.glaceemr.server.application.models.XrefGenproductSynRxnorm_;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
 import com.glenwood.glaceemr.server.application.specifications.ProblemListSpecification;
-import com.google.common.eventbus.AllowConcurrentEvents;
 
 public class ExportQDM {
 
@@ -1607,9 +1606,12 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		measureObj.setIpp(i);
 		measureObj.setDenominator(i);
-		measureObj.setNumerator(electronicallySentMedications);
 		
-		return electronicallySentMedications+" / "+i+"&&&& medications sent electronically &&&&"+ePrescStatus;
+		if(ePrescStatus == 1){
+			measureObj.setNumerator(electronicallySentMedications);
+		}
+		
+		return electronicallySentMedications+" / "+i+" &&&& medications sent electronically &&&& "+ePrescStatus;
 		
 	}
 	
@@ -1770,7 +1772,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	 * @return
 	 */
 	
-	public String getPatientElectronicAccessInfo(Boolean isGroup, int patientId, Date startDate, Date endDate, EntityManager em, MeasureStatus measureObj){
+	public String getPatientElectronicAccessInfo(Boolean isGroup, int patientId, int providerId, Date startDate, Date endDate, EntityManager em, MeasureStatus measureObj){
 		
 		long patientCount = 0;
 		
@@ -1790,14 +1792,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 			directEmailAction.add(1, 2);
 			
 			Predicate[] restrictions= new Predicate[] {
-				
-				directEmailLogTable.get(DirectEmailLog_.directEmailLogActionType).in(directEmailAction),
-				builder.between(builder.function("DATE", Date.class, encounterTable.get(Encounter_.encounterDate)), startDate, endDate),
-				builder.equal(root.get(Chart_.chartPatientid), patientId)
-				
-			};
-			
-			Predicate[] restriction=new Predicate[] {
 					
 				directEmailLogTable.get(DirectEmailLog_.directEmailLogActionType).in(directEmailAction),
 				builder.between(builder.function("DATE", Date.class, encounterTable.get(Encounter_.encounterDate)), startDate, endDate),
@@ -1805,6 +1799,17 @@ Root<Encounter> root = cq.from(Encounter.class);
 				builder.equal(directEmailLogTable.get(DirectEmailLog_.directEmailLogSentBy), patientId),
 				builder.equal(directEmailLogTable.get(DirectEmailLog_.directEmailLogUserType), 2)
 					
+			};
+				
+			Predicate[] restriction=new Predicate[] {
+						
+				directEmailLogTable.get(DirectEmailLog_.directEmailLogActionType).in(directEmailAction),
+				builder.between(builder.function("DATE", Date.class, encounterTable.get(Encounter_.encounterDate)), startDate, endDate),
+				builder.between(builder.function("DATE", Date.class, directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn)), startDate, endDate),
+				builder.equal(directEmailLogTable.get(DirectEmailLog_.directEmailLogSentBy), patientId),
+				builder.equal(encounterTable.get(Encounter_.encounter_service_doctor), providerId),
+				builder.equal(directEmailLogTable.get(DirectEmailLog_.directEmailLogUserType), 2)
+						
 			};
 			
 			cq.multiselect(builder.function("to_char", String.class, directEmailLogTable.get(DirectEmailLog_.directEmailLogSentOn), builder.literal("MM/DD/YYYY HH:MI:SS am")));
@@ -1883,7 +1888,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 			
 			if(result.size() == 2){
-			
+				
 				int total = Integer.parseInt(result.get(0)[1].toString())+Integer.parseInt(result.get(1)[1].toString());
 				
 				measureObj.setIpp(total);
@@ -2026,7 +2031,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			else
 				cq.where(byPatientId, byDateRange, isTransitionOfCareChecked);
 			
-			cq.multiselect(chartJoin.get(Encounter_.encounterId));
+			cq.multiselect(chartJoin.get(Encounter_.encounterId)).distinct(true);
 			
 			List<Integer> encountersWithTransitionOfCare = em.createQuery(cq).getResultList();
 			
@@ -2050,15 +2055,15 @@ Root<Encounter> root = cq.from(Encounter.class);
 					measureObj.setIpp(encountersWithTransitionOfCare.size());
 					measureObj.setDenominator(encountersWithTransitionOfCare.size());
 					
-					resultString = "0 / "+encountersWithTransitionOfCare.size()+" &&&& visits in which medication reconcilation is not performed";
+					resultString = "0 / "+encountersWithTransitionOfCare.size()+" &&&& visits in which medication reconcilation is performed";
 					
 				}else{
 					
 					measureObj.setIpp(encountersWithTransitionOfCare.size());
 					measureObj.setDenominator(encountersWithTransitionOfCare.size());
-					measureObj.setNumerator(finalCount.get(0));
+					measureObj.setNumerator(finalCount.size());
 					
-					resultString = finalCount.get(0)+" / "+encountersWithTransitionOfCare.size()+" &&&& visits in which medication reconcilation is performed";
+					resultString = finalCount.size()+" / "+encountersWithTransitionOfCare.size()+" &&&& visits in which medication reconcilation is performed";
 					
 				}
 				
