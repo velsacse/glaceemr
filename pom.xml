@@ -65,7 +65,7 @@
 			<artifactId>validation-api</artifactId>
 			<version>1.0.0.GA</version>
 		</dependency>
-		
+
 		<!-- Apache Commons FileUpload -->
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -269,12 +269,12 @@
 			<version>${dbcp.version}</version>
 		</dependency> -->
 
-	<dependency>
-		<groupId>org.apache.tomcat</groupId>
-		<artifactId>tomcat-jdbc</artifactId>
-		<version>7.0.35</version>
-		<scope>provided</scope>
-	</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jdbc</artifactId>
+			<version>7.0.35</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Jackson JSON Mapper -->
 		<dependency>
@@ -336,7 +336,7 @@
 			<artifactId>javax.servlet.jsp-api</artifactId>
 			<version>2.2.1</version>
 		</dependency>
-		
+
 		<!-- Jsoup HTML to Pdf Converter Using WKHTMLTOPDF -->
 		<dependency>
 			<groupId>org.jsoup</groupId>
@@ -365,7 +365,7 @@
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-joda</artifactId>
 			<version>2.4.0-rc2</version>
-		</dependency> -->
+			</dependency> -->
 
 		<!-- Misc -->
 		<dependency>
@@ -445,6 +445,62 @@
 			<groupId>com.itextpdf.tool</groupId>
 			<artifactId>xmlworker</artifactId>
 			<version>5.5.8</version>
+		</dependency>
+
+		<!-- CDA Validation -->
+		<!-- https://mvnrepository.com/artifact/org.openehealth.ipf.oht.mdht/ipf-oht-mdht-uml-cda -->
+		<dependency>
+			<groupId>org.openehealth.ipf.oht.mdht</groupId>
+			<artifactId>ipf-oht-mdht-uml-cda</artifactId>
+			<version>1.2.0.201212201425</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.openehealth.ipf.oht.mdht/ipf-oht-mdht-uml-cda-ccd -->
+		<dependency>
+			<groupId>org.openehealth.ipf.oht.mdht</groupId>
+			<artifactId>ipf-oht-mdht-uml-cda-ccd</artifactId>
+			<version>1.2.0.201212201425</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openhealthtools.mdht.cda</groupId>
+			<artifactId>org.openhealthtools.mdht.uml.cda.consol2</artifactId>
+			<version>2.6.3.20170323</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openhealthtools.mdht.cda</groupId>
+			<artifactId>org.openhealthtools.mdht.uml.cda.mu2consol</artifactId>
+			<version>2.6.3.20170323</version>
+		</dependency>
+		<!-- 1st party MDHT - PLUGINS from http://git.eclipse.org/c/mdht/org.eclipse.mdht.git -->
+		<dependency>
+			<groupId>org.eclipse.mdht</groupId>
+			<artifactId>org.eclipse.mdht.emf.runtime</artifactId>
+			<version>3.0.0.201703230502</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mdht</groupId>
+			<artifactId>org.eclipse.mdht.uml.cda</artifactId>
+			<version>3.0.0.201703230502</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mdht</groupId>
+			<artifactId>org.eclipse.mdht.uml.hl7.datatypes</artifactId>
+			<version>3.0.0.201703230502</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mdht</groupId>
+			<artifactId>org.eclipse.mdht.uml.hl7.rim</artifactId>
+			<version>3.0.0.201703230502</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mdht</groupId>
+			<artifactId>org.eclipse.mdht.uml.hl7.vocab</artifactId>
+			<version>3.0.0.201703230502</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.uml2.types</groupId>
+			<artifactId>org.eclipse.uml2.types</artifactId>
+			<version>2.0.0.v20160201-0816</version>
 		</dependency>
 
 	</dependencies>
@@ -553,6 +609,24 @@
 			<url>http://oss.jfrog.org/artifactory/oss-release-local/</url>
 		</repository>
 
+		<!-- cda validation -->
+		<repository>
+
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>mdht-libs</id>
+			<name>libs-release</name>
+			<url>http://devsoap.sitenv.org:8081/artifactory/libs-release</url>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>mdht-plugins</id>
+			<name>plugins-release</name>
+			<url>http://devsoap.sitenv.org:8081/artifactory/plugins-release-local</url>
+		</repository>
 
 	</repositories>
 </project>
