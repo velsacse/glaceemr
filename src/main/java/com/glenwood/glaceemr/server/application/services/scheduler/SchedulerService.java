@@ -11,7 +11,7 @@ public interface SchedulerService {
 
 	List<SchedulerResource> getResources();
 
-	List<SchedulerAppointmentBean> getAppointments(Date date, String resourceId);
+	List<SchedulerAppointmentBean> getAppointments(Date apptDate, Integer[] resourceId);
 
 	List<SchedulerResourceCategory> getResourceCategories();
 

@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.services.scheduler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -67,145 +68,147 @@ public class SchedulerServiceImpl implements SchedulerService{
 
 	@Autowired
 	SchedulerAppointmentRepository schedulerAppointmentRepository;
-	
+
 	@Autowired
 	SchedulerResourcesRepository schedulerResourcesRepository;
-	
+
 	@Autowired
 	SchedulerResourceCategoryRepository schedulerResourceCategoryRepository;
-	
+
 	@Autowired
 	SchedulerUserDefaultRepository schedulerUserDefaultRepository;
-	
+
 	@Autowired
 	SchedulerTemplateRepository schedulerTemplateRepository;
 
 	@PersistenceContext
 	EntityManager em;
-	
+
 	@Override
 	public List<SchedulerResource> getResources() {
 		List<Integer> resourceList = new ArrayList<Integer>();
 		List<SchedulerResourceCategory> resources = schedulerResourceCategoryRepository.findAll(SchedulerSpecification.getResourcesByCategory());
-		
+
 		for (SchedulerResourceCategory schedulerResourceCategory : resources) {
 			resourceList.add(schedulerResourceCategory.getSchResourceCategoryResourceId());
 		}
-		
+
 		List<SchedulerResource> schedulerResources=schedulerResourcesRepository.findAll(SchedulerSpecification.getResources(resourceList));
 		return schedulerResources;
 	}
 
 	@Override
 	public List<SchedulerResourceCategory> getResourceCategories() {
-			List<SchedulerResourceCategory> schedulerResourceCategories=schedulerResourceCategoryRepository.findAll();
+		List<SchedulerResourceCategory> schedulerResourceCategories=schedulerResourceCategoryRepository.findAll();
 		return schedulerResourceCategories;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<SchedulerAppointmentBean> getAppointments(Date apptDate, String resourceId) {
-		
-		    List<Long> list = new ArrayList<Long>();
-		    list.add((long)6);
-		    list.add((long)12);
-		    list.add((long)45);
-		    list.add((long)33);
-			CriteriaBuilder builder = em.getCriteriaBuilder();
-			CriteriaQuery<Object> cq = builder.createQuery();
-			Root<SchedulerAppointment> root = cq.from(SchedulerAppointment.class);
-			Join<SchedulerAppointment, PatientRegistration> joinPatientRegistration=root.join("patRegPatientId",JoinType.LEFT);
-			Join<SchedulerAppointment, H113> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
-			Join<SchedulerAppointment, H113> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
-			Join<SchedulerAppointment, SchedulerAppointmentParameter> joinSchApptParam=root.join("schApptParam",JoinType.LEFT);
-			//Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, H113> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
-			Join<SchedulerAppointment, SchedulerResource> joinSchResLoc=root.join("schResLoc",JoinType.LEFT);
-			Join<SchedulerAppointment, H076> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);
-			Join<SchedulerAppointment, Workflow> joinWorkflow=root.join("workflowPatientId",JoinType.LEFT);
-			Join<Join<SchedulerAppointment, Workflow>, AlertCategory> joinWorkflowStatusName=joinWorkflow.join("alertCategoryName",JoinType.LEFT);
-			
-			Predicate[] predicateStatus = new Predicate[] {
-					builder.equal(joinH113Status.get(H113_.h113002), new Integer(1)),
-					builder.equal(joinH113Status.get(H113_.h113010), new Boolean(true)),
-			};
-			joinH113Status.on(predicateStatus);
-			Predicate[] predicateType = new Predicate[] {
-					builder.equal(joinH113Type.get(H113_.h113002), new Integer(2)),
-					builder.equal(joinH113Type.get(H113_.h113010), new Boolean(true)),
-			};
-			joinH113Type.on(predicateType);
-			Predicate[] predicateParam = new Predicate[] {
-					builder.equal(joinSchApptParam.get(SchedulerAppointmentParameter_.schApptParameterIsactive), new Boolean(true)),
-			};
-			joinSchApptParam.on(predicateParam);/*
+	public List<SchedulerAppointmentBean> getAppointments(Date apptDate, Integer[] resourceId) {
+
+		List<Integer> resourceList = Arrays.asList(resourceId);
+
+		List<Long> list = new ArrayList<Long>();
+		list.add((long)6);
+		list.add((long)12);
+		list.add((long)45);
+		list.add((long)33);
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<SchedulerAppointment> root = cq.from(SchedulerAppointment.class);
+		Join<SchedulerAppointment, PatientRegistration> joinPatientRegistration=root.join("patRegPatientId",JoinType.LEFT);
+		Join<SchedulerAppointment, H113> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
+		Join<SchedulerAppointment, H113> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
+		Join<SchedulerAppointment, SchedulerAppointmentParameter> joinSchApptParam=root.join("schApptParam",JoinType.LEFT);
+		//Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, H113> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
+		Join<SchedulerAppointment, SchedulerResource> joinSchResLoc=root.join("schResLoc",JoinType.LEFT);
+		Join<SchedulerAppointment, H076> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);
+		Join<SchedulerAppointment, Workflow> joinWorkflow=root.join("workflowPatientId",JoinType.LEFT);
+		Join<Join<SchedulerAppointment, Workflow>, AlertCategory> joinWorkflowStatusName=joinWorkflow.join("alertCategoryName",JoinType.LEFT);
+
+		Predicate[] predicateStatus = new Predicate[] {
+				builder.equal(joinH113Status.get(H113_.h113002), new Integer(1)),
+				builder.equal(joinH113Status.get(H113_.h113010), new Boolean(true)),
+		};
+		joinH113Status.on(predicateStatus);
+		Predicate[] predicateType = new Predicate[] {
+				builder.equal(joinH113Type.get(H113_.h113002), new Integer(2)),
+				builder.equal(joinH113Type.get(H113_.h113010), new Boolean(true)),
+		};
+		joinH113Type.on(predicateType);
+		Predicate[] predicateParam = new Predicate[] {
+				builder.equal(joinSchApptParam.get(SchedulerAppointmentParameter_.schApptParameterIsactive), new Boolean(true)),
+		};
+		joinSchApptParam.on(predicateParam);/*
 			Predicate[] predicateReason = new Predicate[] {
 					builder.equal(joinH113Reason.get(H113_.h113002), new Integer(402)),
 					builder.equal(joinH113Reason.get(H113_.h113008), new Integer(1)),
 					builder.equal(joinH113Reason.get(H113_.h113010), new Boolean(true)),
 			};
 			joinH113Reason.on(predicateReason);*/
-			Predicate[] predicateLocation = new Predicate[] {
-					builder.equal(joinSchResLoc.get(SchedulerResource_.schResourceIsdoctor), new Integer(0)),
-					builder.equal(joinSchResLoc.get(SchedulerResource_.schResourceLocalserver), new Boolean(true)),
-			};
-			joinSchResLoc.on(predicateLocation);
-			Predicate[] predicateWorkflow = new Predicate[] {
-					builder.equal(joinWorkflow.get(Workflow_.workflowIsactive), new Boolean(true)),
-			};
-			joinWorkflow.on(predicateWorkflow);
-			
-			//cq.distinct(true);
-			cq.select(builder.construct(SchedulerAppointmentBean.class,
-					root.get(SchedulerAppointment_.schApptId),
-					builder.function("to_char", String.class, root.get(SchedulerAppointment_.schApptStarttime),builder.literal("HH12:MI:SS AM")),
-					builder.function("to_char", String.class, root.get(SchedulerAppointment_.schApptEndtime),builder.literal("HH12:MI:SS AM")),
-					root.get(SchedulerAppointment_.schApptDate),
-					root.get(SchedulerAppointment_.schApptPatientId),
-					joinPatientRegistration.get(PatientRegistration_.patientRegistrationAccountno),
-					root.get(SchedulerAppointment_.schApptPatientname),
-					root.get(SchedulerAppointment_.schApptHomephone),
-					builder.coalesce(root.get(SchedulerAppointment_.schApptHomeextn),builder.literal("-")),
-					root.get(SchedulerAppointment_.schApptWorkphone),
-					builder.coalesce(root.get(SchedulerAppointment_.schApptWorkextn),builder.literal("-")),
-					root.get(SchedulerAppointment_.schApptResource),
-					joinH113Status.get(H113_.h113004),
-					root.get(SchedulerAppointment_.schApptStatus),
-					joinH113Status.get(H113_.h113005),
-					joinH113Type.get(H113_.h113004),
-					root.get(SchedulerAppointment_.schApptType),
-					joinSchResLoc.get(SchedulerResource_.schResourceName),
-					root.get(SchedulerAppointment_.schApptLocation),
-					builder.function("getapptpara", String.class,builder.literal(1),root.get(SchedulerAppointment_.schApptId)),
-					root.get(SchedulerAppointment_.schApptReason),
-					joinSchRefDrId.get(H076_.h076020),
-					root.get(SchedulerAppointment_.schApptReferringdoctorId),
-					joinSchRefDrId.get(H076_.h076010),
-					joinSchRefDrId.get(H076_.h076011),
-					joinWorkflow.get(Workflow_.workflowStatus),
-					joinWorkflowStatusName.get(AlertCategory_.alertCategoryDisplayName),
-//					builder.function("date", Date.class, joinWorkflow.get(Workflow_.workflowStarttime))
-					joinWorkflow.get(Workflow_.workflowStarttime)
-					)).where(builder.and(builder.equal(root.get(SchedulerAppointment_.schApptDate),apptDate),
-							builder.equal(root.get(SchedulerAppointment_.schApptResource), Integer.parseInt(resourceId)),
-							builder.not(root.get(SchedulerAppointment_.h113ApptStatus).in(list))
-							)).orderBy(builder.asc(root.get(SchedulerAppointment_.schApptStarttime)));
-			Query query=em.createQuery(cq);
-			
-			List<SchedulerAppointmentBean> schedulerAppointments=query.getResultList();
-			
+		Predicate[] predicateLocation = new Predicate[] {
+				builder.equal(joinSchResLoc.get(SchedulerResource_.schResourceIsdoctor), new Integer(0)),
+				builder.equal(joinSchResLoc.get(SchedulerResource_.schResourceLocalserver), new Boolean(true)),
+		};
+		joinSchResLoc.on(predicateLocation);
+		Predicate[] predicateWorkflow = new Predicate[] {
+				builder.equal(joinWorkflow.get(Workflow_.workflowIsactive), new Boolean(true)),
+		};
+		joinWorkflow.on(predicateWorkflow);
+
+		//cq.distinct(true);
+		cq.select(builder.construct(SchedulerAppointmentBean.class,
+				root.get(SchedulerAppointment_.schApptId),
+				builder.function("to_char", String.class, root.get(SchedulerAppointment_.schApptStarttime),builder.literal("HH12:MI:SS AM")),
+				builder.function("to_char", String.class, root.get(SchedulerAppointment_.schApptEndtime),builder.literal("HH12:MI:SS AM")),
+				root.get(SchedulerAppointment_.schApptDate),
+				root.get(SchedulerAppointment_.schApptPatientId),
+				joinPatientRegistration.get(PatientRegistration_.patientRegistrationAccountno),
+				root.get(SchedulerAppointment_.schApptPatientname),
+				root.get(SchedulerAppointment_.schApptHomephone),
+				builder.coalesce(root.get(SchedulerAppointment_.schApptHomeextn),builder.literal("-")),
+				root.get(SchedulerAppointment_.schApptWorkphone),
+				builder.coalesce(root.get(SchedulerAppointment_.schApptWorkextn),builder.literal("-")),
+				root.get(SchedulerAppointment_.schApptResource),
+				joinH113Status.get(H113_.h113004),
+				root.get(SchedulerAppointment_.schApptStatus),
+				joinH113Status.get(H113_.h113005),
+				joinH113Type.get(H113_.h113004),
+				root.get(SchedulerAppointment_.schApptType),
+				joinSchResLoc.get(SchedulerResource_.schResourceName),
+				root.get(SchedulerAppointment_.schApptLocation),
+				builder.function("getapptpara", String.class,builder.literal(1),root.get(SchedulerAppointment_.schApptId)),
+				root.get(SchedulerAppointment_.schApptReason),
+				joinSchRefDrId.get(H076_.h076020),
+				root.get(SchedulerAppointment_.schApptReferringdoctorId),
+				joinSchRefDrId.get(H076_.h076010),
+				joinSchRefDrId.get(H076_.h076011),
+				joinWorkflow.get(Workflow_.workflowStatus),
+				joinWorkflowStatusName.get(AlertCategory_.alertCategoryDisplayName),
+				//					builder.function("date", Date.class, joinWorkflow.get(Workflow_.workflowStarttime))
+				joinWorkflow.get(Workflow_.workflowStarttime)
+				)).where(builder.and(builder.equal(root.get(SchedulerAppointment_.schApptDate),apptDate),
+						root.get(SchedulerAppointment_.schApptResource).in(resourceList),
+						builder.not(root.get(SchedulerAppointment_.h113ApptStatus).in(list))
+						)).orderBy(builder.asc(root.get(SchedulerAppointment_.schApptStarttime)));
+		Query query=em.createQuery(cq);
+
+		List<SchedulerAppointmentBean> schedulerAppointments=query.getResultList();
+
 		return schedulerAppointments;
 	}
 
 	@Override
 	public String getDefaultResource(String userId) {
-		
+
 		List<SchedulerUserDefault> userList =schedulerUserDefaultRepository.findAll(SchedulerSpecification.getDefaultUserList(userId)); 
 		String defaultResource="";
-		
+
 		for (SchedulerUserDefault schedulerUserDefault : userList) {
 			defaultResource+=schedulerUserDefault.getSchUserDefaultResourceId()+",";
 		}
-		
+
 		return defaultResource;
 	}
 
@@ -218,13 +221,13 @@ public class SchedulerServiceImpl implements SchedulerService{
 		 * To get template details
 		 */
 		List<Object> templateList= getTemplateData(userId, date);
-		
+
 		/**
 		 * To get lock data
 		 * it will fetch latest lock id for the particular time slot
 		 */
 		List<Object> lockResultList=getLockData(userId, date);
-		
+
 		/**
 		 * Extracting ids alone to get sch_lock details
 		 */
@@ -237,15 +240,15 @@ public class SchedulerServiceImpl implements SchedulerService{
 				e.printStackTrace();
 			}
 		}
-		
+
 		Map<String, List<Object>> tlMap=new HashMap<String, List<Object>>();	// Template and lock objects
 		List<Object> locksList=getLocksById(maxLockIds);
 		tlMap.put("lockdetails", locksList==null?new ArrayList<Object>():locksList);
 		tlMap.put("templatedetails", templateList);
-		
+
 		return	tlMap;
 	}
-	
+
 	/**
 	 * Get template details
 	 * @param userId
@@ -254,7 +257,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 	 */
 	public List<Object> getTemplateData(int userId, Date date) {
 		SchedulerTemplate schedulerTemplate=schedulerTemplateRepository.findOne(PortalAppointmentsSpecification.getSchTemplateId(userId, date));
-		
+
 		CriteriaBuilder cb=em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq=cb.createQuery();
 		Root<SchedulerTemplateTimeMapping> root=cq.from(SchedulerTemplateTimeMapping.class);
@@ -271,7 +274,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailNotes),
 				joinSttmStd.get(SchedulerTemplateDetail_.schTemplateDetailSameDaySlot)));
 		cq.where(predicateStdSttm);
-		
+
 		return em.createQuery(cq).getResultList();
 	}
 
@@ -282,7 +285,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 	 * @return
 	 */
 	public List<Object> getLockData(int userId, Date date) {
-		
+
 		CriteriaBuilder cb=em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq=cb.createQuery();
 		Root<SchedulerLock> root=cq.from(SchedulerLock.class);
@@ -291,7 +294,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 		Predicate predicateLockedDate=cb.equal(exprLockedDate, date);
 		cq.select(cb.tuple(cb.max(root.get(SchedulerLock_.schLockId)),root.get(SchedulerLock_.schLockStarttime),root.get(SchedulerLock_.schLockEndtime)));
 		cq.where(predicateResource,predicateLockedDate).groupBy(root.get(SchedulerLock_.schLockStarttime),root.get(SchedulerLock_.schLockEndtime));
-		
+
 		return em.createQuery(cq).getResultList();
 	}
 
@@ -301,16 +304,16 @@ public class SchedulerServiceImpl implements SchedulerService{
 	 * @return
 	 */
 	public List<Object> getLocksById(List<Integer> lockIdList) {
-		
+
 		if(lockIdList.size()<1)	
 			return null;
-		
+
 		CriteriaBuilder cb=em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq=cb.createQuery();
 		Root<SchedulerLock> root=cq.from(SchedulerLock.class);
 		cq.where(root.get(SchedulerLock_.schLockId).in(lockIdList));
 		cq.select(root);
-		
+
 		List<Object> locksList=em.createQuery(cq).getResultList();
 		return (locksList.size()>0) ? locksList:null;
 	}
