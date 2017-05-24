@@ -64,7 +64,7 @@ public class LoginController {
 	@RequestMapping(value = "loginFailed",method = RequestMethod.GET)
 	public EMRResponseBean loginFailed(HttpServletRequest request,HttpServletResponse response) 
 	{
-		System.out.println("authentication failed");
+		System.out.println("Authentication failed.");
 		emrResponseBean.setLogin(false);
 		emrResponseBean.setSuccess(false);
 		emrResponseBean.setData(null);

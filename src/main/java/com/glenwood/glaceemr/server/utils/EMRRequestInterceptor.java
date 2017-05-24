@@ -40,7 +40,8 @@ public class EMRRequestInterceptor implements HandlerInterceptor{
 //		String tennantId = sessionMap.getDbName();
 //		System.out.println("dbname -->"+tennantId);
 	
-		System.out.println(">>>>In EMR Requestor>>>>>"+request.getRequestURI());
+		System.out.println("EMR Requestor URL :: "+request.getRequestURI());
+
 		if(request.getHeader("STARTSAT") != null)
 		{
 			emrResponseBean.setStartTime(request.getHeader("STARTSAT"));

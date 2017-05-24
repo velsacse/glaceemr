@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.services.scheduler;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,10 +27,12 @@ import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertCategory_;
+import com.glenwood.glaceemr.server.application.models.Appointment;
 import com.glenwood.glaceemr.server.application.models.H076;
 import com.glenwood.glaceemr.server.application.models.H076_;
 import com.glenwood.glaceemr.server.application.models.H113;
 import com.glenwood.glaceemr.server.application.models.H113_;
+import com.glenwood.glaceemr.server.application.models.H213;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointment;
@@ -50,6 +53,7 @@ import com.glenwood.glaceemr.server.application.models.SchedulerTemplateTimeMapp
 import com.glenwood.glaceemr.server.application.models.SchedulerUserDefault;
 import com.glenwood.glaceemr.server.application.models.Workflow;
 import com.glenwood.glaceemr.server.application.models.Workflow_;
+import com.glenwood.glaceemr.server.application.repositories.SchedulerAppointmentParameterRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerAppointmentRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerResourceCategoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchedulerResourcesRepository;
@@ -80,6 +84,9 @@ public class SchedulerServiceImpl implements SchedulerService{
 
 	@Autowired
 	SchedulerTemplateRepository schedulerTemplateRepository;
+
+	@Autowired
+	SchedulerAppointmentParameterRepository schedulerAppointmentParameterRepository;
 
 	@PersistenceContext
 	EntityManager em;
@@ -290,10 +297,11 @@ public class SchedulerServiceImpl implements SchedulerService{
 		CriteriaQuery<Object> cq=cb.createQuery();
 		Root<SchedulerLock> root=cq.from(SchedulerLock.class);
 		Predicate predicateResource=cb.equal(root.get(SchedulerLock_.schLockResourceId), cb.literal(userId));
+		Predicate predicateLockStatus=cb.equal(root.get(SchedulerLock_.schLockStatusId), cb.literal("4"));		//Status 4=Lock, 0=Free
 		Expression<Date> exprLockedDate=cb.function("date", Date.class, root.get(SchedulerLock_.schLockDate));
 		Predicate predicateLockedDate=cb.equal(exprLockedDate, date);
 		cq.select(cb.tuple(cb.max(root.get(SchedulerLock_.schLockId)),root.get(SchedulerLock_.schLockStarttime),root.get(SchedulerLock_.schLockEndtime)));
-		cq.where(predicateResource,predicateLockedDate).groupBy(root.get(SchedulerLock_.schLockStarttime),root.get(SchedulerLock_.schLockEndtime));
+		cq.where(predicateLockedDate,predicateResource,predicateLockStatus).groupBy(root.get(SchedulerLock_.schLockStarttime),root.get(SchedulerLock_.schLockEndtime));
 
 		return em.createQuery(cq).getResultList();
 	}
@@ -317,4 +325,85 @@ public class SchedulerServiceImpl implements SchedulerService{
 		List<Object> locksList=em.createQuery(cq).getResultList();
 		return (locksList.size()>0) ? locksList:null;
 	}
+
+	@Override
+	public Appointment createAppointment(Appointment appointment) {
+
+		int schApptId=getNewSchApptId();
+
+		SchedulerAppointment schApptBean=new SchedulerAppointment();
+		schApptBean.setSchApptId(schApptId);
+		schApptBean.setSchApptDate(java.sql.Date.valueOf(appointment.getSchApptDate()));
+		schApptBean.setSchApptStarttime(Timestamp.valueOf(appointment.getSchApptStarttime()));
+		schApptBean.setSchApptEndtime(Timestamp.valueOf(appointment.getSchApptEndtime()));
+		schApptBean.setSchApptInterval(appointment.getSchApptInterval());
+		schApptBean.setSchApptPatientId(appointment.getSchApptPatientId());
+		schApptBean.setSchApptPatientname(appointment.getSchApptPatientname());
+		schApptBean.setSchApptLocation(appointment.getSchApptLocation());
+		schApptBean.setSchApptResource(appointment.getSchApptResource());
+		schApptBean.setSchApptStatus(appointment.getSchApptStatus());
+		schApptBean.setSchApptReason(-2);
+		schApptBean.setSchApptType(appointment.getSchApptType());
+		schApptBean.setSchApptNextconsId(appointment.getSchApptNextconsId());
+		schApptBean.setSchApptComments(appointment.getSchApptComments());
+		schApptBean.setSchApptLastmodifiedTime(Timestamp.valueOf(appointment.getSchApptLastmodifiedTime()));
+		schApptBean.setSchApptLastmodifiedUserId(appointment.getSchApptLastmodifiedUserId());
+		schApptBean.setSchApptLastmodifiedUsername(appointment.getSchApptLastmodifiedUsername());
+		schApptBean.setSchApptRoomId(appointment.getSchApptRoomId());
+		schApptBean.setH555555(appointment.getH555555());
+		schApptBean.setSchApptStatusgrpId(appointment.getSchApptStatusgrpId());
+
+		SchedulerAppointment schAppt=schedulerAppointmentRepository.saveAndFlush(schApptBean);
+
+		SchedulerAppointmentParameter schApptParam=new SchedulerAppointmentParameter();
+		schApptParam.setSchApptParameterApptId(schAppt.getSchApptId());
+		schApptParam.setSchApptParameterIsactive(true);
+		schApptParam.setSchApptParameterOn(new Timestamp(schAppt.getSchApptDate().getTime()));
+		schApptParam.setSchApptParameterType(1);
+		schApptParam.setSchApptParameterValueId(appointment.getSchApptReason());
+		schApptParam.setSchApptParameterId(getNewSchApptParameterId());
+		schedulerAppointmentParameterRepository.saveAndFlush(schApptParam);
+
+		executeTesttableh213();
+
+		return appointment;
+	}
+
+	public void executeTesttableh213(){
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<H213> root = cq.from(H213.class);
+		cq.select(builder.function("testtableh213", String.class));
+		em.createQuery(cq).getResultList();
+	}
+
+	public Integer getNewSchApptParameterId() {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<SchedulerAppointmentParameter> root = cq.from(SchedulerAppointmentParameter.class);
+		cq.select(builder.max(root.get(SchedulerAppointmentParameter_.schApptParameterId)));
+		Integer apptParamID=(Integer) em.createQuery(cq).getSingleResult();
+		return apptParamID+1;
+	}
+
+	public Integer getNewSchApptId() {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<SchedulerAppointment> root = cq.from(SchedulerAppointment.class);
+		cq.select(builder.max(root.get(SchedulerAppointment_.schApptId)));
+		Integer apptID=(Integer) em.createQuery(cq).getSingleResult();
+		return apptID+1;
+	}
+	
+	@Override
+    public List<Object> getApptBookLocationList() {
+        CriteriaBuilder cb=em.getCriteriaBuilder();
+        CriteriaQuery<Object> cq=cb.createQuery();
+        Root<SchedulerResource> root=cq.from(SchedulerResource.class);
+        cq.select(root);
+        Predicate locationList=cb.equal(root.get(SchedulerResource_.schResourceIsdoctor), 0);
+        cq.where(locationList);
+        List<Object> schResource = em.createQuery(cq).getResultList();
+        return schResource;
+    }
 }

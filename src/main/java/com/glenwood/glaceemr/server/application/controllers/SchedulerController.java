@@ -10,12 +10,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.glenwood.glaceemr.server.application.models.Appointment;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointmentBean;
 import com.glenwood.glaceemr.server.application.models.SchedulerResource;
 import com.glenwood.glaceemr.server.application.models.SchedulerResourceCategory;
@@ -150,14 +152,13 @@ public class SchedulerController {
         EMRResponseBean emrResponseBean=new EMRResponseBean();
         Map<Integer,Object> resultObject = new HashMap<Integer,Object>();
         try{
+            SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy");
             if(!dateString.equals("-1")){
                 date=new Date(dateString);
-                SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy");
                 sdf.format(date);
             }
             else{    // If dateString=-1 ===> Current date
                 date=new Date();
-                SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy");
                 sdf.format(date);
             }
         }
@@ -174,5 +175,36 @@ public class SchedulerController {
         auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting templates", sessionMap.getUserID(), request.getRemoteAddr(), -1, "resourceId="+userIds, LogUserType.USER_LOGIN, "", "");
 
         return emrResponseBean;
-    } 		
+    } 	
+    
+    /**
+     * To create appointment
+     * Sample body content {"schApptDate":"2015-07-22","schApptStarttime":"2015-07-22 14:00:00","schApptEndtime":"2015-07-22 14:20:00","schApptInterval":10,"schApptPatientId":2272,"schApptPatientname":"Tests","schApptLocation":1,"schApptResource":3,"schApptStatus":6,"schApptType":56,"schApptLastmodifiedTime":"2015-07-22 14:00:00","schApptLastmodifiedUserId":"14","schApptRoomId":"2","schApptStatusgrpId":2}
+     * @param appointment
+     * @return
+     */
+    @RequestMapping(value="/createappointment", method=RequestMethod.POST)
+    @ResponseBody
+    public EMRResponseBean createAppointment(@RequestBody(required=true) Appointment appointment){    
+
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        Appointment createdAppointment=schedulerService.createAppointment(appointment);
+        emrResponseBean.setData(createdAppointment);
+    	return emrResponseBean;
+    } 	
+    
+    /**
+     * To get locations
+     * @return
+     */
+    @RequestMapping(value="/getlocations",method=RequestMethod.GET)
+    @ResponseBody
+    public EMRResponseBean getLocation(){
+    	
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        List<Object> schResource = schedulerService.getApptBookLocationList();
+        emrResponseBean.setData(schResource);
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting location list", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+        return emrResponseBean;
+    }
 }
