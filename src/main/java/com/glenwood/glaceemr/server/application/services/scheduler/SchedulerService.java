@@ -24,4 +24,6 @@ public interface SchedulerService {
 
 	List<Object> getApptBookLocationList();
 
+	List<Object> getApptTypes();
+
 }

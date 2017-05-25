@@ -207,4 +207,19 @@ public class SchedulerController {
         auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting location list", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
         return emrResponseBean;
     }
+    
+    /**
+     * To get appointment types
+     * @return
+     */
+    @RequestMapping(value="/getappttypes",method=RequestMethod.GET)
+    @ResponseBody
+    public EMRResponseBean getApptTypes(){
+    	
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        List<Object> apptTypes = schedulerService.getApptTypes();
+        emrResponseBean.setData(apptTypes);
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting location list", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+        return emrResponseBean;
+    }
 }

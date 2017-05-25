@@ -1,6 +1,8 @@
 package com.glenwood.glaceemr.server.application.services.scheduler;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -297,7 +299,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 		CriteriaQuery<Object> cq=cb.createQuery();
 		Root<SchedulerLock> root=cq.from(SchedulerLock.class);
 		Predicate predicateResource=cb.equal(root.get(SchedulerLock_.schLockResourceId), cb.literal(userId));
-		Predicate predicateLockStatus=cb.equal(root.get(SchedulerLock_.schLockStatusId), cb.literal("4"));		//Status 4=Lock, 0=Free
+		Predicate predicateLockStatus=cb.equal(root.get(SchedulerLock_.schLockStatusId), cb.literal(4));		//Status 4=Lock, 0=Free
 		Expression<Date> exprLockedDate=cb.function("date", Date.class, root.get(SchedulerLock_.schLockDate));
 		Predicate predicateLockedDate=cb.equal(exprLockedDate, date);
 		cq.select(cb.tuple(cb.max(root.get(SchedulerLock_.schLockId)),root.get(SchedulerLock_.schLockStarttime),root.get(SchedulerLock_.schLockEndtime)));
@@ -328,12 +330,21 @@ public class SchedulerServiceImpl implements SchedulerService{
 
 	@Override
 	public Appointment createAppointment(Appointment appointment) {
-
 		int schApptId=getNewSchApptId();
+		int schApptStatusGrpId = getApptStatusGrpId(appointment.getSchApptStatus());
 
-		SchedulerAppointment schApptBean=new SchedulerAppointment();
+		SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+        Date parsed = null;
+		try {
+			parsed = format.parse(appointment.getSchApptDate());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+        java.sql.Date sql = new java.sql.Date(parsed.getTime());
+        
+        SchedulerAppointment schApptBean=new SchedulerAppointment();
 		schApptBean.setSchApptId(schApptId);
-		schApptBean.setSchApptDate(java.sql.Date.valueOf(appointment.getSchApptDate()));
+		schApptBean.setSchApptDate(sql);
 		schApptBean.setSchApptStarttime(Timestamp.valueOf(appointment.getSchApptStarttime()));
 		schApptBean.setSchApptEndtime(Timestamp.valueOf(appointment.getSchApptEndtime()));
 		schApptBean.setSchApptInterval(appointment.getSchApptInterval());
@@ -344,14 +355,16 @@ public class SchedulerServiceImpl implements SchedulerService{
 		schApptBean.setSchApptStatus(appointment.getSchApptStatus());
 		schApptBean.setSchApptReason(-2);
 		schApptBean.setSchApptType(appointment.getSchApptType());
-		schApptBean.setSchApptNextconsId(appointment.getSchApptNextconsId());
+		schApptBean.setSchApptNextconsId(-1);	//for new appointment always -1.
 		schApptBean.setSchApptComments(appointment.getSchApptComments());
 		schApptBean.setSchApptLastmodifiedTime(Timestamp.valueOf(appointment.getSchApptLastmodifiedTime()));
 		schApptBean.setSchApptLastmodifiedUserId(appointment.getSchApptLastmodifiedUserId());
 		schApptBean.setSchApptLastmodifiedUsername(appointment.getSchApptLastmodifiedUsername());
 		schApptBean.setSchApptRoomId(appointment.getSchApptRoomId());
 		schApptBean.setH555555(appointment.getH555555());
-		schApptBean.setSchApptStatusgrpId(appointment.getSchApptStatusgrpId());
+		schApptBean.setSchApptRescheduledfromDate(Timestamp.valueOf("1900-01-01 00:00:00"));
+		schApptBean.setSchApptRescheduledfromTime(Timestamp.valueOf("1900-01-01 00:00:00"));
+		schApptBean.setSchApptStatusgrpId(schApptStatusGrpId);
 
 		SchedulerAppointment schAppt=schedulerAppointmentRepository.saveAndFlush(schApptBean);
 
@@ -367,6 +380,16 @@ public class SchedulerServiceImpl implements SchedulerService{
 		executeTesttableh213();
 
 		return appointment;
+	}
+
+	private int getApptStatusGrpId(Integer schApptStatus) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<H113> root = cq.from(H113.class);
+		cq.select(root.get(H113_.h113008)).where(builder.equal(root.get(H113_.h113002), builder.literal(1)),
+				builder.equal(root.get(H113_.h113003), builder.literal(schApptStatus)));
+		List<Object> obj = em.createQuery(cq).getResultList();
+		return Integer.parseInt(obj.get(0).toString());
 	}
 
 	public void executeTesttableh213(){
@@ -406,4 +429,16 @@ public class SchedulerServiceImpl implements SchedulerService{
         List<Object> schResource = em.createQuery(cq).getResultList();
         return schResource;
     }
+
+	@Override
+	public List<Object> getApptTypes() {
+		CriteriaBuilder cb=em.getCriteriaBuilder();
+        CriteriaQuery<Object> cq=cb.createQuery();
+        Root<H113> root=cq.from(H113.class);
+        cq.select(root);
+        Predicate typePred=cb.equal(root.get(H113_.h113002), 2);
+        cq.where(typePred);
+        List<Object> apptTypes = em.createQuery(cq).getResultList();
+        return apptTypes;
+	}
 }

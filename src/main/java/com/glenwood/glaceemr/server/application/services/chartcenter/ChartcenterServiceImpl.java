@@ -87,7 +87,8 @@ public class ChartcenterServiceImpl implements ChartcenterService {
 		cq.multiselect(builder.construct(PatientRegistrationSearchBean.class, root.get(PatientRegistration_.patientRegistrationId),
 				root.get(PatientRegistration_.patientRegistrationLastName),
 				root.get(PatientRegistration_.patientRegistrationFirstName),
-				root.get(PatientRegistration_.patientRegistrationAccountno)));
+				root.get(PatientRegistration_.patientRegistrationAccountno),
+				root.get(PatientRegistration_.patientRegistrationPreferredcontact)));
 		List<Predicate> predicateList = new ArrayList<Predicate>();
 		if (searchMode == 0) {
 			if (lastName.length() > 0) {

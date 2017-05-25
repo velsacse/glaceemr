@@ -6,14 +6,19 @@ public class PatientRegistrationSearchBean {
 	 String patientRegistrationLastName;
 	 String patientRegistrationFirstName;
 	 String patientRegistrationAccountno;
+	 Integer patientRegistrationPreferredContact;
 	 
 	 public PatientRegistrationSearchBean(Integer patientRegistrationId,String patientRegistrationLastName,
-				String patientRegistrationFirstName,String patientRegistrationAccountno){
+				String patientRegistrationFirstName,String patientRegistrationAccountno,
+				Integer patientRegistrationPreferredContact){
 		super();
 		this.patientRegistrationId = patientRegistrationId;
 		this.patientRegistrationLastName = patientRegistrationLastName;
 		this.patientRegistrationFirstName = patientRegistrationFirstName;
 		this.patientRegistrationAccountno = patientRegistrationAccountno;
+		
+		if(patientRegistrationPreferredContact != null)
+			this.patientRegistrationPreferredContact = patientRegistrationPreferredContact;
 	 }
 	 
 	public long getTotalcount() {
@@ -46,5 +51,10 @@ public class PatientRegistrationSearchBean {
 	public void setPatientRegistrationAccountno(String patientRegistrationAccountno) {
 		this.patientRegistrationAccountno = patientRegistrationAccountno;
 	}
-
+	public Integer getPatientRegistrationPreferredContact() {
+		return patientRegistrationPreferredContact;
+	}
+	public void setPatientRegistrationPreferredContact(Integer patientRegistrationPreferredContact) {
+		this.patientRegistrationPreferredContact = patientRegistrationPreferredContact;
+	}
 }
