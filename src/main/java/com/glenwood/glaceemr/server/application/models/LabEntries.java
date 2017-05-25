@@ -359,6 +359,9 @@ public class LabEntries {
 
 	@Column(name="lab_entries_reminder_comments")
 	private String labEntriesReminderComments;
+	
+	@Column(name="lab_entries_snomed")
+	private String labEntriesSnomed;
 
 	@NotFound(action=NotFoundAction.IGNORE)
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -1369,6 +1372,14 @@ public class LabEntries {
 		this.fileDetails = fileDetails;
 	}
 	
+	public void setLabEntriesSnomed(String labEntriesSnomed)
+	{
+		this.labEntriesSnomed = labEntriesSnomed;
+	}
+	public String getLabEntriesSnomed()
+	{
+		return labEntriesSnomed;
+	}
 	
 	public LabEntries(){
 		super();

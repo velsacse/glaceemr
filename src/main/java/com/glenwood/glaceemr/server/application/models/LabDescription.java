@@ -244,6 +244,9 @@ public class LabDescription implements Serializable {
 	@Column(name="lab_description_def_dx8")
 	private String  labDescriptionDefDx8;
 	
+	@Column(name="lab_description_snomed")
+	private String  labDescriptionSnomed;
+	
 	
 	public LabDescription(){
 		super();
@@ -948,4 +951,12 @@ public class LabDescription implements Serializable {
 	public void setLabDescriptionDefDx8(String labDescriptionDefDx8) {
 		this.labDescriptionDefDx8 = labDescriptionDefDx8;
 	}	
+	
+	public String getLabDescriptionSnomed() {
+		return labDescriptionSnomed;
+	}
+	public void setLabDescriptionSnomed(String labDescriptionSnomed) {
+		this.labDescriptionSnomed = labDescriptionSnomed;
+	}
+
 }
