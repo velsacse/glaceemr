@@ -372,8 +372,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 				root.get(PatientRegistration_.patientRegistrationEthnicity),
 				root.get(PatientRegistration_.patientRegistrationRace),
 				root.get(PatientRegistration_.patientRegistrationPreferredLan)));
-				query.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId),
-				builder.equal(root.get(PatientRegistration_.patientRegistrationActive), true));
+				query.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId));
 		/*
 		try{
 			Object[] result= em.createQuery(query).getSingleResult();
