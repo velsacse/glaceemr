@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.Bean.ClinicalDataQDM;
 import com.glenwood.glaceemr.server.application.Bean.InvestigationQDM;
@@ -256,9 +257,25 @@ public class EMeasureUtils {
 			
 			if(jsonFile.exists() && jsonFile.isFile()){
 				
-				List<EMeasure> emeasureInfo = (List<EMeasure>) mapper.readValue(jsonFile, mapper.getTypeFactory().constructCollectionType(List.class, EMeasure.class));
+				long diff = new Date().getTime() - jsonFile.lastModified();
+
+				if (diff > (long) 7 * 24 * 60 * 60 * 1000) {
+					
+					jsonFile.delete();
+					
+					putMeasureInfoDetails(measureId, sharedPath);
+					
+					getMeasureInfo(measureId, sharedPath);
+					
+				}else{
 				
-				measureInfo = emeasureInfo.get(0);
+					mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+					
+					List<EMeasure> emeasureInfo = (List<EMeasure>) mapper.readValue(jsonFile, mapper.getTypeFactory().constructCollectionType(List.class, EMeasure.class));
+				
+					measureInfo = emeasureInfo.get(0);
+				
+				}
 				
 			}else{
 				
