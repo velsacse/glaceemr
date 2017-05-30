@@ -42,6 +42,7 @@ import com.glenwood.glaceemr.server.application.services.chart.MIPS.MUPerformanc
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.MeasureCalculationService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
 import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
+import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
 @RestController
 @Transactional
@@ -396,6 +397,57 @@ public class MUPerformanceRateController {
 	    calendar.set(Calendar.MINUTE, 59);
 	    calendar.set(Calendar.SECOND, 59);
 	    calendar.set(Calendar.MILLISECOND, 999);
+	}
+	
+	@RequestMapping(value = "/getMIPSPerformanceRate", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean macraPerformanceRate(@RequestParam(value="reportingYear", required=true) int reportingYear,
+			@RequestParam(value="accountID", required=true) String accountID){
+		
+		String configuredMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3,ACI_TRANS_EP_1,ACI_TRANS_SM_1,ACI_TRANS_PEA_1,ACI_TRANS_PEA_2,ACI_TRANS_HIE_1,ACI_TRANS_PSE_1,ACI_TRANS_MR_1";
+		
+		List<MacraProviderQDM> providers = new ArrayList<MacraProviderQDM>();
+		
+		int providerId = -1;
+		
+		HashMap<Integer, List<MIPSPerformanceBean>> providerPerformance = new HashMap<Integer, List<MIPSPerformanceBean>>();
+		
+		try{
+		
+			List<MacraProviderQDM> providerInfo = null;
+			
+			providers = providerConfService.getProviderReportingInfo(reportingYear);
+
+			for(int i=0;i<providers.size();i++){
+				
+				providerId = providers.get(i).getMacraProviderConfigurationProviderId();
+				
+				providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+				
+				String completeMeasures = "";
+				
+				if(providerInfo != null){
+					completeMeasures = configuredMeasures.concat(",".concat(providerInfo.get(0).getMeasures()));
+				}else{
+					completeMeasures = configuredMeasures;
+				}
+				
+				providerPerformance.put(providerId, measureService.getMeasureRateReport(providerId, accountID, completeMeasures, true));
+		
+			}
+			
+		}catch(Exception e){
+			
+			e.printStackTrace();
+			
+		}
+		
+		EMRResponseBean response = new EMRResponseBean();
+
+		response.setData(providerPerformance);
+		
+		return response;
+		
 	}
 	
 }

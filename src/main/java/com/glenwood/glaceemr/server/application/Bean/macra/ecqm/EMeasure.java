@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.Bean.macra.ecqm;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class EMeasure
@@ -29,6 +30,13 @@ public class EMeasure
 	private String denominator_exception = new String();
 	private String suplemental_data_elements = new String();
 	private CQMSpecification specification = new CQMSpecification();
+	private boolean isInverseMeasure;
+	private HashMap<String,List<Benchmark>> benchmark = new HashMap<String,List<Benchmark>>();
+	private int criteriaCount;
+	private List<String> criteriaDescription = new ArrayList<String>();
+	private int stratumCount;
+	private List<String> stratumDescription = new ArrayList<String>();
+
 	public int getId()
 	{
 		return id;
@@ -221,4 +229,42 @@ public class EMeasure
 	{
 		this.isHighPriority = isHighPriority;
 	}
+	public boolean isInverseMeasure() {
+		return isInverseMeasure;
+	}
+	public void setInverseMeasure(boolean isInverseMeasure) {
+		this.isInverseMeasure = isInverseMeasure;
+	}
+	public HashMap<String,List<Benchmark>> getBenchmark() {
+		return benchmark;
+	}
+	public void setBenchmark(HashMap<String,List<Benchmark>> benchmark) {
+		this.benchmark = benchmark;
+	}
+	public int getCriteriaCount() {
+		return criteriaCount;
+	}
+	public void setCriteriaCount(int criteriaCount) {
+		this.criteriaCount = criteriaCount;
+	}
+	public List<String> getCriteriaDescription() {
+		return criteriaDescription;
+	}
+	public void setCriteriaDescription(List<String> criteriaDescription) {
+		this.criteriaDescription = criteriaDescription;
+	}
+	public int getStratumCount() {
+		return stratumCount;
+	}
+	public void setStratumCount(int stratumCount) {
+		this.stratumCount = stratumCount;
+	}
+	public List<String> getStratumDescription() {
+		return stratumDescription;
+	}
+	public void setStratumDescription(List<String> stratumDescription) {
+		this.stratumDescription = stratumDescription;
+	}
+	
+	
 }
