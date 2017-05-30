@@ -469,6 +469,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				String paramValuetype = "";
 				String paramEncryptionType = "";
 				String encryptedFileContent = "";
+				String paramName="";
+				if(paramLen > paramValueMap("PARAM_NAME"))
+					paramName = HUtil.ValidateSingleQuote(Optional.fromNullable(param[paramValueMap("PARAM_NAME")]).or("")).trim();
 				if(paramLen > paramValueMap("PARAM_LABENTRYID"))
 					labEntryParamId = Integer.parseInt(HUtil.Nz(param[paramValueMap("PARAM_LABENTRYID")],"-1").trim());
 				if(paramLen > paramValueMap("PARAM_VALUE"))
@@ -513,7 +516,24 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 					labLocDetail = (Hashtable)labLocDetails.get(labLocCode);
 				}
 				labLocDetId = insertLabAddressDetails(labLocDetail);
-				int paramEntryId = insertParamValue(chartId, labEntryParamId, testDetailId, paramId, paramValue, paramDate, paramStatus, paramNotes, paramResultStatus, sortOrder , normalRange,labLocDetId,fileNameId,fileScanId,isPdf);
+				String paramCode="";
+				String paramCodeSystem="";
+				List<LabParameterCode> labParameterCodeList=labParameterCodeRepository.findAll(Specifications.where(InvestigationSpecification.getParamId(paramId)).and(InvestigationSpecification.getCodeSystem("LOINC")));
+				if(labParameterCodeList.size()>0)
+				{
+					paramCode=labParameterCodeList.get(0).getLabParameterCodeValue();
+					paramCodeSystem="2.16.840.1.113883.6.1";
+				}
+				if(paramCode.equals(""))
+				{
+					List<LabParameterCode> labParameterCodeListSnomed=labParameterCodeRepository.findAll(Specifications.where(InvestigationSpecification.getParamId(paramId)).and(InvestigationSpecification.getCodeSystem("SNOMED")));
+					if(labParameterCodeList.size()>0)
+					{
+						paramCode=labParameterCodeList.get(0).getLabParameterCodeValue();
+						paramCodeSystem="2.16.840.1.113883.6.96";
+					}
+				}
+				int paramEntryId = insertParamValue(chartId, labEntryParamId, testDetailId, paramId, paramValue, paramDate, paramStatus, paramNotes, paramResultStatus, sortOrder , normalRange,labLocDetId,fileNameId,fileScanId,isPdf,paramName,paramCode,paramCodeSystem);
 				paramIdVector.add(paramEntryId);
 				sortOrder++;
 			}
@@ -727,7 +747,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			int testDetailId, int paramId, String paramValue, String performedDate,
 			String paramStatus, String paramNotes, String paramResultStatus,
 			int sortOrder, String normalRange, int labLocDetId, int fileNameId,
-			int fileScanId, int isPdf) throws Exception {
+			int fileScanId, int isPdf,String paramName,String paramCode,String paramCodeSystem) throws Exception {
 		if(labEntryParamId == -1) {
 			List<LabEntriesParameter> labEntriesParameterList=labEntriesParameterRepository.findAll(Specifications.where(InvestigationSpecification.getParamEntriesIsActive(true)).and(InvestigationSpecification.getParamEntriesTestDetailIdNot(-1)).and(InvestigationSpecification.getParamEntriesTestDetailId(testDetailId)).and(InvestigationSpecification.getParamEntriesMapId(paramId)));
 			if(labEntriesParameterList.size()>0)
@@ -750,6 +770,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				labEntriesParameterList.get(h).setLabEntriesParameterIspdf(isPdf);
 				labEntriesParameterList.get(h).setLabEntriesParameterFilenameId(fileNameId);
 				labEntriesParameterList.get(h).setLabEntriesParameterFilenameScanid(fileScanId);
+				labEntriesParameterList.get(h).setLabEntriesParameterName(paramName);
+				labEntriesParameterList.get(h).setLabEntriesParameterCode(paramCode);
+				labEntriesParameterList.get(h).setLabEntriesParameterCodeSystem(paramCodeSystem);
 				labEntriesParameterRepository.saveAndFlush(labEntriesParameterList.get(h));
 			}
 			return labEntryParamId;
@@ -782,6 +805,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			labEntriesParameterTemp.setLabEntriesParameterIspdf(isPdf);
 			labEntriesParameterTemp.setLabEntriesParameterFilenameId(fileNameId);
 			labEntriesParameterTemp.setLabEntriesParameterFilenameScanid(fileScanId);
+			labEntriesParameterTemp.setLabEntriesParameterName(paramName);
+			labEntriesParameterTemp.setLabEntriesParameterCode(paramCode);
+			labEntriesParameterTemp.setLabEntriesParameterCodeSystem(paramCodeSystem);
 			labEntriesParameterRepository.saveAndFlush(labEntriesParameterTemp);
 			List<LabEntriesParameter> labEntriesParameterList=labEntriesParameterRepository.findAll(Specifications.where(InvestigationSpecification.getParamEntriesIsActive(true)).and(InvestigationSpecification.getParamEntriesTestDetailIdNot(-1)).and(InvestigationSpecification.getParamEntriesTestDetailId(testDetailId)).and(InvestigationSpecification.getParamEntriesMapId(paramId)));
 			if(labEntriesParameterList.size()>0)
@@ -1053,6 +1079,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		saveObject = saveObject + "lab_patientvisinfoentries_col_0~@@~" + "" +"#@@#";
 		saveObject = saveObject + "lab_persumeimmunityifo_col_0~@@~" + "" +"#@@#";
 		saveObject = saveObject + "lab_loinc_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionLoinc())).or(" ") +"#@@#";
+		saveObject = saveObject + "lab_snomed_col_0~@@~" + Optional.fromNullable(Strings.emptyToNull(testDetails.getLabDescriptionSnomed())).or(" ") +"#@@#";
 		saveObject = saveObject + "lab_status_col_0~@@~" + "0" +"#@@#";
 		String orderedDate = getOrderedDate(encounterId);
 		saveObject = saveObject + "lab_orderon_col_0~@@~" + orderedDate +"#@@#";
@@ -1072,8 +1099,8 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				LabDescription Resultdata = ResultdataAry.get(rstCount);
 				List<LabDescpParameters> descparams = Resultdata.getLabDescParams();
 				if( descparams.size() > 0 ) {
-					for (int i = 0; i < descparams.size(); i++) {
-						LabParameters labParams = descparams.get(i).getLabParametersTable();
+					//for (int i = 0; i < descparams.size(); i++) {
+						LabParameters labParams = descparams.get(rstCount).getLabParametersTable();
 						Resultdata = ResultdataAry.get(rstCount);
 						appendResult += "-1" + " |~|";
 						appendResult += labParams.getLabParametersId() + " |~|";
@@ -1083,7 +1110,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 						appendResult += "N" + " |~|";  //Normal Range
 						appendResult += "" + " |~|"; //Notes;
 						appendResult += "" + " @#@"; //Status	
-					}
+					//}
 				}
 			}
 		}
@@ -2923,6 +2950,10 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 			if (!dataStr[dataValueMap("int_lab_loinc")].equals(""))
 				labEntriesSave.setLabEntriesLoinc(dataStr[dataValueMap("int_lab_loinc")]);
 		}
+		if(dataStr[dataValueMap("int_lab_snomed")] != null){
+			if (!dataStr[dataValueMap("int_lab_snomed")].equals(""))
+				labEntriesSave.setLabEntriesSnomed(dataStr[dataValueMap("int_lab_snomed")]);
+		}
 		if(dataStr[dataValueMap("int_lab_collectionvolume")]!=null){
 			if(!dataStr[dataValueMap("int_lab_collectionvolume")].equals(""))
 				labEntriesSave.setLabEntriesSpecimenCollVol(dataStr[dataValueMap("int_lab_collectionvolume")]);
@@ -3692,6 +3723,9 @@ private int getPatientIdinChart(int chartId2) {
 				String paramNotes = "";
 				String paramResultStatus = "";
 				String normalRange	= "";
+				String paramName="";
+				if(paramLen > paramValueMap("PARAM_NAME"))
+					paramName = HUtil.ValidateSingleQuote(Optional.fromNullable(param[paramValueMap("PARAM_NAME")]).or("")).trim();
 				if(paramLen > paramValueMap("PARAM_LABENTRYID"))
 					labEntryParamId = Integer.parseInt(Optional.fromNullable(param[paramValueMap("PARAM_LABENTRYID")]).or("-1").trim());
 				if(paramLen > paramValueMap("PARAM_VALUE"))
@@ -3717,14 +3751,31 @@ private int getPatientIdinChart(int chartId2) {
 					DeleteParameters(testDetailId,paramId);
 				if(paramLen > paramValueMap("PARAM_NORMALRANGE"))
 					normalRange = HUtil.ValidateSingleQuote(Optional.fromNullable(param[paramValueMap("PARAM_NORMALRANGE")]).or("")).trim();
-				insertParamValue(chartId, labEntryParamId, testDetailId, paramId, paramValue, paramDate, paramStatus, paramNotes, paramResultStatus, sortOrder , normalRange);
+				String paramCode="";
+				String paramCodeSystem="";
+				List<LabParameterCode> labParameterCodeList=labParameterCodeRepository.findAll(Specifications.where(InvestigationSpecification.getParamId(paramId)).and(InvestigationSpecification.getCodeSystem("LOINC")));
+				if(labParameterCodeList.size()>0)
+				{
+					paramCode=labParameterCodeList.get(0).getLabParameterCodeValue();
+					paramCodeSystem="2.16.840.1.113883.6.1";
+				}
+				if(paramCode.equals(""))
+				{
+					List<LabParameterCode> labParameterCodeListSnomed=labParameterCodeRepository.findAll(Specifications.where(InvestigationSpecification.getParamId(paramId)).and(InvestigationSpecification.getCodeSystem("SNOMED")));
+					if(labParameterCodeList.size()>0)
+					{
+						paramCode=labParameterCodeList.get(0).getLabParameterCodeValue();
+						paramCodeSystem="2.16.840.1.113883.6.96";
+					}
+				}
+				insertParamValue(chartId, labEntryParamId, testDetailId, paramId, paramValue, paramDate, paramStatus, paramNotes, paramResultStatus, sortOrder , normalRange,paramName,paramCode,paramCodeSystem);
 				sortOrder++;
 			}
 		}
 		logger.debug("End of save parameter logic.");
 	}
 
-	public void insertParamValue(int chartId, int labEntryParamId, int testDetailId, int paramId, String paramValue, String performedDate, String paramStatus, String paramNotes, String paramResultStatus, int sortOrder , String normalRange) throws Exception {
+	public void insertParamValue(int chartId, int labEntryParamId, int testDetailId, int paramId, String paramValue, String performedDate, String paramStatus, String paramNotes, String paramResultStatus, int sortOrder , String normalRange,String paramName,String paramCode,String paramCodeSystem) throws Exception {
 		if(labEntryParamId == -1) {
 			List<LabEntriesParameter> labEntriesParameterList=labEntriesParameterRepository.findAll(Specifications.where(InvestigationSpecification.getParamEntriesIsActive(true)).and(InvestigationSpecification.getParamEntriesTestDetailIdNot(-1)).and(InvestigationSpecification.getParamEntriesTestDetailId(testDetailId)).and(InvestigationSpecification.getParamEntriesMapId(paramId)));
 			if(labEntriesParameterList.size()>0)
@@ -3743,6 +3794,9 @@ private int getPatientIdinChart(int chartId2) {
 				labEntriesParameterList.get(h).setLabEntriesParameterSortorder(sortOrder);
 				if(!normalRange.equals(""))
 					labEntriesParameterList.get(h).setLabEntriesParameterNormalrange(normalRange);
+				labEntriesParameterList.get(h).setLabEntriesParameterName(paramName);
+				labEntriesParameterList.get(h).setLabEntriesParameterCode(paramCode);
+				labEntriesParameterList.get(h).setLabEntriesParameterCodeSystem(paramCodeSystem);
 				labEntriesParameterRepository.saveAndFlush(labEntriesParameterList.get(h));
 			}
 		} else {
@@ -3764,6 +3818,9 @@ private int getPatientIdinChart(int chartId2) {
 			labEntriesParameterTemp.setLabEntriesParameterIspdf(0);
 			labEntriesParameterTemp.setLabEntriesParameterFilenameId(-2);
 			labEntriesParameterTemp.setLabEntriesParameterFilenameScanid(-2);
+			labEntriesParameterTemp.setLabEntriesParameterName(paramName);
+			labEntriesParameterTemp.setLabEntriesParameterCode(paramCode);
+			labEntriesParameterTemp.setLabEntriesParameterCodeSystem(paramCodeSystem);
 			labEntriesParameterRepository.saveAndFlush(labEntriesParameterTemp);
 		}
 	}

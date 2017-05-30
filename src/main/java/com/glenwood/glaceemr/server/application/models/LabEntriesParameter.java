@@ -79,6 +79,15 @@ public class LabEntriesParameter implements Serializable{
 
 	@Column(name="lab_entries_parameter_filename_scanid")
 	private Integer labEntriesParameterFilenameScanid;
+	
+	@Column(name="lab_entries_parameter_name")
+	private String labEntriesParameterName;
+	
+	@Column(name="lab_entries_parameter_code")
+	private String labEntriesParameterCode;
+	
+	@Column(name="lab_entries_parameter_code_system")
+	private String labEntriesParameterCodeSystem;
 
 	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.LAZY)
 	@JoinColumn(name="lab_entries_parameter_testdetailid", referencedColumnName="lab_entries_testdetail_id", insertable=false, updatable=false)
@@ -230,6 +239,30 @@ public class LabEntriesParameter implements Serializable{
 		this.labEntriesParameterFilenameScanid = labEntriesParameterFilenameScanid;
 	}
 
+	public String getLabEntriesParameterName() {
+		return labEntriesParameterName;
+	}
+
+	public void setLabEntriesParameterName(String labEntriesParameterName) {
+		this.labEntriesParameterName = labEntriesParameterName;
+	}
+	
+	public String getLabEntriesParameterCode() {
+		return labEntriesParameterCode;
+	}
+
+	public void setLabEntriesParameterCode(String labEntriesParameterCode) {
+		this.labEntriesParameterCode = labEntriesParameterCode;
+	}
+	
+	public String getLabEntriesParameterCodeSystem() {
+		return labEntriesParameterCodeSystem;
+	}
+
+	public void setLabEntriesParameterCodeSystem(String labEntriesParameterCodeSystem) {
+		this.labEntriesParameterCodeSystem = labEntriesParameterCodeSystem;
+	}
+	
 	public LabParameters getLabParametersTable() {
 		return labParametersTable;
 	}

@@ -1497,6 +1497,23 @@ public class InvestigationSpecification {
 			}
 		};
 	}
+	/**
+	 * Specification to get the list of parameter code entries having paramId
+	 * @param code
+	 * @return Specification<LabParameterCode>
+	 */
+	public static Specification<LabParameterCode> getParamId(final int paramId)
+	{
+		return new Specification<LabParameterCode>() {
+
+			@Override
+			public Predicate toPredicate(Root<LabParameterCode> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate getParamDetails = cb.equal(root.get(LabParameterCode_.labParameterCodeParamid ),paramId);
+				return getParamDetails;
+			}
+		};
+	}
 
 	/**
 	 * Specification to get the list of parameter code entries having code
