@@ -72,7 +72,8 @@ public class GroupTherapySpecification {
 			public Predicate toPredicate(Root<TherapyGroup> root, CriteriaQuery<?> cq,
 					CriteriaBuilder cb) {
 				Predicate active = cb.equal(root.get(TherapyGroup_.therapyGroupIsActive), true);
-				return active;
+				cq.where(active).orderBy(cb.asc(root.get(TherapyGroup_.therapyGroupName)));
+				return cq.getRestriction();
 			}
 		};
 	}

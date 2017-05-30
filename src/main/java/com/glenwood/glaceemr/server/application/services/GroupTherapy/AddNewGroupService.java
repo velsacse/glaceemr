@@ -6,7 +6,6 @@ import java.util.Map;
 import org.json.JSONException;
 
 import com.glenwood.glaceemr.server.application.models.TherapyGroup;
-import com.glenwood.glaceemr.server.application.models.TherapySession;
 
 
 /**
@@ -132,7 +131,7 @@ public interface AddNewGroupService {
 	/**
 	 * to get selected group and sessions data
 	 */
-	Map<String, Object> listGroupandSessionData(Integer groupId);
+	Map<String, Object> listGroupandSessionData(String dataToSearch) throws Exception;
 	
 	/**
 	 * to get complete open sessions

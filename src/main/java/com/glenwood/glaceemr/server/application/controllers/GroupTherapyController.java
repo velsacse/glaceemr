@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.TherapyGroup;
-import com.glenwood.glaceemr.server.application.models.TherapySession;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.AddNewGroupService;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.AddNoteBean;
 import com.glenwood.glaceemr.server.application.services.GroupTherapy.AddTherapyBean;
@@ -308,6 +307,7 @@ public class GroupTherapyController {
 	TherapyPrintBean therapyPrintBean=addNewGroupService.fetchGrouptherapyPrintData(groupId,sessionId,patientId,gwids);
 	EMRResponseBean emrResponseBean = new EMRResponseBean();
 	emrResponseBean.setData(therapyPrintBean);
+	auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of data for print notes", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 	return emrResponseBean;
 	}
 	
@@ -355,10 +355,11 @@ public class GroupTherapyController {
 	@RequestMapping(value ="/ListGroupDataandSessionData", method = RequestMethod.GET) 
 	@ResponseBody
 	
-	public EMRResponseBean getGroupandSessionData(@RequestParam(value="groupId",required=false,defaultValue="-1")Integer groupId)throws Exception{
-		Map<String,Object> lists=addNewGroupService.listGroupandSessionData(groupId);
+	public EMRResponseBean getGroupandSessionData(@RequestParam(value="dataToSearch",required=false,defaultValue="-1")String dataToSearch)throws Exception{
+		Map<String,Object> lists=addNewGroupService.listGroupandSessionData(dataToSearch);
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(lists);
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.THERAPHYSESSION, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successful retrieval of displaying all open sessions", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return emrResponseBean;
 	}
 	

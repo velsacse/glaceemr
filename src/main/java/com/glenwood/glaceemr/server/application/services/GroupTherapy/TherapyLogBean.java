@@ -21,9 +21,10 @@ public class TherapyLogBean {
 	String therapyStartDate="";
 	String leaderName = "";
 	String supervisorName = "";
+	String sessionTopic = "";
 	
 	
-	public TherapyLogBean(Integer therapyId,Date date,String docName,String leaderName,String supervisorName,String groupName,String pos,Long count,Integer groupId,Integer providerId,Integer leaderId,Integer supervisorId,Integer posId,String endTime,Date therapyStartDate,Integer status){
+	public TherapyLogBean(Integer therapyId,Date date,String sessionTopic,String docName,String leaderName,String supervisorName,String groupName,String pos,Long count,Integer groupId,Integer providerId,Integer leaderId,Integer supervisorId,Integer posId,String endTime,String therapyStartDate,Integer status){
 		super();
 		this.therapyId=therapyId;
 		if(docName!=null)
@@ -40,8 +41,12 @@ public class TherapyLogBean {
 			this.supervisorName="";
 		this.count=count;
 		this.pos=pos;
+		if(therapyStartDate!=null)
+			this.therapyStartDate=therapyStartDate;
+		else
+			this.therapyStartDate="";
 		DateFormat mmformat=new SimpleDateFormat("MM/dd/yyyy");
-		this.date=mmformat.format(therapyStartDate);
+		this.date=mmformat.format(date);
         this.groupName=groupName;
         this.groupId=groupId;
         this.posId=posId;
@@ -58,9 +63,13 @@ public class TherapyLogBean {
         else
         	this.supervisorId=-1;
         this.endTime=endTime;
-        DateFormat timeFormat=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-        this.therapyStartDate=timeFormat.format(therapyStartDate);
+        /*DateFormat timeFormat=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        this.therapyStartDate=timeFormat.format(therapyStartDate);*/
         this.status=status;
+        if(sessionTopic!=null)
+			this.sessionTopic=sessionTopic;
+		else
+			this.sessionTopic="";
 	}
 	
 	public String getLeaderName() {
@@ -211,16 +220,20 @@ public class TherapyLogBean {
 		this.endTime = endTime;
 	}
 
-
-
 	public String getTherapyStartDate() {
 		return therapyStartDate;
 	}
 
-
-
 	public void setTherapyStartDate(String therapyStartDate) {
 		this.therapyStartDate = therapyStartDate;
+	}
+
+	public String getSessionTopic() {
+		return sessionTopic;
+	}
+
+	public void setSessionTopic(String sessionTopic) {
+		this.sessionTopic = sessionTopic;
 	}
 	
 	

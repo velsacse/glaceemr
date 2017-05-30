@@ -272,12 +272,17 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 
 	/**
 	 * To get group and sessions data
+	 * @throws JSONException 
+	 * @throws  
 	 */
 	@Override
-	public Map<String,Object> listGroupandSessionData(Integer groupId) {
+	public Map<String,Object> listGroupandSessionData(String dataToSearch) throws Exception {
+		JSONObject searchData= new JSONObject(dataToSearch);
+		Integer groupId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(searchData.get("groupId").toString())).or("-1"));
+		Integer userId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(searchData.get("userId").toString())).or("-1"));
 		Map<String, Object> mapObject=new HashMap<String,Object>();
 		List<TherapyGroup> getGroupData = listGroupData(groupId.toString());
-		List<TherapySessionBean> getOpenSessions = getOpenSessions(-1,groupId);
+		List<TherapySessionBean> getOpenSessions = getOpenSessions(userId,groupId);
 		mapObject.put("groupData", getGroupData);
 		mapObject.put("sessionData", getOpenSessions);
 		return mapObject;
@@ -539,6 +544,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		Selection[] selections= new Selection[] {
 			    root.get((TherapySession_.therapySessionId)),
 			    root.get((TherapySession_.therapySessionDateValue)),
+			    root.get((TherapySession_.therapySessionTopic)),
 				docJoin.get(EmployeeProfile_.empProfileFullname),
 				leaderJoin.get(EmployeeProfile_.empProfileFullname),
 			    supervisorJoin.get(EmployeeProfile_.empProfileFullname),
@@ -551,14 +557,14 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 			    supervisorJoin.get(EmployeeProfile_.empProfileEmpid),
 			    posJoin.get(PosTable_.posTableRelationId),
 			    root.get((TherapySession_.therapySessionEndTime)),
-			    root.get(TherapySession_.therapySessionDate),
+				builder.function("to_char",String.class, root.get(TherapySession_.therapySessionDate),builder.literal("HH12:MI AM")),
 			    root.get(TherapySession_.therapySessionStatus)
 				
 		};
 		cq.select(builder.construct(TherapyLogBean.class, selections));
 		cq.where(predicates.toArray(new Predicate[predicates.size()])).groupBy(root.get((TherapySession_.therapySessionId)),root.get(TherapySession_.therapySessionDateValue),docJoin.get(EmployeeProfile_.empProfileFullname),groupJoin.get(TherapyGroup_.therapyGroupName),posJoin.get(PosTable_.posTableFacilityComments),groupJoin.get(TherapyGroup_.therapyGroupId),docJoin.get(EmployeeProfile_.empProfileEmpid),posJoin.get(PosTable_.posTableRelationId),root.get((TherapySession_.therapySessionEndTime)),root.get(TherapySession_.therapySessionDate),root.get(TherapySession_.therapySessionStatus),leaderJoin.get(EmployeeProfile_.empProfileFullname),
 			    supervisorJoin.get(EmployeeProfile_.empProfileFullname),leaderJoin.get(EmployeeProfile_.empProfileEmpid),
-			    supervisorJoin.get(EmployeeProfile_.empProfileEmpid));
+			    supervisorJoin.get(EmployeeProfile_.empProfileEmpid), root.get((TherapySession_.therapySessionTopic))).orderBy(builder.desc(root.get((TherapySession_.therapySessionDateValue))));
 		List<TherapyLogBean> confData=new ArrayList<TherapyLogBean>();
 
 		 confData=em.createQuery(cq).getResultList();
@@ -573,11 +579,11 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 	public List<TherapyPatientsBean> getTherapyPatients(String dataToSearch) throws Exception {
 		JSONObject therapyData= new JSONObject(dataToSearch);
 		int therapyId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("therapyId").toString())).or("-1"));
-		int providerId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("providerId").toString())).or("-1"));
-		int groupId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("groupId").toString())).or("-1"));
-		String fromDate=Optional.fromNullable(Strings.emptyToNull(therapyData.get("date").toString())).or("");
+/*		int providerId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("providerId").toString())).or("-1"));
+*/		int groupId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("groupId").toString())).or("-1"));
+		/*String fromDate=Optional.fromNullable(Strings.emptyToNull(therapyData.get("date").toString())).or("");
 		int posId=Integer.parseInt(Optional.fromNullable(Strings.emptyToNull(therapyData.get("posId").toString())).or(""));
-        SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/yyyy");		
+        */SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/yyyy");		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 	    CriteriaQuery<TherapyPatientsBean> cq = builder.createQuery(TherapyPatientsBean.class);
 		Root<TherapySession> root = cq.from(TherapySession.class);
@@ -605,6 +611,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 				patientJoin.get(PatientRegistration_.patientRegistrationLastName),
 				patientJoin.get(PatientRegistration_.patientRegistrationFirstName),
 				patientJoin.get(PatientRegistration_.patientRegistrationDob),
+				root.get(TherapySession_.therapySessionTopic),
 				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsSessionId),
 				builder.function("to_char",String.class, sessionJoin.get(TherapySessionDetails_.therapySessionDetailsStartTime),builder.literal("HH12:MI AM")),
 				sessionJoin.get(TherapySessionDetails_.therapySessionEndTime),
