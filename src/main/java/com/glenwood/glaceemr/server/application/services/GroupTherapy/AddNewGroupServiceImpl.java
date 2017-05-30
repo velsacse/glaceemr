@@ -105,7 +105,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
 		cq.multiselect(root.get(EmployeeProfile_.empProfileEmpid),root.get(EmployeeProfile_.empProfileFullname),root.get(EmployeeProfile_.empProfileGroupid));
 		Predicate predicateByIsActive=builder.equal(root.get(EmployeeProfile_.empProfileIsActive), true);
-		Predicate predicateByEmpGroupId=root.get(EmployeeProfile_.empProfileGroupid).in(-1,-10,-2,-3);
+		Predicate predicateByEmpGroupId=root.get(EmployeeProfile_.empProfileGroupid).in(-1,-10,-2,-3,-25);
 		cq.where(predicateByIsActive,predicateByEmpGroupId).orderBy(builder.desc(root.get(EmployeeProfile_.empProfileGroupid)),builder.asc(root.get(EmployeeProfile_.empProfileFullname)));
 		List<Object[]> resultset = em.createQuery(cq).getResultList();
 		List<EmployeeProfile> phisicianList = new ArrayList<EmployeeProfile>();
