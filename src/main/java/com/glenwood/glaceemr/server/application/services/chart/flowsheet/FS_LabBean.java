@@ -282,7 +282,7 @@ public class FS_LabBean implements Comparable<FS_LabBean> {
 				// e.printStackTrace();
 			}
 		}
-		return 0;
+		return -1;
 
 	}
 }
