@@ -904,6 +904,7 @@ public class AddNewGroupServiceImpl implements AddNewGroupService{
 				patientJoin.get(PatientRegistration_.patientRegistrationLastName),
 				patientJoin.get(PatientRegistration_.patientRegistrationFirstName),
 				patientJoin.get(PatientRegistration_.patientRegistrationDob),
+				root.get(TherapySession_.therapySessionTopic),
 				sessionJoin.get(TherapySessionDetails_.therapySessionDetailsSessionId),
 				builder.function("to_char",String.class, sessionJoin.get(TherapySessionDetails_.therapySessionDetailsStartTime),builder.literal("HH12:MI AM")),
 				sessionJoin.get(TherapySessionDetails_.therapySessionEndTime),
