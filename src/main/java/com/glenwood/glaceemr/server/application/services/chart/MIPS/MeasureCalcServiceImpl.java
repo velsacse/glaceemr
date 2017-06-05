@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -27,12 +28,14 @@ import javax.persistence.criteria.Selection;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.Bean.ClinicalDataQDM;
 import com.glenwood.glaceemr.server.application.Bean.EPMeasureBean;
 import com.glenwood.glaceemr.server.application.Bean.InvestigationQDM;
@@ -52,6 +55,8 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.QDM;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
 import com.glenwood.glaceemr.server.application.Bean.mailer.GlaceMailer;
+import com.glenwood.glaceemr.server.application.Bean.pqrs.PqrsMeasureBean;
+import com.glenwood.glaceemr.server.application.Bean.pqrs.QualityMeasureBean;
 import com.glenwood.glaceemr.server.application.models.Billinglookup;
 import com.glenwood.glaceemr.server.application.models.Billinglookup_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
@@ -67,9 +72,13 @@ import com.glenwood.glaceemr.server.application.models.MacraMeasuresRate_;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
+import com.glenwood.glaceemr.server.application.models.PqrsPatientEntries;
+import com.glenwood.glaceemr.server.application.models.PqrsPatientEntries_;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEntries;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEntriesHistory;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEntries_;
+import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping;
+import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping_;
 import com.glenwood.glaceemr.server.application.repositories.MacraConfigurationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientMeasureStatusLogRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientMeasureStatusRepository;
@@ -1678,44 +1687,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 	}
 	
-	@Override
-	@SuppressWarnings("rawtypes")
-	public List<MIPSPatientInformation> getPatientInformation(String patientsList){
-		
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<MIPSPatientInformation> cq = builder.createQuery(MIPSPatientInformation.class);
-		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
-		
-		Selection[] selections= new Selection[] {
-				root.get(PatientRegistration_.patientRegistrationId).alias("patientId"),
-				root.get(PatientRegistration_.patientRegistrationAccountno).alias("accountNo"),
-				root.get(PatientRegistration_.patientRegistrationLastName).alias("lastName"),
-				root.get(PatientRegistration_.patientRegistrationFirstName).alias("firstName"),
-				builder.function("to_mmddyyyy",Date.class,root.get(PatientRegistration_.patientRegistrationDob)),
-				builder.selectCase().when(builder.equal(root.get(PatientRegistration_.patientRegistrationSex),1),"Male").when(builder.equal(root.get(PatientRegistration_.patientRegistrationSex),2),"Female").otherwise("TG").as(String.class).alias("gender"),
-				root.get(PatientRegistration_.patientRegistrationRace).alias("race"),
-				root.get(PatientRegistration_.patientRegistrationEthnicity).alias("ethnicity"),
-				builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress1), "").alias("address1"),
-				builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress2), "").alias("address2"),
-				builder.coalesce(root.get(PatientRegistration_.patientRegistrationCity), "-").alias("city"),
-				builder.coalesce(root.get(PatientRegistration_.patientRegistrationStateName), "-").alias("state"),
-				builder.coalesce(root.get(PatientRegistration_.patientRegistrationZip), "-").alias("zip"),
-		};
-		
-		cq.multiselect(selections);
-		
-		Predicate byPatientId = root.get(PatientRegistration_.patientRegistrationId).in(Arrays.asList(patientsList.split(",")));
-		
-		cq.where(byPatientId);
-		
-		cq.orderBy(builder.asc(root.get(PatientRegistration_.patientRegistrationLastName)));
-		
-		List<MIPSPatientInformation> patientDetails = em.createQuery(cq).getResultList();
-		
-		return patientDetails;
-		
-	}
-	
 	@SuppressWarnings("unused")
 	@Override
 	public HashMap<String,Object> generateFilterContents(){
@@ -1836,6 +1807,128 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		List<MIPSPatientInformation> patientDetailsWithResults = em.createQuery(cq).getResultList();
 		return patientDetailsWithResults;
 		
+	}
+
+	@Override
+	public List<QualityMeasureBean> getQualityMeasureResponseObject(int userId, HashMap<String, String> codeListForQDM){
+		
+		List<QualityMeasureBean> pqrsResponsearray = new ArrayList<QualityMeasureBean>();
+		try {
+			QualityMeasureBean responseBean = null;
+			List<QualityMeasuresProviderMapping> qualitymeasurebean = new ArrayList<QualityMeasuresProviderMapping>();
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<QualityMeasuresProviderMapping> cquery = builder.createQuery(QualityMeasuresProviderMapping.class);
+			Root<QualityMeasuresProviderMapping> root1 = cquery.from(QualityMeasuresProviderMapping.class);
+			cquery.where(builder.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),userId));
+			cquery.orderBy(builder.asc(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId)));
+			qualitymeasurebean = em.createQuery(cquery).getResultList();
+			Integer userid = -1;
+			String measureid = "";
+			String cmsId = "";
+			for(int i=0;i<qualitymeasurebean.size();i++){
+								
+					String json = new ObjectMapper().writeValueAsString(codeListForQDM);
+					JSONObject jObject  = new JSONObject(json);
+				    Iterator iter = jObject.keys();
+				    String key = "";
+				    String value = "";
+				    while(iter.hasNext())
+				    {
+						key = (String)iter.next();
+						value = jObject.getString(key);
+					String measureidkey = key;
+					String title = value;
+				
+				userid = qualitymeasurebean.get(i).getQualityMeasuresProviderMappingProviderId();
+				measureid = qualitymeasurebean.get(i).getQualityMeasuresProviderMappingMeasureId();
+				 if(measureid.equalsIgnoreCase(measureidkey)){
+					 cmsId = title;
+					 break;
+				 }
+				    }
+				 responseBean = new QualityMeasureBean(measureid, userid, cmsId);
+				 pqrsResponsearray.add(responseBean);
+			}
+		}
+catch(Exception e){
+		}
+
+		return pqrsResponsearray;
+	}
+	
+	@Override
+	public List<PqrsMeasureBean> getPqrsResponseObject(int patientID, int providerId, Date startDate, Date endDate, HashMap<String, String> codeListForQDM) {
+	
+		List<PqrsMeasureBean> pqrsResponsearray = new ArrayList<PqrsMeasureBean>();
+		try {
+		
+		PqrsMeasureBean responseBean = null;
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		List<PqrsPatientEntries> pqrsResponseBean =  new ArrayList<PqrsPatientEntries>();
+		CriteriaQuery<PqrsPatientEntries> cq = builder.createQuery(PqrsPatientEntries.class);
+		Root<PqrsPatientEntries> root = cq.from(PqrsPatientEntries.class);
+		
+		cq.where(builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesPatientId), patientID),
+				builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesProviderId), providerId),
+				builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesIsActive), true),
+				builder.greaterThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), startDate),
+				builder.lessThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), endDate));
+		
+		cq.orderBy(builder.desc(root.get(PqrsPatientEntries_.pqrsPatientEntriesMeasureId)));
+		pqrsResponseBean = em.createQuery(cq).getResultList();
+		String measureid = "";
+		String shortdesc = "";
+		Integer indicator = -1;
+		String performanceind = "";
+		String measureTitle = "";
+		HashMap<String, Integer> measureMap = new HashMap<String, Integer>();
+		
+		for(int i=0;i<pqrsResponseBean.size();i++){
+		
+		String json = new ObjectMapper().writeValueAsString(codeListForQDM);
+		JSONObject jObject  = new JSONObject(json);
+	    Iterator iter = jObject.keys();
+	    String key = "";
+	    String value = "";
+	    while(iter.hasNext())
+	    {
+			key = (String)iter.next();
+			value = jObject.getString(key);
+		String measureidkey = key;
+		String title = value;
+			 measureid = pqrsResponseBean.get(i).getPqrsPatientEntriesMeasureId();
+			 if(measureid.equalsIgnoreCase(measureidkey)){
+				 measureTitle = title;
+				 break;
+			 }
+	    }
+			 shortdesc = pqrsResponseBean.get(i).getPqrsPatientEntriesShortDescription();
+			 indicator = pqrsResponseBean.get(i).getPqrsPatientEntriesPerformanceIndicator();
+			
+			 if(indicator == 1)
+				 performanceind = "Performance Met";
+			 else if(indicator == 2)
+				 performanceind = "Performance Exclusion";
+			 else if(indicator == 3)
+				 performanceind = "Denominator Exception";
+			 else if(indicator == 4)
+				 performanceind = "Denominator Exclusion";
+			 else 
+				 performanceind = "Performance not Met";
+		if(!measureMap.containsKey(measureid)){
+			measureMap.put(measureid, i);
+			responseBean = new PqrsMeasureBean(measureid,measureTitle,performanceind,shortdesc);
+			 pqrsResponsearray.add(responseBean);
+		}else{
+			responseBean  = pqrsResponsearray.get(measureMap.get(measureid));
+			responseBean.setDescription( responseBean.getDescription().concat(","+shortdesc) );
+		}
+		}
+		} 
+		catch(Exception e){
+			
+		}
+		return pqrsResponsearray;
 	}
 	
 }

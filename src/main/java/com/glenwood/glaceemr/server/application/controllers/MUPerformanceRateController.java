@@ -33,14 +33,15 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Response;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
 import com.glenwood.glaceemr.server.application.Bean.mailer.GlaceMailer;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.MUPerformanceRateService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.MeasureCalculationService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
+import com.glenwood.glaceemr.server.application.services.pqrsreport.PqrsReportService;
 import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
@@ -63,6 +64,9 @@ public class MUPerformanceRateController {
 	
 	@Autowired
 	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	PqrsReportService pqrsreportservice;
 
 	@Autowired
 	HttpServletRequest request;
@@ -218,8 +222,15 @@ public class MUPerformanceRateController {
 			}
 
 			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+			
+			if(providerInfo!=null && providerInfo.get(0).getMacraProviderConfigurationReportingMethod()!=2){
 
-			if(providerInfo!=null){
+				Date startDate = providerInfo.get(0).getMacraProviderConfigurationReportingStart();
+				Date EndDate = providerInfo.get(0).getMacraProviderConfigurationReportingEnd();
+
+				pqrsreportservice.getPatientServices(providerId, patientID, startDate, EndDate, accountId);
+
+			}else if(providerInfo!=null){
 
 				String[] measureIds = providerInfo.get(0).getMeasures().split(",");
 

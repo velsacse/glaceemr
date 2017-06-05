@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import com.glenwood.glaceemr.server.application.Bean.pqrs.Claim;
+
 
 
 public class Patient
@@ -31,6 +33,7 @@ public class Patient
 	private List<ActiveMedication> activeMedicationsList = new ArrayList<ActiveMedication>();
 	private List<ProcedureIntolerance> procedureIntoleranceList = new ArrayList<ProcedureIntolerance>();
 	private List<ImmunizationIntolerance> immunizationIntoleranceList = new ArrayList<ImmunizationIntolerance>();
+	private List<Claim> claims = new ArrayList<Claim>();
 	
 	public int getPatientId()
 	{
@@ -208,7 +211,12 @@ public class Patient
 	{
 		this.immunizationIntoleranceList = immunizationIntoleranceList;
 	}
-	
+	public List<Claim> getClaims() {
+		return claims;
+	}
+	public void setClaims(List<Claim> claims) {
+		this.claims = claims;
+	}
 	
 	public void sort() throws Exception
 	{
@@ -227,6 +235,7 @@ public class Patient
 		Collections.sort(this.getActiveMedicationsList());
 		Collections.sort(this.getProcedureIntoleranceList());
 		Collections.sort(this.getImmunizationIntoleranceList());
+		Collections.sort(this.getClaims());
 	}
-
+	
 }

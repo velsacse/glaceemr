@@ -1680,4 +1680,18 @@ public class ServiceDetail {
 	public void setServiceDetailDx20desc(String serviceDetailDx20desc) {
 		this.serviceDetailDx20desc = serviceDetailDx20desc;
 	}
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+   	@JsonManagedReference
+   	@JoinColumn(name="service_detail_posid", referencedColumnName="place_of_service_placeid"  , insertable=false, updatable=false)
+   	private PlaceOfService placeOfService ;
+    
+	
+    public PlaceOfService getPlaceOfService() {
+		return placeOfService;
+	}
+    
+	public void setPlaceOfService(PlaceOfService placeOfService) {
+		this.placeOfService = placeOfService;
+	}
 }

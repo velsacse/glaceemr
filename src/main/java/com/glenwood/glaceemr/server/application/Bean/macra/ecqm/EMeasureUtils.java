@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -35,6 +36,7 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Negation;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.PhysicalExam;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Procedure;
 import com.glenwood.glaceemr.server.application.Bean.mailer.GlaceMailer;
+import com.glenwood.glaceemr.server.application.Bean.pqrs.PqrsHubResponse;
 
 public class EMeasureUtils {
 
@@ -831,5 +833,68 @@ public class EMeasureUtils {
 	public void setMeasureInfo(HashMap<String, String> measureInfo) {
 		this.measureInfo = measureInfo;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public List<PqrsHubResponse> getPpqrsHubReponse(String measureIds) throws Exception{
+		
+		String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/PQRSServices/getPQRSMeasuresInfo?measureIds="+measureIds;
+	    String result = restTemplate.getForObject(apiUrl, String.class);
+	    JSONObject jsonObj = new JSONObject(result);
+		Iterator<String> keys = jsonObj.keys();
+		String content = "";
+		while(keys.hasNext()){
+			if(content.equals("")){
+				content = jsonObj.getString(keys.next());
+			}else{
+				content = content.concat(",".concat(jsonObj.getString(keys.next())));
+			}
+		}
+		content = "[".concat(content.concat("]"));
+		getPqrsMeasureInfo(content);
+	    
+		JSONArray arr=new JSONArray(content);
+	    ObjectMapper mapper=new ObjectMapper();
+	    List<PqrsHubResponse> li=new ArrayList<>();
+	   
+	    for(int i=0;i<arr.length();i++){
+	    PqrsHubResponse cl=new PqrsHubResponse();
+		cl = mapper.readValue(arr.getJSONObject(i).toString(), PqrsHubResponse.class);
+		li.add(cl);
+	    }
+		return li;
+	}
+	
+	public void getPqrsMeasureInfo(String data) throws Exception{
+	
+		JSONArray dataFromHub = new JSONArray(data);
+	    JSONArray measureDetailsArray =new JSONArray();
+	    for(int i=0;i<dataFromHub.length();i++){
+	       
+	        String cmsId = dataFromHub.getJSONObject(i).getString("cmsId");
+	        String title = dataFromHub.getJSONObject(i).getString("title");
+	        String description = dataFromHub.getJSONObject(i).getString("description");
+	    
+	        JSONObject obj = new JSONObject();
+	        
+	        obj.put("cmsId", cmsId);
+	        obj.put("title", title);
+	        obj.put("description", description);
+	        measureDetailsArray.put(obj);
+	        
+	    }
+	    setMeasureDetails(measureDetailsArray);
+}
+	
+	public  HashMap<String, String> getPqrsCodeList(List<PqrsHubResponse> emeasure){
+
+		for(int index = 0;index < emeasure.size();index++)
+		{
+				measureInfo.put(""+emeasure.get(index).getId(), emeasure.get(index).getTitle());
+			}
+			setMeasureInfo(measureInfo);
+			return measureInfo;
+			
+		}
+	
 	
 }
