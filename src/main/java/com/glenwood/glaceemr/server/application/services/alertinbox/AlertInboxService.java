@@ -1,7 +1,10 @@
 package com.glenwood.glaceemr.server.application.services.alertinbox;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.json.JSONArray;
 
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
@@ -148,6 +151,15 @@ public interface AlertInboxService {
 			String patientNameSearchValue, String senderNameSearchValue,
 			String receiverNameSearchValue, String messageSearchValue,
 			String fromDateSearchValue, String toDateSearchValue);
+
+	JSONArray getStatusCategories(String alertSection);
+
+	HashMap<Integer, AlertCategoryBean> archieve(Integer alertStatus, Integer days,
+			Integer patientid, String patientName, Integer fromId,
+			Integer toId, String message);
+
+	List<AlertCategory> getAllCategories();
+	
 	List<AlertEvent> updateStatusbyAlertEventIds(List<Integer> alertEventIds,
 			String alertStatus, String userId);
 }

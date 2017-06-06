@@ -1,31 +1,42 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
+import com.glenwood.glaceemr.server.application.services.alertinbox.AlertArchiveBean;
+import com.glenwood.glaceemr.server.application.services.alertinbox.AlertCategoryBean;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertCountBean;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxBean;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxService;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.RestDispatcherTemplate;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -113,6 +124,7 @@ public class AlertInboxController {
 
 		return alertsLists;
 	}
+
 	/**
 	 * Update the status based on the list of AlertEventId's.
 	 * @param alerteventid		    AlertEvent id's are separated by ","
@@ -163,19 +175,26 @@ public class AlertInboxController {
 			 @RequestParam(value="messageSearchValue", required=false, defaultValue="") String messageSearchValue,
 			 @RequestParam(value="fromDateSearchValue", required=false, defaultValue="") String fromDateSearchValue,
 			 @RequestParam(value="toDateSearchValue", required=false, defaultValue="") String toDateSearchValue) throws Exception{
+
 		logger.debug("Enters into get alerts");
+
 		List<String> categoryIdList=new ArrayList<String>();
 		String[] categoryIdArray = {"-1"};
+
 		List<Map<String, List<Object>>> alertsList;
+
 		if(!categoryIds.equals("-1")){
 			categoryIdArray=categoryIds.split(",");
 		}
+
 		for (String s : categoryIdArray) {
 			categoryIdList.add(s);
 		}
+
 		alertsList = alertInboxService.searchAlerts(userId,categoryIdList,patientNameSearchValue,
 				senderNameSearchValue,receiverNameSearchValue,messageSearchValue,
 				fromDateSearchValue,toDateSearchValue);
+		
 		EMRResponseBean alertsLists=new EMRResponseBean();
 		alertsLists.setData(alertsList);
 		
@@ -183,6 +202,7 @@ public class AlertInboxController {
 		
 		return alertsLists;
 	}
+
 	/**
 	 * Get the category list with count based on the user id
 	 * @param userId 	User Id to get the list of categories with count
@@ -193,6 +213,7 @@ public class AlertInboxController {
 	public EMRResponseBean getAlertCount(
 			 @RequestParam(value="userid", required=false, defaultValue="") String userId){
 		logger.debug("Getting alert counts");
+		
 		List<AlertCountBean> shortcutInfoBeans=alertInboxService.getAlertCount(userId);
 		EMRResponseBean shortcutInfoBean=new EMRResponseBean();
 		shortcutInfoBean.setData(shortcutInfoBeans);
@@ -201,6 +222,7 @@ public class AlertInboxController {
 		
 		return shortcutInfoBean;
 	}
+	
 	/**
 	 * Gets the alerts by categories (Pagination)
 	 * @param userId		Logged in user Id
@@ -225,6 +247,8 @@ public class AlertInboxController {
 		
 		return alertInboxBean;
 	}
+
+
 	/**
 	 * Highlights the alerts
 	 * @param alertids 		Alert id's are separated by ","
@@ -236,9 +260,12 @@ public class AlertInboxController {
 	public EMRResponseBean highlight(
 			 @RequestParam(value="alertid",required=true) String alertids, 
 			 @RequestParam(value="userid",required=true) Integer userId){
+
 		logger.debug("Highlighting the alert with id "+alertids);
+
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertids.split(",");
+
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
@@ -250,6 +277,8 @@ public class AlertInboxController {
 		
 		return alertEvents;
 	}
+
+
 	/**
 	 * Un Highlights the alerts
 	 * @param alertids 		Alert id's are separated by ","
@@ -261,9 +290,12 @@ public class AlertInboxController {
 	public EMRResponseBean unHighlight(
 			@RequestParam(value="alertid",required=true) String alertids,
 			 @RequestParam(value="userid",required=true) Integer userId){
+
 		logger.debug("Un Highlighting the alert with id "+alertids);
+
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertids.split(",");
+
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
@@ -275,6 +307,8 @@ public class AlertInboxController {
 		
 		return alertEvents;
 	}
+
+
 	/**
 	 * Marks the list of alerts to read 
 	 * @param alertids		Alert id's are separated by ","
@@ -286,9 +320,12 @@ public class AlertInboxController {
 	public EMRResponseBean markRead(
 			 @RequestParam(value="alertid",required=true) String alertids, 
 			 @RequestParam(value="userid",required=true) Integer userId){
+
 		logger.debug("Read the alert with id "+alertids);
+
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertids.split(",");
+
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
@@ -300,6 +337,8 @@ public class AlertInboxController {
 		
 		return alertEvents;
 	}
+
+
 	/**
 	 * Marks the list of alerts to unread 
 	 * @param alertids		Alert id's are separated by ","
@@ -311,9 +350,12 @@ public class AlertInboxController {
 	public EMRResponseBean markUnRead(
 			 @RequestParam(value="alertid",required=true) String alertids, 
 			 @RequestParam(value="userid",required=false) Integer userId){
+
 		logger.debug("Un Read the alert with id "+alertids);
+
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertids.split(",");
+
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
@@ -323,6 +365,8 @@ public class AlertInboxController {
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully updated list of alerts with unread option", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"alertid="+alertids, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
+
+
 	/**
 	 * Gets the list of categories based on the category id
 	 * @param categoryIds 	Category id's are separated by ","
@@ -332,9 +376,12 @@ public class AlertInboxController {
 	@ResponseBody
 	public EMRResponseBean getCategories(
 			 @RequestParam(value="categoryid",required=true) String categoryIds){
+
 		logger.debug("Getting the categories with id "+categoryIds);
+
 		List<Integer> categoryIdList=new ArrayList<Integer>();
 		String[] categoryIdArray=categoryIds.split(",");
+
 		for (String s : categoryIdArray) {
 			categoryIdList.add(Integer.parseInt(s));
 		}
@@ -344,6 +391,8 @@ public class AlertInboxController {
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved category details based on categoryId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "categoryIds="+categoryIds, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
+
+
 	/**
 	 * Forward one or more alerts based on the alert id
 	 * @param categoryIds 	Category id's are separated by ","
@@ -358,9 +407,12 @@ public class AlertInboxController {
 			 @RequestParam(value="message",required=true) String message, 
 			 @RequestParam(value="forwardto",required=true) String forwardTo, 
 			 @RequestParam(value="ishighpriority",required=false) String ishighpriority){
+
 		logger.debug("Forwarding the alerts with id "+alertIds);
+
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertIds.split(",");
+
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
@@ -370,6 +422,8 @@ public class AlertInboxController {
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully forwarded list of alerts to "+forwardTo, sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"categoryId="+categoryId, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
+
+
 	/**
 	 * Delete the alerts
 	 * @param alertids 		Alert id's are separated by ","
@@ -381,20 +435,27 @@ public class AlertInboxController {
 	public EMRResponseBean deleteAlerts(
 			 @RequestParam(value="alertid",required=true) String alertids,
 			 @RequestParam(value="userid",required=true) Integer userId){
+
 		logger.debug("Deleting the alert with id "+alertids);
+
 		List<Integer> alertIdList=new ArrayList<Integer>();
 		String[] alertIdArray=alertids.split(",");
+
 		for (String s : alertIdArray) {
 			alertIdList.add(Integer.parseInt(s));
 		}
+		
 		List<AlertEvent> alertEvent=null;
 		if(userId!=null)
 			alertEvent=alertInboxService.deleteAlert(alertIdList,userId);
+		
 		EMRResponseBean alertEvents=new EMRResponseBean();
 		alertEvents.setData(alertEvent);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully deleted list of alerts", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"alertids="+alertids, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
+
+
 	/**
 	 * Delete the alerts by encounter id.
 	 * @param encounterIds 	Encounter id's are separated by ","
@@ -406,9 +467,12 @@ public class AlertInboxController {
 	public EMRResponseBean deleteByEncounterId(
 			 @RequestParam(value="encounterid",required=true) String encounterIds,
 			 @RequestParam(value="userid",required=true) Integer userId){
+
 		logger.debug("Deleting the alert with encounter id "+encounterIds);
+
 		List<Integer> encounterIdList=new ArrayList<Integer>();
 		String[] alertIdArray=encounterIds.split(",");
+
 		for (String s : alertIdArray) {
 			encounterIdList.add(Integer.parseInt(s));
 		}
@@ -418,6 +482,8 @@ public class AlertInboxController {
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully deleted the alerts by encounterId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "userId="+userId+"encounterId="+encounterIds, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
+
+
 	/**
 	 * Get alerts by encounter id.
 	 * @param encounterId 	Encounter id's are separated by ","
@@ -427,8 +493,10 @@ public class AlertInboxController {
 	@ResponseBody
 	public EMRResponseBean byEncounterId(
 			@RequestParam(value="encounterid",required=true) String encounterId){
+
 		List<Integer> encounterIdList=new ArrayList<Integer>();
 		String[] alertIdArray=encounterId.split(",");
+
 		for (String s : alertIdArray) {
 			encounterIdList.add(Integer.parseInt(s));
 		}
@@ -438,6 +506,8 @@ public class AlertInboxController {
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved alerts by encounterId", sessionMap.getUserID(), request.getRemoteAddr(), -1, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 		return alertEvents;
 	}
+
+
 	/**
 	 * Creates alert in AlertEvent Table.
 	 * @param fromid required employee fromId
@@ -461,6 +531,7 @@ public class AlertInboxController {
 			 @RequestParam(value="chartid",required=true, defaultValue="-1") String chartid,
 			 @RequestParam(value="roomid",required=true, defaultValue="-1") String roomid,
 			 @RequestParam(value="parentid",required=true, defaultValue="-1") String parentid){
+		
 		List<Integer> toIdList=new ArrayList<Integer>();
 		String[] toIdArray=toid.split(",");
 		for (String s : toIdArray) {
@@ -475,10 +546,12 @@ public class AlertInboxController {
 		
 		return alertEvents;
 	}
+	
 	@RequestMapping(value = "/getConversation", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getConversation(
 			 @RequestParam(value="alertid",required=true) String alertid){
+		
 		List<AlertEvent> alerts=alertInboxService.getConversion(alertid);
 		EMRResponseBean alert=new EMRResponseBean();
 		alert.setData(alerts);
@@ -487,6 +560,7 @@ public class AlertInboxController {
 		
 		return alert;
 	}
+	
 	@RequestMapping(value = "/forwardIcmAlert", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean forwardIcmAlert(
@@ -495,15 +569,50 @@ public class AlertInboxController {
 			 @RequestParam(value="categoryid",required=true, defaultValue="37" ) Integer categoryid,
 			 @RequestParam(value="patientid",required=true, defaultValue="-1111") Integer patientid,
 			 @RequestParam(value="encounterid",required=true, defaultValue="-1" ) Integer encounterid,
-			@RequestParam(value="forwardto",required=true) Integer forwardto,
+			 @RequestParam(value="forwardto",required=true) Integer forwardto,
 			 @RequestParam(value="message",required=true, defaultValue="") String message,
 			 @RequestParam(value="parentalertid",required=true, defaultValue="-1" ) Integer parentalertid){
+	
 		List<AlertEvent> alerts=alertInboxService.forwardIcmAlert(alertid,userId,encounterid,patientid,categoryid,forwardto,message,parentalertid);
 		EMRResponseBean alert=new EMRResponseBean();
 		alert.setData(alerts);
-		
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.UPDATE, 0, Log_Outcome.SUCCESS, "successfully forwarded internal communication message alert(updation)", sessionMap.getUserID(), request.getRemoteAddr(), patientid, "userId="+userId+"alertid="+alertid, LogUserType.USER_LOGIN, "", "");
-		
 		return alert;
+	}
+	
+	@RequestMapping(value = "/statusCategories", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getStatusCategories(
+			 @RequestParam(value="alertSection",required=true) String alertSection){
+		
+		EMRResponseBean alert=new EMRResponseBean();
+		alert.setData(alertInboxService.getStatusCategories(alertSection).toString());
+		return alert;
+	}
+	
+	@RequestMapping(value = "/archive", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean archive(
+			 @RequestParam(value="alertStatus",required=true, defaultValue="1") Integer alertStatus,
+			 @RequestParam(value="days",required=true, defaultValue="-1") Integer days,
+			 @RequestParam(value="patientid",required=true, defaultValue="-1") Integer patientid,
+			 @RequestParam(value="patientName",required=true, defaultValue="All" ) String patientName,
+			 @RequestParam(value="fromId",required=true, defaultValue="-999") Integer fromId,
+			 @RequestParam(value="toId",required=true, defaultValue="-999") Integer toId,
+			 @RequestParam(value="message",required=true, defaultValue="") String message){
+	
+		HashMap<Integer, AlertCategoryBean> alerts=alertInboxService.archieve(alertStatus,days,patientid,patientName,fromId,toId,message);
+		EMRResponseBean alert=new EMRResponseBean();
+		alert.setData(alerts);
+		return alert;
+	}
+	
+	@RequestMapping(value = "/getAllCategories", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getAllCategories(){
+		
+		EMRResponseBean emrResponseBean = new EMRResponseBean();
+		emrResponseBean.setData(alertInboxService.getAllCategories());
+		return emrResponseBean;
 	}
 }

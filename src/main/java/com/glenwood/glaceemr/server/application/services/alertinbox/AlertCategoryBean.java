@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.services.alertinbox;
 
+import java.util.List;
+
 
 public class AlertCategoryBean {
 
@@ -25,6 +27,11 @@ public class AlertCategoryBean {
 		this.qrurl = qrurl;
 	}
 	
+	public AlertCategoryBean(){
+		
+	}
+	
+	List<AlertInboxBean> alertInboxBean;
 	int alerttype;
 	int qrflag;
 	int subpage;
@@ -39,7 +46,16 @@ public class AlertCategoryBean {
 	String categoryname;
 	Boolean needdatewisegrouping;
 	String qrurl;
+	int unReadCount;
+	int totalCount;
 	
+	
+	public List<AlertInboxBean> getAlertInboxBean() {
+		return alertInboxBean;
+	}
+	public void setAlertInboxBean(List<AlertInboxBean> alertInboxBean) {
+		this.alertInboxBean = alertInboxBean;
+	}
 	public int getAlerttype() {
 		return alerttype;
 	}
@@ -123,6 +139,22 @@ public class AlertCategoryBean {
 	}
 	public void setQrurl(String qrurl) {
 		this.qrurl = qrurl;
+	}
+
+	public int getUnReadCount() {
+		return unReadCount;
+	}
+
+	public void setUnReadCount(int unReadCount) {
+		this.unReadCount = unReadCount;
+	}
+
+	public int getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(int totalCount) {
+		this.totalCount = totalCount;
 	}
 	
 }

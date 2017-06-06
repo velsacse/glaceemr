@@ -13,10 +13,12 @@ public class AlertInboxBean {
 	String redirecturl;
 	Integer chartid;
 	Integer fromid;
+	String fromName;
 	Boolean read;
 	String modifiedbyname;
 	Integer encounterid;
 	Integer toid;
+	String toName;
 	String alert_category_url_caption;
 	String forwardedby;
 	Integer alerttype;
@@ -368,4 +370,21 @@ public class AlertInboxBean {
 	public void setCreateddatetime(String createddatetime) {
 		this.createddatetime = createddatetime;
 	}
+
+	public String getFromName() {
+		return fromName;
+	}
+
+	public void setFromName(String fromName) {
+		this.fromName = fromName;
+	}
+
+	public String getToName() {
+		return toName;
+	}
+
+	public void setToName(String toName) {
+		this.toName = toName;
+	}
+	
 }

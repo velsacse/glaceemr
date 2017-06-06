@@ -12,6 +12,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
@@ -54,7 +59,7 @@ public class AlertEvent {
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="alert_event_closed_date")
 	private Timestamp alertEventClosedDate;
-
+	
 	@Column(name="alert_event_message")
 	private String alertEventMessage;
 
@@ -159,6 +164,11 @@ public class AlertEvent {
 	@JoinColumn(name="alert_event_patient_id", referencedColumnName="patient_registration_id", insertable=false, updatable=false)
 	private PatientRegistration patientRegistration;
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula = @JoinFormula(value = "alert_event_from::text", referencedColumnName = "pharm_details_ncpdpid")) })
+	PharmDetails pharmDetails;
+
 	public Integer getAlertEventId() {
 		return alertEventId;
 	}

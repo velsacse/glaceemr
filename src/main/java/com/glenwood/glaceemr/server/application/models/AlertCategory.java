@@ -69,6 +69,10 @@ public class AlertCategory {
 	@JsonManagedReference
 	List<AlertEvent> alertEventCategoryId;
 	
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="alertCategoryTable")
+	@JsonManagedReference
+	List<AlertArchive> alertArchiveCategoryId;
+	
 	
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="alertCategoryTable")
 	@JsonManagedReference

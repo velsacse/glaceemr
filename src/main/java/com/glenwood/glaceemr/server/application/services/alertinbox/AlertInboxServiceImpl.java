@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,8 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -25,13 +24,17 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.CriteriaBuilder.Trimspec;
 
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.models.AlertArchive;
+import com.glenwood.glaceemr.server.application.models.AlertArchive_;
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertCategory_;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
@@ -45,6 +48,8 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
+import com.glenwood.glaceemr.server.application.models.PharmDetails;
+import com.glenwood.glaceemr.server.application.models.PharmDetails_;
 import com.glenwood.glaceemr.server.application.models.Room;
 import com.glenwood.glaceemr.server.application.models.Room_;
 import com.glenwood.glaceemr.server.application.repositories.AlertArchiveRepository;
@@ -57,6 +62,7 @@ import com.glenwood.glaceemr.server.application.specifications.AlertArchiveSpeci
 import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
 import com.glenwood.glaceemr.server.application.specifications.AlertInboxSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
+import com.glenwood.glaceemr.server.utils.HUtil;
 import com.google.common.base.Optional;
 /**
  * Service Implementation file for AlertInboxController
@@ -301,15 +307,16 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			e.printStackTrace();
 		}
 
-		Set<String> categoryIdSet=new TreeSet<String>(shortCategoryIdList);
-		List<String> categoryIdListTemp=new ArrayList<String>(categoryIdSet);
+		/*Set<String> categoryIdSet=new TreeSet<String>(shortCategoryIdList);
+		List<String> categoryIdListTemp=new ArrayList<String>(categoryIdSet);*/
 
-		if(!categoryIdList.get(0).equals("-1"))
+		/*if(!categoryIdList.get(0).equals("-1"))
 			categoryIdListTemp=categoryIdList;
-
-
+		else
+			categoryIdListTemp.add("-1");*/
+			
 		try{
-			alertList=buildAlertsJsn(categoryIdListTemp,userIdList,pageno,pagesize);
+			alertList=buildAlertsJsn(categoryIdList,userIdList,pageno,pagesize);
 			map.put("alerts", alertList);
 			map.put("shortcutinfo", getShortCutList);
 
@@ -931,7 +938,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			AlertEvent ae=alertEvent;
 			//Un highlight the alert
 			ae.setAlertEventRead(false);
-			ae.setAlertEventReadby(0);
+			ae.setAlertEventReadby(null);
 			ae.removeAlertEventReadDate();
 			ae.setAlertEventCategoryId(Integer.parseInt(categoryId));
 			ae.setAlertEventMessage(message);
@@ -1472,7 +1479,8 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			String receiverNameSearchValue, String messageSearchValue, 
 			String fromDateSearchValue, String toDateSearchValue) {
 		logger.trace("Creating alerts query.");
-		List<Integer> userIdList=constructUserList(userId); 		
+		List<Integer> userIdList=constructUserList(userId);
+		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<AlertCategory> rootAlCate = cq.from(AlertCategory.class);
@@ -1496,7 +1504,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		Join<Encounter,EmployeeProfile> joinEncEmp=joinAeEncId.join("empProfileEmpId",JoinType.LEFT);
 		
 		List<Predicate> predList = new LinkedList<Predicate>();
-		if(!patientNameSearchValue.equals(""))
+		if((!patientNameSearchValue.equalsIgnoreCase("-1"))&&(!patientNameSearchValue.equals("")))
 		{
 			Predicate patientNameSearchPred = builder.equal(joinAcAe.get(AlertEvent_.alertEventPatientId), Integer.parseInt(patientNameSearchValue));
 			predList.add(patientNameSearchPred);
@@ -1668,4 +1676,575 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		return pattern.toString();
 	}
 
+	@Override
+	public JSONArray getStatusCategories(String alertSection) {
+		List<String> alertSec = new ArrayList<String>(Arrays.asList(alertSection.split(",")));
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+		Root<AlertCategory> root = cq.from(AlertCategory.class);
+		cq.multiselect(root.get(AlertCategory_.alertCategoryId),
+				root.get(AlertCategory_.alertCategoryDisplayName));
+		cq.where(root.get(AlertCategory_.alertCategoryId).in(alertSec));
+		List<Object[]> statusResult = em.createQuery(cq).getResultList();
+		
+		JSONArray statusArray = new JSONArray();
+		try
+		{
+			for(Object[] value : statusResult)
+			{
+				JSONObject statusObject = new JSONObject();
+				statusObject.put("id", value[0]);
+				statusObject.put("displayName", value[1]);
+				statusArray.put(statusObject);
+			}
+		}
+		catch(Exception e)
+		{
+			
+		}
+		return statusArray;
+	}
+
+	@Override
+	public HashMap<Integer, AlertCategoryBean> archieve(Integer alertStatus, Integer days,
+			Integer patientid, String patientName, Integer fromId,
+			Integer toId, String message) {
+		List<Predicate> joinPredList = new ArrayList<Predicate>();
+		List<Predicate> archivePredList = new ArrayList<Predicate>();
+		List<Predicate> wherePredList = new ArrayList<Predicate>();
+		
+		CriteriaBuilder builderArchive = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cqArchive = builderArchive.createQuery(Object.class);
+		Root<AlertCategory> rootArchive = cqArchive.from(AlertCategory.class);
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+		Root<AlertCategory> root = cq.from(AlertCategory.class);
+		Join<AlertCategory, AlertEvent> joinae = null;
+		Join<AlertCategory, AlertArchive> joinarchive = null;
+		Join<AlertEvent, Room> room = null;
+		Join<AlertArchive, Room> roomArchive = null;
+		Join<AlertEvent, Chart> chart = null;
+		Join<AlertArchive, Chart> chartArchive = null;
+		Join<AlertEvent, PatientRegistration> patReg = null;
+		Join<AlertArchive, PatientRegistration> patRegArchive = null;
+		Join<AlertEvent, EmployeeProfile> sent = null;
+		Join<AlertArchive, EmployeeProfile> sentArchive = null;
+		Join<AlertEvent, EmployeeProfile> receive = null;
+		Join<AlertArchive, EmployeeProfile> receiveArchive = null;
+		Join<AlertEvent, EmployeeProfile> read = null;
+		Join<AlertArchive, EmployeeProfile> readArchive = null;
+		Join<AlertEvent, EmployeeProfile> modified = null;
+		Join<AlertArchive, EmployeeProfile> modifiedArchive = null;
+		Join<AlertEvent, PharmDetails> pharmDetails = null;
+		Join<AlertArchive, PharmDetails> pharmDetailsArchive = null;
+		
+		if(alertStatus != 0){
+			if(alertStatus != 0 && alertStatus == 1){
+				joinae = root.join(AlertCategory_.alertEventCategoryId,JoinType.INNER);
+			}
+			else if(alertStatus != 0)
+			{
+				joinarchive = root.join(AlertCategory_.alertArchiveCategoryId,JoinType.INNER);
+			}
+				
+			if(fromId != -10 && fromId != -999)
+			{
+				Predicate p1 = null;
+				if(joinae != null)
+					p1 = builder.equal(joinae.get(AlertEvent_.alertEventFrom), fromId);
+				else
+					p1 = builder.equal(joinarchive.get(AlertArchive_.alertEventFrom), fromId);
+				joinPredList.add(p1);
+			}
+			if(days != -999)
+			{
+				Expression<Double> diff = builder.function("date_diff", Double.class, 
+								builder.literal(4),
+								joinae.get(AlertEvent_.alertEventCreatedDate),
+								builder.literal(alertInboxRepository.findCurrentTimeStamp()));
+				joinPredList.add(builder.lessThan(diff, builder.literal((double)days)));
+			}
+			if(toId != -999)
+			{
+				Predicate p1 = null;
+				if(joinae != null)
+					p1 = joinae.get(AlertEvent_.alertEventTo).in(toId);
+				else
+					p1 = joinarchive.get(AlertArchive_.alertEventFrom).in(fromId);
+				joinPredList.add(p1);
+			}
+			
+			if(joinae != null){
+				getQueryFromEvent(room,chart,sent,receive,read,modified,patReg,pharmDetails,joinae,builder,cq,root,
+						joinPredList);
+				Predicate alertEveId = builder.isNotNull(joinae.get(AlertEvent_.alertEventId));
+				wherePredList.add(alertEveId);
+				
+				if(patientid != -1){
+					Predicate patId = builder.equal(joinae.get(AlertEvent_.alertEventPatientId), patientid);
+					wherePredList.add(patId);
+				}
+				else if(!patientName.trim().equalsIgnoreCase("all")){
+					Predicate patName = builder.like(builder.lower(builder.trim(Trimspec.BOTH,joinae.get(AlertEvent_.alertEventPatientName))),
+							patientName.trim().toLowerCase()+"%");
+					wherePredList.add(patName);
+				}
+				
+				if(!message.equalsIgnoreCase(""))
+				{
+					Predicate messagePred = builder.like(builder.lower(builder.trim(Trimspec.BOTH,joinae.get(AlertEvent_.alertEventMessage))),
+							"%"+message.trim().toLowerCase()+"%");
+					wherePredList.add(messagePred);
+				}
+				
+				if(alertStatus != 0){
+					Predicate status = builder.equal(joinae.get(AlertEvent_.alertEventStatus), alertStatus);
+					wherePredList.add(status);
+				}
+				
+			}
+			else{
+				getQueryFromArchive(roomArchive,chartArchive,sentArchive,receiveArchive,readArchive,
+						modifiedArchive,patRegArchive,pharmDetailsArchive,joinarchive,joinPredList,builder,cq,root);
+				
+				Predicate alertEveId = builder.isNotNull(joinarchive.get(AlertArchive_.alertEventId));
+				wherePredList.add(alertEveId);
+				
+				if(patientid != -1){
+					Predicate patId = builder.equal(joinarchive.get(AlertArchive_.alertEventPatientId), patientid);
+					wherePredList.add(patId);
+				}
+				else if(!patientName.trim().equalsIgnoreCase("all")){
+					Predicate patName = builder.like(builder.lower(builder.trim(Trimspec.BOTH,joinarchive.get(AlertArchive_.alertEventPatientName))),
+							patientName.trim().toLowerCase()+"%");
+					wherePredList.add(patName);
+				}
+				
+				if(message != "")
+				{
+					Predicate messagePred = builder.like(builder.lower(builder.trim(Trimspec.BOTH,joinarchive.get(AlertArchive_.alertEventMessage))),
+							"%"+message.trim().toLowerCase()+"%");
+					wherePredList.add(messagePred);
+				}
+				
+				if(alertStatus != 0){
+					Predicate status = builder.equal(joinarchive.get(AlertArchive_.alertEventStatus), alertStatus);
+					wherePredList.add(status);
+				}
+			}
+			
+			cq.where(wherePredList.toArray(new Predicate[] {}));
+		}
+		else
+		{
+			joinae = root.join(AlertCategory_.alertEventCategoryId,JoinType.INNER);
+			joinarchive = rootArchive.join(AlertCategory_.alertArchiveCategoryId,JoinType.INNER);
+			if(fromId != -10 && fromId != -999)
+			{
+				Predicate p1 = builder.equal(joinae.get(AlertEvent_.alertEventFrom), fromId);
+				Predicate archivep1 = builderArchive.equal(joinarchive.get(AlertArchive_.alertEventFrom), fromId);
+				joinPredList.add(p1);
+				archivePredList.add(archivep1);
+			}
+			if(days != -999)
+			{
+				Expression<Double> diff = builder.function("date_diff", Double.class, 
+								builder.literal(4),
+								joinae.get(AlertEvent_.alertEventCreatedDate),
+								builder.literal(alertInboxRepository.findCurrentTimeStamp()));
+				Expression<Double> diffArchive = builder.function("date_diff", Double.class, 
+						builder.literal(4),
+						joinarchive.get(AlertArchive_.alertEventCreatedDate),
+						builderArchive.literal(alertArchiveRepository.findCurrentTimeStamp()));
+				joinPredList.add(builder.lessThan(diff, builder.literal((double)days)));
+				archivePredList.add(builderArchive.lessThan(diffArchive, builderArchive.literal((double)days)));
+			}
+			if(toId != -999)
+			{
+				Predicate p1 = joinae.get(AlertEvent_.alertEventTo).in(toId);
+				Predicate archivep1 = joinarchive.get(AlertArchive_.alertEventFrom).in(fromId);
+				joinPredList.add(p1);
+				archivePredList.add(archivep1);
+			}
+			
+			getQueryFromEvent(room, chart, sent, receive, read, modified, patReg, pharmDetails, joinae, builder, cq, root, joinPredList);
+			getQueryFromArchive(roomArchive, chartArchive, sentArchive, receiveArchive, readArchive, modifiedArchive, patRegArchive, pharmDetailsArchive, joinarchive, joinPredList, builderArchive, cqArchive, rootArchive);
+		}
+		List<AlertArchiveBean> archiveBeanList;
+		if(alertStatus == 0){
+			List<Object> rst = em.createQuery(cq).getResultList();
+			List<Object> result = em.createQuery(cqArchive).getResultList();
+			archiveBeanList = addToBean(rst);
+			List<AlertArchiveBean> archiveList = addToBean(result);
+			List<String> detAlertids = new ArrayList<String>();
+			
+			//remove duplicates
+
+			for (AlertArchiveBean detOption : archiveBeanList) {
+				detAlertids.add(detOption.getAlertEventId().toString());
+			}
+
+			for(int i=0;i<archiveList.size();i++){
+				if(detAlertids.contains(archiveList.get(i).getAlertEventId())){
+					archiveList.remove(i);
+					i--;
+				}
+			}	
+
+			archiveBeanList.addAll(archiveList);
+		}
+		else
+		{
+			List<Object> rst = em.createQuery(cq).getResultList();
+			archiveBeanList = addToBean(rst);
+		}
+		
+		HashMap<Integer, AlertCategoryBean> hash = new HashMap<Integer, AlertCategoryBean>();
+		
+		// framing bean
+		for(int categoryIndex=0;categoryIndex<archiveBeanList.size();categoryIndex++)
+		{
+			if(!hash.containsKey(archiveBeanList.get(categoryIndex).getAlertCategoryId()))
+			{
+				AlertCategoryBean acb = new AlertCategoryBean();
+				acb.setAlertgroup(archiveBeanList.get(categoryIndex).getAlertCategoryGroup());
+				acb.setAlerttype(archiveBeanList.get(categoryIndex).getAlertCategoryType());
+				acb.setAlertsection(archiveBeanList.get(categoryIndex).getAlertCategorySection());
+				acb.setActionmap(archiveBeanList.get(categoryIndex).getAlertCategoryActionMap());
+				acb.setQrflag(archiveBeanList.get(categoryIndex).getAlertCategoryQrFlag());
+				acb.setQrurl(archiveBeanList.get(categoryIndex).getAlertCategoryQrUrl());
+				acb.setCategoryid(archiveBeanList.get(categoryIndex).getAlertCategoryId());
+				acb.setCategoryname(archiveBeanList.get(categoryIndex).getAlertCategoryName() );
+				acb.setDisplayname(archiveBeanList.get(categoryIndex).getAlertCategoryDisplayName());
+				acb.setNeeddatewisegrouping(Boolean.parseBoolean(archiveBeanList.get(categoryIndex).getNeeddatewisegrouping()));
+				acb.setExpanded(Boolean.parseBoolean(archiveBeanList.get(categoryIndex).getExpanded()));
+				acb.setSubpage(archiveBeanList.get(categoryIndex).getAlertCategorySubpage());
+				
+				AlertInboxBean aBean = new AlertInboxBean();
+				String msg = HUtil.Nz(archiveBeanList.get(categoryIndex).getEventMessage(),"");
+				if(msg.equals(""))
+					msg = "-";
+				aBean.setAlertgroup(archiveBeanList.get(categoryIndex).getAlertCategoryGroup());
+				aBean.setAlerttype(archiveBeanList.get(categoryIndex).getAlertCategoryType());
+				aBean.setCategoryid(archiveBeanList.get(categoryIndex).getAlertCategoryId());
+				aBean.setAlertid(archiveBeanList.get(categoryIndex).getAlertEventId());
+				aBean.setFromid(archiveBeanList.get(categoryIndex).getAlertEventFrom());
+				aBean.setToid(archiveBeanList.get(categoryIndex).getAlertEventTo());
+				aBean.setPatientid(archiveBeanList.get(categoryIndex).getAlertEventPatientId());
+				aBean.setChartid(archiveBeanList.get(categoryIndex).getChartId());
+				aBean.setEncounterid(archiveBeanList.get(categoryIndex).getAlertEventEncounterId());
+				aBean.setRefid(archiveBeanList.get(categoryIndex).getAlertEventRefId());
+				aBean.setPatientname(archiveBeanList.get(categoryIndex).getAlertEventPatientName());
+				aBean.setRoomname(archiveBeanList.get(categoryIndex).getRoomName());
+				aBean.setMsg(msg);
+				aBean.setCreateddate(archiveBeanList.get(categoryIndex).getCreatedDate());
+				aBean.setCreatedtime(archiveBeanList.get(categoryIndex).getCreatedTime());
+				aBean.setCreateddatetime(archiveBeanList.get(categoryIndex).getCreatedDateTime().toString());
+				aBean.setFromid(archiveBeanList.get(categoryIndex).getAlertEventFrom());
+				aBean.setFromName(archiveBeanList.get(categoryIndex).getForwardedBy());
+				aBean.setToName(archiveBeanList.get(categoryIndex).getReceiveOtherwise());
+				aBean.setModifiedbyid(archiveBeanList.get(categoryIndex).getAlertEventModifiedby());
+				aBean.setModifiedbyname(archiveBeanList.get(categoryIndex).getModifiedByOtherwise());
+				aBean.setRead(archiveBeanList.get(categoryIndex).getAlertEventRead());
+				aBean.setReadbyid(archiveBeanList.get(categoryIndex).getAlertEventReadby());
+				aBean.setReadbyname(archiveBeanList.get(categoryIndex).getReadByOtherwise());
+				aBean.setReadon(archiveBeanList.get(categoryIndex).getReadOn());
+				aBean.setModifiedon(archiveBeanList.get(categoryIndex).getModifiedOn());
+				aBean.setHighprivilage(archiveBeanList.get(categoryIndex).getAlertEventHighlight());
+				aBean.setSubpage(archiveBeanList.get(categoryIndex).getAlertCategorySubpage());
+				aBean.setStatus(archiveBeanList.get(categoryIndex).getAlertEventStatus());
+				aBean.setParentid(archiveBeanList.get(categoryIndex).getAlertEventPatientId());
+				acb.setAlertInboxBean(new ArrayList<AlertInboxBean>());
+				acb.getAlertInboxBean().add(aBean);
+				
+				hash.put(archiveBeanList.get(categoryIndex).getAlertCategoryId(), acb);
+			}
+			else
+			{
+				AlertInboxBean aBean = new AlertInboxBean();
+				String msg = HUtil.Nz(archiveBeanList.get(categoryIndex).getEventMessage(),"");
+				if(msg.equals(""))
+					msg = "-";
+				aBean.setAlertgroup(archiveBeanList.get(categoryIndex).getAlertCategoryGroup());
+				aBean.setAlerttype(archiveBeanList.get(categoryIndex).getAlertCategoryType());
+				aBean.setCategoryid(archiveBeanList.get(categoryIndex).getAlertCategoryId());
+				aBean.setAlertid(archiveBeanList.get(categoryIndex).getAlertEventId());
+				aBean.setFromid(archiveBeanList.get(categoryIndex).getAlertEventFrom());
+				aBean.setToid(archiveBeanList.get(categoryIndex).getAlertEventTo());
+				aBean.setPatientid(archiveBeanList.get(categoryIndex).getAlertEventPatientId());
+				aBean.setChartid(archiveBeanList.get(categoryIndex).getChartId());
+				aBean.setEncounterid(archiveBeanList.get(categoryIndex).getAlertEventEncounterId());
+				aBean.setRefid(archiveBeanList.get(categoryIndex).getAlertEventRefId());
+				aBean.setPatientname(archiveBeanList.get(categoryIndex).getAlertEventPatientName());
+				aBean.setRoomname(archiveBeanList.get(categoryIndex).getRoomName());
+				aBean.setMsg(msg);
+				aBean.setCreateddate(archiveBeanList.get(categoryIndex).getCreatedDate());
+				aBean.setCreatedtime(archiveBeanList.get(categoryIndex).getCreatedTime());
+				aBean.setCreateddatetime(archiveBeanList.get(categoryIndex).getCreatedDateTime().toString());
+				aBean.setFromid(archiveBeanList.get(categoryIndex).getAlertEventFrom());
+				aBean.setFromName(archiveBeanList.get(categoryIndex).getForwardedBy());
+				aBean.setToName(archiveBeanList.get(categoryIndex).getReceiveOtherwise());
+				aBean.setModifiedbyid(archiveBeanList.get(categoryIndex).getAlertEventModifiedby());
+				aBean.setModifiedbyname(archiveBeanList.get(categoryIndex).getModifiedByOtherwise());
+				aBean.setRead(archiveBeanList.get(categoryIndex).getAlertEventRead());
+				aBean.setReadbyid(archiveBeanList.get(categoryIndex).getAlertEventReadby());
+				aBean.setReadbyname(archiveBeanList.get(categoryIndex).getReadByOtherwise());
+				aBean.setReadon(archiveBeanList.get(categoryIndex).getReadOn());
+				aBean.setModifiedon(archiveBeanList.get(categoryIndex).getModifiedOn());
+				aBean.setHighprivilage(archiveBeanList.get(categoryIndex).getAlertEventHighlight());
+				aBean.setSubpage(archiveBeanList.get(categoryIndex).getAlertCategorySubpage());
+				aBean.setStatus(archiveBeanList.get(categoryIndex).getAlertEventStatus());
+				aBean.setParentid(archiveBeanList.get(categoryIndex).getAlertEventPatientId());
+				AlertCategoryBean acb = hash.get(archiveBeanList.get(categoryIndex).getAlertCategoryId());
+				acb.getAlertInboxBean().add(aBean);
+			}
+		}
+		
+		for(Integer key : hash.keySet())
+		{
+			int unreadAlerts = 0;
+			int totalAlerts  = 0;
+			AlertCategoryBean ac = hash.get(key);
+			for(int i=0;i<ac.getAlertInboxBean().size();i++)
+			{
+				AlertInboxBean aib = ac.getAlertInboxBean().get(i);
+				if(aib.getRead())
+					unreadAlerts++;
+				totalAlerts++;
+			}
+			ac.setUnReadCount(unreadAlerts);
+			ac.setTotalCount(totalAlerts);
+			hash.put(key, ac);
+		}
+		return hash;
+	}
+
+	public List<AlertArchiveBean> addToBean(List<Object> rst) {
+		// TODO Auto-generated method stub
+		List<AlertArchiveBean> archiveBeanList = new ArrayList<AlertArchiveBean>();
+		for(int i=0;i<rst.size();i++)
+		{
+			AlertArchiveBean archiveBean = (AlertArchiveBean) rst.get(i);
+			if(archiveBean.getAlertEventFrom() != null && archiveBean.getAlertEventFrom() == -100)
+			{
+				archiveBean.setForwardedBy("Patient");
+			}
+			
+			if(archiveBean.getAlertEventTo() != null && archiveBean.getAlertEventTo() == -1)
+			{
+				archiveBean.setReceiveOtherwise("All");
+			}
+			else if(archiveBean.getAlertEventTo() != null && archiveBean.getAlertEventTo() == -10)
+			{
+				archiveBean.setReceiveOtherwise("Nurse Practitioner");
+			}
+			else if(archiveBean.getAlertEventTo() != null && archiveBean.getAlertEventTo() == -6)
+			{
+				archiveBean.setReceiveOtherwise("MA");
+			}
+			else if(archiveBean.getAlertEventTo() != null && archiveBean.getAlertEventTo() == -7)
+			{
+				archiveBean.setReceiveOtherwise("Office Manager");
+			}
+			else if(archiveBean.getAlertEventTo() != null && archiveBean.getAlertEventTo() == -2)
+			{
+				archiveBean.setReceiveOtherwise("Nurse");
+			}
+			else if(archiveBean.getAlertEventTo() != null && archiveBean.getAlertEventTo() == -3)
+			{
+				archiveBean.setReceiveOtherwise("Front Desk");
+			}
+			else if(archiveBean.getAlertEventTo() != null && archiveBean.getAlertEventTo() == -5)
+			{
+				archiveBean.setReceiveOtherwise("Admin");
+			}
+			
+			if(archiveBean.getAlertEventReadby() != null && archiveBean.getAlertEventReadby() == -100)
+			{
+				archiveBean.setReadByOtherwise("Patient");
+			}
+			
+			if(archiveBean.getAlertEventModifiedby() != null && archiveBean.getAlertEventModifiedby() == -100)
+			{
+				archiveBean.setModifiedByOtherwise("Patient");
+			}
+			
+			if(archiveBean.getAlertEventStatus() != null && archiveBean.getAlertEventStatus() == 2)
+			{
+				archiveBean.setStatus("Completed");
+			}
+			else
+			{
+				if(archiveBean.getAlertEventStatus() !=null && archiveBean.getAlertEventStatus() == 3)
+				{
+					archiveBean.setStatus("Pending");
+				}
+				else
+				{
+					if(archiveBean.getAlertEventStatus() !=null && archiveBean.getAlertEventStatus() == 4)
+					{
+						archiveBean.setStatus("Deferred");
+					}
+					else
+					{
+						archiveBean.setStatus("Open");
+					}
+				}
+			}
+			archiveBeanList.add(archiveBean);
+		}
+		return archiveBeanList;
+	}
+
+	private void getQueryFromArchive(Join<AlertArchive, Room> roomArchive,
+			Join<AlertArchive, Chart> chartArchive,
+			Join<AlertArchive, EmployeeProfile> sentArchive,
+			Join<AlertArchive, EmployeeProfile> receiveArchive,
+			Join<AlertArchive, EmployeeProfile> readArchive,
+			Join<AlertArchive, EmployeeProfile> modifiedArchive,
+			Join<AlertArchive, PatientRegistration> patRegArchive,
+			Join<AlertArchive, PharmDetails> pharmDetailsArchive,
+			Join<AlertCategory, AlertArchive> joinarchive,
+			List<Predicate> joinPredList, CriteriaBuilder builder,
+			CriteriaQuery<Object> cq, Root<AlertCategory> root) {
+		roomArchive = joinarchive.join(AlertArchive_.roomTable,JoinType.LEFT);
+		chartArchive = joinarchive.join(AlertArchive_.chartTable,JoinType.LEFT);
+		sentArchive = joinarchive.join(AlertArchive_.empProfileTableFrom,JoinType.LEFT);
+		receiveArchive = joinarchive.join(AlertArchive_.empProfileTableTo,JoinType.LEFT);
+		readArchive = joinarchive.join(AlertArchive_.empProfileTableReadBy,JoinType.LEFT);
+		modifiedArchive = joinarchive.join(AlertArchive_.empProfileTableModifiedBy,JoinType.LEFT);
+		patRegArchive = joinarchive.join(AlertArchive_.patientRegistration,JoinType.LEFT);
+		pharmDetailsArchive = joinarchive.join(AlertArchive_.pharmDetails,JoinType.LEFT);
+		joinarchive.on(joinPredList.toArray(new Predicate[] {}));
+			
+		cq.multiselect(builder.construct(AlertArchiveBean.class, builder.coalesce(roomArchive.get(Room_.roomName), builder.literal("-")),
+				root.get(AlertCategory_.alertCategoryId),
+				root.get(AlertCategory_.alertCategoryName),
+				root.get(AlertCategory_.alertCategoryUrl),
+				root.get(AlertCategory_.alertCategoryDisplayName),
+				root.get(AlertCategory_.alertCategoryDisplayOrder),
+				root.get(AlertCategory_.alertCategoryGroup),
+				root.get(AlertCategory_.alertCategoryType),
+				root.get(AlertCategory_.alertCategorySection),
+				root.get(AlertCategory_.alertCategoryActionMap),
+				root.get(AlertCategory_.alertCategorySubpage),
+				root.get(AlertCategory_.alertCategoryQrFlag),
+				root.get(AlertCategory_.alertCategoryQrUrl),
+				chartArchive.get(Chart_.chartId),
+				joinarchive.get(AlertArchive_.alertEventId),
+				patRegArchive.get(PatientRegistration_.patientRegistrationAccountno),
+				joinarchive.get(AlertArchive_.alertEventParentalertid),
+				joinarchive.get(AlertArchive_.alertEventFrom),
+				joinarchive.get(AlertArchive_.alertEventTo),
+				joinarchive.get(AlertArchive_.alertEventRefId),
+				joinarchive.get(AlertArchive_.alertEventPatientId),
+				joinarchive.get(AlertArchive_.alertEventReadby),
+				joinarchive.get(AlertArchive_.alertEventModifiedby),
+				joinarchive.get(AlertArchive_.alertEventStatus),
+				builder.coalesce(joinarchive.get(AlertArchive_.alertEventEncounterId), builder.literal(-1)),
+				builder.function("glace_timezone", String.class, 
+						joinarchive.get(AlertArchive_.alertEventCreatedDate),
+						builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("createdDate"),
+				builder.function("glace_timezone", String.class, 
+						joinarchive.get(AlertArchive_.alertEventCreatedDate),
+						builder.literal("EDT"),builder.literal("HH24:MI")).alias("createdTime"),
+				joinarchive.get(AlertArchive_.alertEventCreatedDate).alias("createdDateTime"),
+				joinarchive.get(AlertArchive_.alertEventMessage).alias("EventMessage"),
+				builder.function("glace_timezone", String.class, 
+						joinarchive.get(AlertArchive_.alertEventReadDate),
+						builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("readOn"),
+				builder.function("glace_timezone", String.class, 
+						joinarchive.get(AlertArchive_.alertEventModifiedDate),
+						builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("modifiedOn"),
+				builder.selectCase().when(builder.like(builder.coalesce(sentArchive.get(EmployeeProfile_.empProfileFullname), "-"), "-"), 
+						builder.coalesce(pharmDetailsArchive.get(PharmDetails_.pharmDetailsStoreName), "-"))
+						.otherwise(sentArchive.get(EmployeeProfile_.empProfileFullname)).alias("forwardedBy"),
+				receiveArchive.get(EmployeeProfile_.empProfileFullname).alias("receiveOtherwise"),
+				builder.coalesce(readArchive.get(EmployeeProfile_.empProfileFullname), "-").alias("readByOtherwise"),
+				builder.coalesce(modifiedArchive.get(EmployeeProfile_.empProfileFullname), "-").alias("modifiedByOtherwise"),
+				joinarchive.get(AlertArchive_.alertEventRead),
+				joinarchive.get(AlertArchive_.alertEventHighlight),
+				joinarchive.get(AlertArchive_.alertEventPatientName),
+				builder.literal("true").alias("expanded"),
+				builder.literal("false").alias("needdatewisegrouping")));	
+	}
+
+	private void getQueryFromEvent(Join<AlertEvent, Room> room,
+			Join<AlertEvent, Chart> chart,
+			Join<AlertEvent, EmployeeProfile> sent,
+			Join<AlertEvent, EmployeeProfile> receive,
+			Join<AlertEvent, EmployeeProfile> read,
+			Join<AlertEvent, EmployeeProfile> modified,
+			Join<AlertEvent, PatientRegistration> patReg,
+			Join<AlertEvent, PharmDetails> pharmDetails,
+			Join<AlertCategory, AlertEvent> joinae, CriteriaBuilder builder, CriteriaQuery<Object> cq, Root<AlertCategory> root, List<Predicate> joinPredList) {
+		room = joinae.join(AlertEvent_.roomTable,JoinType.LEFT);
+		chart = joinae.join(AlertEvent_.chartTable,JoinType.LEFT);
+		sent = joinae.join(AlertEvent_.empProfileTableFrom,JoinType.LEFT);
+		receive = joinae.join(AlertEvent_.empProfileTableTo,JoinType.LEFT);
+		read = joinae.join(AlertEvent_.empProfileTableReadBy,JoinType.LEFT);
+		modified = joinae.join(AlertEvent_.empProfileTableModifiedBy,JoinType.LEFT);
+		patReg = joinae.join(AlertEvent_.patientRegistration,JoinType.LEFT);
+		pharmDetails = joinae.join(AlertEvent_.pharmDetails,JoinType.LEFT);
+		joinae.on(joinPredList.toArray(new Predicate[] {}));
+		
+		cq.multiselect(builder.construct(AlertArchiveBean.class, builder.coalesce(room.get(Room_.roomName), builder.literal("-")),
+				root.get(AlertCategory_.alertCategoryId),
+				root.get(AlertCategory_.alertCategoryName),
+				root.get(AlertCategory_.alertCategoryUrl),
+				root.get(AlertCategory_.alertCategoryDisplayName),
+				root.get(AlertCategory_.alertCategoryDisplayOrder),
+				root.get(AlertCategory_.alertCategoryGroup),
+				root.get(AlertCategory_.alertCategoryType),
+				root.get(AlertCategory_.alertCategorySection),
+				root.get(AlertCategory_.alertCategoryActionMap),
+				root.get(AlertCategory_.alertCategorySubpage),
+				root.get(AlertCategory_.alertCategoryQrFlag),
+				root.get(AlertCategory_.alertCategoryQrUrl),
+				chart.get(Chart_.chartId),
+				joinae.get(AlertEvent_.alertEventId),
+				patReg.get(PatientRegistration_.patientRegistrationAccountno),
+				joinae.get(AlertEvent_.alertEventParentalertid),
+				joinae.get(AlertEvent_.alertEventFrom),
+				joinae.get(AlertEvent_.alertEventTo),
+				joinae.get(AlertEvent_.alertEventRefId),
+				joinae.get(AlertEvent_.alertEventPatientId),
+				joinae.get(AlertEvent_.alertEventReadby),
+				joinae.get(AlertEvent_.alertEventModifiedby),
+				joinae.get(AlertEvent_.alertEventStatus),
+				builder.coalesce(joinae.get(AlertEvent_.alertEventEncounterId), builder.literal(-1)),
+				builder.function("glace_timezone", String.class, 
+						joinae.get(AlertEvent_.alertEventCreatedDate),
+						builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("createdDate"),
+				builder.function("glace_timezone", String.class, 
+						joinae.get(AlertEvent_.alertEventCreatedDate),
+						builder.literal("EDT"),builder.literal("HH24:MI")).alias("createdTime"),
+				joinae.get(AlertEvent_.alertEventCreatedDate).alias("createdDateTime"),
+				joinae.get(AlertEvent_.alertEventMessage).alias("EventMessage"),
+				builder.function("glace_timezone", String.class, 
+						joinae.get(AlertEvent_.alertEventReadDate),
+						builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("readOn"),
+				builder.function("glace_timezone", String.class, 
+						joinae.get(AlertEvent_.alertEventModifiedDate),
+						builder.literal("EDT"),builder.literal("MM/dd/yyyy HH:MI:ss am")).alias("modifiedOn"),
+				builder.selectCase().when(builder.like(builder.coalesce(sent.get(EmployeeProfile_.empProfileFullname), "-"), "-"), 
+						builder.coalesce(pharmDetails.get(PharmDetails_.pharmDetailsStoreName), "-"))
+						.otherwise(sent.get(EmployeeProfile_.empProfileFullname)).alias("forwardedBy"),
+				receive.get(EmployeeProfile_.empProfileFullname).alias("receiveOtherwise"),
+				builder.coalesce(read.get(EmployeeProfile_.empProfileFullname), "-").alias("readByOtherwise"),
+				builder.coalesce(modified.get(EmployeeProfile_.empProfileFullname), "-").alias("modifiedByOtherwise"),
+				joinae.get(AlertEvent_.alertEventRead),
+				joinae.get(AlertEvent_.alertEventHighlight),
+				joinae.get(AlertEvent_.alertEventPatientName),
+				builder.literal("true").alias("expanded"),
+				builder.literal("false").alias("needdatewisegrouping")
+				));
+	}
+
+	@Override
+	public List<AlertCategory> getAllCategories() {
+		List<AlertCategory> alertCategory = alertCategoryRepository.findAll();
+		return alertCategory;
+	}
 }
