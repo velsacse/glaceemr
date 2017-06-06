@@ -285,8 +285,6 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			int pagesize) {
 
 		logger.debug("Modifying shortcuts result list.");
-		System.out.println("sh list "+getShortCutList.size());
-
 		List<String> shortCategoryIdList=new ArrayList<String>();
 		List<Map<String, List<Map<String, List<Object>>>>> alertsArray=new ArrayList<Map<String, List<Map<String, List<Object>>>>>();
 		Map map=new HashMap();
@@ -312,7 +310,6 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 
 		try{
 			alertList=buildAlertsJsn(categoryIdListTemp,userIdList,pageno,pagesize);
-			System.out.println(" ho "+ alertList.toString());
 			map.put("alerts", alertList);
 			map.put("shortcutinfo", getShortCutList);
 
@@ -508,8 +505,6 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			List<Integer> userIdList) {
 
 		logger.trace("Creating alerts query.");
-		System.out.println("cate "+categoryId+" s f"+userIdList.toString());
-
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<AlertCategory> rootAlCate = cq.from(AlertCategory.class);
@@ -586,7 +581,6 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		Query query=em.createQuery(cq);
 
 		List<Object> alertsResultList=query.setMaxResults(10).getResultList();
-		System.out.println("sizxx "+alertsResultList.size());
 
 		return alertsResultList;
 	}
@@ -1478,8 +1472,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			String receiverNameSearchValue, String messageSearchValue, 
 			String fromDateSearchValue, String toDateSearchValue) {
 		logger.trace("Creating alerts query.");
-		List<Integer> userIdList=constructUserList(userId);
-		
+		List<Integer> userIdList=constructUserList(userId); 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<AlertCategory> rootAlCate = cq.from(AlertCategory.class);
@@ -1503,7 +1496,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		Join<Encounter,EmployeeProfile> joinEncEmp=joinAeEncId.join("empProfileEmpId",JoinType.LEFT);
 		
 		List<Predicate> predList = new LinkedList<Predicate>();
-		if(!patientNameSearchValue.equalsIgnoreCase("-1"))
+		if(!patientNameSearchValue.equals(""))
 		{
 			Predicate patientNameSearchPred = builder.equal(joinAcAe.get(AlertEvent_.alertEventPatientId), Integer.parseInt(patientNameSearchValue));
 			predList.add(patientNameSearchPred);
@@ -1602,7 +1595,6 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		Query query=em.createQuery(cq);
 
 		List<Object> alertsResultList=query.setMaxResults(10).getResultList();
-		System.out.println("sizxx "+alertsResultList.size());
 
 		return alertsResultList;
 	}
