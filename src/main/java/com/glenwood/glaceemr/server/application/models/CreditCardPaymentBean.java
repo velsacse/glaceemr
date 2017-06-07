@@ -45,6 +45,8 @@ public class CreditCardPaymentBean {
 	double totalDue;
 	
 	String transactionDateAndTime;
+	
+	String userEmail;
 
 	public int getPatientId() {
 		return patientId;
@@ -220,6 +222,18 @@ public class CreditCardPaymentBean {
 
 	public void setTransactionDateAndTime(String transactionDateAndTime) {
 		this.transactionDateAndTime = transactionDateAndTime;
+	}
+
+	public String getUserEmail() {
+		return userEmail;
+	}
+
+	public void setUserEmail(String userEmail) {
+		this.userEmail = userEmail;
+	}
+
+	public void setProcessDate(String processDate) {
+		this.processDate = processDate;
 	}
 	
 }

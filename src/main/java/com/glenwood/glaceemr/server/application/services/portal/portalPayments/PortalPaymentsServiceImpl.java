@@ -1,7 +1,9 @@
 package com.glenwood.glaceemr.server.application.services.portal.portalPayments;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,10 +17,15 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.text.WordUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
@@ -28,10 +35,12 @@ import com.glenwood.glaceemr.server.application.models.CreditCardPaymentBean;
 import com.glenwood.glaceemr.server.application.models.EnsBillsDetails;
 import com.glenwood.glaceemr.server.application.models.H093;
 import com.glenwood.glaceemr.server.application.models.H810;
+import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.IntermediateStmt;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
+import com.glenwood.glaceemr.server.application.models.PaymentResponse;
 import com.glenwood.glaceemr.server.application.models.PaymentService;
 import com.glenwood.glaceemr.server.application.models.PortalPatientPaymentsSummary;
 import com.glenwood.glaceemr.server.application.models.PortalPatientStatementBean;
@@ -45,6 +54,7 @@ import com.glenwood.glaceemr.server.application.repositories.BillinglookupReposi
 import com.glenwood.glaceemr.server.application.repositories.EnsBillsDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.H093Repository;
 import com.glenwood.glaceemr.server.application.repositories.H810Respository;
+import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.IntermediateStmtRepository;
 import com.glenwood.glaceemr.server.application.repositories.NonServiceDetailsRespository;
 import com.glenwood.glaceemr.server.application.repositories.PatientInsDetailRepository;
@@ -63,6 +73,7 @@ import com.glenwood.glaceemr.server.application.specifications.PortalPaymentsSpe
 import com.glenwood.glaceemr.server.application.specifications.PortalSettingsSpecification;
 import com.glenwood.glaceemr.server.utils.GeneratePDF;
 import com.glenwood.glaceemr.server.utils.IngenixStatementPreview;
+import com.glenwood.glaceemr.server.utils.MultipartUtility;
 
 @Service
 public class PortalPaymentsServiceImpl implements PortalPaymentsService{
@@ -124,17 +135,18 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 
      @Autowired
      PortalMedicalSummaryService portalMedicalSummaryService;
+     
+     @Autowired
+     WebApplicationContext applicationContext;
+     
+     @Autowired
+     InitialSettingsRepository initialSettingsRepository;
 
      @Override
      public List<H093> getPatientStatementHistory(int patientId, int chartId,int pageOffset, int pageIndex) {
 
          List<H093> statementHistoryList=h093Repository.findAll(PortalPaymentsSpecification.getPatientStatementHistory(patientId, chartId), PortalPaymentsSpecification.createPortalStatementHistoryPageRequestByDescDate(pageIndex, pageOffset)).getContent();
-         
-         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
-                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" requested statement history.",-1,
-                 request.getRemoteAddr(),patientId,"",
-                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested statement history.","");
-         
+
          return statementHistoryList;
      }
 
@@ -143,10 +155,6 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 
          List<ReceiptDetail> paymentHistoryList=receiptDetailRepository.findAll(PortalPaymentsSpecification.getPatientPaymentHistory(patientId, chartId), PortalPaymentsSpecification.createPortalPaymentHistoryPageRequestByDescDate(pageIndex, pageOffset)).getContent();
 
-         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
-                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" requested payments history.",-1,
-                 request.getRemoteAddr(),patientId,"",
-                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested payments history.","");
          return paymentHistoryList;
      }
 
@@ -168,16 +176,11 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
              detailsBeanList.add(detailsBean);
          }
 
-         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
-                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" requested payments summary.",-1,
-                 request.getRemoteAddr(),patientId,"",
-                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested payments summary.","");
-
          return detailsBeanList.get(0);
      }
 
      @Override
-     public ReceiptDetail processPaymentTransaction(CreditCardPaymentBean paymentDetailsBean) {
+     public PaymentResponse processPaymentTransaction(CreditCardPaymentBean paymentDetailsBean) throws JSONException, IOException {
 
          PaymentTransactionExecutionModel paymentProcessor=new PaymentTransactionExecutionModel();
 
@@ -186,6 +189,8 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
          PaymentService paymentSummary=new PaymentService();
 
          ReceiptDetail receipt =new ReceiptDetail();
+         
+         PaymentResponse paymentResponse=applicationContext.getBean(PaymentResponse.class);
 
          try {
              ObjectMapper mapper=new ObjectMapper();
@@ -229,12 +234,24 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
              receipt.setReceiptDetailReasonType(Short.valueOf("1"));
              receipt.setReceiptDetailReceiptAmt(paymentSummary.getPaymentServiceAmount());
              receipt.setReceiptDetailTotalReceiptAmt(paymentSummary.getPaymentServiceAmount());
-             receiptDetailRepository.saveAndFlush(receipt);
+             receipt=receiptDetailRepository.saveAndFlush(receipt);
+             if(paymentSummary.getPaymentServiceStatus().equalsIgnoreCase("success"))
+             	paymentResponse.setPaymentSuccess(true);
+             else
+             	paymentResponse.setPaymentSuccess(false);
+
+             paymentResponse.setMessage("You payment has been processed successfully.");
+             paymentResponse.setReceipt(receipt);
 
          } catch (Exception e) {
 
+         	e.printStackTrace();
              paymentSummary=null;
-             e.printStackTrace();
+             paymentResponse.setPaymentSuccess(false);
+             paymentResponse.setMessage("Error in processing payment request.");
+             paymentResponse.setEmailSent(false);
+             return paymentResponse;
+             
          }
 
          H810 paymentAlertCategory=h810Respository.findOne(PortalAlertSpecification.getPortalAlertCategoryByName("Payment Alert"));
@@ -297,7 +314,99 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
                  request.getRemoteAddr(),paymentDetailsBean.getPatientId(),"",
                  AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+paymentDetailsBean.getPatientId()+" performed a credit card payment transaction through Patient Portal.","");
 
-         return receipt;
+         if(paymentDetailsBean.getUserEmail()!=null&&!paymentDetailsBean.getUserEmail().equalsIgnoreCase("")){
+             
+             InitialSettings practiceDetails=initialSettingsRepository.findOne(PortalSettingsSpecification.getPracticeDetails("Practice Name"));
+
+     		String URL ="https://mailer1.glaceemr.com/Mailer/sendMail";
+
+     		String charSet = "UTF-8";
+
+     		String boundary = "===" + System.currentTimeMillis() + "===";
+
+     		MultipartUtility multipartUtility=new MultipartUtility(URL, charSet, boundary);
+
+     		HttpURLConnection httpURLConnection;
+     		String mailpassword="demopwd0";
+
+     		int mailtype=1;
+
+     		String subject="Payment from Patient Portal";
+
+     		JSONArray toIds = new JSONArray();
+     		toIds.put(paymentDetailsBean.getUserEmail());
+
+     		JSONArray ccids = new JSONArray();
+
+     		JSONArray bccids = new JSONArray();
+     		bccids.put("");
+
+     		String accountId="Glenwood";
+
+
+     		String htmlbody="<html><head></head>"+
+     				"<body style='width:100%;color:#1e1e1e;font-size:16px;'>"+
+     				"<label style='width:100%;padding:10px 5px;'>Dear "+paymentDetailsBean.getUsername()+",</label>"+
+     				"<br><br>"+
+     				"<label> Your payment amount of $"+paymentDetailsBean.getPaymentAmount()+" has processed successully. Please login into portal to get print of your payment.</label>"+
+     				"<br><br>"+
+     				"<label style='width:100%;padding:10px 5px;'>Thanks and Regards,</label>"+
+     				"<br>"+
+     				"<label style='width:100%;padding:10px 5px;'>"+WordUtils.capitalizeFully(practiceDetails.getInitialSettingsOptionValue())+".</label>"+
+     				"<label></label></body></html>";
+
+     		String plaintext="";
+
+
+     		JSONObject jsonInString = new JSONObject();
+
+     		jsonInString.put("mailtype", mailtype);
+
+     		jsonInString.put("sender","donotreply@glenwoodsystems.com");
+
+     		jsonInString.put("to",toIds);
+
+     		jsonInString.put("cc", ccids);
+
+     		jsonInString.put("bcc", bccids);
+
+     		jsonInString.put("subject",subject);
+
+     		jsonInString.put("plaintext",plaintext);
+
+     		jsonInString.put("htmlbody",htmlbody);
+
+     		jsonInString.put("accountId",accountId);
+
+     		jsonInString.put("mailpassword",mailpassword);
+
+     		multipartUtility.addFormField("mailerResp", jsonInString.toString());
+
+     		httpURLConnection = multipartUtility.execute();
+
+     		try {
+     			httpURLConnection.connect();
+     		} catch (Exception e) {
+     			paymentResponse.setEmailSent(false);
+     			return paymentResponse;
+     		}
+     		
+
+     		System.out.println(httpURLConnection.getResponseCode());
+
+     		if(!(httpURLConnection.getResponseCode()==200)){
+
+     				System.out.println("Email not sent to the patient.");
+     	            paymentResponse.setEmailSent(false);
+     	            
+     		}else
+     	            paymentResponse.setEmailSent(true);
+     		
+             }else
+             	paymentResponse.setEmailSent(false);
+             
+
+     		return paymentResponse;
      }
 
      public Long getNewReceiptDetailId() {
@@ -323,11 +432,6 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
      public PaymentService getPatientLastPaymentSummary(int patientId) {
 
          PaymentService paymentSummary=paymentServiceRepository.findOne(PortalPaymentsSpecification.getLastPaymentSummary(patientId));
-         
-         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
-                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" requested last payments summary.",-1,
-                 request.getRemoteAddr(),patientId,"",
-                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested last payments summary.","");
 
          return paymentSummary;
      }
@@ -336,12 +440,6 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
      public List<PatientInsDetail> getPatientInsDetails(int patientId) {
 
          List<PatientInsDetail> insList=patientInsDetailRepository.findAll(PortalPaymentsSpecification.getPatientInsDetails(patientId));
-         
-         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
-                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving insurance details of patient with id "+patientId,-1,
-                 request.getRemoteAddr(),patientId,"",
-                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving insurance details of patient with id "+patientId,"");
-
          return insList;
      }
 
@@ -434,11 +532,6 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 
              stmntBean.setStatementPath(stmtPath);
          }
-         
-         auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
-                 AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Retrieving patient statement of patient with id "+patientId,-1,
-                 request.getRemoteAddr(),patientId,"",
-                 AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Retrieving patient statement of patient with id "+patientId,"");
 
          return stmntBean;
      }
@@ -446,7 +539,6 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 
      @Override
      public List<Billinglookup> getPaymentTypes(){
-    	 
 
          return billinglookupRepository.findAll(PortalSettingsSpecification.getPaymentMethod());
 
