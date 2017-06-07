@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPerformanceBean;
 import com.glenwood.glaceemr.server.application.Bean.MIPSResponse;
+import com.glenwood.glaceemr.server.application.Bean.MUAttestationBean;
+import com.glenwood.glaceemr.server.application.Bean.MUPerformanceBean;
 import com.glenwood.glaceemr.server.application.Bean.MacraProviderQDM;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
 import com.glenwood.glaceemr.server.application.Bean.SharedFolderBean;
@@ -64,12 +66,12 @@ public class MUPerformanceRateController {
 	
 	@Autowired
 	AuditTrailSaveService auditTrailSaveService;
-	
-	@Autowired
-	PqrsReportService pqrsreportservice;
 
 	@Autowired
 	HttpServletRequest request;
+	
+	@Autowired
+	PqrsReportService pqrsreportservice;
 	
 	/**
 	 * Get List of patients seen by provider based on selected mode value
@@ -222,16 +224,20 @@ public class MUPerformanceRateController {
 			}
 
 			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
-			
-			if(providerInfo!=null && providerInfo.get(0).getMacraProviderConfigurationReportingMethod()!=2){
 
+			if(providerInfo!=null && providerInfo.get(0).getMacraProviderConfigurationReportingMethod()!=2){
+				
 				Date startDate = providerInfo.get(0).getMacraProviderConfigurationReportingStart();
 				Date EndDate = providerInfo.get(0).getMacraProviderConfigurationReportingEnd();
-
+				
 				pqrsreportservice.getPatientServices(providerId, patientID, startDate, EndDate, accountId);
-
+				
+				measureService.getEPMeasuresResponseObject(accountId, isIndividual, patientID, userIdForEntries, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear(), false);
+				
+				measureService.getEPMeasuresResponseObject(accountId, isIndividual, patientID, userIdForEntries, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear(), true);
+				
 			}else if(providerInfo!=null){
-
+			
 				String[] measureIds = providerInfo.get(0).getMeasures().split(",");
 
 				for(int i=0;i<measureIds.length;i++){
@@ -274,8 +280,10 @@ public class MUPerformanceRateController {
 
 				measureService.saveMeasureDetails(userIdForEntries, patientID, responseToSave, true);
 				
-				measureService.getEPMeasuresResponseObject(accountId, isIndividual, patientID, userIdForEntries, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear());
-
+				measureService.getEPMeasuresResponseObject(accountId, isIndividual, patientID, userIdForEntries, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear(), false);
+				
+				measureService.getEPMeasuresResponseObject(accountId, isIndividual, patientID, userIdForEntries, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear(), true);
+				
 			}
 			
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MUBatchPerformance,LogActionType.UPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating and validating patient QDM" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.GLACE_BATCH, "patientId="+patientID, "");
@@ -349,6 +357,10 @@ public class MUPerformanceRateController {
 
 				performanceService.addToMacraMeasuresRate(providerId,  providerPerformance, reportingYear, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), false);
 				
+				providerPerformance = measureService.getPerformanceCount(providerId, "", "ACI_TRANS_EP_1,ACI_TRANS_SM_1,ACI_TRANS_PEA_1,ACI_TRANS_PEA_2,ACI_TRANS_HIE_1,ACI_TRANS_PSE_1,ACI_TRANS_MR_1", accountID);
+				
+				performanceService.addToMacraMeasuresRate(providerId,  providerPerformance, reportingYear, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), true);
+				
 				providerPerformance = measureService.getPerformanceCount(providerId, "", "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3", accountID);
 				
 				performanceService.addToMacraMeasuresRate(providerId,  providerPerformance, reportingYear, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), true);
@@ -415,13 +427,17 @@ public class MUPerformanceRateController {
 	public EMRResponseBean macraPerformanceRate(@RequestParam(value="reportingYear", required=true) int reportingYear,
 			@RequestParam(value="accountID", required=true) String accountID){
 		
-		String configuredMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3,ACI_TRANS_EP_1,ACI_TRANS_SM_1,ACI_TRANS_PEA_1,ACI_TRANS_PEA_2,ACI_TRANS_HIE_1,ACI_TRANS_PSE_1,ACI_TRANS_MR_1";
+		String aciMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3";
+		
+		String aciTransMeasures = "ACI_TRANS_EP_1,ACI_TRANS_SM_1,ACI_TRANS_PEA_1,ACI_TRANS_PEA_2,ACI_TRANS_HIE_1,ACI_TRANS_PSE_1,ACI_TRANS_MR_1";
 		
 		List<MacraProviderQDM> providers = new ArrayList<MacraProviderQDM>();
 		
 		int providerId = -1;
 		
-		HashMap<Integer, List<MIPSPerformanceBean>> providerPerformance = new HashMap<Integer, List<MIPSPerformanceBean>>();
+		HashMap<Integer, HashMap<String, List<MUPerformanceBean>>> finalReportingBean = new HashMap<Integer, HashMap<String, List<MUPerformanceBean>>>();
+		
+		HashMap<String, List<MUPerformanceBean>> providerPerformance = new HashMap<String, List<MUPerformanceBean>>();
 		
 		try{
 		
@@ -431,20 +447,24 @@ public class MUPerformanceRateController {
 
 			for(int i=0;i<providers.size();i++){
 				
+				providerPerformance = new HashMap<String, List<MUPerformanceBean>>();
+				
 				providerId = providers.get(i).getMacraProviderConfigurationProviderId();
 				
 				providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 				
-				String completeMeasures = "";
-				
 				if(providerInfo != null){
-					completeMeasures = configuredMeasures.concat(",".concat(providerInfo.get(0).getMeasures()));
-				}else{
-					completeMeasures = configuredMeasures;
+					
+					providerPerformance.put("ECQM", measureService.getAnalyticsPerformanceReport(providerId, accountID, providerInfo.get(0).getMeasures()));
+					
 				}
 				
-				providerPerformance.put(providerId, measureService.getMeasureRateReport(providerId, accountID, completeMeasures, true));
-		
+				providerPerformance.put("ACI", measureService.getAnalyticsPerformanceReport(providerId, accountID, aciMeasures));
+				
+				providerPerformance.put("ACI Transition", measureService.getAnalyticsPerformanceReport(providerId, accountID, aciTransMeasures));
+				
+				finalReportingBean.put(providerId ,providerPerformance);
+				
 			}
 			
 		}catch(Exception e){
@@ -453,12 +473,17 @@ public class MUPerformanceRateController {
 			
 		}
 		
+		MUAttestationBean finalResponse = new MUAttestationBean();
+		
+		finalResponse.setReportingYear(reportingYear);
+		finalResponse.setReportingStatus(finalReportingBean);
+		
 		EMRResponseBean response = new EMRResponseBean();
 
-		response.setData(providerPerformance);
+		response.setData(finalResponse);
 		
 		return response;
 		
 	}
-	
+
 }

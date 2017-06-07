@@ -7,6 +7,8 @@ import java.util.List;
 import com.glenwood.glaceemr.server.application.Bean.EPMeasureBean;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPerformanceBean;
+import com.glenwood.glaceemr.server.application.Bean.MUDashboardBean;
+import com.glenwood.glaceemr.server.application.Bean.MUPerformanceBean;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 import com.glenwood.glaceemr.server.application.Bean.pqrs.PqrsMeasureBean;
@@ -54,7 +56,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<EPMeasureBean> getEPMeasuresResponseObject(String accountId,Boolean isGroup,int patientID, int providerId, Date startDate, Date endDate, int repYear);
+	List<EPMeasureBean> getEPMeasuresResponseObject(String accountId,Boolean isGroup,int patientID, int providerId, Date startDate, Date endDate, int repYear, boolean flag);
 	
 	/**
 	 * Function to check whether the MACRA configuration is individual or group
@@ -75,7 +77,18 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<MIPSPerformanceBean> getMeasureRateReport(int providerId, String accountId, String configuredMeasures,boolean isACIReport);
+	List<MIPSPerformanceBean> getMeasureRateReport(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy);
+	
+	/**
+	 * Function to return provider based performance for analytics dashboard 
+	 * 
+	 * @param providerId
+	 * @param accountId
+	 * @param configuredMeasures
+	 * @return
+	 */
+	
+	List<MUPerformanceBean> getAnalyticsPerformanceReport(int providerId, String accountId, String configuredMeasures);
 	
 	/**
 	 * Function to get MIPS Performance details based on NPI value
@@ -87,7 +100,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<MIPSPerformanceBean> getMeasureRateReportByNPI(int providerId, String accountId, String configuredMeasures,boolean isACIReport);
+	List<MIPSPerformanceBean> getMeasureRateReportByNPI(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy);
 	
 	/**
 	 * Function to get provider based performance details and store it in macra_measures_rate table
@@ -111,7 +124,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<MIPSPerformanceBean> getGroupPerformanceCount(String tinValue, String configuredMeasures, String accountId,boolean isACIReport);
+	List<MIPSPerformanceBean> getGroupPerformanceCount(String tinValue, String configuredMeasures, String accountId,boolean isACIReport, boolean isOrderBy);
 
 	/**
 	 * 
@@ -158,5 +171,19 @@ public interface MeasureCalculationService {
 	 */
 	
 	List<QualityMeasureBean> getQualityMeasureResponseObject(int userId, HashMap<String, String> codeListForQDM);
+
+	/**
+	 * Function to get selected provider's MU Dashboard details
+	 * 
+	 * @param providerId
+	 * @param accountId
+	 * @param tinValue
+	 * @param configuredMeasures
+	 * @param aciMeasures
+	 * @param byNpi
+	 * @param providerDashboard
+	 */
+	
+	void getDashBoardDetails(int providerId,  String accountId, String tinValue, String configuredMeasures, String aciMeasures, boolean byNpi, MUDashboardBean providerDashboard);
 	
 }

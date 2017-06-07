@@ -13,6 +13,8 @@ import com.glenwood.glaceemr.server.application.models.MacraConfiguration;
 import com.glenwood.glaceemr.server.application.models.MacraConfiguration_;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration_;
+import com.glenwood.glaceemr.server.application.models.MuAttestationObjectives;
+import com.glenwood.glaceemr.server.application.models.MuAttestationObjectives_;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping_;
 
@@ -90,4 +92,20 @@ public class QPPConfigurationSpecification {
 		};
 		
 	}
+
+	public static Specification<MuAttestationObjectives> getObjectiveDetails(final int reportingYear) {
+		
+		return new Specification<MuAttestationObjectives>() {
+
+			@Override
+			public Predicate toPredicate(Root<MuAttestationObjectives> root,
+					CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate predicateByProgramYear=cb.equal(root.get(MuAttestationObjectives_.objectiveReportingYear), reportingYear);
+				Predicate confObj=cb.and(predicateByProgramYear);
+				return confObj;
+			}
+		};
+		
+	}
+	
 }

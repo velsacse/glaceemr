@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class EncounterQDM {
 
+	int encounterId;
 	String code;
 	Date startDate;
 	Date endDate;
@@ -12,8 +13,9 @@ public class EncounterQDM {
 		super();
 	}
 
-	public EncounterQDM(String code, Date startDate, Date endDate){
+	public EncounterQDM(String code, int encounterId, Date startDate, Date endDate){
 
+		this.encounterId = encounterId;
 		this.code = code;
 		this.startDate = startDate;
 		if(endDate != null){
@@ -29,6 +31,15 @@ public class EncounterQDM {
 		}
 
 	}
+	
+	public int getEncounterId() {
+		return encounterId;
+	}
+
+	public void setEncounterId(int encounterId) {
+		this.encounterId = encounterId;
+	}
+
 	public String getCode() {
 		return code;
 	}

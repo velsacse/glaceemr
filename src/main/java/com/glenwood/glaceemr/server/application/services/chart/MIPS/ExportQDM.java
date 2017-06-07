@@ -174,13 +174,13 @@ Root<Encounter> root = cq.from(Encounter.class);
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public List<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter> getEncounterQDM(Date startDate, Date endDate, EntityManager em, boolean considerProvider,int patientID, int providerId, HashMap<String, String> encounterCodeList){
+	public List<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter> getEncounterQDM(Date startDate, Date endDate, EntityManager em, boolean considerProvider,int patientID, int providerId, HashMap<String, String> encounterCodeList, ArrayList<Integer> officeVisitEncounters){
 		
 		List<String> cptCodes = new ArrayList<String>();
 		
 		String cptCodeListString = "", hcpcsCodeListString = ""; 
 		
-		if(encounterCodeList.get("CPT").length() > 0){
+		if(encounterCodeList.containsKey("CPT") && encounterCodeList.get("CPT").length() > 0){
 			
 			cptCodeListString = encounterCodeList.get("CPT").toString();
 			
@@ -188,7 +188,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 		}
 		
-		if(encounterCodeList.get("HCPCS").length() > 0){
+		if(encounterCodeList.containsKey("HCPCS") && encounterCodeList.get("HCPCS").length() > 0){
 			
 			hcpcsCodeListString = encounterCodeList.get("HCPCS").toString();
 			
@@ -214,6 +214,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		Selection[] selections= new Selection[] {
 				serviceCptJoin.get(Cpt_.cptCptcode),
+				root.get(Encounter_.encounterId),
 				root.get(Encounter_.encounterDate),
 				root.get(Encounter_.encounterClosedDate),
 		};
@@ -271,6 +272,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 			com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter encObject;
 			
 			for(int i=0;i<encounterObj.size();i++){
+				
+				officeVisitEncounters.add(encounterObj.get(i).getEncounterId());
 				
 				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
 				
@@ -1129,7 +1132,7 @@ Root<Encounter> root = cq.from(Encounter.class);
         return attestList;
     }*/
 	
-	public List<Procedure> getMedicationsReviewed(EntityManager em,Boolean considerProvider,int providerId,int patientId,Date date1,Date date2){
+	public List<Procedure> getMedicationsReviewed(EntityManager em,Boolean considerProvider,int providerId,int patientId,Date date1,Date date2,ArrayList<Integer> officeVisitEncounters){
 		
 		List<Procedure> reviewedVisits = new ArrayList<Procedure>();
 		
@@ -1143,13 +1146,27 @@ Root<Encounter> root = cq.from(Encounter.class);
         Predicate date = builder.between(root.get(Encounter_.encounterDate), date1, date2);
         Predicate byProvider = builder.equal(root.get(Encounter_.encounter_service_doctor), providerId);
         Predicate attest = builder.gt(builder.length(builder.trim(root.get(Encounter_.medicationAttestationStatus))), 0);
+        Predicate inEncounters = root.get(Encounter_.encounterId).in(officeVisitEncounters);
         
         cq.multiselect(root.get(Encounter_.encounterDate),root.get(Encounter_.medicationAttestationStatus));
         
-        if(considerProvider)
-        	cq.where(date,attest,byProvider);
-        else
-        	cq.where(date,attest);
+        if(considerProvider){
+
+        	if(officeVisitEncounters.size() > 0){
+        		cq.where(date,attest,byProvider,inEncounters);
+            }else{
+            	cq.where(date,attest,byProvider);
+            }
+        	
+        }else{
+
+        	if(officeVisitEncounters.size() > 0){
+            	cq.where(date,attest,inEncounters);
+        	}else{
+            	cq.where(date,attest);
+        	}
+        	
+        }
         
         List<Object[]> result=em.createQuery(cq).getResultList();
         

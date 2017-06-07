@@ -24,6 +24,7 @@ import com.glenwood.glaceemr.server.application.Bean.EPMeasureBean;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPerformanceBean;
 import com.glenwood.glaceemr.server.application.Bean.MIPSResponse;
+import com.glenwood.glaceemr.server.application.Bean.MUDashboardBean;
 import com.glenwood.glaceemr.server.application.Bean.MacraProviderQDM;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.HttpConnectionUtils;
@@ -216,7 +217,8 @@ public class QPPPerformanceController {
 			@RequestParam(value="accountId", required=true) String accountId,
 			@RequestParam(value="patientID", required=true) int patientID,
 			@RequestParam(value="userId", required=true) int userId,
-			@RequestParam(value="providerId", required=true) int providerId) throws Exception
+			@RequestParam(value="providerId", required=true) int providerId,
+			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans) throws Exception
 	{
 	
 		EMRResponseBean response = new EMRResponseBean();
@@ -239,7 +241,7 @@ public class QPPPerformanceController {
 
 			if(providerInfo!=null){
 
-				epMeasureStatus = measureService.getEPMeasuresResponseObject(accountId,isGroup,patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear());
+				epMeasureStatus = measureService.getEPMeasuresResponseObject(accountId,isGroup,patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear(), isTrans);
 				
 			}else{
 
@@ -288,7 +290,8 @@ public class QPPPerformanceController {
 			@RequestParam(value="mode", required=false, defaultValue="1") int mode,
 			@RequestParam(value="tinValue", required=false, defaultValue="") String tinValue,
 			@RequestParam(value="measureId", required=false, defaultValue="") String measureId,
-			@RequestParam(value="isACIReport", required=false, defaultValue="false") boolean isACIReport) throws Exception{
+			@RequestParam(value="isACIReport", required=false, defaultValue="false") boolean isACIReport,
+			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans) throws Exception{
 		
 		EMRResponseBean response = new EMRResponseBean();
 		
@@ -305,7 +308,13 @@ public class QPPPerformanceController {
 			List<MacraProviderQDM> providerInfo = new ArrayList<MacraProviderQDM>();
 
 			if(isACIReport){
-				configuredMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3";
+				
+				if(isTrans){
+					configuredMeasures = "ACI_TRANS_EP_1,ACI_TRANS_SM_1,ACI_TRANS_PEA_1,ACI_TRANS_PEA_2,ACI_TRANS_HIE_1,ACI_TRANS_PSE_1,ACI_TRANS_MR_1";
+				}else{
+					configuredMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3";
+				}
+				
 			}else{
 				if(mode!=2){
 					providerInfo = providerConfService.getCompleteProviderInfo(providerId);
@@ -318,11 +327,11 @@ public class QPPPerformanceController {
 			List<MIPSPerformanceBean> performanceObj = null;
 
 			if(mode == 0){
-				performanceObj = measureService.getMeasureRateReportByNPI(providerId, accountId, configuredMeasures,isACIReport);
+				performanceObj = measureService.getMeasureRateReportByNPI(providerId, accountId, configuredMeasures,isACIReport, false);
 			}else if(mode == 1){
-				performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport);
+				performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport, false);
 			}else{
-				performanceObj = measureService.getGroupPerformanceCount(tinValue,configuredMeasures, accountId,isACIReport);
+				performanceObj = measureService.getGroupPerformanceCount(tinValue,configuredMeasures, accountId,isACIReport, false);
 			}
 
 			response.setData(performanceObj);
@@ -436,7 +445,7 @@ public class QPPPerformanceController {
 		
 		String configuredMeasures = providerInfo.get(0).getMeasures();
 		
-		List<MIPSPerformanceBean> performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport);
+		List<MIPSPerformanceBean> performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport, false);
 
 		response.setData(performanceObj);
 		
@@ -468,6 +477,62 @@ public class QPPPerformanceController {
 			}
 			
 		}
+		
+		return response;
+		
+	}
+	
+	@RequestMapping(value = "/getDashBoardDetails", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getMUDashboardDetails(
+			@RequestParam(value="providerId", required=true) int providerId,
+			@RequestParam(value="accountId", required=true) String accountId,
+			@RequestParam(value="tinValue", required=false, defaultValue="") String tinValue,
+			@RequestParam(value="isByNpi", required=false, defaultValue="false") boolean byNpi,
+			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans) throws Exception{
+		
+		EMRResponseBean response = new EMRResponseBean();
+		MUDashboardBean providerDashboard = new MUDashboardBean();
+		
+		try{
+			
+			String aciMeasures = "";
+			
+			if(isTrans){
+				aciMeasures = "ACI_TRANS_EP_1,ACI_TRANS_SM_1,ACI_TRANS_PEA_1,ACI_TRANS_PEA_2,ACI_TRANS_HIE_1,ACI_TRANS_PSE_1,ACI_TRANS_MR_1";
+			}else{
+				aciMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3";
+			}
+			
+			Boolean isIndividual=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
+
+			if(!isIndividual){
+				providerId=-1;
+			}
+
+			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+			
+			if(providerInfo!=null){
+				
+				providerDashboard.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
+				providerDashboard.setStartDate(providerInfo.get(0).getMacraProviderConfigurationReportingStart());
+				providerDashboard.setEndDate(providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
+				
+				measureService.getDashBoardDetails(providerId, accountId, tinValue, providerInfo.get(0).getMeasures(), aciMeasures, byNpi, providerDashboard);
+				
+			}else{
+				
+				measureService.getDashBoardDetails(providerId, accountId, tinValue, "", aciMeasures, byNpi, providerDashboard);
+				
+			}
+			
+		}catch(Exception e){
+			
+			e.printStackTrace();
+			
+		}
+		
+		response.setData(providerDashboard);
 		
 		return response;
 		

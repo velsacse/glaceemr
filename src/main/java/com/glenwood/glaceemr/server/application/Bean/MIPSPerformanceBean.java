@@ -34,10 +34,35 @@ public class MIPSPerformanceBean {
 	String npi;
 	String tin;
 	
+	String providerName;
+	
 	/*long notMetPatients;
 	String notMetPatientsList;*/
 	
 	public MIPSPerformanceBean(){
+		
+	}
+	
+	public MIPSPerformanceBean(String measureId, int criteria,int reportingYear,
+			int ippCount, int denominatorCount,
+			int denominatorExclusionCount, int numeratorCount,
+			int numeratorExclusionCount, int denominatorExceptionCount, double performanceRate,
+			double reportingRate, double points, String tin, String providerName) {
+		
+		this.measureId = measureId;
+		this.criteria = criteria;
+		this.reportingYear = reportingYear;
+		this.ippCount = ippCount;
+		this.denominatorCount = denominatorCount;
+		this.denominatorExclusionCount = denominatorExclusionCount;
+		this.numeratorCount = numeratorCount;
+		this.numeratorExclusionCount = numeratorExclusionCount;
+		this.denominatorExceptionCount = denominatorExceptionCount;
+		this.performanceRate = performanceRate;
+		this.reportingRate = reportingRate;
+		this.points = points;
+		this.tin = tin;
+		this.providerName = providerName;
 		
 	}
 	
@@ -156,7 +181,7 @@ public class MIPSPerformanceBean {
 		this.denominatorExceptionPatientsList = denominatorExceptionPatientsList;
 		
 	}
-
+	
 	public MIPSPerformanceBean(String measureId, int criteria,int reportingYear,
 			long ippCount, long denominatorCount,
 			long denominatorExclusionCount, long numeratorCount,
@@ -368,5 +393,13 @@ public class MIPSPerformanceBean {
 			String denominatorExceptionPatientsList) {
 		this.denominatorExceptionPatientsList = denominatorExceptionPatientsList;
 	}
-	
+
+	public String getProviderName() {
+		return providerName;
+	}
+
+	public void setProviderName(String providerName) {
+		this.providerName = providerName;
+	}
+		
 }
