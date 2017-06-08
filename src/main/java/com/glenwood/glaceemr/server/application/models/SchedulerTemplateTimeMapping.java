@@ -6,9 +6,12 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -24,6 +27,8 @@ public class SchedulerTemplateTimeMapping implements Serializable{
 	private static final long serialVersionUID = -4032091034773651981L;
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sch_template_time_mapping_sch_template_time_mapping_id_seq")
+	@SequenceGenerator(name = "sch_template_time_mapping_sch_template_time_mapping_id_seq", sequenceName = "sch_template_time_mapping_sch_template_time_mapping_id_seq", allocationSize = 1)
 	@Column(name="sch_template_time_mapping_id")
 	private Integer schTemplateTimeMappingId;
 

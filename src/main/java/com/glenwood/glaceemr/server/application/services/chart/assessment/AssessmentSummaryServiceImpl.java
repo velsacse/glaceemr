@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.repositories.AssessmentRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
@@ -57,13 +57,13 @@ public class AssessmentSummaryServiceImpl implements AssessmentSummaryService{
 	 * Method to fetch current visit data
 	 */
 	@Override
-	public List<H611> getCurrentDiagnosis(Integer patientId,Integer encounterId) throws Exception {
+	public List<PatientAssessments> getCurrentDiagnosis(Integer patientId,Integer encounterId) throws Exception {
 		
 		logger.debug("Fetching Current Problems");
 		logger.error("in getCurrentDiagnosis");
 		encounterId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + encounterId)).or("-1"));
 		patientId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + patientId)).or("-1"));
-		List<H611> dxs = assessmentRepository.findAll(Specifications.where(AssessmentSpecification.DxByPatientId(patientId)).and(AssessmentSpecification.DxByEncounterId(encounterId)).and(AssessmentSpecification.getOrder()));		
+		List<PatientAssessments> dxs = assessmentRepository.findAll(Specifications.where(AssessmentSpecification.DxByPatientId(patientId)).and(AssessmentSpecification.DxByEncounterId(encounterId)).and(AssessmentSpecification.getOrder()));		
 		return dxs;
 		
 	}
@@ -89,7 +89,7 @@ public class AssessmentSummaryServiceImpl implements AssessmentSummaryService{
 		String dxDesc = Optional.fromNullable(Strings.emptyToNull("" + assessmentDetailsObj.getString("dxDesc"))).or(" ");
 		String dxStatus = Optional.fromNullable(Strings.emptyToNull("" + assessmentDetailsObj.getString("DxStatus"))).or("-2");
 		String assessmentComment = Optional.fromNullable(Strings.emptyToNull("" + assessmentDetailsObj.getString("assessmentComment"))).or(" ");
-		List<H611> dupDxCode = assessmentRepository.findAll(Specifications.where(AssessmentSpecification.DxByPatientId(patientId)).and(AssessmentSpecification.DxByEncounterId(encounterId)).and(AssessmentSpecification.DxByCode(dxCode)));
+		List<PatientAssessments> dupDxCode = assessmentRepository.findAll(Specifications.where(AssessmentSpecification.DxByPatientId(patientId)).and(AssessmentSpecification.DxByEncounterId(encounterId)).and(AssessmentSpecification.DxByCode(dxCode)));
 		if(dupDxCode.size()<1 &&(!dxCode.trim().equalsIgnoreCase(""))){	
 			}
 		}
@@ -103,13 +103,13 @@ public class AssessmentSummaryServiceImpl implements AssessmentSummaryService{
 	 * Method to fetch data for edit page
 	 */
 	@Override
-	public List<H611> getEditData(Integer patientId, Integer encounterId,String dxCode,
+	public List<PatientAssessments> getEditData(Integer patientId, Integer encounterId,String dxCode,
 			Integer problemId) {
 		patientId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + patientId)).or("-1"));
 		encounterId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + encounterId)).or("-1"));
 		dxCode = Optional.fromNullable(Strings.emptyToNull("" + encounterId)).or(" ");
 		problemId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + problemId)).or("-1"));
-		List<H611> dxData = assessmentRepository.findAll(Specifications.where(AssessmentSpecification.getDataToEdit(patientId,encounterId,dxCode,problemId)));
+		List<PatientAssessments> dxData = assessmentRepository.findAll(Specifications.where(AssessmentSpecification.getDataToEdit(patientId,encounterId,dxCode,problemId)));
 		return dxData;
 	}
 	
@@ -120,15 +120,15 @@ public class AssessmentSummaryServiceImpl implements AssessmentSummaryService{
 	@Override
 	public String moveToProblemList(Integer patientId,Integer encounterId,Integer userId) throws Exception {
 		
-		List<H611> currentdiagnosis=getCurrentDiagnosis(patientId, encounterId);
+		List<PatientAssessments> currentdiagnosis=getCurrentDiagnosis(patientId, encounterId);
 		
 		for(int i=0;i<currentdiagnosis.size();i++){
 			
-			H611 assessmentDetailsObj=currentdiagnosis.get(i);
-			String dxCode = assessmentDetailsObj.getH611005();
-			String dxdesc = assessmentDetailsObj.getH611006();
-			String ass_cmt = assessmentDetailsObj.getH611015();			
-			String codeSystem = assessmentDetailsObj.getH611CodingSystemid();
+			PatientAssessments assessmentDetailsObj=currentdiagnosis.get(i);
+			String dxCode = assessmentDetailsObj.getpatient_assessments_dxcode();
+			String dxdesc = assessmentDetailsObj.getpatient_assessments_dxdescription();
+			String ass_cmt = assessmentDetailsObj.getpatient_assessments_assessmentcomment();			
+			String codeSystem = assessmentDetailsObj.getpatient_assessmentsCodingSystemid();
 			
 			if(dxCode!= null)
 				dxCode= dxCode.trim();

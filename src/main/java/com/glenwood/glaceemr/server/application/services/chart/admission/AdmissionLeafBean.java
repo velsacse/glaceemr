@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import com.glenwood.glaceemr.server.application.models.H496;
+import com.glenwood.glaceemr.server.application.models.FaxOutbox;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 
@@ -16,12 +16,12 @@ import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 public class AdmissionLeafBean {
 	
 	List<LeafPatient> admissionLeafBean = Collections.emptyList();
-	List<H496> admissionLeafFaxBean = Collections.emptyList();
+	List<FaxOutbox> admissionLeafFaxBean = Collections.emptyList();
 	List<PatientAllergies> allergyBean = Collections.emptyList();
 	
 	public AdmissionLeafBean(){
 		admissionLeafBean = new ArrayList<LeafPatient>();
-		admissionLeafFaxBean = new ArrayList<H496>();
+		admissionLeafFaxBean = new ArrayList<FaxOutbox>();
 		allergyBean = new ArrayList<PatientAllergies>();
 	}
 
@@ -43,11 +43,11 @@ public class AdmissionLeafBean {
 		this.admissionLeafBean = admissionLeafBean;
 	}
 
-	public List<H496> getAdmissionLeafFaxBean() {
+	public List<FaxOutbox> getAdmissionLeafFaxBean() {
 		return admissionLeafFaxBean;
 	}
 
-	public void setAdmissionLeafFaxBean(List<H496> admissionLeafFaxBean) {
+	public void setAdmissionLeafFaxBean(List<FaxOutbox> admissionLeafFaxBean) {
 		this.admissionLeafFaxBean = admissionLeafFaxBean;
 	}
 	

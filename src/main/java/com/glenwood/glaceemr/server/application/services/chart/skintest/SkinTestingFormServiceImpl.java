@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.Encounter;
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PosTable;
@@ -41,7 +41,7 @@ import com.glenwood.glaceemr.server.application.models.SkinTestOrderEntry;
 import com.glenwood.glaceemr.server.application.models.SkinTestConcentration;
 import com.glenwood.glaceemr.server.application.repositories.EmployeeProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
-import com.glenwood.glaceemr.server.application.repositories.H611Repository;
+import com.glenwood.glaceemr.server.application.repositories.PatientAssessmentsRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabEntriesRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PosTableRepository;
@@ -92,7 +92,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 	@Autowired
 	SkinTestOrderDetailsRepository skinTestOrderDetailsRepository;
 	
-	@Autowired H611Repository h611Repository;
+	@Autowired PatientAssessmentsRepository h611Repository;
 	
 	@Autowired ProblemListRepository problemListRepository;
 	
@@ -734,9 +734,9 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 	 */
 	@Override
 	public DxAndPendingOrdersBean getDxAndPendingOrders(Integer patientId, Integer encounterId,Integer chartId) {
-		List<H611> list1=h611Repository.findAll(SkinTestingFormSpecification.getcodingsystems(encounterId,chartId));
-		for(H611 h611: list1) { 
-			h611.getH611CodingSystemid();
+		List<PatientAssessments> list1=h611Repository.findAll(SkinTestingFormSpecification.getcodingsystems(encounterId,chartId));
+		for(PatientAssessments h611: list1) { 
+			h611.getpatient_assessmentsCodingSystemid();
 		}
 		List<ProblemList> problemList=problemListRepository.findAll(SkinTestingFormSpecification.getproblemlist(patientId));
 		for(ProblemList problemList2: problemList) {
@@ -747,13 +747,13 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 
 		try{
 		for(int z=0;z<list1.size()-1;z++){
-			String dxcode1=list1.get(z).getH611005();
-			String oid=list1.get(z).getH611CodingSystemid();
+			String dxcode1=list1.get(z).getpatient_assessments_dxcode();
+			String oid=list1.get(z).getpatient_assessmentsCodingSystemid();
 			for(int z1=z+1;z1<list1.size();z1++){
-				String dxcode2=list1.get(z1).getH611005();
-				String oid2=list1.get(z1).getH611CodingSystemid();
+				String dxcode2=list1.get(z1).getpatient_assessments_dxcode();
+				String oid2=list1.get(z1).getpatient_assessmentsCodingSystemid();
 				if(((dxcode1.replaceAll("\\s+","")).equalsIgnoreCase((dxcode2).replaceAll("\\s+","")))&&(oid.replaceAll("\\s+","").equalsIgnoreCase(oid2.replaceAll("\\s+","")))){
-					if(list1.get(z).getH611001()>list1.get(z1).getH611001()){
+					if(list1.get(z).getpatient_assessments_id()>list1.get(z1).getpatient_assessments_id()){
 						list1.remove(list1.get(z1));
 					}else{
 						list1.remove(list1.get(z));
@@ -786,9 +786,9 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 		for(int i=0;i<problemList.size();i++){
 			String dxcode=problemList.get(i).getProblemListDxCode();
 			for(int j=0;j<list1.size();j++){
-				String dxcode1=list1.get(j).getH611005();
+				String dxcode1=list1.get(j).getpatient_assessments_dxcode();
 				if(dxcode.replaceAll("\\s+","").equalsIgnoreCase(dxcode1.replaceAll("\\s+",""))){
-					if(problemList.get(i).getProblemListId()>list1.get(j).getH611001()){
+					if(problemList.get(i).getProblemListId()>list1.get(j).getpatient_assessments_id()){
 						list1.remove(list1.get(j));
 					}else{
 						problemList.remove(problemList.get(i));

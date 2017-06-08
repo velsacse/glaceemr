@@ -7,10 +7,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import com.glenwood.glaceemr.server.application.models.LabDescription_;
-import com.glenwood.glaceemr.server.application.models.LabEntries_;
-import com.glenwood.glaceemr.server.application.models.VaccineReport_;
-
 public class FS_LabBean implements Comparable<FS_LabBean> {
 
 	private String islab;

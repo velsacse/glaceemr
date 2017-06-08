@@ -46,16 +46,14 @@ import com.glenwood.glaceemr.server.application.models.EncounterPlan;
 import com.glenwood.glaceemr.server.application.models.EncounterPlan_;
 import com.glenwood.glaceemr.server.application.models.GeneralShortcut;
 import com.glenwood.glaceemr.server.application.models.GeneralShortcut_;
-import com.glenwood.glaceemr.server.application.models.H076;
-import com.glenwood.glaceemr.server.application.models.H076_;
-import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.H611_;
 import com.glenwood.glaceemr.server.application.models.LeafLibrary;
 import com.glenwood.glaceemr.server.application.models.LeafLibrary_;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.LeafPatient_;
 import com.glenwood.glaceemr.server.application.models.PatientAftercareData;
 import com.glenwood.glaceemr.server.application.models.PatientAftercareData_;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
@@ -66,6 +64,8 @@ import com.glenwood.glaceemr.server.application.models.PlanMapping;
 import com.glenwood.glaceemr.server.application.models.PlanMapping_;
 import com.glenwood.glaceemr.server.application.models.PlanType;
 import com.glenwood.glaceemr.server.application.models.PlanType_;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor_;
 import com.glenwood.glaceemr.server.application.models.SoapElementDatalist;
 import com.glenwood.glaceemr.server.application.models.SoapElementDatalist_;
 import com.glenwood.glaceemr.server.application.repositories.AftercareInsMappingRepository;
@@ -892,10 +892,10 @@ public class PlanServiceImpl implements PlanService{
 	private List<String> getMappingDx(Integer encounterId) {
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<String> query= builder.createQuery(String.class);
-		Root<H611> root= query.from(H611.class);
+		Root<PatientAssessments> root= query.from(PatientAssessments.class);
 		
-		query.select(builder.trim(root.get(H611_.h611005)))
-			 .where(builder.equal(root.get(H611_.h611002), encounterId));
+		query.select(builder.trim(root.get(PatientAssessments_.patient_assessments_dxcode)))
+			 .where(builder.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId));
 		
 		List<String> result= em.createQuery(query).getResultList();
 		Set<String> set = new HashSet<String>();
@@ -1052,13 +1052,13 @@ public class PlanServiceImpl implements PlanService{
 		try{
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<Object> query= builder.createQuery();
-		Root<H611> root= query.from(H611.class);
+		Root<PatientAssessments> root= query.from(PatientAssessments.class);
 
-		query.select(root.get(H611_.planNotes));
+		query.select(root.get(PatientAssessments_.planNotes));
 		
-		query.where(builder.equal(root.get(H611_.h611002), encounterId),
-					 builder.equal(root.get(H611_.h611003), patientId),
-					  builder.like(builder.trim(root.get(H611_.h611005)), dxcode));
+		query.where(builder.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId),
+					 builder.equal(root.get(PatientAssessments_.patient_assessments_patientId), patientId),
+					  builder.like(builder.trim(root.get(PatientAssessments_.patient_assessments_dxcode)), dxcode));
 		List<Object> result= em.createQuery(query).getResultList();
 		if(result !=null && result.size()>0)
 			return result.get(0).toString();
@@ -1254,26 +1254,26 @@ public class PlanServiceImpl implements PlanService{
 	 * @return
 	 */
 	@Override
-	public List<H611> getCurrentDx(Integer patientId, Integer encounterId) {
+	public List<PatientAssessments> getCurrentDx(Integer patientId, Integer encounterId) {
 		
 		try{
 		CriteriaBuilder builder= em.getCriteriaBuilder();
-		CriteriaQuery<H611> query= builder.createQuery(H611.class);
-		Root<H611> root= query.from(H611.class);
+		CriteriaQuery<PatientAssessments> query= builder.createQuery(PatientAssessments.class);
+		Root<PatientAssessments> root= query.from(PatientAssessments.class);
 		
-		query.select(builder.construct(H611.class, 
-					  root.get(H611_.h611001), 
-					   root.get(H611_.h611005), 
-					    root.get(H611_.h611006),
-					     root.get(H611_.h611015),
-					      root.get(H611_.h611016),
-				    	   root.get(H611_.h611CodingSystemid)))
-			  .where(builder.equal(root.get(H611_.h611002), encounterId),
-					  builder.equal(root.get(H611_.h611003), patientId),
-					   builder.equal(root.get(H611_.h611008), false))
-			  .orderBy(builder.asc(root.get(H611_.h611010)));
+		query.select(builder.construct(PatientAssessments.class, 
+					  root.get(PatientAssessments_.patient_assessments_id), 
+					   root.get(PatientAssessments_.patient_assessments_dxcode), 
+					    root.get(PatientAssessments_.patient_assessments_dxdescription),
+					     root.get(PatientAssessments_.patient_assessments_assessmentcomment),
+					      root.get(PatientAssessments_.patient_assessments_status),
+				    	   root.get(PatientAssessments_.patient_assessmentsCodingSystemid)))
+			  .where(builder.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId),
+					  builder.equal(root.get(PatientAssessments_.patient_assessments_patientId), patientId),
+					   builder.equal(root.get(PatientAssessments_.patient_assessments_isactive), false))
+			  .orderBy(builder.asc(root.get(PatientAssessments_.patient_assessments_dxorder)));
 		
-		List<H611> result= em.createQuery(query).getResultList();
+		List<PatientAssessments> result= em.createQuery(query).getResultList();
 		
 		return result;
 		}catch(Exception e){
@@ -1580,18 +1580,18 @@ public class PlanServiceImpl implements PlanService{
 	}
 
 	@Override
-	public List<H076> getReferringPhysicians() {
+	public List<ReferringDoctor> getReferringPhysicians() {
 		
 		CriteriaBuilder builder= em.getCriteriaBuilder();
-		CriteriaQuery<H076> query= builder.createQuery(H076.class);
-		Root<H076> root= query.from(H076.class);
+		CriteriaQuery<ReferringDoctor> query= builder.createQuery(ReferringDoctor.class);
+		Root<ReferringDoctor> root= query.from(ReferringDoctor.class);
 		
-		query.select(builder.construct(H076.class,
-				root.get(H076_.h076001),
-				root.get(H076_.h076003),
-				root.get(H076_.h076005)));
+		query.select(builder.construct(ReferringDoctor.class,
+				root.get(ReferringDoctor_.referring_doctor_uniqueid),
+				root.get(ReferringDoctor_.referring_doctor_lastname),
+				root.get(ReferringDoctor_.referring_doctor_firstname)));
 		
-		query.where(builder.equal(root.get(H076_.h076015), true));		
+		query.where(builder.equal(root.get(ReferringDoctor_.referring_doctor_isactive), true));		
 		
 		return em.createQuery(query).getResultList();
 	}

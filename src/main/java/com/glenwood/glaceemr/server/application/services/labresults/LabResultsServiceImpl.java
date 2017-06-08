@@ -36,8 +36,6 @@ import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileDetails_;
 import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.FileName_;
-import com.glenwood.glaceemr.server.application.models.H213;
-import com.glenwood.glaceemr.server.application.models.H213_;
 import com.glenwood.glaceemr.server.application.models.Hl7DocsInbox;
 import com.glenwood.glaceemr.server.application.models.Hl7DocsInbox_;
 import com.glenwood.glaceemr.server.application.models.Hl7ResultInbox;
@@ -53,6 +51,8 @@ import com.glenwood.glaceemr.server.application.models.LabEntries_;
 import com.glenwood.glaceemr.server.application.models.LabcompanyDetails;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator_;
 import com.glenwood.glaceemr.server.application.models.Specimen;
 import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
@@ -1016,9 +1016,9 @@ public class LabResultsServiceImpl implements LabResultsService {
 		try {
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Object> cq = builder.createQuery();
-			Root<H213> root = cq.from(H213.class);
-			cq.select(root.get(H213_.h213003));
-			cq.where(builder.equal(root.get(H213_.h213002),"chart"));
+			Root<PrimarykeyGenerator> root = cq.from(PrimarykeyGenerator.class);
+			cq.select(root.get(PrimarykeyGenerator_.primarykey_generator_rowcount));
+			cq.where(builder.equal(root.get(PrimarykeyGenerator_.primarykey_generator_tablename),"chart"));
 			return "" + em.createQuery(cq).getSingleResult();
 		} catch(Exception e) {
 			e.printStackTrace();

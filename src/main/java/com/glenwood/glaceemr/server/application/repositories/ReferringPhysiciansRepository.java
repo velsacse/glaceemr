@@ -4,9 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import com.glenwood.glaceemr.server.application.models.H076;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
 
 @Repository
-public interface ReferringPhysiciansRepository extends JpaRepository<H076, Integer> ,JpaSpecificationExecutor<H076>{
+public interface ReferringPhysiciansRepository extends JpaRepository<ReferringDoctor, Integer> ,JpaSpecificationExecutor<ReferringDoctor>{
 
 }

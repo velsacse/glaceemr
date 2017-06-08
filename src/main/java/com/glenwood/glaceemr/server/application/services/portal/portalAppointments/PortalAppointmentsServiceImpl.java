@@ -27,14 +27,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertCategory_;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues_;
 import com.glenwood.glaceemr.server.application.models.AppointmentDetailsBean;
 import com.glenwood.glaceemr.server.application.models.ApptRequestBean;
-import com.glenwood.glaceemr.server.application.models.H076;
-import com.glenwood.glaceemr.server.application.models.H076_;
-import com.glenwood.glaceemr.server.application.models.H113;
-import com.glenwood.glaceemr.server.application.models.H113_;
-import com.glenwood.glaceemr.server.application.models.H213;
-import com.glenwood.glaceemr.server.application.models.H810;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PortalApptRequest;
@@ -42,6 +39,9 @@ import com.glenwood.glaceemr.server.application.models.PortalApptRequestDetail;
 import com.glenwood.glaceemr.server.application.models.PortalApptRequestDetailBean;
 import com.glenwood.glaceemr.server.application.models.PortalApptRequest_;
 import com.glenwood.glaceemr.server.application.models.PortalSchedulerAppointmentBean;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor_;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointment;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointmentParameter;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointmentParameter_;
@@ -58,8 +58,8 @@ import com.glenwood.glaceemr.server.application.models.SchedulerTemplateTimeMapp
 import com.glenwood.glaceemr.server.application.models.Workflow;
 import com.glenwood.glaceemr.server.application.models.Workflow_;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
-import com.glenwood.glaceemr.server.application.repositories.H113Repository;
-import com.glenwood.glaceemr.server.application.repositories.H810Respository;
+import com.glenwood.glaceemr.server.application.repositories.AppReferenceValuesRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalAlertConfigRespository;
 import com.glenwood.glaceemr.server.application.repositories.PortalApptRequestDetailRepository;
 import com.glenwood.glaceemr.server.application.repositories.PortalApptRequestRepository;
 import com.glenwood.glaceemr.server.application.repositories.SchDateTemplateRepository;
@@ -115,10 +115,10 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 	SchedulerAppointmentParameterRepository schedulerAppointmentParameterRepository;
 
 	@Autowired
-	H113Repository h113Repository;
+	AppReferenceValuesRepository h113Repository;
 	
 	@Autowired
-	H810Respository h810Respository;
+	PatientPortalAlertConfigRespository patient_portal_alert_configRespository;
 	
 	@Autowired
 	AlertEventRepository alertEventRepository;
@@ -162,24 +162,24 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<SchedulerAppointment> root = cq.from(SchedulerAppointment.class);
 		Join<SchedulerAppointment, PatientRegistration> joinPatientRegistration=root.join("patRegPatientId",JoinType.LEFT);
-		Join<SchedulerAppointment, H113> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
-		Join<SchedulerAppointment, H113> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
+		Join<SchedulerAppointment, AppReferenceValues> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
+		Join<SchedulerAppointment, AppReferenceValues> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerAppointmentParameter> joinSchApptParam=root.join("schApptParam",JoinType.LEFT);
-		Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, H113> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
+		Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, AppReferenceValues> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerResource> joinSchResLoc=root.join("schResLoc",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerResource> joinSchResProvider=root.join("schResProvider",JoinType.LEFT);
-		Join<SchedulerAppointment, H076> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);
+		Join<SchedulerAppointment, ReferringDoctor> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);
 		Join<SchedulerAppointment, Workflow> joinWorkflow=root.join("workflowPatientId",JoinType.LEFT);
 		Join<Join<SchedulerAppointment, Workflow>, AlertCategory> joinWorkflowStatusName=joinWorkflow.join("alertCategoryName",JoinType.LEFT);
 		
 		Predicate[] predicateStatus = new Predicate[] {
-				builder.equal(joinH113Status.get(H113_.h113002), new Integer(1)),
-				builder.equal(joinH113Status.get(H113_.h113010), new Boolean(true)),
+				builder.equal(joinH113Status.get(AppReferenceValues_.App_Reference_Values_tableId), new Integer(1)),
+				builder.equal(joinH113Status.get(AppReferenceValues_.App_Reference_Values_isActive), new Boolean(true)),
 		};
 		joinH113Status.on(predicateStatus);
 		Predicate[] predicateType = new Predicate[] {
-				builder.equal(joinH113Type.get(H113_.h113002), new Integer(2)),
-				builder.equal(joinH113Type.get(H113_.h113010), new Boolean(true)),
+				builder.equal(joinH113Type.get(AppReferenceValues_.App_Reference_Values_tableId), new Integer(2)),
+				builder.equal(joinH113Type.get(AppReferenceValues_.App_Reference_Values_isActive), new Boolean(true)),
 		};
 		joinH113Type.on(predicateType);
 		Predicate[] predicateParam = new Predicate[] {
@@ -187,9 +187,9 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		};
 		joinSchApptParam.on(predicateParam);
 		Predicate[] predicateReason = new Predicate[] {
-				builder.equal(joinH113Reason.get(H113_.h113002), new Integer(402)),
-				builder.equal(joinH113Reason.get(H113_.h113008), new Integer(1)),
-				builder.equal(joinH113Reason.get(H113_.h113010), new Boolean(true)),
+				builder.equal(joinH113Reason.get(AppReferenceValues_.App_Reference_Values_tableId), new Integer(402)),
+				builder.equal(joinH113Reason.get(AppReferenceValues_.App_Reference_Values_reason_type), new Integer(1)),
+				builder.equal(joinH113Reason.get(AppReferenceValues_.App_Reference_Values_isActive), new Boolean(true)),
 		};
 		joinH113Reason.on(predicateReason);
 		Predicate[] predicateLocation = new Predicate[] {
@@ -247,21 +247,21 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 				root.get(SchedulerAppointment_.schApptWorkphone),
 				builder.coalesce(root.get(SchedulerAppointment_.schApptWorkextn),builder.literal("-")),
 				root.get(SchedulerAppointment_.schApptResource),
-				joinH113Status.get(H113_.h113004),
+				joinH113Status.get(AppReferenceValues_.App_Reference_Values_statusName),
 				root.get(SchedulerAppointment_.schApptStatus),
-				joinH113Type.get(H113_.h113004),
+				joinH113Type.get(AppReferenceValues_.App_Reference_Values_statusName),
 				root.get(SchedulerAppointment_.schApptType),
 				joinSchResLoc.get(SchedulerResource_.schResourceName),
 				root.get(SchedulerAppointment_.schApptLocation),
 				joinSchResProvider.get(SchedulerResource_.schResourceFullname),
 				joinSchResProvider.get(SchedulerResource_.schResourceDoctorId),
-				joinH113Reason.get(H113_.h113004),
+				joinH113Reason.get(AppReferenceValues_.App_Reference_Values_statusName),
 				root.get(SchedulerAppointment_.schApptReason),
 				root.get(SchedulerAppointment_.schApptComments),
-				joinSchRefDrId.get(H076_.h076020),
+				joinSchRefDrId.get(ReferringDoctor_.referring_doctor_referringdoctor),
 				root.get(SchedulerAppointment_.schApptReferringdoctorId),
-				joinSchRefDrId.get(H076_.h076010),
-				joinSchRefDrId.get(H076_.h076011),
+				joinSchRefDrId.get(ReferringDoctor_.referring_doctor_phoneno),
+				joinSchRefDrId.get(ReferringDoctor_.referring_doctor_fax_number),
 				joinWorkflow.get(Workflow_.workflowStatus),
 				joinWorkflowStatusName.get(AlertCategory_.alertCategoryDisplayName),
 				joinWorkflow.get(Workflow_.workflowStarttime)
@@ -327,9 +327,9 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 
 		AppointmentDetailsBean appointmentDetailsBean=new AppointmentDetailsBean();
 
-		List<H113> schApptStatusList=h113Repository.findAll(PortalAppointmentsSpecification.getSchApptStatusList());
-		List<H113> schApptTypeList=h113Repository.findAll(PortalAppointmentsSpecification.getSchApptTypeList());
-		List<H113> schApptReasonList=h113Repository.findAll(PortalAppointmentsSpecification.getSchApptReasonList());
+		List<AppReferenceValues> schApptStatusList=h113Repository.findAll(PortalAppointmentsSpecification.getSchApptStatusList());
+		List<AppReferenceValues> schApptTypeList=h113Repository.findAll(PortalAppointmentsSpecification.getSchApptTypeList());
+		List<AppReferenceValues> schApptReasonList=h113Repository.findAll(PortalAppointmentsSpecification.getSchApptReasonList());
 
 		appointmentDetailsBean.setSchApptStatusList(schApptStatusList);
 		appointmentDetailsBean.setSchApptTypeList(schApptTypeList);
@@ -496,10 +496,10 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		
 		
 		
-		H810 demographicAlertCategory=h810Respository.findOne(PortalSettingsSpecification.getPortalAlertCategory(4));
-		  boolean sendToAll =demographicAlertCategory.getH810005();  
-        int provider = Integer.parseInt(demographicAlertCategory.getH810003());
-        int forwardTo = Integer.parseInt(demographicAlertCategory.getH810004());
+		PatientPortalAlertConfig demographicAlertCategory=patient_portal_alert_configRespository.findOne(PortalSettingsSpecification.getPortalAlertCategory(4));
+		  boolean sendToAll =demographicAlertCategory.getpatient_portal_alert_config_send_to_all();  
+        int provider = Integer.parseInt(demographicAlertCategory.getpatient_portal_alert_config_provider());
+        int forwardTo = Integer.parseInt(demographicAlertCategory.getpatient_portal_alert_config_forward_to());
         
 		AlertEvent alert1=new AlertEvent();
 		alert1.setAlertEventCategoryId(19);
@@ -564,24 +564,24 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<SchedulerAppointment> root = cq.from(SchedulerAppointment.class);
 		Join<SchedulerAppointment, PatientRegistration> joinPatientRegistration=root.join("patRegPatientId",JoinType.LEFT);
-		Join<SchedulerAppointment, H113> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
-		Join<SchedulerAppointment, H113> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
+		Join<SchedulerAppointment, AppReferenceValues> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
+		Join<SchedulerAppointment, AppReferenceValues> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerAppointmentParameter> joinSchApptParam=root.join("schApptParam",JoinType.LEFT);
-		Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, H113> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
+		Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, AppReferenceValues> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerResource> joinSchResLoc=root.join("schResLoc",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerResource> joinSchResProvider=root.join("schResProvider",JoinType.LEFT);
-		Join<SchedulerAppointment, H076> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);
+		Join<SchedulerAppointment, ReferringDoctor> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);
 		Join<SchedulerAppointment, Workflow> joinWorkflow=root.join("workflowPatientId",JoinType.LEFT);
 		Join<Join<SchedulerAppointment, Workflow>, AlertCategory> joinWorkflowStatusName=joinWorkflow.join("alertCategoryName",JoinType.LEFT);
 		
 		Predicate[] predicateStatus = new Predicate[] {
-				builder.equal(joinH113Status.get(H113_.h113002), new Integer(1)),
-				builder.equal(joinH113Status.get(H113_.h113010), new Boolean(true)),
+				builder.equal(joinH113Status.get(AppReferenceValues_.App_Reference_Values_tableId), new Integer(1)),
+				builder.equal(joinH113Status.get(AppReferenceValues_.App_Reference_Values_isActive), new Boolean(true)),
 		};
 		joinH113Status.on(predicateStatus);
 		Predicate[] predicateType = new Predicate[] {
-				builder.equal(joinH113Type.get(H113_.h113002), new Integer(2)),
-				builder.equal(joinH113Type.get(H113_.h113010), new Boolean(true)),
+				builder.equal(joinH113Type.get(AppReferenceValues_.App_Reference_Values_tableId), new Integer(2)),
+				builder.equal(joinH113Type.get(AppReferenceValues_.App_Reference_Values_isActive), new Boolean(true)),
 		};
 		joinH113Type.on(predicateType);
 		Predicate[] predicateParam = new Predicate[] {
@@ -589,9 +589,9 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		};
 		joinSchApptParam.on(predicateParam);
 		Predicate[] predicateReason = new Predicate[] {
-				builder.equal(joinH113Reason.get(H113_.h113002), new Integer(402)),
-				builder.equal(joinH113Reason.get(H113_.h113008), new Integer(1)),
-				builder.equal(joinH113Reason.get(H113_.h113010), new Boolean(true)),
+				builder.equal(joinH113Reason.get(AppReferenceValues_.App_Reference_Values_tableId), new Integer(402)),
+				builder.equal(joinH113Reason.get(AppReferenceValues_.App_Reference_Values_reason_type), new Integer(1)),
+				builder.equal(joinH113Reason.get(AppReferenceValues_.App_Reference_Values_isActive), new Boolean(true)),
 		};
 		joinH113Reason.on(predicateReason);
 		Predicate[] predicateLocation = new Predicate[] {
@@ -636,21 +636,21 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 				root.get(SchedulerAppointment_.schApptWorkphone),
 				builder.coalesce(root.get(SchedulerAppointment_.schApptWorkextn),builder.literal("-")),
 				root.get(SchedulerAppointment_.schApptResource),
-				joinH113Status.get(H113_.h113004),
+				joinH113Status.get(AppReferenceValues_.App_Reference_Values_statusName),
 				root.get(SchedulerAppointment_.schApptStatus),
-				joinH113Type.get(H113_.h113004),
+				joinH113Type.get(AppReferenceValues_.App_Reference_Values_statusName),
 				root.get(SchedulerAppointment_.schApptType),
 				joinSchResLoc.get(SchedulerResource_.schResourceName),
 				root.get(SchedulerAppointment_.schApptLocation),
 				joinSchResProvider.get(SchedulerResource_.schResourceFullname),
 				joinSchResProvider.get(SchedulerResource_.schResourceDoctorId),
-				joinH113Reason.get(H113_.h113004),
+				joinH113Reason.get(AppReferenceValues_.App_Reference_Values_statusName),
 				root.get(SchedulerAppointment_.schApptReason),
 				root.get(SchedulerAppointment_.schApptComments),
-				joinSchRefDrId.get(H076_.h076020),
+				joinSchRefDrId.get(ReferringDoctor_.referring_doctor_referringdoctor),
 				root.get(SchedulerAppointment_.schApptReferringdoctorId),
-				joinSchRefDrId.get(H076_.h076010),
-				joinSchRefDrId.get(H076_.h076011),
+				joinSchRefDrId.get(ReferringDoctor_.referring_doctor_phoneno),
+				joinSchRefDrId.get(ReferringDoctor_.referring_doctor_fax_number),
 				joinWorkflow.get(Workflow_.workflowStatus),
 				joinWorkflowStatusName.get(AlertCategory_.alertCategoryDisplayName),
 				joinWorkflow.get(Workflow_.workflowStarttime)
@@ -731,10 +731,10 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 				
 		
 		/*Creating an alert for the booked appointment*/
-		H810 demographicAlertCategory=h810Respository.findOne(PortalSettingsSpecification.getPortalAlertCategory(4));
-		  boolean sendToAll =demographicAlertCategory.getH810005();  
-      int provider = Integer.parseInt(demographicAlertCategory.getH810003());
-      int forwardTo = Integer.parseInt(demographicAlertCategory.getH810004());
+		PatientPortalAlertConfig demographicAlertCategory=patient_portal_alert_configRespository.findOne(PortalSettingsSpecification.getPortalAlertCategory(4));
+		  boolean sendToAll =demographicAlertCategory.getpatient_portal_alert_config_send_to_all();  
+      int provider = Integer.parseInt(demographicAlertCategory.getpatient_portal_alert_config_provider());
+      int forwardTo = Integer.parseInt(demographicAlertCategory.getpatient_portal_alert_config_forward_to());
       
 		AlertEvent alert1=new AlertEvent();
 		alert1.setAlertEventCategoryId(19);
@@ -797,7 +797,7 @@ public void executeTesttableh213(){
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<H213> root = cq.from(H213.class);
+		Root<PrimarykeyGenerator> root = cq.from(PrimarykeyGenerator.class);
 		cq.select(builder.function("testtableh213", String.class));
 		
 		em.createQuery(cq).getResultList();

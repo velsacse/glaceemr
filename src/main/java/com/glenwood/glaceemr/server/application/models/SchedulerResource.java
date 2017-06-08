@@ -3,9 +3,12 @@ package com.glenwood.glaceemr.server.application.models;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -15,6 +18,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 public class SchedulerResource {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sch_resource_sch_resource_id_seq")
+	@SequenceGenerator(name = "sch_resource_sch_resource_id_seq", sequenceName = "sch_resource_sch_resource_id_seq", allocationSize = 1)
 	@Column(name="sch_resource_id")
 	private Integer schResourceId;
 

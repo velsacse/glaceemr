@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues;
 import com.glenwood.glaceemr.server.application.models.CoreClassGendrug;
 import com.glenwood.glaceemr.server.application.models.CoreClassGendrug_;
 import com.glenwood.glaceemr.server.application.models.CoreClassHierarchy;
@@ -37,10 +38,6 @@ import com.glenwood.glaceemr.server.application.models.CurrentMedication;
 import com.glenwood.glaceemr.server.application.models.DrugSchedule;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H113;
-import com.glenwood.glaceemr.server.application.models.H802;
-import com.glenwood.glaceemr.server.application.models.H802_;
-import com.glenwood.glaceemr.server.application.models.H810;
 import com.glenwood.glaceemr.server.application.models.MedStatus;
 import com.glenwood.glaceemr.server.application.models.MedStatus_;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
@@ -48,6 +45,9 @@ import com.glenwood.glaceemr.server.application.models.MedsAdminPlan;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
 import com.glenwood.glaceemr.server.application.models.NdcPkgProduct;
 import com.glenwood.glaceemr.server.application.models.NdcPkgProduct_;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
+import com.glenwood.glaceemr.server.application.models.PatientPortalRefillRequest;
+import com.glenwood.glaceemr.server.application.models.PatientPortalRefillRequest_;
 import com.glenwood.glaceemr.server.application.models.PharmacyFilterBean;
 import com.glenwood.glaceemr.server.application.models.PharmacyMapping;
 import com.glenwood.glaceemr.server.application.models.PharmacyMapping_;
@@ -56,15 +56,15 @@ import com.glenwood.glaceemr.server.application.models.Prescription;
 import com.glenwood.glaceemr.server.application.models.Prescription_;
 import com.glenwood.glaceemr.server.application.repositories.AlertCategoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
+import com.glenwood.glaceemr.server.application.repositories.AppReferenceValuesRepository;
 import com.glenwood.glaceemr.server.application.repositories.CurrentMedicationRepository;
 import com.glenwood.glaceemr.server.application.repositories.DrugScheduleRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
-import com.glenwood.glaceemr.server.application.repositories.H113Repository;
-import com.glenwood.glaceemr.server.application.repositories.H802Repository;
-import com.glenwood.glaceemr.server.application.repositories.H810Respository;
 import com.glenwood.glaceemr.server.application.repositories.MedAdministrationLogRepository;
 import com.glenwood.glaceemr.server.application.repositories.MedAdministrationPlanRepository;
 import com.glenwood.glaceemr.server.application.repositories.MedAdministrationPlanShortcutRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalAlertConfigRespository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalRefillRequestRepository;
 import com.glenwood.glaceemr.server.application.repositories.PharmDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PharmacyMappingRepository;
 import com.glenwood.glaceemr.server.application.repositories.PrescriptionRepository;
@@ -103,7 +103,7 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	MedAdministrationPlanShortcutRepository medAdministrationPlanShortcutRepository;
 	
 	@Autowired
-	H113Repository h113Repository;
+	AppReferenceValuesRepository App_Reference_ValuesRepository;
 	
 	@Autowired
 	EncounterRepository encounterRepository;
@@ -115,7 +115,7 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	PharmDetailsRepository pharmDetailsRepository;
 	
 	@Autowired
-	H802Repository h802Repository;
+	PatientPortalRefillRequestRepository patient_portal_refill_requestRepository;
 	
 	@Autowired
 	PharmacyMappingRepository pharmacyMappingRepository;
@@ -124,7 +124,7 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	AlertCategoryRepository alertCategoryRepository;
 	
 	@Autowired
-	H810Respository h810Respository;
+	PatientPortalAlertConfigRespository patient_portal_alert_configRespository;
 	
 	@PersistenceContext
 	EntityManager em;
@@ -285,7 +285,6 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		for(Prescription obj:prescmedlist) {
 			obj.setMedsAdminPlan(medAdminPlanRepository.findAll(PrescripitonSpecification.getMedsPlanIds(obj.getDocPrescId())));
 		}
-		
 		Map<String, Object> mapobject=new HashMap<String,Object>();
 		mapobject.put("currentmed", currentmedlist);
 		mapobject.put("prescmed", prescmedlist);
@@ -462,19 +461,19 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		
 		for(int i=0;i<requestBean.getPrecriptionList().size();i++){
 		
-		H802 prescriptionMed=new H802();
-		prescriptionMed.setH802002(requestId);
-		prescriptionMed.setH802003(requestBean.getPatientId());
-		prescriptionMed.setH802004(1);
-		prescriptionMed.setH802005(requestedDate.toString());
-		prescriptionMed.setH802006(requestBean.getPrecriptionList().get(i).getPrescriptionId());
-		prescriptionMed.setH802007(1);
-		prescriptionMed.setH802008(0);
+		PatientPortalRefillRequest prescriptionMed=new PatientPortalRefillRequest();
+		prescriptionMed.setpatient_portal_refill_request_refill_id(requestId);
+		prescriptionMed.setpatient_portal_refill_request_patient_id(requestBean.getPatientId());
+		prescriptionMed.setpatient_portal_refill_request_zhtml(1);
+		prescriptionMed.setpatient_portal_refill_request_requested_date(requestedDate.toString());
+		prescriptionMed.setpatient_portal_refill_request_prescription_id(requestBean.getPrecriptionList().get(i).getPrescriptionId());
+		prescriptionMed.setpatient_portal_refill_request_status(1);
+		prescriptionMed.setpatient_portal_refill_request_flag(0);
 		
 		requestedMedicine = requestedMedicine.equalsIgnoreCase("") ? "" : requestedMedicine + ",";
 		requestedMedicine = requestedMedicine+requestBean.getPrecriptionList().get(i).getPrescriptionName()+" ["+requestBean.getPrecriptionList().get(i).getPrescriptionDosage()+"]";
 		
-		h802Repository.saveAndFlush(prescriptionMed);
+		patient_portal_refill_requestRepository.saveAndFlush(prescriptionMed);
 		}
 		
 		String requestComments = "Request Type : Refill requested from patient portal \r\n Medication : "+requestedMedicine+"\r\n Comments : "+requestBean.getComments()+" \r\n Suggested Pharmacy : "+requestBean.getPharmacyName();
@@ -501,10 +500,10 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 		
 		String requestInfo      = "Request " + requestedMedicine + " for Refillment as on " + requestedDate;
 		
-		H810 paymentAlertCategory=h810Respository.findOne(PortalAlertSpecification.getPortalAlertCategoryByName("Refill Request"));
-		boolean sendToAll =paymentAlertCategory.getH810005();  
-		int provider = Integer.parseInt(paymentAlertCategory.getH810003());
-		int forwardTo = Integer.parseInt(paymentAlertCategory.getH810004());
+		PatientPortalAlertConfig paymentAlertCategory=patient_portal_alert_configRespository.findOne(PortalAlertSpecification.getPortalAlertCategoryByName("Refill Request"));
+		boolean sendToAll =paymentAlertCategory.getpatient_portal_alert_config_send_to_all();  
+		int provider = Integer.parseInt(paymentAlertCategory.getpatient_portal_alert_config_provider());
+		int forwardTo = Integer.parseInt(paymentAlertCategory.getpatient_portal_alert_config_forward_to());
 
 		AlertCategory alertCategory=alertCategoryRepository.findOne(AlertCategorySpecification.getAlertCategoryByName("Refill Request"));
 		
@@ -565,8 +564,8 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<H802> root = cq.from(H802.class);
-		cq.select(builder.max(root.get(H802_.h802002)));
+		Root<PatientPortalRefillRequest> root = cq.from(PatientPortalRefillRequest.class);
+		cq.select(builder.max(root.get(PatientPortalRefillRequest_.patient_portal_refill_request_refill_id)));
 		Integer requestId=(Integer) em.createQuery(cq).getSingleResult();
 
 		return requestId+1;
@@ -585,8 +584,8 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	
 	public Integer getEncounterReasonId(String reasonType, int reasonGroup) {
 
-		H113 encounterReason=h113Repository.findOne(EncounterSpecification.getEncounterReasonId(reasonType, reasonGroup));
-		return encounterReason.getH113003();
+		AppReferenceValues encounterReason=App_Reference_ValuesRepository.findOne(EncounterSpecification.getEncounterReasonId(reasonType, reasonGroup));
+		return encounterReason.getApp_Reference_Values_statusId();
 	}
 
 	@Override

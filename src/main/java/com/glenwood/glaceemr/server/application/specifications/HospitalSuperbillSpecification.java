@@ -20,7 +20,7 @@ import com.glenwood.glaceemr.server.application.models.Cpt;
 import com.glenwood.glaceemr.server.application.models.Cpt_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
-import com.glenwood.glaceemr.server.application.models.H076;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PosTable;
@@ -44,7 +44,7 @@ public class HospitalSuperbillSpecification {
                Join<Admission,PosTable> posTableJoin=root.join(Admission_.posTable,JoinType.INNER);
                Join<Admission,EmployeeProfile> empJoin=root.join(Admission_.empProfile,JoinType.INNER);
                Join<PatientRegistration,EmployeeProfile> primPhysician=patRegJoin.join(PatientRegistration_.empProfile,JoinType.LEFT);
-               Join<PatientRegistration,H076> refPhysician=patRegJoin.join(PatientRegistration_.referringPhyTable,JoinType.LEFT);
+               Join<PatientRegistration,ReferringDoctor> refPhysician=patRegJoin.join(PatientRegistration_.referringPhyTable,JoinType.LEFT);
                Predicate dischargeDate=root.get(Admission_.admissionDischargeDate).isNull();
                Predicate admissionPosType=cb.equal(root.get(Admission_.admissionPosId),selectedPosId);
                Predicate patientActive=cb.equal(patRegJoin.get(PatientRegistration_.patientRegistrationActive),true);

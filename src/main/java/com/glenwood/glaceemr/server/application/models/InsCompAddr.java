@@ -5,9 +5,12 @@ import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -18,7 +21,10 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @Table(name = "ins_comp_addr")
 public class InsCompAddr {
 
+	
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ins_comp_addr_ins_comp_addr_id_seq")
+	@SequenceGenerator(name = "ins_comp_addr_ins_comp_addr_id_seq", sequenceName = "ins_comp_addr_ins_comp_addr_id_seq", allocationSize = 1)
 	@Column(name="ins_comp_addr_id")
 	private Integer insCompAddrId;
 

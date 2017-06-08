@@ -1,16 +1,20 @@
 package com.glenwood.glaceemr.server.application.models;
 
-import java.sql.Timestamp;
 import java.sql.Date;
+import java.sql.Timestamp;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -22,6 +26,8 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class NonServiceDetails {
 
 	@Id
+	 @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "non_service_detail_non_service_detail_id_seq")
+	@SequenceGenerator(name = "non_service_detail_non_service_detail_id_seq", sequenceName = "non_service_detail_non_service_detail_id_seq", allocationSize = 1)
 	@Column(name="non_service_detail_id")
 	private Long nonServiceDetailId;
 

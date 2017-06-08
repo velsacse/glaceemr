@@ -13,8 +13,8 @@ import org.springframework.data.jpa.domain.Specification;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
-import com.glenwood.glaceemr.server.application.models.H809;
-import com.glenwood.glaceemr.server.application.models.H809_;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 
@@ -116,17 +116,17 @@ public class PatientRegistrationSpecification {
 	 * @param username	: used to get patient details of a patient of that username.
 	 * @return list of patient details.
 	 */	
-	public static Specification<H809> getPatientDetailsByUsername(final String username) {
+	public static Specification<PatientPortalUser> getPatientDetailsByUsername(final String username) {
 
-		   return new Specification<H809>() {
+		   return new Specification<PatientPortalUser>() {
 
 			@Override
-			public Predicate toPredicate(Root<H809> root,
+			public Predicate toPredicate(Root<PatientPortalUser> root,
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 								
-			    Predicate personalDetailsPredicate=cb.equal(cb.upper(root.get(H809_.h809004)),username.toUpperCase());
+			    Predicate personalDetailsPredicate=cb.equal(cb.upper(root.get(PatientPortalUser_.patient_portal_user_name)),username.toUpperCase());
 				
-			    root.fetch(H809_.chartH809Table,JoinType.INNER).fetch(Chart_.patientRegistrationTable);
+			    root.fetch(PatientPortalUser_.chartpatient_portal_userTable,JoinType.INNER).fetch(Chart_.patientRegistrationTable);
 			    
 			    cq.where(cb.and(personalDetailsPredicate));
 				return cq.getRestriction();

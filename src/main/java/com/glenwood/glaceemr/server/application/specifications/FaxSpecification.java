@@ -2,6 +2,7 @@ package com.glenwood.glaceemr.server.application.specifications;
 
 import java.util.Arrays;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -10,20 +11,22 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+
 import com.glenwood.glaceemr.server.application.models.DoctorSign;
 import com.glenwood.glaceemr.server.application.models.DoctorSign_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.FaxFolder;
+import com.glenwood.glaceemr.server.application.models.FaxInbox;
+import com.glenwood.glaceemr.server.application.models.FaxInbox_;
+import com.glenwood.glaceemr.server.application.models.FaxOutbox;
+import com.glenwood.glaceemr.server.application.models.FaxOutbox_;
 import com.glenwood.glaceemr.server.application.models.FaxStatus;
 import com.glenwood.glaceemr.server.application.models.FaxStatus_;
 import com.glenwood.glaceemr.server.application.models.FaxType;
-import com.glenwood.glaceemr.server.application.models.H491;
-import com.glenwood.glaceemr.server.application.models.H491_;
-import com.glenwood.glaceemr.server.application.models.H496;
-import com.glenwood.glaceemr.server.application.models.H496_;
 import com.glenwood.glaceemr.server.application.models.InFaxStatus;
 import com.glenwood.glaceemr.server.application.models.InFaxStatus_;
 /**
@@ -35,22 +38,22 @@ public class FaxSpecification {
 	@Autowired
 	EntityManager entityManager;
 
-	public static Specification<H496> getOutboxDetails(final Integer h496004, final Integer userId) {
-		return new Specification<H496>() {
+	public static Specification<FaxOutbox> getOutboxDetails(final Integer fax_outbox_folderid, final Integer userId) {
+		return new Specification<FaxOutbox>() {
 			@SuppressWarnings("unused")
 			@Override
-			public Predicate toPredicate(Root<H496> root,
+			public Predicate toPredicate(Root<FaxOutbox> root,
 				   CriteriaQuery<?> cq, CriteriaBuilder cb) {
-				Join<H496, FaxFolder> h496join= root.join(H496_.faxFolder,JoinType.INNER);
-				Join<H496, FaxStatus> statusjoin= root.join(H496_.faxStatus,JoinType.INNER);
-				Join<H496, EmployeeProfile> empProfile1join= root.join(H496_.chart_users_1,JoinType.LEFT);
-				Join<H496, EmployeeProfile> empProfile2join= root.join(H496_.chart_users_2,JoinType.LEFT);
-				Join<H496, EmployeeProfile> empProfile3join= root.join(H496_.chart_users_3,JoinType.LEFT);
+				Join<FaxOutbox, FaxFolder> h496join= root.join(FaxOutbox_.faxFolder,JoinType.INNER);
+				Join<FaxOutbox, FaxStatus> statusjoin= root.join(FaxOutbox_.faxStatus,JoinType.INNER);
+				Join<FaxOutbox, EmployeeProfile> empProfile1join= root.join(FaxOutbox_.chart_users_1,JoinType.LEFT);
+				Join<FaxOutbox, EmployeeProfile> empProfile2join= root.join(FaxOutbox_.chart_users_2,JoinType.LEFT);
+				Join<FaxOutbox, EmployeeProfile> empProfile3join= root.join(FaxOutbox_.chart_users_3,JoinType.LEFT);
 				Predicate condition = null;
 				if(userId==-1){
-					condition = cb.and(cb.equal(root.get(H496_.h496004),h496004),cb.equal(statusjoin.get(FaxStatus_.groupid),7),cb.equal(root.get(H496_.h496023Faxbox),1));
+					condition = cb.and(cb.equal(root.get(FaxOutbox_.fax_outbox_folderid),fax_outbox_folderid),cb.equal(statusjoin.get(FaxStatus_.groupid),7),cb.equal(root.get(FaxOutbox_.fax_outbox023Faxbox),1));
 				}else{
-					condition = cb.and(cb.equal(root.get(H496_.h496004),h496004),cb.equal(statusjoin.get(FaxStatus_.groupid),7),cb.equal(root.get(H496_.h496023Faxbox),1),cb.equal(root.get(H496_.h496012),userId),cb.equal(root.get(H496_.h496013),userId));
+					condition = cb.and(cb.equal(root.get(FaxOutbox_.fax_outbox_folderid),fax_outbox_folderid),cb.equal(statusjoin.get(FaxStatus_.groupid),7),cb.equal(root.get(FaxOutbox_.fax_outbox023Faxbox),1),cb.equal(root.get(FaxOutbox_.fax_outbox_forwardedto),userId),cb.equal(root.get(FaxOutbox_.fax_outbox_createdby),userId));
 				}
 				return cq.where(condition).getRestriction();
 			}			
@@ -58,113 +61,113 @@ public class FaxSpecification {
 	}
 	
 	@SuppressWarnings("unused")
-	public static Predicate getFaxOutboxDetails(final Integer h496004, final Integer userId, Root<H496> root,
+	public static Predicate getFaxOutboxDetails(final Integer fax_outbox_folderid, final Integer userId, Root<FaxOutbox> root,
 			   CriteriaQuery<?> cq, CriteriaBuilder cb){
 		
-		Join<H496, FaxFolder> h496join= root.join(H496_.faxFolder,JoinType.INNER);
-		Join<H496, FaxStatus> statusjoin= root.join(H496_.faxStatus,JoinType.INNER);
-		Join<H496, EmployeeProfile> empProfile1join= root.join(H496_.chart_users_1,JoinType.LEFT);
-		Join<H496, EmployeeProfile> empProfile2join= root.join(H496_.chart_users_2,JoinType.LEFT);
-		Join<H496, EmployeeProfile> empProfile3join= root.join(H496_.chart_users_3,JoinType.LEFT);
+		Join<FaxOutbox, FaxFolder> h496join= root.join(FaxOutbox_.faxFolder,JoinType.INNER);
+		Join<FaxOutbox, FaxStatus> statusjoin= root.join(FaxOutbox_.faxStatus,JoinType.INNER);
+		Join<FaxOutbox, EmployeeProfile> empProfile1join= root.join(FaxOutbox_.chart_users_1,JoinType.LEFT);
+		Join<FaxOutbox, EmployeeProfile> empProfile2join= root.join(FaxOutbox_.chart_users_2,JoinType.LEFT);
+		Join<FaxOutbox, EmployeeProfile> empProfile3join= root.join(FaxOutbox_.chart_users_3,JoinType.LEFT);
 		Predicate condition = null;
 		if(userId==-1){
-			condition = cb.and(cb.equal(root.get(H496_.h496004),h496004),cb.equal(statusjoin.get(FaxStatus_.groupid),7),cb.equal(root.get(H496_.h496023Faxbox),1));
+			condition = cb.and(cb.equal(root.get(FaxOutbox_.fax_outbox_folderid),fax_outbox_folderid),cb.equal(statusjoin.get(FaxStatus_.groupid),7),cb.equal(root.get(FaxOutbox_.fax_outbox023Faxbox),1));
 		}else{
-			condition = cb.and(cb.equal(root.get(H496_.h496004),h496004),cb.equal(statusjoin.get(FaxStatus_.groupid),7),cb.equal(root.get(H496_.h496023Faxbox),1),cb.equal(root.get(H496_.h496012),userId),cb.equal(root.get(H496_.h496013),userId));
+			condition = cb.and(cb.equal(root.get(FaxOutbox_.fax_outbox_folderid),fax_outbox_folderid),cb.equal(statusjoin.get(FaxStatus_.groupid),7),cb.equal(root.get(FaxOutbox_.fax_outbox023Faxbox),1),cb.equal(root.get(FaxOutbox_.fax_outbox_forwardedto),userId),cb.equal(root.get(FaxOutbox_.fax_outbox_createdby),userId));
 		}
 		
 		return cq.where(condition).getRestriction();
 		
 	}
 
-	public static Specification<H491> getInboxDetails(final Integer h491010, final Integer h491013, final Integer h491014, final Integer h491017_faxbox) {
-		return new Specification<H491>() {
+	public static Specification<FaxInbox> getInboxDetails(final Integer fax_inbox_folderid, final Integer fax_inbox_statusid, final Integer fax_inbox_forwardeduserid, final Integer h491017_faxbox) {
+		return new Specification<FaxInbox>() {
 			@SuppressWarnings("unused")
 			@Override
-			public Predicate toPredicate(Root<H491> root,
+			public Predicate toPredicate(Root<FaxInbox> root,
 				   CriteriaQuery<?> cq, CriteriaBuilder cb) {
-				Join<H491, FaxFolder> faxFolderjoin = root.join(H491_.faxFolder,JoinType.INNER);
-				Join<H491, InFaxStatus> statusjoin = root.join(H491_.faxStatus,JoinType.INNER);
-				Join<H491, FaxType> faxTypejoin = root.join(H491_.faxType,JoinType.INNER);
-				Join<H491, EmployeeProfile> empProfile1join = root.join(H491_.emplopyeeProfile,JoinType.LEFT);
-				Join<H491, EmployeeProfile> empProfile2join = root.join(H491_.emplopyeeProfile1,JoinType.LEFT);
+				Join<FaxInbox, FaxFolder> faxFolderjoin = root.join(FaxInbox_.faxFolder,JoinType.INNER);
+				Join<FaxInbox, InFaxStatus> statusjoin = root.join(FaxInbox_.faxStatus,JoinType.INNER);
+				Join<FaxInbox, FaxType> faxTypejoin = root.join(FaxInbox_.faxType,JoinType.INNER);
+				Join<FaxInbox, EmployeeProfile> empProfile1join = root.join(FaxInbox_.emplopyeeProfile,JoinType.LEFT);
+				Join<FaxInbox, EmployeeProfile> empProfile2join = root.join(FaxInbox_.emplopyeeProfile1,JoinType.LEFT);
 				Predicate condition = null;
-				if(h491013 == -1){
-					condition = cb.and(cb.equal(statusjoin.get(InFaxStatus_.groupid),6),cb.equal(root.get(H491_.h491010),h491010),cb.equal(root.get(H491_.h491014),h491014),cb.equal(root.get(H491_.h491017Faxbox),h491017_faxbox),cb.equal(root.get(H491_.h491018Isenabled),true));
+				if(fax_inbox_statusid == -1){
+					condition = cb.and(cb.equal(statusjoin.get(InFaxStatus_.groupid),6),cb.equal(root.get(FaxInbox_.fax_inbox_folderid),fax_inbox_folderid),cb.equal(root.get(FaxInbox_.fax_inbox_forwardeduserid),fax_inbox_forwardeduserid),cb.equal(root.get(FaxInbox_.fax_inbox017Faxbox),h491017_faxbox),cb.equal(root.get(FaxInbox_.fax_inbox018Isenabled),true));
 				}else{
-					condition = cb.and(cb.equal(statusjoin.get(InFaxStatus_.groupid),6),cb.equal(root.get(H491_.h491010),h491010),cb.equal(root.get(H491_.h491013),0),cb.equal(root.get(H491_.h491014),h491014),cb.equal(root.get(H491_.h491017Faxbox),h491017_faxbox),cb.equal(root.get(H491_.h491018Isenabled),true));
+					condition = cb.and(cb.equal(statusjoin.get(InFaxStatus_.groupid),6),cb.equal(root.get(FaxInbox_.fax_inbox_folderid),fax_inbox_folderid),cb.equal(root.get(FaxInbox_.fax_inbox_statusid),0),cb.equal(root.get(FaxInbox_.fax_inbox_forwardeduserid),fax_inbox_forwardeduserid),cb.equal(root.get(FaxInbox_.fax_inbox017Faxbox),h491017_faxbox),cb.equal(root.get(FaxInbox_.fax_inbox018Isenabled),true));
 				}
 				return cq.where(condition).getRestriction();
 			}			
 		};
 	}
 	@SuppressWarnings("unused")
-	public static Predicate getFaxInboxDetails(final Integer h491010, final Integer h491013, final Integer h491014, final Integer h491017_faxbox,Root<H491> root,CriteriaQuery<?> cq, CriteriaBuilder cb) {
+	public static Predicate getFaxInboxDetails(final Integer fax_inbox_folderid, final Integer fax_inbox_statusid, final Integer fax_inbox_forwardeduserid, final Integer h491017_faxbox,Root<FaxInbox> root,CriteriaQuery<?> cq, CriteriaBuilder cb) {
 		
-				Join<H491, FaxFolder> faxFolderjoin = root.join(H491_.faxFolder,JoinType.INNER);
-				Join<H491, InFaxStatus> statusjoin = root.join(H491_.faxStatus,JoinType.INNER);
-				Join<H491, FaxType> faxTypejoin = root.join(H491_.faxType,JoinType.INNER);
-				Join<H491, EmployeeProfile> empProfile1join = root.join(H491_.emplopyeeProfile,JoinType.LEFT);
-				Join<H491, EmployeeProfile> empProfile2join = root.join(H491_.emplopyeeProfile1,JoinType.LEFT);
+				Join<FaxInbox, FaxFolder> faxFolderjoin = root.join(FaxInbox_.faxFolder,JoinType.INNER);
+				Join<FaxInbox, InFaxStatus> statusjoin = root.join(FaxInbox_.faxStatus,JoinType.INNER);
+				Join<FaxInbox, FaxType> faxTypejoin = root.join(FaxInbox_.faxType,JoinType.INNER);
+				Join<FaxInbox, EmployeeProfile> empProfile1join = root.join(FaxInbox_.emplopyeeProfile,JoinType.LEFT);
+				Join<FaxInbox, EmployeeProfile> empProfile2join = root.join(FaxInbox_.emplopyeeProfile1,JoinType.LEFT);
 				Predicate condition = null;
-				if(h491013 == -1){
-					condition = cb.and(cb.equal(statusjoin.get(InFaxStatus_.groupid),6),cb.equal(root.get(H491_.h491010),h491010),cb.equal(root.get(H491_.h491014),h491014),cb.equal(root.get(H491_.h491017Faxbox),h491017_faxbox),cb.equal(root.get(H491_.h491018Isenabled),true));
+				if(fax_inbox_statusid == -1){
+					condition = cb.and(cb.equal(statusjoin.get(InFaxStatus_.groupid),6),cb.equal(root.get(FaxInbox_.fax_inbox_folderid),fax_inbox_folderid),cb.equal(root.get(FaxInbox_.fax_inbox_forwardeduserid),fax_inbox_forwardeduserid),cb.equal(root.get(FaxInbox_.fax_inbox017Faxbox),h491017_faxbox),cb.equal(root.get(FaxInbox_.fax_inbox018Isenabled),true));
 				}else{
-					condition = cb.and(cb.equal(statusjoin.get(InFaxStatus_.groupid),6),cb.equal(root.get(H491_.h491010),h491010),cb.equal(root.get(H491_.h491013),0),cb.equal(root.get(H491_.h491014),h491014),cb.equal(root.get(H491_.h491017Faxbox),h491017_faxbox),cb.equal(root.get(H491_.h491018Isenabled),true));
+					condition = cb.and(cb.equal(statusjoin.get(InFaxStatus_.groupid),6),cb.equal(root.get(FaxInbox_.fax_inbox_folderid),fax_inbox_folderid),cb.equal(root.get(FaxInbox_.fax_inbox_statusid),0),cb.equal(root.get(FaxInbox_.fax_inbox_forwardeduserid),fax_inbox_forwardeduserid),cb.equal(root.get(FaxInbox_.fax_inbox017Faxbox),h491017_faxbox),cb.equal(root.get(FaxInbox_.fax_inbox018Isenabled),true));
 				}
 				return cq.where(condition).getRestriction();
 			}			
 
 	
-	public static Specification<H491>faxForward(final String faxId[]){
-		return new Specification<H491>() {
+	public static Specification<FaxInbox>faxForward(final String faxId[]){
+		return new Specification<FaxInbox>() {
 			@Override
-			public Predicate toPredicate(Root<H491> root,
+			public Predicate toPredicate(Root<FaxInbox> root,
 				   CriteriaQuery<?> cq, CriteriaBuilder cb) {				
-				Predicate predicate=cq.where(root.get(H491_.h491001).in(Arrays.asList(faxId))).getRestriction();
+				Predicate predicate=cq.where(root.get(FaxInbox_.fax_inbox_id).in(Arrays.asList(faxId))).getRestriction();
 				return predicate;
 			}
 		};
 	}
 
-	public static Specification<H491> getInFaxDetails(final Integer faxId, final Integer userId, final Integer faxTab, final Integer faxFolder){
-			return new Specification<H491>() {
+	public static Specification<FaxInbox> getInFaxDetails(final Integer faxId, final Integer userId, final Integer faxTab, final Integer faxFolder){
+			return new Specification<FaxInbox>() {
 			@Override
-			public Predicate toPredicate(Root<H491> root,
+			public Predicate toPredicate(Root<FaxInbox> root,
 				   CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				   Predicate condition = null;
 				   if(faxTab == 1){
-					   condition = cb.and(cb.equal(root.get(H491_.h491001),faxId), cb.equal(root.get(H491_.h491010),faxFolder), cb.equal(root.get(H491_.h491014),0));
+					   condition = cb.and(cb.equal(root.get(FaxInbox_.fax_inbox_id),faxId), cb.equal(root.get(FaxInbox_.fax_inbox_folderid),faxFolder), cb.equal(root.get(FaxInbox_.fax_inbox_forwardeduserid),0));
 				   }else{
-					   condition = cb.and(cb.equal(root.get(H491_.h491001),faxId), cb.equal(root.get(H491_.h491010),faxFolder), cb.equal(root.get(H491_.h491014),userId));
+					   condition = cb.and(cb.equal(root.get(FaxInbox_.fax_inbox_id),faxId), cb.equal(root.get(FaxInbox_.fax_inbox_folderid),faxFolder), cb.equal(root.get(FaxInbox_.fax_inbox_forwardeduserid),userId));
 				   }
 				return cq.where(condition).getRestriction();
 			}
 		};
 	}
 	 
-	public static Specification<H491> lastFaxReceivedTime(final Integer faxId){
-		return new Specification<H491>() {
+	public static Specification<FaxInbox> lastFaxReceivedTime(final Integer faxId){
+		return new Specification<FaxInbox>() {
 		@Override
-		public Predicate toPredicate(Root<H491> root,
+		public Predicate toPredicate(Root<FaxInbox> root,
 			   CriteriaQuery<?> cq, CriteriaBuilder cb) {
 			   Predicate condition = null;
-			   condition = cb.and(cb.equal(root.get(H491_.h491001), faxId));
+			   condition = cb.and(cb.equal(root.get(FaxInbox_.fax_inbox_id), faxId));
 			return cq.where(condition).getRestriction();
 		}
 	};
 }
 
-	public static Specification<H496> getOutFaxDetails(final Integer userId,final Integer faxId,final Integer faxTab, final Integer faxFolder){
-		return new Specification<H496>() {
+	public static Specification<FaxOutbox> getOutFaxDetails(final Integer userId,final Integer faxId,final Integer faxTab, final Integer faxFolder){
+		return new Specification<FaxOutbox>() {
 			@Override
-			public Predicate toPredicate(Root<H496> root,
+			public Predicate toPredicate(Root<FaxOutbox> root,
 				   CriteriaQuery<?> cq, CriteriaBuilder cb) {
 			       Predicate condition = null;
 			    		   if(faxTab == 1){
-							   condition = cb.and(cb.equal(root.get(H496_.h496001),faxId), cb.equal(root.get(H496_.h496010),faxFolder), cb.equal(root.get(H496_.h496014),0));
+							   condition = cb.and(cb.equal(root.get(FaxOutbox_.fax_outbox_id),faxId), cb.equal(root.get(FaxOutbox_.fax_outbox_recipientname),faxFolder), cb.equal(root.get(FaxOutbox_.fax_outbox_createddate),0));
 						   }else{
-							   condition = cb.and(cb.equal(root.get(H496_.h496001),faxId), cb.equal(root.get(H496_.h496010),faxFolder), cb.equal(root.get(H496_.h496014),userId));
+							   condition = cb.and(cb.equal(root.get(FaxOutbox_.fax_outbox_id),faxId), cb.equal(root.get(FaxOutbox_.fax_outbox_recipientname),faxFolder), cb.equal(root.get(FaxOutbox_.fax_outbox_createddate),userId));
 						   }  
 			return cq.where(condition).getRestriction();
 			}
@@ -237,14 +240,14 @@ public class FaxSpecification {
 	 * code to return fax details of selected fax Id's
 	 */
 	
-	public static Specification<H491> getSelectedFaxDetails(final List<Integer> faxId){
+	public static Specification<FaxInbox> getSelectedFaxDetails(final List<Integer> faxId){
 		
-		return new Specification<H491>() {
+		return new Specification<FaxInbox>() {
 			
 			@Override
-			public Predicate toPredicate(Root<H491> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+			public Predicate toPredicate(Root<FaxInbox> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
-				Expression<Integer> expr=root.get(H491_.h491001);
+				Expression<Integer> expr=root.get(FaxInbox_.fax_inbox_id);
 				Predicate predicate=query.where(expr.in(faxId)).getRestriction();
 				return predicate;
 				
@@ -253,14 +256,14 @@ public class FaxSpecification {
 		};
 		
 	}
-public static Specification<H496> getSelectedFaxDetails1(final List<Integer> faxId){
+public static Specification<FaxOutbox> getSelectedFaxDetails1(final List<Integer> faxId){
 		
-		return new Specification<H496>() {
+		return new Specification<FaxOutbox>() {
 			
 			@Override
-			public Predicate toPredicate(Root<H496> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+			public Predicate toPredicate(Root<FaxOutbox> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
-				Expression<Integer> expr=root.get(H496_.h496001);
+				Expression<Integer> expr=root.get(FaxOutbox_.fax_outbox_id);
 				Predicate predicate=query.where(expr.in(faxId)).getRestriction();
 				return predicate;
 				

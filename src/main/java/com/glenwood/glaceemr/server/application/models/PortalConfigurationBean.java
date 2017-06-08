@@ -29,7 +29,7 @@ public class PortalConfigurationBean {
 	String glaceSpringUrl;
 	List<PatientPortalMenuConfig> portalMenuItemList;
 	List<PatientPortalFeatureConfig> portalFeatureItemList;
-	List<H809> loggedInUserDetailsList;
+	List<PatientPortalUser> loggedInUserDetailsList;
 	
 	public String getUsername() {
 		return username;
@@ -40,6 +40,7 @@ public class PortalConfigurationBean {
 	public String getTennantDB() {
 		return tennantDB;
 	}
+	
 	public void setTennantDB(String tennantDB) {
 		this.tennantDB = tennantDB;
 	}
@@ -176,10 +177,10 @@ public class PortalConfigurationBean {
 			List<PatientPortalMenuConfig> portalMenuItemList) {
 		this.portalMenuItemList = portalMenuItemList;
 	}
-	public List<H809> getLoggedInUserDetailsList() {
+	public List<PatientPortalUser> getLoggedInUserDetailsList() {
 		return loggedInUserDetailsList;
 	}
-	public void setLoggedInUserDetailsList(List<H809> loggedInUserDetailsList) {
+	public void setLoggedInUserDetailsList(List<PatientPortalUser> loggedInUserDetailsList) {
 		this.loggedInUserDetailsList = loggedInUserDetailsList;
 	}
 	public List<PatientPortalFeatureConfig> getPortalFeatureItemList() {

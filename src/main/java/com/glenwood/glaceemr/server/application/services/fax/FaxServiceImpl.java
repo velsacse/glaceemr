@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
@@ -13,22 +14,24 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.glenwood.glaceemr.server.application.models.DoctorSign;
 import com.glenwood.glaceemr.server.application.models.DoctorSign_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
-import com.glenwood.glaceemr.server.application.models.H491;
-import com.glenwood.glaceemr.server.application.models.H491_;
-import com.glenwood.glaceemr.server.application.models.H496;
-import com.glenwood.glaceemr.server.application.models.H496_;
+import com.glenwood.glaceemr.server.application.models.FaxInbox;
+import com.glenwood.glaceemr.server.application.models.FaxInbox_;
+import com.glenwood.glaceemr.server.application.models.FaxOutbox;
+import com.glenwood.glaceemr.server.application.models.FaxOutbox_;
 import com.glenwood.glaceemr.server.application.models.LoginUsers;
 import com.glenwood.glaceemr.server.application.models.LoginUsers_;
 import com.glenwood.glaceemr.server.application.repositories.DoctorsignRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmployeeProfileRepository;
-import com.glenwood.glaceemr.server.application.repositories.H491Repository;
-import com.glenwood.glaceemr.server.application.repositories.H496Repository;
+import com.glenwood.glaceemr.server.application.repositories.FaxInboxRepository;
+import com.glenwood.glaceemr.server.application.repositories.FaxOutboxRepository;
 import com.glenwood.glaceemr.server.application.specifications.FaxSpecification;
 
 /**
@@ -43,10 +46,10 @@ public  class FaxServiceImpl implements FaxService{
 	EntityManager entityManager;
 
 	@Autowired
-	H496Repository h496Repository;
+	FaxOutboxRepository fax_outboxRepository;
 
 	@Autowired
-	H491Repository h491Repository;
+	FaxInboxRepository fax_inboxRepository;
 
 	@Autowired
 	EmployeeProfileRepository employeeProfileRepository;
@@ -59,37 +62,37 @@ public  class FaxServiceImpl implements FaxService{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<H496> getOutboxDetails(Integer h496004, Integer userId,Integer pageNo){
+	public List<FaxOutbox> getOutboxDetails(Integer fax_outbox_folderid, Integer userId,Integer pageNo){
 
 		entityManager = emf.createEntityManager();
 
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<H496> root = cq.from(H496.class);
+		Root<FaxOutbox> root = cq.from(FaxOutbox.class);
 
-		List<H496> getOutboxDetails=new ArrayList<H496>();
+		List<FaxOutbox> getOutboxDetails=new ArrayList<FaxOutbox>();
 		try {
 			cq.select(builder.construct(FaxOutboxBean.class, 
-					root.get(H496_.h496001).alias("faxId"),
-					builder.coalesce(root.get(H496_.h496002), ""),
-					root.get(H496_.h496003).alias("faxFileName"),
-					root.get(H496_.h496004).alias("folderId"),
-					root.get(H496_.h496006).alias("scheduleTime"),
-					root.get(H496_.h496007).alias("actualDespatchtime"),
-					root.get(H496_.h496008).alias("statusId"),
-					root.get(H496_.h496009).alias("recipientNumber"),
-					root.get(H496_.h496010).alias("recipientName"),
-					root.get(H496_.h496012).alias("forwardedToUserId"),
-					root.get(H496_.h496013).alias("createdBy"),
-					root.get(H496_.h496014).alias("createdDate"),
-					builder.coalesce(root.get(H496_.h496015), ""),
-					root.get(H496_.h496019).alias("modifiedBy"),
-					root.get(H496_.h496022).alias("senderName"),
-					root.get(H496_.h496Faxpngfiles).alias("outboxThumbnail"),
-					root.get(H496_.h496Attachment).alias("faxAttachments"),
-					builder.coalesce(root.get(H496_.h496RetriesNote),"")
-					)).where(FaxSpecification.getFaxOutboxDetails(h496004, userId, root, cq, builder));
-			cq.orderBy(builder.desc(root.get(H496_.h496006)));
+					root.get(FaxOutbox_.fax_outbox_id).alias("faxId"),
+					builder.coalesce(root.get(FaxOutbox_.fax_outbox_subject), ""),
+					root.get(FaxOutbox_.fax_outbox_htmlfile).alias("faxFileName"),
+					root.get(FaxOutbox_.fax_outbox_folderid).alias("folderId"),
+					root.get(FaxOutbox_.fax_outbox_scheduledtime).alias("scheduleTime"),
+					root.get(FaxOutbox_.fax_outbox_dispatchtime).alias("actualDespatchtime"),
+					root.get(FaxOutbox_.fax_outbox_statusid).alias("statusId"),
+					root.get(FaxOutbox_.fax_outbox_recipientnumber).alias("recipientNumber"),
+					root.get(FaxOutbox_.fax_outbox_recipientname).alias("recipientName"),
+					root.get(FaxOutbox_.fax_outbox_forwardedto).alias("forwardedToUserId"),
+					root.get(FaxOutbox_.fax_outbox_createdby).alias("createdBy"),
+					root.get(FaxOutbox_.fax_outbox_createddate).alias("createdDate"),
+					builder.coalesce(root.get(FaxOutbox_.fax_outbox_billingcode), ""),
+					root.get(FaxOutbox_.fax_outbox_modifiedby).alias("modifiedBy"),
+					root.get(FaxOutbox_.fax_outbox_sendername).alias("senderName"),
+					root.get(FaxOutbox_.fax_outboxFaxpngfiles).alias("outboxThumbnail"),
+					root.get(FaxOutbox_.fax_outboxAttachment).alias("faxAttachments"),
+					builder.coalesce(root.get(FaxOutbox_.fax_outboxRetriesNote),"")
+					)).where(FaxSpecification.getFaxOutboxDetails(fax_outbox_folderid, userId, root, cq, builder));
+			cq.orderBy(builder.desc(root.get(FaxOutbox_.fax_outbox_scheduledtime)));
 			Query query = entityManager.createQuery(cq);
 			if(pageNo == 1){
 				getOutboxDetails = query.setFirstResult(0).setMaxResults(12).getResultList();
@@ -107,30 +110,30 @@ public  class FaxServiceImpl implements FaxService{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<FaxInboxBean> getInboxDetails(Integer h491010, Integer h491013,Integer h491014, Integer h491017_faxbox,int pageNo) {
+	public List<FaxInboxBean> getInboxDetails(Integer fax_inbox_folderid, Integer fax_inbox_statusid,Integer fax_inbox_forwardeduserid, Integer fax_inbox_location,int pageNo) {
 		entityManager = emf.createEntityManager();
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<H491> root = cq.from(H491.class);
+		Root<FaxInbox> root = cq.from(FaxInbox.class);
 
 		List<FaxInboxBean> getInboxDetails=new ArrayList<FaxInboxBean>();
 		try{
 			cq.select(builder.construct(FaxInboxBean.class, 
-					root.get(H491_.h491001).alias("faxId"),
-					root.get(H491_.h491005).alias("receiveDate"),
-					root.get(H491_.h491006).alias("senderName"),
-					root.get(H491_.h491007).alias("recepientName"),
-					root.get(H491_.h491009).alias("faxFileName"),
-					root.get(H491_.h491010).alias("folderId"), 
-					builder.coalesce(root.get(H491_.h491011), ""),
-					root.get(H491_.h491012).alias("faxTypeId"),
-					root.get(H491_.h491013).alias("statusId"),
-					root.get(H491_.h491014).alias("forwardTo"),
-					root.get(H491_.h491015).alias("modifiedBy"),
-					root.get(H491_.h491016).alias("modifiedDate"),
-					builder.coalesce(root.get(H491_.h491020Faxnotes), "")
-					)).where(FaxSpecification.getFaxInboxDetails(h491010, h491013, h491014, h491017_faxbox, root, cq, builder));
-			cq.orderBy(builder.desc(root.get(H491_.h491001)),(builder.desc(root.get(H491_.h491015))),(builder.desc(root.get(H491_.h491016))));
+					root.get(FaxInbox_.fax_inbox_id).alias("faxId"),
+					root.get(FaxInbox_.fax_inbox_receiveddate).alias("receiveDate"),
+					root.get(FaxInbox_.fax_inbox_tsid).alias("senderName"),
+					root.get(FaxInbox_.fax_inbox_csid).alias("recepientName"),
+					root.get(FaxInbox_.fax_inbox_filenames).alias("faxFileName"),
+					root.get(FaxInbox_.fax_inbox_folderid).alias("folderId"), 
+					builder.coalesce(root.get(FaxInbox_.fax_inbox_subject), ""),
+					root.get(FaxInbox_.fax_inbox_type).alias("faxTypeId"),
+					root.get(FaxInbox_.fax_inbox_statusid).alias("statusId"),
+					root.get(FaxInbox_.fax_inbox_forwardeduserid).alias("forwardTo"),
+					root.get(FaxInbox_.fax_inbox_modifieduserid).alias("modifiedBy"),
+					root.get(FaxInbox_.fax_inbox_modifiedtime).alias("modifiedDate"),
+					builder.coalesce(root.get(FaxInbox_.fax_inbox020Faxnotes), "")
+					)).where(FaxSpecification.getFaxInboxDetails(fax_inbox_folderid, fax_inbox_statusid, fax_inbox_forwardeduserid, fax_inbox_location, root, cq, builder));
+			cq.orderBy(builder.desc(root.get(FaxInbox_.fax_inbox_id)),(builder.desc(root.get(FaxInbox_.fax_inbox_modifieduserid))),(builder.desc(root.get(FaxInbox_.fax_inbox_modifiedtime))));
 
 			Query query = entityManager.createQuery(cq);
 
@@ -154,29 +157,29 @@ public  class FaxServiceImpl implements FaxService{
 		List<FaxFolderBean> tabBasedCount = new ArrayList<FaxFolderBean>();
 		FaxFolderBean faxTabCount = new FaxFolderBean();
 		try{
-			faxTabCount.setTotalInbox(h491Repository.count(FaxSpecification.getInboxDetails(1,-1,0,fax_location)));
-			faxTabCount.setUnreadInbox(h491Repository.count(FaxSpecification.getInboxDetails(1,0,0,fax_location)));
+			faxTabCount.setTotalInbox(fax_inboxRepository.count(FaxSpecification.getInboxDetails(1,-1,0,fax_location)));
+			faxTabCount.setUnreadInbox(fax_inboxRepository.count(FaxSpecification.getInboxDetails(1,0,0,fax_location)));
 
-			faxTabCount.setTotalSaved(h491Repository.count(FaxSpecification.getInboxDetails(5,-1,0,fax_location)));
-			faxTabCount.setUnreadSaved(h491Repository.count(FaxSpecification.getInboxDetails(5,0,0,fax_location)));
+			faxTabCount.setTotalSaved(fax_inboxRepository.count(FaxSpecification.getInboxDetails(5,-1,0,fax_location)));
+			faxTabCount.setUnreadSaved(fax_inboxRepository.count(FaxSpecification.getInboxDetails(5,0,0,fax_location)));
 
-			faxTabCount.setTotalTrash(h491Repository.count(FaxSpecification.getInboxDetails(3,-1,0,fax_location)));
-			faxTabCount.setUnreadTrash(h491Repository.count(FaxSpecification.getInboxDetails(3,0,0,fax_location)));
+			faxTabCount.setTotalTrash(fax_inboxRepository.count(FaxSpecification.getInboxDetails(3,-1,0,fax_location)));
+			faxTabCount.setUnreadTrash(fax_inboxRepository.count(FaxSpecification.getInboxDetails(3,0,0,fax_location)));
 
-			faxTabCount.setOutboxFax(h496Repository.count(FaxSpecification.getOutboxDetails(2,-1)));
-			faxTabCount.setSentFax(h496Repository.count(FaxSpecification.getOutboxDetails(4,-1)));
+			faxTabCount.setOutboxFax(fax_outboxRepository.count(FaxSpecification.getOutboxDetails(2,-1)));
+			faxTabCount.setSentFax(fax_outboxRepository.count(FaxSpecification.getOutboxDetails(4,-1)));
 
-			faxTabCount.setMytotalInbox(h491Repository.count(FaxSpecification.getInboxDetails(1,-1,userId,fax_location)));
-			faxTabCount.setMyunreadInbox(h491Repository.count(FaxSpecification.getInboxDetails(1,0,userId,fax_location)));
+			faxTabCount.setMytotalInbox(fax_inboxRepository.count(FaxSpecification.getInboxDetails(1,-1,userId,fax_location)));
+			faxTabCount.setMyunreadInbox(fax_inboxRepository.count(FaxSpecification.getInboxDetails(1,0,userId,fax_location)));
 
-			faxTabCount.setMytotalSaved(h491Repository.count(FaxSpecification.getInboxDetails(5,-1,userId,fax_location)));
-			faxTabCount.setMyunreadSaved(h491Repository.count(FaxSpecification.getInboxDetails(5,0,userId,fax_location)));
+			faxTabCount.setMytotalSaved(fax_inboxRepository.count(FaxSpecification.getInboxDetails(5,-1,userId,fax_location)));
+			faxTabCount.setMyunreadSaved(fax_inboxRepository.count(FaxSpecification.getInboxDetails(5,0,userId,fax_location)));
 
-			faxTabCount.setMytotalTrash(h491Repository.count(FaxSpecification.getInboxDetails(3,-1,userId,fax_location)));
-			faxTabCount.setMyunreadTrash(h491Repository.count(FaxSpecification.getInboxDetails(3,0,userId,fax_location)));
+			faxTabCount.setMytotalTrash(fax_inboxRepository.count(FaxSpecification.getInboxDetails(3,-1,userId,fax_location)));
+			faxTabCount.setMyunreadTrash(fax_inboxRepository.count(FaxSpecification.getInboxDetails(3,0,userId,fax_location)));
 
-			faxTabCount.setMyoutboxFax(h496Repository.count(FaxSpecification.getOutboxDetails(2,userId)));
-			faxTabCount.setMysentFax(h496Repository.count(FaxSpecification.getOutboxDetails(4,userId)));
+			faxTabCount.setMyoutboxFax(fax_outboxRepository.count(FaxSpecification.getOutboxDetails(2,userId)));
+			faxTabCount.setMysentFax(fax_outboxRepository.count(FaxSpecification.getOutboxDetails(4,userId)));
 
 			tabBasedCount.add(faxTabCount);
 		}catch(Exception e){
@@ -190,7 +193,7 @@ public  class FaxServiceImpl implements FaxService{
 	@Override
 	public void deleteSelectFax (String faxId,String fileNames,Integer TRASH, Integer userId) {
 
-		List<H491> faxToDelete=new ArrayList<H491>();
+		List<FaxInbox> faxToDelete=new ArrayList<FaxInbox>();
 		List<Integer> selectedId = new ArrayList<Integer>();
 
 		for(int index=0;index<faxId.split(",").length;index++){
@@ -198,25 +201,25 @@ public  class FaxServiceImpl implements FaxService{
 		}
 		
 		
-		faxToDelete = h491Repository.findAll(FaxSpecification.getSelectedFaxDetails(selectedId));
+		faxToDelete = fax_inboxRepository.findAll(FaxSpecification.getSelectedFaxDetails(selectedId));
 		
-		H491 faxInboxBean = faxToDelete.get(0);
+		FaxInbox faxInboxBean = faxToDelete.get(0);
 
-		String updatedFileNames = getStringDiff(faxInboxBean.getH491009(), fileNames, ",");
+		String updatedFileNames = getStringDiff(faxInboxBean.getfax_inbox_filenames(), fileNames, ",");
 
 		if(fileNames.trim().length()<=0 || updatedFileNames.indexOf('.')<0){
 
-			for(H491 faxDetails : faxToDelete) {
+			for(FaxInbox faxDetails : faxToDelete) {
 
 				if(TRASH == 3){
-					faxDetails.setH491015(userId);
-					faxDetails.setH491018Isenabled(false);
+					faxDetails.setfax_inbox_modifieduserid(userId);
+					faxDetails.setfax_inbox018Isenabled(false);
 				}else{
-					faxDetails.setH491015(userId);
-					faxDetails.setH491010(3);
+					faxDetails.setfax_inbox_modifieduserid(userId);
+					faxDetails.setfax_inbox_folderid(3);
 				}
 				
-				faxDetails = h491Repository.saveAndFlush(faxDetails);
+				faxDetails = fax_inboxRepository.saveAndFlush(faxDetails);
 
 			}
 		}
@@ -224,48 +227,48 @@ public  class FaxServiceImpl implements FaxService{
 		else{
 			
 			Date date=new Date();
-			faxInboxBean.setH491015(userId);
-			faxInboxBean.setH491009(updatedFileNames);
-			faxInboxBean.setH491016(new Timestamp(date.getTime()));
-			h491Repository.save(faxInboxBean);		
+			faxInboxBean.setfax_inbox_modifieduserid(userId);
+			faxInboxBean.setfax_inbox_filenames(updatedFileNames);
+			faxInboxBean.setfax_inbox_modifiedtime(new Timestamp(date.getTime()));
+			fax_inboxRepository.save(faxInboxBean);		
 
-			H491 newFaxInboxBean = new H491();
+			FaxInbox newFaxInboxBean = new FaxInbox();
 			int currFaxId = getCurrMaxId();
 
-			newFaxInboxBean.setH491001(currFaxId);
-			newFaxInboxBean.setH491002(faxInboxBean.getH491002());
-			newFaxInboxBean.setH491003(faxInboxBean.getH491003());
-			newFaxInboxBean.setH491004(faxInboxBean.getH491004());
-			newFaxInboxBean.setH491005(faxInboxBean.getH491005());
-			newFaxInboxBean.setH491006(faxInboxBean.getH491006());
-			newFaxInboxBean.setH491007(faxInboxBean.getH491007());
-			newFaxInboxBean.setH491008(faxInboxBean.getH491008());
-			newFaxInboxBean.setH491009(fileNames);
-			newFaxInboxBean.setH491011(faxInboxBean.getH491011());
-			newFaxInboxBean.setH491012(faxInboxBean.getH491012());
-			newFaxInboxBean.setH491013(faxInboxBean.getH491013());
-			newFaxInboxBean.setH491015(userId);
-			newFaxInboxBean.setH491016(faxInboxBean.getH491016());
-			newFaxInboxBean.setH491017Faxbox(faxInboxBean.getH491017Faxbox());
+			newFaxInboxBean.setfax_inbox_id(currFaxId);
+			newFaxInboxBean.setfax_inbox_sendername(faxInboxBean.getfax_inbox_sendername());
+			newFaxInboxBean.setfax_inbox_recipientname(faxInboxBean.getfax_inbox_recipientname());
+			newFaxInboxBean.setfax_inbox_recipientnumber(faxInboxBean.getfax_inbox_recipientnumber());
+			newFaxInboxBean.setfax_inbox_receiveddate(faxInboxBean.getfax_inbox_receiveddate());
+			newFaxInboxBean.setfax_inbox_tsid(faxInboxBean.getfax_inbox_tsid());
+			newFaxInboxBean.setfax_inbox_csid(faxInboxBean.getfax_inbox_csid());
+			newFaxInboxBean.setfax_inbox_routinginfo(faxInboxBean.getfax_inbox_routinginfo());
+			newFaxInboxBean.setfax_inbox_filenames(fileNames);
+			newFaxInboxBean.setfax_inbox_subject(faxInboxBean.getfax_inbox_subject());
+			newFaxInboxBean.setfax_inbox_type(faxInboxBean.getfax_inbox_type());
+			newFaxInboxBean.setfax_inbox_statusid(faxInboxBean.getfax_inbox_statusid());
+			newFaxInboxBean.setfax_inbox_modifieduserid(userId);
+			newFaxInboxBean.setfax_inbox_modifiedtime(faxInboxBean.getfax_inbox_modifiedtime());
+			newFaxInboxBean.setfax_inbox017Faxbox(faxInboxBean.getfax_inbox017Faxbox());
 			if(TRASH == 3){
-				newFaxInboxBean.setH491018Isenabled (false);
-				newFaxInboxBean.setH491015(userId);
-				if(faxInboxBean.getH491014() == 0){
-					newFaxInboxBean.setH491014(userId);
+				newFaxInboxBean.setfax_inbox018Isenabled (false);
+				newFaxInboxBean.setfax_inbox_modifieduserid(userId);
+				if(faxInboxBean.getfax_inbox_forwardeduserid() == 0){
+					newFaxInboxBean.setfax_inbox_forwardeduserid(userId);
 				}else{
-					newFaxInboxBean.setH491014(faxInboxBean.getH491014());
+					newFaxInboxBean.setfax_inbox_forwardeduserid(faxInboxBean.getfax_inbox_forwardeduserid());
 				}
 			}else{
-				newFaxInboxBean.setH491015(userId);
-				newFaxInboxBean.setH491010(3);
-				if(faxInboxBean.getH491014() == 0){
-					newFaxInboxBean.setH491014(userId);
+				newFaxInboxBean.setfax_inbox_modifieduserid(userId);
+				newFaxInboxBean.setfax_inbox_folderid(3);
+				if(faxInboxBean.getfax_inbox_forwardeduserid() == 0){
+					newFaxInboxBean.setfax_inbox_forwardeduserid(userId);
 				}else{
-					newFaxInboxBean.setH491014(faxInboxBean.getH491014());
+					newFaxInboxBean.setfax_inbox_forwardeduserid(faxInboxBean.getfax_inbox_forwardeduserid());
 				}
 			}
 
-			h491Repository.saveAndFlush(newFaxInboxBean);
+			fax_inboxRepository.saveAndFlush(newFaxInboxBean);
 		}
 	}
 
@@ -301,8 +304,8 @@ public  class FaxServiceImpl implements FaxService{
 
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<H491> root = cq.from(H491.class);
-		cq.select(builder.max(root.get(H491_.h491001)));
+		Root<FaxInbox> root = cq.from(FaxInbox.class);
+		cq.select(builder.max(root.get(FaxInbox_.fax_inbox_id)));
 		Integer faxId=(Integer) entityManager.createQuery(cq).getSingleResult();
 
 		return faxId+1;
@@ -311,19 +314,19 @@ public  class FaxServiceImpl implements FaxService{
 	@Override
 	public void deleteSelectOutboxFax (String faxId,Integer TRASH, Integer userId) {
 
-		List<H496> faxToDelete=new ArrayList<H496>();
+		List<FaxOutbox> faxToDelete=new ArrayList<FaxOutbox>();
 		List<Integer> selectedId = new ArrayList<Integer>();
 		for(int index=0;index<faxId.split(",").length;index++){
 			selectedId.add(index, Integer.parseInt(faxId.split(",")[index]));
 		}
-		faxToDelete = h496Repository.findAll(FaxSpecification.getSelectedFaxDetails1(selectedId));
+		faxToDelete = fax_outboxRepository.findAll(FaxSpecification.getSelectedFaxDetails1(selectedId));
 
-		for(H496 faxDetails : faxToDelete) {
+		for(FaxOutbox faxDetails : faxToDelete) {
 
-			faxDetails.setH496008(9);
-			faxDetails.setH496019(userId);
+			faxDetails.setfax_outbox_statusid(9);
+			faxDetails.setfax_outbox_modifiedby(userId);
 
-			faxDetails = h496Repository.save(faxDetails);
+			faxDetails = fax_outboxRepository.save(faxDetails);
 		}
 	}
 
@@ -383,62 +386,62 @@ public  class FaxServiceImpl implements FaxService{
 	}
 
 	@Override
-	public List<H491> forwardFax(String faxId,String fileNames, Integer forwardTo,Integer folderId,Integer userId){
+	public List<FaxInbox> forwardFax(String faxId,String fileNames, Integer forwardTo,Integer folderId,Integer userId){
 
-		List<H491> faxList = new ArrayList<H491>();
+		List<FaxInbox> faxList = new ArrayList<FaxInbox>();
 
 		String[] faxIds = faxId.split(",");
 
-		faxList=h491Repository.findAll(FaxSpecification.faxForward(faxIds));
+		faxList=fax_inboxRepository.findAll(FaxSpecification.faxForward(faxIds));
 		
-		H491 faxInboxBean = faxList.get(0);
+		FaxInbox faxInboxBean = faxList.get(0);
 
-		String updatedFileNames = getStringDiff(faxInboxBean.getH491009(), fileNames, ",");
+		String updatedFileNames = getStringDiff(faxInboxBean.getfax_inbox_filenames(), fileNames, ",");
 
 		if(fileNames.trim().length()<=0 || updatedFileNames.indexOf('.')<0){
 
-			H491 aeupdate=null;
-			for(H491 fax:faxList){
+			FaxInbox aeupdate=null;
+			for(FaxInbox fax:faxList){
 				Date date=new Date();
-				H491 ae =fax;
-				ae.setH491014(forwardTo);
-				ae.setH491010(folderId);
-				ae.setH491015(userId);
-				ae.setH491016(new Timestamp(date.getTime()));
+				FaxInbox ae =fax;
+				ae.setfax_inbox_forwardeduserid(forwardTo);
+				ae.setfax_inbox_folderid(folderId);
+				ae.setfax_inbox_modifieduserid(userId);
+				ae.setfax_inbox_modifiedtime(new Timestamp(date.getTime()));
 				aeupdate=ae;
-				h491Repository.save(aeupdate);
+				fax_inboxRepository.save(aeupdate);
 			}
 
 		}else{
 
 			Date date=new Date();
-			faxInboxBean.setH491015(userId);
-			faxInboxBean.setH491009(updatedFileNames);
-			faxInboxBean.setH491016(new Timestamp(date.getTime()));
-			h491Repository.save(faxInboxBean);		
+			faxInboxBean.setfax_inbox_modifieduserid(userId);
+			faxInboxBean.setfax_inbox_filenames(updatedFileNames);
+			faxInboxBean.setfax_inbox_modifiedtime(new Timestamp(date.getTime()));
+			fax_inboxRepository.save(faxInboxBean);		
 
-			H491 newFaxInboxBean = new H491();
+			FaxInbox newFaxInboxBean = new FaxInbox();
 			int currFaxId = getCurrMaxId();
 
-			newFaxInboxBean.setH491001(currFaxId);
-			newFaxInboxBean.setH491002(faxInboxBean.getH491002());
-			newFaxInboxBean.setH491003(faxInboxBean.getH491003());
-			newFaxInboxBean.setH491004(faxInboxBean.getH491004());
-			newFaxInboxBean.setH491005(faxInboxBean.getH491005());
-			newFaxInboxBean.setH491006(faxInboxBean.getH491006());
-			newFaxInboxBean.setH491007(faxInboxBean.getH491007());
-			newFaxInboxBean.setH491008(faxInboxBean.getH491008());
-			newFaxInboxBean.setH491009(fileNames);
-			newFaxInboxBean.setH491010(faxInboxBean.getH491010());
-			newFaxInboxBean.setH491011(faxInboxBean.getH491011());
-			newFaxInboxBean.setH491012(faxInboxBean.getH491012());
-			newFaxInboxBean.setH491013(faxInboxBean.getH491013());
-			newFaxInboxBean.setH491014(forwardTo);
-			newFaxInboxBean.setH491015(userId);
-			newFaxInboxBean.setH491016(faxInboxBean.getH491016());
-			newFaxInboxBean.setH491017Faxbox(faxInboxBean.getH491017Faxbox());
+			newFaxInboxBean.setfax_inbox_id(currFaxId);
+			newFaxInboxBean.setfax_inbox_sendername(faxInboxBean.getfax_inbox_sendername());
+			newFaxInboxBean.setfax_inbox_recipientname(faxInboxBean.getfax_inbox_recipientname());
+			newFaxInboxBean.setfax_inbox_recipientnumber(faxInboxBean.getfax_inbox_recipientnumber());
+			newFaxInboxBean.setfax_inbox_receiveddate(faxInboxBean.getfax_inbox_receiveddate());
+			newFaxInboxBean.setfax_inbox_tsid(faxInboxBean.getfax_inbox_tsid());
+			newFaxInboxBean.setfax_inbox_csid(faxInboxBean.getfax_inbox_csid());
+			newFaxInboxBean.setfax_inbox_routinginfo(faxInboxBean.getfax_inbox_routinginfo());
+			newFaxInboxBean.setfax_inbox_filenames(fileNames);
+			newFaxInboxBean.setfax_inbox_folderid(faxInboxBean.getfax_inbox_folderid());
+			newFaxInboxBean.setfax_inbox_subject(faxInboxBean.getfax_inbox_subject());
+			newFaxInboxBean.setfax_inbox_type(faxInboxBean.getfax_inbox_type());
+			newFaxInboxBean.setfax_inbox_statusid(faxInboxBean.getfax_inbox_statusid());
+			newFaxInboxBean.setfax_inbox_forwardeduserid(forwardTo);
+			newFaxInboxBean.setfax_inbox_modifieduserid(userId);
+			newFaxInboxBean.setfax_inbox_modifiedtime(faxInboxBean.getfax_inbox_modifiedtime());
+			newFaxInboxBean.setfax_inbox017Faxbox(faxInboxBean.getfax_inbox017Faxbox());
 
-			h491Repository.saveAndFlush(newFaxInboxBean);
+			fax_inboxRepository.saveAndFlush(newFaxInboxBean);
 
 		}
 
@@ -478,8 +481,8 @@ public  class FaxServiceImpl implements FaxService{
 
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<H491> root = cq.from(H491.class);
-		cq.select(builder.max(root.get(H491_.h491001)));
+		Root<FaxInbox> root = cq.from(FaxInbox.class);
+		cq.select(builder.max(root.get(FaxInbox_.fax_inbox_id)));
 		Integer faxId=(Integer) entityManager.createQuery(cq).getSingleResult();
 
 		return faxId+1;
@@ -487,35 +490,35 @@ public  class FaxServiceImpl implements FaxService{
 
 
 	@Override
-	public List<H491> getInFaxDetails(final Integer faxId, Integer userId, Integer faxTab, Integer faxFolder) {
+	public List<FaxInbox> getInFaxDetails(final Integer faxId, Integer userId, Integer faxTab, Integer faxFolder) {
 
 
-		List<H491> inFaxDetails=new ArrayList<H491>();
-		inFaxDetails = h491Repository.findAll(FaxSpecification.getInFaxDetails(faxId, faxFolder, faxFolder, faxFolder));
+		List<FaxInbox> inFaxDetails=new ArrayList<FaxInbox>();
+		inFaxDetails = fax_inboxRepository.findAll(FaxSpecification.getInFaxDetails(faxId, faxFolder, faxFolder, faxFolder));
 
 		if(faxId!=-1){
-			inFaxDetails = h491Repository.findAll(FaxSpecification.getInFaxDetails(faxId, userId, faxTab, faxFolder));
+			inFaxDetails = fax_inboxRepository.findAll(FaxSpecification.getInFaxDetails(faxId, userId, faxTab, faxFolder));
 		}else{
-			inFaxDetails = h491Repository.findAll(FaxSpecification.getInFaxDetails(getMaxFaxId(faxFolder), userId, faxTab, faxFolder));
+			inFaxDetails = fax_inboxRepository.findAll(FaxSpecification.getInFaxDetails(getMaxFaxId(faxFolder), userId, faxTab, faxFolder));
 		}
 
-		inFaxDetails.get(0).setH491013(1);
-		inFaxDetails.get(0).setH491015(userId);
+		inFaxDetails.get(0).setfax_inbox_statusid(1);
+		inFaxDetails.get(0).setfax_inbox_modifieduserid(userId);
 
-		h491Repository.save(inFaxDetails.get(0));
+		fax_inboxRepository.save(inFaxDetails.get(0));
 
 		return inFaxDetails;
 
 	}
 
 	@Override
-	public List<H496> getOutFaxDetails(Integer userId,Integer faxId, Integer faxTab, Integer faxFolder) {
-		List<H496> getOutboxDetails=new ArrayList<H496>();
+	public List<FaxOutbox> getOutFaxDetails(Integer userId,Integer faxId, Integer faxTab, Integer faxFolder) {
+		List<FaxOutbox> getOutboxDetails=new ArrayList<FaxOutbox>();
 		try{
 			if(faxId!=-1){
-				getOutboxDetails = h496Repository.findAll(FaxSpecification.getOutFaxDetails(userId,faxId, faxTab, faxFolder));
+				getOutboxDetails = fax_outboxRepository.findAll(FaxSpecification.getOutFaxDetails(userId,faxId, faxTab, faxFolder));
 			}else{
-				getOutboxDetails = h496Repository.findAll(FaxSpecification.getOutFaxDetails(getMaxFaxId(faxFolder),userId,faxTab, faxFolder));
+				getOutboxDetails = fax_outboxRepository.findAll(FaxSpecification.getOutFaxDetails(getMaxFaxId(faxFolder),userId,faxTab, faxFolder));
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -530,11 +533,11 @@ public  class FaxServiceImpl implements FaxService{
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Object> cq = builder.createQuery();
 			if(faxFolder == 2 || faxFolder == 4){
-				Root<H496> root = cq.from(H496.class);
-				cq.select(builder.max(root.get(H496_.h496001)));
+				Root<FaxOutbox> root = cq.from(FaxOutbox.class);
+				cq.select(builder.max(root.get(FaxOutbox_.fax_outbox_id)));
 			}else{
-				Root<H491> root = cq.from(H491.class);
-				cq.select(builder.max(root.get(H491_.h491001))); 
+				Root<FaxInbox> root = cq.from(FaxInbox.class);
+				cq.select(builder.max(root.get(FaxInbox_.fax_inbox_id))); 
 			}
 			return Integer.parseInt("" + em.createQuery(cq).getSingleResult());
 		} catch(Exception e) {
@@ -641,15 +644,15 @@ public  class FaxServiceImpl implements FaxService{
 
 		String timeDetails = "";
 
-		H491 faxReceivedTime = new H491();
+		FaxInbox faxReceivedTime = new FaxInbox();
 
-		faxReceivedTime = h491Repository.findOne(FaxSpecification.lastFaxReceivedTime(getMaxFaxId1(0, userId)));
+		faxReceivedTime = fax_inboxRepository.findOne(FaxSpecification.lastFaxReceivedTime(getMaxFaxId1(0, userId)));
 
-		timeDetails = faxReceivedTime.getH491005().toString();
+		timeDetails = faxReceivedTime.getfax_inbox_receiveddate().toString();
 
-		faxReceivedTime = h491Repository.findOne(FaxSpecification.lastFaxReceivedTime(getMaxFaxId1(1, userId)));
+		faxReceivedTime = fax_inboxRepository.findOne(FaxSpecification.lastFaxReceivedTime(getMaxFaxId1(1, userId)));
 
-		timeDetails = timeDetails.concat("~".concat(faxReceivedTime.getH491005().toString()));
+		timeDetails = timeDetails.concat("~".concat(faxReceivedTime.getfax_inbox_receiveddate().toString()));
 
 		return timeDetails;
 
@@ -665,14 +668,14 @@ public  class FaxServiceImpl implements FaxService{
 
 			CriteriaQuery<Object> cq = builder.createQuery();
 
-			Root<H491> root = cq.from(H491.class);
+			Root<FaxInbox> root = cq.from(FaxInbox.class);
 
-			cq.select(builder.max(root.get(H491_.h491001)));
+			cq.select(builder.max(root.get(FaxInbox_.fax_inbox_id)));
 
 			if(faxTab == 0){
-				cq.where(builder.and(builder.equal(root.get(H491_.h491010), 1), builder.equal(root.get(H491_.h491014), userId), builder.equal(root.get(H491_.h491018Isenabled), true)));
+				cq.where(builder.and(builder.equal(root.get(FaxInbox_.fax_inbox_folderid), 1), builder.equal(root.get(FaxInbox_.fax_inbox_forwardeduserid), userId), builder.equal(root.get(FaxInbox_.fax_inbox018Isenabled), true)));
 			}else{
-				cq.where(builder.and(builder.equal(root.get(H491_.h491010), 1), builder.equal(root.get(H491_.h491014), 0),builder.equal(root.get(H491_.h491018Isenabled), true)));
+				cq.where(builder.and(builder.equal(root.get(FaxInbox_.fax_inbox_folderid), 1), builder.equal(root.get(FaxInbox_.fax_inbox_forwardeduserid), 0),builder.equal(root.get(FaxInbox_.fax_inbox018Isenabled), true)));
 			}
 
 			return Integer.parseInt("" + em.createQuery(cq).getSingleResult());

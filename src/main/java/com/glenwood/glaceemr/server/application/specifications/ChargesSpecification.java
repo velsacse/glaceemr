@@ -22,14 +22,8 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H066;
-import com.glenwood.glaceemr.server.application.models.H066_;
-import com.glenwood.glaceemr.server.application.models.H076;
-import com.glenwood.glaceemr.server.application.models.H076_;
-import com.glenwood.glaceemr.server.application.models.H213;
-import com.glenwood.glaceemr.server.application.models.H213_;
-import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.H611_;
+import com.glenwood.glaceemr.server.application.models.ExpectedCptAmount;
+import com.glenwood.glaceemr.server.application.models.ExpectedCptAmount_;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InitialSettings_;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr;
@@ -37,10 +31,16 @@ import com.glenwood.glaceemr.server.application.models.InsCompAddr_;
 import com.glenwood.glaceemr.server.application.models.InsCompany;
 import com.glenwood.glaceemr.server.application.models.NonServiceDetails;
 import com.glenwood.glaceemr.server.application.models.NonServiceDetails_;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments_;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail_;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.PosTable_;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator_;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor_;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail_;
 import com.glenwood.glaceemr.server.application.models.SubmitStatus;
@@ -118,14 +118,14 @@ public class ChargesSpecification {
 		};
 	}*/
 
-	public static Specification<H076> getAllReferringDrList() {
-		return new Specification<H076>() {
+	public static Specification<ReferringDoctor> getAllReferringDrList() {
+		return new Specification<ReferringDoctor>() {
 			
 			@Override
-			public Predicate toPredicate(Root<H076> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<ReferringDoctor> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate h076Active=cb.and(cb.isTrue(root.get(H076_.h076015)),root.get(H076_.h076003).isNotNull(),root.get(H076_.h076005).isNotNull(),root.get(H076_.h076020).isNotNull());
-				return query.where(h076Active).orderBy(cb.asc(root.get(H076_.h076002))).getRestriction();
+				Predicate referring_doctorActive=cb.and(cb.isTrue(root.get(ReferringDoctor_.referring_doctor_isactive)),root.get(ReferringDoctor_.referring_doctor_lastname).isNotNull(),root.get(ReferringDoctor_.referring_doctor_firstname).isNotNull(),root.get(ReferringDoctor_.referring_doctor_referringdoctor).isNotNull());
+				return query.where(referring_doctorActive).orderBy(cb.asc(root.get(ReferringDoctor_.referring_doctor_rdoctorid))).getRestriction();
 			}
 		};
 	}
@@ -237,27 +237,27 @@ public class ChargesSpecification {
 			}
 		};
 	}
-	public static Specification<H213> getServiceDetailMaxId() {
-		return new Specification<H213>() {
+	public static Specification<PrimarykeyGenerator> getServiceDetailMaxId() {
+		return new Specification<PrimarykeyGenerator>() {
 
 			@Override
-			public Predicate toPredicate(Root<H213> root,
+			public Predicate toPredicate(Root<PrimarykeyGenerator> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
-				Predicate maxValue=cb.equal(root.get(H213_.h213002), "service_detail");
+				Predicate maxValue=cb.equal(root.get(PrimarykeyGenerator_.primarykey_generator_tablename), "service_detail");
 				return maxValue;
 			}
 		};
 	}
 
-	public static Specification<H213> getAssociateServiceDetailMaxId() {
-		return new Specification<H213>() {
+	public static Specification<PrimarykeyGenerator> getAssociateServiceDetailMaxId() {
+		return new Specification<PrimarykeyGenerator>() {
 
 			@Override
-			public Predicate toPredicate(Root<H213> root,
+			public Predicate toPredicate(Root<PrimarykeyGenerator> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
-				Predicate maxValue=cb.equal(root.get(H213_.h213002), "associate_service_detail");
+				Predicate maxValue=cb.equal(root.get(PrimarykeyGenerator_.primarykey_generator_tablename), "associate_service_detail");
 				return maxValue;
 			}
 		};
@@ -274,16 +274,16 @@ public class ChargesSpecification {
 		};
 	}
 
-	public static Specification<H066> getExpectedPayment(final Integer cptId,final String modifier1,
+	public static Specification<ExpectedCptAmount> getExpectedPayment(final Integer cptId,final String modifier1,
 			final String modifier2,final String placeofServiceId,final int dosYear,
 			final Integer primaryInsuraceId) {
-		return new Specification<H066>() {
+		return new Specification<ExpectedCptAmount>() {
 
 			@Override
-			public Predicate toPredicate(Root<H066> root,
+			public Predicate toPredicate(Root<ExpectedCptAmount> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate conditionalPredicate=cb.and(cb.equal(root.get(H066_.h066002),cptId),cb.equal(root.get(H066_.h066003),modifier1),cb.equal(root.get(H066_.h066004),modifier2),cb.equal(root.get(H066_.h066009),dosYear));
-				return query.where(conditionalPredicate).orderBy(cb.desc(root.get(H066_.h066001))).getRestriction();
+				Predicate conditionalPredicate=cb.and(cb.equal(root.get(ExpectedCptAmount_.expected_cpt_amount_cptId),cptId),cb.equal(root.get(ExpectedCptAmount_.expected_cpt_amount_modifier1),modifier1),cb.equal(root.get(ExpectedCptAmount_.expected_cpt_amount_modifier2),modifier2),cb.equal(root.get(ExpectedCptAmount_.expected_cpt_amount_year),dosYear));
+				return query.where(conditionalPredicate).orderBy(cb.desc(root.get(ExpectedCptAmount_.expected_cpt_amount_Id))).getRestriction();
 			}
 		};
 	}
@@ -338,12 +338,12 @@ public class ChargesSpecification {
 		};
 	}
 
-	public static Specification<H611> getEMRDxCodes(final Integer patientId,final Integer encounterId) {
-		return new Specification<H611>() {
+	public static Specification<PatientAssessments> getEMRDxCodes(final Integer patientId,final Integer encounterId) {
+		return new Specification<PatientAssessments>() {
 
 			@Override
-			public Predicate toPredicate(Root<H611> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate condition=cb.and(cb.equal(root.get(H611_.h611002),encounterId ),cb.equal(root.get(H611_.h611003),patientId));
+			public Predicate toPredicate(Root<PatientAssessments> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Predicate condition=cb.and(cb.equal(root.get(PatientAssessments_.patient_assessments_id),encounterId ),cb.equal(root.get(PatientAssessments_.patient_assessments_patientId),patientId));
 				return query.where(condition).getRestriction();
 			}
 		};

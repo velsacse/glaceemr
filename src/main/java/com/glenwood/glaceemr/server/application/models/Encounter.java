@@ -245,19 +245,20 @@ public class Encounter implements Serializable {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@NotFound(action=NotFoundAction.IGNORE)
-	@JoinColumn(name="encounter_ref_doctor",referencedColumnName="h076001",insertable=false,updatable=false)
-	H076 referringTable;
+	@JoinColumn(name="encounter_ref_doctor",referencedColumnName="referring_doctor_uniqueid",insertable=false,updatable=false)
+	ReferringDoctor referringTable;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="encounter_room",referencedColumnName="h479001",insertable=false,updatable=false)
+	@JoinColumn(name="encounter_room",referencedColumnName="room_details_id",insertable=false,updatable=false)
     Room room;
 	
-	public H076 getReferringTable() {
+	public ReferringDoctor getReferringTable() {
 		return referringTable;
 	}
 
-	public void setReferringTable(H076 referringTable) {
+	
+	public void setReferringTable(ReferringDoctor referringTable) {
 		this.referringTable = referringTable;
 	}
 
@@ -712,8 +713,8 @@ public class Encounter implements Serializable {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="encounter_reason", referencedColumnName="h479001", insertable=false, updatable=false)
-	H479 h479;
+	@JoinColumn(name="encounter_reason", referencedColumnName="room_details_id", insertable=false, updatable=false)
+	RoomDetails room_details;
 	
 	@ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.ALL,optional = false)
 	@JsonManagedReference

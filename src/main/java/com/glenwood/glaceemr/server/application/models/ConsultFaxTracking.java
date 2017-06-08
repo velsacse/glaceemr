@@ -37,12 +37,13 @@ public class ConsultFaxTracking {
 
 	
 	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
-	@JoinColumn(name="fax_id", referencedColumnName="h496001" , insertable=false, updatable=false)
-	private H496 h496;
+	@JoinColumn(name="fax_id", referencedColumnName="fax_outbox_id" , insertable=false, updatable=false)
+	private FaxOutbox fax_outbox;
 	
 	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
 	@JoinColumn(name="leaf_id", referencedColumnName="leaf_library_id" , insertable=false, updatable=false)
 	private LeafLibrary leafLibrary;
+	
 	
 	
 	
@@ -63,12 +64,12 @@ public class ConsultFaxTracking {
 		this.leafLibrary = leafLibrary;
 	}
 
-	public H496 getH496() {
-		return h496;
+	public FaxOutbox getfax_outbox() {
+		return fax_outbox;
 	}
 
-	public void setH496(H496 h496) {
-		this.h496 = h496;
+	public void setfax_outbox(FaxOutbox fax_outbox) {
+		this.fax_outbox = fax_outbox;
 	}
 
 

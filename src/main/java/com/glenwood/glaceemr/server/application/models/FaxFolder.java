@@ -38,7 +38,7 @@ public class FaxFolder {
 	
 	@OneToMany(mappedBy="faxFolder")
 	@JsonManagedReference
-	List<H491> h491;
+	List<FaxInbox> fax_inbox;
 	
 	public Integer getFaxFolderId() {
 		return faxFolderId;
@@ -51,6 +51,7 @@ public class FaxFolder {
 	public Integer getFaxFolderPriority() {
 		return faxFolderPriority;
 	}
+	
 
 	public void setFaxFolderPriority(Integer faxFolderPriority) {
 		this.faxFolderPriority = faxFolderPriority;

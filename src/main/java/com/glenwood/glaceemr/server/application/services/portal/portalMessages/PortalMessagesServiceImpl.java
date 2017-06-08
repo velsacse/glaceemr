@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
-import com.glenwood.glaceemr.server.application.models.H213;
-import com.glenwood.glaceemr.server.application.models.H810;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
 import com.glenwood.glaceemr.server.application.models.PortalMessage;
 import com.glenwood.glaceemr.server.application.models.PortalMessageBean;
 import com.glenwood.glaceemr.server.application.models.PortalMessageThreadBean;
@@ -27,7 +27,7 @@ import com.glenwood.glaceemr.server.application.models.PortalMessage_;
 import com.glenwood.glaceemr.server.application.models.PortalPatientPaymentsSummary;
 import com.glenwood.glaceemr.server.application.repositories.AlertCategoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
-import com.glenwood.glaceemr.server.application.repositories.H810Respository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalAlertConfigRespository;
 import com.glenwood.glaceemr.server.application.repositories.PortalMessageRepository;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
@@ -52,7 +52,7 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 	AlertCategoryRepository alertCategoryRepository;
 	
 	@Autowired 
-	H810Respository h810Respository;
+	PatientPortalAlertConfigRespository h810Respository;
 
 	@Autowired
 	EntityManager em;
@@ -211,10 +211,10 @@ public class PortalMessagesServiceImpl implements PortalMessagesService{
 
 		System.out.println("In SaveNewMessage");
 		
-		H810 paymentAlertCategory=h810Respository.findOne(PortalAlertSpecification.getPortalAlertCategoryByName("Message Request"));
-		boolean sendToAll =paymentAlertCategory.getH810005();  
-        int provider = Integer.parseInt(paymentAlertCategory.getH810003());
-        int forwardTo = Integer.parseInt(paymentAlertCategory.getH810004());
+		PatientPortalAlertConfig paymentAlertCategory=h810Respository.findOne(PortalAlertSpecification.getPortalAlertCategoryByName("Message Request"));
+		boolean sendToAll =paymentAlertCategory.getpatient_portal_alert_config_send_to_all();  
+        int provider = Integer.parseInt(paymentAlertCategory.getpatient_portal_alert_config_provider());
+        int forwardTo = Integer.parseInt(paymentAlertCategory.getpatient_portal_alert_config_forward_to());
         
 		AlertCategory alertCategory=alertCategoryRepository.findOne(AlertCategorySpecification.getAlertCategoryByName("Message from Patient Portal"));
         

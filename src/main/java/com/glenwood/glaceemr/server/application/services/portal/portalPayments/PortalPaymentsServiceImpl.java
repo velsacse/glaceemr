@@ -33,8 +33,8 @@ import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.Billinglookup;
 import com.glenwood.glaceemr.server.application.models.CreditCardPaymentBean;
 import com.glenwood.glaceemr.server.application.models.EnsBillsDetails;
-import com.glenwood.glaceemr.server.application.models.H093;
-import com.glenwood.glaceemr.server.application.models.H810;
+import com.glenwood.glaceemr.server.application.models.GeneratedBillsHistoryDetails;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.IntermediateStmt;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
@@ -52,8 +52,8 @@ import com.glenwood.glaceemr.server.application.repositories.AlertCategoryReposi
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
 import com.glenwood.glaceemr.server.application.repositories.BillinglookupRepository;
 import com.glenwood.glaceemr.server.application.repositories.EnsBillsDetailsRepository;
-import com.glenwood.glaceemr.server.application.repositories.H093Repository;
-import com.glenwood.glaceemr.server.application.repositories.H810Respository;
+import com.glenwood.glaceemr.server.application.repositories.GeneratedBillsHistoryDetailsRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalAlertConfigRespository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.IntermediateStmtRepository;
 import com.glenwood.glaceemr.server.application.repositories.NonServiceDetailsRespository;
@@ -95,7 +95,7 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
      PatientInsDetailRepository patientInsDetailRepository;
 
      @Autowired
-     H093Repository h093Repository;
+     GeneratedBillsHistoryDetailsRepository h093Repository;
 
      @Autowired
      AlertEventRepository alertEventRepository;
@@ -107,7 +107,7 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
      PortalSettingsService portalSettingsService;
 
      @Autowired
-     H810Respository h810Respository;
+     PatientPortalAlertConfigRespository h810Respository;
 
      @Autowired
      IntermediateStmtRepository intermediateStmtRepository;
@@ -143,9 +143,9 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
      InitialSettingsRepository initialSettingsRepository;
 
      @Override
-     public List<H093> getPatientStatementHistory(int patientId, int chartId,int pageOffset, int pageIndex) {
+     public List<GeneratedBillsHistoryDetails> getPatientStatementHistory(int patientId, int chartId,int pageOffset, int pageIndex) {
 
-         List<H093> statementHistoryList=h093Repository.findAll(PortalPaymentsSpecification.getPatientStatementHistory(patientId, chartId), PortalPaymentsSpecification.createPortalStatementHistoryPageRequestByDescDate(pageIndex, pageOffset)).getContent();
+         List<GeneratedBillsHistoryDetails> statementHistoryList=h093Repository.findAll(PortalPaymentsSpecification.getPatientStatementHistory(patientId, chartId), PortalPaymentsSpecification.createPortalStatementHistoryPageRequestByDescDate(pageIndex, pageOffset)).getContent();
 
          return statementHistoryList;
      }
@@ -254,10 +254,10 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
              
          }
 
-         H810 paymentAlertCategory=h810Respository.findOne(PortalAlertSpecification.getPortalAlertCategoryByName("Payment Alert"));
-         boolean sendToAll =paymentAlertCategory.getH810005();
-         int provider = Integer.parseInt(paymentAlertCategory.getH810003());
-         int forwardTo = Integer.parseInt(paymentAlertCategory.getH810004());
+         PatientPortalAlertConfig paymentAlertCategory=h810Respository.findOne(PortalAlertSpecification.getPortalAlertCategoryByName("Payment Alert"));
+         boolean sendToAll =paymentAlertCategory.getpatient_portal_alert_config_send_to_all();
+         int provider = Integer.parseInt(paymentAlertCategory.getpatient_portal_alert_config_provider());
+         int forwardTo = Integer.parseInt(paymentAlertCategory.getpatient_portal_alert_config_forward_to());
 
          AlertCategory alertCategory=alertCategoryRepository.findOne(AlertCategorySpecification.getAlertCategoryByName("Payment from Patient Portal"));
 
@@ -449,7 +449,7 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
          PortalPatientStatementBean stmntBean = new PortalPatientStatementBean();
          String patientAccountId=portalMedicalSummaryService.getPatientPersonalDetails(patientId).getPatientRegistrationAccountno();
          if(!billType.equalsIgnoreCase("IM")){
-             H093 patientStatement=h093Repository.findOne(PortalPaymentsSpecification.getPatientStatementFileDetails(patientId, billId));
+             GeneratedBillsHistoryDetails patientStatement=h093Repository.findOne(PortalPaymentsSpecification.getPatientStatementFileDetails(patientId, billId));
              stmntBean.setBatchNo(patientStatement.getEnsBatchNo());
 
              if(stmntBean.getBatchNo()==0){
@@ -558,3 +558,4 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
      }
 
 }
+	

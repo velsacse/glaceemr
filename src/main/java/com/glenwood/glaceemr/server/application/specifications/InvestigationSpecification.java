@@ -27,8 +27,8 @@ import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileDetails_;
-import com.glenwood.glaceemr.server.application.models.H068;
-import com.glenwood.glaceemr.server.application.models.H068_;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
+import com.glenwood.glaceemr.server.application.models.ChartStatus_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping;
@@ -618,51 +618,51 @@ public class InvestigationSpecification {
 	}
 
 	/**
-	 * Method to get the status list based on column h068005
+	 * Method to get the status list based on column chart_status_reference_idchart_status_reference_id
 	 * @return predicate value statusValue
 	 */
-	public static Specification<H068> getStatusList() {
-		return new Specification<H068>() {
+	public static Specification<ChartStatus> getStatusList() {
+		return new Specification<ChartStatus>() {
 
 			@Override
-			public Predicate toPredicate(Root<H068> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<ChartStatus> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate statusValue = cb.equal(root.get(H068_.h068005), 413);
-				query.orderBy(cb.asc(root.get(H068_.h068002)));
+				Predicate statusValue = cb.equal(root.get(ChartStatus_.chart_status_reference_id), 413);
+				query.orderBy(cb.asc(root.get(ChartStatus_.chart_status_status_id)));
 				return statusValue;
 			}
 		};
 	}
 
 	/**
-	 * Method to get the refusal reason list based on column h068005
+	 * Method to get the refusal reason list based on column chart_status_reference_id
 	 * @return predicate value refusalReasonValue
 	 */
-	public static Specification<H068> getRefusalReasonList() {
-		return new Specification<H068>() {
+	public static Specification<ChartStatus> getRefusalReasonList() {
+		return new Specification<ChartStatus>() {
 
 			@Override
-			public Predicate toPredicate(Root<H068> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<ChartStatus> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate refusalReasonValue = cb.equal(root.get(H068_.h068005), 997);
-				query.orderBy(cb.asc(root.get(H068_.h068002)));
+				Predicate refusalReasonValue = cb.equal(root.get(ChartStatus_.chart_status_reference_id), 997);
+				query.orderBy(cb.asc(root.get(ChartStatus_.chart_status_status_id)));
 				return refusalReasonValue;
 			}
 		};
 	}
 
 	/**
-	 * Method to get the source list based on column h068005
+	 * Method to get the source list based on column chart_status_reference_id
 	 * @return predicate value sourceValue
 	 */
-	public static Specification<H068> getSourceList() {
-		return new Specification<H068>() {
+	public static Specification<ChartStatus> getSourceList() {
+		return new Specification<ChartStatus>() {
 
 			@Override
-			public Predicate toPredicate(Root<H068> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<ChartStatus> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate sourceValue = cb.equal(root.get(H068_.h068005), 998);
-				query.orderBy(cb.asc(root.get(H068_.h068002)));
+				Predicate sourceValue = cb.equal(root.get(ChartStatus_.chart_status_reference_id), 998);
+				query.orderBy(cb.asc(root.get(ChartStatus_.chart_status_status_id)));
 				return sourceValue;
 			}
 		};

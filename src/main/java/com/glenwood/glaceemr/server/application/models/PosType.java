@@ -2,7 +2,10 @@ package com.glenwood.glaceemr.server.application.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
@@ -10,6 +13,8 @@ import javax.persistence.Table;
 public class PosType {	
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pos_type_pos_type_unique_id_seq")
+	@SequenceGenerator(name = "pos_type_pos_type_unique_id_seq", sequenceName = "pos_type_pos_type_unique_id_seq", allocationSize = 1)
 	@Column(name="pos_type_type_id")
 	private Integer posTypeTypeId;
 	

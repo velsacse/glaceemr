@@ -3,7 +3,7 @@ package com.glenwood.glaceemr.server.application.services.chart.growthgraph;
 
 import java.util.List;
 
-import com.glenwood.glaceemr.server.application.models.H650;
+import com.glenwood.glaceemr.server.application.models.GrowthGraph;
 import com.glenwood.glaceemr.server.application.models.GrowthGraphVitalData;
 import com.glenwood.glaceemr.server.application.models.GrowthGraphPatientData;
 
@@ -36,6 +36,6 @@ public interface GrowthGraphService {
 	 * @param patientId
 	 * @return list graph details
 	 */
-	List<H650> getGraphList(String patientId);
+	List<GrowthGraph> getGraphList(String patientId);
 
 }

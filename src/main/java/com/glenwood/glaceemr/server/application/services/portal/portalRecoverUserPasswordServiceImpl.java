@@ -20,11 +20,11 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.glenwood.glaceemr.server.application.models.H809;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PortalPasswordResetBean;
-import com.glenwood.glaceemr.server.application.repositories.H809Repository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalUserRepository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
@@ -40,7 +40,7 @@ import com.glenwood.glaceemr.server.utils.MultipartUtility;
 public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPasswordService{
 
 	@Autowired
-	H809Repository h809Repository;
+	PatientPortalUserRepository patient_portal_userRepository;
 
 	@Autowired
 	ObjectMapper objectMapper;
@@ -58,13 +58,13 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 	public RecoverPortalPasswordBean authenticateUsernameAndGetSecurityQuestions(
 			RecoverPortalPasswordBean recoverBean) throws JsonProcessingException {
 
-		List<H809> portalUsersList=h809Repository.findAll(PortalRecoverUserPasswordSpecifiction.authenticatePortalUser(recoverBean.getUsername()));
+		List<PatientPortalUser> portalUsersList=patient_portal_userRepository.findAll(PortalRecoverUserPasswordSpecifiction.authenticatePortalUser(recoverBean.getUsername()));
 
 		RecoverPortalPasswordBean securityQuestionsBean=new RecoverPortalPasswordBean();
 		
 		if(portalUsersList.size()>0){
-		H809 portalUser=portalUsersList.get(0);
-		securityQuestionsBean.setUsername(portalUser.getH809004());
+		PatientPortalUser portalUser=portalUsersList.get(0);
+		securityQuestionsBean.setUsername(portalUser.getpatient_portal_user_name());
 		securityQuestionsBean.setDbname(recoverBean.getDbname());
 		securityQuestionsBean.setSecurityQuestion1(portalUser.getSecurityQuestion1());
 		securityQuestionsBean.setSecurityQuestion2(portalUser.getSecurityQuestion2());
@@ -77,7 +77,7 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 	public EMRResponseBean authenticateSecurityQuestions(
 			RecoverPortalPasswordBean recoverBean) throws IOException, JSONException {
 
-		H809 portalUser=h809Repository.findOne(PortalRecoverUserPasswordSpecifiction.authenticatePortalUser(recoverBean.getUsername()));
+		PatientPortalUser portalUser=patient_portal_userRepository.findOne(PortalRecoverUserPasswordSpecifiction.authenticatePortalUser(recoverBean.getUsername()));
 		InitialSettings practiceDetails=initialSettingsRepository.findOne(PortalSettingsSpecification.getPracticeDetails("Practice Name"));
 
 
@@ -94,11 +94,11 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 		boolean isAnswer3Correct=false;
 
 		DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-		Date DOB = new Date(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationDob().getTime());
+		Date DOB = new Date(portalUser.getChartpatient_portal_userTable().getPatientRegistrationTable().getPatientRegistrationDob().getTime());
 
 		if(dateFormat.format(DOB).equalsIgnoreCase(recoverBean.getDob()))
 			isDOBCorrect=true;
-		if(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationAccountno().equalsIgnoreCase(recoverBean.getAccountID()))
+		if(portalUser.getChartpatient_portal_userTable().getPatientRegistrationTable().getPatientRegistrationAccountno().equalsIgnoreCase(recoverBean.getAccountID()))
 			isAccountIDCorrect=true;
 		if(portalUser.getSecurityAnswer1().equalsIgnoreCase(recoverBean.getSecurityAnswer1()))
 			isAnswer1Correct=true;
@@ -128,11 +128,11 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 			return bean;
 		}
 		
-		portalUser.setH809Token(generateRandomString());
+		portalUser.setpatient_portal_userToken(generateRandomString());
 		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
-				AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalUser.getH809002()+" has successfully updated the token.",-1,
-				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
-				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalUser.getH809002()+" has requested the password reset.","");
+				AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalUser.getpatient_portal_user_patient_id()+" has successfully updated the token.",-1,
+				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getpatient_portal_user_patient_id())),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalUser.getpatient_portal_user_patient_id()+" has requested the password reset.","");
 
 
 		String URL ="https://mailer1.glaceemr.com/Mailer/sendMail";
@@ -151,7 +151,7 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 		String subject="Password Recovery";
 
 		JSONArray toIds = new JSONArray();
-		toIds.put(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationMailId());
+		toIds.put(portalUser.getChartpatient_portal_userTable().getPatientRegistrationTable().getPatientRegistrationMailId());
 
 		JSONArray ccids = new JSONArray();
 
@@ -162,11 +162,11 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 
 		String htmlbody="<html><head></head>"+
 				"<body style='width:100%;color:#1e1e1e;font-size:16px;'>"+
-				"<label style='width:100%;padding:10px 5px;'>Dear "+WordUtils.capitalizeFully(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationFirstName())+" "+WordUtils.capitalizeFully(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationLastName())+",</label>"+
+				"<label style='width:100%;padding:10px 5px;'>Dear "+WordUtils.capitalizeFully(portalUser.getChartpatient_portal_userTable().getPatientRegistrationTable().getPatientRegistrationFirstName())+" "+WordUtils.capitalizeFully(portalUser.getChartpatient_portal_userTable().getPatientRegistrationTable().getPatientRegistrationLastName())+",</label>"+
 				"<br><br>"+
 				"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Welcome to Patient Portal password reset service.</label>"+
 				"<br><br>"+
-				"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='color:#1773cf' href='https://patientportal.glaceemr.com/glaceportal_login/PasswordReset.jsp?practiceId="+recoverBean.getDbname()+"&patientId="+portalUser.getH809002()+"&resetToken="+portalUser.getH809Token()+"'>Click here to reset password.</a></label>"+
+				"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='color:#1773cf' href='https://patientportal.glaceemr.com/glaceportal_login/PasswordReset.jsp?practiceId="+recoverBean.getDbname()+"&patientId="+portalUser.getpatient_portal_user_patient_id()+"&resetToken="+portalUser.getpatient_portal_userToken()+"'>Click here to reset password.</a></label>"+
 				"<br><br>"+
 				"<label style='width:100%;padding:10px 5px;'>Thanks and Regards,</label>"+
 				"<br>"+
@@ -208,7 +208,7 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 		
 		if(httpURLConnection.getResponseCode()==200){
 			bean.setSuccess(true);
-			bean.setData(portalUser.getChartH809Table().getPatientRegistrationTable().getPatientRegistrationMailId());
+			bean.setData(portalUser.getChartpatient_portal_userTable().getPatientRegistrationTable().getPatientRegistrationMailId());
 		}
 		else{
 			bean.setSuccess(false);
@@ -224,40 +224,40 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 		PortalRegistrationResponse regResponse=new PortalRegistrationResponse();
 		
 		if(portalPasswordResetBean.getPatientId()!=-1){
-			H809 portalUser=h809Repository.findOne(PortalLoginSpecification.patientById(String.valueOf(portalPasswordResetBean.getPatientId())));
+			PatientPortalUser portalUser=patient_portal_userRepository.findOne(PortalLoginSpecification.patientById(String.valueOf(portalPasswordResetBean.getPatientId())));
 			
-			if(portalUser.getH809Token()==null||portalUser.getH809Token().equals("-1")){
+			if(portalUser.getpatient_portal_userToken()==null||portalUser.getpatient_portal_userToken().equals("-1")){
 				regResponse.setSuccess(false);
 				regResponse.setMessage("Password reset link has been expired.");
-			}else if(!portalUser.getH809Token().equals(portalPasswordResetBean.getToken())){
+			}else if(!portalUser.getpatient_portal_userToken().equals(portalPasswordResetBean.getToken())){
 				regResponse.setSuccess(false);
 				regResponse.setMessage("Password reset token mismatch.");
 				auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
 						AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalPasswordResetBean.getPatientId()+" has successfully reset the password.",-1,
-						request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+						request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getpatient_portal_user_patient_id())),"",
 						AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalPasswordResetBean.getPatientId()+" has successfully reset the password.","");
-			}else if(portalUser.getH809Token().equals(portalPasswordResetBean.getToken())){
+			}else if(portalUser.getpatient_portal_userToken().equals(portalPasswordResetBean.getToken())){
 				
-				if(!portalPasswordResetBean.getPassword().equals(portalUser.getH809010())){
-				portalUser.setH809Token("-1");
-				portalUser.setH809010(portalPasswordResetBean.getPassword());
+				if(!portalPasswordResetBean.getPassword().equals(portalUser.getpatient_portal_user_password())){
+				portalUser.setpatient_portal_userToken("-1");
+				portalUser.setpatient_portal_user_password(portalPasswordResetBean.getPassword());
 				MD5 md5 = new MD5();
 				md5.setHashString(portalPasswordResetBean.getPassword());
 				String encryptedPassword=md5.getHashString();
-				portalUser.setH809005(encryptedPassword);
-				h809Repository.saveAndFlush(portalUser);
+				portalUser.setpatient_portal_user_password_hash(encryptedPassword);
+				patient_portal_userRepository.saveAndFlush(portalUser);
 				regResponse.setSuccess(true);
 				regResponse.setMessage("Your password has been reset successfully.");
 				auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
 						AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalPasswordResetBean.getPatientId()+" has successfully reset the password.",-1,
-						request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+						request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getpatient_portal_user_patient_id())),"",
 						AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalPasswordResetBean.getPatientId()+" has successfully reset the password.","");
 				}else{
 					regResponse.setSuccess(false);
 					regResponse.setMessage("Please enter new password different from old one.");
 					auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
 							AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+portalPasswordResetBean.getPatientId()+" has failed to reset the password.",-1,
-							request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+							request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getpatient_portal_user_patient_id())),"",
 							AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+portalPasswordResetBean.getPatientId()+" has failed to reset the password.","");
 				}
 			}
@@ -277,14 +277,14 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 		PortalRegistrationResponse regResponse=new PortalRegistrationResponse();
 		
 		if(patientId!=-1){
-			H809 portalUser=h809Repository.findOne(PortalLoginSpecification.patientById(String.valueOf(patientId)));
+			PatientPortalUser portalUser=patient_portal_userRepository.findOne(PortalLoginSpecification.patientById(String.valueOf(patientId)));
 			
-			portalUser.setH809Token(generateRandomString());
+			portalUser.setpatient_portal_userToken(generateRandomString());
 			regResponse.setSuccess(true);
 			regResponse.setMessage("Password reset token has been generated successfully.");
 			auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
 					AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+patientId+" has successfully updated the token.",-1,
-					request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+					request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getpatient_portal_user_patient_id())),"",
 					AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" has requested the password reset.","");
 		}else{
 			regResponse.setSuccess(false);

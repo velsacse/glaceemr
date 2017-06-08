@@ -7,8 +7,8 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.glenwood.glaceemr.server.application.models.H810;
-import com.glenwood.glaceemr.server.application.models.H810_;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig_;
 
 public class PortalAlertSpecification {
 
@@ -16,15 +16,15 @@ public class PortalAlertSpecification {
 	 * @param patientId	: used to get total messages list of a patient of that particular id
 	 * @return BooleanExpression is a  predicate  
 	 */	
-	public static Specification<H810> getPortalAlertCategoryByName(final String alertCategory)
+	public static Specification<PatientPortalAlertConfig> getPortalAlertCategoryByName(final String alertCategory)
 	   {
-		   return new Specification<H810>() {
+		   return new Specification<PatientPortalAlertConfig>() {
 
 			@Override
-			public Predicate toPredicate(Root<H810> root,
+			public Predicate toPredicate(Root<PatientPortalAlertConfig> root,
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 								
-				Predicate alertPredicate=cq.where(cb.equal(root.get(H810_.h810002), alertCategory)).getRestriction();
+				Predicate alertPredicate=cq.where(cb.equal(root.get(PatientPortalAlertConfig_.patient_portal_alert_config_display_name), alertCategory)).getRestriction();
 				
 				return alertPredicate;
 			}

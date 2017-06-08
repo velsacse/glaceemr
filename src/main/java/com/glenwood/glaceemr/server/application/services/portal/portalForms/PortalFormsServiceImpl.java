@@ -41,7 +41,7 @@ import com.glenwood.glaceemr.server.application.models.ClinicalQuestionsGroup;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.GroupQuestionsMapping;
-import com.glenwood.glaceemr.server.application.models.H810;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
 import com.glenwood.glaceemr.server.application.models.LeafXmlVersion;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElementsQuestions;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElementsQuestions_;
@@ -56,8 +56,8 @@ import com.glenwood.glaceemr.server.application.repositories.FileDetailsReposito
 import com.glenwood.glaceemr.server.application.repositories.FileNameRepository;
 import com.glenwood.glaceemr.server.application.repositories.FormsTemplateRepository;
 import com.glenwood.glaceemr.server.application.repositories.GroupQuestionsMappingRepository;
-import com.glenwood.glaceemr.server.application.repositories.H809Repository;
-import com.glenwood.glaceemr.server.application.repositories.H810Respository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalUserRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalAlertConfigRespository;
 import com.glenwood.glaceemr.server.application.repositories.LeafVersionRepository;
 import com.glenwood.glaceemr.server.application.repositories.LeafXmlVersionRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsQuestionsRepository;
@@ -122,7 +122,7 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 	AlertEventRepository alertEventRepository;
 	
 	@Autowired
-	H810Respository h810Respository;
+	PatientPortalAlertConfigRespository h810Respository;
 
 
 	/*Consent Forms Related*/
@@ -140,10 +140,10 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 	
 	@Autowired
 	SessionMap sessionMap;
-	
+
 	@Autowired
 	AuditTrailSaveService auditTrailSaveService;
-	
+
 	LinkedHashMap <String, PatientClinicalIntakeBean> patientElementsBeanMap=null;
 
 	LinkedHashMap <String, PatientClinicalIntakeBean> patientOptionElementsBeanMap=null;
@@ -675,7 +675,6 @@ public class PortalFormsServiceImpl implements PortalFormsService{
 			throw e;
 		}finally{
 		}
-		
 		return clinicalIntakeXML;
 	}
 

@@ -32,8 +32,6 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H076;
-import com.glenwood.glaceemr.server.application.models.H076_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
 import com.glenwood.glaceemr.server.application.models.LabGroups;
@@ -45,6 +43,8 @@ import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.PosTable_;
 import com.glenwood.glaceemr.server.application.models.Prescription;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor_;
 import com.glenwood.glaceemr.server.application.models.Room;
 import com.glenwood.glaceemr.server.application.repositories.ActivityLogRepository;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
@@ -218,7 +218,7 @@ public class RoomStatusServiceImpl implements  RoomStatusService {
 				builder.equal(posJoin.get(Encounter_.encounterStatus),1),
 				builder.equal(posJoin.get(Encounter_.encounterRoomIsactive),true)));
 	    Join<Chart,PatientRegistration> patJoin = chartJoin.join(Chart_.patientRegistrationTable,JoinType.INNER);
-	    Join<PatientRegistration,H076> h076Join = patJoin.join(PatientRegistration_.referringPhyTable,JoinType.LEFT);
+	    Join<PatientRegistration,ReferringDoctor> h076Join = patJoin.join(PatientRegistration_.referringPhyTable,JoinType.LEFT);
 	    Join<PatientRegistration,AlertEvent> alertJoin = patJoin.join(PatientRegistration_.alertEvent,JoinType.LEFT);
 		alertJoin.on(alertJoin.get(AlertEvent_.alertEventCategoryId).in(2,3,4));		
 	    cq.select(builder.construct(PosRooms.class,
@@ -229,7 +229,7 @@ public class RoomStatusServiceImpl implements  RoomStatusService {
 	    		builder.concat(patJoin.get(PatientRegistration_.patientRegistrationFirstName),
 	    		patJoin.get(PatientRegistration_.patientRegistrationLastName)),
 	    		patJoin.get(PatientRegistration_.patientRegistrationId),
-	    		h076Join.get(H076_.h076020),
+	    		h076Join.get(ReferringDoctor_.referring_doctor_referringdoctor),
 	    		alertJoin.get(AlertEvent_.alertEventCategoryId),
 	    		builder.function("to_char",String.class,builder.function("age",String.class,builder.literal(encounterRepository.findCurrentTimeStamp()),posJoin.get(Encounter_.encounterCreatedDate)),builder.literal("DD:HH24:MI:SS")),
 	    		builder.function("to_char",String.class,builder.function("age",String.class,builder.literal(alertEventRepository.findCurrentTimeStamp()),alertJoin.get(AlertEvent_.alertEventCreatedDate)),builder.literal("DD:HH24:MI:SS"))));

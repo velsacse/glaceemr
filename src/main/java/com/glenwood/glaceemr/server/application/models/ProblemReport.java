@@ -1,11 +1,14 @@
 package com.glenwood.glaceemr.server.application.models;
 
-import java.sql.Timestamp;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -16,6 +19,8 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class ProblemReport {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "problem_report_problem_report_uniqueid_seq")
+	@SequenceGenerator(name = "problem_report_problem_report_uniqueid_seq", sequenceName = "problem_report_problem_report_uniqueid_seq", allocationSize = 1)
 	@Column(name="problem_report_uniqueid")
 	private Integer problemReportUniqueid;
 

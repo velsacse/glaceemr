@@ -26,40 +26,41 @@ public class FaxController {
 	FaxService faxService;
 	/**
 	 * API to get Outboxdetails of fax
-	 * @param h496004
+	 * @param fax_outbox_folderid
 	 * @param userId
 	 * @return
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/getOutboxDetails",method=RequestMethod.GET)
 	@ResponseBody
-	public  EMRResponseBean getOutboxDetails(@RequestParam(value="folderId",required=true,defaultValue="2")Integer h496004,
+	public  EMRResponseBean getOutboxDetails(@RequestParam(value="folderId",required=true,defaultValue="2")Integer fax_outbox_folderid,
 			@RequestParam(value="userId",required=true,defaultValue="-1")Integer userId,
 			@RequestParam(value="pageNo",required=true,defaultValue="1")Integer pageNo) throws Exception{
 		    EMRResponseBean emrResponse = new EMRResponseBean();
-		    emrResponse.setData(faxService.getOutboxDetails(h496004,userId,pageNo));
+		    emrResponse.setData(faxService.getOutboxDetails(fax_outbox_folderid,userId,pageNo));
 		return emrResponse;
 	}
+	
 
 	/**
 	 * API to get Inboxdetails of fax
-	 * @param h491010
-	 * @param h491013
-	 * @param h491014
-	 * @param h491017_faxbox
+	 * @param fax_inbox_folderid
+	 * @param fax_inbox_statusid
+	 * @param fax_inbox_forwardeduserid
+	 * @param fax_inbox_location
 	 * @return
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/getInboxDetails",method=RequestMethod.GET)
 	@ResponseBody
 	public  EMRResponseBean getInboxDetails(
-			@RequestParam(value="folderId",required=true,defaultValue="1")Integer h491010,
-			@RequestParam(value="faxStatusId",required=false,defaultValue="-1")Integer h491013,
-			@RequestParam(value="forwaredUserId",required=true,defaultValue="0")Integer h491014,
-			@RequestParam(value="faxLocation",required=false,defaultValue="1")Integer h491017_faxbox,
+			@RequestParam(value="folderId",required=true,defaultValue="1")Integer fax_inbox_folderid,
+			@RequestParam(value="faxStatusId",required=false,defaultValue="-1")Integer fax_inbox_statusid,
+			@RequestParam(value="forwaredUserId",required=true,defaultValue="0")Integer fax_inbox_forwardeduserid,
+			@RequestParam(value="faxLocation",required=false,defaultValue="1")Integer fax_inbox_location,
 			@RequestParam(value="pageNo",required=true,defaultValue="1")int pageNo) throws Exception{
 		    EMRResponseBean  emrResponse = new EMRResponseBean();
-		    emrResponse.setData(faxService.getInboxDetails(h491010,h491013,h491014,h491017_faxbox,pageNo));
+		    emrResponse.setData(faxService.getInboxDetails(fax_inbox_folderid,fax_inbox_statusid,fax_inbox_forwardeduserid,fax_inbox_location,pageNo));
 		return emrResponse;
 	}
 

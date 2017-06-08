@@ -6,9 +6,12 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -19,7 +22,10 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @Table(name = "leaf_patient")
 public class LeafPatient {
 
+	
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "leaf_patient_leaf_tab_patient_id_seq")
+	@SequenceGenerator(name = "leaf_patient_leaf_tab_patient_id_seq", sequenceName = "leaf_patient_leaf_tab_patient_id_seq", allocationSize = 1)
 	@Column(name="leaf_patient_id")
 	private Integer leafPatientId;
 
@@ -125,8 +131,8 @@ public class LeafPatient {
 	private Encounter encounterTable;
 	
 	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
-	@JoinColumn(name="leaf_patient_problemid", referencedColumnName="h629001" , insertable=false, updatable=false)
-	private H629 h629;
+	@JoinColumn(name="leaf_patient_problemid", referencedColumnName="problem_leaf_details_id" , insertable=false, updatable=false)
+	private ProblemLeafDetails problem_leaf_details;
 	
 	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY) 
 	@JoinColumn(name="leaf_patient_created_by", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
@@ -155,12 +161,12 @@ public class LeafPatient {
 		this.empProfile_sign_userid = empProfile_sign_userid;
 	}
 
-	public H629 getH629() {
-		return h629;
+	public ProblemLeafDetails getproblem_leaf_details() {
+		return problem_leaf_details;
 	}
 
-	public void setH629(H629 h629) {
-		this.h629 = h629;
+	public void setproblem_leaf_details(ProblemLeafDetails problem_leaf_details) {
+		this.problem_leaf_details = problem_leaf_details;
 	}
 
 	

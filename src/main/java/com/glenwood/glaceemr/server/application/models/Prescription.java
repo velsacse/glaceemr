@@ -1,18 +1,21 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.JoinColumnOrFormula;
@@ -23,8 +26,8 @@ import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 import com.glenwood.glaceemr.server.utils.JsonDateSerializer;
+import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "doc_presc")
@@ -37,6 +40,8 @@ public class Prescription implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "doc_presc_doc_presc_id_seq")
+	@SequenceGenerator(name = "doc_presc_doc_presc_id_seq", sequenceName = "doc_presc_doc_presc_id_seq", allocationSize = 1)
 	@Column(name="doc_presc_id")
 	private Integer docPrescId;
 

@@ -116,13 +116,14 @@ public class AlertEvent {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="alert_event_room_id",referencedColumnName="h479001",insertable=false,updatable=false)
+	@JoinColumn(name="alert_event_room_id",referencedColumnName="room_details_id",insertable=false,updatable=false)
 	Room roomTable;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
 	@JoinColumn(name="alert_event_chart_id",referencedColumnName="chart_id",insertable=false,updatable=false)
 	Chart chartTable;
+	
 	
 
 	@ManyToOne(fetch=FetchType.LAZY)

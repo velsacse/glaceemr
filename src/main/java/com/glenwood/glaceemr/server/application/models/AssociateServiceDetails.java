@@ -4,10 +4,14 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -21,6 +25,8 @@ public class AssociateServiceDetails {
 	private Long associateServiceDetailId;
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "associate_service_detail_associate_service_detail_id_seq")
+	@SequenceGenerator(name = "associate_service_detail_associate_service_detail_id_seq", sequenceName = "associate_service_detail_associate_service_detail_id_seq", allocationSize = 1)
 	@Column(name="associate_service_detail_service_id")
 	private Integer associateServiceDetailServiceId;
 	

@@ -17,14 +17,14 @@ import org.springframework.stereotype.Service;
 import com.glenwood.glaceemr.server.application.models.BillingConfigTable;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
-import com.glenwood.glaceemr.server.application.models.H077;
-import com.glenwood.glaceemr.server.application.models.H077_;
 import com.glenwood.glaceemr.server.application.models.LetterHeaderEmp;
 import com.glenwood.glaceemr.server.application.models.LetterHeaderEmp_;
 import com.glenwood.glaceemr.server.application.models.LetterHeaderPos;
 import com.glenwood.glaceemr.server.application.models.PlaceOfService;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.PosType;
+import com.glenwood.glaceemr.server.application.models.SpecialisationReferring;
+import com.glenwood.glaceemr.server.application.models.SpecialisationReferring_;
 import com.glenwood.glaceemr.server.application.models.print.GenericLetterHeader;
 import com.glenwood.glaceemr.server.application.models.print.LetterHeaderContent;
 import com.glenwood.glaceemr.server.application.repositories.BillingConfigTableRepository;
@@ -86,6 +86,7 @@ public class LetterHeaderServiceImpl implements LetterHeaderService{
 	public List<LetterHeaderContent> getLetterHeaderContentList(Integer letterHeaderId, List<Integer> variantId) {
 		return letterContentRepository.findAll(LetterHeaderSpecification.getLetterHeaderContent(letterHeaderId,variantId));
 	}
+	
 	
 	@Override
 	public long getLetterHeaderContentCount(Integer letterHeaderId, List<Integer> variantId) {
@@ -238,7 +239,7 @@ public class LetterHeaderServiceImpl implements LetterHeaderService{
 		CriteriaQuery<EmployeeDataBean> query= builder.createQuery(EmployeeDataBean.class);
 		Root<LetterHeaderEmp> root= query.from(LetterHeaderEmp.class);
 		Join<LetterHeaderEmp, EmployeeProfile> empJoin= root.join(LetterHeaderEmp_.empProfile, JoinType.LEFT);
-		Join<EmployeeProfile, H077> specialtyJoin= empJoin.join(EmployeeProfile_.specialityTable, JoinType.LEFT);
+		Join<EmployeeProfile, SpecialisationReferring> specialtyJoin= empJoin.join(EmployeeProfile_.specialityTable, JoinType.LEFT);
 		
 		Predicate pred= builder.equal(root.get(LetterHeaderEmp_.letterHeaderEmpMapId),headerId);
 		Predicate varPred= builder.equal(root.get(LetterHeaderEmp_.letterHeaderEmpVariant),variantId);
@@ -256,7 +257,7 @@ public class LetterHeaderServiceImpl implements LetterHeaderService{
 										         empJoin.get(EmployeeProfile_.empProfileZip),										          
 										          empJoin.get(EmployeeProfile_.empProfilePhoneno),
 										           empJoin.get(EmployeeProfile_.empProfileMailid),
-										            specialtyJoin.get(H077_.h077002)));
+										            specialtyJoin.get(SpecialisationReferring_.specialisation_referring_name)));
 		query.where(pred,varPred);
 		query.orderBy(builder.asc(root.get(LetterHeaderEmp_.letterHeaderEmpOrder)));
 		

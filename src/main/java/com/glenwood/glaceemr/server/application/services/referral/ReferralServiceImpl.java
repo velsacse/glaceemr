@@ -25,7 +25,7 @@ import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.Encounter;	
 import com.glenwood.glaceemr.server.application.models.Guarantor;
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
@@ -36,7 +36,7 @@ import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
 import com.glenwood.glaceemr.server.application.repositories.GuarantorRepository;
-import com.glenwood.glaceemr.server.application.repositories.H611Repository;
+import com.glenwood.glaceemr.server.application.repositories.PatientAssessmentsRepository;
 import com.glenwood.glaceemr.server.application.repositories.LeafPatientRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
@@ -46,7 +46,7 @@ import com.glenwood.glaceemr.server.application.specifications.ChartSpecificatio
 import com.glenwood.glaceemr.server.application.specifications.EmployeeSpecification;
 import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
 import com.glenwood.glaceemr.server.application.specifications.GuarantorSpecification;
-import com.glenwood.glaceemr.server.application.specifications.H611Specfication;
+import com.glenwood.glaceemr.server.application.specifications.PatientAssessmentsSpecfication;
 import com.glenwood.glaceemr.server.application.specifications.LeafPatientSpecfication;
 import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.ReferralSpecification;
@@ -83,7 +83,7 @@ public class ReferralServiceImpl implements ReferralService{
 	ChartRepository chartRepository; 
 	
 	@Autowired
-	H611Repository h611Repository;
+	PatientAssessmentsRepository h611Repository;
 	
 	@Autowired
 	ProblemListRepository problemListRepository; 
@@ -116,24 +116,25 @@ public class ReferralServiceImpl implements ReferralService{
 		Root<Referral> root= query.from(Referral.class);
 		
 		query.select(builder.construct(Referral.class, 
-						root.get(Referral_.h413001),
-						 root.get(Referral_.h413006),
-						  root.get(Referral_.h413007),
-						   root.get(Referral_.h413037),
-						    root.get(Referral_.criticalStatus)));
+				root.get(Referral_.referral_details_refid),
+				 root.get(Referral_.referral_details_rdoctor_to),
+				  root.get(Referral_.referral_details_rdoctor_spec),
+				   root.get(Referral_.referral_details_printleafdetail),
+				    root.get(Referral_.criticalStatus)));
+
 		
 		if(!dx.trim().isEmpty()){
-			query.where(builder.equal(root.get(Referral_.h413003), encounterId),
-						 builder.equal(root.get(Referral_.h413002), chartId),
-						   builder.notEqual(root.get(Referral_.h413041), 2),
-							builder.like(builder.upper(root.get(Referral_.h413011)), "%" + dx.toUpperCase() + "%"));
-		}
+			query.where(builder.equal(root.get(Referral_.referral_details_encounterid), encounterId),
+					 builder.equal(root.get(Referral_.referral_details_chartid), chartId),
+					   builder.notEqual(root.get(Referral_.referral_details_patientid), 2),
+						builder.like(builder.upper(root.get(Referral_.referral_details_dxcode)), "%" + dx.toUpperCase() + "%"));
+	}
 		else{
-			query.where(builder.equal(root.get(Referral_.h413003), encounterId),
-					 	 builder.equal(root.get(Referral_.h413002), chartId),
-					 	   builder.notEqual(root.get(Referral_.h413041), 2));					 	    
-		}
-		query.orderBy(builder.asc(root.get(Referral_.h413001)));
+			query.where(builder.equal(root.get(Referral_.referral_details_encounterid), encounterId),
+				 	 builder.equal(root.get(Referral_.referral_details_chartid), chartId),
+				 	   builder.notEqual(root.get(Referral_.referral_details_patientid), 2));					 	    
+}
+		query.orderBy(builder.asc(root.get(Referral_.referral_details_refid)));
 		try{
 			logger.debug("Getting list of referrals");
 			return em.createQuery(query).getResultList();
@@ -173,9 +174,9 @@ public class ReferralServiceImpl implements ReferralService{
 //			Date date = new Date();
 			Referral refUpdate = ref;
 //			refUpdate.setH413004(new Timestamp(date.getTime()));
-			refUpdate.setH413037(reason);
-			refUpdate.setH413013(notes);
-			refUpdate.setH413011(dx);
+			refUpdate.setreferral_details_printleafdetail(reason);
+			refUpdate.setreferral_details_comment(notes);
+			refUpdate.setreferral_details_dxcode(dx);
 			refUpdate.setCriticalStatus(criticalstatus);
 			
 			SimpleDateFormat sourceformatter = new SimpleDateFormat("MM/dd/yyyy");			
@@ -210,7 +211,7 @@ public class ReferralServiceImpl implements ReferralService{
 		for(Referral ref: referralList){
 			Date date = new Date();
 			Referral refUpdate = ref;
-			refUpdate.setH413041(2);
+			refUpdate.setreferral_details_patientid(2);
 			refUpdate.setReferralCancelBy(loginId);
 			refUpdate.setReferralCancelOn(new Timestamp(date.getTime()));
 			referral = refUpdate;
@@ -270,7 +271,7 @@ public class ReferralServiceImpl implements ReferralService{
 			List<Integer> leafPatientIdList = new ArrayList<>();
 			List<Integer> leafencounterIdList = new ArrayList<>();
 			if(referral!=null) {
-				String template = referral.getH413038();
+				String template = referral.getreferral_details_scribble();
 				if(template==null)
 					template="";
 				String[] templateArr = template.split("SoapNotesPrint.Action");
@@ -313,17 +314,17 @@ public class ReferralServiceImpl implements ReferralService{
 					leafLib.setLeafLibraryName(name+" - Follow up");
 				}
 			}*/
-			List<H611> dxList = h611Repository.findAll(H611Specfication.getByEncounterId(ids));
+			List<PatientAssessments> dxList = h611Repository.findAll(PatientAssessmentsSpecfication.getByEncounterId(ids));
 			List<ProblemList> problemList=problemListRepository.findAll(ReferralSpecification.getproblemlist(patientId+""));
 			
 			for(int z=0;z<dxList.size()-1;z++){
-				String dxcode1=dxList.get(z).getH611005();
+				String dxcode1=dxList.get(z).getpatient_assessments_dxcode();
 				dxcode1= (dxcode1!=null ? dxcode1.trim(): dxcode1);
-				String oid=dxList.get(z).getH611CodingSystemid();
+				String oid=dxList.get(z).getpatient_assessmentsCodingSystemid();
 				for(int z1=z+1;z1<dxList.size();z1++){
-					String dxcode2=dxList.get(z1).getH611005();
+					String dxcode2=dxList.get(z1).getpatient_assessments_dxcode();
 					dxcode2= (dxcode2!=null ? dxcode2.trim(): dxcode2);
-					String oid2=dxList.get(z1).getH611CodingSystemid();
+					String oid2=dxList.get(z1).getpatient_assessmentsCodingSystemid();
 					if(((dxcode1.replaceAll("\\s+","")).equalsIgnoreCase((dxcode2).replaceAll("\\s+","")))&&(oid.replaceAll("\\s+","").equalsIgnoreCase(oid2.replaceAll("\\s+","")))){
 						dxList.remove(dxList.get(z1));
 						z1--;
@@ -353,7 +354,7 @@ public class ReferralServiceImpl implements ReferralService{
 				String dxcode=problemList.get(i).getProblemListDxCode();
 				dxcode= (dxcode!=null ? dxcode.trim(): dxcode);
 				for(int j=0;j<dxList.size();j++){
-					String dxcode1=dxList.get(j).getH611005();
+					String dxcode1=dxList.get(j).getpatient_assessments_dxcode();
 					dxcode1= (dxcode1!=null ? dxcode1.trim(): dxcode1);
 					if(dxcode.replaceAll("\\s+","").equalsIgnoreCase(dxcode1.replaceAll("\\s+",""))){
 						dxList.remove(dxList.get(j));
@@ -407,9 +408,9 @@ public class ReferralServiceImpl implements ReferralService{
 		Join<H611,CodingSystems> dxCodingSystemJoin= root.join("codingsystemsTable",JoinType.INNER);
 		Predicate pred=null;
 		if(ids.size()>0)
-			pred= root.get(H611_.h611002).in(ids);
+			pred= root.get(H611_.patient_assessments_encounterid).in(ids);
 		else
-			pred= root.get(H611_.h611002).in(-999);
+			pred= root.get(H611_.patient_assessments_encounterid).in(-999);
 		
 		cq.distinct(true).select(builder.construct(ReferralDiagnosisBean.class,root.get(H611_.h611005),root.get(H611_.h611006))).where(pred).orderBy(builder.asc(root.get(H611_.h611005)));
 		
@@ -519,15 +520,15 @@ public class ReferralServiceImpl implements ReferralService{
 							refUpdate.setReferralOrderOn(dataStamp);
 						}
 
-						if(referralForm.getStatus()==2 && refUpdate.getH413041()!=2){
+						if(referralForm.getStatus()==2 && refUpdate.getreferral_details_patientid()!=2){
 							refUpdate.setReferralCancelBy(loginId);
 							refUpdate.setReferralCancelOn(dataStamp);
 						}
-						if(referralForm.getStatus()==3 && refUpdate.getH413041()!=3){
+						if(referralForm.getStatus()==3 && refUpdate.getreferral_details_patientid()!=3){
 							refUpdate.setReferralReceiveBy(userId);
 							refUpdate.setReferralReceiveOn(dataStamp);
 						}
-						if(referralForm.getStatus()==4 && refUpdate.getH413041()!=4){
+						if(referralForm.getStatus()==4 && refUpdate.getreferral_details_patientid()!=4){
 							refUpdate.setReferralReceiveBy(userId);
 							refUpdate.setReferralReceiveOn(dataStamp);
 							refUpdate.setReferralReviewedBy(userId);
@@ -539,7 +540,7 @@ public class ReferralServiceImpl implements ReferralService{
 					else {
 						apptdate = sourceformatter.parse(referralForm.getApptDate());
 						Timestamp apptdateTimestamp = new Timestamp(apptdate.getTime());
-						refUpdate.setH413022(apptdateTimestamp);
+						refUpdate.setreferral_details_apptconfirmdate(apptdateTimestamp);
 					}
 
 					if(referralForm.getAuthDate().isEmpty())
@@ -547,7 +548,7 @@ public class ReferralServiceImpl implements ReferralService{
 					else {
 						authdate = sourceformatter.parse(referralForm.getAuthDate());
 						Timestamp authdateTimestamp = new Timestamp(authdate.getTime());
-						refUpdate.setH413017(authdateTimestamp);
+						refUpdate.setreferral_details_authdate(authdateTimestamp);
 					}
 
 					if(referralForm.getAuthExpDate().isEmpty())
@@ -563,7 +564,7 @@ public class ReferralServiceImpl implements ReferralService{
 					else {
 						consreceivedate = sourceformatter.parse(referralForm.getConsReportReceivedDate());
 						Timestamp consreceivedTimestamp = new Timestamp(consreceivedate.getTime());
-						refUpdate.setH413029(consreceivedTimestamp);
+						refUpdate.setreferral_details_concernreprtrecdate(consreceivedTimestamp);
 					}
 
 					if(referralForm.getConsReportReviewedDate()== null || referralForm.getConsReportReviewedDate().isEmpty())
@@ -571,14 +572,14 @@ public class ReferralServiceImpl implements ReferralService{
 					else {
 						consreviewedate = sourceformatter.parse(referralForm.getConsReportReviewedDate());
 						Timestamp consreviewedTimestamp = new Timestamp(consreviewedate.getTime());
-						refUpdate.setH413031(consreviewedTimestamp);
+						refUpdate.setreferral_details_revdate(consreviewedTimestamp);
 					}
 					if(referralForm.getOrderedDate().isEmpty())
 						referralForm.setOrderedDate(null);
 					else {
 						orderdate = sourceformatter.parse(referralForm.getOrderedDate());
 						Timestamp orderdateTimestamp = new Timestamp(orderdate.getTime());
-						refUpdate.setH413004(orderdateTimestamp);
+						refUpdate.setreferral_details_ord_on(orderdateTimestamp);
 					}
 
 				}catch(ParseException e) {
@@ -596,35 +597,35 @@ public class ReferralServiceImpl implements ReferralService{
 				if(groupId==-1)
 					refUpdate.setReferreddoctorLoginid(loginId);
 				refUpdate.setReferralReferredtoid(reftoId);
-				refUpdate.setH413005(referralForm.getReferredBy());
-				refUpdate.setH413006(referralForm.getReferredTo());
-				refUpdate.setH413007(referralForm.getSpecialization());
-				refUpdate.setH413008(referralForm.getAddress());
-				refUpdate.setH413009(referralForm.getPhone());
-				refUpdate.setH413010(referralForm.getFax());
-				refUpdate.setH413011(referralForm.getRdx());
-				refUpdate.setH413013(referralForm.getReferralNotes());
-				refUpdate.setH413014(referralForm.getAuthNeeded());
-				refUpdate.setH413015(referralForm.getAuthDone());
-				refUpdate.setH413016(referralForm.getAuthNumber());
+				refUpdate.setreferral_details_rdoctor_from(referralForm.getReferredBy());
+				refUpdate.setreferral_details_rdoctor_to(referralForm.getReferredTo());
+				refUpdate.setreferral_details_rdoctor_spec(referralForm.getSpecialization());
+				refUpdate.setreferral_details_rdoctor_address(referralForm.getAddress());
+				refUpdate.setreferral_details_rdoctor_phno(referralForm.getPhone());
+				refUpdate.setreferral_details_rdoctor_faxno(referralForm.getFax());
+				refUpdate.setreferral_details_dxcode(referralForm.getRdx());
+				refUpdate.setreferral_details_comment(referralForm.getReferralNotes());
+				refUpdate.setreferral_details_authneeded(referralForm.getAuthNeeded());
+				refUpdate.setreferral_details_auth_id(referralForm.getAuthDone());
+				refUpdate.setreferral_details_authnumber(referralForm.getAuthNumber());
 
-				refUpdate.setH413018(referralForm.getAuthBy());
-				refUpdate.setH413020(referralForm.getAuthNotes());
-				refUpdate.setH413021(referralForm.getApptConfirmed());
+				refUpdate.setreferral_details_authoriseddate(referralForm.getAuthBy());
+				refUpdate.setreferral_details_authcontact_person(referralForm.getAuthNotes());
+				refUpdate.setreferral_details_authcomment(referralForm.getApptConfirmed());
 
-				refUpdate.setH413023(referralForm.getApptTime());
-				refUpdate.setH413024(referralForm.getApptBy());
-				refUpdate.setH413025(referralForm.getApptContactPerson());
-				refUpdate.setH413026(referralForm.getPatientNotified());
-				refUpdate.setH413027(referralForm.getApptNotes());
-				refUpdate.setH413028(referralForm.getIsConsReportReceived());
-				refUpdate.setH413030(referralForm.getIsConsReportReviewed());
+				refUpdate.setreferral_details_appttime(referralForm.getApptTime());
+				refUpdate.setreferral_details_apptby(referralForm.getApptBy());
+				refUpdate.setreferral_details_authcontactperson(referralForm.getApptContactPerson());
+				refUpdate.setreferral_details_ptnotified(referralForm.getPatientNotified());
+				refUpdate.setreferral_details_apptcomment(referralForm.getApptNotes());
+				refUpdate.setreferral_details_concernreportreceived(referralForm.getIsConsReportReceived());
+				refUpdate.setreferral_details_concernreportid(referralForm.getIsConsReportReviewed());
 
-				refUpdate.setH413033(referralForm.getConsComment());
+				refUpdate.setreferral_details_reportverify(referralForm.getConsComment());
 
-				refUpdate.setH413037(referralForm.getReason());
-				refUpdate.setH413038(referralForm.getPrintLeaf());
-				refUpdate.setH413041(referralForm.getStatus());
+				refUpdate.setreferral_details_printleafdetail(referralForm.getReason());
+				refUpdate.setreferral_details_scribble(referralForm.getPrintLeaf());
+				refUpdate.setreferral_details_patientid(referralForm.getStatus());
 				refUpdate.setReferralGuarantorname(referralForm.getGuarantorName());
 				refUpdate.setReferralNoVisits(referralForm.getNumofVisits());
 				refUpdate.setReferralHospitalname(referralForm.getHospitalName());
@@ -639,11 +640,11 @@ public class ReferralServiceImpl implements ReferralService{
 			
 			List<Referral> referralList = referralRepository.findAll(ReferralSpecification.orderByIdDesc());
 			Referral ref = referralList.get(0);
-			int maxid=ref.getH413001();
+			int maxid=ref.getreferral_details_refid();
 			int alertId= createAlert(maxid+1, 17, patientId, encounterId, chartId, userId, -1, 1, -1, -1, "");
 			
 			Referral referral = new Referral();
-			referral.setH413001(maxid+1);
+			referral.setreferral_details_refid(maxid+1);
 
 			SimpleDateFormat sourceformatter = new SimpleDateFormat("MM/dd/yyyy");
 			Date orderdate=null, apptdate=null, authdate=null, authexpdate=null, consreceivedate=null, consreviewedate=null;
@@ -683,7 +684,7 @@ public class ReferralServiceImpl implements ReferralService{
 				else {
 					apptdate = sourceformatter.parse(referralForm.getApptDate());
 					Timestamp apptdateTimestamp = new Timestamp(apptdate.getTime());
-					referral.setH413022(apptdateTimestamp);
+					referral.setreferral_details_apptconfirmdate(apptdateTimestamp);
 				}
 
 				if(referralForm.getAuthDate().isEmpty())
@@ -691,7 +692,7 @@ public class ReferralServiceImpl implements ReferralService{
 				else {
 					authdate = sourceformatter.parse(referralForm.getAuthDate());
 					Timestamp authdateTimestamp = new Timestamp(authdate.getTime());
-					referral.setH413017(authdateTimestamp);
+					referral.setreferral_details_authdate(authdateTimestamp);
 				}
 
 				if(referralForm.getAuthExpDate().isEmpty())
@@ -707,7 +708,7 @@ public class ReferralServiceImpl implements ReferralService{
 				else {
 					consreceivedate = sourceformatter.parse(referralForm.getConsReportReceivedDate());
 					Timestamp consreceivedTimestamp = new Timestamp(consreceivedate.getTime());
-					referral.setH413029(consreceivedTimestamp);
+					referral.setreferral_details_concernreprtrecdate(consreceivedTimestamp);
 				}
 
 				if(referralForm.getConsReportReviewedDate().isEmpty())
@@ -715,14 +716,14 @@ public class ReferralServiceImpl implements ReferralService{
 				else {
 					consreviewedate = sourceformatter.parse(referralForm.getConsReportReviewedDate());
 					Timestamp consreviewedTimestamp = new Timestamp(consreviewedate.getTime());
-					referral.setH413031(consreviewedTimestamp);
+					referral.setreferral_details_revdate(consreviewedTimestamp);
 				}
 				if(referralForm.getOrderedDate().isEmpty())
 					referralForm.setOrderedDate(null);
 				else {
 					orderdate = sourceformatter.parse(referralForm.getOrderedDate());
 					Timestamp orderdateTimestamp = new Timestamp(orderdate.getTime());
-					referral.setH413004(orderdateTimestamp);
+					referral.setreferral_details_ord_on(orderdateTimestamp);
 				}
 
 			}catch(ParseException e) {
@@ -730,40 +731,40 @@ public class ReferralServiceImpl implements ReferralService{
 			}
 
 			referral.setReferralReferredtoid(reftoId);
-			referral.setH413002(chartId);
-			referral.setH413003(encounterId);
-			referral.setH413005(referralForm.getReferredBy());
-			referral.setH413006(referralForm.getReferredTo());
-			referral.setH413007(referralForm.getSpecialization());
-			referral.setH413008(referralForm.getAddress());
-			referral.setH413009(referralForm.getPhone());
-			referral.setH413010(referralForm.getFax());
-			referral.setH413011(referralForm.getRdx());
-			referral.setH413013(referralForm.getReferralNotes());
-			referral.setH413014(referralForm.getAuthNeeded());
-			referral.setH413015(referralForm.getAuthDone());
-			referral.setH413016(referralForm.getAuthNumber());
+			referral.setreferral_details_chartid(chartId);
+			referral.setreferral_details_encounterid(encounterId);
+			referral.setreferral_details_rdoctor_from(referralForm.getReferredBy());
+			referral.setreferral_details_rdoctor_to(referralForm.getReferredTo());
+			referral.setreferral_details_rdoctor_spec(referralForm.getSpecialization());
+			referral.setreferral_details_rdoctor_address(referralForm.getAddress());
+			referral.setreferral_details_rdoctor_phno(referralForm.getPhone());
+			referral.setreferral_details_rdoctor_faxno(referralForm.getFax());
+			referral.setreferral_details_dxcode(referralForm.getRdx());
+			referral.setreferral_details_comment(referralForm.getReferralNotes());
+			referral.setreferral_details_authneeded(referralForm.getAuthNeeded());
+			referral.setreferral_details_auth_id(referralForm.getAuthDone());
+			referral.setreferral_details_authnumber(referralForm.getAuthNumber());
 
-			referral.setH413018(referralForm.getAuthBy());
-			referral.setH413020(referralForm.getAuthNotes());
-			referral.setH413021(referralForm.getApptConfirmed());
+			referral.setreferral_details_authoriseddate(referralForm.getAuthBy());
+			referral.setreferral_details_authcontact_person(referralForm.getAuthNotes());
+			referral.setreferral_details_authcomment(referralForm.getApptConfirmed());
 
-			referral.setH413023(referralForm.getApptTime());
-			referral.setH413024(referralForm.getApptBy());
-			referral.setH413025(referralForm.getApptContactPerson());
-			referral.setH413026(referralForm.getPatientNotified());
-			referral.setH413027(referralForm.getApptNotes());
-			referral.setH413028(referralForm.getIsConsReportReceived());
-			referral.setH413030(referralForm.getIsConsReportReviewed());
+			referral.setreferral_details_appttime(referralForm.getApptTime());
+			referral.setreferral_details_apptby(referralForm.getApptBy());
+			referral.setreferral_details_authcontactperson(referralForm.getApptContactPerson());
+			referral.setreferral_details_ptnotified(referralForm.getPatientNotified());
+			referral.setreferral_details_apptcomment(referralForm.getApptNotes());
+			referral.setreferral_details_concernreportreceived(referralForm.getIsConsReportReceived());
+			referral.setreferral_details_concernreportid(referralForm.getIsConsReportReviewed());
 
-			referral.setH413033(referralForm.getConsComment());
-			referral.setH413034(-1);
-			referral.setH413035(patientId);
-			referral.setH413036(alertId);
-			referral.setH413037(referralForm.getReason());
-			referral.setH413038(referralForm.getPrintLeaf());
-			referral.setH413040(-1);
-			referral.setH413041(referralForm.getStatus());
+			referral.setreferral_details_reportverify(referralForm.getConsComment());
+			referral.setreferral_details_isactive(-1);
+			referral.setreferral_details_myalert(patientId);
+			referral.setreferral_details_referral_for(alertId);
+			referral.setreferral_details_printleafdetail(referralForm.getReason());
+			referral.setreferral_details_scribble(referralForm.getPrintLeaf());
+			referral.setreferral_details_leafid(-1);
+			referral.setreferral_details_patientid(referralForm.getStatus());
 			referral.setReferreddoctorLoginid(loginId);
 			referral.setReferralGuarantorname(referralForm.getGuarantorName());
 			referral.setReferralNoVisits(referralForm.getNumofVisits());
@@ -795,17 +796,17 @@ public class ReferralServiceImpl implements ReferralService{
 		String patientId = getpatientid(chartId);
 		List<Referral> referralList = referralRepository.findAll(ReferralSpecification.getByRefId(referralId));
 		
-		List<H611> dxList=h611Repository.findAll(ReferralSpecification.getcodingsystems(encounterId,chartId));
+		List<PatientAssessments> dxList=h611Repository.findAll(ReferralSpecification.getcodingsystems(encounterId,chartId));
 		List<ProblemList> problemList=problemListRepository.findAll(ReferralSpecification.getproblemlist(patientId));
 		
 		for(int z=0;z<dxList.size()-1;z++){
-			String dxcode1=dxList.get(z).getH611005();
+			String dxcode1=dxList.get(z).getpatient_assessments_dxcode();
 			dxcode1= (dxcode1!=null ? dxcode1.trim(): dxcode1);
-			String oid=dxList.get(z).getH611CodingSystemid();
+			String oid=dxList.get(z).getpatient_assessmentsCodingSystemid();
 			for(int z1=z+1;z1<dxList.size();z1++){
-				String dxcode2=dxList.get(z1).getH611005();
+				String dxcode2=dxList.get(z1).getpatient_assessments_dxcode();
 				dxcode2= (dxcode2!=null ? dxcode2.trim(): dxcode2);
-				String oid2=dxList.get(z1).getH611CodingSystemid();
+				String oid2=dxList.get(z1).getpatient_assessmentsCodingSystemid();
 				if(((dxcode1.replaceAll("\\s+","")).equalsIgnoreCase((dxcode2).replaceAll("\\s+","")))&&(oid.replaceAll("\\s+","").equalsIgnoreCase(oid2.replaceAll("\\s+","")))){
 					dxList.remove(dxList.get(z1));
 					z1--;
@@ -835,7 +836,7 @@ public class ReferralServiceImpl implements ReferralService{
 			String dxcode=problemList.get(i).getProblemListDxCode();
 			dxcode= (dxcode!=null ? dxcode.trim(): dxcode);
 			for(int j=0;j<dxList.size();j++){
-				String dxcode1=dxList.get(j).getH611005();
+				String dxcode1=dxList.get(j).getpatient_assessments_dxcode();
 				dxcode1= (dxcode1!=null ? dxcode1.trim(): dxcode1);
 				if(dxcode.replaceAll("\\s+","").equalsIgnoreCase(dxcode1.replaceAll("\\s+",""))){
 					dxList.remove(dxList.get(j));

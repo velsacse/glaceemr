@@ -4,10 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import com.glenwood.glaceemr.server.application.models.H802;
+import com.glenwood.glaceemr.server.application.models.PatientPortalRefillRequest;
 
 
 @Repository
-public interface H802Repository extends JpaRepository<H802, Integer> ,JpaSpecificationExecutor<H802> {
+public interface PatientPortalRefillRequestRepository extends JpaRepository<PatientPortalRefillRequest, Integer> ,JpaSpecificationExecutor<PatientPortalRefillRequest> {
 
 }

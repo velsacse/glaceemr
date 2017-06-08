@@ -11,7 +11,7 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.glenwood.glaceemr.server.application.models.H076;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InitialSettings_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
@@ -26,7 +26,7 @@ public class GenericPrintSpecification {
 			public Predicate toPredicate(Root<PatientRegistration> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				
-				Fetch<PatientRegistration, H076> patRefJoin = root.fetch(PatientRegistration_.referringPhyTable,JoinType.LEFT);
+				Fetch<PatientRegistration, ReferringDoctor> patRefJoin = root.fetch(PatientRegistration_.referringPhyTable,JoinType.LEFT);
 //				Join<PatientRegistration, PatientInsDetail> patInsAddrJoin = root.join(PatientRegistration_.patientInsuranceTable, JoinType.LEFT);
 //				patInsAddrJoin.on(cb.equal(patInsAddrJoin.get(PatientInsDetail_.patientInsDetailIsactive), true));
 //				patInsAddrJoin.on(patInsAddrJoin.get(PatientInsDetail_.patientInsDetailInstype).in(2));
@@ -61,7 +61,7 @@ public class GenericPrintSpecification {
 					CriteriaBuilder cb) {
 				
 				root.fetch(PatientRegistration_.empProfile, JoinType.LEFT);
-				Fetch<PatientRegistration, H076> patRefJoin = root.fetch(PatientRegistration_.referringPhyTable,JoinType.LEFT);
+				Fetch<PatientRegistration, ReferringDoctor> patRefJoin = root.fetch(PatientRegistration_.referringPhyTable,JoinType.LEFT);
 //				Join<PatientRegistration, PatientInsDetail> patInsAddrJoin = root.join(PatientRegistration_.patientInsuranceTable, JoinType.LEFT);
 //				patInsAddrJoin.on(cb.equal(patInsAddrJoin.get(PatientInsDetail_.patientInsDetailIsactive), true));
 //				patInsAddrJoin.on(patInsAddrJoin.get(PatientInsDetail_.patientInsDetailInstype).in(insTypeList));

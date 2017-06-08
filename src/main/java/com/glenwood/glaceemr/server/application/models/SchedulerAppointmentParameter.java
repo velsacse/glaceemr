@@ -45,8 +45,8 @@ public class SchedulerAppointmentParameter implements Serializable{
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="sch_appt_parameter_value_id",referencedColumnName="h113003",insertable=false,updatable=false)
-	H113 h113Reason;
+	@JoinColumn(name="sch_appt_parameter_value_id",referencedColumnName="App_Reference_Values_statusId",insertable=false,updatable=false)
+	AppReferenceValues App_Reference_ValuesReason;
 
 	public Integer getSchApptParameterId() {
 		return schApptParameterId;

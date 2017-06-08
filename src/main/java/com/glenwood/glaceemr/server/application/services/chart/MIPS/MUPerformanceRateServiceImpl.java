@@ -28,13 +28,13 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H478;
-import com.glenwood.glaceemr.server.application.models.H478_;
 import com.glenwood.glaceemr.server.application.models.MacraMeasuresRate;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail_;
+import com.glenwood.glaceemr.server.application.models.StaffPinNumberDetails;
+import com.glenwood.glaceemr.server.application.models.StaffPinNumberDetails_;
 import com.glenwood.glaceemr.server.application.repositories.MacraMeasuresRateRepository;
 import com.glenwood.glaceemr.server.application.specifications.QPPPerformanceSpecification;
 
@@ -250,10 +250,10 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
-		Root<H478> root = cq.from(H478.class);
+		Root<StaffPinNumberDetails> root = cq.from(StaffPinNumberDetails.class);
 		
-		cq.select(root.get(H478_.h478006));
-		cq.where(builder.equal(root.get(H478_.h478001), providerId));
+		cq.select(root.get(StaffPinNumberDetails_.staff_pin_number_details_cctpin_number));
+		cq.where(builder.equal(root.get(StaffPinNumberDetails_.staff_pin_number_details_profileid), providerId));
 		
 		List<Object> results = em.createQuery(cq).getResultList();
 		

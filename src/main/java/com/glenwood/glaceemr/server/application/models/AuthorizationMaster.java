@@ -6,10 +6,15 @@ import java.sql.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
@@ -19,7 +24,10 @@ public class AuthorizationMaster implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "auth_master_auth_master_uniqueid_seq")
+	@SequenceGenerator(name = "auth_master_auth_master_uniqueid_seq", sequenceName = "auth_master_auth_master_uniqueid_seq", allocationSize = 1)
 	@Column(name="auth_master_uniqueid")
 	private Integer authMasterUniqueid;
 

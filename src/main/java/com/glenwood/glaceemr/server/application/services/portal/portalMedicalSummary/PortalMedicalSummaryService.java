@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.glenwood.glaceemr.server.application.models.Chart;
-import com.glenwood.glaceemr.server.application.models.H809;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
 import com.glenwood.glaceemr.server.application.models.PortalConfigurationBean;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
@@ -71,7 +71,7 @@ public interface PortalMedicalSummaryService {
 	 * @return list of details of a patient.
 	 * @throws JsonProcessingException 
 	 */
-	public List<H809> getPatientDetailsByUsername(String username) throws JsonProcessingException;
+	public List<PatientPortalUser> getPatientDetailsByUsername(String username) throws JsonProcessingException;
 	
 	/**
 	 * details of a patient.

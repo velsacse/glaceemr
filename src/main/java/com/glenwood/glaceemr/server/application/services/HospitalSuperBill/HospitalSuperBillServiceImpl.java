@@ -120,7 +120,7 @@ public class HospitalSuperBillServiceImpl implements HospitalSuperbillService {
 				AdmisssionInfo.setPosId(admissionList.get(i).getPosTable().getPosTableRelationId());
 				AdmisssionInfo.setAdmissionDischargeDate(admissionList.get(i).getAdmissionDischargeDate());
 				if(admissionList.get(i).getPatientRegistration().getReferringPhyTable()!=null)
-					AdmisssionInfo.setReferringDoctor(Optional.fromNullable(admissionList.get(i).getPatientRegistration().getReferringPhyTable().getH076020()).or(""));
+					AdmisssionInfo.setReferringDoctor(Optional.fromNullable(admissionList.get(i).getPatientRegistration().getReferringPhyTable().getreferring_doctor_referringdoctor()).or(""));
 				int flag = 0;
 				
 				for (int j=0;j<service.size();j++) {

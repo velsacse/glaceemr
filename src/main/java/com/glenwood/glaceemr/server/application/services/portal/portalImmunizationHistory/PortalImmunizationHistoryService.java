@@ -2,7 +2,7 @@ package com.glenwood.glaceemr.server.application.services.portal.portalImmunizat
 
 import java.util.List;
 
-import com.glenwood.glaceemr.server.application.models.H068;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
 import com.glenwood.glaceemr.server.application.models.ImmunizationRecord;
 import com.glenwood.glaceemr.server.application.models.LabDescription;
 import com.glenwood.glaceemr.server.application.models.PatientImmunizationInformation;
@@ -20,7 +20,7 @@ public interface PortalImmunizationHistoryService {
 	
 	List<Vaccine> getVaccineList(String searchKey);
 	
-	List<H068> getVaccUpdateReasonList();
+	List<ChartStatus> getVaccUpdateReasonList();
 	
 	PatientImmunizationInformation requestVaccineUpdate(VaccineUpdateBean vaccineUpdateBean);
 }

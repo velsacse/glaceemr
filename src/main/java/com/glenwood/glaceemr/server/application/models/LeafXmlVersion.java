@@ -1,28 +1,27 @@
 package com.glenwood.glaceemr.server.application.models;
 
-import java.sql.Timestamp;
-import java.sql.Date;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
+
 
 @Entity
 @Table(name = "leaf_xml_version")
 public class LeafXmlVersion {
 
 	@Id
+	 @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "leaf_xml_version_leaf_xml_version_id_seq")
+	@SequenceGenerator(name = "leaf_xml_version_leaf_xml_version_id_seq", sequenceName = "leaf_xml_version_leaf_xml_version_id_seq", allocationSize = 1)
 	@Column(name="leaf_xml_version_id")
 	private Integer leafXmlVersionId;
 

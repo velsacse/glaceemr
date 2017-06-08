@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -16,11 +15,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.EnsBillsDetails;
 import com.glenwood.glaceemr.server.application.models.EnsBillsDetails_;
-import com.glenwood.glaceemr.server.application.models.H093;
-import com.glenwood.glaceemr.server.application.models.H093_;
+import com.glenwood.glaceemr.server.application.models.GeneratedBillsHistoryDetails;
+import com.glenwood.glaceemr.server.application.models.GeneratedBillsHistoryDetails_;
 import com.glenwood.glaceemr.server.application.models.IntermediateStmt;
 import com.glenwood.glaceemr.server.application.models.IntermediateStmt_;
-import com.glenwood.glaceemr.server.application.models.NamesMapping;
 import com.glenwood.glaceemr.server.application.models.NonServiceDetails;
 import com.glenwood.glaceemr.server.application.models.NonServiceDetails_;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
@@ -88,22 +86,22 @@ public class PortalPaymentsSpecification {
 	/**
 	 * @return list of available Language options  
 	 */	
-	public static Specification<H093> getPatientStatementHistory(final int patientId, int chartId)
+	public static Specification<GeneratedBillsHistoryDetails> getPatientStatementHistory(final int patientId, int chartId)
 	{
-		return new Specification<H093>() {
+		return new Specification<GeneratedBillsHistoryDetails>() {
 
 			@Override
-			public Predicate toPredicate(Root<H093> root,
+			public Predicate toPredicate(Root<GeneratedBillsHistoryDetails> root,
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
 				
 				if (Long.class != cq.getResultType()) {
 					
-					root.fetch(H093_.h092,JoinType.LEFT);
-					root.fetch(H093_.ensBillsDetails, JoinType.LEFT);
+					root.fetch(GeneratedBillsHistoryDetails_.bill_status,JoinType.LEFT);
+					root.fetch(GeneratedBillsHistoryDetails_.ensBillsDetails, JoinType.LEFT);
 				}
 
-				Predicate statementHistoryPredicate=cq.where(cb.equal(root.get(H093_.h093004), patientId)).getRestriction();
+				Predicate statementHistoryPredicate=cq.where(cb.equal(root.get(GeneratedBillsHistoryDetails_.generated_bills_history_details_patientid), patientId)).getRestriction();
 
 				return statementHistoryPredicate;
 			}
@@ -114,15 +112,15 @@ public class PortalPaymentsSpecification {
 	/**
 	 * @return list of available Language options  
 	 */	
-	public static Specification<H093> getPatientBalance(final int patientId)
+	public static Specification<GeneratedBillsHistoryDetails> getPatientBalance(final int patientId)
 	{
-		return new Specification<H093>() {
+		return new Specification<GeneratedBillsHistoryDetails>() {
 
 			@Override
-			public Predicate toPredicate(Root<H093> root,
+			public Predicate toPredicate(Root<GeneratedBillsHistoryDetails> root,
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
-				Predicate statementHistoryPredicate=cq.multiselect(cb.function("pt_balance", BigDecimal.class, cb.literal(root.get(H093_.h093004)))).where(cb.equal(root.get(H093_.h093004), patientId)).getRestriction();
+				Predicate statementHistoryPredicate=cq.multiselect(cb.function("pt_balance", BigDecimal.class, cb.literal(root.get(GeneratedBillsHistoryDetails_.generated_bills_history_details_patientid)))).where(cb.equal(root.get(GeneratedBillsHistoryDetails_.generated_bills_history_details_patientid), patientId)).getRestriction();
 
 				return statementHistoryPredicate;
 			}
@@ -184,16 +182,16 @@ public class PortalPaymentsSpecification {
 
 	}
 	
-	public static Specification<H093> getPatientStatementFileDetails(final int patientId, final int billId) {
+	public static Specification<GeneratedBillsHistoryDetails> getPatientStatementFileDetails(final int patientId, final int billId) {
 
-		return new Specification<H093>() {
+		return new Specification<GeneratedBillsHistoryDetails>() {
 
 			@Override
-			public Predicate toPredicate(Root<H093> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
+			public Predicate toPredicate(Root<GeneratedBillsHistoryDetails> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
 				
-				root.fetch(H093_.ensBillsDetails, JoinType.LEFT);
-				Predicate statementPredicate=cq.where(cb.equal(root.get(H093_.h093004), patientId),cb.equal(root.get(H093_.h093001), billId)).getRestriction();
+				root.fetch(GeneratedBillsHistoryDetails_.ensBillsDetails, JoinType.LEFT);
+				Predicate statementPredicate=cq.where(cb.equal(root.get(GeneratedBillsHistoryDetails_.generated_bills_history_details_patientid), patientId),cb.equal(root.get(GeneratedBillsHistoryDetails_.generated_bills_history_details_billid), billId)).getRestriction();
 				
 				return statementPredicate;
 			}

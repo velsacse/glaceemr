@@ -9,16 +9,16 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.AftercareInsMapping;
 import com.glenwood.glaceemr.server.application.models.AftercareInsMapping_;
-import com.glenwood.glaceemr.server.application.models.H213;
-import com.glenwood.glaceemr.server.application.models.H213_;
-import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.H611_;
 import com.glenwood.glaceemr.server.application.models.PatientAftercareData;
 import com.glenwood.glaceemr.server.application.models.PatientAftercareData_;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalDxElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalDxElements_;
 import com.glenwood.glaceemr.server.application.models.PlanMapping;
 import com.glenwood.glaceemr.server.application.models.PlanMapping_;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator_;
 import com.glenwood.glaceemr.server.application.models.SoapElementDatalist;
 import com.glenwood.glaceemr.server.application.models.SoapElementDatalist_;
 
@@ -156,30 +156,30 @@ public class PlanSpecification {
 	 * @param dxCode
 	 * @return
 	 */
-	public static Specification<H611> getAssessments(final Integer encounterId, final Integer patientId, final String dxCode) {
-		return new Specification<H611>() {
+	public static Specification<PatientAssessments> getAssessments(final Integer encounterId, final Integer patientId, final String dxCode) {
+		return new Specification<PatientAssessments>() {
 
 			@Override
-			public Predicate toPredicate(Root<H611> root,
+			public Predicate toPredicate(Root<PatientAssessments> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 
-				query.where(cb.equal(root.get(H611_.h611002), encounterId),
-						 	 cb.equal(root.get(H611_.h611003), patientId),
-						 	  cb.like(cb.lower(cb.trim(root.get(H611_.h611005))), dxCode.trim().toLowerCase()));
+				query.where(cb.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId),
+						 	 cb.equal(root.get(PatientAssessments_.patient_assessments_patientId), patientId),
+						 	  cb.like(cb.lower(cb.trim(root.get(PatientAssessments_.patient_assessments_dxcode))), dxCode.trim().toLowerCase()));
 				
 				return query.getRestriction();
 			}
 		};
 	}
 
-	public static Specification<H213> getDxSequence() {
-		return new Specification<H213>() {
+	public static Specification<PrimarykeyGenerator> getDxSequence() {
+		return new Specification<PrimarykeyGenerator>() {
 
 			@Override
-			public Predicate toPredicate(Root<H213> root,
+			public Predicate toPredicate(Root<PrimarykeyGenerator> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
-				query.where(cb.equal(root.get(H213_.h213002), "h611"));
+				query.where(cb.equal(root.get(PrimarykeyGenerator_.primarykey_generator_tablename), "patient_assessments"));
 				
 				return query.getRestriction();
 			}

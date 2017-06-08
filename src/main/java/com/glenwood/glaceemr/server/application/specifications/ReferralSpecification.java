@@ -13,8 +13,8 @@ import com.glenwood.glaceemr.server.application.models.CodingSystems;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.H611_;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.ProblemList_;
@@ -39,7 +39,7 @@ public class ReferralSpecification {
 			@Override
 			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate encounterPred = cb.equal(root.get(Referral_.h413003),encounterId);				
+				Predicate encounterPred = cb.equal(root.get(Referral_.referral_details_encounterid),encounterId);				
 				return encounterPred;
 			}
 			
@@ -58,7 +58,7 @@ public class ReferralSpecification {
 			@Override
 			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate pred = cb.equal((root.get(Referral_.h413001)), refId);				
+				Predicate pred = cb.equal((root.get(Referral_.referral_details_refid)), refId);				
 				return pred;
 			}
 		};
@@ -76,7 +76,7 @@ public class ReferralSpecification {
 			@Override
 			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate pred = cb.equal((root.get(Referral_.h413035)), patientId);
+				Predicate pred = cb.equal((root.get(Referral_.referral_details_myalert)), patientId);
 				return pred;
 			}
 		};
@@ -96,7 +96,7 @@ public class ReferralSpecification {
 					CriteriaBuilder cb) {
 				
 				Join<Referral, EmployeeProfile> joinEmp = root.join("empprofileTable",JoinType.LEFT);
-				Predicate pred = cb.equal((root.get(Referral_.h413002)), chartId);				
+				Predicate pred = cb.equal((root.get(Referral_.referral_details_chartid)), chartId);				
 				return pred;
 				
 			}
@@ -119,10 +119,10 @@ public class ReferralSpecification {
 			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				
-				Predicate fromNamePred = cb.like(cb.upper(root.get(Referral_.h413005)), fromName.toUpperCase());
-				Predicate toNamePred = cb.like(cb.upper(root.get(Referral_.h413006)), toName.toUpperCase());
-				Predicate patientPred = cb.equal(root.get(Referral_.h413035), patientId);
-				Predicate encounterPred = cb.equal(root.get(Referral_.h413003), patientId);
+				Predicate fromNamePred = cb.like(cb.upper(root.get(Referral_.referral_details_rdoctor_from)), fromName.toUpperCase());
+				Predicate toNamePred = cb.like(cb.upper(root.get(Referral_.referral_details_rdoctor_to)), toName.toUpperCase());
+				Predicate patientPred = cb.equal(root.get(Referral_.referral_details_myalert), patientId);
+				Predicate encounterPred = cb.equal(root.get(Referral_.referral_details_encounterid), patientId);
 				
 				query.where(cb.and(patientPred,encounterPred,fromNamePred,toNamePred));
 				
@@ -144,7 +144,7 @@ public class ReferralSpecification {
 			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				
-				Predicate pred = cb.notEqual(root.get(Referral_.h413041), status);
+				Predicate pred = cb.notEqual(root.get(Referral_.referral_details_patientid), status);
 				
 				return pred;
 			}
@@ -163,7 +163,7 @@ public class ReferralSpecification {
 			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				
-				query.orderBy(cb.desc(root.get(Referral_.h413004)));
+				query.orderBy(cb.desc(root.get(Referral_.referral_details_ord_on)));
 				
 				return query.getRestriction();
 			}
@@ -181,7 +181,7 @@ public class ReferralSpecification {
 			@Override
 			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				query.orderBy(cb.asc(root.get(Referral_.h413001)));
+				query.orderBy(cb.asc(root.get(Referral_.referral_details_refid)));
 				return query.getRestriction();
 			}
 		};
@@ -199,8 +199,8 @@ public class ReferralSpecification {
 			@Override
 			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate pred = cb.equal((root.get(Referral_.h413001)), refId);
-				query.where(pred).orderBy(cb.desc(root.get(Referral_.h413004)));
+				Predicate pred = cb.equal((root.get(Referral_.referral_details_refid)), refId);
+				query.where(pred).orderBy(cb.desc(root.get(Referral_.referral_details_ord_on)));
 				Join<Referral,PatientRegistration> patRegJoin= root.join("patientRegistrationTable",JoinType.INNER);
 				Join<Referral,EmployeeProfile> empProfileJoin= root.join("empprofileTable",JoinType.LEFT);
 				return query.getRestriction();
@@ -219,7 +219,7 @@ public class ReferralSpecification {
 			@Override
 			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				query.orderBy(cb.desc(root.get(Referral_.h413001)));
+				query.orderBy(cb.desc(root.get(Referral_.referral_details_refid)));
 				return query.getRestriction();
 			}
 		};
@@ -237,7 +237,7 @@ public class ReferralSpecification {
 			@Override
 			public Predicate toPredicate(Root<Referral> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate pred = cb.like(root.get(Referral_.h413011), "%"+dx+"%");
+				Predicate pred = cb.like(root.get(Referral_.referral_details_dxcode), "%"+dx+"%");
 				return pred;
 			}
 		};
@@ -250,15 +250,15 @@ public class ReferralSpecification {
 	 * @param chartid
 	 * @return
 	 */
-	public static Specification<H611> getcodingsystems(final int encounterid,final int chartid ) {
-		return new Specification<H611>() {
+	public static Specification<PatientAssessments> getcodingsystems(final int encounterid,final int chartid ) {
+		return new Specification<PatientAssessments>() {
 
 			@Override
-			public Predicate toPredicate(Root<H611> root,
+			public Predicate toPredicate(Root<PatientAssessments> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 
-				Join<H611,CodingSystems> rootjoin=root.join(H611_.codingsystemsTable,JoinType.INNER);
-				Join<H611, Encounter> encounterjoin=root.join(H611_.encounter,JoinType.INNER);
+				Join<PatientAssessments,CodingSystems> rootjoin=root.join(PatientAssessments_.codingsystemsTable,JoinType.INNER);
+				Join<PatientAssessments, Encounter> encounterjoin=root.join(PatientAssessments_.encounter,JoinType.INNER);
 				Predicate predicate=cb.equal(encounterjoin.get(Encounter_.encounterChartid), chartid);
 				Predicate predicate1=cb.equal(encounterjoin.get(Encounter_.encounterType), 1);
 				query.distinct(true);

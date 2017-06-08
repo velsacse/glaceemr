@@ -3,9 +3,12 @@ package com.glenwood.glaceemr.server.application.models;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
@@ -13,6 +16,8 @@ import javax.persistence.Table;
 public class SchedulerTemplate {
 
 	@Id
+	  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sch_template_sch_template_id_seq")
+	@SequenceGenerator(name = "sch_template_sch_template_id_seq", sequenceName = "sch_template_sch_template_id_seq", allocationSize = 1)
 	@Column(name="sch_template_id")
 	private Integer schTemplateId;
 

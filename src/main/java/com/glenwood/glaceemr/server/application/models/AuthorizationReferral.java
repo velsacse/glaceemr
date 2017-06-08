@@ -1,15 +1,19 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
-import java.sql.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -19,6 +23,8 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class AuthorizationReferral {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "authorization_referral_authorization_referral_id_seq")
+	@SequenceGenerator(name = "authorization_referral_authorization_referral_id_seq", sequenceName = "authorization_referral_authorization_referral_id_seq", allocationSize = 1)
 	@Column(name="authorization_referral_id")
 	private Integer authorizationReferralId;
 
@@ -97,16 +103,16 @@ public class AuthorizationReferral {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="authorization_referral_doctor_id", referencedColumnName="h076001" , insertable=false, updatable=false)
-	private H076  h076;
+	@JoinColumn(name="authorization_referral_doctor_id", referencedColumnName="referring_doctor_uniqueid" , insertable=false, updatable=false)
+	private ReferringDoctor  referring_doctor;
 
 	
-	public H076 getH076() {
-		return h076;
+	public ReferringDoctor getreferring_doctor() {
+		return referring_doctor;
 	}
 
-	public void setH076(H076 h076) {
-		this.h076 = h076;
+	public void setreferring_doctor(ReferringDoctor referring_doctor) {
+		this.referring_doctor = referring_doctor;
 	}
 
 	public Integer getAuthorizationReferralId() {

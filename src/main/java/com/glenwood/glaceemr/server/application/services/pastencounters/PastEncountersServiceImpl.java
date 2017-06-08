@@ -32,12 +32,12 @@ import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.EncounterPlan;
 import com.glenwood.glaceemr.server.application.models.EncounterPlan_;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H113;
-import com.glenwood.glaceemr.server.application.models.H113_;
-import com.glenwood.glaceemr.server.application.models.H413;
-import com.glenwood.glaceemr.server.application.models.H413_;
-import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.H611_;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues_;
+import com.glenwood.glaceemr.server.application.models.ReferralDetails;
+import com.glenwood.glaceemr.server.application.models.ReferralDetails_;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
 import com.glenwood.glaceemr.server.application.models.LabGroups;
@@ -603,16 +603,16 @@ public class PastEncountersServiceImpl implements PastEncountersService{
 	private List<Object[]> getReferrals(Integer encounterId, Integer chartId) {
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
-		Root<H413> root= query.from(H413.class);		
+		Root<ReferralDetails> root= query.from(ReferralDetails.class);		
 		
-		query.multiselect(root.get(H413_.h413006),
-				root.get(H413_.h413037));
+		query.multiselect(root.get(ReferralDetails_.referral_details_rdoctor_to),
+				root.get(ReferralDetails_.referral_details_printleafdetail));
 		
-		query.where(builder.equal(root.get(H413_.h413002), chartId),
-				builder.equal(root.get(H413_.h413003), encounterId),
-				builder.notEqual(root.get(H413_.h413041), 2));				
+		query.where(builder.equal(root.get(ReferralDetails_.referral_details_chartid), chartId),
+				builder.equal(root.get(ReferralDetails_.referral_details_encounterid), encounterId),
+				builder.notEqual(root.get(ReferralDetails_.referral_details_patientid), 2));				
 				
-		query.orderBy(builder.desc(root.get(H413_.h413004)));
+		query.orderBy(builder.desc(root.get(ReferralDetails_.referral_details_ord_on)));
 		
 		List<Object[]> result= em.createQuery(query).getResultList();
 		
@@ -628,13 +628,13 @@ public class PastEncountersServiceImpl implements PastEncountersService{
 	private String getEncounterReason(Integer encounterId,Integer encReason) {
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<Object> query= builder.createQuery(Object.class);
-		Root<H113> root= query.from(H113.class);		
+		Root<AppReferenceValues> root= query.from(AppReferenceValues.class);		
 		
-		query.select(root.get(H113_.h113004));
+		query.select(root.get(AppReferenceValues_.App_Reference_Values_statusName));
 		
-		query.where(builder.equal(root.get(H113_.h113008), 1),
-				builder.equal(root.get(H113_.h113002), 402),
-				builder.equal(root.get(H113_.h113003), encReason));
+		query.where(builder.equal(root.get(AppReferenceValues_.App_Reference_Values_reason_type), 1),
+				builder.equal(root.get(AppReferenceValues_.App_Reference_Values_tableId), 402),
+				builder.equal(root.get(AppReferenceValues_.App_Reference_Values_statusId), encReason));
 				
 		String reason="";
 
@@ -709,14 +709,14 @@ public class PastEncountersServiceImpl implements PastEncountersService{
 	private List<Object[]> getDiagnosis(Integer encounterId) {
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
-		Root<H611> root= query.from(H611.class);
+		Root<PatientAssessments> root= query.from(PatientAssessments.class);
 		
-		query.multiselect(builder.trim(root.get(H611_.h611005)), builder.trim(root.get(H611_.h611006)),
-				root.get(H611_.h611010), root.get(H611_.h611004),root.get(H611_.h611015));
+		query.multiselect(builder.trim(root.get(PatientAssessments_.patient_assessments_dxcode)), builder.trim(root.get(PatientAssessments_.patient_assessments_dxdescription)),
+				root.get(PatientAssessments_.patient_assessments_dxorder), root.get(PatientAssessments_.patient_assessments_encounterdate),root.get(PatientAssessments_.patient_assessments_assessmentcomment));
 		
-		query.where(builder.equal(root.get(H611_.h611002), encounterId));
+		query.where(builder.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId));
 		
-		query.orderBy(builder.asc(root.get(H611_.h611010)));
+		query.orderBy(builder.asc(root.get(PatientAssessments_.patient_assessments_dxorder)));
 		List<Object[]> result= em.createQuery(query).getResultList();
 		
 		return result;

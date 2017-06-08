@@ -24,8 +24,8 @@ import org.springframework.stereotype.Service;
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping;
-import com.glenwood.glaceemr.server.application.models.H068;
-import com.glenwood.glaceemr.server.application.models.H810;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
 import com.glenwood.glaceemr.server.application.models.ImmunizationRecord;
 import com.glenwood.glaceemr.server.application.models.LabDescription;
 import com.glenwood.glaceemr.server.application.models.LabDescription_;
@@ -39,8 +39,8 @@ import com.glenwood.glaceemr.server.application.models.Vis;
 import com.glenwood.glaceemr.server.application.repositories.AlertCategoryRepository;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
 import com.glenwood.glaceemr.server.application.repositories.CvxVaccineGroupRepository;
-import com.glenwood.glaceemr.server.application.repositories.H068Repository;
-import com.glenwood.glaceemr.server.application.repositories.H810Respository;
+import com.glenwood.glaceemr.server.application.repositories.ChartStatusRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalAlertConfigRespository;
 import com.glenwood.glaceemr.server.application.repositories.LabDescriptionRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabEntriesRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientImmunizationInformationRepository;
@@ -67,7 +67,7 @@ public class PortalImmunizationHistoryServiceImpl implements PortalImmunizationH
 	VaccineReportRepository vaccineReportRepository;
 
 	@Autowired
-	H068Repository h068Repository;
+	ChartStatusRepository h068Repository;
 
 	@Autowired
 	PatientImmunizationInformationRepository patientImmunizationInformationRepository;
@@ -79,7 +79,7 @@ public class PortalImmunizationHistoryServiceImpl implements PortalImmunizationH
 	CvxVaccineGroupRepository cvxVaccineGroupRepository;
 
 	@Autowired
-	H810Respository h810Respository; 
+	PatientPortalAlertConfigRespository h810Respository; 
 
 	@Autowired
 	AlertEventRepository alertEventRepository;
@@ -309,15 +309,14 @@ public class PortalImmunizationHistoryServiceImpl implements PortalImmunizationH
 			Vaccine vaccine=(Vaccine)resultList.get(i);
 			vaccineList.add(vaccine);
 		}
-		
 
 		return vaccineList;
 	}
 
 	@Override
-	public List<H068> getVaccUpdateReasonList() {
+	public List<ChartStatus> getVaccUpdateReasonList() {
 
-		List<H068> vaccUpdateReasonList=h068Repository.findAll(PortalImmunizationHistorySpecification.getVaccineUpdateReasonList());
+		List<ChartStatus> vaccUpdateReasonList=h068Repository.findAll(PortalImmunizationHistorySpecification.getVaccineUpdateReasonList());
 
 		return vaccUpdateReasonList;
 	}
@@ -361,10 +360,10 @@ public class PortalImmunizationHistoryServiceImpl implements PortalImmunizationH
 		pii=patientImmunizationInformationRepository.saveAndFlush(pii);
 
 
-		H810 paymentAlertCategory=h810Respository.findOne(PortalAlertSpecification.getPortalAlertCategoryByName("Clinical Intake"));
-		boolean sendToAll =paymentAlertCategory.getH810005();  
-		int provider = Integer.parseInt(paymentAlertCategory.getH810003());
-		int forwardTo = Integer.parseInt(paymentAlertCategory.getH810004());
+		PatientPortalAlertConfig paymentAlertCategory=h810Respository.findOne(PortalAlertSpecification.getPortalAlertCategoryByName("Clinical Intake"));
+		boolean sendToAll =paymentAlertCategory.getpatient_portal_alert_config_send_to_all();  
+		int provider = Integer.parseInt(paymentAlertCategory.getpatient_portal_alert_config_provider());
+		int forwardTo = Integer.parseInt(paymentAlertCategory.getpatient_portal_alert_config_forward_to());
 		
 		AlertCategory alertCategory=alertCategoryRepository.findOne(AlertCategorySpecification.getAlertCategoryByName("Clinical Intake"));
 

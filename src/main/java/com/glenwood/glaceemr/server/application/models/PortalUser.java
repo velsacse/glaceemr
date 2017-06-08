@@ -27,49 +27,50 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
-@Table(name = "h809")
+@Table(name = "patient_portal_user")
 public class PortalUser implements UserDetails {
 
 	private static final long serialVersionUID = 1L;
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="h809_h809001_seq")
-	@SequenceGenerator(name ="h809_h809001_seq", sequenceName="h809_h809001_seq", allocationSize=1)
-	@Column(name="h809001")
-	private Integer h809001;
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="patient_portal_user_patient_portal_user_portal_id_seq")
+	@SequenceGenerator(name ="patient_portal_user_patient_portal_user_portal_id_seq", sequenceName="patient_portal_user_patient_portal_user_portal_id_seq", allocationSize=1)
+	@Column(name="patient_portal_user_portal_id")
+	private Integer patient_portal_user_portal_id;
 
 	
-	@Column(name="h809002")
+	
+	@Column(name="patient_portal_user_patient_id")
 	private Long id;
 
-	@Column(name="h809003")
-	private Date h809003;
+	@Column(name="patient_portal_user_created_on")
+	private Date patient_portal_user_created_on;
 
-	@Column(name="h809004")
+	@Column(name="patient_portal_user_name")
 	private String username;
 
-	@Column(name="h809005")
+	@Column(name="patient_portal_user_password_hash")
 	private String password;
 
-	@Column(name="h809006")
+	@Column(name="patient_portal_user_account_state")
 	private Integer isActive;
 
-	@Column(name="h809007")
-	private String h809007;
+	@Column(name="patient_portal_user_security_question")
+	private String patient_portal_user_security_question;
 
-	@Column(name="h809008")
-	private String h809008;
+	@Column(name="patient_portal_user_security_answer")
+	private String patient_portal_user_security_answer;
 
-	@Column(name="h809009")
+	@Column(name="patient_portal_user_portal_account_verified")
 	private Integer isOldUser;
 
-	@Column(name="h809010")
+	@Column(name="patient_portal_user_password")
 	private String originalPassword;
 
 	@JsonSerialize(using = JsonTimestampSerializer.class)
-	@Column(name="h809011")
-	private Timestamp h809011;
+	@Column(name="patient_portal_user_access_time")
+	private Timestamp patient_portal_user_access_time;
 
-	@Column(name="wrong_entry_count")
+	@Column(name="patient_portal_user_wrong_entry_count")
 	private Integer wrongEntryCount;
 
 	@JsonSerialize(using = JsonTimestampSerializer.class)
@@ -103,15 +104,15 @@ public class PortalUser implements UserDetails {
 	@Column(name="from_portal_isactive")
 	private boolean fromPortalIsactive;
 	
-	@Column(name="h809_token")
-	private String h809Token;
+	@Column(name="patient_portal_user_token")
+	private String patient_portal_userToken;
 
-	public Integer getH809001() {
-		return h809001;
+	public Integer getpatient_portal_user_portal_id() {
+		return patient_portal_user_portal_id;
 	}
 
-	public void setH809001(Integer h809001) {
-		this.h809001 = h809001;
+	public void setpatient_portal_user_portal_id(Integer patient_portal_user_portal_id) {
+		this.patient_portal_user_portal_id = patient_portal_user_portal_id;
 	}
 
 	public Long getId() {
@@ -122,12 +123,12 @@ public class PortalUser implements UserDetails {
 		this.id = id;
 	}
 	
-	public Date getH809003() {
-		return h809003;
+	public Date getpatient_portal_user_created_on() {
+		return patient_portal_user_created_on;
 	}
 
-	public void setH809003(Date h809003) {
-		this.h809003 = h809003;
+	public void setpatient_portal_user_created_on(Date patient_portal_user_created_on) {
+		this.patient_portal_user_created_on = patient_portal_user_created_on;
 	}
 	@JsonIgnore
 	public String getUsername() {
@@ -162,20 +163,20 @@ public class PortalUser implements UserDetails {
 		this.isActive = isActive;
 	}
 	
-	public String getH809007() {
-		return h809007;
+	public String getpatient_portal_user_security_question() {
+		return patient_portal_user_security_question;
 	}
 
-	public void setH809007(String h809007) {
-		this.h809007 = h809007;
+	public void setpatient_portal_user_security_question(String patient_portal_user_security_question) {
+		this.patient_portal_user_security_question = patient_portal_user_security_question;
 	}
 
-	public String getH809008() {
-		return h809008;
+	public String getpatient_portal_user_security_answer() {
+		return patient_portal_user_security_answer;
 	}
 
-	public void setH809008(String h809008) {
-		this.h809008 = h809008;
+	public void setpatient_portal_user_security_answer(String patient_portal_user_security_answer) {
+		this.patient_portal_user_security_answer = patient_portal_user_security_answer;
 	}
 
 	public Integer getIsOldUser() {
@@ -186,12 +187,12 @@ public class PortalUser implements UserDetails {
 		this.isOldUser = isOldUser;
 	}
 
-	public Timestamp getH809011() {
-		return h809011;
+	public Timestamp getpatient_portal_user_access_time() {
+		return patient_portal_user_access_time;
 	}
 
-	public void setH809011(Timestamp h809011) {
-		this.h809011 = h809011;
+	public void setpatient_portal_user_access_time(Timestamp patient_portal_user_access_time) {
+		this.patient_portal_user_access_time = patient_portal_user_access_time;
 	}
 
 	public Integer getWrongEntryCount() {
@@ -282,12 +283,12 @@ public class PortalUser implements UserDetails {
 		this.fromPortalIsactive = fromPortalIsactive;
 	}
 
-	public String getH809Token() {
-		return h809Token;
+	public String getpatient_portal_userToken() {
+		return patient_portal_userToken;
 	}
 
-	public void setH809Token(String h809Token) {
-		this.h809Token = h809Token;
+	public void setpatient_portal_userToken(String patient_portal_userToken) {
+		this.patient_portal_userToken = patient_portal_userToken;
 	}
 
 	public PortalUser()

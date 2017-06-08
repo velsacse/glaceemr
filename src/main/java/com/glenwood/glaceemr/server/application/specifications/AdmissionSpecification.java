@@ -16,20 +16,14 @@ import com.glenwood.glaceemr.server.application.models.Admission;
 import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
 import com.glenwood.glaceemr.server.application.models.AdmissionRoom_;
 import com.glenwood.glaceemr.server.application.models.Admission_;
-import com.glenwood.glaceemr.server.application.models.ClinicalElements;
-import com.glenwood.glaceemr.server.application.models.ClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.ConsultFaxTracking;
 import com.glenwood.glaceemr.server.application.models.ConsultFaxTracking_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H448;
-import com.glenwood.glaceemr.server.application.models.H496;
-import com.glenwood.glaceemr.server.application.models.H496_;
-import com.glenwood.glaceemr.server.application.models.H616;
-import com.glenwood.glaceemr.server.application.models.H616_;
-import com.glenwood.glaceemr.server.application.models.H629;
-import com.glenwood.glaceemr.server.application.models.H629_;
+import com.glenwood.glaceemr.server.application.models.FaxOutbox;
+import com.glenwood.glaceemr.server.application.models.FaxOutbox_;
+import com.glenwood.glaceemr.server.application.models.LeafConfData;
 import com.glenwood.glaceemr.server.application.models.LeafGroup;
 import com.glenwood.glaceemr.server.application.models.LeafGroup_;
 import com.glenwood.glaceemr.server.application.models.LeafLibrary;
@@ -40,13 +34,14 @@ import com.glenwood.glaceemr.server.application.models.PatientAdmission;
 import com.glenwood.glaceemr.server.application.models.PatientAdmission_;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies_;
-import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
-import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientEpisode;
 import com.glenwood.glaceemr.server.application.models.PatientEpisode_;
+import com.glenwood.glaceemr.server.application.models.ProblemLeafDetails;
+import com.glenwood.glaceemr.server.application.models.ProblemLeafDetails_;
 import com.glenwood.glaceemr.server.application.models.ProviderLeafMapping;
 import com.glenwood.glaceemr.server.application.models.ProviderLeafMapping_;
-import com.glenwood.glaceemr.server.application.models.VitalsParameter;
+import com.glenwood.glaceemr.server.application.models.TemplateDetails;
+import com.glenwood.glaceemr.server.application.models.TemplateDetails_;
 
 public class AdmissionSpecification {
 
@@ -138,9 +133,9 @@ public class AdmissionSpecification {
 				provJoin.on(cb.equal(provJoin.get(ProviderLeafMapping_.userid),userId));
 				Join<LeafLibrary,LeafPatient> leafPatJoin= leafJoin.join(LeafLibrary_.leafPatients,JoinType.LEFT);
 				leafPatJoin.on(cb.and(cb.equal(leafPatJoin.get(LeafPatient_.leafPatientEncounterId),encounterId),cb.equal(leafPatJoin.get(LeafPatient_.leafPatientIsactive), true)));
-				Join<LeafLibrary,H616> h616join = leafJoin.join(LeafLibrary_.h616,JoinType.LEFT);
-				Join<LeafLibrary,H448> h448join = leafJoin.join(LeafLibrary_.h448,JoinType.LEFT);
-				query.orderBy(cb.asc(root.get(LeafGroup_.leafGroupName)),cb.asc(root.get(LeafGroup_.leafGroupOrder)),cb.asc(leafJoin.get(LeafLibrary_.leafLibraryName)),cb.asc(h616join.get(H616_.h616002)),cb.asc(leafJoin.get(LeafLibrary_.leafLibraryOrder)));
+				Join<LeafLibrary,TemplateDetails> h616join = leafJoin.join(LeafLibrary_.template_details,JoinType.LEFT);
+				Join<LeafLibrary,LeafConfData> h448join = leafJoin.join(LeafLibrary_.leaf_conf_data,JoinType.LEFT);
+				query.orderBy(cb.asc(root.get(LeafGroup_.leafGroupName)),cb.asc(root.get(LeafGroup_.leafGroupOrder)),cb.asc(leafJoin.get(LeafLibrary_.leafLibraryName)),cb.asc(h616join.get(TemplateDetails_.template_details_name)),cb.asc(leafJoin.get(LeafLibrary_.leafLibraryOrder)));
 				return cb.and(cb.isNull(leafPatJoin.get(LeafPatient_.leafPatientId)),
 						   cb.notEqual(leafJoin.get(LeafLibrary_.leafLibraryType),4),
 						   cb.equal(root.get(LeafGroup_.leafGroupIsactive), true),
@@ -167,10 +162,10 @@ public class AdmissionSpecification {
 				provJoin.on(cb.equal(provJoin.get(ProviderLeafMapping_.userid),userId));
 				Join<LeafLibrary,LeafPatient> leafPatJoin= root.join(LeafLibrary_.leafPatients,JoinType.LEFT);
 				leafPatJoin.on(cb.and(cb.equal(leafPatJoin.get(LeafPatient_.leafPatientEncounterId),encounterId),cb.equal(leafPatJoin.get(LeafPatient_.leafPatientIsactive), true)));
-				Join<LeafLibrary,H616> h616join = root.join(LeafLibrary_.h616,JoinType.LEFT);
-				root.fetch(LeafLibrary_.h448,JoinType.LEFT);
+				Join<LeafLibrary,TemplateDetails> h616join = root.join(LeafLibrary_.template_details,JoinType.LEFT);
+				root.fetch(LeafLibrary_.leaf_conf_data,JoinType.LEFT);
 				//query.orderBy(cb.asc(root.get(LeafGroup_.leafGroupName)),cb.asc(root.get(LeafGroup_.leafGroupOrder)),cb.asc(leafJoin.get(LeafLibrary_.leafLibraryName)),cb.asc(h616join.get(H616_.h616002)),cb.asc(leafJoin.get(LeafLibrary_.leafLibraryOrder)));
-				query.orderBy(cb.asc(root.get(LeafLibrary_.leafLibraryName)),cb.asc(h616join.get(H616_.h616002)),cb.asc(root.get(LeafLibrary_.leafLibraryOrder)));
+				query.orderBy(cb.asc(root.get(LeafLibrary_.leafLibraryName)),cb.asc(h616join.get(TemplateDetails_.template_details_name)),cb.asc(root.get(LeafLibrary_.leafLibraryOrder)));
 				return cb.and(cb.isNull(leafPatJoin.get(LeafPatient_.leafPatientId)),
 						   cb.notEqual(root.get(LeafLibrary_.leafLibraryType),4),
 						   //cb.equal(root.get(LeafGroup_.leafGroupIsactive), true),
@@ -229,8 +224,8 @@ public class AdmissionSpecification {
 			public Predicate toPredicate(Root<LeafPatient> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
 				Join<LeafPatient, LeafLibrary> libJoin =(Join<LeafPatient, LeafLibrary>) root.fetch(LeafPatient_.leafLibraryTable,JoinType.INNER);
-				Fetch<LeafPatient, H629> leafPatJoin = root.fetch(LeafPatient_.h629,JoinType.LEFT);
-				leafPatJoin.fetch(H629_.empProfile,JoinType.LEFT);
+				Fetch<LeafPatient, ProblemLeafDetails> leafPatJoin = root.fetch(LeafPatient_.problem_leaf_details,JoinType.LEFT);
+				leafPatJoin.fetch(ProblemLeafDetails_.empProfile,JoinType.LEFT);
 				root.fetch(LeafPatient_.empProfile_createdBy,JoinType.LEFT);
 				root.fetch(LeafPatient_.empProfile_lastModifiedBy,JoinType.LEFT);
 				root.fetch(LeafPatient_.empProfile_ma_signed_userid,JoinType.LEFT);
@@ -248,16 +243,16 @@ public class AdmissionSpecification {
 	
 	
 	
-	public static Specification<H496> getLeafFaxDetails(final List<Integer> encounterId){
+	public static Specification<FaxOutbox> getLeafFaxDetails(final List<Integer> encounterId){
 
-		return new Specification<H496>(){
+		return new Specification<FaxOutbox>(){
 
 			@Override
-			public Predicate toPredicate(Root<H496> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+			public Predicate toPredicate(Root<FaxOutbox> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
 				
-				Join<H496, ConsultFaxTracking>  faxTrackJoin =root.join(H496_.consultFaxTrackings,JoinType.INNER);
-				Join<H496, EmployeeProfile> empJoin = root.join(H496_.empProfile,JoinType.INNER);
+				Join<FaxOutbox, ConsultFaxTracking>  faxTrackJoin =root.join(FaxOutbox_.consultFaxTrackings,JoinType.INNER);
+				Join<FaxOutbox, EmployeeProfile> empJoin = root.join(FaxOutbox_.empProfile,JoinType.INNER);
 				Join<ConsultFaxTracking, LeafLibrary> leafLibJoin = faxTrackJoin.join(ConsultFaxTracking_.leafLibrary,JoinType.INNER);
 				Join<LeafLibrary,LeafPatient> leafPatJoin = leafLibJoin.join(LeafLibrary_.leafPatients,JoinType.INNER);
 				leafLibJoin.on(faxTrackJoin.get(ConsultFaxTracking_.encounterid).in(encounterId));

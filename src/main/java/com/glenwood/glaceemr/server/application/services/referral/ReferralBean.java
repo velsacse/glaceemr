@@ -3,7 +3,7 @@ package com.glenwood.glaceemr.server.application.services.referral;
 import java.util.List;
 
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.Referral;
@@ -18,7 +18,7 @@ public class ReferralBean {
 	
 	List<LeafPatient> savedLeafList;
 	
-	List<H611> dxList;
+	List<PatientAssessments> dxList;
 	
 	List<ProblemList> problemList;
 	
@@ -26,7 +26,7 @@ public class ReferralBean {
 
 	public ReferralBean(List<EmployeeProfile> empList, List<Referral> referralList,
 					    List<LeafPatient> leafList,List<LeafPatient> savedLeafList,
-					    List<H611> dxList,List<ProblemList> problemList,
+					    List<PatientAssessments> dxList,List<ProblemList> problemList,
 					    List<ReferralDiagnosisBean> diagnosisList) {
 		
 		this.empList = empList;
@@ -71,11 +71,11 @@ public class ReferralBean {
 		this.savedLeafList = savedLeafList;
 	}
 
-	public List<H611> getDxList() {
+	public List<PatientAssessments> getDxList() {
 		return dxList;
 	}
 
-	public void setDxList(List<H611> dxList) {
+	public void setDxList(List<PatientAssessments> dxList) {
 		this.dxList = dxList;
 	}
 

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.GrowthGraphPatientData;
 import com.glenwood.glaceemr.server.application.models.GrowthGraphVitalData;
-import com.glenwood.glaceemr.server.application.models.H650;
+import com.glenwood.glaceemr.server.application.models.GrowthGraph;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
@@ -30,6 +30,7 @@ import com.glenwood.glaceemr.server.utils.SessionMap;
  * @author Jeyanthkumar
  *
  */
+
 
 @RestController
 @Transactional
@@ -103,14 +104,14 @@ public class GrowthGraphController {
 	/**
 	 * To get graph list based on patient id
 	 * @param patientId
-	 * @return list of graph details from h650 table
+	 * @return list of graph details from growthgraph table
 	 */
 	@RequestMapping(value = "/getgraphlist", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getGraphList(
 			 @RequestParam(value="patientid", required=false, defaultValue="true") String patientId){
 		
-		List<H650> patientDetails=growthGraphService.getGraphList(patientId);
+		List<GrowthGraph> patientDetails=growthGraphService.getGraphList(patientId);
 		EMRResponseBean result= new EMRResponseBean();
 		result.setData(patientDetails);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting list of growth graph", sessionMap.getUserID(), request.getRemoteAddr(), Integer.parseInt(patientId), "", LogUserType.USER_LOGIN, "", "");

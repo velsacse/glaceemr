@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.FileDetails;
-import com.glenwood.glaceemr.server.application.models.H068;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.LabParameterCode;
@@ -25,7 +25,7 @@ import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.FileDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.FileNameRepository;
-import com.glenwood.glaceemr.server.application.repositories.H068Repository;
+import com.glenwood.glaceemr.server.application.repositories.ChartStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7ResultInboxRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7UnmappedResultsRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabEntriesParameterRepository;
@@ -66,7 +66,7 @@ public class PortalLabResultsServiceImpl implements PortalLabResultsService{
 	LabEntriesRepository labEntriesRepository;
 	
 	@Autowired
-	H068Repository h068Repository;
+	ChartStatusRepository h068Repository;
 
 	@Autowired
 	LabEntriesParameterRepository labEntriesParametersRepository;
@@ -103,7 +103,7 @@ public class PortalLabResultsServiceImpl implements PortalLabResultsService{
 	@Override
 	public PortalLabResultsConfigBean getPortalLabResultsConfigBean() {
 		
-		List<H068> labResultsList=h068Repository.findAll(PortalLabResultsSpecification.getLabStatusConfig());
+		List<ChartStatus> labResultsList=h068Repository.findAll(PortalLabResultsSpecification.getLabStatusConfig());
 		
 		PortalLabResultsConfigBean labResultConfigBean=new PortalLabResultsConfigBean();
 		labResultConfigBean.setLabResultStatusList(labResultsList);	

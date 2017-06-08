@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,12 +24,14 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.glenwood.glaceemr.server.application.models.ChiefComplaints;
 import com.glenwood.glaceemr.server.application.models.ChiefComplaints_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMapping;
@@ -38,17 +39,12 @@ import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMa
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsCondition;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsCondition_;
-import com.glenwood.glaceemr.server.application.models.ClinicalElements_;
-import com.glenwood.glaceemr.server.application.models.ClinicalSystem;
-import com.glenwood.glaceemr.server.application.models.ClinicalSystem_;
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.GeneralShortcut;
 import com.glenwood.glaceemr.server.application.models.GeneralShortcut_;
-import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.H611_;
 import com.glenwood.glaceemr.server.application.models.HpiDxMap;
 import com.glenwood.glaceemr.server.application.models.HpiDxMap_;
 import com.glenwood.glaceemr.server.application.models.HpiElement;
@@ -60,6 +56,8 @@ import com.glenwood.glaceemr.server.application.models.HpiSymptomOrderby;
 import com.glenwood.glaceemr.server.application.models.HpiSymptomQualifier;
 import com.glenwood.glaceemr.server.application.models.HpiSymptom_;
 import com.glenwood.glaceemr.server.application.models.LeafLibrary;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
@@ -2366,9 +2364,9 @@ public class HPIServiceImpl implements HPIService{
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
-		Root<H611> root = cq.from(H611.class);
-		cq.select(builder.trim(root.get(H611_.h611005)));
-		cq.where(builder.and(builder.equal(root.get(H611_.h611003), patientId)),builder.equal(root.get(H611_.h611002), encounterId));
+		Root<PatientAssessments> root = cq.from(PatientAssessments.class);
+		cq.select(builder.trim(root.get(PatientAssessments_.patient_assessments_dxcode)));
+		cq.where(builder.and(builder.equal(root.get(PatientAssessments_.patient_assessments_patientId), patientId)),builder.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId));
 		List<Object> obj = em.createQuery(cq).getResultList();
 		for(int i=0;i<obj.size();i++)
 		{

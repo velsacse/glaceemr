@@ -55,7 +55,7 @@ import com.glenwood.glaceemr.server.application.models.FlowsheetParam_;
 import com.glenwood.glaceemr.server.application.models.FlowsheetType;
 import com.glenwood.glaceemr.server.application.models.FlowsheetType_;
 import com.glenwood.glaceemr.server.application.models.Flowsheet_;
-import com.glenwood.glaceemr.server.application.models.H068;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping;
@@ -121,7 +121,7 @@ import com.glenwood.glaceemr.server.application.repositories.FlowsheetLabReposit
 import com.glenwood.glaceemr.server.application.repositories.FlowsheetParamRepository;
 import com.glenwood.glaceemr.server.application.repositories.FlowsheetRepository;
 import com.glenwood.glaceemr.server.application.repositories.FlowsheetTypeRepository;
-import com.glenwood.glaceemr.server.application.repositories.H068Repository;
+import com.glenwood.glaceemr.server.application.repositories.ChartStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.IcdmRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabDescpParametersRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabDescriptionRepository;
@@ -265,7 +265,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	EncounterEntityRepository encounterEntityRepository;
 
 	@Autowired
-	H068Repository h068Repository;
+	ChartStatusRepository h068Repository;
 
 	@Autowired
 	ClinicalElementsOptionsRepository clinicalElementsOptionsRepository;
@@ -3974,7 +3974,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				//getting list of params having param id and chart id
 				List<LabEntriesParameter> perfParamsInt=labEntriesParameterRepository.findAll(Specifications.where(InvestigationSpecification.getParamDetailsStatus(paramIdsGroup, chartId)));
 
-				List<H068> statusList=h068Repository.findAll(InitialSettingsSpecification.getIdType(413));
+				List<ChartStatus> statusList=h068Repository.findAll(InitialSettingsSpecification.getIdType(413));
 				if(perfParamsInt.size()>0){
 					for(int k=0;k<perfParamsInt.size();k++){
 						paramBean = new FS_LabBean();
@@ -3995,8 +3995,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						paramBean.setStatus(status);
 						paramBean.setGender(gender+"");
 						for(int n=0;n<statusList.size();n++){
-							if(statusList.get(n).getH068002()==perfParamsInt.get(k).getLabEntriesTable().getLabEntriesTestStatus()){
-								status=statusList.get(n).getH068003();
+							if(statusList.get(n).getchart_status_status_id()==perfParamsInt.get(k).getLabEntriesTable().getLabEntriesTestStatus()){
+								status=statusList.get(n).getchart_status_status_name();
 								break;
 							}
 						}
@@ -4118,7 +4118,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				//Order Vaccines by Date
 				perfVaccinesInt=orderByDateVaccines(perfVaccinesInt, true);
 
-				List<H068> statusList=h068Repository.findAll(InitialSettingsSpecification.getIdType(413));
+				List<ChartStatus> statusList=h068Repository.findAll(InitialSettingsSpecification.getIdType(413));
 				if(perfOrdersInt.size()>0){
 					for(int k=0;k<perfOrdersInt.size();k++){
 						labBean = new FS_LabBean();
@@ -4135,8 +4135,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 							prfOnSort=MoreObjects.firstNonNull(perfOrdersInt.get(k).getLabEntriesOrdOn(),"1900-05-13 16:40:35").toString();
 							perOn=MoreObjects.firstNonNull(perfOrdersInt.get(k).getLabEntriesPerfOn(),"Never Performed").toString();
 							for(int n=0;n<statusList.size();n++){
-								if(statusList.get(n).getH068002()==perfOrdersInt.get(k).getLabEntriesTestStatus()){
-									status=statusList.get(n).getH068003();
+								if(statusList.get(n).getchart_status_status_id()==perfOrdersInt.get(k).getLabEntriesTestStatus()){
+									status=statusList.get(n).getchart_status_status_name();
 									break;
 								}
 							}
@@ -4193,8 +4193,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						labBean.setPerformedOn(perOn);
 						String status="";
 						for(int n=0;n<statusList.size();n++){
-							if(statusList.get(n).getH068002()==perfVaccinesInt.get(k).getVaccineReportIsemr()){
-								status=statusList.get(n).getH068003();
+							if(statusList.get(n).getchart_status_status_id()==perfVaccinesInt.get(k).getVaccineReportIsemr()){
+								status=statusList.get(n).getchart_status_status_name();
 								break;
 							}
 						}

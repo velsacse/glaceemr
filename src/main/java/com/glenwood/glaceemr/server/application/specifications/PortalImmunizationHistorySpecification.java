@@ -12,8 +12,8 @@ import org.springframework.data.jpa.domain.Specification;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsQuestions;
 import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping;
 import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping_;
-import com.glenwood.glaceemr.server.application.models.H068;
-import com.glenwood.glaceemr.server.application.models.H068_;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
+import com.glenwood.glaceemr.server.application.models.ChartStatus_;
 import com.glenwood.glaceemr.server.application.models.LabDescription;
 import com.glenwood.glaceemr.server.application.models.LabDescription_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
@@ -149,14 +149,14 @@ public class PortalImmunizationHistorySpecification {
 	/**
 	 * @return Vaccine Update Reasons Predicate  
 	 */	
-	public static Specification<H068> getVaccineUpdateReasonList()
+	public static Specification<ChartStatus> getVaccineUpdateReasonList()
 	{
-		return new Specification<H068>() {
+		return new Specification<ChartStatus>() {
 
 			@Override
-			public Predicate toPredicate(Root<H068> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
+			public Predicate toPredicate(Root<ChartStatus> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				
-				Predicate vaccUpdateReasonPredicate=cq.where(cb.equal(root.get(H068_.h068005), 998)).orderBy(cb.asc(root.get(H068_.h068003))).getRestriction();
+				Predicate vaccUpdateReasonPredicate=cq.where(cb.equal(root.get(ChartStatus_.chart_status_reference_id), 998)).orderBy(cb.asc(root.get(ChartStatus_.chart_status_status_name))).getRestriction();
 
 				return vaccUpdateReasonPredicate;
 			}

@@ -17,8 +17,8 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.H611_;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
 import com.glenwood.glaceemr.server.application.models.PosTable;
@@ -137,13 +137,13 @@ public class SkinTestingFormSpecification {
 	 * @param chartid
 	 * @return
 	 */
-	public static Specification<H611> getcodingsystems(final int encounterid,final int chartid ) {
-		return new Specification<H611>() {
+	public static Specification<PatientAssessments> getcodingsystems(final int encounterid,final int chartid ) {
+		return new Specification<PatientAssessments>() {
 
 			@Override
-			public Predicate toPredicate(Root<H611> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Join<H611,CodingSystems> rootjoin=root.join(H611_.codingsystemsTable,JoinType.INNER);
-				Join<H611, Encounter> encounterjoin=root.join(H611_.encounter,JoinType.INNER);
+			public Predicate toPredicate(Root<PatientAssessments> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				Join<PatientAssessments,CodingSystems> rootjoin=root.join(PatientAssessments_.codingsystemsTable,JoinType.INNER);
+				Join<PatientAssessments, Encounter> encounterjoin=root.join(PatientAssessments_.encounter,JoinType.INNER);
 				Predicate predicate=cb.equal(encounterjoin.get(Encounter_.encounterChartid), chartid);
 				Predicate predicate1=cb.equal(encounterjoin.get(Encounter_.encounterType), 1);
 				query.distinct(true);

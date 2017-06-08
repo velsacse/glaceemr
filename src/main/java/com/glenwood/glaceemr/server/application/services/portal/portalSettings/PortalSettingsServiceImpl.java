@@ -21,9 +21,9 @@ import com.glenwood.glaceemr.server.application.models.DemographicmodifyStatus;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EncryptedPatientDetails;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
-import com.glenwood.glaceemr.server.application.models.H807;
-import com.glenwood.glaceemr.server.application.models.H809;
-import com.glenwood.glaceemr.server.application.models.H810;
+import com.glenwood.glaceemr.server.application.models.PatientPortalDemographicRequest;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr;
 import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
@@ -41,9 +41,9 @@ import com.glenwood.glaceemr.server.application.repositories.BillingConfigTableR
 import com.glenwood.glaceemr.server.application.repositories.BillinglookupRepository;
 import com.glenwood.glaceemr.server.application.repositories.DemographicmodifyStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
-import com.glenwood.glaceemr.server.application.repositories.H807Repository;
-import com.glenwood.glaceemr.server.application.repositories.H809Repository;
-import com.glenwood.glaceemr.server.application.repositories.H810Respository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalDemographicRequestRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalUserRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalAlertConfigRespository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.InsCompAddrRepository;
 import com.glenwood.glaceemr.server.application.repositories.InsCompanyRepository;
@@ -88,10 +88,10 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 	PatientRegistrationRepository patientRegistrationRepository;
 
 	@Autowired
-	H807Repository h807Repository;
+	PatientPortalDemographicRequestRepository h807Repository;
 
 	@Autowired
-	H810Respository h810Respository;
+	PatientPortalAlertConfigRespository h810Respository;
 	
 	@Autowired
 	PatientClinicalElementsQuestionsRepository patientClinicalElementsQuestionsRepository;
@@ -130,7 +130,7 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 	PortalPaymentsService portalPaymentsService;
 
 	@Autowired
-	H809Repository h809Repository;
+	PatientPortalUserRepository h809Repository;
 
 	@Autowired
 	SessionMap sessionMap;
@@ -221,123 +221,121 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 		PatientRegistrationBean regSaveDetailsBean=savePatientDemographicsBean.getSavePatientRegistrationBean();
 		PatientRegistration registrationDetails=portalMedicalSummaryService.getPatientPersonalDetails(regSaveDetailsBean.getPatientRegistrationId());
 
-		H807 demographicChanges=new H807();
+		PatientPortalDemographicRequest demographicChanges=new PatientPortalDemographicRequest();
 		if(regSaveDetailsBean.getPatientRegistrationFirstName()!=null&&!regSaveDetailsBean.getPatientRegistrationFirstName().equals(registrationDetails.getPatientRegistrationFirstName()))
-			demographicChanges.setH807002(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationFirstName()));
+			demographicChanges.setdemographic_request_first_name(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationFirstName()));
 		else
-			demographicChanges.setH807002("");
+			demographicChanges.setdemographic_request_first_name("");
 
 		if(regSaveDetailsBean.getPatientRegistrationLastName()!=null&&!regSaveDetailsBean.getPatientRegistrationLastName().equals(registrationDetails.getPatientRegistrationLastName()))
-			demographicChanges.setH807003(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationLastName()));
+			demographicChanges.setdemographic_request_last_name(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationLastName()));
 		else 
-			demographicChanges.setH807003("");
+			demographicChanges.setdemographic_request_last_name("");
 
 		if(regSaveDetailsBean.getPatientRegistrationMidInitial()!=null&&!regSaveDetailsBean.getPatientRegistrationMidInitial().equals(registrationDetails.getPatientRegistrationMidInitial()))
-			demographicChanges.setH807004(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationMidInitial()));
+			demographicChanges.setdemographic_request_mid_initial(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationMidInitial()));
 		else
-			demographicChanges.setH807004("");
+			demographicChanges.setdemographic_request_mid_initial("");
 
 		if(regSaveDetailsBean.getPatientRegistrationWorkNo()!=null&&!regSaveDetailsBean.getPatientRegistrationWorkNo().equals(registrationDetails.getPatientRegistrationWorkNo()))
-			demographicChanges.setH807005(regSaveDetailsBean.getPatientRegistrationWorkNo());
+			demographicChanges.setdemographic_request_work_phone(regSaveDetailsBean.getPatientRegistrationWorkNo());
 		else
-			demographicChanges.setH807005("");
+			demographicChanges.setdemographic_request_work_phone("");
 
 		if(regSaveDetailsBean.getPatientRegistrationDob()!=null&&!regSaveDetailsBean.getPatientRegistrationDob().equals(registrationDetails.getPatientRegistrationDob()))
-			demographicChanges.setH807006(regSaveDetailsBean.getPatientRegistrationDob());
+			demographicChanges.setdemographic_request_date_of_birth(regSaveDetailsBean.getPatientRegistrationDob());
 		else
-			demographicChanges.setH807006("");
+			demographicChanges.setdemographic_request_date_of_birth("");
 
 		if(regSaveDetailsBean.getPatientRegistrationSex()!=null&&!regSaveDetailsBean.getPatientRegistrationSex().equals(registrationDetails.getPatientRegistrationSex()))
-			demographicChanges.setH807007(regSaveDetailsBean.getPatientRegistrationSex());
+			demographicChanges.setdemographic_request_gender(regSaveDetailsBean.getPatientRegistrationSex());
 		else{
 			if(regSaveDetailsBean.getPatientRegistrationSex()!=null)
-				demographicChanges.setH807007(regSaveDetailsBean.getPatientRegistrationSex());
+				demographicChanges.setdemographic_request_gender(regSaveDetailsBean.getPatientRegistrationSex());
 			else
-				demographicChanges.setH807007(-1);
+				demographicChanges.setdemographic_request_gender(-1);
 		}
 
 		if(regSaveDetailsBean.getPatientRegistrationMaritalstatus()!=null&&!regSaveDetailsBean.getPatientRegistrationMaritalstatus().equals(registrationDetails.getPatientRegistrationMaritalstatus()))
-			demographicChanges.setH807008(regSaveDetailsBean.getPatientRegistrationMaritalstatus());
+			demographicChanges.setdemographic_request_marital_status(regSaveDetailsBean.getPatientRegistrationMaritalstatus());
 		else{
 			if(regSaveDetailsBean.getPatientRegistrationMaritalstatus()!=null)
-				demographicChanges.setH807008(regSaveDetailsBean.getPatientRegistrationMaritalstatus());
+				demographicChanges.setdemographic_request_marital_status(regSaveDetailsBean.getPatientRegistrationMaritalstatus());
 			else
-				demographicChanges.setH807008(-1);
+				demographicChanges.setdemographic_request_marital_status(-1);
 		}
 
 		if(regSaveDetailsBean.getPatientRegistrationPhoneNo()!=null&&!regSaveDetailsBean.getPatientRegistrationPhoneNo().equals(registrationDetails.getPatientRegistrationPhoneNo()))
-			demographicChanges.setH807009(regSaveDetailsBean.getPatientRegistrationPhoneNo());
+			demographicChanges.setdemographic_request_home_phone(regSaveDetailsBean.getPatientRegistrationPhoneNo());
 		else
-			demographicChanges.setH807009("");
+			demographicChanges.setdemographic_request_home_phone("");
 
 		if(!(regSaveDetailsBean.getPatientRegistrationAddress1()+regSaveDetailsBean.getPatientRegistrationAddress2()).equals(registrationDetails.getPatientRegistrationAddress1()+registrationDetails.getPatientRegistrationAddress2()))
-			demographicChanges.setH807010(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationAddress1()+regSaveDetailsBean.getPatientRegistrationAddress2()));
+			demographicChanges.setdemographic_request_address(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationAddress1()+regSaveDetailsBean.getPatientRegistrationAddress2()));
 		else
-			demographicChanges.setH807010("");
+			demographicChanges.setdemographic_request_address("");
 
 		if(regSaveDetailsBean.getPatientRegistrationCity()!=null&&!regSaveDetailsBean.getPatientRegistrationCity().equals(registrationDetails.getPatientRegistrationCity()))
-			demographicChanges.setH807011(regSaveDetailsBean.getPatientRegistrationCity());
+			demographicChanges.setdemographic_request_city(regSaveDetailsBean.getPatientRegistrationCity());
 		else
-			demographicChanges.setH807011("");
+			demographicChanges.setdemographic_request_city("");
 
 		if(regSaveDetailsBean.getPatientRegistrationState()!=null&&!regSaveDetailsBean.getPatientRegistrationState().equals(registrationDetails.getPatientRegistrationState()))
-			demographicChanges.setH807012(regSaveDetailsBean.getPatientRegistrationState());
+			demographicChanges.setdemographic_request_state(regSaveDetailsBean.getPatientRegistrationState());
 		else{
 			if(regSaveDetailsBean.getPatientRegistrationState()!=null)
-				demographicChanges.setH807012(regSaveDetailsBean.getPatientRegistrationState());
+				demographicChanges.setdemographic_request_state(regSaveDetailsBean.getPatientRegistrationState());
 			else
-				demographicChanges.setH807012("-1");
+				demographicChanges.setdemographic_request_state("-1");
 		}
 
 		if(regSaveDetailsBean.getPatientRegistrationZip()!=null&&!regSaveDetailsBean.getPatientRegistrationZip().equals(registrationDetails.getPatientRegistrationZip()))
-			demographicChanges.setH807013(regSaveDetailsBean.getPatientRegistrationZip());
+			demographicChanges.setdemographic_request_zip(regSaveDetailsBean.getPatientRegistrationZip());
 		else
-			demographicChanges.setH807013("");
+			demographicChanges.setdemographic_request_zip("");
 
 		if(regSaveDetailsBean.getPatientRegistrationMailId()!=null&&!regSaveDetailsBean.getPatientRegistrationMailId().equals(registrationDetails.getPatientRegistrationMailId()))
-			demographicChanges.setH807014(regSaveDetailsBean.getPatientRegistrationMailId());
+			demographicChanges.setdemographic_request_email(regSaveDetailsBean.getPatientRegistrationMailId());
 		else
-			demographicChanges.setH807014("");
+			demographicChanges.setdemographic_request_email("");
 
 
+		demographicChanges.setdemographic_request_employer("");
+		demographicChanges.setdemographic_request_cell_no("");
+		demographicChanges.setdemographic_request_driver_license("");
+		demographicChanges.setdemographic_request_refer_physician("-1");
+		demographicChanges.setdemographic_request_how_intro(-1);
+		demographicChanges.setdemographic_request_contact_person("");
+		demographicChanges.setdemographic_request_contact_person_relation(-1);
+		demographicChanges.setdemographic_request_contact_person_address("");
+		demographicChanges.setdemographic_request_contact_person_city("");
+		demographicChanges.setdemographic_request_contact_person_state("-1");
+		demographicChanges.setdemographic_request_contact_person_zip("");
+		demographicChanges.setdemographic_request_primary_ins_company("");
+		demographicChanges.setdemographic_request_primary_ins_company_id("");
+		demographicChanges.setdemographic_request_primary_ins_patient_id("");
+		demographicChanges.setdemographic_request_primary_ins_valid_from("");
+		demographicChanges.setdemographic_request_primary_ins_valid_to("");
+		demographicChanges.setdemographic_request_primary_ins_group_number("");
+		demographicChanges.setdemographic_request_primary_ins_group_name("");
+		demographicChanges.setdemographic_request_primary_ins_relation(-1);
+		demographicChanges.setdemographic_request_primary_ins_subscriber_name("");
+		demographicChanges.setdemographic_request_secondary_ins_company("");
+		demographicChanges.setdemographic_request_secondary_ins_company_id("");
+		demographicChanges.setdemographic_request_secondary_ins_patient_id("");
+		demographicChanges.setdemographic_request_secondary_ins_valid_from("");
+		demographicChanges.setdemographic_request_secondary_ins_valid_to("");
+		demographicChanges.setdemographic_request_secondary_ins_group_number("");
+		demographicChanges.setdemographic_request_secondary_ins_group_name("");
+		demographicChanges.setdemographic_request_secondary_ins_relation(-1);
+		demographicChanges.setdemographic_request_secondary_ins_subscriber_name("");
+		demographicChanges.setdemographic_request_user_name("");
+		demographicChanges.setdemographic_request_patient_id(regSaveDetailsBean.getPatientRegistrationId());
+		demographicChanges.setdemographic_request_email_reminder(false);
+		demographicChanges.setdemographic_request_phone_reminder(false);
+		demographicChanges.setdemographic_request_primary_ins_copay(0.00);
 
-		demographicChanges.setH807015("");
-		demographicChanges.setH807016("");
-		demographicChanges.setH807017("");
-		demographicChanges.setH807018("-1");
-		demographicChanges.setH807019(-1);
-		demographicChanges.setH807020("");
-		demographicChanges.setH807021(-1);
-		demographicChanges.setH807022("");
-		demographicChanges.setH807023("");
-		demographicChanges.setH807024("-1");
-		demographicChanges.setH807025("");
-		demographicChanges.setH807026("");
-		demographicChanges.setH807027("");
-		demographicChanges.setH807028("");
-		demographicChanges.setH807029("");
-		demographicChanges.setH807030("");
-		demographicChanges.setH807031("");
-		demographicChanges.setH807032("");
-		demographicChanges.setH807033(-1);
-		demographicChanges.setH807034("");
-		demographicChanges.setH807035("");
-		demographicChanges.setH807036("");
-		demographicChanges.setH807037("");
-		demographicChanges.setH807038("");
-		demographicChanges.setH807039("");
-		demographicChanges.setH807040("");
-		demographicChanges.setH807041("");
-		demographicChanges.setH807042(-1);
-		demographicChanges.setH807043("");
-		demographicChanges.setH807044("");
-		demographicChanges.setH807045(regSaveDetailsBean.getPatientRegistrationId());
-		demographicChanges.setH807046(false);
-		demographicChanges.setH807047(false);
-		demographicChanges.setH807048(0.00);
-
-
-		H807 demographicEntry=h807Repository.saveAndFlush(demographicChanges);
+		PatientPortalDemographicRequest demographicEntry=h807Repository.saveAndFlush(demographicChanges);
 
 
 		if(regSaveDetailsBean.getPatientRegistrationSiblingsAges()!=null)
@@ -363,10 +361,10 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 		demographicmodifyStatusRepository.saveAndFlush(demographicStatus);
 
 
-		H810 demographicAlertCategory=h810Respository.findOne(PortalSettingsSpecification.getPortalAlertCategory(3));
-		boolean sendToAll =demographicAlertCategory.getH810005();  
-		int provider = Integer.parseInt(demographicAlertCategory.getH810003());
-		int forwardTo = Integer.parseInt(demographicAlertCategory.getH810004());
+		PatientPortalAlertConfig demographicAlertCategory=h810Respository.findOne(PortalSettingsSpecification.getPortalAlertCategory(3));
+		boolean sendToAll =demographicAlertCategory.getpatient_portal_alert_config_send_to_all();  
+		int provider = Integer.parseInt(demographicAlertCategory.getpatient_portal_alert_config_provider());
+		int forwardTo = Integer.parseInt(demographicAlertCategory.getpatient_portal_alert_config_forward_to());
 
 		AlertEvent alert1=new AlertEvent();
 		alert1.setAlertEventCategoryId(22);
@@ -374,7 +372,7 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 		alert1.setAlertEventPatientId(regSaveDetailsBean.getPatientRegistrationId());
 		alert1.setAlertEventPatientName(registrationDetails.getPatientRegistrationLastName()+", "+registrationDetails.getPatientRegistrationFirstName());
 		alert1.setAlertEventEncounterId(-1);
-		alert1.setAlertEventRefId(demographicEntry.getH807001());
+		alert1.setAlertEventRefId(demographicEntry.getdemographic_request_id());
 		alert1.setAlertEventMessage("Request to change the Demographics Details.");
 		alert1.setAlertEventRoomId(-1);
 		alert1.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
@@ -395,7 +393,7 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 					alert2.setAlertEventPatientId(regSaveDetailsBean.getPatientRegistrationId());
 					alert2.setAlertEventPatientName(registrationDetails.getPatientRegistrationLastName()+", "+registrationDetails.getPatientRegistrationFirstName());
 					alert2.setAlertEventEncounterId(-1);
-					alert2.setAlertEventRefId(demographicEntry.getH807001());
+					alert2.setAlertEventRefId(demographicEntry.getdemographic_request_id());
 					alert2.setAlertEventMessage("Request to change the Demographics Details.");
 					alert2.setAlertEventRoomId(-1);
 					alert2.setAlertEventCreatedDate(new Timestamp(new Date().getTime()));
@@ -447,11 +445,11 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 
 		KioskLoginDetails responseBean=objectMapper.readValue(responseString.substring(1,responseString.length()-1), KioskLoginDetails.class);*/
 
-		H809 patientDetails=h809Repository.findOne(PortalLoginSpecification.activePatientById(patientId));
+		PatientPortalUser patientDetails=h809Repository.findOne(PortalLoginSpecification.activePatientById(patientId));
 
 		EncryptedPatientDetails loginDetailsBean=new EncryptedPatientDetails();
 
-		loginDetailsBean.setAuthString(patientDetails.getH809004()+"*&@#"+patientDetails.getH809005());
+		loginDetailsBean.setAuthString(patientDetails.getpatient_portal_user_name()+"*&@#"+patientDetails.getpatient_portal_user_password_hash());
 		loginDetailsBean.setTennantDB(sessionMap.getPortalDBName());
 		loginDetailsBean.setPatientId(patientId);
 

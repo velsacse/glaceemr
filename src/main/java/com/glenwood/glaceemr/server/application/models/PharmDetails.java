@@ -4,7 +4,10 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -15,12 +18,163 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class PharmDetails implements java.io.Serializable{
 
 	
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="pharm_details_pharm_details_id_seq")
+	@SequenceGenerator(name ="pharm_details_pharm_details_id_seq", sequenceName="pharm_details_pharm_details_id_seq", allocationSize=1)
+	@Column(name="pharm_details_id")
+	private Integer pharmDetailsId;
 	
+	@Column(name="pharm_details_store_name")
+	private String pharmDetailsStoreName;
+
+	@Column(name="pharm_details_address_line_1")
+	private String pharmDetailsAddressLine1;
+
+	@Column(name="pharm_details_city")
+	private String pharmDetailsCity;
+
+	@Column(name="pharm_details_state")
+	private String pharmDetailsState;
+
+	@Column(name="pharm_details_zip")
+	private String pharmDetailsZip;
+
+	@Column(name="pharm_details_physician_line")
+	private String pharmDetailsPhysicianLine;
+
+	@Column(name="pharm_details_fax")
+	private String pharmDetailsFax;
+
+	@Column(name="pharm_details_primary_phone")
+	private String pharmDetailsPrimaryPhone;
+
+	@Column(name="pharm_details_is_24hr")
+	private String pharmDetailsIs24hr;
+
+	@Column(name="pharm_details_ncpdpid")
+	private String pharmDetailsNcpdpid;
+
+	@Column(name="pharm_details_email")
+	private String pharmDetailsEmail;
+
+	@Column(name="pharm_details_store_number")
+	private String pharmDetailsStoreNumber;
+
+	@Column(name="pharm_details_ref_num_alt1")
+	private String pharmDetailsRefNumAlt1;
+
+	@Column(name="pharm_details_ref_num_alt1_qualifier")
+	private String pharmDetailsRefNumAlt1Qualifier;
+
+	@Column(name="pharm_details_address_line_2")
+	private String pharmDetailsAddressLine2;
+
+	@Column(name="pharm_details_ph_alt1_and_qualifer")
+	private String pharmDetailsPhAlt1AndQualifer;
+
+	@Column(name="pharm_details_ph_alt2_and_qualifer")
+	private String pharmDetailsPhAlt2AndQualifer;
+
+	@Column(name="pharm_details_ph_alt3_and_qualifer")
+	private String pharmDetailsPhAlt3AndQualifer;
+
+	@Column(name="pharm_details_ph_alt4_and_qualifer")
+	private String pharmDetailsPhAlt4AndQualifer;
+
+	@Column(name="pharm_details_ph_alt5_and_qualifer")
+	private String pharmDetailsPhAlt5AndQualifer;
+
+	@JsonSerialize(using = JsonTimestampSerializer.class)
+	@Column(name="pharm_details_active_start_time")
+	private Timestamp pharmDetailsActiveStartTime;
+
+	@JsonSerialize(using = JsonTimestampSerializer.class)
+	@Column(name="pharm_details_active_end_time")
+	private Timestamp pharmDetailsActiveEndTime;
+
+	@Column(name="pharm_details_service_level")
+	private Integer pharmDetailsServiceLevel;
+
+	@Column(name="pharm_details_partner_account")
+	private String pharmDetailsPartnerAccount;
+
+	@JsonSerialize(using = JsonTimestampSerializer.class)
+	@Column(name="pharm_details_last_modify_date")
+	private Timestamp pharmDetailsLastModifyDate;
+
+	@Column(name="pharm_details_24_hr_flag")
+	private Integer pharmDetails24HrFlag;
+
+	@Column(name="pharm_details_cross_street")
+	private String pharmDetailsCrossStreet;
+
+	@Column(name="pharm_details_record_change")
+	private String pharmDetailsRecordChange;
+
+	@Column(name="pharm_details_old_service_level")
+	private String pharmDetailsOldServiceLevel;
+
+	@Column(name="pharm_details_text_service_level")
+	private String pharmDetailsTextServiceLevel;
+
+	@Column(name="pharm_details_text_service_level_change")
+	private String pharmDetailsTextServiceLevelChange;
+
+	@Column(name="pharm_details_version")
+	private String pharmDetailsVersion;
+
+	@Column(name="pharm_details_ss_email")
+	private String pharmDetailsSsEmail;
+
+	@Column(name="pharm_details_is_ss_pharm")
+	private Integer pharmDetailsIsSsPharm;
+
+	@Column(name="pharm_details_pharmacist_lname")
+	private String pharmDetailsPharmacistLname;
+
+	@Column(name="pharm_details_pharmacist_fname")
+	private String pharmDetailsPharmacistFname;
+
+	@Column(name="pharm_details_pharmacist_midname")
+	private String pharmDetailsPharmacistMidname;
+
+	@Column(name="pharm_details_pharmacist_prefix")
+	private String pharmDetailsPharmacistPrefix;
+
+	@Column(name="pharm_details_pharmacist_suffix")
+	private String pharmDetailsPharmacistSuffix;
+
+	@Column(name="pharm_details_ph_beeper")
+	private String pharmDetailsPhBeeper;
+
+	@Column(name="pharm_details_ph_cell")
+	private String pharmDetailsPhCell;
+
+	@Column(name="pharm_details_ph_night")
+	private String pharmDetailsPhNight;
+
+	@Column(name="pharm_details_specialtytype1")
+	private String pharmDetailsSpecialtytype1;
+
+	@Column(name="pharm_details_specialtytype2")
+	private String pharmDetailsSpecialtytype2;
+
+	@Column(name="pharm_details_specialtytype3")
+	private String pharmDetailsSpecialtytype3;
+
+	@Column(name="pharm_details_specialtytype4")
+	private String pharmDetailsSpecialtytype4;
+	
+	@Column(name="pharm_details_npi")
+	private String pharmDetailsnpi;
+
 	public Integer getPharmDetailsId() {
 		return pharmDetailsId;
 	}
@@ -404,158 +558,6 @@ public class PharmDetails implements java.io.Serializable{
 	public void setPharmDetailsSpecialtytype4(String pharmDetailsSpecialtytype4) {
 		this.pharmDetailsSpecialtytype4 = pharmDetailsSpecialtytype4;
 	}
-
-//	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="pharm_details_pharm_details_id_seq")
-//	@SequenceGenerator(name =" pharm_details_pharm_details_id_seq", sequenceName="pharm_details_pharm_details_id_seq", allocationSize=1)
-	@Id
-	@Column(name="pharm_details_id")
-	private Integer pharmDetailsId;
-
-	@Column(name="pharm_details_store_name")
-	private String pharmDetailsStoreName;
-
-	@Column(name="pharm_details_address_line_1")
-	private String pharmDetailsAddressLine1;
-
-	@Column(name="pharm_details_city")
-	private String pharmDetailsCity;
-
-	@Column(name="pharm_details_state")
-	private String pharmDetailsState;
-
-	@Column(name="pharm_details_zip")
-	private String pharmDetailsZip;
-
-	@Column(name="pharm_details_physician_line")
-	private String pharmDetailsPhysicianLine;
-
-	@Column(name="pharm_details_fax")
-	private String pharmDetailsFax;
-
-	@Column(name="pharm_details_primary_phone")
-	private String pharmDetailsPrimaryPhone;
-
-	@Column(name="pharm_details_is_24hr")
-	private String pharmDetailsIs24hr;
-
-	@Column(name="pharm_details_ncpdpid")
-	private String pharmDetailsNcpdpid;
-
-	@Column(name="pharm_details_email")
-	private String pharmDetailsEmail;
-
-	@Column(name="pharm_details_store_number")
-	private String pharmDetailsStoreNumber;
-
-	@Column(name="pharm_details_ref_num_alt1")
-	private String pharmDetailsRefNumAlt1;
-
-	@Column(name="pharm_details_ref_num_alt1_qualifier")
-	private String pharmDetailsRefNumAlt1Qualifier;
-
-	@Column(name="pharm_details_address_line_2")
-	private String pharmDetailsAddressLine2;
-
-	@Column(name="pharm_details_ph_alt1_and_qualifer")
-	private String pharmDetailsPhAlt1AndQualifer;
-
-	@Column(name="pharm_details_ph_alt2_and_qualifer")
-	private String pharmDetailsPhAlt2AndQualifer;
-
-	@Column(name="pharm_details_ph_alt3_and_qualifer")
-	private String pharmDetailsPhAlt3AndQualifer;
-
-	@Column(name="pharm_details_ph_alt4_and_qualifer")
-	private String pharmDetailsPhAlt4AndQualifer;
-
-	@Column(name="pharm_details_ph_alt5_and_qualifer")
-	private String pharmDetailsPhAlt5AndQualifer;
-
-	@JsonSerialize(using = JsonTimestampSerializer.class)
-	@Column(name="pharm_details_active_start_time")
-	private Timestamp pharmDetailsActiveStartTime;
-
-	@JsonSerialize(using = JsonTimestampSerializer.class)
-	@Column(name="pharm_details_active_end_time")
-	private Timestamp pharmDetailsActiveEndTime;
-
-	@Column(name="pharm_details_service_level")
-	private Integer pharmDetailsServiceLevel;
-
-	@Column(name="pharm_details_partner_account")
-	private String pharmDetailsPartnerAccount;
-
-	@JsonSerialize(using = JsonTimestampSerializer.class)
-	@Column(name="pharm_details_last_modify_date")
-	private Timestamp pharmDetailsLastModifyDate;
-
-	@Column(name="pharm_details_24_hr_flag")
-	private Integer pharmDetails24HrFlag;
-
-	@Column(name="pharm_details_cross_street")
-	private String pharmDetailsCrossStreet;
-
-	@Column(name="pharm_details_record_change")
-	private String pharmDetailsRecordChange;
-
-	@Column(name="pharm_details_old_service_level")
-	private String pharmDetailsOldServiceLevel;
-
-	@Column(name="pharm_details_text_service_level")
-	private String pharmDetailsTextServiceLevel;
-
-	@Column(name="pharm_details_text_service_level_change")
-	private String pharmDetailsTextServiceLevelChange;
-
-	@Column(name="pharm_details_version")
-	private String pharmDetailsVersion;
-
-	@Column(name="pharm_details_ss_email")
-	private String pharmDetailsSsEmail;
-
-	@Column(name="pharm_details_is_ss_pharm")
-	private Integer pharmDetailsIsSsPharm;
-
-	@Column(name="pharm_details_pharmacist_lname")
-	private String pharmDetailsPharmacistLname;
-
-	@Column(name="pharm_details_pharmacist_fname")
-	private String pharmDetailsPharmacistFname;
-
-	@Column(name="pharm_details_pharmacist_midname")
-	private String pharmDetailsPharmacistMidname;
-
-	@Column(name="pharm_details_pharmacist_prefix")
-	private String pharmDetailsPharmacistPrefix;
-
-	@Column(name="pharm_details_pharmacist_suffix")
-	private String pharmDetailsPharmacistSuffix;
-
-	@Column(name="pharm_details_ph_beeper")
-	private String pharmDetailsPhBeeper;
-
-	@Column(name="pharm_details_ph_cell")
-	private String pharmDetailsPhCell;
-
-	@Column(name="pharm_details_ph_night")
-	private String pharmDetailsPhNight;
-
-	@Column(name="pharm_details_specialtytype1")
-	private String pharmDetailsSpecialtytype1;
-
-	@Column(name="pharm_details_specialtytype2")
-	private String pharmDetailsSpecialtytype2;
-
-	@Column(name="pharm_details_specialtytype3")
-	private String pharmDetailsSpecialtytype3;
-
-	@Column(name="pharm_details_specialtytype4")
-	private String pharmDetailsSpecialtytype4;
-	
-	@Column(name="pharm_details_npi")
-	private String pharmDetailsnpi;
-
-
 	public String getPharmDetailsnpi() {
 		return pharmDetailsnpi;
 	}

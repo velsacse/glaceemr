@@ -26,9 +26,9 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H076;
-import com.glenwood.glaceemr.server.application.models.H113;
-import com.glenwood.glaceemr.server.application.models.H113_;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues_;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InitialSettings_;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr;
@@ -334,10 +334,10 @@ public class RefillRequestSpecification {
 			public Predicate toPredicate(Root<SchedulerAppointment> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				Join<SchedulerAppointment, SchedulerResource> aptResJoin=root.join(SchedulerAppointment_.schResLoc,JoinType.INNER);
-				Join<SchedulerAppointment,H113> aptH113Join=root.join(SchedulerAppointment_.h113ApptType,JoinType.LEFT);
+				Join<SchedulerAppointment,AppReferenceValues> aptH113Join=root.join(SchedulerAppointment_.App_Reference_ValuesApptType,JoinType.LEFT);
 				
 				aptResJoin.on(cb.and(cb.notEqual(aptResJoin.get(SchedulerResource_.schResourceIsdoctor), 0),cb.lessThan(aptResJoin.get(SchedulerResource_.schResourceIsdoctor), 10)));
-				aptH113Join.on(cb.and(cb.equal(aptH113Join.get(H113_.h113002), 402),cb.equal(aptH113Join.get(H113_.h113008), 1),cb.equal(aptH113Join.get(H113_.h113010), true)));	
+				aptH113Join.on(cb.and(cb.equal(aptH113Join.get(AppReferenceValues_.App_Reference_Values_tableId), 402),cb.equal(aptH113Join.get(AppReferenceValues_.App_Reference_Values_reason_type), 1),cb.equal(aptH113Join.get(AppReferenceValues_.App_Reference_Values_isActive), true)));	
 				Predicate patient=cb.equal(root.get(SchedulerAppointment_.schApptPatientId),patientId);
 				Predicate apptStatus=cb.not(root.get(SchedulerAppointment_.schApptStatus).in(6,12));
 				Predicate apptTime; 
@@ -387,7 +387,7 @@ public class RefillRequestSpecification {
 				Join<PatientRegistration,PatientInsDetail> patInsJoin=root.join(PatientRegistration_.patientInsuranceTable,JoinType.LEFT);
 				Join<PatientInsDetail,InsCompAddr> insCompJoin=patInsJoin.join(PatientInsDetail_.insCompAddr,JoinType.LEFT);
 				Join<InsCompAddr,InsCompany> insAddCompjoin=insCompJoin.join(InsCompAddr_.insCompany,JoinType.LEFT);
-				Join<PatientRegistration,H076> patH076Join=root.join(PatientRegistration_.referringPhyTable,JoinType.LEFT);
+				Join<PatientRegistration,ReferringDoctor> patH076Join=root.join(PatientRegistration_.referringPhyTable,JoinType.LEFT);
 				Join<PatientRegistration,EmployeeProfile> patEmpJoin=root.join(PatientRegistration_.empProfile,JoinType.LEFT);
 				Join<PatientRegistration,AccountType> patAccTypeJoin=root.join(PatientRegistration_.ptAccType,JoinType.LEFT);
 				Join<PatientRegistration,AuthorizationMaster> patAuthJoin=root.join(PatientRegistration_.authMaster,JoinType.LEFT);

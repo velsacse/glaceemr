@@ -25,21 +25,21 @@ import org.springframework.transaction.annotation.Transactional;
 import com.glenwood.glaceemr.server.application.models.AftercareIns;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H213;
-import com.glenwood.glaceemr.server.application.models.H213_;
-import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.H611_;
 import com.glenwood.glaceemr.server.application.models.PatientAftercareData;
 import com.glenwood.glaceemr.server.application.models.PatientAftercareData_;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalDxElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalDxElements_;
 import com.glenwood.glaceemr.server.application.models.PlanInstruction;
 import com.glenwood.glaceemr.server.application.models.PlanInstruction_;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator_;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
-import com.glenwood.glaceemr.server.application.repositories.H213Repository;
-import com.glenwood.glaceemr.server.application.repositories.H611Repository;
 import com.glenwood.glaceemr.server.application.repositories.PatientAftercareDataRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientAssessmentsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalDxElementsRepository;
+import com.glenwood.glaceemr.server.application.repositories.PrimarykeyGeneratorRepository;
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.ClinicalElementsService;
 import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
 import com.glenwood.glaceemr.server.application.specifications.PlanSpecification;
@@ -60,10 +60,10 @@ public class ImportDataServiceImpl implements ImportDataService{
 	PatientClinicalDxElementsRepository patientClinicalDxElementsRepository;
 	
 	@Autowired
-	H611Repository h611Repository;
+	PatientAssessmentsRepository h611Repository;
 	
 	@Autowired
-	H213Repository h213Repository;
+	PrimarykeyGeneratorRepository h213Repository;
 	
 	@Autowired
 	PatientAftercareDataRepository patientAftercareDataRepository;
@@ -252,12 +252,12 @@ public class ImportDataServiceImpl implements ImportDataService{
 			String dxCode) {
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<String> query= builder.createQuery(String.class);
-		Root<H611> root= query.from(H611.class);
+		Root<PatientAssessments> root= query.from(PatientAssessments.class);
 		
-		query.select(builder.coalesce(root.get(H611_.planNotes),""));
-		query.where(builder.and(builder.equal(root.get(H611_.h611002), encounterId),
-								 builder.equal(root.get(H611_.h611003), patientId),
-								  builder.like(builder.lower(builder.trim(root.get(H611_.h611005))), dxCode.trim().toLowerCase())));
+		query.select(builder.coalesce(root.get(PatientAssessments_.planNotes),""));
+		query.where(builder.and(builder.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId),
+								 builder.equal(root.get(PatientAssessments_.patient_assessments_patientId), patientId),
+								  builder.like(builder.lower(builder.trim(root.get(PatientAssessments_.patient_assessments_dxcode))), dxCode.trim().toLowerCase())));
 		
 		String returnVal= "";
 		try{
@@ -280,18 +280,18 @@ public class ImportDataServiceImpl implements ImportDataService{
 			Integer encounterId, Integer prevEncounterId, Integer userId) {
 		Timestamp encDate= getEncounterDate(encounterId);
 		int order= getMaxOrder(encounterId);
-		List<H611> prevDxlist= getEncounterAssessments(prevEncounterId);
-		List<H611> curDxlist= getEncounterAssessments(encounterId);
+		List<PatientAssessments> prevDxlist= getEncounterAssessments(prevEncounterId);
+		List<PatientAssessments> curDxlist= getEncounterAssessments(encounterId);
 		deleteDxIns(patientId, chartId, encounterId, "");
 		if(prevDxlist != null){
 			for(int i=0; i< prevDxlist.size(); i++) {
-				H611 res = prevDxlist.get(i);
-				String oldCode = res.getH611005() != null? res.getH611005().toString() : null;
+				PatientAssessments res = prevDxlist.get(i);
+				String oldCode = res.getpatient_assessments_dxcode() != null? res.getpatient_assessments_dxcode().toString() : null;
 				int flag = 0;
 				for(int j=0; j< curDxlist.size(); j++) {
 
-					H611 curres = curDxlist.get(j);
-					String newCode = curres.getH611005() != null? curres.getH611005().toString() : null;
+					PatientAssessments curres = curDxlist.get(j);
+					String newCode = curres.getpatient_assessments_dxcode() != null? curres.getpatient_assessments_dxcode().toString() : null;
 
 					if(oldCode != null && newCode != null) {
 						if(oldCode.trim().equalsIgnoreCase(newCode.trim())) {
@@ -303,7 +303,7 @@ public class ImportDataServiceImpl implements ImportDataService{
 				if(flag == 0) {
 					int orderRow;
 					try {
-						orderRow = Integer.parseInt(res.getH611010().toString());
+						orderRow = Integer.parseInt(res.getpatient_assessments_dxorder().toString());
 					} catch(Exception e) {
 						orderRow = 1;
 					}
@@ -312,16 +312,16 @@ public class ImportDataServiceImpl implements ImportDataService{
 					Timestamp now= new Timestamp(new Date().getTime());
 					
 					int maxId= getMaxDxId();
-					H611 newObj= new H611(maxId, encounterId, res.getH611003(), encDate,
-							res.getH611005(), res.getH611006(), res.getH611007(), res.getH611008(),
-							res.getH555555(), res.getH611009(), orderVal, now,
-							res.getH611012(), now, res.getH611014(), res.getH611015(),
-							res.getH611016(), res.getH611CodingSystemid(), res.getAssessmentDxcodesystem(), res.getPlanNotes());
+					PatientAssessments newObj= new PatientAssessments(maxId, encounterId, res.getpatient_assessments_patientId(), encDate,
+							res.getpatient_assessments_dxcode(), res.getpatient_assessments_dxdescription(), res.getpatient_assessments_scribble(), res.getpatient_assessments_isactive(),
+							res.getH555555(), res.getpatient_assessments_dxtype(), orderVal, now,
+							res.getpatient_assessments_userid(), now, res.getpatient_assessments_lastmodifiedby(), res.getpatient_assessments_assessmentcomment(),
+							res.getpatient_assessments_status(), res.getpatient_assessmentsCodingSystemid(), res.getAssessmentDxcodesystem(), res.getPlanNotes());
 
 					h611Repository.save(newObj);
 					updateDxSequence(maxId);
 
-					List<PatientClinicalDxElements> result = getPreviousDxInstructions(patientId, prevEncounterId, HUtil.Nz(res.getH611005(),""));
+					List<PatientClinicalDxElements> result = getPreviousDxInstructions(patientId, prevEncounterId, HUtil.Nz(res.getpatient_assessments_dxcode(),""));
 					for(int j=0; j<result.size(); j++){
 						PatientClinicalDxElements resultRow= result.get(j);
 						PatientClinicalDxElements patdxObj= new PatientClinicalDxElements(maxId, patientId, chartId, encounterId, resultRow.getPatientClinicalDxElementsGwid(), resultRow.getPatientClinicalDxElementsCode(), resultRow.getPatientClinicalDxElementsCodesystem(), resultRow.getPatientClinicalDxElementsValue());
@@ -334,9 +334,9 @@ public class ImportDataServiceImpl implements ImportDataService{
 				}
 				else {
 					
-					updateDxNotes(encounterId, patientId, res.getH611005(), res.getPlanNotes());
-					int max= getAssessmentId(encounterId, patientId, res.getH611005());
-					List<PatientClinicalDxElements> result = getPreviousDxInstructions(patientId, prevEncounterId, HUtil.Nz(res.getH611005(),""));
+					updateDxNotes(encounterId, patientId, res.getpatient_assessments_dxcode(), res.getPlanNotes());
+					int max= getAssessmentId(encounterId, patientId, res.getpatient_assessments_dxcode());
+					List<PatientClinicalDxElements> result = getPreviousDxInstructions(patientId, prevEncounterId, HUtil.Nz(res.getpatient_assessments_dxcode(),""));
 					for(int j=0; j<result.size(); j++){
 						PatientClinicalDxElements resultRow= result.get(j);
 						PatientClinicalDxElements patdxObj= new PatientClinicalDxElements(max, patientId, chartId, encounterId, resultRow.getPatientClinicalDxElementsGwid(), resultRow.getPatientClinicalDxElementsCode(), resultRow.getPatientClinicalDxElementsCodesystem(), resultRow.getPatientClinicalDxElementsValue());
@@ -355,9 +355,9 @@ public class ImportDataServiceImpl implements ImportDataService{
 	 */
 	private void updateDxSequence(int max) {
 		
-		H213 seqObj=  h213Repository.findOne(PlanSpecification.getDxSequence());
+		PrimarykeyGenerator seqObj=  h213Repository.findOne(PlanSpecification.getDxSequence());
 		if(seqObj!= null){
-			seqObj.setH213003(max);
+			seqObj.setprimarykey_generator_rowcount(max);
 			h213Repository.save(seqObj);
 		}
 	}
@@ -369,10 +369,10 @@ public class ImportDataServiceImpl implements ImportDataService{
 	private int getMaxDxId() {
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<Integer> query= builder.createQuery(Integer.class);
-		Root<H213> root= query.from(H213.class);
+		Root<PrimarykeyGenerator> root= query.from(PrimarykeyGenerator.class);
 		
-		query.select(builder.coalesce(root.get(H213_.h213003),1));
-		query.where(builder.equal(root.get(H213_.h213002), "h611"));
+		query.select(builder.coalesce(root.get(PrimarykeyGenerator_.primarykey_generator_rowcount),1));
+		query.where(builder.equal(root.get(PrimarykeyGenerator_.primarykey_generator_tablename), "h611"));
 		
 		int returnVal= 1;
 		try{
@@ -398,13 +398,13 @@ public class ImportDataServiceImpl implements ImportDataService{
 		
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<Integer> query= builder.createQuery(Integer.class);
-		Root<H611> root= query.from(H611.class);
+		Root<PatientAssessments> root= query.from(PatientAssessments.class);
 		
-		query.select(builder.coalesce(root.get(H611_.h611001),-1));
+		query.select(builder.coalesce(root.get(PatientAssessments_.patient_assessments_id),-1));
 		
-		query.where(builder.and(builder.equal(root.get(H611_.h611002), encounterId),
-				builder.and(builder.equal(root.get(H611_.h611003), patientId),
-				 builder.like(builder.lower(builder.trim(root.get(H611_.h611005))), dxCode.trim().toLowerCase()))));
+		query.where(builder.and(builder.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId),
+				builder.and(builder.equal(root.get(PatientAssessments_.patient_assessments_patientId), patientId),
+				 builder.like(builder.lower(builder.trim(root.get(PatientAssessments_.patient_assessments_dxcode))), dxCode.trim().toLowerCase()))));
 		
 		int returnVal= -1;
 		try{
@@ -421,7 +421,7 @@ public class ImportDataServiceImpl implements ImportDataService{
 	 * Get Dx Notes based on Encounter
 	 * @param encounterId
 	 * @param patientId
-	 * @param h611005
+	 * @param patient_assessments_dxcode
 	 */
 	private void updateDxNotes(Integer encounterId, Integer patientId, String dxCode, String notes) {
 		
@@ -431,15 +431,15 @@ public class ImportDataServiceImpl implements ImportDataService{
 	}
 
 
-	private List<H611> getAssessments(Integer encounterId, Integer patientId, String dxCode, String notes) {
+	private List<PatientAssessments> getAssessments(Integer encounterId, Integer patientId, String dxCode, String notes) {
 		return h611Repository.findAll(PlanSpecification.getAssessments(encounterId, patientId, dxCode));
 	}
 
-	private void updateNotes(List<H611> dxlist, String notes) {
+	private void updateNotes(List<PatientAssessments> dxlist, String notes) {
 		
 		if(dxlist != null){
 			for(int i=0; i<dxlist.size(); i++){
-				H611 dxRow= dxlist.get(i);
+				PatientAssessments dxRow= dxlist.get(i);
 				dxRow.setPlanNotes(notes);
 				h611Repository.save(dxRow);
 			}
@@ -526,25 +526,25 @@ public class ImportDataServiceImpl implements ImportDataService{
 	 * Get Assessments based on Encounter 
 	 * @param encounterId
 	 */
-	private List<H611> getEncounterAssessments(Integer encounterId) {
+	private List<PatientAssessments> getEncounterAssessments(Integer encounterId) {
 		CriteriaBuilder builder= em.getCriteriaBuilder();
-		CriteriaQuery<H611> query= builder.createQuery(H611.class);
-		Root<H611> root= query.from(H611.class);
+		CriteriaQuery<PatientAssessments> query= builder.createQuery(PatientAssessments.class);
+		Root<PatientAssessments> root= query.from(PatientAssessments.class);
 		
-		query.select(builder.construct(H611.class,
-			root.get(H611_.h611001),root.get(H611_.h611002),root.get(H611_.h611003),
-			 root.get(H611_.h611004),root.get(H611_.h611005),root.get(H611_.h611006),
-			  root.get(H611_.h611007),root.get(H611_.h611008),root.get(H611_.h555555),
-			   root.get(H611_.h611009),root.get(H611_.h611010),root.get(H611_.h611011),
-			    root.get(H611_.h611012),root.get(H611_.h611013),root.get(H611_.h611014),
-			     root.get(H611_.h611015),root.get(H611_.h611016),root.get(H611_.h611CodingSystemid),
-			      root.get(H611_.assessmentDxcodesystem),root.get(H611_.planNotes)));
+		query.select(builder.construct(PatientAssessments.class,
+			root.get(PatientAssessments_.patient_assessments_id),root.get(PatientAssessments_.patient_assessments_id),root.get(PatientAssessments_.patient_assessments_patientId),
+			 root.get(PatientAssessments_.patient_assessments_encounterdate),root.get(PatientAssessments_.patient_assessments_dxcode),root.get(PatientAssessments_.patient_assessments_dxdescription),
+			  root.get(PatientAssessments_.patient_assessments_scribble),root.get(PatientAssessments_.patient_assessments_isactive),root.get(PatientAssessments_.h555555),
+			   root.get(PatientAssessments_.patient_assessments_dxtype),root.get(PatientAssessments_.patient_assessments_dxorder),root.get(PatientAssessments_.patient_assessments_createdon),
+			    root.get(PatientAssessments_.patient_assessments_userid),root.get(PatientAssessments_.patient_assessments_lastmodifiedon),root.get(PatientAssessments_.patient_assessments_lastmodifiedby),
+			     root.get(PatientAssessments_.patient_assessments_assessmentcomment),root.get(PatientAssessments_.patient_assessments_status),root.get(PatientAssessments_.patient_assessmentsCodingSystemid),
+			      root.get(PatientAssessments_.assessmentDxcodesystem),root.get(PatientAssessments_.planNotes)));
 		
-		query.where(builder.equal(root.get(H611_.h611002), encounterId));
+		query.where(builder.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId));
 		
-		query.orderBy(builder.asc(root.get(H611_.h611010)));
+		query.orderBy(builder.asc(root.get(PatientAssessments_.patient_assessments_dxorder)));
 		
-		List<H611> result= null;
+		List<PatientAssessments> result= null;
 		try{
 			result= em.createQuery(query).getResultList();
 		}catch(Exception e){
@@ -562,10 +562,10 @@ public class ImportDataServiceImpl implements ImportDataService{
 	private int getMaxOrder(Integer encounterId) {
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<Integer> query= builder.createQuery(Integer.class);
-		Root<H611> root= query.from(H611.class);
+		Root<PatientAssessments> root= query.from(PatientAssessments.class);
 		
-		query.select(builder.coalesce(builder.max(root.get(H611_.h611010)),1));
-		query.where(builder.equal(root.get(H611_.h611002), encounterId));
+		query.select(builder.coalesce(builder.max(root.get(PatientAssessments_.patient_assessments_dxorder)),1));
+		query.where(builder.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId));
 		
 		int returnVal= 1;
 		try{

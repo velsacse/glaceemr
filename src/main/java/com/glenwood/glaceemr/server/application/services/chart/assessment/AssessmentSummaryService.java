@@ -3,7 +3,7 @@ package com.glenwood.glaceemr.server.application.services.chart.assessment;
 import java.util.List;
 
 import org.json.JSONObject;
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 
 
 public interface AssessmentSummaryService {
@@ -15,7 +15,7 @@ public interface AssessmentSummaryService {
 	 * @return
 	 * @throws Exception
 	 */
-	List<H611> getCurrentDiagnosis(Integer patienId,Integer encounterId) throws Exception;
+	List<PatientAssessments> getCurrentDiagnosis(Integer patienId,Integer encounterId) throws Exception;
 	
 	/**
 	 * Method to save current visit data
@@ -33,7 +33,7 @@ public interface AssessmentSummaryService {
 	 * @param problemId
 	 * @return
 	 */
-	List<H611> getEditData(Integer patientId, Integer encounterId,
+	List<PatientAssessments> getEditData(Integer patientId, Integer encounterId,
 			String dxCode, Integer problemId);
 
 	/**

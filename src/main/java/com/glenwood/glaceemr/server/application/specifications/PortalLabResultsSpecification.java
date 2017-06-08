@@ -14,8 +14,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileDetails_;
-import com.glenwood.glaceemr.server.application.models.H068;
-import com.glenwood.glaceemr.server.application.models.H068_;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
+import com.glenwood.glaceemr.server.application.models.ChartStatus_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
@@ -28,14 +28,14 @@ import com.glenwood.glaceemr.server.application.models.LabParameters_;
 public class PortalLabResultsSpecification {
 
 
-	public static Specification<H068> getLabStatusConfig() {
-		return new Specification<H068>() {
+	public static Specification<ChartStatus> getLabStatusConfig() {
+		return new Specification<ChartStatus>() {
 
 			@Override
-			public Predicate toPredicate(Root<H068> root, CriteriaQuery<?> cq,
+			public Predicate toPredicate(Root<ChartStatus> root, CriteriaQuery<?> cq,
 					CriteriaBuilder cb) {
 
-				Predicate labResultsPredicate = cq.where(cb.equal(root.get(H068_.h068005), 413)).getRestriction();
+				Predicate labResultsPredicate = cq.where(cb.equal(root.get(ChartStatus_.chart_status_reference_id), 413)).getRestriction();
 				return labResultsPredicate;
 			}	
 		};

@@ -7,8 +7,8 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.glenwood.glaceemr.server.application.models.H068;
-import com.glenwood.glaceemr.server.application.models.H068_;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
+import com.glenwood.glaceemr.server.application.models.ChartStatus_;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InitialSettings_;
 
@@ -36,14 +36,14 @@ public class InitialSettingsSpecification {
 	 * @param id
 	 * @return Specification<H068>
 	 */
-	public static Specification<H068> getIdType(final Integer type)
+	public static Specification<ChartStatus> getIdType(final Integer type)
 	{
-		return new Specification<H068>() {
+		return new Specification<ChartStatus>() {
 
 			@Override
-			public Predicate toPredicate(Root<H068> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<ChartStatus> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
-				Predicate typeId = cb.equal(root.get(H068_.h068005),type);
+				Predicate typeId = cb.equal(root.get(ChartStatus_.chart_status_reference_id),type);
 				return typeId;
 			}
 		};

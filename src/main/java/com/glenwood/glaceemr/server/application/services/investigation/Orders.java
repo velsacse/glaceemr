@@ -3,7 +3,7 @@ package com.glenwood.glaceemr.server.application.services.investigation;
 import java.util.List;
 
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
-import com.glenwood.glaceemr.server.application.models.H068;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
 import com.glenwood.glaceemr.server.application.models.ImmunisationSite;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails;
@@ -16,9 +16,9 @@ public class Orders {
 
 	LabData labEntries;
 	List<Vaccines> vaccineConsentInfo;
-	List<H068> statusList;
-	List<H068> refusalReasonList;
-	List<H068> sourceList;
+	List<ChartStatus> statusList;
+	List<ChartStatus> refusalReasonList;
+	List<ChartStatus> sourceList;
 	List<ImmunisationSite> siteInfo;
 	List<LabEntriesParameter> labParameters;
 	List<String> docDetails;
@@ -130,22 +130,22 @@ public class Orders {
 	public void setLabEntries(LabData labEntries) {
 		this.labEntries = labEntries;
 	}
-	public List<H068> getStatusList() {
+	public List<ChartStatus> getStatusList() {
 		return statusList;
 	}
-	public void setStatusList(List<H068> statusList) {
+	public void setStatusList(List<ChartStatus> statusList) {
 		this.statusList = statusList;
 	}
-	public List<H068> getRefusalReasonList() {
+	public List<ChartStatus> getRefusalReasonList() {
 		return refusalReasonList;
 	}
-	public void setRefusalReasonList(List<H068> refusalReasonList) {
+	public void setRefusalReasonList(List<ChartStatus> refusalReasonList) {
 		this.refusalReasonList = refusalReasonList;
 	}
-	public List<H068> getSourceList() {
+	public List<ChartStatus> getSourceList() {
 		return sourceList;
 	}
-	public void setSourceList(List<H068> sourceList) {
+	public void setSourceList(List<ChartStatus> sourceList) {
 		this.sourceList = sourceList;
 	}
 	public List<ImmunisationSite> getSiteInfo() {

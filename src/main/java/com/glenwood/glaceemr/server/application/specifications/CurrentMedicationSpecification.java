@@ -19,11 +19,6 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.EpisodeTypeList;
-import com.glenwood.glaceemr.server.application.models.H076;
-import com.glenwood.glaceemr.server.application.models.H076_;
-import com.glenwood.glaceemr.server.application.models.H113;
-import com.glenwood.glaceemr.server.application.models.H113_;
-import com.glenwood.glaceemr.server.application.models.H479;
 import com.glenwood.glaceemr.server.application.models.PatientEncounterType;
 import com.glenwood.glaceemr.server.application.models.PatientEncounterType_;
 import com.glenwood.glaceemr.server.application.models.PatientEpisode;
@@ -35,6 +30,9 @@ import com.glenwood.glaceemr.server.application.models.PharmacyMapping_;
 import com.glenwood.glaceemr.server.application.models.RatePlan;
 import com.glenwood.glaceemr.server.application.models.ReceiptDetail;
 import com.glenwood.glaceemr.server.application.models.ReceiptDetail_;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor_;
+import com.glenwood.glaceemr.server.application.models.RoomDetails;
 
 
 @Component
@@ -91,14 +89,14 @@ public class CurrentMedicationSpecification {
 				Join<Chart, PatientRegistration> chartPatJoin=encChartJoin.join(Chart_.patientRegistrationTable,JoinType.INNER);
 				Join<Encounter, PatientEncounterType> encPatTypeJoin=root.join(Encounter_.patientEncounterType,JoinType.INNER);
 				Join<PatientEncounterType, RatePlan> patRateJoin=encPatTypeJoin.join(PatientEncounterType_.ratePlan,JoinType.INNER);
-				Join<Encounter, H479> encH479Join=root.join(Encounter_.h479,JoinType.LEFT);
-				Join<PatientRegistration, H076> patH076Join=chartPatJoin.join(PatientRegistration_.referringPhyTable,JoinType.LEFT);
+				Join<Encounter, RoomDetails> encH479Join=root.join(Encounter_.room_details,JoinType.LEFT);
+				Join<PatientRegistration, ReferringDoctor> patH076Join=chartPatJoin.join(PatientRegistration_.referringPhyTable,JoinType.LEFT);
 				Join<Encounter, EmployeeProfile> encEmpJoin=root.join(Encounter_.empProfileEmpId,JoinType.LEFT);
-				Join<Encounter, H076> encH076Join=root.join(Encounter_.referringTable,JoinType.LEFT);
+				Join<Encounter, ReferringDoctor> encH076Join=root.join(Encounter_.referringTable,JoinType.LEFT);
 				Join<Encounter, PatientEpisode> encPatEpiJoin=root.join(Encounter_.patientEpisode,JoinType.LEFT);
 				Join<PatientEpisode, EpisodeTypeList> patEpisodeJoin=encPatEpiJoin.join(PatientEpisode_.episodeTypeList,JoinType.LEFT);
-				patH076Join.on(cb.equal(patH076Join.get(H076_.h076016), 1));
-				encH076Join.on(cb.equal(encH076Join.get(H076_.h076016), 1));
+				patH076Join.on(cb.equal(patH076Join.get(ReferringDoctor_.referring_doctor_type), 1));
+				encH076Join.on(cb.equal(encH076Join.get(ReferringDoctor_.referring_doctor_type), 1));
 				
 				Predicate type=cb.equal(root.get(Encounter_.encounterType), 1);
 				Predicate status=root.get(Encounter_.encounterStatus).in(1,2);

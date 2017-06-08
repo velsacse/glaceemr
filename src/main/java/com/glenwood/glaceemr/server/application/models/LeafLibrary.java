@@ -5,18 +5,24 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "leaf_library")
 public class LeafLibrary {
 
+	
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "leaf_library_leaf_library_id_seq")
+	@SequenceGenerator(name = "leaf_library_leaf_library_id_seq", sequenceName = "leaf_library_leaf_library_id_seq", allocationSize = 1)
 	@Column(name="leaf_library_id")
 	private Integer leafLibraryId;
 
@@ -135,13 +141,13 @@ public class LeafLibrary {
 	List<LeafPatient> leafPatients;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name = "leaf_library_name", referencedColumnName = "h616002", insertable = false, updatable = false)
-	private H616 h616;
+	@JoinColumn(name = "leaf_library_name", referencedColumnName = "template_details_name", insertable = false, updatable = false)
+	private TemplateDetails template_details;
 	
 	
 	@OneToOne(fetch=FetchType.LAZY,optional=false)
-	@JoinColumn(name="leaf_library_id", referencedColumnName="h448003" , insertable=false, updatable=false)
-	private H448 h448;
+	@JoinColumn(name="leaf_library_id", referencedColumnName="leaf_conf_data_leafid" , insertable=false, updatable=false)
+	private LeafConfData leaf_conf_data;
 	
 	public List<LeafPatient> getLeafPatients() {
 		return leafPatients;
@@ -151,12 +157,12 @@ public class LeafLibrary {
 		this.leafPatients = leafPatients;
 	}
 
-	public H448 getH448() {
-		return h448;
+	public LeafConfData getleaf_conf_data() {
+		return leaf_conf_data;
 	}
 
-	public void setH448(H448 h448) {
-		this.h448 = h448;
+	public void setleaf_conf_data(LeafConfData leaf_conf_data) {
+		this.leaf_conf_data = leaf_conf_data;
 	}
 
 	public LeafGroup getLeafGroup() {
@@ -176,12 +182,12 @@ public class LeafLibrary {
 		this.providerLeafMappings = providerLeafMappings;
 	}
 
-	public H616 getH616() {
-		return h616;
+	public TemplateDetails gettemplate_details() {
+		return template_details;
 	}
 
-	public void setH616(H616 h616) {
-		this.h616 = h616;
+	public void settemplate_details(TemplateDetails template_details) {
+		this.template_details = template_details;
 	}
 	
 	public Integer getLeafLibraryId() {

@@ -8,8 +8,8 @@ import javax.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
 
-import com.glenwood.glaceemr.server.application.models.H611;
-import com.glenwood.glaceemr.server.application.models.H611_;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments_;
 import com.glenwood.glaceemr.server.application.models.Icdm;
 import com.glenwood.glaceemr.server.application.models.Icdm_;
 
@@ -21,15 +21,15 @@ public class AssessmentSpecification {
 	 * @param encounterId
 	 * @return
 	 */
-	public static Specification<H611> DxByEncounterId(final Integer encounterId)	{
-		return new Specification<H611>() {
+	public static Specification<PatientAssessments> DxByEncounterId(final Integer encounterId)	{
+		return new Specification<PatientAssessments>() {
 
 			@Override
-			public Predicate toPredicate(Root<H611> root,
+			public Predicate toPredicate(Root<PatientAssessments> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
 				
-				Predicate DxByEncounterId = cb.equal(root.get(H611_.h611002), encounterId);
+				Predicate DxByEncounterId = cb.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId);
 				return DxByEncounterId;
 			}
 		};
@@ -40,15 +40,15 @@ public class AssessmentSpecification {
 	 * @param patientId
 	 * @return
 	 */
-	public static Specification<H611> DxByPatientId(final Integer patientId)	{
-		return new Specification<H611>() {
+	public static Specification<PatientAssessments> DxByPatientId(final Integer patientId)	{
+		return new Specification<PatientAssessments>() {
 
 			@Override
-			public Predicate toPredicate(Root<H611> root,
+			public Predicate toPredicate(Root<PatientAssessments> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
 				
-				Predicate DxByPatientId = cb.equal(root.get(H611_.h611003), patientId);
+				Predicate DxByPatientId = cb.equal(root.get(PatientAssessments_.patient_assessments_patientId), patientId);
 				return DxByPatientId;
 			}
 		};
@@ -57,15 +57,15 @@ public class AssessmentSpecification {
 	/*
 	 * Fetching information related to particular code
 	 */
-	public static Specification<H611> DxByCode(final String dxCode)	{
-		return new Specification<H611>() {
+	public static Specification<PatientAssessments> DxByCode(final String dxCode)	{
+		return new Specification<PatientAssessments>() {
 
 			@Override
-			public Predicate toPredicate(Root<H611> root,
+			public Predicate toPredicate(Root<PatientAssessments> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
 				
-				Predicate DxByPatientId = cb.like(root.get(H611_.h611005), dxCode);
+				Predicate DxByPatientId = cb.like(root.get(PatientAssessments_.patient_assessments_dxcode), dxCode);
 				return DxByPatientId;
 			}
 		};
@@ -161,17 +161,17 @@ public class AssessmentSpecification {
 	 * @param problemid
 	 * @return
 	 */
-	public static Specification<H611> getDataToEdit(final int patientid,final int encounterid,final String dxCode,final int problemid) {
-		return new Specification<H611>() {
+	public static Specification<PatientAssessments> getDataToEdit(final int patientid,final int encounterid,final String dxCode,final int problemid) {
+		return new Specification<PatientAssessments>() {
 
 			@Override
-			public Predicate toPredicate(Root<H611> root,
+			public Predicate toPredicate(Root<PatientAssessments> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {	
 				
-				Predicate predicate=cb.equal(root.get(H611_.h611003), patientid);
-				Predicate predicate1=cb.equal(root.get(H611_.h611002), encounterid);
-				Predicate predicate2=cb.equal(root.get(H611_.h611001), problemid);
-				Predicate predicate3=cb.like(root.get(H611_.h611005), dxCode);
+				Predicate predicate=cb.equal(root.get(PatientAssessments_.patient_assessments_patientId), patientid);
+				Predicate predicate1=cb.equal(root.get(PatientAssessments_.patient_assessments_id), encounterid);
+				Predicate predicate2=cb.equal(root.get(PatientAssessments_.patient_assessments_id), problemid);
+				Predicate predicate3=cb.like(root.get(PatientAssessments_.patient_assessments_dxcode), dxCode);
 				Predicate result;
 				if(problemid!=-1){
 					 result=cb.and(predicate,predicate1,predicate2);
@@ -191,14 +191,14 @@ public class AssessmentSpecification {
 	 * @param keyword
 	 * @return
 	 */
-	public static Specification<H611> getOrder()	{
-		return new Specification<H611>() {
+	public static Specification<PatientAssessments> getOrder()	{
+		return new Specification<PatientAssessments>() {
 
 			@Override
-			public Predicate toPredicate(Root<H611> root,
+			public Predicate toPredicate(Root<PatientAssessments> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
-				query.orderBy(cb.asc(root.get(H611_.h611010)));
+				query.orderBy(cb.asc(root.get(PatientAssessments_.patient_assessments_dxorder)));
 				return query.getRestriction();
 			}
 		};

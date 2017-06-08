@@ -4,33 +4,34 @@ import java.util.List;
 
 public class AppointmentDetailsBean {
 
-	List<H113> schApptStatusList;
+	List<AppReferenceValues> schApptStatusList;
 	
-	List<H113> schApptTypeList;
+	List<AppReferenceValues> schApptTypeList;
 	
-	List<H113> schApptReasonList;
+	List<AppReferenceValues> schApptReasonList;
 
-	public List<H113> getSchApptStatusList() {
+	public List<AppReferenceValues> getSchApptStatusList() {
 		return schApptStatusList;
 	}
 
-	public void setSchApptStatusList(List<H113> schApptStatusList) {
+	
+	public void setSchApptStatusList(List<AppReferenceValues> schApptStatusList) {
 		this.schApptStatusList = schApptStatusList;
 	}
 
-	public List<H113> getSchApptTypeList() {
+	public List<AppReferenceValues> getSchApptTypeList() {
 		return schApptTypeList;
 	}
 
-	public void setSchApptTypeList(List<H113> schApptTypeList) {
+	public void setSchApptTypeList(List<AppReferenceValues> schApptTypeList) {
 		this.schApptTypeList = schApptTypeList;
 	}
 
-	public List<H113> getSchApptReasonList() {
+	public List<AppReferenceValues> getSchApptReasonList() {
 		return schApptReasonList;
 	}
 
-	public void setSchApptReasonList(List<H113> schApptReasonList) {
+	public void setSchApptReasonList(List<AppReferenceValues> schApptReasonList) {
 		this.schApptReasonList = schApptReasonList;
 	}
 	

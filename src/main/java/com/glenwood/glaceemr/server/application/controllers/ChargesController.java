@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.Cpt;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
@@ -53,6 +53,7 @@ import com.google.common.base.Strings;
 @Transactional
 @RequestMapping(value = "/user/Charges")
 public class ChargesController {
+	 
 	
 	@Autowired
 	ChargesServices chargesServices;
@@ -190,7 +191,7 @@ public class ChargesController {
 	@ResponseBody
 	public EMRResponseBean getEMRDxCodes(@RequestParam(value="patientId", required=true)Integer patientId,
 										@RequestParam(value="dos", required=true)String dos) throws Exception{
-		List<H611> dxDetails=chargesServices.getEMRDxCodes(patientId,dos);								
+		List<PatientAssessments> dxDetails=chargesServices.getEMRDxCodes(patientId,dos);								
 		EMRResponseBean dxDetail=new EMRResponseBean();
 		dxDetail.setData(dxDetails);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FINANCE_CHARGE, LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"success in getting EMR diagnosis list" , -1,request.getRemoteAddr() , patientId,"Dos="+dos.toString(),LogUserType.USER_LOGIN ,"","");

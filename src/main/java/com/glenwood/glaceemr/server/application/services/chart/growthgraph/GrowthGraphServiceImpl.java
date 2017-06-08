@@ -21,13 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
-import com.glenwood.glaceemr.server.application.models.H650;
+import com.glenwood.glaceemr.server.application.models.GrowthGraph;
+import com.glenwood.glaceemr.server.application.models.GrowthGraphPatientData;
 import com.glenwood.glaceemr.server.application.models.GrowthGraphVitalData;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
-import com.glenwood.glaceemr.server.application.models.GrowthGraphPatientData;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
-import com.glenwood.glaceemr.server.application.repositories.H650Repository;
+import com.glenwood.glaceemr.server.application.repositories.GrowthGraphRepository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
@@ -51,7 +51,7 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 	InitialSettingsRepository initialSettingsRepository;
 
 	@Autowired
-	H650Repository h650Repository;
+	GrowthGraphRepository growthgraphRepository;
 
 	@Autowired
 	EncounterEntityRepository encounterEntityRepository;
@@ -277,14 +277,14 @@ public class GrowthGraphServiceImpl implements GrowthGraphService{
 	 * @return list graph details
 	 */
 	@Override
-	public List<H650> getGraphList(String patientId) {
+	public List<GrowthGraph> getGraphList(String patientId) {
 
 
 		PatientRegistration patientRegistration=patientRegistrationRepository.findOne(PatientRegistrationSpecification.getPatientPersonalDetails(Integer.parseInt(patientId)));
 		int ageInMonth = (int)((DateUtil.dateDiff( DateUtil.DATE ,patientRegistration.getPatientRegistrationDob() ,new Date() )%365)/30);
 		Integer sex=patientRegistration.getPatientRegistrationSex();
 
-		List<H650> graphData=h650Repository.findAll(GrowthGraphSpecification.byAgeandSex(ageInMonth, sex));
+		List<GrowthGraph> graphData=growthgraphRepository.findAll(GrowthGraphSpecification.byAgeandSex(ageInMonth, sex));
 
 		return graphData;
 	}

@@ -22,15 +22,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.Chart;
-import com.glenwood.glaceemr.server.application.models.H213;
-import com.glenwood.glaceemr.server.application.models.H809;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PortalUser;
 import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
-import com.glenwood.glaceemr.server.application.repositories.H213Repository;
-import com.glenwood.glaceemr.server.application.repositories.H809Repository;
+import com.glenwood.glaceemr.server.application.repositories.PrimarykeyGeneratorRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalUserRepository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientInsDetailRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
@@ -52,7 +52,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 	PortalUserRepository portalUserRepository; 
 
 	@Autowired
-	H809Repository h809Repository;
+	PatientPortalUserRepository h809Repository;
 
 	@Autowired
 	PatientRegistrationRepository patientRegistrationRepository;
@@ -67,7 +67,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 	PortalMedicalSummaryService portalMedicalSummaryService;
 	
 	@Autowired
-	H213Repository h213Repository;
+	PrimarykeyGeneratorRepository h213Repository;
 	
 	@Autowired
 	InitialSettingsRepository initialSettingsRepository;
@@ -115,7 +115,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		}
 		}
 
-		List<H809> portalUsersList= h809Repository.findAll(PortalLoginSpecification.getAllPatientsByUsername(username));
+		List<PatientPortalUser> portalUsersList= h809Repository.findAll(PortalLoginSpecification.getAllPatientsByUsername(username));
 		
 		if(portalUsersList.size()>0){
 			
@@ -185,11 +185,11 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		patientChart.setChartAlreadyseen(false);
 		
 		
-		H213 h213=h213Repository.findOne(PortalLoginSpecification.h213ByCategoryName("chart"));
-		patientChart.setChartId(h213.getH213003()+1);
+		PrimarykeyGenerator h213=h213Repository.findOne(PortalLoginSpecification.h213ByCategoryName("chart"));
+		patientChart.setChartId(h213.getprimarykey_generator_rowcount()+1);
 		patientChart=chartRepository.saveAndFlush(patientChart);//creating an entry in chart table
 		
-		h213.setH213003(patientChart.getChartId());
+		h213.setprimarykey_generator_rowcount(patientChart.getChartId());
 		h213=h213Repository.saveAndFlush(h213);//updating chart max id in h213 table with chart_id from chart table
 		
 		
@@ -197,17 +197,17 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		
 		patientDetails.setPatientRegistrationChartno(String.valueOf(patientChart.getChartId()));//updating chart_id in patient_registration table
 		
-		H809 portalUser=new H809();
-		portalUser.setH809002(Long.valueOf(String.valueOf(patientDetails.getPatientRegistrationId())));
-		portalUser.setH809003(new java.sql.Date(new Date().getTime()));
-		portalUser.setH809004(registrationBean.getPatRegPreferredUsername());
+		PatientPortalUser portalUser=new PatientPortalUser();
+		portalUser.setpatient_portal_user_patient_id(Long.valueOf(String.valueOf(patientDetails.getPatientRegistrationId())));
+		portalUser.setpatient_portal_user_created_on(new java.sql.Date(new Date().getTime()));
+		portalUser.setpatient_portal_user_name(registrationBean.getPatRegPreferredUsername());
 		MD5 md5 = new MD5();
 		md5.setHashString(registrationBean.getPatRegPassword());
 		String encryptedPassword=md5.getHashString();
-		portalUser.setH809005(encryptedPassword);
-		portalUser.setH809006(1);
-		portalUser.setH809009(0);
-		portalUser.setH809010(registrationBean.getPatRegPassword());
+		portalUser.setpatient_portal_user_password_hash(encryptedPassword);
+		portalUser.setpatient_portal_user_account_state(1);
+		portalUser.setpatient_portal_user_portal_account_verified(0);
+		portalUser.setpatient_portal_user_password(registrationBean.getPatRegPassword());
 		registrationBean.setSecurityQuestion1(registrationBean.getSecurityQuestion1().replaceAll("'", "''"));
 		registrationBean.setSecurityQuestion2(registrationBean.getSecurityQuestion2().replaceAll("'", "''"));
 		registrationBean.setSecurityQuestion3(registrationBean.getSecurityQuestion3().replaceAll("'", "''"));
@@ -224,7 +224,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		portalUser.setAccessTime(new Timestamp(new Date().getTime()));
         portalUser.setFromPortalIsactive(true);
         portalUser.setFromPortal(true);
-        portalUser.setH809Token("-1");
+        portalUser.setpatient_portal_userToken("-1");
 
 		portalUser=h809Repository.saveAndFlush(portalUser);//creating an entry in h809 table
 		
@@ -317,8 +317,8 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		
 		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENT_REGISTRATION,
 				AuditTrailEnumConstants.LogActionType.CREATE,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"New patient registered through Patient Portal.",-1,
-				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
-				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"New patient registered through Patient Portal with id "+portalUser.getH809002(),"");
+				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getpatient_portal_user_patient_id())),"",
+				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"New patient registered through Patient Portal with id "+portalUser.getpatient_portal_user_patient_id(),"");
 		
 		return regResponse;
 	}
@@ -337,9 +337,9 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 	@Override
 	public PortalRegistrationResponse activateUserAccount(int patientId) {
 		
-		H809 userDetails=h809Repository.findOne(PortalLoginSpecification.inactivePatientById(patientId));
-		userDetails.setH809006(1);
-		userDetails.setH809009(1);
+		PatientPortalUser userDetails=h809Repository.findOne(PortalLoginSpecification.inactivePatientById(patientId));
+		userDetails.setpatient_portal_user_account_state(1);
+		userDetails.setpatient_portal_user_portal_account_verified(1);
 		userDetails.setPasswordReset(1);
 		userDetails=h809Repository.saveAndFlush(userDetails);
 		
@@ -355,7 +355,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<H213> root = cq.from(H213.class);
+		Root<PrimarykeyGenerator> root = cq.from(PrimarykeyGenerator.class);
 		cq.select(builder.function("testtableh213", String.class));
 		
 		em.createQuery(cq).getResultList();
@@ -374,17 +374,17 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		patientDetails=patientRegistrationRepository.saveAndFlush(patientDetails);
 		}
 		
-		H809 portalUser=findByPatientId(registrationBean.getPatientId());
-		portalUser.setH809004(registrationBean.getPatRegPreferredUsername());
-		portalUser.setH809009(1);
-		portalUser.setH809006(1);
+		PatientPortalUser portalUser=findByPatientId(registrationBean.getPatientId());
+		portalUser.setpatient_portal_user_name(registrationBean.getPatRegPreferredUsername());
+		portalUser.setpatient_portal_user_portal_account_verified(1);
+		portalUser.setpatient_portal_user_account_state(1);
 		portalUser.setPasswordReset(1);
 		portalUser.setAccessTime(new Timestamp(new Date().getTime()));
-		portalUser.setH809010(registrationBean.getPatRegPassword());
+		portalUser.setpatient_portal_user_password(registrationBean.getPatRegPassword());
 		MD5 md5 = new MD5();
 		md5.setHashString(registrationBean.getPatRegPassword());
 		String encryptedPassword=md5.getHashString();
-		portalUser.setH809005(encryptedPassword);
+		portalUser.setpatient_portal_user_password_hash(encryptedPassword);
 		portalUser.setWrongEntryCount(0);
 		portalUser.setSecurityQuestion1(registrationBean.getSecurityQuestion1());
 		portalUser.setSecurityAnswer1(registrationBean.getSecurityAnswer1());
@@ -394,7 +394,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		portalUser.setSecurityAnswer3(registrationBean.getSecurityAnswer3());
         portalUser.setFromPortalIsactive(true);
         portalUser.setFromPortal(true);
-        portalUser.setH809Token("-1");
+        portalUser.setpatient_portal_userToken("-1");
 		
 		h809Repository.saveAndFlush(portalUser);
 		
@@ -404,7 +404,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		
 		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
 				AuditTrailEnumConstants.LogActionType.SIGNUP,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with id "+registrationBean.getPatientId()+" signed up for Patient Portal.",-1,
-				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getH809002())),"",
+				request.getRemoteAddr(),Integer.parseInt(String.valueOf(portalUser.getpatient_portal_user_patient_id())),"",
 				AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+registrationBean.getPatientId()+" signed up for Patient Portal","");
 		
 		return regResponse;
@@ -421,9 +421,9 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 	}
 
 	@Override
-	public H809 findByPatientId(int patientId) {
+	public PatientPortalUser findByPatientId(int patientId) {
 		
-		H809 portalUser=h809Repository.findOne(PortalLoginSpecification.patientById(String.valueOf(patientId)));
+		PatientPortalUser portalUser=h809Repository.findOne(PortalLoginSpecification.patientById(String.valueOf(patientId)));
 		
 		return portalUser;
 	}
@@ -448,7 +448,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 			regResponse.setMessage("No such user exists with the submitted details.");
 		}else{
 			
-			H809 portalUser=findByPatientId(patientsList.get(0).getPatientRegistrationId());
+			PatientPortalUser portalUser=findByPatientId(patientsList.get(0).getPatientRegistrationId());
 			
 			InitialSettings practiceDetails=initialSettingsRepository.findOne(PortalSettingsSpecification.getPracticeDetails("Practice Name"));
 			
@@ -485,9 +485,9 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 	"<br><br>"+
 	"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Welcome and thank you for signing up for Patient Portal!</label>"+
 	"<br><br>"+
-	"<label style='font-weight:bold;font-size:14px;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Username: <span style='font-weight:normal;color:#1e1e1e;font-size:16px;'>"+portalUser.getH809004()+"</span></label>"+
+	"<label style='font-weight:bold;font-size:14px;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Username: <span style='font-weight:normal;color:#1e1e1e;font-size:16px;'>"+portalUser.getpatient_portal_user_name()+"</span></label>"+
 	"<br><br>"+
-	"<label style='font-weight:bold;font-size:14px;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password: <span style='font-weight:normal;color:#1e1e1e;font-size:16px;'>"+portalUser.getH809010()+"</span></label>"+
+	"<label style='font-weight:bold;font-size:14px;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password: <span style='font-weight:normal;color:#1e1e1e;font-size:16px;'>"+portalUser.getpatient_portal_user_password()+"</span></label>"+
 	"<br><br>"+
 	"<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='color:#1773cf' href='https://patientportal.glaceemr.com/glaceportal_login/portal.jsp?practiceId="+practiceId+"'>Click here to login into portal</a></label>"+
 	"<br><br>"+

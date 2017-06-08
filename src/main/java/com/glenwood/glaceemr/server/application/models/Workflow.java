@@ -82,7 +82,7 @@ public class Workflow implements Serializable{
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="workflow_roomid",referencedColumnName="h479001",insertable=false,updatable=false)
+	@JoinColumn(name="workflow_roomid",referencedColumnName="room_details_id",insertable=false,updatable=false)
 	Room roomTableRoomId;
 
 	@ManyToOne(fetch=FetchType.LAZY)

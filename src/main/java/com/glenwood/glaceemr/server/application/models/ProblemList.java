@@ -1,14 +1,17 @@
 package com.glenwood.glaceemr.server.application.models;
 
-import java.sql.Timestamp;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -21,6 +24,8 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class ProblemList {
 
 	@Id
+	 @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "problem_list_problem_list_id_seq")
+	@SequenceGenerator(name = "problem_list_problem_list_id_seq", sequenceName = "problem_list_problem_list_id_seq", allocationSize = 1)
 	@Column(name="problem_list_id")
 	private Integer problemListId;
 

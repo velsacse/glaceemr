@@ -5,14 +5,16 @@ import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -22,6 +24,8 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class Cpt {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cpt_cpt_id_seq")
+	@SequenceGenerator(name = "cpt_cpt_id_seq", sequenceName = "cpt_cpt_id_seq", allocationSize = 1)
 	@Column(name="cpt_id")
 	private Integer cptId;
 

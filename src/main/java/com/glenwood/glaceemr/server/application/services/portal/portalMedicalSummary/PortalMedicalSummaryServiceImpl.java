@@ -30,7 +30,7 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H809;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
 import com.glenwood.glaceemr.server.application.models.PortalConfigurationBean;
@@ -49,7 +49,7 @@ import com.glenwood.glaceemr.server.application.repositories.BillinglookupReposi
 import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
-import com.glenwood.glaceemr.server.application.repositories.H809Repository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalUserRepository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientAllergiesRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsRepository;
@@ -88,7 +88,7 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 	PatientRegistrationRepository patientRegistrationRepository;
 	
 	@Autowired
-	H809Repository h809Repository;
+	PatientPortalUserRepository h809Repository;
 	
 	@Autowired
 	BillinglookupRepository billinglookupRepository;
@@ -128,7 +128,7 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 	
 	@Autowired
 	HttpServletRequest request;
-	
+
 
 	@Override
 	public PortalConfigurationBean getSessionMap(String username) throws JsonProcessingException {
@@ -228,11 +228,11 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 
 
 	@Override
-	public List<H809> getPatientDetailsByUsername(String username) throws JsonProcessingException {
+	public List<PatientPortalUser> getPatientDetailsByUsername(String username) throws JsonProcessingException {
 		
 		System.out.println("username:::***************************************:::"+username);
 		
-		List<H809> patientPersonalDetails= h809Repository.findAll(PatientRegistrationSpecification.getPatientDetailsByUsername(username));
+		List<PatientPortalUser> patientPersonalDetails= h809Repository.findAll(PatientRegistrationSpecification.getPatientDetailsByUsername(username));
 		
 		System.out.println("patientPersonalDetailsSize::::*********************************************:::"+patientPersonalDetails.size());
 		

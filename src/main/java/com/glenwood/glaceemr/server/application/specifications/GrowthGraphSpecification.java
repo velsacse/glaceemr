@@ -20,8 +20,8 @@ import com.glenwood.glaceemr.server.application.models.Cpt;
 import com.glenwood.glaceemr.server.application.models.Cpt_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H650;
-import com.glenwood.glaceemr.server.application.models.H650_;
+import com.glenwood.glaceemr.server.application.models.GrowthGraph;
+import com.glenwood.glaceemr.server.application.models.GrowthGraph_;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail_;
 
@@ -33,27 +33,27 @@ public class GrowthGraphSpecification {
 	 * @param sex (1 is male 0 is female)
 	 * @return
 	 */
-	public static Specification<H650> byAgeandSex(final Integer ageInMonth, final Integer sex)
+	public static Specification<GrowthGraph> byAgeandSex(final Integer ageInMonth, final Integer sex)
 	{
-		return new Specification<H650>() {
+		return new Specification<GrowthGraph>() {
 
 			@Override
-			public Predicate toPredicate(Root<H650> root,
+			public Predicate toPredicate(Root<GrowthGraph> root,
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
 
-				Predicate fromId=cb.greaterThanOrEqualTo(root.get(H650_.h650001), 1);
-				Predicate toId=cb.lessThanOrEqualTo(root.get(H650_.h650001), 10);
-				Predicate cond=cb.equal(root.get(H650_.h650017), true);
-				Predicate ageInMonthLeast=cb.greaterThanOrEqualTo(root.get(H650_.h650004), 0);
-				Predicate ageInMonthHighest=cb.lessThanOrEqualTo(root.get(H650_.h650004), ageInMonth);
+				Predicate fromId=cb.greaterThanOrEqualTo(root.get(GrowthGraph_.growthgraph_id), 1);
+				Predicate toId=cb.lessThanOrEqualTo(root.get(GrowthGraph_.growthgraph_id), 10);
+				Predicate cond=cb.equal(root.get(GrowthGraph_.growthgraph_graph_is_active), true);
+				Predicate ageInMonthLeast=cb.greaterThanOrEqualTo(root.get(GrowthGraph_.growthgraph_age_range_from), 0);
+				Predicate ageInMonthHighest=cb.lessThanOrEqualTo(root.get(GrowthGraph_.growthgraph_age_range_from), ageInMonth);
 				Predicate sexPredicate=null;
 				if(sex==1)
-					sexPredicate=cb.equal(root.get(H650_.h650003), "M");
+					sexPredicate=cb.equal(root.get(GrowthGraph_.growthgraph_gender), "M");
 				else
-					sexPredicate=cb.equal(root.get(H650_.h650003), "F");
+					sexPredicate=cb.equal(root.get(GrowthGraph_.growthgraph_gender), "F");
 				Predicate predicate=cb.and(fromId,toId,cond,ageInMonthLeast,ageInMonthHighest,sexPredicate);
-				cq.orderBy(cb.asc(root.get(H650_.h650007)));
+				cq.orderBy(cb.asc(root.get(GrowthGraph_.growthgraph_order_by)));
 				return predicate;
 			}
 

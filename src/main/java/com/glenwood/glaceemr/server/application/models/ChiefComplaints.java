@@ -2,14 +2,20 @@ package com.glenwood.glaceemr.server.application.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "chief_complaints")
 public class ChiefComplaints {
 	
+	
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "chief_complaints_chief_complaints_id_seq")
+	@SequenceGenerator(name = "chief_complaints_chief_complaints_id_seq", sequenceName = "chief_complaints_chief_complaints_id_seq", allocationSize = 1)
 	@Column(name="chief_complaints_id")
 	private Integer chiefComplaintsId;
 

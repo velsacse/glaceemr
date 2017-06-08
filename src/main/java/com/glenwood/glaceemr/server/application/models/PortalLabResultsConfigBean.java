@@ -4,13 +4,14 @@ import java.util.List;
 
 public class PortalLabResultsConfigBean {
 	
-	List<H068> labResultStatusList;
+	List<ChartStatus> labResultStatusList;
 
-	public List<H068> getLabResultStatusList() {
+	public List<ChartStatus> getLabResultStatusList() {
 		return labResultStatusList;
 	}
 
-	public void setLabResultStatusList(List<H068> labResultStatusList) {
+	
+	public void setLabResultStatusList(List<ChartStatus> labResultStatusList) {
 		this.labResultStatusList = labResultStatusList;
 	}
 	

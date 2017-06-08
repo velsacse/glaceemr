@@ -1,15 +1,18 @@
 package com.glenwood.glaceemr.server.application.models;
 
-import java.sql.Timestamp;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -21,6 +24,8 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class SchedulerAppointment {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sch_appt_sch_appt_id_seq")
+	@SequenceGenerator(name = "sch_appt_sch_appt_id_seq", sequenceName = "sch_appt_sch_appt_id_seq", allocationSize = 1)
 	@Column(name="sch_appt_id")
 	private Integer schApptId;
 
@@ -120,19 +125,19 @@ public class SchedulerAppointment {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="sch_appt_status",referencedColumnName="h113003",insertable=false,updatable=false)
-	H113 h113ApptStatus;
+	@JoinColumn(name="sch_appt_status",referencedColumnName="App_Reference_Values_statusId",insertable=false,updatable=false)
+	AppReferenceValues App_Reference_ValuesApptStatus;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="sch_appt_type",referencedColumnName="h113003",insertable=false,updatable=false)
-	H113 h113ApptType;
+	@JoinColumn(name="sch_appt_type",referencedColumnName="App_Reference_Values_statusId",insertable=false,updatable=false)
+	AppReferenceValues App_Reference_ValuesApptType;
 	
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="sch_appt_reason",referencedColumnName="h113003",insertable=false,updatable=false)
-	H113 h113ApptReason;
+	@JoinColumn(name="sch_appt_reason",referencedColumnName="App_Reference_Values_statusId",insertable=false,updatable=false)
+	AppReferenceValues App_Reference_ValuesApptReason;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -146,8 +151,8 @@ public class SchedulerAppointment {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="sch_appt_referringdoctor_id",referencedColumnName="h076001",insertable=false,updatable=false)
-	H076 schRefDrId;
+	@JoinColumn(name="sch_appt_referringdoctor_id",referencedColumnName="referring_doctor_uniqueid",insertable=false,updatable=false)
+	ReferringDoctor schRefDrId;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -399,28 +404,28 @@ public class SchedulerAppointment {
 		this.patRegPatientId = patRegPatientId;
 	}
 
-	public H113 getH113ApptStatus() {
-		return h113ApptStatus;
+	public AppReferenceValues getApp_Reference_ValuesApptStatus() {
+		return App_Reference_ValuesApptStatus;
 	}
 
-	public void setH113ApptStatus(H113 h113ApptStatus) {
-		this.h113ApptStatus = h113ApptStatus;
+	public void setApp_Reference_ValuesApptStatus(AppReferenceValues App_Reference_ValuesApptStatus) {
+		this.App_Reference_ValuesApptStatus = App_Reference_ValuesApptStatus;
 	}
 
-	public H113 getH113ApptType() {
-		return h113ApptType;
+	public AppReferenceValues getApp_Reference_ValuesApptType() {
+		return App_Reference_ValuesApptType;
 	}
 
-	public void setH113ApptType(H113 h113ApptType) {
-		this.h113ApptType = h113ApptType;
+	public void setApp_Reference_ValuesApptType(AppReferenceValues App_Reference_ValuesApptType) {
+		this.App_Reference_ValuesApptType = App_Reference_ValuesApptType;
 	}
 
-	public H113 getH113ApptReason() {
-		return h113ApptReason;
+	public AppReferenceValues getApp_Reference_ValuesApptReason() {
+		return App_Reference_ValuesApptReason;
 	}
 
-	public void setH113ApptReason(H113 h113ApptReason) {
-		this.h113ApptReason = h113ApptReason;
+	public void setApp_Reference_ValuesApptReason(AppReferenceValues App_Reference_ValuesApptReason) {
+		this.App_Reference_ValuesApptReason = App_Reference_ValuesApptReason;
 	}
 
 	public SchedulerAppointmentParameter getSchApptParam() {
@@ -439,11 +444,11 @@ public class SchedulerAppointment {
 		this.schResLoc = schResLoc;
 	}
 
-	public H076 getSchRefDrId() {
+	public ReferringDoctor getSchRefDrId() {
 		return schRefDrId;
 	}
 
-	public void setSchRefDrId(H076 schRefDrId) {
+	public void setSchRefDrId(ReferringDoctor schRefDrId) {
 		this.schRefDrId = schRefDrId;
 	}
 

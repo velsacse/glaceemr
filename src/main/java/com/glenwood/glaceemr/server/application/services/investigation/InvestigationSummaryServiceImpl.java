@@ -61,9 +61,9 @@ import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileDetails_;
 import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.FileName_;
-import com.glenwood.glaceemr.server.application.models.H068;
-import com.glenwood.glaceemr.server.application.models.H213;
-import com.glenwood.glaceemr.server.application.models.H213_;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping_;
 import com.glenwood.glaceemr.server.application.models.Hl7ResultInbox;
@@ -120,7 +120,7 @@ import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepositor
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
 import com.glenwood.glaceemr.server.application.repositories.FileDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.FileNameRepository;
-import com.glenwood.glaceemr.server.application.repositories.H068Repository;
+import com.glenwood.glaceemr.server.application.repositories.ChartStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7ResultInboxRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7UnmappedResultsRepository;
 import com.glenwood.glaceemr.server.application.repositories.IcdmRepository;
@@ -213,7 +213,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	VisRepository visRepository;
 
 	@Autowired
-	H068Repository h068Repository;
+	ChartStatusRepository h068Repository;
 
 	@Autowired
 	BodySiteRepository bodySiteRepository;
@@ -911,9 +911,9 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	private String getLabTestDetailId() {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
-		Root<H213> root = cq.from(H213.class);
-		cq.select(root.get(H213_.h213003));
-		cq.where(builder.equal(root.get(H213_.h213002),"lab_entries"));
+		Root<PrimarykeyGenerator> root = cq.from(PrimarykeyGenerator.class);
+		cq.select(root.get(PrimarykeyGenerator_.primarykey_generator_rowcount));
+		cq.where(builder.equal(root.get(PrimarykeyGenerator_.primarykey_generator_tablename),"lab_entries"));
 		return "" + em.createQuery(cq).getFirstResult();
 	}
 
@@ -1782,15 +1782,15 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 		orderDetails.setLabEntries(labData);
 
 		logger.debug("in getting status list");
-		List<H068> statusList = h068Repository.findAll(InvestigationSpecification.getStatusList());
+		List<ChartStatus> statusList = h068Repository.findAll(InvestigationSpecification.getStatusList());
 		orderDetails.setStatusList(statusList);
 
 		logger.debug("in getting refusal reason list");
-		List<H068> refusalReason = h068Repository.findAll(InvestigationSpecification.getRefusalReasonList());
+		List<ChartStatus> refusalReason = h068Repository.findAll(InvestigationSpecification.getRefusalReasonList());
 		orderDetails.setRefusalReasonList(refusalReason);
 
 		logger.debug("in getting source list");
-		List<H068> sourceList = h068Repository.findAll(InvestigationSpecification.getSourceList());
+		List<ChartStatus> sourceList = h068Repository.findAll(InvestigationSpecification.getSourceList());
 		orderDetails.setSourceList(sourceList);
 
 		logger.debug("in getting immunisation site info");

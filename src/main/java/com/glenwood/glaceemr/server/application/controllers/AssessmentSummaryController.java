@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
@@ -24,6 +24,7 @@ import com.glenwood.glaceemr.server.application.services.chart.assessment.Assess
 import com.glenwood.glaceemr.server.application.services.chart.problemlist.ProblemListService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
+ 
 
 /**
  * Controller for Assessments module
@@ -66,7 +67,7 @@ public class AssessmentSummaryController {
 		try{
 			logger.debug("getting current diagnosis");
 			logger.error("getting current diagnosis");
-			List<H611> currentProblems = assessmentService.getCurrentDiagnosis(patientId,encounterId);
+			List<PatientAssessments> currentProblems = assessmentService.getCurrentDiagnosis(patientId,encounterId);
 			emrResponseBean.setData(currentProblems);
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ASSESSMENT, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Assessments viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 		}catch(Exception e){
@@ -143,7 +144,7 @@ public class AssessmentSummaryController {
 			logger.debug("Fetching data corresponds to edit dx");
 			logger.error("Fetching data corresponds to edit dx");
 
-			List<H611> editData = assessmentService.getEditData(patientId,encounterId,dxCode,problemId);
+			List<PatientAssessments> editData = assessmentService.getEditData(patientId,encounterId,dxCode,problemId);
 			emrResponseBean.setData(editData);
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ASSESSMENT, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Patient Dx '"+dxCode+"' details viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "encounterId="+encounterId+"|problemId="+problemId, LogUserType.USER_LOGIN, "", "");
 		}catch(Exception e){

@@ -20,7 +20,7 @@ import com.glenwood.glaceemr.server.application.models.PatientSurveyAnswers;
 import com.glenwood.glaceemr.server.application.models.PatientSurveySaveBean;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
 import com.glenwood.glaceemr.server.application.repositories.CahpsQuestionnaireRepository;
-import com.glenwood.glaceemr.server.application.repositories.H810Respository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalAlertConfigRespository;
 import com.glenwood.glaceemr.server.application.repositories.PatientCahpsSurveyRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientSurveyAnswersRepository;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
@@ -43,7 +43,7 @@ public class PortalCahpsSurveyServiceImpl implements PortalCahpsSurveyService{
 	PatientSurveyAnswersRepository patientSurveyAnswersRepository;
 	
 	@Autowired
-	H810Respository h810Respository;
+	PatientPortalAlertConfigRespository h810Respository;
 	
 	@Autowired
 	AlertEventRepository alertEventRepository;

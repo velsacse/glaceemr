@@ -7,6 +7,7 @@ import org.json.JSONException;
 
 import com.glenwood.glaceemr.server.application.models.Billinglookup;
 import com.glenwood.glaceemr.server.application.models.CreditCardPaymentBean;
+import com.glenwood.glaceemr.server.application.models.GeneratedBillsHistoryDetails;
 import com.glenwood.glaceemr.server.application.models.H093;
 import com.glenwood.glaceemr.server.application.models.NonServiceDetails;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
@@ -19,7 +20,7 @@ import com.glenwood.glaceemr.server.application.models.ReceiptDetail;
 
 public interface PortalPaymentsService {
 
-	List<H093> getPatientStatementHistory(int patientId, int chartId, int pageOffset, int pageIndex);
+	List<GeneratedBillsHistoryDetails> getPatientStatementHistory(int patientId, int chartId, int pageOffset, int pageIndex);
 	
 	List<ReceiptDetail> getPatientPaymentHistory(int patientId, int chartId, int pageOffset, int pageIndex);
 

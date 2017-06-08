@@ -13,8 +13,8 @@ import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.EncounterPlan;
 import com.glenwood.glaceemr.server.application.models.EncounterPlan_;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H113;
-import com.glenwood.glaceemr.server.application.models.H113_;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues_;
 
 
 public class EncounterSpecification {
@@ -153,12 +153,12 @@ public class EncounterSpecification {
 	 * @param reason id
 	 * @return
 	 */
-	public static Specification<H113> getEncounterReasonId(final String reasonType, final Integer reasonGroup) {
-		return new Specification<H113>() {
+	public static Specification<AppReferenceValues> getEncounterReasonId(final String reasonType, final Integer reasonGroup) {
+		return new Specification<AppReferenceValues>() {
 			@Override
-			public Predicate toPredicate(Root<H113> root, CriteriaQuery<?> cq,CriteriaBuilder cb) {
+			public Predicate toPredicate(Root<AppReferenceValues> root, CriteriaQuery<?> cq,CriteriaBuilder cb) {
 				
-				return cq.where(cb.equal(cb.upper(root.get(H113_.h113004)), "REFILLS"), cb.equal(root.get(H113_.h113008), reasonGroup)).getRestriction();
+				return cq.where(cb.equal(cb.upper(root.get(AppReferenceValues_.App_Reference_Values_statusName)), "REFILLS"), cb.equal(root.get(AppReferenceValues_.App_Reference_Values_reason_type), reasonGroup)).getRestriction();
 			}
 		};
 	}

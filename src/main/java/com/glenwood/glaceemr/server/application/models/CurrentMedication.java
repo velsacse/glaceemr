@@ -1,18 +1,22 @@
 package com.glenwood.glaceemr.server.application.models;
 
-import java.sql.Timestamp;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
 
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -27,6 +31,8 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 public class CurrentMedication {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "current_medication_current_medication_id_seq")
+	@SequenceGenerator(name = "current_medication_current_medication_id_seq", sequenceName = "current_medication_current_medication_id_seq", allocationSize = 1)
 	@Column(name="current_medication_id")
 	private Integer currentMedicationId;
 

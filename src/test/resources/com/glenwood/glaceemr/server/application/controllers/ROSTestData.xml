@@ -34,10 +34,10 @@
 
 
 
-	<h076 h076001="1" h076003="Arthur" h076005="Blumer" h076008="-2"
-		h076010="8606285767$$" h076011="8606280218" h076015="true" h076016="1"
-		h076018="false" h076019="-2" h076020="Arthur M.D., Blumer" h555555="1"
-		h076021="M.D."></h076>
+	<referring_doctor referring_doctor_uniqueid="1" referring_doctor_lastname="Arthur" referring_doctor_firstname="Blumer" referring_doctor_state="-2"
+		referring_doctor_phoneno="8606285767$$" referring_doctor_fax_number="8606280218" referring_doctor_isactive="true" referring_doctor_type="1"
+		referring_doctor_iserphysician="false" referring_doctor_speciality_id="-2" referring_doctor_referringdoctor="Arthur M.D., Blumer" h555555="1"
+		referring_doctor_credential="M.D."></referring_doctor>
 
 	<leaf_library leaf_library_id="2156"
 		leaf_library_name="Pediatrics well baby (3744)"

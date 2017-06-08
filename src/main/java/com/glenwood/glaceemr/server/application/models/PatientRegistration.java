@@ -10,17 +10,21 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
+
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -57,6 +61,8 @@ public class PatientRegistration implements Serializable {
 	}
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patient_registration_patient_registration_id_seq")
+	@SequenceGenerator(name = "patient_registration_patient_registration_id_seq", sequenceName = "patient_registration_patient_registration_id_seq", allocationSize = 1)
 	@Column(name="patient_registration_id")
 	private Integer patientRegistrationId;
 
@@ -639,9 +645,9 @@ public class PatientRegistration implements Serializable {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="patient_registration_refering_physician",referencedColumnName="H076001",insertable=false,updatable=false)
+	@JoinColumn(name="patient_registration_refering_physician",referencedColumnName="referring_doctor_uniqueid",insertable=false,updatable=false)
 	@NotFound(action=NotFoundAction.IGNORE)	// To ignore entries -1, -2 in patient_registration table which doesn't exist in H076001
-	private H076 referringPhyTable;
+	private ReferringDoctor referringPhyTable;
 
 	@OneToMany(mappedBy="patientRegistrationTable")
 	@JsonManagedReference
@@ -670,7 +676,7 @@ public class PatientRegistration implements Serializable {
 	@JsonBackReference
 	List<AlertEvent> alertEvent;	
 	
-	public H076 getReferringPhyTable() {
+	public ReferringDoctor getReferringPhyTable() {
 		return referringPhyTable;
 	}
 
@@ -682,7 +688,7 @@ public class PatientRegistration implements Serializable {
 		this.alertEvent = alertEvent;
 	}
 
-	public void setReferringPhyTable(H076 referringPhyTable) {
+	public void setReferringPhyTable(ReferringDoctor referringPhyTable) {
 		this.referringPhyTable = referringPhyTable;
 	}			
 	

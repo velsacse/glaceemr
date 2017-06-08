@@ -8,16 +8,20 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
+
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -52,6 +56,8 @@ public class EmployeeProfile implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "emp_profile_emp_profile_empid_seq")
+	@SequenceGenerator(name = "emp_profile_emp_profile_empid_seq", sequenceName = "emp_profile_emp_profile_empid_seq", allocationSize = 1)
 	@Column(name="emp_profile_empid")
 	private Integer empProfileEmpid;
 
@@ -185,9 +191,9 @@ public class EmployeeProfile implements Serializable {
 	@JsonBackReference
 	List<Admission> admission;
 	
-	@OneToMany(mappedBy="h478001")
+	@OneToMany(mappedBy="staff_pin_number_details_profileid")
 	@JsonManagedReference
-	List<H478> h478;
+	List<StaffPinNumberDetails> staff_pin_number_details;
 	
 	public Integer getEmpProfileEmpid() {
 		return empProfileEmpid;
@@ -537,8 +543,8 @@ public class EmployeeProfile implements Serializable {
 	@ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
 	@JsonManagedReference
 	@NotFound(action=NotFoundAction.IGNORE)
-	@JoinColumn(name="emp_profile_speciality", referencedColumnName="h077001" , insertable=false, updatable=false)
-	H077 specialityTable;
+	@JoinColumn(name="emp_profile_speciality", referencedColumnName="specialisation_referring_id" , insertable=false, updatable=false)
+	SpecialisationReferring specialityTable;
 
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="employeeProfile")
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -565,11 +571,11 @@ public class EmployeeProfile implements Serializable {
 		this.prescriberDetails = prescriberDetails;
 	}
 
-	public H077 getSpecialityTable() {
+	public SpecialisationReferring getSpecialityTable() {
 		return specialityTable;
 	}
 
-	public void setSpecialityTable(H077 specialityTable) {
+	public void setSpecialityTable(SpecialisationReferring specialityTable) {
 		this.specialityTable = specialityTable;
 	}
 	

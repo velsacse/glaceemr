@@ -14,8 +14,8 @@ import com.glenwood.glaceemr.server.application.models.Billinglookup;
 import com.glenwood.glaceemr.server.application.models.Billinglookup_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
-import com.glenwood.glaceemr.server.application.models.H810;
-import com.glenwood.glaceemr.server.application.models.H810_;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig_;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InitialSettings_;
 import com.glenwood.glaceemr.server.application.models.PatientPortalFeatureConfig;
@@ -103,15 +103,15 @@ public class PortalSettingsSpecification {
 	/**
 	 * @return list of available Language options  
 	 */	
-	public static Specification<H810> getPortalAlertCategory(final int portalAlertCategory)
+	public static Specification<PatientPortalAlertConfig> getPortalAlertCategory(final int portalAlertCategory)
 	   {
-		   return new Specification<H810>() {
+		   return new Specification<PatientPortalAlertConfig>() {
 
 			@Override
-			public Predicate toPredicate(Root<H810> root,
+			public Predicate toPredicate(Root<PatientPortalAlertConfig> root,
 					CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				
-				Predicate alertPredicate=cq.where(cb.equal(root.get(H810_.h810001), portalAlertCategory)).getRestriction();
+				Predicate alertPredicate=cq.where(cb.equal(root.get(PatientPortalAlertConfig_.patient_portal_alert_config_id), portalAlertCategory)).getRestriction();
 				return alertPredicate;
 			}
 			   

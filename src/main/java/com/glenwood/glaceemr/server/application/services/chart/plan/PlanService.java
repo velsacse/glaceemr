@@ -2,8 +2,8 @@ package com.glenwood.glaceemr.server.application.services.chart.plan;
 
 import java.util.List;
 
-import com.glenwood.glaceemr.server.application.models.H076;
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 
 public interface PlanService {
 	
@@ -13,7 +13,7 @@ public interface PlanService {
 
 	ShortcutsData getPlanShortcuts(Integer limit, Integer offset, String key);
 
-	List<H611> getCurrentDx(Integer patientId, Integer encounterId);
+	List<PatientAssessments> getCurrentDx(Integer patientId, Integer encounterId);
 
 	String getSystems(Integer patientId, Integer chartId, Integer encounterId,
 			Integer templateId, String clientId, Integer tabId);
@@ -31,6 +31,6 @@ public interface PlanService {
 
 	void getLanguages(Integer insId, Integer patientId);
 
-	List<H076> getReferringPhysicians();
+	List<ReferringDoctor> getReferringPhysicians();
 
 }

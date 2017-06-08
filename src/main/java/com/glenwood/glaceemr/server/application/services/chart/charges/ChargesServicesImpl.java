@@ -31,10 +31,10 @@ import com.glenwood.glaceemr.server.application.models.AssociateServiceDetails;
 import com.glenwood.glaceemr.server.application.models.Cpt;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.Encounter;
-import com.glenwood.glaceemr.server.application.models.H066;
-import com.glenwood.glaceemr.server.application.models.H076;
-import com.glenwood.glaceemr.server.application.models.H213;
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.ExpectedCptAmount;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.NonServiceDetails;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
@@ -50,10 +50,10 @@ import com.glenwood.glaceemr.server.application.repositories.AssociateServiceDet
 import com.glenwood.glaceemr.server.application.repositories.CptRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmployeeProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
-import com.glenwood.glaceemr.server.application.repositories.H066Repository;
-import com.glenwood.glaceemr.server.application.repositories.H076Repository;
-import com.glenwood.glaceemr.server.application.repositories.H213Repository;
-import com.glenwood.glaceemr.server.application.repositories.H611Repository;
+import com.glenwood.glaceemr.server.application.repositories.ExpectedCptAmountRepository;
+import com.glenwood.glaceemr.server.application.repositories.ReferringDoctorRepository;
+import com.glenwood.glaceemr.server.application.repositories.PrimarykeyGeneratorRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientAssessmentsRepository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.NonServiceDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientInsDetailRepository;
@@ -85,7 +85,7 @@ public class ChargesServicesImpl implements ChargesServices{
 	QuickCptRepository quickCptRepository;
 	
 	@Autowired
-	H076Repository h076Repository;
+	ReferringDoctorRepository referring_doctorRepository;
 	
 	@Autowired
 	ServiceDetailRepository serviceDetailRepository;
@@ -100,7 +100,7 @@ public class ChargesServicesImpl implements ChargesServices{
 	PatientRegistrationRepository patientRegistrationRepository;
 	
 	@Autowired
-	H213Repository h213Repository;
+	PrimarykeyGeneratorRepository primarykey_generatorRepository;
 	
 	@Autowired
 	AssociateServiceDetailsRepository associateServiceDetailsRepository;
@@ -109,7 +109,7 @@ public class ChargesServicesImpl implements ChargesServices{
 	InitialSettingsRepository initialSettingsRepository;
 	
 	@Autowired
-	H066Repository h066Repository;
+	ExpectedCptAmountRepository expected_cpt_amountRepository;
 	
 	@Autowired
 	SubmitStatusRepository submitStatusRepository;
@@ -118,7 +118,7 @@ public class ChargesServicesImpl implements ChargesServices{
 	EncounterRepository encounterRepository;
 	
 	@Autowired
-	H611Repository h611Repository;
+	PatientAssessmentsRepository patient_assessmentsRepository;
 	
 	@Autowired
 	SessionMap sessionMap;
@@ -129,12 +129,12 @@ public class ChargesServicesImpl implements ChargesServices{
 		List<PosTable>  posValue=posTableRepository.findAll(Specifications.where(ChargesSpecification.checkPosIsActive()));
 		List<EmployeeProfile> empValue=  empProfileRepository.findAll(Specifications.where(ChargesSpecification.getAllEmployeeDetails()));
 		List<PatientInsDetail> insDetails=patientInsDetailRepository.findAll(ChargesSpecification.getInsDetails(patientId));
-		List<H076> h076ReferringDr=h076Repository.findAll(ChargesSpecification.getAllReferringDrList());
+		List<ReferringDoctor> referring_doctorReferringDr=referring_doctorRepository.findAll(ChargesSpecification.getAllReferringDrList());
 		ChargesPageBasicDetailsBean chargesBean=new ChargesPageBasicDetailsBean();
 		chargesBean.setPosDetails(posValue);
 		chargesBean.setEmployeeDetails(empValue);
 		chargesBean.setInsDetails(insDetails);
-		chargesBean.setH076ReferringDr(h076ReferringDr);
+		chargesBean.setreferring_doctorReferringDr(referring_doctorReferringDr);
 		return chargesBean;
 	}
 
@@ -420,22 +420,22 @@ public class ChargesServicesImpl implements ChargesServices{
 	public void requestToSaveService(ServiceDetail createdEntity) {
 		try {
 			serviceDetailRepository.save(createdEntity);
-			List<H213> serviceh213=h213Repository.findAll(ChargesSpecification.getServiceDetailMaxId());
-			List<H213> associateh213=h213Repository.findAll(ChargesSpecification.getAssociateServiceDetailMaxId());
-			Integer associateh213003=associateh213.get(0).getH213003();
-			associateh213.get(0).setH213003(associateh213003+1);
-			h213Repository.saveAndFlush(associateh213.get(0));
-			aSDEntityCreation(serviceh213,associateh213003+1);
+			List<PrimarykeyGenerator> serviceprimarykey_generator=primarykey_generatorRepository.findAll(ChargesSpecification.getServiceDetailMaxId());
+			List<PrimarykeyGenerator> associateprimarykey_generator=primarykey_generatorRepository.findAll(ChargesSpecification.getAssociateServiceDetailMaxId());
+			Integer associateprimarykey_generator_rowcount=associateprimarykey_generator.get(0).getprimarykey_generator_rowcount();
+			associateprimarykey_generator.get(0).setprimarykey_generator_rowcount(associateprimarykey_generator_rowcount+1);
+			primarykey_generatorRepository.saveAndFlush(associateprimarykey_generator.get(0));
+			aSDEntityCreation(serviceprimarykey_generator,associateprimarykey_generator_rowcount+1);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void aSDEntityCreation(List<H213> serviceh213, int maxAssociate) {
+	public void aSDEntityCreation(List<PrimarykeyGenerator> serviceprimarykey_generator, int maxAssociate) {
 		try {
 			AssociateServiceDetails associateServiceInsert=new AssociateServiceDetails();
 			associateServiceInsert.setAssociateServiceDetailId(Long.valueOf(maxAssociate));
-			associateServiceInsert.setAssociateServiceDetailServiceId(serviceh213.get(0).getH213003());
+			associateServiceInsert.setAssociateServiceDetailServiceId(serviceprimarykey_generator.get(0).getprimarykey_generator_rowcount());
 			associateServiceInsert.setAssociateServiceDetailSpecialDx("");
 			reqeustToSaveAssociateServiceDetail(associateServiceInsert);
 		} catch (Exception e) {
@@ -454,9 +454,9 @@ public class ChargesServicesImpl implements ChargesServices{
 	public Double getExpectedPayments(Integer cptId, String modifier1,String modifier2, String placeofServiceId, int dosYear,Integer primaryInsuraceId) {
 		double expPmt = 0.00;
 		if(primaryInsuraceId>0){
-			List<H066> h066Pmt=h066Repository.findAll(ChargesSpecification.getExpectedPayment(cptId,modifier1,modifier2,placeofServiceId,dosYear,primaryInsuraceId));
+			List<ExpectedCptAmount> h066Pmt=expected_cpt_amountRepository.findAll(ChargesSpecification.getExpectedPayment(cptId,modifier1,modifier2,placeofServiceId,dosYear,primaryInsuraceId));
 			if(h066Pmt.size()>0)
-			expPmt=Double.valueOf(Optional.fromNullable(Strings.emptyToNull(h066Pmt.get(0).getH066007().toString())).or("0.00"));
+			expPmt=Double.valueOf(Optional.fromNullable(Strings.emptyToNull(h066Pmt.get(0).getexpected_cpt_amount_allowedamt().toString())).or("0.00"));
 		}
 		return expPmt;
 	}
@@ -545,10 +545,10 @@ public class ChargesServicesImpl implements ChargesServices{
 	}
 
 	@Override
-	public List<H611> getEMRDxCodes(Integer patientId,String dos) {
+	public List<PatientAssessments> getEMRDxCodes(Integer patientId,String dos) {
 		patientId=Optional.fromNullable(Integer.parseInt(Strings.emptyToNull(patientId.toString()))).or(-1);
 		dos=Optional.fromNullable(Strings.emptyToNull(dos.toString())).or("");
-		List<H611> getEMRDxcodes=new ArrayList<H611>();
+		List<PatientAssessments> getEMRDxcodes=new ArrayList<PatientAssessments>();
 		try {
 			DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 			java.util.Date encounterDate = (java.util.Date)formatter.parse(dos);
@@ -557,7 +557,7 @@ public class ChargesServicesImpl implements ChargesServices{
 			String endDate=newFormat.format(encounterDate).toString()+" 23:59:59";
 			List<Encounter> maxEncounterId=encounterRepository.findAll(ChargesSpecification.getMaxEncounterId(patientId,startDate,endDate),new PageRequest(0, 1,Direction.DESC,"encounterId")).getContent();
 			if(maxEncounterId.size()>0){
-				getEMRDxcodes=h611Repository.findAll(ChargesSpecification.getEMRDxCodes(patientId,maxEncounterId.get(0).getEncounterId())); 
+				getEMRDxcodes=patient_assessmentsRepository.findAll(ChargesSpecification.getEMRDxCodes(patientId,maxEncounterId.get(0).getEncounterId())); 
 			}
 		} catch (Exception e) {
 			

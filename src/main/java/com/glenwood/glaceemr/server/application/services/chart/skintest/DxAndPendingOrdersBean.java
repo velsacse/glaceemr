@@ -2,19 +2,19 @@ package com.glenwood.glaceemr.server.application.services.chart.skintest;
 
 import java.util.List;
 
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 
 public class DxAndPendingOrdersBean {
-	List<H611> dxList;
+	List<PatientAssessments> dxList;
 	List<ProblemList> problemList;
 	List<LabEntries> pendingOrders;
 	
-	public List<H611> getdxList() {
+	public List<PatientAssessments> getdxList() {
 		return dxList;
 	}
-	public void setdxList(List<H611> dxList) {
+	public void setdxList(List<PatientAssessments> dxList) {
 		this.dxList = dxList;
 	}
 	public List<ProblemList> getProblemList() {

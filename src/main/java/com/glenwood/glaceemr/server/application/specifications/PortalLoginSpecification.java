@@ -11,10 +11,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
-import com.glenwood.glaceemr.server.application.models.H213;
-import com.glenwood.glaceemr.server.application.models.H213_;
-import com.glenwood.glaceemr.server.application.models.H809;
-import com.glenwood.glaceemr.server.application.models.H809_;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator_;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PortalUser;
@@ -41,60 +41,60 @@ public class PortalLoginSpecification {
 	};
    }
    
-   public static Specification<H809> patientById(final String patientId)
+   public static Specification<PatientPortalUser> patientById(final String patientId)
    {
-	   return new Specification<H809>() {
+	   return new Specification<PatientPortalUser>() {
 
 		@Override
-		public Predicate toPredicate(Root<H809> root,
+		public Predicate toPredicate(Root<PatientPortalUser> root,
 				CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				
-			Predicate usernamePredicate=cb.and(cb.equal(root.get(H809_.h809002), Integer.parseInt(patientId)));
+			Predicate usernamePredicate=cb.and(cb.equal(root.get(PatientPortalUser_.patient_portal_user_patient_id), Integer.parseInt(patientId)));
 			return usernamePredicate;		
 		}
 		   
 	};
    }
    
-   public static Specification<H809> activePatientById(final int patientId)
+   public static Specification<PatientPortalUser> activePatientById(final int patientId)
    {
-	   return new Specification<H809>() {
+	   return new Specification<PatientPortalUser>() {
 
 		@Override
-		public Predicate toPredicate(Root<H809> root,
+		public Predicate toPredicate(Root<PatientPortalUser> root,
 				CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				
-			Predicate usernamePredicate=cb.and(cb.equal(root.get(H809_.h809002),patientId),cb.equal(root.get(H809_.h809009), 1));
+			Predicate usernamePredicate=cb.and(cb.equal(root.get(PatientPortalUser_.patient_portal_user_patient_id),patientId),cb.equal(root.get(PatientPortalUser_.patient_portal_user_portal_account_verified), 1));
 			return usernamePredicate;		
 		}
 		   
 	};
    }
    
-   public static Specification<H809> inactivePatientById(final int patientId)
+   public static Specification<PatientPortalUser> inactivePatientById(final int patientId)
    {
-	   return new Specification<H809>() {
+	   return new Specification<PatientPortalUser>() {
 
 		@Override
-		public Predicate toPredicate(Root<H809> root,
+		public Predicate toPredicate(Root<PatientPortalUser> root,
 				CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				
-			Predicate usernamePredicate=cb.and(cb.equal(root.get(H809_.h809002),patientId),cb.equal(root.get(H809_.h809009), 0));
+			Predicate usernamePredicate=cb.and(cb.equal(root.get(PatientPortalUser_.patient_portal_user_patient_id),patientId),cb.equal(root.get(PatientPortalUser_.patient_portal_user_portal_account_verified), 0));
 			return usernamePredicate;		
 		}
 		   
 	};
    }
    
-   public static Specification<H809> getAllPatientsByUsername(final String username)
+   public static Specification<PatientPortalUser> getAllPatientsByUsername(final String username)
    {
-	   return new Specification<H809>() {
+	   return new Specification<PatientPortalUser>() {
 
 		@Override
-		public Predicate toPredicate(Root<H809> root,
+		public Predicate toPredicate(Root<PatientPortalUser> root,
 				CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				
-			Predicate usernamePredicate=cb.and(cb.equal(cb.upper(root.get(H809_.h809004)), username.toUpperCase()));
+			Predicate usernamePredicate=cb.and(cb.equal(cb.upper(root.get(PatientPortalUser_.patient_portal_user_name)), username.toUpperCase()));
 			return usernamePredicate;		
 		}
 		   
@@ -152,15 +152,15 @@ public class PortalLoginSpecification {
    }
    
    
-   public static Specification<H213> h213ByCategoryName(final String category)
+   public static Specification<PrimarykeyGenerator> h213ByCategoryName(final String category)
    {
-	   return new Specification<H213>() {
+	   return new Specification<PrimarykeyGenerator>() {
 
 		@Override
-		public Predicate toPredicate(Root<H213> root,
+		public Predicate toPredicate(Root<PrimarykeyGenerator> root,
 				CriteriaQuery<?> cq, CriteriaBuilder cb) {
 				
-			Predicate chartPredicate=cb.and(cb.equal(root.get(H213_.h213002), category));
+			Predicate chartPredicate=cb.and(cb.equal(root.get(PrimarykeyGenerator_.primarykey_generator_tablename), category));
 			return chartPredicate;		
 		}
 		   

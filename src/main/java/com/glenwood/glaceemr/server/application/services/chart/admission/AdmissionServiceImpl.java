@@ -25,7 +25,7 @@ import com.glenwood.glaceemr.server.application.models.Admission;
 import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
 import com.glenwood.glaceemr.server.application.models.Admission_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
-import com.glenwood.glaceemr.server.application.models.H496;
+import com.glenwood.glaceemr.server.application.models.FaxOutbox;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.PatientAdmission;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
@@ -34,7 +34,7 @@ import com.glenwood.glaceemr.server.application.repositories.AdmissionRepository
 import com.glenwood.glaceemr.server.application.repositories.AdmissionRoomRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
-import com.glenwood.glaceemr.server.application.repositories.H496Repository;
+import com.glenwood.glaceemr.server.application.repositories.FaxOutboxRepository;
 import com.glenwood.glaceemr.server.application.repositories.LeafGroupRepository;
 import com.glenwood.glaceemr.server.application.repositories.LeafLibraryRepository;
 import com.glenwood.glaceemr.server.application.repositories.LeafPatientRepository;
@@ -77,7 +77,7 @@ public class AdmissionServiceImpl implements AdmissionService {
 	PatientAllergyRepository patientAllergyRepository;
 	
 	@Autowired
-	H496Repository H496Repository;
+	FaxOutboxRepository fax_outboxRepository;
 	
 	@Autowired
 	AdmissionRoomRepository admissionRoomRepository;
@@ -408,7 +408,7 @@ public class AdmissionServiceImpl implements AdmissionService {
 	@Override
 	public AdmissionLeafBean getAdmissionLeafs(Integer admssEpisode) {
 		List<LeafPatient> admissionLeafs = null;
-		List<H496> admssLeafFaxDet = null;
+		List<FaxOutbox> admssLeafFaxDet = null;
 		List<PatientAllergies> admissionAllergiesDet = null;
 		try {
 			List<Encounter> admssEnc=encounterEntityRepository.findAll(AdmissionSpecification.getAdmissionEncByEpisodeId(admssEpisode));
@@ -418,7 +418,7 @@ public class AdmissionServiceImpl implements AdmissionService {
 			}
 			if(encounterIds.size() >= 1){
 				admissionLeafs =  leafPatientRepository.findAll(Specifications.where(AdmissionSpecification.getPatientLeafsByEncId(encounterIds)).and(AdmissionSpecification.getAdmissionPatientLeafsByEncId(encounterIds)));
-				admssLeafFaxDet =  H496Repository.findAll(AdmissionSpecification.getLeafFaxDetails(encounterIds));
+				admssLeafFaxDet =  fax_outboxRepository.findAll(AdmissionSpecification.getLeafFaxDetails(encounterIds));
 				admissionAllergiesDet = patientAllergyRepository.findAll(AdmissionSpecification.getPatientAllergiesList(encounterIds));
 			}else{
 				admissionLeafs = Collections.emptyList();

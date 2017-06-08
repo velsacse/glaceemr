@@ -57,10 +57,6 @@ import com.glenwood.glaceemr.server.application.models.DirectEmailLog;
 import com.glenwood.glaceemr.server.application.models.DirectEmailLog_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H413;
-import com.glenwood.glaceemr.server.application.models.H413_;
-import com.glenwood.glaceemr.server.application.models.H809;
-import com.glenwood.glaceemr.server.application.models.H809_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping;
@@ -87,6 +83,8 @@ import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalHistory_;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PortalMessage;
@@ -96,6 +94,8 @@ import com.glenwood.glaceemr.server.application.models.Prescription_;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.ReconciledMedication;
 import com.glenwood.glaceemr.server.application.models.ReconciledMedication_;
+import com.glenwood.glaceemr.server.application.models.ReferralDetails;
+import com.glenwood.glaceemr.server.application.models.ReferralDetails_;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail_;
 import com.glenwood.glaceemr.server.application.models.VaccineReport;
@@ -825,20 +825,20 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<ReferralQDM> cq = builder.createQuery(ReferralQDM.class);
-		Root<H413> rooth413 = cq.from(H413.class);
+		Root<ReferralDetails> rooth413 = cq.from(ReferralDetails.class);
 		Selection[] selections= new Selection[] {
-				rooth413.get(H413_.h413001).alias("Referral id"),
-				rooth413.get(H413_.h413004).alias("Referred Date"),
-				rooth413.get(H413_.referralOrderOn).alias("Ordered Date"),
-				rooth413.get(H413_.referralReviewedOn).alias("Reviewed On"),
-				rooth413.get(H413_.h413041).alias("Status")
+				rooth413.get(ReferralDetails_.referral_details_refid).alias("Referral id"),
+				rooth413.get(ReferralDetails_.referral_details_ord_on).alias("Referred Date"),
+				rooth413.get(ReferralDetails_.referralOrderOn).alias("Ordered Date"),
+				rooth413.get(ReferralDetails_.referralReviewedOn).alias("Reviewed On"),
+				rooth413.get(ReferralDetails_.referral_details_patientid).alias("Status")
 		};
 		
 		cq.select(builder.construct(ReferralQDM.class,selections));
 		
-		Predicate predicateByPatientId=builder.equal(rooth413.get(H413_.h413035),patientId);
-		Predicate byProvider=builder.equal(rooth413.get(H413_.referralOrderBy), providerId);
-		Predicate byDateRange = builder.between(rooth413.get(H413_.referralOrderOn), startDate, endDate);
+		Predicate predicateByPatientId=builder.equal(rooth413.get(ReferralDetails_.referral_details_myalert),patientId);
+		Predicate byProvider=builder.equal(rooth413.get(ReferralDetails_.referralOrderBy), providerId);
+		Predicate byDateRange = builder.between(rooth413.get(ReferralDetails_.referralOrderOn), startDate, endDate);
 		
 		if(considerProvider)
 			cq.where(predicateByPatientId,byProvider,byDateRange);
@@ -1742,15 +1742,15 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<String> cq = builder.createQuery(String.class);
-			Root<H809> root = cq.from(H809.class);
+			Root<PatientPortalUser> root = cq.from(PatientPortalUser.class);
 			
-			cq.multiselect(builder.function("to_char", String.class, root.get(H809_.h809011), builder.literal("MM/DD/YYYY HH:MI:SS am")));
+			cq.multiselect(builder.function("to_char", String.class, root.get(PatientPortalUser_.patient_portal_user_access_time), builder.literal("MM/DD/YYYY HH:MI:SS am")));
 			
-			cq.where(builder.between(builder.coalesce(root.get(H809_.h809011), defaultDate), startDate, endDate),
-					builder.equal(builder.coalesce(root.get(H809_.h809009), 0), 1),
-					builder.equal(root.get(H809_.h809002), patientId));
+			cq.where(builder.between(builder.coalesce(root.get(PatientPortalUser_.patient_portal_user_access_time), defaultDate), startDate, endDate),
+					builder.equal(builder.coalesce(root.get(PatientPortalUser_.patient_portal_user_portal_account_verified), 0), 1),
+					builder.equal(root.get(PatientPortalUser_.patient_portal_user_patient_id), patientId));
 			
-			cq.orderBy(builder.desc(root.get(H809_.h809011)));
+			cq.orderBy(builder.desc(root.get(PatientPortalUser_.patient_portal_user_access_time)));
 			
 			List<String> accessedTime = em.createQuery(cq).getResultList();
 			
@@ -1883,11 +1883,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 			
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
-			Root<H413> root = cq.from(H413.class);
+			Root<ReferralDetails> root = cq.from(ReferralDetails.class);
 			
 			Selection[] selections= new Selection[] {
 				
-				builder.coalesce(root.get(H413_.summaryCareRecordProvidedElectronic),0),
+				builder.coalesce(root.get(ReferralDetails_.summaryCareRecordProvidedElectronic),0),
 				builder.count(root),
 								
 			};
@@ -1895,11 +1895,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 			cq.multiselect(selections);
 			
 			if(isGroup)
-				cq.where(builder.equal(root.get(H413_.referralById), providerId),builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate), builder.equal(root.get(H413_.h413035), patientId));
+				cq.where(builder.equal(root.get(ReferralDetails_.referralById), providerId),builder.between(builder.function("DATE", Date.class, root.get(ReferralDetails_.referralOrderOn)), startDate, endDate), builder.equal(root.get(ReferralDetails_.referral_details_myalert), patientId));
 			else
-				cq.where(builder.between(builder.function("DATE", Date.class, root.get(H413_.referralOrderOn)), startDate, endDate), builder.equal(root.get(H413_.h413035), patientId));
+				cq.where(builder.between(builder.function("DATE", Date.class, root.get(ReferralDetails_.referralOrderOn)), startDate, endDate), builder.equal(root.get(ReferralDetails_.referral_details_myalert), patientId));
 			
-			cq.groupBy(root.get(H413_.summaryCareRecordProvidedElectronic));
+			cq.groupBy(root.get(ReferralDetails_.summaryCareRecordProvidedElectronic));
 			
 			List<Object[]> result = em.createQuery(cq).getResultList();
 			

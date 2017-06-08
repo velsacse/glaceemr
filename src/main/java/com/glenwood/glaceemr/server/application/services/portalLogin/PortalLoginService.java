@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.json.JSONException;
 
-import com.glenwood.glaceemr.server.application.models.H809;
+import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
 import com.glenwood.glaceemr.server.application.models.PortalUser;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalPatientRegistrationBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalRegistrationResponse;
@@ -15,7 +15,7 @@ public interface PortalLoginService {
 
 	PortalUser findByUserNameIgnoreCase(String userName);
 	
-	H809 findByPatientId(int patientId);
+	PatientPortalUser findByPatientId(int patientId);
 
 	PortalRegistrationResponse checkDuplicatePatientData(String userName, String dob, String firstName, String lastName);	
 	

@@ -2,23 +2,28 @@ package com.glenwood.glaceemr.server.application.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name="h479")
+@Table(name="room_details")
 public class Room {
 
 	@Id
-	@Column(name="h479001")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = " room_details_room_details_id_seq")
+	@SequenceGenerator(name = " room_details_room_details_id_seq", sequenceName = " room_details_room_details_id_seq", allocationSize = 1)
+	@Column(name="room_details_id")
 	@NotNull
 	private Integer roomId;
 	
-	@Column(name="h479002")
+	@Column(name="room_details_name")
 	private String roomName;
 	
-	@Column(name="h479003")
+	@Column(name="room_details_isactive")
 	@NotNull
 	private Boolean roomIsActive;
 	

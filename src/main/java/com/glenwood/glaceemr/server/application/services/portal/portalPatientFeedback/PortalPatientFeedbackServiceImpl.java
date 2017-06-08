@@ -14,14 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
-import com.glenwood.glaceemr.server.application.models.H810;
+import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
 import com.glenwood.glaceemr.server.application.models.PatientFeedback;
 import com.glenwood.glaceemr.server.application.models.PatientFeedbackAnswers;
 import com.glenwood.glaceemr.server.application.models.PatientFeedbackQuestionnaire;
 import com.glenwood.glaceemr.server.application.models.PatientFeedbackSaveBean;
 import com.glenwood.glaceemr.server.application.models.PatientFeedback_;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
-import com.glenwood.glaceemr.server.application.repositories.H810Respository;
+import com.glenwood.glaceemr.server.application.repositories.PatientPortalAlertConfigRespository;
 import com.glenwood.glaceemr.server.application.repositories.PatientFeedbackAnswersRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientFeedbackQuestionnaireRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientFeedbackRepository;
@@ -43,7 +43,7 @@ public class PortalPatientFeedbackServiceImpl implements PortalPatientFeedbackSe
 	PatientFeedbackAnswersRepository patientFeedbackAnswersRepository;
 
 	@Autowired
-	H810Respository h810Respository;
+	PatientPortalAlertConfigRespository h810Respository;
 	
 	@Autowired
 	AlertEventRepository alertEventRepository;

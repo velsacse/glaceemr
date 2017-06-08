@@ -19,8 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.glenwood.glaceemr.server.application.models.H113;
-import com.glenwood.glaceemr.server.application.models.H113_;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues;
+import com.glenwood.glaceemr.server.application.models.AppReferenceValues_;
 import com.glenwood.glaceemr.server.application.models.PortalApptRequest;
 import com.glenwood.glaceemr.server.application.models.PortalApptRequest_;
 import com.glenwood.glaceemr.server.application.models.PosTable;
@@ -230,14 +230,14 @@ public class PortalAppointmentsSpecification {
 	/**
 	 * @return Appointment Status List  
 	 */	
-	public static Specification<H113> getSchApptStatusList()
+	public static Specification<AppReferenceValues> getSchApptStatusList()
 	{
-		return new Specification<H113>() {
+		return new Specification<AppReferenceValues>() {
 
 			@Override
-			public Predicate toPredicate(Root<H113> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
+			public Predicate toPredicate(Root<AppReferenceValues> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
-				Predicate schApptStatusList=cq.where(cb.equal(root.get(H113_.h113002), 1)).getRestriction();
+				Predicate schApptStatusList=cq.where(cb.equal(root.get(AppReferenceValues_.App_Reference_Values_tableId), 1)).getRestriction();
 
 				return schApptStatusList;
 			}
@@ -248,14 +248,14 @@ public class PortalAppointmentsSpecification {
 	/**
 	 * @return Appointment Type List  
 	 */	
-	public static Specification<H113> getSchApptTypeList()
+	public static Specification<AppReferenceValues> getSchApptTypeList()
 	{
-		return new Specification<H113>() {
+		return new Specification<AppReferenceValues>() {
 
 			@Override
-			public Predicate toPredicate(Root<H113> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
+			public Predicate toPredicate(Root<AppReferenceValues> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
-				Predicate schApptStatusList=cq.where(cb.equal(root.get(H113_.h113002), 2)).getRestriction();
+				Predicate schApptStatusList=cq.where(cb.equal(root.get(AppReferenceValues_.App_Reference_Values_tableId), 2)).getRestriction();
 
 				return schApptStatusList;
 			}
@@ -266,14 +266,14 @@ public class PortalAppointmentsSpecification {
 	/**
 	 * @return Appointment Reason List  
 	 */	
-	public static Specification<H113> getSchApptReasonList()
+	public static Specification<AppReferenceValues> getSchApptReasonList()
 	{
-		return new Specification<H113>() {
+		return new Specification<AppReferenceValues>() {
 
 			@Override
-			public Predicate toPredicate(Root<H113> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
+			public Predicate toPredicate(Root<AppReferenceValues> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
-				Predicate schApptStatusList=cq.where(cb.equal(root.get(H113_.h113002), 402)).getRestriction();
+				Predicate schApptStatusList=cq.where(cb.equal(root.get(AppReferenceValues_.App_Reference_Values_tableId), 402)).getRestriction();
 
 				return schApptStatusList;
 			}

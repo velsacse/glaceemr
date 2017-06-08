@@ -7,7 +7,7 @@ package com.glenwood.glaceemr.server.application.services.chart.charges;
 import java.util.List;
 
 import com.glenwood.glaceemr.server.application.models.Cpt;
-import com.glenwood.glaceemr.server.application.models.H611;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.Quickcpt;
@@ -118,5 +118,5 @@ public interface ChargesServices {
 	 * @param dos
 	 * @return
 	 */
-	public List<H611> getEMRDxCodes(Integer patientId,String dos);
+	public List<PatientAssessments> getEMRDxCodes(Integer patientId,String dos);
 }

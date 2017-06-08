@@ -14,151 +14,151 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
-@Table(name = "h413")
+@Table(name = "referral_details")
 public class Referral {
 
 	public Referral(){
 		
 	}
-	public Referral(Integer h413001, String h413006, String h413007, String h413037, Integer criticalStatus){
-		this.h413001= h413001;
-		this.h413006= h413006;
-		this.h413007= h413007;
-		this.h413037= h413037;
+	public Referral(Integer referral_details_refid, String referral_details_rdoctor_to, String referral_details_rdoctor_spec, String referral_details_printleafdetail, Integer criticalStatus){
+		this.referral_details_refid= referral_details_refid;
+		this.referral_details_rdoctor_to= referral_details_rdoctor_to;
+		this.referral_details_rdoctor_spec= referral_details_rdoctor_spec;
+		this.referral_details_printleafdetail= referral_details_printleafdetail;
 		this.criticalStatus= criticalStatus;
 	}
 	@Id	
-	@Column(name="h413001")
-	private Integer h413001;
+	@Column(name="referral_details_refid")
+	private Integer referral_details_refid;
 
-	@Column(name="h413002")
-	private Integer h413002;
+	@Column(name="referral_details_chartid")
+	private Integer referral_details_chartid;
 
-	@Column(name="h413003")
-	private Integer h413003;
+	@Column(name="referral_details_encounterid")
+	private Integer referral_details_encounterid;
 
 	@JsonSerialize(using = JsonTimestampSerializer.class)
-	@Column(name="h413004")
+	@Column(name="referral_details_ord_on")
 //	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-	private Timestamp h413004;
+	private Timestamp referral_details_ord_on;
 
-	@Column(name="h413005")
-	private String h413005;
+	@Column(name="referral_details_rdoctor_from")
+	private String referral_details_rdoctor_from;
 
-	@Column(name="h413006")
-	private String h413006;
+	@Column(name="referral_details_rdoctor_to")
+	private String referral_details_rdoctor_to;
 
-	@Column(name="h413007")
-	private String h413007;
+	@Column(name="referral_details_rdoctor_spec")
+	private String referral_details_rdoctor_spec;
 
-	@Column(name="h413008")
-	private String h413008;
+	@Column(name="referral_details_rdoctor_address")
+	private String referral_details_rdoctor_address;
 
-	@Column(name="h413009")
-	private String h413009;
+	@Column(name="referral_details_rdoctor_phno")
+	private String referral_details_rdoctor_phno;
 
-	@Column(name="h413010")
-	private String h413010;
+	@Column(name="referral_details_rdoctor_faxno")
+	private String referral_details_rdoctor_faxno;
 
-	@Column(name="h413011")
-	private String h413011;
+	@Column(name="referral_details_dxcode")
+	private String referral_details_dxcode;
 
-	@Column(name="h413012")
-	private String h413012;
+	@Column(name="referral_details_cptcode")
+	private String referral_details_cptcode;
 
-	@Column(name="h413013")
-	private String h413013;
+	@Column(name="referral_details_comment")
+	private String referral_details_comment;
 
-	@Column(name="h413014")
-	private Short h413014;
+	@Column(name="referral_details_authneeded")
+	private Short referral_details_authneeded;
 
-	@Column(name="h413015")
-	private Short h413015;
+	@Column(name="referral_details_auth_id")
+	private Short referral_details_auth_id;
 
-	@Column(name="h413016")
-	private String h413016;
-
-	@JsonSerialize(using = JsonTimestampSerializer.class)
-	@Column(name="h413017")
-	private Timestamp h413017;
-
-	@Column(name="h413018")
-	private String h413018;
-
-	@Column(name="h413019")
-	private String h413019;
-
-	@Column(name="h413020")
-	private String h413020;
-
-	@Column(name="h413021")
-	private Short h413021;
+	@Column(name="referral_details_authnumber")
+	private String referral_details_authnumber;
 
 	@JsonSerialize(using = JsonTimestampSerializer.class)
-	@Column(name="h413022")	
-	private Timestamp h413022;
+	@Column(name="referral_details_authdate")
+	private Timestamp referral_details_authdate;
 
-	@Column(name="h413023")
-	private String h413023;
+	@Column(name="referral_details_authoriseddate")
+	private String referral_details_authoriseddate;
 
-	@Column(name="h413024")
-	private String h413024;
+	@Column(name="referral_details_authby")
+	private String referral_details_authby;
 
-	@Column(name="h413025")
-	private String h413025;
+	@Column(name="referral_details_authcontact_person")
+	private String referral_details_authcontact_person;
 
-	@Column(name="h413026")
-	private Short h413026;
-
-	@Column(name="h413027")
-	private String h413027;
-
-	@Column(name="h413028")
-	private Short h413028;
+	@Column(name="referral_details_authcomment")
+	private Short referral_details_authcomment;
 
 	@JsonSerialize(using = JsonTimestampSerializer.class)
-	@Column(name="h413029")
-	private Timestamp h413029;
+	@Column(name="referral_details_apptconfirmdate")	
+	private Timestamp referral_details_apptconfirmdate;
 
-	@Column(name="h413030")
-	private Short h413030;
+	@Column(name="referral_details_appttime")
+	private String referral_details_appttime;
+
+	@Column(name="referral_details_apptby")
+	private String referral_details_apptby;
+
+	@Column(name="referral_details_authcontactperson")
+	private String referral_details_authcontactperson;
+
+	@Column(name="referral_details_ptnotified")
+	private Short referral_details_ptnotified;
+
+	@Column(name="referral_details_apptcomment")
+	private String referral_details_apptcomment;
+
+	@Column(name="referral_details_concernreportreceived")
+	private Short referral_details_concernreportreceived;
 
 	@JsonSerialize(using = JsonTimestampSerializer.class)
-	@Column(name="h413031")
-	private Timestamp h413031;
+	@Column(name="referral_details_concernreprtrecdate")
+	private Timestamp referral_details_concernreprtrecdate;
 
-	@Column(name="h413032")
-	private String h413032;
+	@Column(name="referral_details_concernreportid")
+	private Short referral_details_concernreportid;
 
-	@Column(name="h413033")
-	private String h413033;
+	@JsonSerialize(using = JsonTimestampSerializer.class)
+	@Column(name="referral_details_revdate")
+	private Timestamp referral_details_revdate;
 
-	@Column(name="h413034")
-	private Integer h413034;
+	@Column(name="referral_details_revby")
+	private String referral_details_revby;
 
-	@Column(name="h413035")
-	private Integer h413035;
+	@Column(name="referral_details_reportverify")
+	private String referral_details_reportverify;
 
-	@Column(name="h413036")
-	private Integer h413036;
+	@Column(name="referral_details_isactive")
+	private Integer referral_details_isactive;
 
-	@Column(name="h413037")
-	private String h413037;
+	@Column(name="referral_details_myalert")
+	private Integer referral_details_myalert;
 
-	@Column(name="h413038")
-	private String h413038;
+	@Column(name="referral_details_referral_for")
+	private Integer referral_details_referral_for;
 
-	@Column(name="h413039")
-	private String h413039;
+	@Column(name="referral_details_printleafdetail")
+	private String referral_details_printleafdetail;
 
-	@Column(name="h413040")
-	private Integer h413040;
+	@Column(name="referral_details_scribble")
+	private String referral_details_scribble;
+
+	@Column(name="referral_details_alert")
+	private String referral_details_alert;
+
+	@Column(name="referral_details_leafid")
+	private Integer referral_details_leafid;
 
 	@Column(name="referreddoctor_loginid")
 	private Integer referreddoctorLoginid;
 
-	@Column(name="h413041")
-	private Integer h413041;
+	@Column(name="referral_details_patientid")
+	private Integer referral_details_patientid;
 
 	@Column(name="referral_order_by")
 	private Integer referralOrderBy;
@@ -227,329 +227,329 @@ public class Referral {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="h413035",referencedColumnName="patient_registration_id",insertable=false,updatable=false)
+	@JoinColumn(name="referral_details_myalert",referencedColumnName="patient_registration_id",insertable=false,updatable=false)
 	PatientRegistration patientRegistrationTable;
 	
+
 	
-	
-	public Integer getH413001() {
-		return h413001;
+	public Integer getreferral_details_refid() {
+		return referral_details_refid;
 	}
 
-	public void setH413001(Integer h413001) {
-		this.h413001 = h413001;
+	public void setreferral_details_refid(Integer referral_details_refid) {
+		this.referral_details_refid = referral_details_refid;
 	}
 
-	public Integer getH413002() {
-		return h413002;
+	public Integer getreferral_details_chartid() {
+		return referral_details_chartid;
 	}
 
-	public void setH413002(Integer h413002) {
-		this.h413002 = h413002;
+	public void setreferral_details_chartid(Integer referral_details_chartid) {
+		this.referral_details_chartid = referral_details_chartid;
 	}
 
-	public Integer getH413003() {
-		return h413003;
+	public Integer getreferral_details_encounterid() {
+		return referral_details_encounterid;
 	}
 
-	public void setH413003(Integer h413003) {
-		this.h413003 = h413003;
+	public void setreferral_details_encounterid(Integer referral_details_encounterid) {
+		this.referral_details_encounterid = referral_details_encounterid;
 	}
 
-	public Timestamp getH413004() {
-		return h413004;
+	public Timestamp getreferral_details_ord_on() {
+		return referral_details_ord_on;
 	}
 
-	public void setH413004(Timestamp h413004) {
-		this.h413004 = h413004;
+	public void setreferral_details_ord_on(Timestamp referral_details_ord_on) {
+		this.referral_details_ord_on = referral_details_ord_on;
 	}
 
-	public String getH413005() {
-		return h413005;
+	public String getreferral_details_rdoctor_from() {
+		return referral_details_rdoctor_from;
 	}
 
-	public void setH413005(String h413005) {
-		this.h413005 = h413005;
+	public void setreferral_details_rdoctor_from(String referral_details_rdoctor_from) {
+		this.referral_details_rdoctor_from = referral_details_rdoctor_from;
 	}
 
-	public String getH413006() {
-		return h413006;
+	public String getreferral_details_rdoctor_to() {
+		return referral_details_rdoctor_to;
 	}
 
-	public void setH413006(String h413006) {
-		this.h413006 = h413006;
+	public void setreferral_details_rdoctor_to(String referral_details_rdoctor_to) {
+		this.referral_details_rdoctor_to = referral_details_rdoctor_to;
 	}
 
-	public String getH413007() {
-		return h413007;
+	public String getreferral_details_rdoctor_spec() {
+		return referral_details_rdoctor_spec;
 	}
 
-	public void setH413007(String h413007) {
-		this.h413007 = h413007;
+	public void setreferral_details_rdoctor_spec(String referral_details_rdoctor_spec) {
+		this.referral_details_rdoctor_spec = referral_details_rdoctor_spec;
 	}
 
-	public String getH413008() {
-		return h413008;
+	public String getreferral_details_rdoctor_address() {
+		return referral_details_rdoctor_address;
 	}
 
-	public void setH413008(String h413008) {
-		this.h413008 = h413008;
+	public void setreferral_details_rdoctor_address(String referral_details_rdoctor_address) {
+		this.referral_details_rdoctor_address = referral_details_rdoctor_address;
 	}
 
-	public String getH413009() {
-		return h413009;
+	public String getreferral_details_rdoctor_phno() {
+		return referral_details_rdoctor_phno;
 	}
 
-	public void setH413009(String h413009) {
-		this.h413009 = h413009;
+	public void setreferral_details_rdoctor_phno(String referral_details_rdoctor_phno) {
+		this.referral_details_rdoctor_phno = referral_details_rdoctor_phno;
 	}
 
-	public String getH413010() {
-		return h413010;
+	public String getreferral_details_rdoctor_faxno() {
+		return referral_details_rdoctor_faxno;
 	}
 
-	public void setH413010(String h413010) {
-		this.h413010 = h413010;
+	public void setreferral_details_rdoctor_faxno(String referral_details_rdoctor_faxno) {
+		this.referral_details_rdoctor_faxno = referral_details_rdoctor_faxno;
 	}
 
-	public String getH413011() {
-		return h413011;
+	public String getreferral_details_dxcode() {
+		return referral_details_dxcode;
 	}
 
-	public void setH413011(String h413011) {
-		this.h413011 = h413011;
+	public void setreferral_details_dxcode(String referral_details_dxcode) {
+		this.referral_details_dxcode = referral_details_dxcode;
 	}
 
-	public String getH413012() {
-		return h413012;
+	public String getreferral_details_cptcode() {
+		return referral_details_cptcode;
 	}
 
-	public void setH413012(String h413012) {
-		this.h413012 = h413012;
+	public void setreferral_details_cptcode(String referral_details_cptcode) {
+		this.referral_details_cptcode = referral_details_cptcode;
 	}
 
-	public String getH413013() {
-		return h413013;
+	public String getreferral_details_comment() {
+		return referral_details_comment;
 	}
 
-	public void setH413013(String h413013) {
-		this.h413013 = h413013;
+	public void setreferral_details_comment(String referral_details_comment) {
+		this.referral_details_comment = referral_details_comment;
 	}
 
-	public Short getH413014() {
-		return h413014;
+	public Short getreferral_details_authneeded() {
+		return referral_details_authneeded;
 	}
 
-	public void setH413014(Short h413014) {
-		this.h413014 = h413014;
+	public void setreferral_details_authneeded(Short referral_details_authneeded) {
+		this.referral_details_authneeded = referral_details_authneeded;
 	}
 
-	public Short getH413015() {
-		return h413015;
+	public Short getreferral_details_auth_id() {
+		return referral_details_auth_id;
 	}
 
-	public void setH413015(Short h413015) {
-		this.h413015 = h413015;
+	public void setreferral_details_auth_id(Short referral_details_auth_id) {
+		this.referral_details_auth_id = referral_details_auth_id;
 	}
 
-	public String getH413016() {
-		return h413016;
+	public String getreferral_details_authnumber() {
+		return referral_details_authnumber;
 	}
 
-	public void setH413016(String h413016) {
-		this.h413016 = h413016;
+	public void setreferral_details_authnumber(String referral_details_authnumber) {
+		this.referral_details_authnumber = referral_details_authnumber;
 	}
 
-	public Timestamp getH413017() {
-		return h413017;
+	public Timestamp getreferral_details_authdate() {
+		return referral_details_authdate;
 	}
 
-	public void setH413017(Timestamp h413017) {
-		this.h413017 = h413017;
+	public void setreferral_details_authdate(Timestamp referral_details_authdate) {
+		this.referral_details_authdate = referral_details_authdate;
 	}
 
-	public String getH413018() {
-		return h413018;
+	public String getreferral_details_authoriseddate() {
+		return referral_details_authoriseddate;
 	}
 
-	public void setH413018(String h413018) {
-		this.h413018 = h413018;
+	public void setreferral_details_authoriseddate(String referral_details_authoriseddate) {
+		this.referral_details_authoriseddate = referral_details_authoriseddate;
 	}
 
-	public String getH413019() {
-		return h413019;
+	public String getreferral_details_authby() {
+		return referral_details_authby;
 	}
 
-	public void setH413019(String h413019) {
-		this.h413019 = h413019;
+	public void setreferral_details_authby(String referral_details_authby) {
+		this.referral_details_authby = referral_details_authby;
 	}
 
-	public String getH413020() {
-		return h413020;
+	public String getreferral_details_authcontact_person() {
+		return referral_details_authcontact_person;
 	}
 
-	public void setH413020(String h413020) {
-		this.h413020 = h413020;
+	public void setreferral_details_authcontact_person(String referral_details_authcontact_person) {
+		this.referral_details_authcontact_person = referral_details_authcontact_person;
 	}
 
-	public Short getH413021() {
-		return h413021;
+	public Short getreferral_details_authcomment() {
+		return referral_details_authcomment;
 	}
 
-	public void setH413021(Short h413021) {
-		this.h413021 = h413021;
+	public void setreferral_details_authcomment(Short referral_details_authcomment) {
+		this.referral_details_authcomment = referral_details_authcomment;
 	}
 
-	public Timestamp getH413022() {
-		return h413022;
+	public Timestamp getreferral_details_apptconfirmdate() {
+		return referral_details_apptconfirmdate;
 	}
 
-	public void setH413022(Timestamp h413022) {
-		this.h413022 = h413022;
+	public void setreferral_details_apptconfirmdate(Timestamp referral_details_apptconfirmdate) {
+		this.referral_details_apptconfirmdate = referral_details_apptconfirmdate;
 	}
 
-	public String getH413023() {
-		return h413023;
+	public String getreferral_details_appttime() {
+		return referral_details_appttime;
 	}
 
-	public void setH413023(String h413023) {
-		this.h413023 = h413023;
+	public void setreferral_details_appttime(String referral_details_appttime) {
+		this.referral_details_appttime = referral_details_appttime;
 	}
 
-	public String getH413024() {
-		return h413024;
+	public String getreferral_details_apptby() {
+		return referral_details_apptby;
 	}
 
-	public void setH413024(String h413024) {
-		this.h413024 = h413024;
+	public void setreferral_details_apptby(String referral_details_apptby) {
+		this.referral_details_apptby = referral_details_apptby;
 	}
 
-	public String getH413025() {
-		return h413025;
+	public String getreferral_details_authcontactperson() {
+		return referral_details_authcontactperson;
 	}
 
-	public void setH413025(String h413025) {
-		this.h413025 = h413025;
+	public void setreferral_details_authcontactperson(String referral_details_authcontactperson) {
+		this.referral_details_authcontactperson = referral_details_authcontactperson;
 	}
 
-	public Short getH413026() {
-		return h413026;
+	public Short getreferral_details_ptnotified() {
+		return referral_details_ptnotified;
 	}
 
-	public void setH413026(Short h413026) {
-		this.h413026 = h413026;
+	public void setreferral_details_ptnotified(Short referral_details_ptnotified) {
+		this.referral_details_ptnotified = referral_details_ptnotified;
 	}
 
-	public String getH413027() {
-		return h413027;
+	public String getreferral_details_apptcomment() {
+		return referral_details_apptcomment;
 	}
 
-	public void setH413027(String h413027) {
-		this.h413027 = h413027;
+	public void setreferral_details_apptcomment(String referral_details_apptcomment) {
+		this.referral_details_apptcomment = referral_details_apptcomment;
 	}
 
-	public Short getH413028() {
-		return h413028;
+	public Short getreferral_details_concernreportreceived() {
+		return referral_details_concernreportreceived;
 	}
 
-	public void setH413028(Short h413028) {
-		this.h413028 = h413028;
+	public void setreferral_details_concernreportreceived(Short referral_details_concernreportreceived) {
+		this.referral_details_concernreportreceived = referral_details_concernreportreceived;
 	}
 
-	public Timestamp getH413029() {
-		return h413029;
+	public Timestamp getreferral_details_concernreprtrecdate() {
+		return referral_details_concernreprtrecdate;
 	}
 
-	public void setH413029(Timestamp h413029) {
-		this.h413029 = h413029;
+	public void setreferral_details_concernreprtrecdate(Timestamp referral_details_concernreprtrecdate) {
+		this.referral_details_concernreprtrecdate = referral_details_concernreprtrecdate;
 	}
 
-	public Short getH413030() {
-		return h413030;
+	public Short getreferral_details_concernreportid() {
+		return referral_details_concernreportid;
 	}
 
-	public void setH413030(Short h413030) {
-		this.h413030 = h413030;
+	public void setreferral_details_concernreportid(Short referral_details_concernreportid) {
+		this.referral_details_concernreportid = referral_details_concernreportid;
 	}
 
-	public Timestamp getH413031() {
-		return h413031;
+	public Timestamp getreferral_details_revdate() {
+		return referral_details_revdate;
 	}
 
-	public void setH413031(Timestamp h413031) {
-		this.h413031 = h413031;
+	public void setreferral_details_revdate(Timestamp referral_details_revdate) {
+		this.referral_details_revdate = referral_details_revdate;
 	}
 
-	public String getH413032() {
-		return h413032;
+	public String getreferral_details_revby() {
+		return referral_details_revby;
 	}
 
-	public void setH413032(String h413032) {
-		this.h413032 = h413032;
+	public void setreferral_details_revby(String referral_details_revby) {
+		this.referral_details_revby = referral_details_revby;
 	}
 
-	public String getH413033() {
-		return h413033;
+	public String getreferral_details_reportverify() {
+		return referral_details_reportverify;
 	}
 
-	public void setH413033(String h413033) {
-		this.h413033 = h413033;
+	public void setreferral_details_reportverify(String referral_details_reportverify) {
+		this.referral_details_reportverify = referral_details_reportverify;
 	}
 
-	public Integer getH413034() {
-		return h413034;
+	public Integer getreferral_details_isactive() {
+		return referral_details_isactive;
 	}
 
-	public void setH413034(Integer h413034) {
-		this.h413034 = h413034;
+	public void setreferral_details_isactive(Integer referral_details_isactive) {
+		this.referral_details_isactive = referral_details_isactive;
 	}
 
-	public Integer getH413035() {
-		return h413035;
+	public Integer getreferral_details_myalert() {
+		return referral_details_myalert;
 	}
 
-	public void setH413035(Integer h413035) {
-		this.h413035 = h413035;
+	public void setreferral_details_myalert(Integer referral_details_myalert) {
+		this.referral_details_myalert = referral_details_myalert;
 	}
 
-	public Integer getH413036() {
-		return h413036;
+	public Integer getreferral_details_referral_for() {
+		return referral_details_referral_for;
 	}
 
-	public void setH413036(Integer h413036) {
-		this.h413036 = h413036;
+	public void setreferral_details_referral_for(Integer referral_details_referral_for) {
+		this.referral_details_referral_for = referral_details_referral_for;
 	}
 
-	public String getH413037() {
-		return h413037;
+	public String getreferral_details_printleafdetail() {
+		return referral_details_printleafdetail;
 	}
 
-	public void setH413037(String h413037) {
-		this.h413037 = h413037;
+	public void setreferral_details_printleafdetail(String referral_details_printleafdetail) {
+		this.referral_details_printleafdetail = referral_details_printleafdetail;
 	}
 
-	public String getH413038() {
-		return h413038;
+	public String getreferral_details_scribble() {
+		return referral_details_scribble;
 	}
 
-	public void setH413038(String h413038) {
-		this.h413038 = h413038;
+	public void setreferral_details_scribble(String referral_details_scribble) {
+		this.referral_details_scribble = referral_details_scribble;
 	}
 
-	public String getH413039() {
-		return h413039;
+	public String getreferral_details_alert() {
+		return referral_details_alert;
 	}
 
-	public void setH413039(String h413039) {
-		this.h413039 = h413039;
+	public void setreferral_details_alert(String referral_details_alert) {
+		this.referral_details_alert = referral_details_alert;
 	}
 
-	public Integer getH413040() {
-		return h413040;
+	public Integer getreferral_details_leafid() {
+		return referral_details_leafid;
 	}
 
-	public void setH413040(Integer h413040) {
-		this.h413040 = h413040;
+	public void setreferral_details_leafid(Integer referral_details_leafid) {
+		this.referral_details_leafid = referral_details_leafid;
 	}
 
 	public Integer getReferreddoctorLoginid() {
@@ -560,12 +560,12 @@ public class Referral {
 		this.referreddoctorLoginid = referreddoctorLoginid;
 	}
 
-	public Integer getH413041() {
-		return h413041;
+	public Integer getreferral_details_patientid() {
+		return referral_details_patientid;
 	}
 
-	public void setH413041(Integer h413041) {
-		this.h413041 = h413041;
+	public void setreferral_details_patientid(Integer referral_details_patientid) {
+		this.referral_details_patientid = referral_details_patientid;
 	}
 
 	public Integer getReferralOrderBy() {
