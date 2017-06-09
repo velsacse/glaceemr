@@ -32,8 +32,6 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.H076;
-import com.glenwood.glaceemr.server.application.models.H076_;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr_;
@@ -50,6 +48,8 @@ import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.PosTable_;
 import com.glenwood.glaceemr.server.application.models.PosType;
 import com.glenwood.glaceemr.server.application.models.PosType_;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor_;
 import com.glenwood.glaceemr.server.application.models.print.GenericPrintStyle;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
@@ -481,18 +481,18 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		}
 
 		address = textFormat.getAddress(patientDetails.getPatientRegistrationAddress1(),patientDetails.getPatientRegistrationAddress2(),patientDetails.getPatientRegistrationCity(),state,patientDetails.getPatientRegistrationZip());
-		H076 refPhyEntity = null;
+		ReferringDoctor refPhyEntity = null;
 		if(patientDetails.getPatientRegistrationReferingPhysician() != null)
 			refPhyEntity = getReferringPhyDetails((long)patientDetails.getPatientRegistrationReferingPhysician());	
 		refPhyName = "";
 		if(refPhyEntity != null)
-			refPhyName = textFormat.getFormattedName(refPhyEntity.getH076005(), refPhyEntity.getH076004(), refPhyEntity.getH076003(), refPhyEntity.getH076021());
-		H076 serviceRefEntity=null;
+			refPhyName = textFormat.getFormattedName(refPhyEntity.getreferring_doctor_firstname(), refPhyEntity.getreferring_doctor_midinitial(), refPhyEntity.getreferring_doctor_lastname(), refPhyEntity.getreferring_doctor_credential());
+		ReferringDoctor serviceRefEntity=null;
 		if(encounter != null)
 			serviceRefEntity = getReferringPhyDetails(encounter.getEncounterRefDoctor());
 		serviceRefName = "";
 		if(serviceRefEntity != null)
-			serviceRefName = textFormat.getFormattedName(serviceRefEntity.getH076005(), serviceRefEntity.getH076004(), serviceRefEntity.getH076003(), serviceRefEntity.getH076021());
+			serviceRefName = textFormat.getFormattedName(serviceRefEntity.getreferring_doctor_firstname(), serviceRefEntity.getreferring_doctor_midinitial(), serviceRefEntity.getreferring_doctor_lastname(), serviceRefEntity.getreferring_doctor_credential());
 
 		//		List<InsuranceDataBean> insuranceBean = parseInsuranceDetails(practiceList);
 
@@ -708,22 +708,22 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 		}
 	}
 
-	private H076 getReferringPhyDetails(
+	private ReferringDoctor getReferringPhyDetails(
 			Long refId) {
 
 		CriteriaBuilder builder= em.getCriteriaBuilder();
-		CriteriaQuery<H076> query= builder.createQuery(H076.class);
-		Root<H076> root= query.from(H076.class);
+		CriteriaQuery<ReferringDoctor> query= builder.createQuery(ReferringDoctor.class);
+		Root<ReferringDoctor> root= query.from(ReferringDoctor.class);
 
-		query.select(builder.construct(H076.class, root.get(H076_.h076001),
-				root.get(H076_.h076003),
-				root.get(H076_.h076004),
-				root.get(H076_.h076005),
-				root.get(H076_.h076021)));
-		query.where(builder.equal(root.get(H076_.h076001), refId));
+		query.select(builder.construct(ReferringDoctor.class, root.get(ReferringDoctor_.referring_doctor_uniqueid),
+				root.get(ReferringDoctor_.referring_doctor_lastname),
+				root.get(ReferringDoctor_.referring_doctor_midinitial),
+				root.get(ReferringDoctor_.referring_doctor_firstname),
+				root.get(ReferringDoctor_.referring_doctor_credential)));
+		query.where(builder.equal(root.get(ReferringDoctor_.referring_doctor_uniqueid), refId));
 
 		try{
-			H076 result= em.createQuery(query).getSingleResult();
+			ReferringDoctor result= em.createQuery(query).getSingleResult();
 			return result;
 		}catch(NoResultException e){
 			return null;

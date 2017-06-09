@@ -8,13 +8,11 @@ import org.json.JSONException;
 import com.glenwood.glaceemr.server.application.models.Billinglookup;
 import com.glenwood.glaceemr.server.application.models.CreditCardPaymentBean;
 import com.glenwood.glaceemr.server.application.models.GeneratedBillsHistoryDetails;
-import com.glenwood.glaceemr.server.application.models.H093;
-import com.glenwood.glaceemr.server.application.models.NonServiceDetails;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
 import com.glenwood.glaceemr.server.application.models.PaymentResponse;
-import com.glenwood.glaceemr.server.application.models.PortalPatientStatementBean;
 import com.glenwood.glaceemr.server.application.models.PaymentService;
 import com.glenwood.glaceemr.server.application.models.PortalPatientPaymentsSummary;
+import com.glenwood.glaceemr.server.application.models.PortalPatientStatementBean;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.ReceiptDetail;
 

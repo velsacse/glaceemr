@@ -63,8 +63,6 @@ import com.glenwood.glaceemr.server.application.models.Billinglookup;
 import com.glenwood.glaceemr.server.application.models.Billinglookup_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
-import com.glenwood.glaceemr.server.application.models.H478;
-import com.glenwood.glaceemr.server.application.models.H478_;
 import com.glenwood.glaceemr.server.application.models.InsCompany;
 import com.glenwood.glaceemr.server.application.models.InsCompany_;
 import com.glenwood.glaceemr.server.application.models.MacraConfiguration;
@@ -82,6 +80,8 @@ import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEnt
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEntries_;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping_;
+import com.glenwood.glaceemr.server.application.models.StaffPinNumberDetails;
+import com.glenwood.glaceemr.server.application.models.StaffPinNumberDetails_;
 import com.glenwood.glaceemr.server.application.repositories.MacraConfigurationRepository;
 import com.glenwood.glaceemr.server.application.repositories.MuAttestationObjectivesRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientMeasureStatusLogRepository;
@@ -1137,10 +1137,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
-		Root<H478> root = cq.from(H478.class);
+		Root<StaffPinNumberDetails> root = cq.from(StaffPinNumberDetails.class);
 
-		cq.select(root.get(H478_.h478006));
-		cq.where(builder.equal(root.get(H478_.h478001), providerId));
+		cq.select(root.get(StaffPinNumberDetails_.staff_pin_number_details_cctpin_number));
+		cq.where(builder.equal(root.get(StaffPinNumberDetails_.staff_pin_number_details_profileid), providerId));
 
 		List<Object> results = em.createQuery(cq).getResultList();
 
@@ -1816,9 +1816,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		CriteriaBuilder builder2 = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq2 = builder2.createQuery();
-		Root<H478> rooth478 = cq2.from(H478.class);
-		Join<H478,MacraProviderConfiguration> joinh478MacraProviderConfiguration=rooth478.join(H478_.macraProviderConfiguration,JoinType.INNER);
-		cq2.select(rooth478.get(H478_.h478006));
+		Root<StaffPinNumberDetails> rooth478 = cq2.from(StaffPinNumberDetails.class);
+		Join<StaffPinNumberDetails,MacraProviderConfiguration> joinh478MacraProviderConfiguration=rooth478.join(StaffPinNumberDetails_.macraProviderConfiguration,JoinType.INNER);
+		cq2.select(rooth478.get(StaffPinNumberDetails_.staff_pin_number_details_cctpin_number));
 		List<Object> result2=em.createQuery(cq2).getResultList();
 		filterDetails.put("npi", result2);
 

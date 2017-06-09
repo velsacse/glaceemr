@@ -111,7 +111,7 @@ public class AlertArchive {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
-	@JoinColumn(name="alert_event_room_id",referencedColumnName="h479001",insertable=false,updatable=false)
+	@JoinColumn(name="alert_event_room_id",referencedColumnName="room_details_id",insertable=false,updatable=false)
 	Room roomTable;
 	
 
