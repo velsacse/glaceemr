@@ -277,7 +277,8 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 			endDay = Calendar.getInstance().get(Calendar.DATE);
 		Calendar endDate = Calendar.getInstance();
 		endDate.set(year, whichMonth, endDay);
-		List<CurrentMedication> currentmedlist=currentMedicationRepository.findAll(PrescripitonSpecification.getactivemedwithclass(patientid,startDate.getTime(),endDate.getTime()));
+//		List<CurrentMedication> currentmedlist=currentMedicationRepository.findAll(PrescripitonSpecification.getactivemedwithclass(patientid,startDate.getTime(),endDate.getTime()));
+		List<CurrentMedication> currentmedlist= new ArrayList<CurrentMedication>();
 		List<Prescription> prescmedlist=prescriptionRepository.findAll(PrescripitonSpecification.getactivemedwithclasspresc(patientid,startDate.getTime(),endDate.getTime()));
 		for(CurrentMedication obj:currentmedlist) {
 			obj.setMedsAdminPlan(medAdminPlanRepository.findAll(PrescripitonSpecification.getMedsPlanIds(obj.getCurrentMedicationId())));
@@ -668,16 +669,5 @@ public class PrescriptionServiceImpl implements PrescriptionService{
        return pre1;
     }
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
 
