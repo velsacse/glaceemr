@@ -23,6 +23,18 @@ public class EncounterQDM {
 		}
 
 	}
+	
+	
+	public EncounterQDM(String code, Date startDate, Date endDate){
+
+		this.code = code;
+		this.startDate = startDate;
+		if(endDate != null){
+			this.endDate = endDate;
+		}
+
+	}
+	
 	public EncounterQDM(Date startDate, Date endDate){
 
 		this.startDate = startDate;
