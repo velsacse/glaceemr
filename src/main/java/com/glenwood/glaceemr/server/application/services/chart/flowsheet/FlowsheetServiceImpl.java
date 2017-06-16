@@ -980,16 +980,19 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		for (int i=0;i<testIds.length;i++){
 			testIdString += testIds[i]+",";
 		}
+		if(testIdString.length()>0){
 		testIdString = testIdString.substring(0, testIdString.length()-1);
+		}
 		return testIdString;
 	}
 
 	private Integer[] getGroupTestIds(List<FS_GroupIdTest> testIdandGroupIds, Integer groupIds){
 		ArrayList<Integer> testIds= new ArrayList<Integer>();
 		for(FS_GroupIdTest fsgroup:testIdandGroupIds){
-			if(groupIds==fsgroup.getGroupId()){
+			if((int)groupIds==fsgroup.getGroupId()){
 				testIds.add(fsgroup.getTestId());
 			}
+			
 		}
 		Integer[] testIdArray = new Integer[testIds.size()];
 		testIdArray=testIds.toArray(testIdArray);

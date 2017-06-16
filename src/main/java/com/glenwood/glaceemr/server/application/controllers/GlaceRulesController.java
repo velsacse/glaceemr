@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.Session;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigura
 import com.glenwood.glaceemr.server.application.services.pqrsreport.PqrsReportService;
 import com.glenwood.glaceemr.server.application.services.rulesengine.GlaceRulesService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
+import com.glenwood.glaceemr.server.utils.SessionMap;
 
 /**
  * @author software
@@ -62,6 +64,9 @@ public class GlaceRulesController {
 	
 	@Autowired
 	HttpServletRequest request;
+	
+	@Autowired
+	SessionMap sessionMap;
 
 	@RequestMapping(value = "/getPQRSMeasure", method = RequestMethod.GET)
     @ResponseBody
@@ -69,7 +74,7 @@ public class GlaceRulesController {
 		String measure=glaceRulesService.getMeasures(providerId);
 		EMRResponseBean result=new EMRResponseBean();
 		result.setData(measure);
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PQRS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "Collected Configured Measures", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PQRS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "Collected Configured Measures",providerId, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return result;
 		
 	}
@@ -136,15 +141,15 @@ public class GlaceRulesController {
 
 			finalResponse.setDataFromResponse(responseFromCentralServer);
 
-			finalResponse.setPqrsresponse(measureService.getPqrsResponseObject(patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(),codeListForQDM));
+			finalResponse.setPqrsresponse(measureService.getPqrsResponseObject(patientID, providerId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(),codeListForQDM));
 
-			finalResponse.setQualityMeasures(measureService.getQualityMeasureResponseObject(userId,codeListForQDM));
+			finalResponse.setQualityMeasures(measureService.getQualityMeasureResponseObject(providerId,codeListForQDM));
 
 		}else{
 
 		}
 		response.setData(finalResponse);
-
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PQRS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "data to draw qty measures in MIPS flowsheet",sessionMap.getUserID(), request.getRemoteAddr(),patientID, "", LogUserType.USER_LOGIN, "", "");
 		return response;
 	}
 	
