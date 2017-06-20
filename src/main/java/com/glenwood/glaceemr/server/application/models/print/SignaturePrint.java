@@ -52,6 +52,12 @@ public class SignaturePrint {
 	@Column(name="signature_print_evaluation")
 	private Boolean isEvaluationTimeReq;
 
+	@Column(name="signature_print_regards")
+	private String signaturePrintRegards;
+	
+	@Column(name="signature_print_regards_style")
+	private String signaturePrintRegardsStyle;
+	
 	public Integer getSignaturePrintId() {
 		return signaturePrintId;
 	}
@@ -156,6 +162,20 @@ public class SignaturePrint {
 		this.isEvaluationTimeReq = isEvaluationTimeReq;
 	}
 
-	
-	
+	public String getSignaturePrintRegards() {
+		return signaturePrintRegards;
+	}
+
+	public void setSignaturePrintRegards(String signaturePrintRegards) {
+		this.signaturePrintRegards = signaturePrintRegards;
+	}
+
+	public String getSignaturePrintRegardsStyle() {
+		return signaturePrintRegardsStyle;
+	}
+
+	public void setSignaturePrintRegardsStyle(String signaturePrintRegardsStyle) {
+		this.signaturePrintRegardsStyle = signaturePrintRegardsStyle;
+	}
+
 }

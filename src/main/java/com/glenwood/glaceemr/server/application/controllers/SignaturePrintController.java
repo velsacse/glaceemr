@@ -9,17 +9,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.DoctorSign;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.print.SignaturePrint;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.print.signature.SignaturePrintService;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -74,7 +77,9 @@ public class SignaturePrintController {
 			@RequestParam(value="signfooter") String signaturePrintSignfooter,@RequestParam(value="signfooterStyle") String signaturePrintSignfooterStyle,
 			@RequestParam(value="cosignfooter") String signaturePrintCosignfooter,@RequestParam(value="cosignfooterStyle") String signaturePrintCosignfooterStyle,
 			@RequestParam(value="isEncounterDateReq") Boolean isEncounterDateReq,@RequestParam(value="isSignTimestampReq") Boolean isSignTimestampReq,
-			@RequestParam(value="isCosignTimestampReq") Boolean isCosignTimestampReq,@RequestParam(value="isEvaluationTimeReq") Boolean isEvaluationTimeReq) throws Exception{
+			@RequestParam(value="isCosignTimestampReq") Boolean isCosignTimestampReq,@RequestParam(value="isEvaluationTimeReq") Boolean isEvaluationTimeReq,
+			@RequestParam(value="regards", defaultValue="", required=false) String signaturePrintRegards,
+			@RequestParam(value="regardsStyle", defaultValue="", required=false) String signaturePrintRegardsStyle) throws Exception{
 		logger.debug("Begin request processing  - to Save signature print.");
 		
 		SignaturePrint newSignaturePrint=new SignaturePrint();
@@ -90,6 +95,8 @@ public class SignaturePrintController {
 		newSignaturePrint.setIsSignTimestampReq(isSignTimestampReq);
 		newSignaturePrint.setIsCosignTimestampReq(isCosignTimestampReq);
 		newSignaturePrint.setIsEvaluationTimeReq(isEvaluationTimeReq);
+		newSignaturePrint.setSignaturePrintRegards(signaturePrintRegards);
+		newSignaturePrint.setSignaturePrintRegardsStyle(signaturePrintRegardsStyle);
 		SignaturePrint signaturePrint = signaturePrintService.saveSignaturePrint(newSignaturePrint);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.UPDATE,1,Log_Outcome.SUCCESS,"Successfully saved signature print style",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to Save signature print.");
@@ -111,7 +118,9 @@ public class SignaturePrintController {
 			@RequestParam(value="cosignfooter") String signaturePrintCosignfooter,@RequestParam(value="cosignfooterStyle") String signaturePrintCosignfooterStyle,
 			@RequestParam(value="isEncounterDateReq") Boolean isEncounterDateReq,@RequestParam(value="isSignTimestampReq") Boolean isSignTimestampReq,
 			@RequestParam(value="isCosignTimestampReq") Boolean isCosignTimestampReq,@RequestParam(value="isEvaluationTimeReq") Boolean isEvaluationTimeReq,
-			@RequestParam(value="signaturePrintId") Integer signaturePrintId) throws Exception{
+			@RequestParam(value="signaturePrintId") Integer signaturePrintId,
+			@RequestParam(value="regards", defaultValue="", required=false) String signaturePrintRegards,
+			@RequestParam(value="regardsStyle", defaultValue="", required=false) String signaturePrintRegardsStyle) throws Exception{
 		logger.debug("Begin request processing - to Update signature print.");
 		
 		SignaturePrint updateSignaturePrint=new SignaturePrint();
@@ -128,6 +137,8 @@ public class SignaturePrintController {
 		updateSignaturePrint.setIsSignTimestampReq(isSignTimestampReq);
 		updateSignaturePrint.setIsCosignTimestampReq(isCosignTimestampReq);
 		updateSignaturePrint.setIsEvaluationTimeReq(isEvaluationTimeReq);
+		updateSignaturePrint.setSignaturePrintRegards(signaturePrintRegards);		
+		updateSignaturePrint.setSignaturePrintRegardsStyle(signaturePrintRegardsStyle);
 		SignaturePrint signaturePrint = signaturePrintService.saveSignaturePrint(updateSignaturePrint);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.UPDATE,1,Log_Outcome.SUCCESS,"Successfully updated signature print style",-1,request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to Update signature print.");
