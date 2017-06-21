@@ -118,6 +118,7 @@ public class PrescripitonSpecification {
 				String likePattern = getLikePattern("active");
 				Predicate patientId=cb.equal(root.get(Prescription_.docPrescPatientId), patientid);
 				Predicate isactive=cb.equal(root.get(Prescription_.docPrescIsActive),true);
+				Predicate status=root.get(Prescription_.docPrescStatus).in(1,2,3);
 				Predicate ismedsup=cb.equal(root.get(Prescription_.docPrescIsMedSup),false);
 				Predicate medstatus=cb.like(cb.lower(currjoin.get(MedStatus_.medStatusGroup)),likePattern);
 				Predicate orderDate = null;
@@ -130,7 +131,7 @@ public class PrescripitonSpecification {
 
 				//					root.fetch(Prescription_.medsAdminPlan,JoinType.LEFT);
 				if(startDate!=null&&endDate!=null) {
-					cq.where(cb.and(patientId, isactive,medstatus,ismedsup,orderDate));
+					cq.where(cb.and(patientId, isactive,medstatus,ismedsup,orderDate,status));
 				}
 				else
 					cq.where(cb.and(patientId, isactive,medstatus,ismedsup));
