@@ -42,33 +42,78 @@ public class AuditTrailFetchServiceImpl implements AuditTrailFetchService {
 
 	@Override
 	public Iterable<AuditTrail> getSearchResult(int userId, String module, String outcome, String desc,
-			String startDate, String endDate, String action, int parentEvent, int patientId, String sessionId, String clientIp, int logId, int currentPage, int pageSize) {
+			String startDate, String endDate, String action, int parentEvent, int patientId, String sessionId, String clientIp, int logId, String sortProperty, String order, int currentPage, int pageSize) {
 		Iterable<AuditTrail> searchedList = null;
 
 		Timestamp findCurrentTimeStamp = findCurrentTimeStamp();
-		Sort sort = new Sort(Direction.DESC, "logOn");
+		Sort sort = null;
+		
+		if(sortProperty.equalsIgnoreCase("id"))
+		{
+			if(order.equalsIgnoreCase("asc"))
+			{
+				sort = new Sort(Direction.ASC,"logId");
+			}
+			else
+			{
+				sort = new Sort(Direction.DESC,"logId");
+			}
+		}
+		else if(sortProperty.equalsIgnoreCase("module"))
+		{
+			if(order.equalsIgnoreCase("asc"))
+			{
+				sort = new Sort(Direction.ASC,"module");
+			}
+			else
+			{
+				sort = new Sort(Direction.DESC,"module");
+			}
+		}
+		else if(sortProperty.equalsIgnoreCase("action"))
+		{
+			if(order.equalsIgnoreCase("asc"))
+			{
+				sort = new Sort(Direction.ASC,"action");
+			}
+			else
+			{
+				sort = new Sort(Direction.DESC,"action");
+			}
+		}
+		else
+		{
+			if(order.equalsIgnoreCase("asc"))
+			{
+				sort = new Sort(Direction.ASC,"logOn");
+			}
+			else
+			{
+				sort = new Sort(Direction.DESC,"logOn");
+			}
+		}
 
 		if (startDate.equals("-1") && !endDate.equals("-1")) {
 
 			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, module,
-					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId,  null, Timestamp.valueOf(endDate)), new PageRequest(currentPage, pageSize, sort));
+					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  null, Timestamp.valueOf(endDate)), new PageRequest(currentPage, pageSize, sort));
 
 		} else if (!startDate.equals("-1") && endDate.equals("-1")) {
 
 			searchedList = auditTrailRepository.findAll(
-					AuditTrailSpecifications.getSearchResult(userId, module, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, 
+					AuditTrailSpecifications.getSearchResult(userId, module, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order, 
 							(Timestamp) Timestamp.valueOf(startDate), (Timestamp) findCurrentTimeStamp),
 					new PageRequest(currentPage, pageSize, sort));
 		} else if (!startDate.equals("-1") && !endDate.equals("-1")) {
 
 			searchedList = auditTrailRepository.findAll(
-					AuditTrailSpecifications.getSearchResult(userId, module, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, 
+					AuditTrailSpecifications.getSearchResult(userId, module, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order, 
 							Timestamp.valueOf(startDate), Timestamp.valueOf(endDate)),
 					new PageRequest(currentPage, pageSize, sort));
 		} else if (startDate.equals("-1") && endDate.equals("-1")) {
 
 			searchedList = auditTrailRepository.findAll(
-					AuditTrailSpecifications.getSearchResult(userId, module, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, null, findCurrentTimeStamp),
+					AuditTrailSpecifications.getSearchResult(userId, module, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order, null, findCurrentTimeStamp),
 					new PageRequest(currentPage, pageSize, sort));
 		} else {
 
@@ -170,23 +215,23 @@ public class AuditTrailFetchServiceImpl implements AuditTrailFetchService {
 
 	@Override
 	public Iterable<AuditTrail> generateCsv(int userId, String module, String outcome, String desc, String startDate,
-			String endDate, String action, int parentEvent, int patientId, String sessionId, String clientIp, int logId, HttpServletResponse response)
+			String endDate, String action, int parentEvent, int patientId, String sessionId, String clientIp, int logId, String sortProperty, String order, HttpServletResponse response)
 			throws IOException {
 
 		Iterable<AuditTrail> searchedList = null;
 		Timestamp findCurrentTimeStamp = findCurrentTimeStamp();
 		if (startDate.equals("-1") && !endDate.equals("-1")) {
 			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, module,
-					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId,  null, Timestamp.valueOf(endDate)));
+					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  null, Timestamp.valueOf(endDate)));
 		} else if (!startDate.equals("-1") && endDate.equals("-1")) {
 			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, module,
-					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId,  Timestamp.valueOf(startDate), findCurrentTimeStamp));
+					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  Timestamp.valueOf(startDate), findCurrentTimeStamp));
 		} else if (!startDate.equals("-1") && !endDate.equals("-1")) {
 			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, module,
-					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId,  Timestamp.valueOf(startDate), Timestamp.valueOf(endDate)));
+					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  Timestamp.valueOf(startDate), Timestamp.valueOf(endDate)));
 		} else if (startDate.equals("-1") && endDate.equals("-1")) {
 			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, module,
-					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId,  null, findCurrentTimeStamp));
+					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  null, findCurrentTimeStamp));
 		} else {
 			searchedList = auditTrailRepository.findAll();
 		}

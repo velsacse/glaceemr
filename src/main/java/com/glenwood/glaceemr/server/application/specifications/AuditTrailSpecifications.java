@@ -135,13 +135,13 @@ public class AuditTrailSpecifications {
 		return checkClientIpSpec;
 	}
 	
-	public static Specification<AuditTrail> getSearchResult(final int userId, final String module, final String outcome, final String desc, final String action, final int parentEvent, final int patientId, final String sessionId, final String clientIp, final int logId, final Timestamp startTimeStamp, final Timestamp endTimeStamp) {
+	public static Specification<AuditTrail> getSearchResult(final int userId, final String module, final String outcome, final String desc, final String action, final int parentEvent, final int patientId, final String sessionId, final String clientIp, final int logId, final String sortProperty, final String order, final Timestamp startTimeStamp, final Timestamp endTimeStamp) {
 		Specification<AuditTrail> specification = new Specification<AuditTrail>() {
 			@Override
 			public Predicate toPredicate(Root<AuditTrail> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-				Predicate checklogOnPredicate = cb.lessThanOrEqualTo(root.get(AuditTrail_.logOn), endTimeStamp);
+					Predicate checklogOnPredicate = cb.lessThanOrEqualTo(root.get(AuditTrail_.logOn), endTimeStamp);
 
-				return checklogOnPredicate;
+					return checklogOnPredicate;
 			}
 		};
 

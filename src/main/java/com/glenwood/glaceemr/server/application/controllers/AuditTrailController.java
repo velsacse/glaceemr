@@ -28,7 +28,7 @@ import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.HUtil;
 
 @RestController
-@RequestMapping(value = "auditTrail.Action")
+@RequestMapping(value = "/user/auditTrail.Action")
 public class AuditTrailController {
 
 	@Autowired
@@ -43,7 +43,7 @@ public class AuditTrailController {
 	public EMRResponseBean searchEventLog(@RequestParam(value = "data") String data,
 			@RequestParam(value = "currentpage") int currentPage, @RequestParam(value = "pagesize") int pageSize)
 			throws Exception {
-		auditResponseBean= new EMRResponseBean();
+		auditResponseBean = new EMRResponseBean();
 		JSONObject dataObj = new JSONObject(data);
 		int userId = Integer.parseInt((String) HUtil.nz(dataObj.get("userId"), "-1"));
 		int patientid = (int) HUtil.nz(dataObj.get("patientid"), -1);
@@ -55,6 +55,8 @@ public class AuditTrailController {
 		int parentEvent = (int) HUtil.nz(dataObj.get("parentEvent"), -1);
 		String sessionId = (String) HUtil.nz(dataObj.get("sessionId"), "-1");
 		String clientIp = (String) HUtil.nz(dataObj.get("clientIp"), "-1");
+		String sortProperty = (String) HUtil.nz(dataObj.get("sortProperty"), "");
+		String order = (String) HUtil.nz(dataObj.get("order"), "");
 		int logId = (int) HUtil.nz(dataObj.get("logId"), -1);
 		if (!startDate.equals("-1")) {
 			SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
@@ -70,12 +72,12 @@ public class AuditTrailController {
 			endDate = newFormat.format(eDate);
 		}
 		Iterable<AuditTrail> auditLogList = auditTrailFetchService.getSearchResult(userId, module, outcome, desc,
-				startDate, endDate, action, parentEvent, patientid, sessionId, clientIp, logId, currentPage, pageSize);
+				startDate, endDate, action, parentEvent, patientid, sessionId, clientIp, logId, sortProperty, order, currentPage, pageSize);
 		auditResponseBean.setData(auditLogList);
 		auditResponseBean.setSuccess(true);
 		return auditResponseBean;
 	}
-	
+
 	@RequestMapping(value = "/exportCsvCount", method = RequestMethod.GET)
 	public @ResponseBody String exportCsvCount(@RequestParam(value = "data") String data, HttpServletRequest request,
 			HttpServletResponse newResponse) throws Exception {
@@ -91,7 +93,7 @@ public class AuditTrailController {
 		String sessionId = (String) HUtil.nz(dataObj.get("sessionId"), "-1");
 		String clientIp = (String) HUtil.nz(dataObj.get("clientIp"), "-1");
 		int logId = (int) HUtil.nz(dataObj.get("logId"), "-1");
-		
+
 		if (!startDate.equals("-1")) {
 			SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
 			Date sDate = format.parse(startDate);
@@ -105,7 +107,7 @@ public class AuditTrailController {
 			SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			endDate = newFormat.format(eDate);
 		}
-		
+
 		String auditLogCount = auditTrailFetchService.generateCsvCount(userId, module, outcome, desc, startDate,
 				endDate, action, parentEvent, patientid, sessionId, clientIp, logId, newResponse);
 		return auditLogCount;
@@ -127,10 +129,25 @@ public class AuditTrailController {
 		String sessionId = (String) HUtil.nz(dataObj.get("sessionId"), "-1");
 		String clientIp = (String) HUtil.nz(dataObj.get("clientIp"), "-1");
 		int logId = (int) HUtil.nz(dataObj.get("logId"), "-1");
+		String sortProperty = (String) HUtil.nz(dataObj.get("sortProperty"), "");
+		String order = (String) HUtil.nz(dataObj.get("order"), "");
 		int coSign = Integer.parseInt((String) HUtil.nz(dataObj.get("coSign"), "-1"));
-		
+
+		if (!startDate.equals("-1")) {
+			SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+			Date sDate = format.parse(startDate);
+			SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			startDate = newFormat.format(sDate);
+		}
+		if (!endDate.equals("-1")) {
+			SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+			Date eDate = format.parse(endDate);
+			SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			endDate = newFormat.format(eDate);
+		}
+
 		Iterable<AuditTrail> auditLogList = auditTrailFetchService.generateCsv(userId, module, outcome, desc, startDate,
-				endDate, action, parentEvent, patientid, sessionId, clientIp, logId, newResponse);
+				endDate, action, parentEvent, patientid, sessionId, clientIp, logId, sortProperty, order, newResponse);
 
 		SimpleDateFormat monthDayYearformatter = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
 		BufferedWriter writer = new BufferedWriter(newResponse.getWriter());
@@ -166,7 +183,7 @@ public class AuditTrailController {
 			writer.write("Request URL");
 			writer.write("	");
 			writer.write("Reference URL");
-			if(coSign != -1 && coSign == 1){
+			if (coSign != -1 && coSign == 1) {
 				writer.write("	");
 				writer.write("Patient Information");
 				writer.write("	");
@@ -179,7 +196,6 @@ public class AuditTrailController {
 				writer.write("PHI Description");
 			}
 			writer.newLine();
-			
 
 			Iterator<AuditTrail> list = auditLogList.iterator();
 
@@ -211,10 +227,10 @@ public class AuditTrailController {
 				writer.write("	");
 				String patientId = "";
 				try {
-				patientId = String.valueOf(eventLog.getPatientId());
-				if (patientId.equals("") || patientId.equals("0") || patientId.equals("-1") || patientId == null) {
-					patientId = "N/A";
-				}
+					patientId = String.valueOf(eventLog.getPatientId());
+					if (patientId.equals("") || patientId.equals("0") || patientId.equals("-1") || patientId == null) {
+						patientId = "N/A";
+					}
 				} catch (Exception e) {
 					patientId = "N/A";
 				}
@@ -227,143 +243,143 @@ public class AuditTrailController {
 				writer.write(Log_Outcome.nameOf(eventLog.getOutcome()));
 				writer.write("	");
 				String clientIP = "";
-				try{
+				try {
 					clientIP = eventLog.getClientIp();
-				if (clientIP.equals("") || clientIP == null) {
-					clientIP = "N/A";
-				}
-				}catch(Exception e){
+					if (clientIP.equals("") || clientIP == null) {
+						clientIP = "N/A";
+					}
+				} catch (Exception e) {
 					clientIP = "N/A";
 				}
 				writer.write(clientIP);
 				writer.write("	");
 				String Desc = "";
-				try{
-				Desc = eventLog.getDesc();
-				if (Desc.equals("") || Desc == null) {
-					Desc = "N/A";
-				}
-				}catch(Exception e){
+				try {
+					Desc = eventLog.getDesc();
+					if (Desc.equals("") || Desc == null) {
+						Desc = "N/A";
+					}
+				} catch (Exception e) {
 					Desc = "N/A";
 				}
 				writer.write(Desc);
 				writer.write("	");
 				String sessionID = "";
-				try{
+				try {
 					sessionID = eventLog.getSessionId();
-				if (sessionID.equals("") || sessionID == null) {
-					sessionID = "N/A";
-				}
-				}catch(Exception e){
+					if (sessionID.equals("") || sessionID == null) {
+						sessionID = "N/A";
+					}
+				} catch (Exception e) {
 					sessionID = "N/A";
 				}
 				writer.write(sessionID);
 				writer.write("	");
 				String serverIp = "";
-				try{
-				serverIp = eventLog.getServerIp();
-				if (serverIp.equals("") || serverIp == null) {
-					serverIp = "N/A";
-				}
-				}catch(Exception e){
+				try {
+					serverIp = eventLog.getServerIp();
+					if (serverIp.equals("") || serverIp == null) {
+						serverIp = "N/A";
+					}
+				} catch (Exception e) {
 					serverIp = "N/A";
 				}
 				writer.write(serverIp);
 				writer.write("	");
 				String serverHostname = "";
-				try{
-				serverHostname = eventLog.getServerHostname();
-				if (serverHostname.equals("") || serverHostname == null) {
-					serverHostname = "N/A";
-				}
-				}catch(Exception e){
+				try {
+					serverHostname = eventLog.getServerHostname();
+					if (serverHostname.equals("") || serverHostname == null) {
+						serverHostname = "N/A";
+					}
+				} catch (Exception e) {
 					serverHostname = "N/A";
 				}
 				writer.write(serverHostname);
 				writer.write("	");
 				String reqUrl = "";
-				try{
-				reqUrl = eventLog.getRequestedUrl();
-				if (reqUrl.equals("") || reqUrl == null) {
-					reqUrl = "N/A";
-				}
-				}catch(Exception e){
+				try {
+					reqUrl = eventLog.getRequestedUrl();
+					if (reqUrl.equals("") || reqUrl == null) {
+						reqUrl = "N/A";
+					}
+				} catch (Exception e) {
 					reqUrl = "N/A";
 				}
 				writer.write(reqUrl);
 				writer.write("	");
 				String refUrl = "";
-				try{
-				refUrl = eventLog.getReferenceUrl();
-				if (refUrl.equals("") || refUrl == null) {
-					refUrl = "N/A";
-				}
-				}catch(Exception e){
+				try {
+					refUrl = eventLog.getReferenceUrl();
+					if (refUrl.equals("") || refUrl == null) {
+						refUrl = "N/A";
+					}
+				} catch (Exception e) {
 					refUrl = "N/A";
 				}
 				writer.write(refUrl);
-				if(coSign != -1 && coSign ==1){
+				if (coSign != -1 && coSign == 1) {
 					writer.write("	");
 					String patientName = "";
 					String patientDOB;
-					try{
+					try {
 						patientName = eventLog.getPatientName();
-					if (patientName.equals("") || patientName == null) {
+						if (patientName.equals("") || patientName == null) {
+							patientName = "N/A";
+						}
+					} catch (Exception e) {
 						patientName = "N/A";
 					}
-					}catch(Exception e){
-						patientName = "N/A";
-					}
-					try{
+					try {
 						patientDOB = eventLog.getDob().toString();
-					if (patientDOB.equals("") || patientDOB == null) {
+						if (patientDOB.equals("") || patientDOB == null) {
+							patientDOB = "N/A";
+						}
+					} catch (Exception e) {
 						patientDOB = "N/A";
 					}
-					}catch(Exception e){
-						patientDOB = "N/A";
-					}
-					writer.write("Patient Name : "+patientName+", Patient DOB : "+patientDOB);
+					writer.write("Patient Name : " + patientName + ", Patient DOB : " + patientDOB);
 					writer.write("	");
 					String revIDs = "";
-					try{
+					try {
 						revIDs = eventLog.getRelevantIds();
-					if (revIDs.equals("") || revIDs == null) {
-						revIDs = "N/A";
-					}
-					}catch(Exception e){
+						if (revIDs.equals("") || revIDs == null) {
+							revIDs = "N/A";
+						}
+					} catch (Exception e) {
 						revIDs = "N/A";
 					}
 					writer.write(revIDs);
 					writer.write("	");
 					String raw = "";
-					try{
+					try {
 						raw = eventLog.getRawData();
-					if (raw.equals("") || raw == null) {
-						raw = "N/A";
-					}
-					}catch(Exception e){
+						if (raw.equals("") || raw == null) {
+							raw = "N/A";
+						}
+					} catch (Exception e) {
 						raw = "N/A";
 					}
 					writer.write(raw);
 					writer.write("	");
 					String back = "";
-					try{
+					try {
 						back = eventLog.getBackUpData();
-					if (back.equals("") || back == null) {
-						back = "N/A";
-					}
-					}catch(Exception e){
+						if (back.equals("") || back == null) {
+							back = "N/A";
+						}
+					} catch (Exception e) {
 						back = "N/A";
 					}
 					writer.write(back);
 					writer.write("	");
 					String phi = "";
-					try{
+					try {
 						phi = eventLog.getPhiDescription();
-					if (phi.equals("") || phi == null) {
-						phi = "N/A";
-					}
-					}catch(Exception e){
+						if (phi.equals("") || phi == null) {
+							phi = "N/A";
+						}
+					} catch (Exception e) {
 						phi = "N/A";
 					}
 					writer.write(phi);
@@ -380,6 +396,5 @@ public class AuditTrailController {
 		}
 
 	}
-	
-	
+
 }
