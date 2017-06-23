@@ -874,12 +874,12 @@ Root<Encounter> root = cq.from(Encounter.class);
 		joinLabentriesChart.on(predicateByPatientId);
 		
 		cq.select(builder.construct(ImmunizationDetailsBean.class,
-				joinLabdescLabentries.get(LabEntries_.labEntriesTestId),
-				rootlabDescription.get(LabDescription_.labDescriptionTestDesc),
+				builder.coalesce(joinLabdescLabentries.get(LabEntries_.labEntriesTestId),0),
+				builder.coalesce(rootlabDescription.get(LabDescription_.labDescriptionTestDesc),""),
 				joinLabdescLabentries.get(LabEntries_.labEntriesPerfOn),
-				rootlabDescription.get(LabDescription_.labDescriptionCvx),
-				joinLabdescLabentries.get(LabEntries_ .labEntriesTestStatus),
-				joinLabdescLabentries.get(LabEntries_.labEntriesRefusalreason)
+				builder.coalesce(rootlabDescription.get(LabDescription_.labDescriptionCvx),""),
+				builder.coalesce(joinLabdescLabentries.get(LabEntries_ .labEntriesTestStatus),0),
+				builder.coalesce(joinLabdescLabentries.get(LabEntries_.labEntriesRefusalreason),0)
 				));
 		Predicate predicateBytestStatus=builder.greaterThan(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),2);
 		Predicate predicateBytestStatus1=builder.notEqual(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),7);
@@ -896,8 +896,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 		CriteriaQuery<Object> cq1 = builder1.createQuery();
 		Root<CvxVaccineGroupMapping> rootTable=cq1.from(CvxVaccineGroupMapping.class);
 		cq1.select(builder1.construct(CVXVaccineGroupMappingBean.class,
-				rootTable.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingCvxCode).alias("CVX"),
-				rootTable.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingUncertainFormulationCvx).alias("Vaccine Group CVX")
+				builder.coalesce(rootTable.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingCvxCode),"").alias("CVX"),
+				builder.coalesce(rootTable.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingUncertainFormulationCvx),"").alias("Vaccine Group CVX")
 				));
 		List<Object> resultlist1=em.createQuery(cq1).getResultList();
 		List<CVXVaccineGroupMappingBean> vaccGroupMappingDetails=new ArrayList<CVXVaccineGroupMappingBean>();
@@ -923,6 +923,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 						if(immunizationDetails.get(i).getLabDescriptionCvx().equals(vaccGroupMappingDetails.get(j).getCvx_vaccine_group_mapping_cvx_code())){
 							vaccId=immunizationDetails.get(i).getLabEntriesTestId();
 							vaccName=immunizationDetails.get(i).getLabDescriptionTestDesc();
+							if(immunizationDetails.get(i).getLabEntriesPerfOn()!=null)
 							performedDate=immunizationDetails.get(i).getLabEntriesPerfOn();
 							status=immunizationDetails.get(i).getStatus();
 							refusalReason=immunizationDetails.get(i).getRefusalReason();
@@ -946,11 +947,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 		joinvaccReportChart.on(predicateByPatientId1);
 		Predicate predicateByIsEMR=builder2.equal(vaccReportTable.get(VaccineReport_.vaccineReportIsemr),2);
 		cq2.select(builder2.construct(VaccReportBean.class,
-				vaccReportTable.get(VaccineReport_.vaccineReportVaccineId),
-				vaccReportTable.get(VaccineReport_.vaccineReportChartId),
+				builder2.coalesce(vaccReportTable.get(VaccineReport_.vaccineReportVaccineId),0),
+				builder2.coalesce(vaccReportTable.get(VaccineReport_.vaccineReportChartId),0),
 				vaccReportTable.get(VaccineReport_.vaccineReportGivenDate),
-				joinvaccReportLabdesc.get(LabDescription_.labDescriptionTestDesc),
-				joinvaccReportLabdesc.get(LabDescription_.labDescriptionCvx)
+				builder2.coalesce(joinvaccReportLabdesc.get(LabDescription_.labDescriptionTestDesc),""),
+				builder2.coalesce(joinvaccReportLabdesc.get(LabDescription_.labDescriptionCvx),"")
 				));
 		cq2.where(predicateByIsEMR);
 		cq2.distinct(true);
@@ -967,6 +968,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					if(vaccReportObj.get(i).getLabDescriptionCvx().equals(vaccGroupMappingDetails.get(j).getCvx_vaccine_group_mapping_cvx_code())){
 						vaccId=vaccReportObj.get(i).getVaccineReportVaccineId();
 						vaccName=vaccReportObj.get(i).getLabDescriptionTestDesc();
+						if(vaccReportObj.get(i).getVaccineReportGivenDate()!=null)
 						performedDate=vaccReportObj.get(i).getVaccineReportGivenDate();
 						cvx=vaccGroupMappingDetails.get(j).getCvx_vaccine_group_mapping_cvx_code();
 						groupCVX=vaccGroupMappingDetails.get(j).getCvx_vaccine_group_mapping_uncertain_formulation_cvx();
@@ -983,8 +985,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 			immuObject.setCode(immuFirstQueryResult.get(i).getCvx());
 			immuObject.setCodeSystem(immuFirstQueryResult.get(i).getVaccName());
 			immuObject.setCodeSystemOID("2.16.840.1.113883.12.292");
-			immuObject.setStartDate(immuFirstQueryResult.get(i).getPerformedDate());
-			immuObject.setEndDate(immuFirstQueryResult.get(i).getPerformedDate());
+			if(immuFirstQueryResult.get(i).getPerformedDate()!=null)
+			{
+				immuObject.setStartDate(immuFirstQueryResult.get(i).getPerformedDate());
+				immuObject.setEndDate(immuFirstQueryResult.get(i).getPerformedDate());
+			}
 			immuObject.setStatus(immuFirstQueryResult.get(i).getStatus());
 			if(immuFirstQueryResult.get(i).getStatus()==3 || immuFirstQueryResult.get(i).getStatus()==4 || immuFirstQueryResult.get(i).getStatus()==5 || immuFirstQueryResult.get(i).getStatus()==6)
 				immuObject.setStatus(2);

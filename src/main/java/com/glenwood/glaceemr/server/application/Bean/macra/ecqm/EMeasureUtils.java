@@ -580,6 +580,59 @@ public class EMeasureUtils {
 		
 	}
 	
+	public List<PhysicalExam> getPhysicalexam(List<InvestigationQDM> patientInvestigationData, String codeList,List<PhysicalExam> physicalExamFromCNM)
+	{
+		InvestigationQDM eachObj = null;
+		PhysicalExam physicalExamObj;
+		List<PhysicalExam> physicalExamQDM = new ArrayList<PhysicalExam>();
+		
+		for(int i=0;i<patientInvestigationData.size();i++){
+			
+			eachObj = patientInvestigationData.get(i);
+			physicalExamObj = new PhysicalExam();
+			
+			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+				
+				physicalExamObj.setCode(eachObj.getCode());
+				physicalExamObj.setResultValue(eachObj.getResultValue());
+				if(eachObj.getCompanyId() == 54){
+					physicalExamObj.setCodeSystemOID("2.16.840.1.113883.6.96");
+				}else if(eachObj.getCompanyId() == 51){
+					physicalExamObj.setCodeSystemOID("2.16.840.1.113883.6.1");
+				}
+				
+				physicalExamObj.setDescription(eachObj.getCodeDescription());
+				if(eachObj.getStatus()==3 || eachObj.getStatus()==4 || eachObj.getStatus()==5 || eachObj.getStatus()==6){
+					physicalExamObj.setStatus(2);
+					physicalExamObj.setStartDate(eachObj.getPerformeOn());
+					physicalExamObj.setEndDate(eachObj.getPerformeOn());
+				}else if(eachObj.getStatus() == 1){
+					physicalExamObj.setStartDate(eachObj.getCreatedOn());
+					physicalExamObj.setEndDate(eachObj.getCreatedOn());
+				}else if(eachObj.getStatus() == 8){
+					physicalExamObj.setStartDate(eachObj.getCreatedOn());
+					physicalExamObj.setEndDate(eachObj.getCreatedOn());
+					Negation n = new Negation();
+					n.setCode("105480006");
+					n.setDescription("Refusal of treatment by patient (situation)");
+					physicalExamObj.setNegation(n);
+				}else{
+					physicalExamObj.setStartDate(eachObj.getPerformeOn());
+					physicalExamObj.setEndDate(eachObj.getPerformeOn());
+				}
+				
+				physicalExamQDM.add(physicalExamObj);
+				
+			}
+			
+			
+		}
+		if(physicalExamFromCNM!=null){
+			physicalExamQDM.addAll(physicalExamFromCNM);
+		}
+		return physicalExamQDM;
+	}
+	
 	public List<Intervention> getInterventionQDM(List<InvestigationQDM> patientInvestigationData, String codeList){
 		
 		InvestigationQDM eachObj = null;

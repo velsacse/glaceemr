@@ -292,8 +292,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			}
 
 			if(codeListForQDM.containsKey("Physical Exam")){
-				List<PhysicalExam> physicalExam=measureUtils.getPhysicalexamFromCNM(clinicalDataQDM,measureUtils.getCodeListByCategory(codeListForQDM, "Physical Exam"));
-				requestObj.setPhysicalExamList(physicalExam);
+				String codeList = measureUtils.getCodeListByCategory(codeListForQDM, "Physical Exam");
+				List<PhysicalExam> physicalExamFromCNM=measureUtils.getPhysicalexamFromCNM(clinicalDataQDM,codeList);
+				requestObj.setPhysicalExamList(measureUtils.getPhysicalexam(investigationQDM,codeList,physicalExamFromCNM));
 			}
 
 			if(codeListForQDM.containsKey("Procedure")){
