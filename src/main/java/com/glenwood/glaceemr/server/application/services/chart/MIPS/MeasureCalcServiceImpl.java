@@ -1083,9 +1083,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		int range = results.size();
 		
-		if(isOrderBy && range > 6){
+		/*if(isOrderBy && range > 6){
 			range = 6;
-		}
+		}*/
 
 		for(int i=0;i<range;i++){
 
