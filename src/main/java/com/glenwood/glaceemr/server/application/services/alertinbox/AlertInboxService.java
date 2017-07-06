@@ -143,6 +143,8 @@ public interface AlertInboxService {
 	List<AlertEvent> getAlertsByEncIdAndCatId(Integer encounterId,Integer categoryId);
 
 	List<AlertEvent> getConversion(String alertid);
+	
+	List<AlertEventBean> getMessageConversion(String alertid) throws Exception;
 
 	List<AlertEvent> forwardIcmAlert(Integer alertid, Integer userId, Integer encounterid,Integer patientid, Integer categoryid,
 			Integer forwardto, String message, Integer parentalertid);

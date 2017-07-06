@@ -1252,6 +1252,167 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		return alerts;
 	}
 	
+	@Override
+	public List<AlertEventBean> getMessageConversion(String alertid) throws Exception {
+	
+		List<Integer> alertId = new ArrayList<Integer>();
+		alertId.add(Integer.parseInt(alertid));
+		String createdDateParsed="",createdDateTime="";
+		AlertEvent activeAlert = alertInboxRepository.findOne(AlertInboxSpecification.byAlertId(alertId));
+		int parentId = activeAlert.getAlertEventParentalertid();
+        List<AlertEventBean> alerts = new ArrayList<AlertEventBean>();
+		AlertEventBean alertEventBean = new AlertEventBean();
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		final String OLD_FORMAT3 =  "yyyy-MM-dd HH:mm:ss";
+		SimpleDateFormat sdf = new SimpleDateFormat(OLD_FORMAT3);
+		Timestamp logOn = findCurrentTimeStamp();
+		Date currentDate = sdf.parse(logOn+"");
+		Date dateFromDb = format.parse(activeAlert.getAlertEventCreatedDate()+"");
+		//in milliseconds		
+		createdDateTime=parseDate(currentDate,dateFromDb);
+		final String OLD_FORMAT = "yyyy-MM-dd";
+		final String NEW_FORMAT = "MM/dd/yyyy";
+		// 2015-11-29
+		String oldDateString = activeAlert.getAlertEventCreatedDate()+"";
+		SimpleDateFormat sdf1 = new SimpleDateFormat(OLD_FORMAT);
+		Date d = sdf1.parse(oldDateString);
+		sdf1.applyPattern(NEW_FORMAT);
+		createdDateParsed = sdf1.format(d);		//29/11/2015
+		alertEventBean.setAlertEventCategoryId(activeAlert.getAlertEventCategoryId());
+		alertEventBean.setAlertEventChartId(activeAlert.getAlertEventChartId());
+		if(activeAlert.getAlertEventClosedDate()!=null) 
+			alertEventBean.setAlertEventClosedDate(activeAlert.getAlertEventClosedDate()+"");
+		alertEventBean.setAlertEventCreatedDate(activeAlert.getAlertEventCreatedDate()+"");
+		alertEventBean.setAlertEventEncounterId(activeAlert.getAlertEventEncounterId());
+		alertEventBean.setAlertEventFrom(activeAlert.getAlertEventFrom());
+		alertEventBean.setAlertEventFrompage(activeAlert.getAlertEventFrompage());
+		alertEventBean.setAlertEventHighlight(activeAlert.getAlertEventHighlight());
+		alertEventBean.setAlertEventId(activeAlert.getAlertEventId());
+		alertEventBean.setAlertEventIsgroupalert(activeAlert.getAlertEventIsgroupalert());
+		alertEventBean.setAlertEventMessage(activeAlert.getAlertEventMessage());
+		alertEventBean.setAlertEventModifiedby(activeAlert.getAlertEventModifiedby());
+		if(activeAlert.getAlertEventModifiedDate()!=null)
+			alertEventBean.setAlertEventModifiedDate(activeAlert.getAlertEventModifiedDate()+"");
+		alertEventBean.setAlertEventParentalertid(activeAlert.getAlertEventParentalertid());
+		alertEventBean.setAlertEventPatientId(activeAlert.getAlertEventPatientId());
+		alertEventBean.setAlertEventPatientName(activeAlert.getAlertEventPatientName());
+		alertEventBean.setAlertEventRead(activeAlert.getAlertEventRead());
+		alertEventBean.setAlertEventReadby(activeAlert.getAlertEventReadby());
+		if(activeAlert.getAlertEventReadDate()!=null)
+			alertEventBean.setAlertEventReadDate(activeAlert.getAlertEventReadDate()+"");
+		alertEventBean.setAlertEventRefId(activeAlert.getAlertEventRefId());
+		alertEventBean.setAlertEventRoomId(activeAlert.getAlertEventRoomId());
+		alertEventBean.setAlertEventStatus(activeAlert.getAlertEventStatus());
+		alertEventBean.setAlertEventStatus1(activeAlert.getAlertEventStatus1());
+		alertEventBean.setAlertEventTo(activeAlert.getAlertEventTo());
+		alertEventBean.setAlertEventUnknown(activeAlert.getAlertEventUnknown());
+		alertEventBean.setEmpProfileTableFrom(activeAlert.getEmpProfileTableFrom());
+		alertEventBean.setCreateddate(createdDateParsed);
+		alertEventBean.setCreatedDateTime(createdDateTime);
+
+		if(parentId!=-1){
+			List<AlertArchive> inactiveAlerts = alertArchiveRepository.findAll(AlertInboxSpecification.inactiveAlertsByParentid(parentId,37));
+			for(int i=0;i<inactiveAlerts.size();i++){
+
+				AlertArchive alertArchive= inactiveAlerts.get(i);
+				AlertEventBean ae = new AlertEventBean();
+				SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				final String OLD_FORMAT2 =  "yyyy-MM-dd HH:mm:ss";
+				SimpleDateFormat sdfDate = new SimpleDateFormat(OLD_FORMAT2);
+				Timestamp logOnDate = findCurrentTimeStamp();
+				Date currDate = sdfDate.parse(logOnDate+"");
+				Date dateFromDbase = simpleFormat.parse(alertArchive.getAlertEventCreatedDate()+"");			
+				createdDateTime=parseDate(currDate, dateFromDbase);		
+				// 2015-11-29
+				String oldDateString1 = alertArchive.getAlertEventCreatedDate()+"";
+				SimpleDateFormat sdf2 = new SimpleDateFormat(OLD_FORMAT);							
+				Date date = sdf2.parse(oldDateString1);
+				sdf1.applyPattern(NEW_FORMAT);
+				createdDateParsed = sdf2.format(date);		//29/11/2015								
+				ae.setAlertEventCategoryId(alertArchive.getAlertEventCategoryId());
+				ae.setAlertEventChartId(alertArchive.getAlertEventChartId());
+				if(alertArchive.getAlertEventClosedDate()!=null) 
+					ae.setAlertEventClosedDate(alertArchive.getAlertEventClosedDate()+"");
+				ae.setAlertEventCreatedDate(alertArchive.getAlertEventCreatedDate()+"");
+				ae.setAlertEventEncounterId(alertArchive.getAlertEventEncounterId());
+				ae.setAlertEventFrom(alertArchive.getAlertEventFrom());
+				ae.setAlertEventFrompage(alertArchive.getAlertEventFrompage());
+				ae.setAlertEventHighlight(alertArchive.getAlertEventHighlight());
+				ae.setAlertEventId(alertArchive.getAlertEventId());
+				ae.setAlertEventIsgroupalert(alertArchive.getAlertEventIsgroupalert());
+				ae.setAlertEventMessage(alertArchive.getAlertEventMessage());
+				ae.setAlertEventModifiedby(alertArchive.getAlertEventModifiedby());
+				if(alertArchive.getAlertEventModifiedDate()!=null)
+					ae.setAlertEventModifiedDate(alertArchive.getAlertEventModifiedDate()+"");
+				ae.setAlertEventParentalertid(alertArchive.getAlertEventParentalertid());
+				ae.setAlertEventPatientId(alertArchive.getAlertEventPatientId());
+				ae.setAlertEventPatientName(alertArchive.getAlertEventPatientName());
+				ae.setAlertEventRead(alertArchive.getAlertEventRead());
+				ae.setAlertEventReadby(alertArchive.getAlertEventReadby());
+				if(alertArchive.getAlertEventReadDate()!=null)
+					ae.setAlertEventReadDate(alertArchive.getAlertEventReadDate()+"");
+				ae.setAlertEventRefId(alertArchive.getAlertEventRefId());
+				ae.setAlertEventRoomId(alertArchive.getAlertEventRoomId());
+				ae.setAlertEventStatus(alertArchive.getAlertEventStatus());
+				ae.setAlertEventStatus1(alertArchive.getAlertEventStatus1());
+				ae.setAlertEventTo(alertArchive.getAlertEventTo());
+				ae.setAlertEventUnknown(alertArchive.getAlertEventUnknown());
+				ae.setEmpProfileTableFrom(alertArchive.getEmpProfileTableFrom());
+				ae.setCreateddate(createdDateParsed);
+				ae.setCreatedDateTime(createdDateTime);
+				alerts.add(ae);
+			}
+		}
+		alerts.add(alertEventBean);
+		return alerts;
+	}
+
+	private String parseDate(Date currentDate, Date dateFromDb) {
+		String createdDateTime;
+		long diff = currentDate.getTime() - dateFromDb.getTime();
+
+		long diffSeconds = diff / 1000 % 60;
+		long diffMinutes = diff / (60 * 1000) % 60;
+		long diffHours = diff / (60 * 60 * 1000) % 24;
+		long diffDays = diff / (24 * 60 * 60 * 1000);
+		String timeBuffer="";
+		if(diffDays==0){
+			if(diffHours==0){
+				if(diffMinutes==0){
+					timeBuffer=diffSeconds+" secs";
+				}
+				else{
+					if(diffSeconds==0)
+						timeBuffer=diffMinutes+" mins ";
+					else
+						timeBuffer=diffMinutes+" mins "+diffSeconds+" secs";
+				}
+			}
+			else{
+				if(diffMinutes==0)
+					timeBuffer=diffHours+" hrs ";
+				else
+					timeBuffer=diffHours+" hrs "+diffMinutes+" mins ";
+			}
+		}
+		else{
+			if(diffHours==0)
+				timeBuffer=diffDays+" days ";
+			else
+				timeBuffer=diffDays+" days "+diffHours+" hrs ";
+		}
+
+		createdDateTime=timeBuffer;		
+		return createdDateTime;
+	}
+
+	public Timestamp findCurrentTimeStamp() {
+
+		Query query = em.createNativeQuery(" select current_timestamp ");
+		return (Timestamp) query.getSingleResult();
+	}
+	
+	
 	/**
 	 * method which is used to create new alert and it will delete existing alert and before that insert an alert to alert_archive
 	 */

@@ -27,6 +27,7 @@ import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertArchiveBean;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertCategoryBean;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertCountBean;
+import com.glenwood.glaceemr.server.application.services.alertinbox.AlertEventBean;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxBean;
 import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditLogConstants;
@@ -614,5 +615,18 @@ public class AlertInboxController {
 		EMRResponseBean emrResponseBean = new EMRResponseBean();
 		emrResponseBean.setData(alertInboxService.getAllCategories());
 		return emrResponseBean;
+	}
+	
+	@RequestMapping(value = "/getMessageConversion", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getMessageConversation(
+			 @RequestParam(value="alertid",required=true) String alertid) throws Exception{
+		List<AlertEventBean> alerts=alertInboxService.getMessageConversion(alertid);
+		EMRResponseBean alert=new EMRResponseBean();
+		alert.setData(alerts);
+		
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved conversation message for particular alert", sessionMap.getUserID(), request.getRemoteAddr(), -1, "alertid="+alertid, LogUserType.USER_LOGIN, "", "");
+		
+		return alert;
 	}
 }
