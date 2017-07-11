@@ -40,7 +40,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	Request getQDMRequestObject(Boolean isIndividual,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM, Date startDate, Date endDate);
+	Request getQDMRequestObject(String accountId,Boolean isIndividual,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM, Date startDate, Date endDate);
 
 	/**
 	 * 

@@ -132,7 +132,7 @@ public class QPPPerformanceController {
 
 				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedPath));
 				finalResponse.setMeasureInfo(utils.getMeasureInfo());
-				requestObj = measureService.getQDMRequestObject(isIndividual,patientID, userId, codeListForQDM, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
+				requestObj = measureService.getQDMRequestObject(accountId,isIndividual,patientID, userId, codeListForQDM, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 
 				requestObj.setAccountId(accountId);
 				requestObj.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
@@ -327,11 +327,11 @@ public class QPPPerformanceController {
 			List<MIPSPerformanceBean> performanceObj = null;
 
 			if(mode == 0){
-				performanceObj = measureService.getMeasureRateReportByNPI(providerId, accountId, configuredMeasures,isACIReport, false);
+				performanceObj = measureService.getMeasureRateReportByNPI(providerId, accountId, configuredMeasures,isACIReport, true);
 			}else if(mode == 1){
-				performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport, false);
+				performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport, true);
 			}else{
-				performanceObj = measureService.getGroupPerformanceCount(tinValue,configuredMeasures, accountId,isACIReport, false);
+				performanceObj = measureService.getGroupPerformanceCount(tinValue,configuredMeasures, accountId,isACIReport, true);
 			}
 
 			response.setData(performanceObj);
@@ -445,7 +445,7 @@ public class QPPPerformanceController {
 		
 		String configuredMeasures = providerInfo.get(0).getMeasures();
 		
-		List<MIPSPerformanceBean> performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport, false);
+		List<MIPSPerformanceBean> performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport, true);
 
 		response.setData(performanceObj);
 		

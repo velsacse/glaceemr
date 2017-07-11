@@ -222,7 +222,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	}
 
 	@Override
-	public Request getQDMRequestObject(Boolean considerProvider,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM, Date repStartDate, Date repEndDate) {
+	public Request getQDMRequestObject(String accountId,Boolean considerProvider,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM, Date repStartDate, Date repEndDate) {
 
 		Request finalReqObject = new Request();
 
@@ -343,9 +343,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				e.printStackTrace(printWriter);
 
-				String responseMsg = GlaceMailer.buildMailContentFormat("glace", patientID,"Error occurred while generating QDM Object",writer.toString());
+				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while generating QDM Object",writer.toString());
 
-				GlaceMailer.sendFailureReport(responseMsg,"glace",GlaceMailer.Configure.MU);
+				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
 
 			} catch (Exception e1) {
 
@@ -1078,7 +1078,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		if(isOrderBy){
 			cq.orderBy(builder.desc(root.get(MacraMeasuresRate_.macraMeasuresRatePerformance)));
 		}
-		
+		List<MIPSPerformanceBean> finalResult=new ArrayList<MIPSPerformanceBean>();
 		List<MIPSPerformanceBean> results = em.createQuery(cq).getResultList();
 
 		int range = results.size();
@@ -1123,8 +1123,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
 
 		}
-
-		return results;
+		finalResult=arrangeItForCriteria(results);
+		return finalResult;
 
 	}
 
@@ -1206,7 +1206,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		cq.groupBy(root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
 				root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
-				root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear));
+				root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
+				root.get(MacraMeasuresRate_.macraMeasuresRatePerformance));
 
 		Selection[] selections= new Selection[] {
 
@@ -1238,9 +1239,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		int range = results.size();
 		
-		if(isOrderBy && range > 6){
+		/*if(isOrderBy && range > 6){
 			range = 6;
-		}
+		}*/
 		
 		for(int i=0;i<range;i++){
 
@@ -1328,9 +1329,48 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			resultObject.setPoints(points);
 
 		}
+		List<MIPSPerformanceBean> finalResult=arrangeItForCriteria(results);
+		return finalResult;
 
-		return results;
+	}
 
+	private List<MIPSPerformanceBean> arrangeItForCriteria(List<MIPSPerformanceBean> results) 
+	{
+		
+		ArrayList<MIPSPerformanceBean> finalResult=new ArrayList<MIPSPerformanceBean>();
+		ArrayList<String> a=new ArrayList<String>();
+		ArrayList<String> c=new ArrayList<String>();
+		ArrayList<String> b=new ArrayList<String>();
+		for(int i=0;i<results.size();i++)
+		{
+			if(!a.contains(results.get(i).getMeasureId()))
+				a.add(results.get(i).getMeasureId());
+			else if(!b.contains(results.get(i).getMeasureId()))
+				b.add(results.get(i).getMeasureId());
+		}
+		for(int j=0;j<results.size();j++)
+		{
+			if(b.contains(results.get(j).getMeasureId()) && !c.contains(results.get(j).getMeasureId()))
+			{
+				String measureId=results.get(j).getMeasureId();
+				ArrayList<MIPSPerformanceBean> temp=new ArrayList<MIPSPerformanceBean>();
+				for(int k=0;k<results.size();k++)
+				{
+					if(measureId.equals(results.get(k).getMeasureId()))
+					{
+						temp.add(results.get(k));
+					}
+				}
+				finalResult.addAll(temp);
+				c.add(measureId);
+			}
+			else if(a.contains(results.get(j).getMeasureId()) && !b.contains(results.get(j).getMeasureId()))
+			{
+				finalResult.add(results.get(j));
+			}
+		}
+		
+		return finalResult;
 	}
 
 	/**
@@ -1344,7 +1384,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<MIPSPerformanceBean> getGroupPerformanceCount(String tinValue, String configuredMeasures, String accountId,boolean isACIReport, boolean isOrderBy){
-
+		List<MIPSPerformanceBean> finalResult=new ArrayList<MIPSPerformanceBean>();
 		List<MIPSPerformanceBean> results = new ArrayList<MIPSPerformanceBean>();
 
 		Writer writer = new StringWriter();
@@ -1490,7 +1530,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
 				resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
 				resultObject.setPoints(points);
-
+				
+				finalResult=arrangeItForCriteria(results);
 			}
 
 		}catch(Exception e){
@@ -1518,7 +1559,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		}
 
-		return results;
+		return finalResult;
 
 	}
 

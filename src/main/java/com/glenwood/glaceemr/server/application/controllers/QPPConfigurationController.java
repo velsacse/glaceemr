@@ -51,14 +51,15 @@ public class QPPConfigurationController {
 			@RequestParam(value = "providerId", required = false, defaultValue = "-1") Integer providerId,
 			@RequestParam(value = "startDate", required = true) String startDate,
 			@RequestParam(value = "endDate", required = true) String endDate,
-			@RequestParam(value = "submissionMtd", required = true) Integer submissionMtd)throws Exception {
+			@RequestParam(value = "submissionMtd", required = true) Integer submissionMtd,
+			@RequestParam(value = "reportType", required = true) short reportType)throws Exception {
 		
 			SimpleDateFormat originalFormat = new SimpleDateFormat("MM/dd/yyyy");
 			
 			Date StartDate = originalFormat.parse(startDate);
 			Date EndDate = originalFormat.parse(endDate);
 			
-			QppConfigurationService.saveConfDetails(programYear, type, providerId, StartDate, EndDate, submissionMtd);
+			QppConfigurationService.saveConfDetails(programYear, type, providerId, StartDate, EndDate, submissionMtd,reportType);
 
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.CREATEORUPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in saving provider MACRA configuration details" , -1, request.getRemoteAddr(),-1,"providerId="+providerId+"&reportingYear="+programYear,LogUserType.USER_LOGIN, "", "");
 

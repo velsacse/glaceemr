@@ -90,6 +90,17 @@ public class MacraProviderConfiguration implements Serializable{
 		this.macraProviderConfigurationAciGroup = macraProviderConfigurationAciGroup;
 	}
 
+	
+	public short getMacraProviderConfigurationReportType() {
+		return macraProviderConfigurationReportType;
+	}
+
+	public void setMacraProviderConfigurationReportType(
+			short macraProviderConfigurationReportType) {
+		this.macraProviderConfigurationReportType = macraProviderConfigurationReportType;
+	}
+
+
 	@Column(name="macra_provider_configuration_provider_id")
 	private Integer macraProviderConfigurationProviderId;
 
@@ -107,6 +118,9 @@ public class MacraProviderConfiguration implements Serializable{
 
 	@Column(name="macra_provider_configuration_aci_group")
 	private Integer macraProviderConfigurationAciGroup;
+	
+	@Column(name="macra_provider_configuration_report_type")
+	private short macraProviderConfigurationReportType;
 	
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="macraProviderConfiguration")
 	@JsonManagedReference

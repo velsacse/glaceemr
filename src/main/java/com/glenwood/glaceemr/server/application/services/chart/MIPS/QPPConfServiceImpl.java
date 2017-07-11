@@ -80,7 +80,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 	@Override
 	public void saveConfDetails(Integer programYear, Integer type,
 			Integer providerId, java.util.Date startDate, java.util.Date endDate,
-			Integer submissionMtd) throws Exception {
+			Integer submissionMtd,short reportType) throws Exception {
 		java.sql.Date sqlStartDate = new java.sql.Date(startDate.getTime());
 		java.sql.Date sqlEndDate = new java.sql.Date(endDate.getTime());
 		MacraConfiguration yearThereOrNot=macraConfigurationRepository.findOne(Specifications.where(QPPConfigurationSpecification.getConfObj(programYear)));
@@ -104,6 +104,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 			macraProviderConfObj.setMacraProviderConfigurationReportingStart(sqlStartDate);
 			macraProviderConfObj.setMacraProviderConfigurationReportingEnd(sqlEndDate);
 			macraProviderConfObj.setMacraProviderConfigurationReportingYear(programYear);
+			macraProviderConfObj.setMacraProviderConfigurationReportType(reportType);
 			macraProviderConfigurationRepository.saveAndFlush(macraProviderConfObj);
 		}
 		else{
@@ -111,6 +112,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 			providerThereOrNot.setMacraProviderConfigurationReportingStart(sqlStartDate);
 			providerThereOrNot.setMacraProviderConfigurationReportingYear(programYear);
 			providerThereOrNot.setMacraProviderConfigurationReportingMethod(submissionMtd);
+			providerThereOrNot.setMacraProviderConfigurationReportType(reportType);
 			macraProviderConfigurationRepository.saveAndFlush(providerThereOrNot);
 		}
 		

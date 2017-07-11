@@ -14,7 +14,7 @@ import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMa
 public interface QPPConfigurationService {
 	
 	void saveConfDetails(Integer programYear, Integer type, Integer providerId,
-			java.util.Date startDate, java.util.Date endDate, Integer submissionMtd)throws Exception;
+			java.util.Date startDate, java.util.Date endDate, Integer submissionMtd,short reportType)throws Exception;
 	
 	/**
 	 * Function to get employee profile empid based on provider

@@ -367,15 +367,16 @@ Root<Encounter> root = cq.from(Encounter.class);
 			assessmentObj.setCode(diagnosisObj.get(i).getProblemListDxCode());
 			assessmentObj.setCodeSystemOID(diagnosisObj.get(i).getProblemListCodingSystemid());
 			assessmentObj.setDescription(diagnosisObj.get(i).getProblemListDxDescp());
-
-			if(diagnosisObj.get(i).getProblemListCodingSystemid().equals("2.16.840.1.113883.6.90")){
+			if(diagnosisObj.get(i).getProblemListCodingSystemid()!=null)
+			{
+				if(diagnosisObj.get(i).getProblemListCodingSystemid().equals("2.16.840.1.113883.6.90")){
 				assessmentObj.setCodeSystem("ICD10CM");
-			}else if(diagnosisObj.get(i).getProblemListCodingSystemid().equals("2.16.840.1.113883.6.96")){
-				assessmentObj.setCodeSystem("SNOMEDCT");
-			}else if(diagnosisObj.get(i).getProblemListCodingSystemid().equals("2.16.840.1.113883.6.103")){
-				assessmentObj.setCodeSystem("ICD9CM");
+				}else if(diagnosisObj.get(i).getProblemListCodingSystemid().equals("2.16.840.1.113883.6.96")){
+					assessmentObj.setCodeSystem("SNOMEDCT");
+				}else if(diagnosisObj.get(i).getProblemListCodingSystemid().equals("2.16.840.1.113883.6.103")){
+					assessmentObj.setCodeSystem("ICD9CM");
+				}
 			}
-			
 			Calendar c = Calendar.getInstance();
 			if(diagnosisObj.get(i).getProblemListCreatedon()!=null)
 			c.setTimeInMillis(diagnosisObj.get(i).getProblemListCreatedon().getTime());
