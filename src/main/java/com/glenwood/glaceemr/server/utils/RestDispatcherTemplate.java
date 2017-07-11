@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.utils;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
@@ -56,6 +57,9 @@ public class RestDispatcherTemplate {
 				baseURL = baseURL.replace(portNum, "");
 			}
 	        
+	        if(connectionPath.contains("/patientdetails/getSession")){
+	        	baseURL = baseURL.replace("/GWT", "");
+	        }
 	        System.out.println("URL :::::: "+baseURL+connectionPath);
 	        
 	        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseURL+connectionPath);
@@ -73,8 +77,14 @@ public class RestDispatcherTemplate {
 	        
 	        if(result.hasBody())
 	        	responseBuffer=result.getBody();
-	        		
-	        responseBean = objectMapper.readValue(responseBuffer.toString(), EMRResponseBean.class);
+	        	
+	        if(connectionPath.contains("/SoapNotesPrint.Action")){
+	        	responseBean.setData(URLEncoder.encode(responseBuffer,"UTF-8"));
+	        }
+	        else
+	        {
+	        	responseBean = objectMapper.readValue(responseBuffer.toString(), EMRResponseBean.class);
+	        }
 	                        		
 			return responseBean;
 			
@@ -139,7 +149,7 @@ public class RestDispatcherTemplate {
 	 
 	setAndCheckJSESSIONIDCookie(request, headers);
     
-
+	System.out.println("URL :::: "+baseURL+connectionPath);
 	HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<MultiValueMap<String, String>>(requestObj, headers);
 	
 	responseBean = restTemplate.postForObject(baseURL+connectionPath, entity, EMRResponseBean.class);
