@@ -65,9 +65,7 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 
 	@Override
 	public void saveData(Integer patientId, Integer encounterId,Integer chartId, Integer templateId, String patElementsJSON) throws Exception {
-		
 		loadClinicalDataBean(patientId,encounterId,chartId,templateId,patElementsJSON);
-
 		// delete the data in ElementsToDeleteBean
 
 		deletePatientClinicalData(patientId,chartId,encounterId);
@@ -75,7 +73,6 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 		deletePatientEpisodeData(patientId,episodeId);
 
 		// save the data in ElementsToSaveBean
-
 		SaveDataClincialData(encounterId,patientId,chartId);
 
 	}
@@ -88,6 +85,7 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 		for(Entry<String,ElementsToSaveBean> entrySet:hashResultSet){
 			String clinicalElementGWId=entrySet.getKey();
 			String clinicalElementId=clinicalElementGWId;
+			
 			isPatientElementExist=false;
 			if(clinicalDataBean.getPatientElements().get(clinicalElementId)!=null){
 				isPatientElementExist=true;
@@ -105,10 +103,14 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 					}else{
 						if(elementsToSaveBean.getElemenetsToSaveType()!=ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_MULTIPLEOPTION){
 							List<PatientClinicalElements> patClinicalElem=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinEleByGWID(encounterId,patientId, clinicalElementId));
+							if(patClinicalElem.size()>0){
 							for (PatientClinicalElements patientClinicalElements : patClinicalElem) {
 								patientClinicalElements.setPatientClinicalElementsValue(elementsToSaveBean.getValueToSave());
 								patientClinicalElementsRepository.save(patientClinicalElements);
-							}	
+							}	}
+							else{
+								patientClinicalElementsRepository.save(setInsertStmtValues(elementsToSaveBean,patientId,chartId,encounterId,clinicalElementId));
+							}
 
 						}
 					}
@@ -130,7 +132,7 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 					encounterPlan.setPlantext(elementsToSaveBean.getValueToSave().replaceAll("'", "''"));
 					encounterPlanRepository.save(encounterPlan);
 				}
-			}
+				}
 			else if(clinicalElementGWId.equals("0000100100000000000"))
 			{
 				List<Encounter> encounters=encounterEntityRepository.findAll(EncounterEntitySpecification.getEncounterByEncId(encounterId));
@@ -167,8 +169,8 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 						}
 					}
 				}
+				
 			}else if(clinicalElementBean!=null &&  clinicalElementBean.getClinicalElementIsEpisode()){
-
 				isPatientEpisodeElementExist=false;
 				clinicalElementId=clinicalElementGWId;
 				if(clinicalDataBean.getPatientEpisodeElements().get(clinicalElementId)!=null)
@@ -196,10 +198,8 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 						}
 					}
 				}
-
 			}
 		}
-
 	}
 
 	private PatientClinicalElements setInsertStmtValues(ElementsToSaveBean elementsToSaveBean,Integer patientId, Integer chartId, Integer encounterId,String clinicalElementId) {
@@ -228,7 +228,7 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 			obj.setElemenetsToSaveType(elementsToSaveJSONObject.getInt("elemenetsToSaveType"));
 			obj.setValueToSave(URLDecoder.decode(elementsToSaveJSONObject.getString("valueToSave"),"UTF-8"));
 			clinicalElementGroup.add(elementsToSaveJSONObject.getString("clinicalelementgwid"));
-			elementsToSave.put(elementsToSaveJSONObject.getString("clinicalelementgwid"), obj);				
+			elementsToSave.put(elementsToSaveJSONObject.getString("clinicalelementgwid"), obj);
 		}
 		for (int i = 0; i < ElementsToDeleteJSONArray.length();i++) {
 			JSONObject elementsToDeleteJSONObject = ElementsToDeleteJSONArray.getJSONObject(i);
@@ -251,12 +251,11 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 			
 			gwids.add(gwid);
 		}
+		clinicalDataBean.getElementsToSave().clear();
 		clinicalDataBean.getElementsToSave().putAll(elementsToSave);
 		clinicalDataBean.getElementsToDelete().putAll(elementsToDelete);
 		loadClinicalElementsDetailsToSave(patientId,encounterId);
 	}
-
-
 
 	private void loadClinicalElementsDetailsToSave(Integer patientId,Integer encounterId) {
 		clinicalDataBean.setClinicalData(clinicalElementsRepository.findAll(ClinicalElementsSpecification.getClinicalElements(gwids)));
@@ -327,7 +326,7 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 	private void deletePatientClinicalData(Integer patientId, Integer chartId,Integer encounterId) {
 		Set<Entry<String, ElementsToDeleteBean>> hashResultSet=clinicalDataBean.getElementsToDelete().entrySet();
 		List<PatientClinicalElements> patClinicalElemToDelete=new ArrayList<PatientClinicalElements>();
-		for(Entry<String, ElementsToDeleteBean> entrySet:hashResultSet){
+			for(Entry<String, ElementsToDeleteBean> entrySet:hashResultSet){
 			String clinicalElementId=entrySet.getKey();
 			if(clinicalDataBean.getElementsToSave().get(clinicalElementId)==null){
 				if(clinicalDataBean.getPatientElements().get(clinicalElementId)!=null){
@@ -358,6 +357,7 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 			}
 		}
 		patientClinicalElementsRepository.deleteInBatch(patClinicalElemToDelete);
+		
 	}
 
 
@@ -383,7 +383,6 @@ public class SaveClinicalDataServiceImpl implements SaveClinicalDataService{
 			}
 		}
 		patientEpisodeAttributeDetailsRepository.deleteInBatch(patientEpisodeAttributeDet);
-
 	}
 
 
