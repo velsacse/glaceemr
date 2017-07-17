@@ -844,11 +844,22 @@ public class EMeasureUtils {
 				interventionObj.setCodeSystemOID(eachObj.getCodeSystemOID());
 				interventionObj.setResultCode(eachObj.getResultCode());
 				interventionObj.setResultCodeSystemOID(eachObj.getResultCodeSystem());
-				interventionObj.setStartDate(eachObj.getRecordedDate());
+				interventionObj.setStartDate(eachObj.getStartDate());
+				if(eachObj.getStatus()==3)
+				{
+					Negation negationObj=new Negation();
+					negationObj.setCode(eachObj.getNotDoneCode());
+					negationObj.setDescription(eachObj.getNotDoneDesc());
+					negationObj.setCodeSystemOID(eachObj.getCodeSystemOID());
+					interventionObj.setNegation(negationObj);
+					
+				}
 				interventionList.add(interventionObj);
+				
 			}
 		}
 		return interventionList;
+		
 	}
 
 	public List<DiagnosticStudy> getDiagnosisFromCNM(List<ClinicalDataQDM> clinicalData,String codeList){

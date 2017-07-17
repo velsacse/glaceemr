@@ -41,6 +41,8 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Procedure;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.QDM;
 import com.glenwood.glaceemr.server.application.models.CNMCodeSystem;
 import com.glenwood.glaceemr.server.application.models.CNMCodeSystem_;
+import com.glenwood.glaceemr.server.application.models.CarePlanIntervention;
+import com.glenwood.glaceemr.server.application.models.CarePlanIntervention_;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
@@ -1370,6 +1372,41 @@ Root<Encounter> root = cq.from(Encounter.class);
 			}
 		}  
 		
+		/***********************Intervention Query*********************/
+		CriteriaBuilder interventionCriteria = em.getCriteriaBuilder();
+		CriteriaQuery<ClinicalDataQDM> cq = interventionCriteria.createQuery(ClinicalDataQDM.class);
+		Root<CarePlanIntervention> carePlanIntervention = cq.from(CarePlanIntervention.class);
+
+		List<Predicate> predicates = new ArrayList<>();
+		if(patientId!=-1)
+			predicates.add(interventionCriteria.equal(carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionPatientId), patientId));
+		
+		if(startDate!=null && endDate!=null)
+		{
+			predicates.add(interventionCriteria.or(interventionCriteria.between(carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionOrderedOn),startDate,endDate),
+					interventionCriteria.between(carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionPerformedOn),startDate,endDate)));
+		}
+		Selection[] selectedColumns = new Selection[]{
+
+				carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionDescription),
+				carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionCode),
+				carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionCodeName),
+				carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionCodeSystem),
+				carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionStatus),
+				carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionOrderedOn),
+				carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionPerformedOn),
+				carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionNotDoneDescription),
+				carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionNotDoneCode),
+				carePlanIntervention.get(CarePlanIntervention_.carePlanInterventionNotDoneCodeSystem),
+		};
+
+		cq.select(interventionCriteria.construct(ClinicalDataQDM.class, selectedColumns));
+		cq.where(predicates.toArray(new Predicate[predicates.size()]));
+
+		List<ClinicalDataQDM> interventions=em.createQuery(cq).getResultList();
+		
+		clinicaldataFinal.addAll(interventions);
+
 		return clinicaldataFinal;
 	}
 

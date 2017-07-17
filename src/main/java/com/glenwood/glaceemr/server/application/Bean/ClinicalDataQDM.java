@@ -2,6 +2,8 @@ package com.glenwood.glaceemr.server.application.Bean;
 
 import java.util.Date;
 
+import com.glenwood.glaceemr.server.application.models.CarePlanIntervention_;
+
 
 public class ClinicalDataQDM {
 	private String code;	
@@ -17,8 +19,41 @@ public class ClinicalDataQDM {
 	private String patientResult;
 	private int patientId;
 	private String optionValue;
+	private int Status;
+	private String notDoneDesc;
+	private String notDoneCode;
+	private String notDoneCodeSystemOID;
+	/*private Date orderedDate;
+	private Date performedDate;*/
 	
- public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,String resultCode,String optionValue,String patientResult,String resultValue) {	
+	
+	public int getStatus() {
+		return Status;
+	}
+	public void setStatus(int status) {
+		Status = status;
+	}
+	
+	public String getNotDoneDesc() {
+		return notDoneDesc;
+	}
+	public void setNotDoneDesc(String notDoneDesc) {
+		this.notDoneDesc = notDoneDesc;
+	}
+	public String getNotDoneCode() {
+		return notDoneCode;
+	}
+	public void setNotDoneCode(String notDoneCode) {
+		this.notDoneCode = notDoneCode;
+	}
+	public String getNotDoneCodeSystemOID() {
+		return notDoneCodeSystemOID;
+	}
+	public void setNotDoneCodeSystemOID(String notDoneCodeSystemOID) {
+		this.notDoneCodeSystemOID = notDoneCodeSystemOID;
+	}
+	
+	public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,String resultCode,String optionValue,String patientResult,String resultValue) {	
 		super();	
 		this.code = code;
 		this.patientId=patientId;
@@ -27,7 +62,8 @@ public class ClinicalDataQDM {
 		this.resultCode = resultCode;
 		this.optionValue = optionValue;	
 		this.patientResult=patientResult;
-		this.resultValue = resultValue;				
+		this.resultValue = resultValue;	
+		
 	}
 	public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,Date recordedDate,String resultCode,String resultValue,String optionValue,String patientResult) {	
 		super();	
@@ -40,6 +76,23 @@ public class ClinicalDataQDM {
 		this.resultValue = resultValue;	
 		this.optionValue = optionValue;	
 		this.patientResult=patientResult;				
+	}
+		
+	public ClinicalDataQDM(String elementName,String code,String codeSystem,String codeSystemOID,int Status,Date orderedDate,Date performedDate,String notDoneDesc,String notDoneCode,String notDoneCodeSystemOID)
+	{
+		super();
+		this.elementName=elementName;
+		this.code=code;
+		this.codeSystem=codeSystem;
+		this.codeSystemOID=codeSystemOID;
+		this.Status=Status;
+		this.notDoneDesc=notDoneDesc;
+		this.notDoneCode=notDoneCode;
+		this.notDoneCodeSystemOID=notDoneCodeSystemOID;
+		if(performedDate!=null)
+			this.startDate=performedDate;
+		else if(orderedDate!=null)
+			this.startDate=orderedDate;
 	}
 	
 	public String getCode() {
