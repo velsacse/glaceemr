@@ -44,6 +44,8 @@ public  class FaxServiceImpl implements FaxService{
 
 	@Autowired
 	EntityManager entityManager;
+	
+	
 
 	@Autowired
 	FaxOutboxRepository fax_outboxRepository;
@@ -501,8 +503,10 @@ public  class FaxServiceImpl implements FaxService{
 		}else{
 			inFaxDetails = fax_inboxRepository.findAll(FaxSpecification.getInFaxDetails(getMaxFaxId(faxFolder), userId, faxTab, faxFolder));
 		}
-
+		
+		
 		inFaxDetails.get(0).setfax_inbox_statusid(1);
+		
 		inFaxDetails.get(0).setfax_inbox_modifieduserid(userId);
 
 		fax_inboxRepository.save(inFaxDetails.get(0));
@@ -527,25 +531,9 @@ public  class FaxServiceImpl implements FaxService{
 		return getOutboxDetails;
 	}
 
-	private int getMaxFaxId(int faxFolder) {
-		EntityManager em = emf.createEntityManager();
-		try {
-			CriteriaBuilder builder = em.getCriteriaBuilder();
-			CriteriaQuery<Object> cq = builder.createQuery();
-			if(faxFolder == 2 || faxFolder == 4){
-				Root<FaxOutbox> root = cq.from(FaxOutbox.class);
-				cq.select(builder.max(root.get(FaxOutbox_.fax_outbox_id)));
-			}else{
-				Root<FaxInbox> root = cq.from(FaxInbox.class);
-				cq.select(builder.max(root.get(FaxInbox_.fax_inbox_id))); 
-			}
-			return Integer.parseInt("" + em.createQuery(cq).getSingleResult());
-		} catch(Exception e) {
-			e.printStackTrace();
-			return -1;
-		} finally {
-		}
-	}
+	
+	
+	
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -686,5 +674,33 @@ public  class FaxServiceImpl implements FaxService{
 		} finally {
 		}
 	}
+
+	
+	public Integer getMaxFaxId(Integer faxFolder) {
+		// TODO Auto-generated method stub
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		if(faxFolder == 2 || faxFolder == 4){
+			Root<FaxOutbox> root = cq.from(FaxOutbox.class);
+			cq.select(builder.max(root.get(FaxOutbox_.fax_outbox_id)));
+		}else{
+			Root<FaxInbox> root = cq.from(FaxInbox.class);
+			cq.select(builder.max(root.get(FaxInbox_.fax_inbox_id))); 
+		}
+		List<Object> result = entityManager.createQuery(cq).getResultList();
+		Integer maxId =-1;
+		for (int i = 0; i < result.size(); i++) {
+			maxId = Integer.valueOf(result.get(i)==null?"0":result.get(i).toString());
+		}
+		if (result.size()>0) {
+			return maxId;
+		}
+		
+		return 0;
+		
+		
+	     
+}
+	
 
 }
