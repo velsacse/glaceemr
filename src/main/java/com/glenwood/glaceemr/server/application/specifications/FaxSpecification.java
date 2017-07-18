@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.specifications;
 
+import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
 
@@ -165,9 +166,9 @@ public class FaxSpecification {
 				   CriteriaQuery<?> cq, CriteriaBuilder cb) {
 			       Predicate condition = null;
 			    		   if(faxTab == 1){
-							   condition = cb.and(cb.equal(root.get(FaxOutbox_.fax_outbox_id),faxId), cb.equal(root.get(FaxOutbox_.fax_outbox_recipientname),faxFolder), cb.equal(root.get(FaxOutbox_.fax_outbox_createddate),0));
+							   condition = cb.and(cb.equal(root.get(FaxOutbox_.fax_outbox_id),faxId), cb.equal(root.get(FaxOutbox_.fax_outbox_recipientname),String.valueOf(faxFolder))/*, cb.equal(root.get(FaxOutbox_.fax_outbox_createddate),Date.valueOf(String.valueOf(0)))*/);
 						   }else{
-							   condition = cb.and(cb.equal(root.get(FaxOutbox_.fax_outbox_id),faxId), cb.equal(root.get(FaxOutbox_.fax_outbox_recipientname),faxFolder), cb.equal(root.get(FaxOutbox_.fax_outbox_createddate),userId));
+							   condition = cb.and(cb.equal(root.get(FaxOutbox_.fax_outbox_id),faxId), cb.equal(root.get(FaxOutbox_.fax_outbox_recipientname),String.valueOf(faxFolder))/* cb.equal(root.get(FaxOutbox_.fax_outbox_createddate),Date.valueOf(String.valueOf(userId))*/);
 						   }  
 			return cq.where(condition).getRestriction();
 			}
