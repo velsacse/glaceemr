@@ -280,26 +280,33 @@ public class RoomStatusServiceImpl implements  RoomStatusService {
 
 	/**
 	 * to swap patients
-	 * @return List<Encounter>
+	 * @return status
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
 	@Override
 	public JSONObject updateSwapPatients(Short toswap,Short withroom,Integer pos) {
-        List<Encounter> chartidsfortoswap = new ArrayList<Encounter>();
+		List<Encounter> chartidsfortoswap = new ArrayList<Encounter>();
         chartidsfortoswap = encounterRepository.findAll(RoomStatusSpecification.getchartIds(toswap, pos));
         List<Encounter> chartidswithRoom = new ArrayList<Encounter>();
         chartidswithRoom = encounterRepository.findAll(RoomStatusSpecification.chartidswithroom(withroom,pos));        
         for(int i=0;i<chartidsfortoswap.size();i++)
-        {    	  
-        	chartidsfortoswap.get(i).setEncounterRoom(withroom);  
-    	  
+        {    	
+        	CriteriaBuilder cb = em.getCriteriaBuilder();
+    		CriteriaUpdate<Encounter> update = cb.createCriteriaUpdate(Encounter.class);
+    		Root<Encounter> rootCriteria = update.from(Encounter.class);
+    		update.set(rootCriteria.get(Encounter_.encounterRoom), withroom);
+    		update.where(rootCriteria.get(Encounter_.encounterChartid).in(chartidsfortoswap.get(i).getEncounterChartid()));
+    		this.em.createQuery(update).executeUpdate();
         }
-        encounterRepository.save(chartidswithRoom);
         for(int i=0;i<chartidswithRoom.size();i++)
         {
-        	chartidswithRoom.get(i).setEncounterRoom(toswap);  
+        	CriteriaBuilder cb = em.getCriteriaBuilder();
+    		CriteriaUpdate<Encounter> update = cb.createCriteriaUpdate(Encounter.class);
+    		Root<Encounter> rootCriteria = update.from(Encounter.class);
+    		update.set(rootCriteria.get(Encounter_.encounterRoom), toswap);
+    		update.where(rootCriteria.get(Encounter_.encounterChartid).in(chartidswithRoom.get(i).getEncounterChartid()));
+    		this.em.createQuery(update).executeUpdate();
         }  
-        encounterRepository.save(chartidsfortoswap);
         String status = "updated";
         JSONObject switchRooms = new JSONObject();
         try {
@@ -313,7 +320,7 @@ public class RoomStatusServiceImpl implements  RoomStatusService {
 	/**
 	 * to get encounterids
 	 * @param patientId
-	 * @return
+	 * @return encounterIdlist
 	 */
 	public List<Integer> getEncId(String patientId){
 	    Chart chart = chartRepository.findOne(RoomStatusSpecification.getChartId(patientId));
