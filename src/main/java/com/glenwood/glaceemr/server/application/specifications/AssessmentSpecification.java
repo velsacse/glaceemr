@@ -29,7 +29,7 @@ public class AssessmentSpecification {
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				
 				
-				Predicate DxByEncounterId = cb.equal(root.get(PatientAssessments_.patient_assessments_id), encounterId);
+				Predicate DxByEncounterId = cb.equal(root.get(PatientAssessments_.patient_assessments_encounterid), encounterId);
 				return DxByEncounterId;
 			}
 		};
