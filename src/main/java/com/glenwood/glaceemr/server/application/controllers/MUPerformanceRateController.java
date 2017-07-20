@@ -208,7 +208,7 @@ public class MUPerformanceRateController {
 		Response responseFromCentralServer = new Response();
 		MIPSResponse finalResponse = new MIPSResponse();
 		
-		String hub_url = "http://test.glaceemr.com/glacecds/ECQMServices/validateECQM";
+		String hub_url = measureService.getMeasureValidationServer()+"/glacecds/ECQMServices/validateECQM";
 		
 		Writer writer = new StringWriter();
 		PrintWriter printWriter = new PrintWriter(writer);
