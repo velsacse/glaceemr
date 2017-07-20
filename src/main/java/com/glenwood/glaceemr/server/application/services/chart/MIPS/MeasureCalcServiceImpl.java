@@ -63,6 +63,8 @@ import com.glenwood.glaceemr.server.application.models.Billinglookup;
 import com.glenwood.glaceemr.server.application.models.Billinglookup_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
+import com.glenwood.glaceemr.server.application.models.GatewayController;
+import com.glenwood.glaceemr.server.application.models.GatewayController_;
 import com.glenwood.glaceemr.server.application.models.InsCompany;
 import com.glenwood.glaceemr.server.application.models.InsCompany_;
 import com.glenwood.glaceemr.server.application.models.MacraConfiguration;
@@ -2161,6 +2163,18 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		return results;
 
+	}
+	
+	@Override
+	public String getMeasureValidationServer() {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<String> cq = builder.createQuery(String.class);
+		Root<GatewayController> root = cq.from(GatewayController.class);
+		cq.select(root.get(GatewayController_.gatewayControllerUrl));
+		cq.where(builder.equal(root.get(GatewayController_.gatewayControllerModuleName), "MACRA measure validation"));
+		List<String> results = em.createQuery(cq).getResultList();
+		return results.get(0);
+	
 	}
 	
 	@Override

@@ -105,8 +105,7 @@ public class QPPPerformanceController {
 		MIPSResponse finalResponse = new MIPSResponse();
 		EMRResponseBean response = new EMRResponseBean();
 		
-		String hub_url = "http://test.glaceemr.com/glacecds/ECQMServices/validateECQM";
-		
+		String hub_url = measureService.getMeasureValidationServer()+"/glacecds/ECQMServices/validateECQM";
 		int savedUser = userId; //used to store logged userId to store the details in patient entries
 		
 		Writer writer = new StringWriter();

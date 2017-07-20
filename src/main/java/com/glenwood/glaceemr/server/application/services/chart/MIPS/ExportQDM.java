@@ -424,7 +424,7 @@ Root<Encounter> root = cq.from(Encounter.class);
         
         Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
         Predicate patId=builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
-        Predicate status=root.get(Prescription_.docPrescStatus).in(1,2);
+//        Predicate status=root.get(Prescription_.docPrescStatus).in(1,2);
        
         cq.select(builder.construct(MedicationQDM.class, root.get(Prescription_.rxname),
                 root.get(Prescription_.rxstrength),
@@ -445,10 +445,10 @@ Root<Encounter> root = cq.from(Encounter.class);
             cal.add(Calendar.YEAR, range);
             Date startDate = cal.getTime();
             Predicate dateRange=builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate);
-           	cq.where(builder.and(patId,status,dateRange));
+           	cq.where(builder.and(patId,dateRange));
         }
         else{
-            cq.where(builder.and(patId,status));
+            cq.where(builder.and(patId));
         }
         
         cq.distinct(true);
@@ -507,8 +507,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
 		Predicate patId=builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
-		Predicate status=root.get(Prescription_.docPrescStatus).in(1,2);
-		Predicate activeMed=builder.equal(root.get(Prescription_.docPrescIsActive), true);
+//		Predicate status=root.get(Prescription_.docPrescStatus).in(1,2);
+//		Predicate activeMed=builder.equal(root.get(Prescription_.docPrescIsActive), true);
 		cq.select(builder.construct(MedicationQDM.class, root.get(Prescription_.rxname),
 				root.get(Prescription_.rxstrength),
 				root.get(Prescription_.rxform),
@@ -527,11 +527,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 			Date endDate = cal.getTime();
 			cal.add(Calendar.YEAR, range);
 			Date startDate = cal.getTime();
-			Predicate dateRange=builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate);
-			cq.where(builder.and(patId,status,dateRange,activeMed));	
+			Predicate dateRange=builder.or(builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate),builder.between(root.get(Prescription_.docPrescInactivatedOn),startDate , endDate));
+			cq.where(builder.and(patId,dateRange));	
 		}
 		else{
-			cq.where(builder.and(patId,status,activeMed));
+			cq.where(builder.and(patId));
 		}
 
 		cq.distinct(true);
@@ -1632,8 +1632,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<Prescription> root = cq.from(Prescription.class);
-		
-		Predicate byProviderId  = builder.equal(root.get(Prescription_.docPrescOrderedBy), providerId);
+		Join<Prescription, Encounter> joinEncounter=root.join(Prescription_.encounter,JoinType.INNER);
+		Predicate byProviderId  = builder.equal(joinEncounter.get(Encounter_.encounter_service_doctor), providerId);
 		Predicate byOrderedDate = builder.between(root.get(Prescription_.docPrescOrderedDate), startDate, endDate);
 		Predicate byIsActive 	= builder.equal(root.get(Prescription_.docPrescIsActive), true);
 		Predicate byPatientId	= builder.equal(root.get(Prescription_.docPrescPatientId), patientId);

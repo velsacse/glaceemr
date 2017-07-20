@@ -186,4 +186,5 @@ public interface MeasureCalculationService {
 	
 	void getDashBoardDetails(int providerId,  String accountId, String tinValue, String configuredMeasures, String aciMeasures, boolean byNpi, MUDashboardBean providerDashboard);
 	
+	String getMeasureValidationServer();
 }
