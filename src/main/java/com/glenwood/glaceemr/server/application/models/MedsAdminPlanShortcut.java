@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -16,7 +17,12 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "meds_admin_plan_shortcut")
-public class MedsAdminPlanShortcut {
+public class MedsAdminPlanShortcut implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="meds_admin_plan_shortcut_id")
@@ -34,7 +40,7 @@ public class MedsAdminPlanShortcut {
 	private Boolean medsAdminPlanShortcutIsActive;
 	
 	@Column(name="meds_admin_plan_shortcut_cycles_per_day")
-	private Boolean medsAdminPlanShortcutCyclesPerDay;
+	private Double medsAdminPlanShortcutCyclesPerDay;
 	
 	@OneToMany(mappedBy="medsAdminPlanShortcut", fetch=FetchType.EAGER)
 	@JsonManagedReference
@@ -76,12 +82,12 @@ public class MedsAdminPlanShortcut {
 	
 	
 
-	public Boolean getMedsAdminPlanShortcutCyclesPerDay() {
+	public Double getMedsAdminPlanShortcutCyclesPerDay() {
 		return medsAdminPlanShortcutCyclesPerDay;
 	}
 
 	public void setMedsAdminPlanShortcutCyclesPerDay(
-			Boolean medsAdminPlanShortcutCyclesPerDay) {
+			Double medsAdminPlanShortcutCyclesPerDay) {
 		this.medsAdminPlanShortcutCyclesPerDay = medsAdminPlanShortcutCyclesPerDay;
 	}
 

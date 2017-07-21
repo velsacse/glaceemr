@@ -75,6 +75,11 @@ public class MedsAdminPlan {
 		this.shortcut = shortcut;
 	}
 	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
+	@JoinColumn(name="shortcut",referencedColumnName="meds_admin_plan_shortcut_name",insertable=false, updatable=false)
+	@JsonManagedReference
+	MedsAdminPlanShortcut medsAdminShortcut;
+	
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="meds_admin_plan_medication_id",referencedColumnName="doc_presc_id",insertable=false, updatable=false)
 	@JsonBackReference

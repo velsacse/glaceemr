@@ -436,7 +436,7 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 	 */
 	@Override
 	public List<MedsAdminPlanShortcut> getMedAdminPlanShortcuts() {
-		List<MedsAdminPlanShortcut> shortcutsList = medAdministrationPlanShortcutRepository.findAll();
+		List<MedsAdminPlanShortcut> shortcutsList = medAdministrationPlanShortcutRepository.findAll(PrescripitonSpecification.getshortcuts());
 		return shortcutsList;
 	}
 	

@@ -34,6 +34,8 @@ import com.glenwood.glaceemr.server.application.models.MedStatus_;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog;
 import com.glenwood.glaceemr.server.application.models.MedsAdminLog_;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlan;
+import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut;
+import com.glenwood.glaceemr.server.application.models.MedsAdminPlanShortcut_;
 import com.glenwood.glaceemr.server.application.models.MedsAdminPlan_;
 import com.glenwood.glaceemr.server.application.models.NdcPkgProduct;
 import com.glenwood.glaceemr.server.application.models.NdcPkgProduct_;
@@ -434,6 +436,17 @@ public class PrescripitonSpecification {
 					CriteriaBuilder cb) {
 				
 				return cq.where(cb.equal(root.get(Encounter_.encounterChartid), chartId), cb.equal(root.get(Encounter_.encounterType), encounterType), cb.equal(root.get(Encounter_.encounterReason), encounterReason)).orderBy(cb.desc(root.get(Encounter_.encounterDate))).getRestriction();
+			}
+		};
+	}
+	
+	public static Specification<MedsAdminPlanShortcut> getshortcuts() {
+		return new Specification<MedsAdminPlanShortcut>() {
+
+			@Override
+			public Predicate toPredicate(Root<MedsAdminPlanShortcut> root,CriteriaQuery<?> query, CriteriaBuilder cb) {
+				query.orderBy(cb.asc(root.get(MedsAdminPlanShortcut_.medsAdminPlanShortcutId)));
+				return query.getRestriction();
 			}
 		};
 	}
