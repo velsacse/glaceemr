@@ -95,7 +95,7 @@ public class PastEncountersServiceImpl implements PastEncountersService{
 		Root<Encounter> root= query.from(Encounter.class);
 		Join<Encounter, EmployeeProfile> empJoin= root.join(Encounter_.empProfileEmpId, JoinType.LEFT);
 		Join<Encounter, LeafPatient> leafJoin= root.join(Encounter_.leafPatient, JoinType.LEFT);
-		Join<LeafPatient, LeafLibrary> libraryJoin= leafJoin.join(LeafPatient_.leafLibraryTable, JoinType.INNER);
+		Join<LeafPatient, LeafLibrary> libraryJoin= leafJoin.join(LeafPatient_.leafLibraryTable, JoinType.LEFT);
 		
 		query.multiselect(root.get(Encounter_.encounterId),
 						   root.get(Encounter_.encounterChiefcomp),
