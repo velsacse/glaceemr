@@ -27,6 +27,7 @@ public class Patient
 	private List<PhysicalExam> physicalExamList = new ArrayList<PhysicalExam>();
 	private List<DiagnosticStudy> diagnosticStudyList = new ArrayList<DiagnosticStudy>();
 	private List<LabTest> labTestList = new ArrayList<LabTest>();
+	private List<FunctionalStatus> functionalStatus=new ArrayList<FunctionalStatus>();
 	private List<Communication> communications = new ArrayList<Communication>();
 	private List<Immunization> immunizationList = new ArrayList<Immunization>();
 	private List<QDM> tobaccoStatusList = new ArrayList<QDM>();
@@ -154,6 +155,13 @@ public class Patient
 	public void setDiagnosticStudyList(List<DiagnosticStudy> diagnosticStudyList)
 	{
 		this.diagnosticStudyList = diagnosticStudyList;
+	}
+	
+	public List<FunctionalStatus> getFunctionalStatus() {
+		return functionalStatus;
+	}
+	public void setFunctionalStatus(List<FunctionalStatus> functionalStatus) {
+		this.functionalStatus = functionalStatus;
 	}
 	public List<LabTest> getLabTestList()
 	{

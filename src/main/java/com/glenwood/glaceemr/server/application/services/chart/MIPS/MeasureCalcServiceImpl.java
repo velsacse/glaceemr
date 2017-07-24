@@ -48,6 +48,7 @@ import com.glenwood.glaceemr.server.application.Bean.ReferralQDM;
 import com.glenwood.glaceemr.server.application.Bean.SharedFolderBean;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Assessment;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.DiagnosticStudy;
+import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.FunctionalStatus;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Intervention;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.LabTest;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Patient;
@@ -307,6 +308,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				requestObj.setProcedureList(measureUtils.getProcedureQDM(investigationQDM,codeList,medicationsReviewed,procFromCNM,procBasedOnCPT));
 			}
 
+			if(codeListForQDM.containsKey("Functional Status")){
+				String codeList=measureUtils.getCodeListByCategory(codeListForQDM, "Functional Status");
+				List<FunctionalStatus> functionalStatusList=measureUtils.getFunctionalStatus(clinicalDataQDM, codeList);
+				requestObj.setFunctionalStatus(functionalStatusList);
+			}
+			
 			if(codeListForQDM.containsKey("Intervention")){
 
 				String codeList = measureUtils.getCodeListByCategory(codeListForQDM, "Intervention");

@@ -30,6 +30,7 @@ import com.glenwood.glaceemr.server.application.Bean.InvestigationQDM;
 import com.glenwood.glaceemr.server.application.Bean.MedicationQDM;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Assessment;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.DiagnosticStudy;
+import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.FunctionalStatus;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Intervention;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.LabTest;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Negation;
@@ -467,6 +468,13 @@ public class EMeasureUtils {
 			
 		}
 		
+		if(measureObj.containsKey("Functional Status")){
+			
+			snomedCodeList = getCodeList(measureObj,"Functional Status","SNOMEDCT",snomedCodeList);
+			loincCodeList = getCodeList(measureObj,"Functional Status","LOINC",loincCodeList);
+			
+		}
+
 		codeListForCNM.put("SNOMED", snomedCodeList);
 		
 		codeListForCNM.put("LOINC", loincCodeList);
@@ -831,6 +839,27 @@ public class EMeasureUtils {
 		return procedureList;
 	}
 
+	public List<FunctionalStatus> getFunctionalStatus(List<ClinicalDataQDM> clinicalData,String codeList){
+		ClinicalDataQDM eachObj= null;
+		FunctionalStatus functionalStatusObj;
+		List<FunctionalStatus> functionalStatusList=new ArrayList<FunctionalStatus>();
+		for(int i=0;i<clinicalData.size();i++){
+			eachObj=clinicalData.get(i);
+			functionalStatusObj =new FunctionalStatus();
+			
+			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+				functionalStatusObj.setCode(eachObj.getCode());
+				functionalStatusObj.setCodeSystem(eachObj.getCodeSystem());
+				functionalStatusObj.setCodeSystemOID(eachObj.getCodeSystemOID());
+				functionalStatusObj.setResultCode(eachObj.getResultCode());
+				functionalStatusObj.setResultCodeSystemOID(eachObj.getResultCodeSystem());
+				functionalStatusObj.setStartDate(eachObj.getRecordedDate());
+				functionalStatusList.add(functionalStatusObj);
+			}
+		}
+		return functionalStatusList;
+	}
+	
 	public List<Intervention> getInterventionFromCNM(List<ClinicalDataQDM> clinicalData,String codeList){
 		ClinicalDataQDM eachObj= null;
 		Intervention interventionObj;
