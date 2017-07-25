@@ -404,7 +404,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 	
 	
 	public List<MedicationOrder> getMedicationQDM(EntityManager em,Boolean considerProvider,int providerId,String rxNormCodes,int patientId, int range) {
-	       
         String [] codes=rxNormCodes.split(",");
         
         List<String> codeList=new ArrayList<String>();
@@ -527,7 +526,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			Date endDate = cal.getTime();
 			cal.add(Calendar.YEAR, range);
 			Date startDate = cal.getTime();
-			Predicate dateRange=builder.or(builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate),builder.between(root.get(Prescription_.docPrescInactivatedOn),startDate , endDate));
+			Predicate dateRange=builder.or(builder.equal(root.get(Prescription_.docPrescIsActive), true),builder.between(root.get(Prescription_.docPrescInactivatedOn),startDate , endDate));
 			cq.where(builder.and(patId,dateRange));	
 		}
 		else{
