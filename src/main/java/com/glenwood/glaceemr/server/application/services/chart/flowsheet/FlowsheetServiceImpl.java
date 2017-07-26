@@ -883,7 +883,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		}
 
 		Map<Integer, FS_LabBean> latestGrupLabData = new HashMap<>();
-		Collections.sort(labdata);
+		Collections.reverse(labdata);
 		for(FS_GroupIdTest testIdandGroupId : testIdandGroupIds) {
 			if(!latestGrupLabData.containsKey(testIdandGroupId.getGroupId()) || 
 					latestGrupLabData.get(testIdandGroupId.getGroupId())== null ){

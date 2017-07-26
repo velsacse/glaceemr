@@ -132,19 +132,36 @@ public class FS_LabBean implements Comparable<FS_LabBean> {
 				if (counter == (testIds.size() - 1)) {
 					completedDetailIdstr.append(testIds.get(counter).toString()
 							.split("@#@")[0]);
-					CompStatus.add(Integer.parseInt(testIds.get(counter)
-							.toString().split("@#@")[1]));
+					CompStatus.add(Integer.parseInt(testIds.get(counter).toString().split("@#@")[1]));
 				} else {
-					completedDetailIdstr.append(testIds.get(counter).toString()
-							.split("@#@")[0]
+					
+					completedDetailIdstr.append(testIds.get(counter).toString().split("@#@")[0]
 							+ "_");
-					CompStatus.add(Integer.parseInt(testIds.get(counter)
-							.toString().split("@#@")[1]));
+					CompStatus.add(Integer.parseInt(testIds.get(counter).toString().split("@#@")[1]));
 				}
 			}
 			this.completedDetaildId = completedDetailIdstr.toString();
-			if (CompStatus.size() > 0)
-				this.completedIdStatus = Collections.max(CompStatus) + "";
+			
+			if (CompStatus.size() > 0){
+				String[] testIdArr = completedDetailIdstr.toString().split("_");
+				List<Integer> testIdList = new ArrayList<Integer>();
+				
+				for(int b=0;b<testIdArr.length;b++){
+					int testid = Integer.parseInt(testIdArr[b]);
+					testIdList.add(testid);
+				}
+				int maxTestId = Collections.max(testIdList);
+				
+				for (int counter = 0; counter < testIds.size(); counter++) {
+						int cmpTestId = Integer.parseInt(testIds.get(counter).toString().split("@#@")[0]);
+						if(cmpTestId==maxTestId){
+							this.completedIdStatus=testIds.get(counter).toString().split("@#@")[1];
+						}
+				}
+				
+				//this.completedIdStatus = Collections.max(CompStatus) + "";
+			}
+				
 			else
 				this.completedIdStatus = "";
 		} catch (Exception e) {
