@@ -873,7 +873,7 @@ public class EMeasureUtils {
 				interventionObj.setCodeSystemOID(eachObj.getCodeSystemOID());
 				interventionObj.setResultCode(eachObj.getResultCode());
 				interventionObj.setResultCodeSystemOID(eachObj.getResultCodeSystem());
-				interventionObj.setStartDate(eachObj.getStartDate());
+				interventionObj.setStartDate(eachObj.getRecordedDate());
 				if(eachObj.getStatus()==3)
 				{
 					Negation negationObj=new Negation();

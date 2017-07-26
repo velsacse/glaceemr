@@ -90,9 +90,9 @@ public class ClinicalDataQDM {
 		this.notDoneCode=notDoneCode;
 		this.notDoneCodeSystemOID=notDoneCodeSystemOID;
 		if(performedDate!=null)
-			this.startDate=performedDate;
+			this.recordedDate=performedDate;
 		else if(orderedDate!=null)
-			this.startDate=orderedDate;
+			this.recordedDate=orderedDate;
 	}
 	
 	public String getCode() {
