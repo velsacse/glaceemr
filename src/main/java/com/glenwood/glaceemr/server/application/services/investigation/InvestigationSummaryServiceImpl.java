@@ -50,6 +50,7 @@ import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.AssociatedOrderPblm;
 import com.glenwood.glaceemr.server.application.models.BodySite;
 import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.Cpt;
 import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping;
@@ -61,9 +62,6 @@ import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileDetails_;
 import com.glenwood.glaceemr.server.application.models.FileName;
 import com.glenwood.glaceemr.server.application.models.FileName_;
-import com.glenwood.glaceemr.server.application.models.ChartStatus;
-import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
-import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping_;
 import com.glenwood.glaceemr.server.application.models.Hl7ResultInbox;
@@ -101,7 +99,8 @@ import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PatientVisEntries;
 import com.glenwood.glaceemr.server.application.models.PatientVisEntries_;
-import com.glenwood.glaceemr.server.application.models.ProblemList_;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator_;
 import com.glenwood.glaceemr.server.application.models.Specimen;
 import com.glenwood.glaceemr.server.application.models.VaccinationConsentForm;
 import com.glenwood.glaceemr.server.application.models.VaccineOrderDetails;
@@ -114,13 +113,13 @@ import com.glenwood.glaceemr.server.application.repositories.AlertCategoryReposi
 import com.glenwood.glaceemr.server.application.repositories.AssociatedOrderPblmRepository;
 import com.glenwood.glaceemr.server.application.repositories.BodySiteRepository;
 import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
+import com.glenwood.glaceemr.server.application.repositories.ChartStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.CptRepository;
 import com.glenwood.glaceemr.server.application.repositories.CvxVaccineGroupRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
 import com.glenwood.glaceemr.server.application.repositories.FileDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.FileNameRepository;
-import com.glenwood.glaceemr.server.application.repositories.ChartStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7ResultInboxRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7UnmappedResultsRepository;
 import com.glenwood.glaceemr.server.application.repositories.IcdmRepository;
@@ -152,7 +151,6 @@ import com.glenwood.glaceemr.server.application.services.alertinbox.AlertInboxSe
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailService;
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.ClinicalElementsService;
 import com.glenwood.glaceemr.server.application.specifications.AlertCategorySpecification;
-import com.glenwood.glaceemr.server.application.specifications.ChartSpecification;
 import com.glenwood.glaceemr.server.application.specifications.InitialSettingsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.InvestigationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PatientClinicalElementsSpecification;
@@ -1942,7 +1940,6 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 	}
 
 	private String getEmployeeName(String employeeId) {
-		System.out.println("employeeId in getemployeeName"+employeeId);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
@@ -2804,7 +2801,7 @@ public class InvestigationSummaryServiceImpl implements	InvestigationSummaryServ
 				}
 			}else if(lab_status>=3){
 				if ((dataStr[dataValueMap("int_lab_Dosagelevel")]!=null) && (!dataStr[dataValueMap("int_lab_Dosagelevel")].equals(""))){
-					saveVaccineDosage(dataStr[dataValueMap("int_lab_Dosagelevel")],dataStr[dataValueMap("int_lab_testid")],Integer.parseInt(dataStr[dataValueMap("int_lab_performby")]), labEncounterId,  dataStr[dataValueMap("int_lab_performon")].split(" ")[0],Integer.parseInt(dataStr[dataValueMap("int_lab_testdetailid")]));
+					saveVaccineDosage(dataStr[dataValueMap("int_lab_Dosagelevel")],dataStr[dataValueMap("int_lab_testid")],Integer.parseInt(dataStr[dataValueMap("int_lab_performby")]), labEncounterId,  dataStr[dataValueMap("int_lab_performon")].split(" ")[0],Integer.parseInt(dataStr[dataValueMap("int_lab_testdetailid")]),dataStr[dataValueMap("int_lab_shortnotes")]);
 				}
 			}
 		}
@@ -3463,7 +3460,7 @@ private int getPatientIdinChart(int chartId2) {
 		}
 	}
 
-	public void saveVaccineDosage(String dosage,String testid, int performedby, int labencId, String givenDate,int testdetailid){
+	public void saveVaccineDosage(String dosage,String testid, int performedby, int labencId, String givenDate,int testdetailid, String resultNotes){
 		LabEntries labEntriesList=labEntriesRepository.findOne(InvestigationSpecification.testdetailIds(testdetailid));
 		int status=1;
 		if(labEntriesList!=null)
@@ -3483,6 +3480,7 @@ private int getPatientIdinChart(int chartId2) {
 					Date dateMod=new Date();
 					Timestamp timeStampModified=new Timestamp(dateMod.getTime());
 					vaccineReportListUpdate.get(j).setVaccineReportLastModified(timeStampModified);
+					vaccineReportListUpdate.get(j).setVaccineReportComments(resultNotes);
 					vaccineReportRepository.saveAndFlush(vaccineReportListUpdate.get(j));
 				}
 
@@ -3509,7 +3507,7 @@ private int getPatientIdinChart(int chartId2) {
 					Timestamp timeStampGiven=new Timestamp(dateGiven.getTime());
 					vaccineReportTemp.setVaccineReportGivenDate(timeStampGiven);
 					vaccineReportTemp.setVaccineReportDosageLevel(Integer.parseInt(dosage));
-					vaccineReportTemp.setVaccineReportComments("");
+					vaccineReportTemp.setVaccineReportComments(resultNotes);
 					vaccineReportTemp.setVaccineReportIsemr(1);
 					vaccineReportTemp.setVaccineReportUserid(performedby);
 					Date dateMod=new Date();
@@ -3529,7 +3527,7 @@ private int getPatientIdinChart(int chartId2) {
 					vaccineReportTemp.setVaccineReportVaccineId(Integer.parseInt(testid));
 					vaccineReportTemp.setVaccineReportGivenDate(Timestamp.valueOf(givenDate+" 00:00:00"));
 					vaccineReportTemp.setVaccineReportDosageLevel(Integer.parseInt(dosage));
-					vaccineReportTemp.setVaccineReportComments("");
+					vaccineReportTemp.setVaccineReportComments(resultNotes);
 					vaccineReportTemp.setVaccineReportIsemr(1);
 					vaccineReportTemp.setVaccineReportUserid(performedby);
 					Date dateMod=new Date();
@@ -3564,7 +3562,7 @@ private int getPatientIdinChart(int chartId2) {
 					Timestamp timeStampGiven=new Timestamp(dateGiven.getTime());
 					vaccineReportTemp.setVaccineReportGivenDate(timeStampGiven);
 					vaccineReportTemp.setVaccineReportDosageLevel(currdos);
-					vaccineReportTemp.setVaccineReportComments("");
+					vaccineReportTemp.setVaccineReportComments(resultNotes);
 					vaccineReportTemp.setVaccineReportIsemr(1);
 					vaccineReportTemp.setVaccineReportUserid(performedby);
 					Date dateMod=new Date();
@@ -3585,7 +3583,7 @@ private int getPatientIdinChart(int chartId2) {
 					vaccineReportTemp.setVaccineReportVaccineId(Integer.parseInt(testid));
 					vaccineReportTemp.setVaccineReportGivenDate(Timestamp.valueOf(givenDate+" 00:00:00"));
 					vaccineReportTemp.setVaccineReportDosageLevel(Integer.parseInt(dosage));
-					vaccineReportTemp.setVaccineReportComments("");
+					vaccineReportTemp.setVaccineReportComments(resultNotes);
 					vaccineReportTemp.setVaccineReportIsemr(1);
 					vaccineReportTemp.setVaccineReportUserid(performedby);
 					Date dateMod=new Date();
