@@ -35,6 +35,8 @@ public class MIPSPerformanceBean {
 	String tin;
 	
 	String providerName;
+	Boolean highPriority;
+	String Outcome;
 	
 	/*long notMetPatients;
 	String notMetPatientsList;*/
@@ -205,6 +207,22 @@ public class MIPSPerformanceBean {
 
 	public void setPoints(double points) {
 		this.points = points;
+	}
+	
+	public Boolean getHighPriority() {
+		return highPriority;
+	}
+
+	public void setHighPriority(Boolean highPriority) {
+		this.highPriority = highPriority;
+	}
+
+	public String getOutcome() {
+		return Outcome;
+	}
+
+	public void setOutcome(String outcome) {
+		Outcome = outcome;
 	}
 
 	public String getNpi() {

@@ -577,8 +577,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Join<LabEntries, Encounter> EncLabJoin = root.join(LabEntries_.encounter, JoinType.INNER);
 		Join<Encounter, Chart> EncChartJoin = EncLabJoin.join(Encounter_.chartTable, JoinType.INNER);
 		Join<LabEntries, LabDescription> labEntriesDescJoin = root.join(LabEntries_.labDescriptionTable, JoinType.INNER);
-		Join<LabDescription, Hl7ExternalTestmapping> labDescExtrnTestMappingJoin = labEntriesDescJoin.join(LabDescription_.hl7ExternalTestmappingTable, JoinType.INNER);
-		Join<Hl7ExternalTestmapping, Hl7ExternalTest> hl7ExtTestMappingJoin = labDescExtrnTestMappingJoin.join(Hl7ExternalTestmapping_.hl7ExternalTestTable, JoinType.INNER);
+		Join<LabDescription, Hl7ExternalTestmapping> labDescExtrnTestMappingJoin = labEntriesDescJoin.join(LabDescription_.hl7ExternalTestmappingTable, JoinType.LEFT);
+		Join<Hl7ExternalTestmapping, Hl7ExternalTest> hl7ExtTestMappingJoin = labDescExtrnTestMappingJoin.join(Hl7ExternalTestmapping_.hl7ExternalTestTable, JoinType.LEFT);
 		Expression<String> labCode = builder.<String>selectCase().when(labEntriesDescJoin.get(LabDescription_.labDescriptionLoinc).isNotNull(),labEntriesDescJoin.get(LabDescription_.labDescriptionLoinc)).otherwise(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestCode));
 		
 		Selection[] selections= new Selection[] {
@@ -600,8 +600,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					builder.notEqual(root.get(LabEntries_.labEntriesTestStatus), 7),
 					builder.between(root.get(LabEntries_.labEntriesPerfOn), startDate, endDate),
 					builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
-					hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
-					labCode.isNotNull(),
+					
 			};
 		
 		cq.where(restrictions);
@@ -1634,16 +1633,15 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Join<Prescription, Encounter> joinEncounter=root.join(Prescription_.encounter,JoinType.INNER);
 		Predicate byProviderId  = builder.equal(joinEncounter.get(Encounter_.encounter_service_doctor), providerId);
 		Predicate byOrderedDate = builder.between(root.get(Prescription_.docPrescOrderedDate), startDate, endDate);
-		Predicate byIsActive 	= builder.equal(root.get(Prescription_.docPrescIsActive), true);
 		Predicate byPatientId	= builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
 		
 		cq.multiselect(root.get(Prescription_.rxname).alias("Medication"),
 				builder.coalesce(root.get(Prescription_.docPrescIsEPrescSent),0).alias("IsSentElectronically"));
 		
 		if(isGroup)
-			cq.where(byProviderId,byOrderedDate,byPatientId,byIsActive);
+			cq.where(byProviderId,byOrderedDate,byPatientId);
 		else
-			cq.where(byOrderedDate,byPatientId,byIsActive);
+			cq.where(byOrderedDate,byPatientId);
 		
 		List<Object[]> result=em.createQuery(cq).getResultList();
 		
@@ -1957,9 +1955,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				returnString = result.get(0)[1]+" / "+total+" &&&& referrals sent electronically";
 				
 			}else if(result.size() == 1){
-				
-				System.out.println(" "+result.get(0)[0]+" and "+result.get(0)[1]);
-				
+								
 				if(result.get(0)[0].toString().equals("1")){
 
 					returnString = result.get(0)[1]+" / "+result.get(0)[1]+" &&&& referrals sent electronically";

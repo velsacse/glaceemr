@@ -487,6 +487,7 @@ public class QPPPerformanceController {
 			@RequestParam(value="providerId", required=true) int providerId,
 			@RequestParam(value="accountId", required=true) String accountId,
 			@RequestParam(value="tinValue", required=false, defaultValue="") String tinValue,
+			@RequestParam(value="sharedPath", required=true) String sharedPath,
 			@RequestParam(value="isByNpi", required=false, defaultValue="false") boolean byNpi,
 			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans) throws Exception{
 		
@@ -517,11 +518,11 @@ public class QPPPerformanceController {
 				providerDashboard.setStartDate(providerInfo.get(0).getMacraProviderConfigurationReportingStart());
 				providerDashboard.setEndDate(providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 				
-				measureService.getDashBoardDetails(providerId, accountId, tinValue, providerInfo.get(0).getMeasures(), aciMeasures, byNpi, providerDashboard);
+				measureService.getDashBoardDetails(providerId, accountId, tinValue, providerInfo.get(0).getMeasures(), aciMeasures, byNpi, providerDashboard,sharedPath);
 				
 			}else{
 				
-				measureService.getDashBoardDetails(providerId, accountId, tinValue, "", aciMeasures, byNpi, providerDashboard);
+				measureService.getDashBoardDetails(providerId, accountId, tinValue, "", aciMeasures, byNpi, providerDashboard,sharedPath);
 				
 			}
 			

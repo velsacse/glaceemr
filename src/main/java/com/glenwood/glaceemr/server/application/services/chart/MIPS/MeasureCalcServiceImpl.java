@@ -56,6 +56,9 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.PhysicalExam
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Procedure;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.QDM;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
+import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.Benchmark;
+import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.Decile;
+import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasure;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
 import com.glenwood.glaceemr.server.application.Bean.mailer.GlaceMailer;
 import com.glenwood.glaceemr.server.application.Bean.pqrs.PqrsMeasureBean;
@@ -1126,12 +1129,14 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 			}else{
 				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+				addPointsAndPriorityStatus(measureId, accountId, resultObject);
 			}
 
 			resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
 			resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
 
 		}
+		
 		finalResult=arrangeItForCriteria(results);
 		return finalResult;
 
@@ -1280,6 +1285,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 			}else{
 				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+				addPointsAndPriorityStatus(measureId, accountId, resultObject);
 			}
 
 			DecimalFormat newFormat = new DecimalFormat("#0.00");
@@ -1482,6 +1488,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					
 				}else{
 					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+					addPointsAndPriorityStatus(measureId, accountId, resultObject);
 				}
 
 				DecimalFormat newFormat = new DecimalFormat("#0.00");
@@ -1672,14 +1679,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				long denominatorCount = resultObject.getDenominatorCount();
 				long denominatorExclusionCount = resultObject.getDenominatorExclusionCount();
 				long denominatorExceptionCount = resultObject.getDenominatorExceptionCount();
-
 				try{
 
 					if(numeratorCount != 0 || denominatorExceptionCount != 0 || denominatorExclusionCount!=0){
 
 						reportingRate =  Double.valueOf(""+numeratorCount+denominatorExceptionCount+denominatorExclusionCount) / denominatorCount;
 						reportingRate =  Double.valueOf(newFormat.format(reportingRate));
-
 					}
 
 					if(numeratorCount > 0){
@@ -1688,7 +1693,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 						performanceRate =  Double.valueOf(""+numeratorCount) / denominatorCount;
 						performanceRate =  Double.valueOf(newFormat.format(performanceRate));
-
 					}
 
 					if(reportingRate > 0 && reportingRate%10 != 0){
@@ -1753,6 +1757,26 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	}
 
+	public void addPointsAndPriorityStatus(String measureId, String accountId,MIPSPerformanceBean resultObject)
+	{
+		EMeasureUtils measureUtils = new EMeasureUtils();
+		try 
+		{
+			String sharedFolderPath = sharedFolderBean.getSharedFolderPath().get(accountId).toString();
+			List<EMeasure> emeasureObj=measureUtils.getMeasureBeanDetails(measureId,sharedFolderPath);
+			EMeasure eMeasure=emeasureObj.get(0);
+			resultObject.setHighPriority(eMeasure.isHighPriority());
+			resultObject.setOutcome(eMeasure.getType());
+			resultObject.setPoints(getPointsByBenchMark(resultObject.getPerformanceRate(), eMeasure));
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		
+
+	}
+	
 	private String getCMSIdAndTitle(String measureId, String accountId){
 
 		String result = "";
@@ -2185,10 +2209,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	}
 	
 	@Override
-	public void getDashBoardDetails(int providerId, String accountId, String tinValue, String configuredMeasures, String aciMeasures, boolean byNpi, MUDashboardBean providerDashboard){		
-		
+	public void getDashBoardDetails(int providerId, String accountId, String tinValue, String configuredMeasures, String aciMeasures, boolean byNpi, MUDashboardBean providerDashboard,String sharedPath){		
+		EMeasureUtils measureUtils = new EMeasureUtils();
 		List<MIPSPerformanceBean> ecqmPerformance, aciPerformance;
-		int ecqmPoints = 0, aciPoints = 0;
+		int ecqmPoints = 0, aciPoints = 0,measurePoint=0;
 		
 		if(byNpi){
 			
@@ -2207,9 +2231,36 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			
 		}
 		
+		List<MIPSPerformanceBean> temp=new ArrayList<MIPSPerformanceBean>();
+		List<EMeasure> eMeasures=new ArrayList<EMeasure>();
 		for(int i=0;i<ecqmPerformance.size();i++){
-			ecqmPoints += getPointsByReporting(ecqmPerformance.get(i).getReportingRate()); 
+			EMeasure eMeasureObj=null;
+			try {
+				eMeasures= measureUtils.getMeasureBeanDetails(ecqmPerformance.get(i).getMeasureId(), sharedPath);
+				eMeasureObj=eMeasures.get(0);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			if(i<5 && temp.size()<7)
+			{
+				temp.add(ecqmPerformance.get(i));
+				measurePoint=getPointsByBenchMark(ecqmPerformance.get(i).getPerformanceRate(),eMeasureObj);
+				ecqmPerformance.get(i).setPoints(measurePoint);
+				ecqmPoints+=measurePoint;
+			}
+			else if(i>=5 && temp.size()<7)
+			{
+				if(eMeasureObj.getType().equalsIgnoreCase("Outcome") || eMeasureObj.isHighPriority())
+				{
+					temp.add(ecqmPerformance.get(i));
+					ecqmPoints+=getPointsByBenchMark(ecqmPerformance.get(i).getPerformanceRate(),eMeasureObj);
+				}
+			}
+			//aciPoints += aciPerformance.get(i).getPoints();
+			
 		}
+
 		
 		for(int i=0;i<aciPerformance.size();i++){
 			
@@ -2251,4 +2302,34 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 	}
 	
+	private int getPointsByBenchMark(double performancRate,EMeasure eMeasureObj){
+		performancRate=performancRate*100;
+		HashMap<String, List<Benchmark>> benchMark=eMeasureObj.getBenchmark();
+		List<Benchmark> benchMarkObjs=benchMark.get("2017");
+		int index=0;
+		for(int i=0;i<benchMarkObjs.size();i++)
+		{
+			if(benchMarkObjs.get(i).getSubmissionMethod().equals("EHR"))
+			{
+				ArrayList<Decile> decileList=benchMarkObjs.get(i).getDecileList();
+				for(int j=0;j<decileList.size();j++)
+				{
+					if(decileList.get(j).getEnd()!=null)
+					{
+						if(performancRate>=decileList.get(j).getStart() && performancRate<=decileList.get(j).getEnd())
+						index= decileList.get(j).getIndex();
+					}
+					else if(performancRate>=decileList.get(j).getStart())
+					{
+						index= decileList.get(j).getIndex();
+					}
+				}
+			}
+		}
+		if(index==0)
+			index=1;
+		return index;
+		
+	}
+
 }
