@@ -2314,14 +2314,23 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				ArrayList<Decile> decileList=benchMarkObjs.get(i).getDecileList();
 				for(int j=0;j<decileList.size();j++)
 				{
-					if(decileList.get(j).getEnd()!=null)
+					if(!(decileList.get(j).getStart()==null && decileList.get(j).getEnd()==null))
 					{
-						if(performancRate>=decileList.get(j).getStart() && performancRate<=decileList.get(j).getEnd())
-						index= decileList.get(j).getIndex();
-					}
-					else if(performancRate>=decileList.get(j).getStart())
-					{
-						index= decileList.get(j).getIndex();
+						if(decileList.get(j).getStart()!=null && decileList.get(j).getEnd()!=null)
+						{
+							if(performancRate>=decileList.get(j).getStart() && performancRate<=decileList.get(j).getEnd())
+							index= decileList.get(j).getIndex();
+						}
+						else if(decileList.get(j).getStart()!=null)
+						{
+							if(performancRate>=decileList.get(j).getStart())
+								index= decileList.get(j).getIndex();
+						}
+						else if(decileList.get(j).getEnd()!=null)
+						{
+							if(performancRate<=decileList.get(j).getEnd())
+								index= decileList.get(j).getIndex();
+						}
 					}
 				}
 			}
