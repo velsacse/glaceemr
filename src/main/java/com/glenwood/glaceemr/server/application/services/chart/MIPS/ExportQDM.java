@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -98,6 +99,8 @@ import com.glenwood.glaceemr.server.application.models.ReconciledMedication;
 import com.glenwood.glaceemr.server.application.models.ReconciledMedication_;
 import com.glenwood.glaceemr.server.application.models.ReferralDetails;
 import com.glenwood.glaceemr.server.application.models.ReferralDetails_;
+import com.glenwood.glaceemr.server.application.models.RiskAssessment;
+import com.glenwood.glaceemr.server.application.models.RiskAssessment_;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail_;
 import com.glenwood.glaceemr.server.application.models.VaccineReport;
@@ -284,7 +287,18 @@ Root<Encounter> root = cq.from(Encounter.class);
 					encObject.setCode(encounterObj.get(i).getCode());
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
 					encObject.setStartDate(encounterObj.get(i).getStartDate());
-					encObject.setEndDate(encounterObj.get(i).getStartDate());
+					if(encounterObj.get(i).getEndDate()==null)
+					{
+						Calendar cal = new GregorianCalendar();
+						cal.setTime(encounterObj.get(i).getStartDate());
+						cal.set(Calendar.HOUR_OF_DAY, 24);  
+						cal.set(Calendar.MINUTE, 0);  
+						cal.set(Calendar.SECOND, 0);  
+						cal.set(Calendar.MILLISECOND, 0); 
+						encObject.setEndDate(cal.getTime());
+					}
+					else
+					encObject.setEndDate(encounterObj.get(i).getEndDate());
 					encounterQDM.add(i, encObject);
 					
 					cptThere=true;
@@ -294,7 +308,19 @@ Root<Encounter> root = cq.from(Encounter.class);
 					encObject.setCode(encounterObj.get(i).getCode());
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
 					encObject.setStartDate(encounterObj.get(i).getStartDate());
-					encObject.setEndDate(encounterObj.get(i).getStartDate());
+					if(encounterObj.get(i).getEndDate()==null)
+					{
+						
+						Calendar cal = new GregorianCalendar();
+						cal.setTime(encounterObj.get(i).getStartDate());
+						cal.set(Calendar.HOUR_OF_DAY, 24);  
+						cal.set(Calendar.MINUTE, 0);  
+						cal.set(Calendar.SECOND, 0);  
+						cal.set(Calendar.MILLISECOND, 0); 
+						encObject.setEndDate(cal.getTime());
+					}
+					else
+					encObject.setEndDate(encounterObj.get(i).getEndDate());
 					encounterQDM.add(i, encObject);
 					
 					cptThere=true;
@@ -615,6 +641,42 @@ Root<Encounter> root = cq.from(Encounter.class);
 			e.printStackTrace();			
 		}
 
+		/*********************Investigation details only from labEntries***********************/
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<InvestigationQDM> cq2 = cb.createQuery(InvestigationQDM.class);
+		Root<LabEntries> rootLabEntries = cq2.from(LabEntries.class);
+		Join<LabEntries, Encounter> EncLabJoin1 = rootLabEntries.join(LabEntries_.encounter, JoinType.INNER);
+		Join<Encounter, Chart> EncChartJoin1 = EncLabJoin1.join(Encounter_.chartTable, JoinType.INNER);
+		Expression<String> labCode1 = cb.<String>selectCase().when(cb.equal(rootLabEntries.get(LabEntries_.labEntriesLoinc),"-1"),rootLabEntries.get(LabEntries_.labEntriesSnomed)).otherwise(rootLabEntries.get(LabEntries_.labEntriesLoinc));
+		Selection[] selections1= new Selection[] {
+				rootLabEntries.get(LabEntries_.labEntriesStatus),
+				rootLabEntries.get(LabEntries_.labEntriesConfirmTestStatus),
+				rootLabEntries.get(LabEntries_.labEntriesTestdetailId),
+				labCode1,
+				rootLabEntries.get(LabEntries_.labEntriesTestDesc),
+				rootLabEntries.get(LabEntries_.labEntriesTestStatus),
+				builder.selectCase().when(cb.equal(rootLabEntries.get(LabEntries_.labEntriesLoinc),"-1"), cb.literal(54)).otherwise(cb.literal(51)),
+				rootLabEntries.get(LabEntries_.labEntriesOrdOn),
+				rootLabEntries.get(LabEntries_.labEntriesPerfOn),
+		};
+		cq2.select(cb.construct(InvestigationQDM.class,selections1));
+		Predicate[] restrictions1= new Predicate[] {
+				cb.equal(EncChartJoin1.get(Chart_.chartPatientid), patientID),
+				cb.notEqual(rootLabEntries.get(LabEntries_.labEntriesTestStatus), 2),
+				cb.notEqual(rootLabEntries.get(LabEntries_.labEntriesTestStatus), 7),
+				rootLabEntries.get(LabEntries_.labEntriesCvx).isNull()
+				//builder.equal(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestIsactive), true),
+				//hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestLabcompanyid).in(54, 51),
+		};
+	
+		cq2.where(restrictions1);
+		List<InvestigationQDM> simpleLabEntries = new ArrayList<InvestigationQDM>();
+		simpleLabEntries = em.createQuery(cq2).getResultList();
+		
+		procedureForLabs.addAll(simpleLabEntries);
+		
+		
+		
 		List<Integer> labEntriesTestDetailId=new ArrayList<Integer>();
 		labEntriesTestDetailId.add(000000);
 		for(int i=0;i<procedureForLabs.size();i++){
@@ -1404,6 +1466,43 @@ Root<Encounter> root = cq.from(Encounter.class);
 		List<ClinicalDataQDM> interventions=em.createQuery(cq).getResultList();
 		
 		clinicaldataFinal.addAll(interventions);
+
+		/***********************Risk Assessment Query*********************/
+		CriteriaBuilder riskCB = em.getCriteriaBuilder();
+		CriteriaQuery<ClinicalDataQDM> riskCQ = riskCB.createQuery(ClinicalDataQDM.class);
+		Root<RiskAssessment> riskAssessment = riskCQ.from(RiskAssessment.class);
+
+		List<Predicate> riskPredicates = new ArrayList<>();
+		if(patientId!=-1)
+			riskPredicates.add(riskCB.equal(riskAssessment.get(RiskAssessment_.riskAssessmentPatientId), patientId));
+		
+		if(startDate!=null && endDate!=null)
+		{
+			riskPredicates.add(riskCB.or(riskCB.between(riskAssessment.get(RiskAssessment_.riskAssessmentOrderedOn),startDate,endDate),
+					riskCB.between(riskAssessment.get(RiskAssessment_.riskAssessmentPerformedOn),startDate,endDate)));
+		}
+		Selection[] selectedColumns1 = new Selection[]{
+
+				riskAssessment.get(RiskAssessment_.riskAssessmentDescription),
+				riskAssessment.get(RiskAssessment_.riskAssessmentCode),
+				riskAssessment.get(RiskAssessment_.riskAssessmentCodeName),
+				riskAssessment.get(RiskAssessment_.riskAssessmentCodeSystem),
+				riskAssessment.get(RiskAssessment_.riskAssessmentStatus),
+				riskAssessment.get(RiskAssessment_.riskAssessmentOrderedOn),
+				riskAssessment.get(RiskAssessment_.riskAssessmentPerformedOn),
+				riskAssessment.get(RiskAssessment_.riskAssessmentNotdoneDescription),
+				riskAssessment.get(RiskAssessment_.riskAssessmentNotdoneCode),
+				riskAssessment.get(RiskAssessment_.riskAssessmentNotdoneCodeSystem),
+				riskAssessment.get(RiskAssessment_.riskAssessmentResultCode),
+				riskAssessment.get(RiskAssessment_.riskAssessmentResultCodeSystem)
+		};
+
+		riskCQ.select(riskCB.construct(ClinicalDataQDM.class, selectedColumns1));
+		riskCQ.where(riskPredicates.toArray(new Predicate[riskPredicates.size()]));
+
+		List<ClinicalDataQDM> riskAssessmentList=em.createQuery(riskCQ).getResultList();
+		
+		clinicaldataFinal.addAll(riskAssessmentList);
 
 		return clinicaldataFinal;
 	}

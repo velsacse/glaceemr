@@ -95,6 +95,25 @@ public class ClinicalDataQDM {
 			this.recordedDate=orderedDate;
 	}
 	
+	public ClinicalDataQDM(String elementName,String code,String codeSystem,String codeSystemOID,int Status,Date orderedDate,Date performedDate,String notDoneDesc,String notDoneCode,String notDoneCodeSystemOID,String resultCode,String resultCodeSystem)		
+	{		
+		super();		
+		this.elementName=elementName;		
+		this.code=code;		
+		this.codeSystem=codeSystem;		
+		this.codeSystemOID=codeSystemOID;		
+		this.Status=Status;		
+		this.notDoneDesc=notDoneDesc;		
+		this.notDoneCode=notDoneCode;		
+		this.notDoneCodeSystemOID=notDoneCodeSystemOID;		
+		if(performedDate!=null)		
+		this.recordedDate=performedDate;		
+		else if(orderedDate!=null)		
+		this.recordedDate=orderedDate;		
+		this.resultCode=resultCode;		
+		this.resultCodeSystem=resultCodeSystem;		
+	}
+	
 	public String getCode() {
 		return code;
 	}
