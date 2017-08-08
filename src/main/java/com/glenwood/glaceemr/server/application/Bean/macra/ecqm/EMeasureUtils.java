@@ -494,7 +494,7 @@ public class EMeasureUtils {
 			eachObj = patientInvestigationData.get(i);
 			labTestObj = new LabTest();
 			
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && eachObj.getCode()!="" && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode().length() > 0){
 				
 				labTestObj.setCode(eachObj.getCode());
 				labTestObj.setResultValue(eachObj.getResultValue());
@@ -545,7 +545,7 @@ public class EMeasureUtils {
 			eachObj = patientInvestigationData.get(i);
 			diagnosticStudyObj = new DiagnosticStudy();
 			
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && eachObj.getCode()!="" && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode().length() > 0){
 				
 				diagnosticStudyObj.setCode(eachObj.getCode());
 				diagnosticStudyObj.setResultValue(eachObj.getResultValue());
@@ -599,7 +599,7 @@ public class EMeasureUtils {
 			eachObj = patientInvestigationData.get(i);
 			physicalExamObj = new PhysicalExam();
 			
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && eachObj.getCode()!="" && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode().length() > 0){
 				
 				physicalExamObj.setCode(eachObj.getCode());
 				physicalExamObj.setResultValue(eachObj.getResultValue());
@@ -652,7 +652,7 @@ public class EMeasureUtils {
 			eachObj = patientInvestigationData.get(i);
 			interventionObj = new Intervention();
 			
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && eachObj.getCode()!="" && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode().length() > 0){
 				
 				interventionObj.setCode(eachObj.getCode());
 				interventionObj.setCode(eachObj.getResultValue());
@@ -703,7 +703,7 @@ public class EMeasureUtils {
 			eachObj = patientInvestigationData.get(i);
 			procedureObj = new Procedure();
 			
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && eachObj.getCode()!="" && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode().length() > 0){
 
 				procedureObj.setCode(eachObj.getCode());
 				procedureObj.setResultValue(eachObj.getResultValue());

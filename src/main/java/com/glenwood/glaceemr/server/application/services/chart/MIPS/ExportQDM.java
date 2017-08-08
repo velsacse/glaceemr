@@ -605,7 +605,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Join<LabEntries, LabDescription> labEntriesDescJoin = root.join(LabEntries_.labDescriptionTable, JoinType.INNER);
 		Join<LabDescription, Hl7ExternalTestmapping> labDescExtrnTestMappingJoin = labEntriesDescJoin.join(LabDescription_.hl7ExternalTestmappingTable, JoinType.LEFT);
 		Join<Hl7ExternalTestmapping, Hl7ExternalTest> hl7ExtTestMappingJoin = labDescExtrnTestMappingJoin.join(Hl7ExternalTestmapping_.hl7ExternalTestTable, JoinType.LEFT);
-		Expression<String> labCode = builder.<String>selectCase().when(labEntriesDescJoin.get(LabDescription_.labDescriptionLoinc).isNotNull(),labEntriesDescJoin.get(LabDescription_.labDescriptionLoinc)).otherwise(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestCode));
+		Expression<String> labCode = builder.<String>selectCase().when(builder.notEqual(labEntriesDescJoin.get(LabDescription_.labDescriptionLoinc), ""),labEntriesDescJoin.get(LabDescription_.labDescriptionLoinc)).otherwise(hl7ExtTestMappingJoin.get(Hl7ExternalTest_.hl7ExternalTestCode));
 		
 		Selection[] selections= new Selection[] {
 				root.get(LabEntries_.labEntriesStatus),
