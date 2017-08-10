@@ -103,7 +103,8 @@ public class GlaceRulesController {
 		Response responseFromCentralServer = new Response();
 		PqrsResponseBean finalResponse = new PqrsResponseBean();
 		EMRResponseBean response = new EMRResponseBean();
-		String hub_url = "http://test.glaceemr.com/glacecds/ECQMServices/validateECQM";
+		
+		String hub_url = measureService.getMeasureValidationServer()+"/glacecds/ECQMServices/validateRegistryReport";
 
 		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 

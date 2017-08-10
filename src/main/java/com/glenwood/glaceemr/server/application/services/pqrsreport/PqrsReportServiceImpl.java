@@ -48,6 +48,7 @@ import com.glenwood.glaceemr.server.application.repositories.PqrsPatientEntriesR
 import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
 import com.glenwood.glaceemr.server.application.repositories.QualityMeasuresPatientEntriesRepository;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.ExportQDM;
+import com.glenwood.glaceemr.server.application.services.chart.MIPS.MeasureCalculationService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
 import com.glenwood.glaceemr.server.application.services.chart.print.TextFormatter;
 import com.glenwood.glaceemr.server.application.specifications.QPPPerformanceSpecification;
@@ -87,6 +88,10 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 
 	@Autowired
 	ProblemListRepository diagnosisRepo;
+	
+	@Autowired
+	MeasureCalculationService measureService;
+	
 
 
 	@Override
@@ -175,7 +180,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 		Request requestObj = new Request();
 		PQRSResponse response = new PQRSResponse();
 
-		String hub_url = "http://test.glaceemr.com/glacecds/ECQMServices/validateClaimsReport";
+		String hub_url = measureService.getMeasureValidationServer()+"/glacecds/ECQMServices/validateRegistryReport";
 
 		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 

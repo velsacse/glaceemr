@@ -1999,7 +1999,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			CriteriaQuery<QualityMeasuresProviderMapping> cquery = builder.createQuery(QualityMeasuresProviderMapping.class);
 			Root<QualityMeasuresProviderMapping> root1 = cquery.from(QualityMeasuresProviderMapping.class);
 			cquery.where(builder.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),userId));
-			cquery.orderBy(builder.asc(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId)));
+			cquery.orderBy(builder.asc(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId).as(Integer.class)));
 			qualitymeasurebean = em.createQuery(cquery).getResultList();
 			Integer userid = -1;
 			String measureid = "";
@@ -2053,7 +2053,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					builder.greaterThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), startDate),
 					builder.lessThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), endDate));
 
-			cq.orderBy(builder.desc(root.get(PqrsPatientEntries_.pqrsPatientEntriesMeasureId)));
+			cq.orderBy(builder.asc(root.get(PqrsPatientEntries_.pqrsPatientEntriesMeasureId).as(Integer.class)));
 			pqrsResponseBean = em.createQuery(cq).getResultList();
 			String measureid = "";
 			String shortdesc = "";
