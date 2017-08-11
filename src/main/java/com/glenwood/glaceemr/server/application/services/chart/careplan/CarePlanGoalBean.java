@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class CarePlanGoalBean {
-
 	Integer carePlanGoalId;
 	Integer carePlanGoalPatientId;
 	Integer carePlanGoalEncounterId;
@@ -13,7 +12,6 @@ public class CarePlanGoalBean {
 	String carePlanGoalConcernDesc;
 	Integer carePlanGoalPriority;
 	Integer carePlanGoalType;
-	Integer carePlanGoalGoalType;
 	Integer carePlanGoalTerm;
 	Integer carePlanGoalProviderId;
 	String carePlanGoalDesc;
@@ -31,6 +29,10 @@ public class CarePlanGoalBean {
 	String carePlanGoalCreatedOn;
 	Integer carePlanGoalModifiedBy;
 	String carePlanGoalModifiedOn;
+	Integer episodeId;
+	Integer carePlanGoalFrom;
+	Integer aggregateValue;
+	Integer carePlanGoalResultStatus;
 	
 	public CarePlanGoalBean(){	
 	}
@@ -45,7 +47,7 @@ public class CarePlanGoalBean {
 			String carePlanGoalCodeOperator, String carePlanGoalValue,
 			String carePlanGoalUnit, Integer carePlanGoalStatus,
 			Date carePlanGoalTargetDate, Date carePlanGoalNextReviewDate,
-			String carePlanGoalNotes,Integer carePlanGoalProgress ) {
+			String carePlanGoalNotes,Integer carePlanGoalFrom,Integer carePlanGoalProgress,Integer carePlanGoalResultStatus,Integer episodeId) {
 		
 		super();
 		
@@ -75,7 +77,10 @@ public class CarePlanGoalBean {
 		else
 			this.carePlanGoalNextReviewDate = "";	
 		this.carePlanGoalNotes = carePlanGoalNotes;
+		this.carePlanGoalFrom = carePlanGoalFrom;
 		this.carePlanGoalProgress=carePlanGoalProgress;
+		this.carePlanGoalResultStatus=carePlanGoalResultStatus;
+		this.episodeId=episodeId;
 	}
 
 
@@ -133,14 +138,6 @@ public class CarePlanGoalBean {
 
 	public void setCarePlanGoalType(Integer carePlanGoalType) {
 		this.carePlanGoalType = carePlanGoalType;
-	}
-
-	public Integer getCarePlanGoalGoalType() {
-		return carePlanGoalGoalType;
-	}
-
-	public void setCarePlanGoalGoalType(Integer carePlanGoalGoalType) {
-		this.carePlanGoalGoalType = carePlanGoalGoalType;
 	}
 
 	public Integer getCarePlanGoalTerm() {
@@ -278,4 +275,35 @@ public class CarePlanGoalBean {
 		this.carePlanGoalModifiedOn = carePlanGoalModifiedOn;
 	}
 	
+	public Integer getEpisodeId() {
+		return episodeId;
+	}
+
+	public void setEpisodeId(Integer episodeId) {
+		this.episodeId = episodeId;
+	}
+
+	public Integer getCarePlanGoalFrom() {
+		return carePlanGoalFrom;
+	}
+
+	public void setCarePlanGoalFrom(Integer carePlanGoalFrom) {
+		this.carePlanGoalFrom = carePlanGoalFrom;
+	}
+
+	public Integer getAggregateValue() {
+		return aggregateValue;
+	}
+
+	public void setAggregateValue(Integer aggregateValue) {
+		this.aggregateValue = aggregateValue;
+	}
+
+	public Integer getCarePlanGoalResultStatus() {
+		return carePlanGoalResultStatus;
+	}
+
+	public void setCarePlanGoalResultStatus(Integer carePlanGoalResultStatus) {
+		this.carePlanGoalResultStatus = carePlanGoalResultStatus;
+	}
 }

@@ -22,6 +22,8 @@ public class CarePlanConcernBean {
 	String concernCreatedOn;
 	Integer concernModifiedBy;
 	String concernModifiedOn;
+	Integer episodeId;
+	Integer concernFrom;
 	
 	public Integer getConcernId() {
 		return concernId;
@@ -142,5 +144,17 @@ public class CarePlanConcernBean {
 	}
 	public void setConcernModifiedOn(String concernModifiedOn) {
 		this.concernModifiedOn = concernModifiedOn;
+	}
+	public Integer getEpisodeId() {
+		return episodeId;
+	}
+	public void setEpisodeId(Integer episodeId) {
+		this.episodeId = episodeId;
+	}
+	public Integer getConcernFrom() {
+		return concernFrom;
+	}
+	public void setConcernFrom(Integer concernFrom) {
+		this.concernFrom = concernFrom;
 	}
 }

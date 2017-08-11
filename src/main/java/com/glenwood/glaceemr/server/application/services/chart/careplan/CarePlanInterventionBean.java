@@ -29,6 +29,10 @@ public class CarePlanInterventionBean {
 	String interventionNotDoneCodeSystem;
 	String interventionNotes;
 	DateFormat timeFormat = new SimpleDateFormat("MM/dd/yyyy");
+	
+	public CarePlanInterventionBean(){
+		
+	}
 
 	public CarePlanInterventionBean(Integer interventionId, Integer interventionPatientId,
 			Integer interventionEncounterId, Integer interventionConcernId, Integer interventionGoalId,

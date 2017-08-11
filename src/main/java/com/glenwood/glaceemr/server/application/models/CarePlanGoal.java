@@ -43,8 +43,8 @@ public class CarePlanGoal {
 	@Column(name="careplan_goal_priority")
 	private Integer carePlanGoalPriority;
 	
-	@Column(name="careplan_goal_goal_type")
-	private Integer carePlanGoalGoalType;
+	@Column(name="careplan_goal_from")
+	private Integer carePlanGoalFrom;
 	
 	@Column(name="careplan_goal_term")
 	private Integer carePlanGoalTerm;
@@ -112,8 +112,14 @@ public class CarePlanGoal {
 	@JoinColumn(name = "careplan_goal_concern_id", referencedColumnName = "careplan_concern_id", insertable = false, updatable = false)
 	private CarePlanConcern carePlanConcern;
 	
+	@Column(name="careplan_goal_episodeId")
+	private Integer careplanGoalEpisodeId;
+	
 	@OneToMany(mappedBy="carePlanGoal")
 	List<CarePlanOutcome> carePlanOutcome;
+	
+	@Column(name="careplan_goal_result_status")
+	private Integer carePlanGoalResultStatus;
 	
 	public Integer getCarePlanGoalId() {
 		return carePlanGoalId;
@@ -163,12 +169,12 @@ public class CarePlanGoal {
 		this.carePlanGoalPriority = carePlanGoalPriority;
 	}
 
-	public Integer getCarePlanGoalGoalType() {
-		return carePlanGoalGoalType;
+	public Integer getCarePlanGoalFrom() {
+		return carePlanGoalFrom;
 	}
 
-	public void setCarePlanGoalGoalType(Integer carePlanGoalGoalType) {
-		this.carePlanGoalGoalType = carePlanGoalGoalType;
+	public void setCarePlanGoalFrom(Integer carePlanGoalFrom) {
+		this.carePlanGoalFrom = carePlanGoalFrom;
 	}
 
 	public Integer getCarePlanGoalTerm() {
@@ -321,5 +327,21 @@ public class CarePlanGoal {
 
 	public void setCarePlanGoalModifiedOn(Timestamp carePlanGoalModifiedOn) {
 		this.carePlanGoalModifiedOn = carePlanGoalModifiedOn;
+	}
+	
+	public Integer getCareplanGoalEpisodeId() {
+		return careplanGoalEpisodeId;
+	}
+
+	public void setCareplanGoalEpisodeId(Integer careplanGoalEpisodeId) {
+		this.careplanGoalEpisodeId = careplanGoalEpisodeId;
+	}
+
+	public Integer getCareplanGoalResultStatus() {
+		return carePlanGoalResultStatus;
+	}
+
+	public void setCareplanGoalResultStatus(Integer carePlanGoalResultStatus) {
+		this.carePlanGoalResultStatus = carePlanGoalResultStatus;
 	}
 }

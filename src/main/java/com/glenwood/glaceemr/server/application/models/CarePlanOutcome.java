@@ -135,9 +135,6 @@ public class CarePlanOutcome {
 	public void setCarePlanOutcomeProgress(Integer carePlanOutcomeProgress) {
 		this.carePlanOutcomeProgress = carePlanOutcomeProgress;
 	}
-
-	
-	
 	
 	public String getCarePlanOutcomeCode() {
 		return carePlanOutcomeCode;

@@ -84,7 +84,13 @@ public class CarePlanConcern {
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="careplan_concern_modified_on")
 	private Timestamp carePlanConcernModifiedOn;
-
+	
+	@Column(name="careplan_concern_from")
+	private Integer carePlanConcernFrom;
+	
+	@Column(name="careplan_concern_episodeId")
+	private Integer careplanConcernEpisodeId;
+	
 	@OneToMany(mappedBy="carePlanConcern")
 	List<CarePlanGoal> carePlanGoal;
 	
@@ -250,6 +256,21 @@ public class CarePlanConcern {
 	public void setCarePlanConcernModifiedOn(Timestamp carePlanConcernModifiedOn) {
 		this.carePlanConcernModifiedOn = carePlanConcernModifiedOn;
 	}
+
+	public Integer getCareplanConcernEpisodeId() {
+		return careplanConcernEpisodeId;
+	}
+
+	public void setCareplanConcernEpisodeId(Integer careplanConcernEpisodeId) {
+		this.careplanConcernEpisodeId = careplanConcernEpisodeId;
+	}
+
+	public Integer getCarePlanConcernFrom() {
+		return carePlanConcernFrom;
+	}
+
+	public void setCarePlanConcernFrom(Integer carePlanConcernFrom) {
+		this.carePlanConcernFrom = carePlanConcernFrom;
+	}
 	
 }
-
