@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.WebApplicationContext;
 
+import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.services.portal.portalMedicalSummary.PortalMedicalSummaryService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
@@ -20,6 +24,8 @@ public class PortalMedicalSummaryController {
 	@Autowired
 	PortalMedicalSummaryService portalMedicalSummaryService;
 	
+	@Autowired
+	WebApplicationContext context;
 	
 	/**
 	 * @param username 		: username of a patient
@@ -260,6 +266,99 @@ public class PortalMedicalSummaryController {
 			responseBean.setData("Error in retrieving patient medical summary details!");
 			return responseBean;
 		}
+	}
+	
+	/**
+	 * @param patientId 		: Required patient's id 
+	 * @param chartId 		: Required patient's chart id 
+	 * @return List of Patient Medication .
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/PatientMediationList", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getPatientMediationList(@RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+			@RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getPatientMedication(patientId, chartId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving Medication  list!");
+			return responseBean;
+		}
+	}
+	
+	
+	@RequestMapping(value = "/Vital/VitalListByPatient", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getPatientVitalList(@RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+			@RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
+
+		EMRResponseBean responseBean=new EMRResponseBean();
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getPatientVital(patientId, chartId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving vital  list!");
+			return responseBean;
+		}
+	}
+	
+	@RequestMapping(value = "/PatientAllergiesByPatientIdNewMedicalSummary", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getPatientAllergiesByPatientIdForNewMedicalSummary(@RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+			@RequestParam(value="pageOffset", required=false, defaultValue="5") int pageOffset,
+			@RequestParam(value="pageIndex", required=false, defaultValue="0") int pageIndex) throws Exception{
+
+		EMRResponseBean responseBean=context.getBean(EMRResponseBean.class);
+		
+		List<PatientAllergies> patientAllergiesList=portalMedicalSummaryService.getPatientAllergiesByPatientIdNew(patientId, pageOffset, pageIndex);
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(patientAllergiesList.toArray());
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving patient allergies!");
+			return responseBean;
+		}
+	}
+	
+	
+	@RequestMapping(value = "/log", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean putlog(@RequestParam(value="patientId", required=false, defaultValue="-1") int patientId,
+			@RequestParam(value="chartId", required=false, defaultValue="") int chartId) throws Exception{
+		EMRResponseBean responseBean=new EMRResponseBean();
+		portalMedicalSummaryService.putLog(patientId, chartId);
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		
+		return responseBean;
+		
 	}
 	
 }

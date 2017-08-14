@@ -22,14 +22,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.CurrentMedication;
+import com.glenwood.glaceemr.server.application.models.CurrentMedication_;
+import com.glenwood.glaceemr.server.application.models.DirectEmailLog;
+import com.glenwood.glaceemr.server.application.models.DirectEmailLog_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
+import com.glenwood.glaceemr.server.application.models.PatientAllergies_;
 import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
@@ -43,10 +49,19 @@ import com.glenwood.glaceemr.server.application.models.PatientPortalFeatureConfi
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PlanInstruction;
 import com.glenwood.glaceemr.server.application.models.PortalMedicalSummaryBean;
+import com.glenwood.glaceemr.server.application.models.PortalMedicationBean;
 import com.glenwood.glaceemr.server.application.models.PortalPlanOfCareBean;
+import com.glenwood.glaceemr.server.application.models.PortalVitalsBean;
+import com.glenwood.glaceemr.server.application.models.Prescription;
+import com.glenwood.glaceemr.server.application.models.Prescription_;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
+import com.glenwood.glaceemr.server.application.models.UnitsOfMeasure;
+import com.glenwood.glaceemr.server.application.models.UnitsOfMeasure_;
+import com.glenwood.glaceemr.server.application.models.VitalsParameter;
+import com.glenwood.glaceemr.server.application.models.VitalsParameter_;
 import com.glenwood.glaceemr.server.application.repositories.BillinglookupRepository;
 import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
+import com.glenwood.glaceemr.server.application.repositories.DirectEmailLogRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientPortalUserRepository;
@@ -66,7 +81,9 @@ import com.glenwood.glaceemr.server.application.services.portal.portalSettings.P
 import com.glenwood.glaceemr.server.application.specifications.ChartSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PatientRegistrationSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalMedicalSummarySpecification;
+import com.glenwood.glaceemr.server.utils.HUtil;
 import com.glenwood.glaceemr.server.utils.SessionMap;
+
 
 
 @Service
@@ -129,6 +146,10 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 	@Autowired
 	HttpServletRequest request;
 
+	@Autowired
+	DirectEmailLogRepository directEmailLogRepository;
+	
+	final static Logger logger = Logger.getLogger(PortalMedicalSummaryServiceImpl.class);
 
 	@Override
 	public PortalConfigurationBean getSessionMap(String username) throws JsonProcessingException {
@@ -413,6 +434,163 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 	public static Pageable createPortalPlanOfCareByDescDate(int pageIndex, int offset) {
 
 		return new PageRequest(pageIndex, offset, Sort.Direction.DESC,"encounterDate");
+	}
+	
+	
+	@Override
+	public List<PortalMedicationBean> getPatientMedication(int patientId, int chartId) 
+	{
+		try
+		{
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<PortalMedicationBean> criteriaQuery = builder.createQuery(PortalMedicationBean.class);
+			Root<CurrentMedication> root = criteriaQuery.from(CurrentMedication.class);
+			criteriaQuery.select(builder.construct(PortalMedicationBean.class, root.get(CurrentMedication_.currentMedicationRxName),
+					root.get(CurrentMedication_.currentMedicationOrderOn),
+					root.get(CurrentMedication_.currentMedicationIsActive)));
+			criteriaQuery.where(builder.and(builder.equal(root.get(CurrentMedication_.currentMedicationPatientId), patientId),builder.equal(root.get(CurrentMedication_.currentMedicationIsActive), true))).distinct(true);
+			List<PortalMedicationBean> medicationSummary=em.createQuery(criteriaQuery).getResultList();
+			CriteriaQuery<PortalMedicationBean> criteriaQuery1 = builder.createQuery(PortalMedicationBean.class);
+			Root<Prescription> root1 = criteriaQuery1.from(Prescription.class);
+			criteriaQuery1.select(builder.construct(PortalMedicationBean.class, root1.get(Prescription_.rxname),
+					root1.get(Prescription_.docPrescOrderedDate),
+					root1.get(Prescription_.docPrescIsActive)));
+			criteriaQuery1.where(builder.and(builder.equal(root1.get(Prescription_.docPrescPatientId), patientId),builder.equal(root1.get(Prescription_.docPrescIsActive), true))).distinct(true);
+			List<PortalMedicationBean> medicationSummary1=em.createQuery(criteriaQuery1).getResultList();
+			for(int i=0;i<medicationSummary1.size();i++){
+				medicationSummary.add(medicationSummary1.get(i));
+			}
+			logger.info("Medication Summary result size: "+medicationSummary.size());
+			return medicationSummary;
+		}
+		catch(Exception exception)
+		{
+			logger.error("Medication Summary API failed");
+			exception.printStackTrace();
+			return null;
+		}
+		finally
+		{
+			em.close();
+		}
+	}
+
+
+
+	
+
+
+	@Override
+	public List<PortalVitalsBean> getPatientVital(int patientId, int chartId) {try
+	{
+		
+		logger.error("Vitals API started");
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		List<String> gwIdList = new ArrayList<String>();
+		gwIdList.add("0000200200100038000");gwIdList.add("0000200200100107000");gwIdList.add("0000200200100227000");gwIdList.add("0000200200100075000");gwIdList.add("0000200200100076000");gwIdList.add("0000200200100022000");gwIdList.add("0000200200100023000");gwIdList.add("0000200200100023000");gwIdList.add("0000200200100039000");gwIdList.add("0000200200100024000");gwIdList.add("0000200200100025000");gwIdList.add("0000200200100044000");
+		CriteriaQuery<Integer> criteriaQuery1 = builder.createQuery(Integer.class);
+		Root<PatientClinicalElements> root1 = criteriaQuery1.from(PatientClinicalElements.class);
+		criteriaQuery1.select(builder.greatest(root1.get(PatientClinicalElements_.patientClinicalElementsEncounterid))).where(builder.and(builder.equal(root1.get(PatientClinicalElements_.patientClinicalElementsChartid),chartId)));
+		List<Integer> EncounterIdList=em.createQuery(criteriaQuery1).setMaxResults(2).getResultList();
+		int maxEncounterId = 0;
+		if(EncounterIdList.size()>0){
+			maxEncounterId=Integer.parseInt(HUtil.Nz(EncounterIdList.get(0),"0"));
+		}
+		CriteriaQuery<PortalVitalsBean> criteriaQuery = builder.createQuery(PortalVitalsBean.class);
+		Root<PatientClinicalElements> root = criteriaQuery.from(PatientClinicalElements.class);
+		Join<PatientClinicalElements,Encounter> PatientClinicalElementEncounterJoin=root.join(PatientClinicalElements_.encounter,JoinType.INNER);
+		Join<PatientClinicalElements,VitalsParameter> patientClinicalElementVitalParameter=root.join(PatientClinicalElements_.vitalsParameter,JoinType.INNER);
+		Join<VitalsParameter, UnitsOfMeasure> measureJoin=patientClinicalElementVitalParameter.join(VitalsParameter_.unitsOfMeasureTable,JoinType.INNER);
+		criteriaQuery.select(builder.construct(PortalVitalsBean.class, 
+				root.get(PatientClinicalElements_.patientClinicalElementsGwid),
+				root.get(PatientClinicalElements_.patientClinicalElementsValue),
+				PatientClinicalElementEncounterJoin.get(Encounter_.encounterDate),
+				measureJoin.get(UnitsOfMeasure_.unitsOfMeasureCode)
+				));
+		criteriaQuery.where(builder.and(builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsChartid), chartId),builder.equal(PatientClinicalElementEncounterJoin.get(Encounter_.encounterId), maxEncounterId),root.get(PatientClinicalElements_.patientClinicalElementsGwid).in(gwIdList))).distinct(true);
+		List<PortalVitalsBean> vitalList=em.createQuery(criteriaQuery).getResultList();
+		logger.info("Vital Summary result size: "+vitalList.size());
+		return vitalList;
+		
+		
+	}
+	catch(Exception exception)
+	{
+		logger.error("Vital  API failed");
+		exception.printStackTrace();
+		return null;
+	}
+	finally
+	{
+		em.close();
+	}}
+	
+	
+	@Override
+	public void putLog(int patientId, int chartId) {
+		try {
+			logger.error("Putting log");
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Integer> criteriaQuery1 = builder.createQuery(Integer.class);
+			Root<DirectEmailLog> root1 = criteriaQuery1.from(DirectEmailLog.class);
+			criteriaQuery1.select(root1.get(DirectEmailLog_.directEmailLogId));
+			criteriaQuery1.where(builder.and(builder.equal(root1.get(DirectEmailLog_.directEmailLogPatientid), patientId),builder.equal(root1.get(DirectEmailLog_.directEmailLogActionType), 1),builder.equal(root1.get(DirectEmailLog_.directEmailLogUserType), 2))).distinct(true);
+			List<Integer> logId=em.createQuery(criteriaQuery1).getResultList();
+			if(logId.size()<1){
+				CriteriaQuery<Integer> criteriaQuery = builder.createQuery(Integer.class);
+				Root<DirectEmailLog> root = criteriaQuery.from(DirectEmailLog.class);
+				criteriaQuery.select(builder.greatest(root.get(DirectEmailLog_.directEmailLogId)));
+				int id=em.createQuery(criteriaQuery).getSingleResult();
+			DirectEmailLog directEmailLog = new DirectEmailLog();
+			directEmailLog.setDirectEmailLogId(id+1);
+			directEmailLog.setDirectEmailLogActionType(1);
+			directEmailLog.setDirectEmailLogSentBy(patientId);
+			directEmailLog.setDirectEmailLogSentOn(directEmailLogRepository.findCurrentTimeStamp());
+			directEmailLog.setDirectEmailLogUserType(2);
+			directEmailLogRepository.saveAndFlush(directEmailLog);
+			
+			}
+			logger.error("entered data in log");
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Error While entered data in log");
+		}
+	}
+
+
+
+	@Override
+	public List<PatientAllergies> getPatientAllergiesByPatientIdNew(
+			int patientId, int pageOffset, int pageIndex)
+			throws JsonProcessingException {
+		try
+		{
+			Chart chart=chartRepository.findOne(ChartSpecification.getChartId(patientId));	
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<PatientAllergies> criteriaQuery = builder.createQuery(PatientAllergies.class);
+			Root<PatientAllergies> root = criteriaQuery.from(PatientAllergies.class);
+			criteriaQuery.select(builder.construct(PatientAllergies.class, root.get(PatientAllergies_. patAllergAllergicTo),
+					root.get(PatientAllergies_. patAllergReactionTo),
+					root.get(PatientAllergies_. patAllergOnsetDate),
+					root.get(PatientAllergies_. patAllergCreatedOn),
+					root.get(PatientAllergies_. patAllergModifiedOn),
+					root.get(PatientAllergies_. patAllergDrugCategory),
+					root.get(PatientAllergies_. patAllergSeverity)));
+			criteriaQuery.where(builder.and(builder.equal(root.get(PatientAllergies_.patAllergStatus), 1),builder.notEqual(root.get(PatientAllergies_.patAllergTypeId),"-1"),builder.notEqual(root.get(PatientAllergies_.patAllergTypeId),"-2"),builder.equal(root.get(PatientAllergies_.patAllergChartId), chart.getChartId()))).distinct(true);
+			List<PatientAllergies> patientAllergiesList=em.createQuery(criteriaQuery).getResultList();
+			logger.info("Allergies  result size: "+patientAllergiesList.size());
+			return patientAllergiesList;
+		}
+		catch(Exception exception)
+		{
+			logger.error("Allergies Summary API failed");
+			exception.printStackTrace();
+			return null;
+		}
+		finally
+		{
+			em.close();
+		}
 	}
 
 }

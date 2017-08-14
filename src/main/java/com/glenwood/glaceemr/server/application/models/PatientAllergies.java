@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -367,5 +368,25 @@ public class PatientAllergies {
 	public void setAllergiesType(AllergiesType allergiesType) {
 		this.allergiesType = allergiesType;
 	}
+	
+	public PatientAllergies(String patAllergAllergicTo,
+			String patAllergReactionTo, String patAllergOnsetDate,
+			Date patAllergCreatedOn, Date patAllergModifiedOn,
+			String patAllergDrugCategory, Integer patAllergSeverity) {
+		super();
+		this.patAllergAllergicTo = patAllergAllergicTo;
+		this.patAllergReactionTo = patAllergReactionTo;
+		this.patAllergOnsetDate = patAllergOnsetDate;
+		this.patAllergCreatedOn =  new Timestamp(patAllergCreatedOn.getTime());
+		this.patAllergModifiedOn = new Timestamp(patAllergModifiedOn.getTime());
+		this.patAllergDrugCategory = patAllergDrugCategory;
+		this.patAllergSeverity = patAllergSeverity;
+	}
+
+	public PatientAllergies() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
 	
 }

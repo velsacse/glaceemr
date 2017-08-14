@@ -10,7 +10,9 @@ import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PortalMedicalSummaryBean;
+import com.glenwood.glaceemr.server.application.models.PortalMedicationBean;
 import com.glenwood.glaceemr.server.application.models.PortalPlanOfCareBean;
+import com.glenwood.glaceemr.server.application.models.PortalVitalsBean;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 
 public interface PortalMedicalSummaryService {
@@ -81,5 +83,14 @@ public interface PortalMedicalSummaryService {
 	public PortalMedicalSummaryBean getPortalMedicalSummaryDetails(int patientId, int chartId);
 
 	
+	public List<PortalMedicationBean> getPatientMedication(int patientId, int chartId);
+	
+	public List<PortalVitalsBean> getPatientVital(int patientId, int chartId);
+	
+	
+	public List<PatientAllergies> getPatientAllergiesByPatientIdNew(int patientId, int pageOffset, int pageIndex) throws JsonProcessingException;
+
+	
+	public void putLog(int patientId, int chartId);
 	
 }
