@@ -14,6 +14,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileDetails_;
+import com.glenwood.glaceemr.server.application.models.LabDescription;
+import com.glenwood.glaceemr.server.application.models.LabDescription_;
 import com.glenwood.glaceemr.server.application.models.ChartStatus;
 import com.glenwood.glaceemr.server.application.models.ChartStatus_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
@@ -60,12 +62,12 @@ public class PortalLabResultsSpecification {
 					
 					root.fetch(LabEntries_.encounter, JoinType.LEFT);
 				}
-
+                Join<LabEntries, LabDescription> joinLab = root.join(LabEntries_.labDescriptionTable,JoinType.INNER);
 				Predicate statusPredicate=cb.not(root.get(LabEntries_.labEntriesTestStatus).in(1,2,5,7,8));
-				Predicate groupPredicate=cb.not(root.get(LabEntries_.labEntriesGroupid).in(5,36));
+				Predicate typePredicate=cb.notEqual(joinLab.get(LabDescription_.labDescriptionTestcategoryType),3);
 				Predicate chartPredicate=cb.equal(root.get(LabEntries_.labEntriesChartid), chartId);
 
-				Predicate labResultsPredicate = cq.where(statusPredicate, groupPredicate, chartPredicate).getRestriction();
+				Predicate labResultsPredicate = cq.where(statusPredicate, typePredicate, chartPredicate).getRestriction();
 				return labResultsPredicate;
 			}	
 		};
