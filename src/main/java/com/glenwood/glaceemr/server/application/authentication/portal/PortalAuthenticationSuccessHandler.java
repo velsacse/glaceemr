@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -67,7 +68,10 @@ public class PortalAuthenticationSuccessHandler implements AuthenticationSuccess
 			sessionMap.setGlaceTomcatUrl(portal_tomcat_url);
 			sessionMap.setGlaceTomcatContext(portal_tomcat_context);
 			sessionMap.setGlaceSpringContext(portal_spring_context);
-			
+            System.out.println(":::::::::::::::: PortalAuthenticationSuccessHandler ::::::::GLACE EMR BACKEND:::::::");
+            
+            HttpSession session = request.getSession();
+            session.setMaxInactiveInterval(45*60);
 			PrintWriter out=response.getWriter();
 			response.addCookie(new Cookie("JSESSIONID", request.getSession().getId()));
 			response.addHeader("PORTALSESSIONID", request.getSession().getId());
