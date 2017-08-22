@@ -481,7 +481,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		HashMap<String, List<Object>> diagnosisCodeList;
 		
 		EMeasureUtils utils = new EMeasureUtils();
-		List<EMeasure> emeasure = utils.getMeasureBeanDetails(measureId, sharedPath);
+		List<EMeasure> emeasure = utils.getMeasureBeanDetails(measureId, sharedPath,"-1");
 		CQMSpecification specification = emeasure.get(0).getSpecification();
 		HashMap<String, Category> qdmCatagory = specification.getQdmCategory();
 		

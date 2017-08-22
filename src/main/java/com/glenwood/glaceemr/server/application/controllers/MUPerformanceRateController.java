@@ -243,8 +243,15 @@ public class MUPerformanceRateController {
 				for(int i=0;i<measureIds.length;i++){
 					cqmMeasures.add(Integer.parseInt(measureIds[i]));
 				}
-
-				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString()));
+				HashMap<String, HashMap<String, String>> codeListForQDM;
+				try{
+				codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString(),accountId));
+				}
+				catch(Exception e)
+				{
+					throw e;
+				}
+				
 				finalResponse.setMeasureInfo(utils.getMeasureInfo());
 				requestObj = measureService.getQDMRequestObject(accountId,isIndividual,patientID, providerId, codeListForQDM, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 

@@ -61,7 +61,7 @@ public class EMeasureUtils {
 		
 		for(int index = 0;index < emeasure.size();index++){
 			
-			measureInfo.put(""+emeasure.get(index).getId(), emeasure.get(index).getTitle());
+			measureInfo.put(""+emeasure.get(index).getId(), emeasure.get(index).getTitle()+"&&&"+emeasure.get(index).isInverseMeasure());
 			
 			specification = emeasure.get(index).getSpecification();
 			qdmCatagory=specification.getQdmCategory();
@@ -170,45 +170,18 @@ public class EMeasureUtils {
 		
 	}
 	
-	public List<EMeasure> getMeasureBeanDetails(String measureIds, String sharedPath) throws Exception{
+	public List<EMeasure> getMeasureBeanDetails(String measureIds, String sharedPath,String accountId) throws Exception{
 
 		List<EMeasure> measureInfo = new ArrayList<EMeasure>();
 		Writer writer = new StringWriter();
 		PrintWriter printWriter = new PrintWriter(writer);
 
-		try{
-
-			for(int i=0;i<measureIds.split(",").length;i++){
-
-				int measureId = Integer.parseInt(measureIds.split(",")[i]);
-
-				measureInfo.add(getMeasureInfo(measureId, sharedPath));
-
-			}
-
-		}catch(Exception e){
+		for(int i=0;i<measureIds.split(",").length;i++){
 			
-			try {
+			int measureId = Integer.parseInt(measureIds.split(",")[i]);
 
-				e.printStackTrace(printWriter);
+			measureInfo.add(getMeasureInfo(measureId, sharedPath,accountId));
 
-				String responseMsg = buildMailContentFormat("glace", -1,"Error occurred while getting codelist",writer.toString());
-
-				GlaceMailer.sendFailureReport(responseMsg,"glace",GlaceMailer.Configure.MU);
-
-			} catch (Exception e1) {
-
-				e1.printStackTrace();
-
-			}finally{
-
-				printWriter.flush();
-				printWriter.close();
-
-				e.printStackTrace();
-
-			}
-			
 		}
 
 		return measureInfo;
@@ -228,7 +201,7 @@ public class EMeasureUtils {
 		}
 		
 		mailContent += "<tr><td><b>Error Message: </b></td><td>"+responseString+"</td></tr>";
-		
+		if(!exceptionTrace.equals("-1"))
 		mailContent += "<tr><td><b>Exception Trace: </b></td><td>"+exceptionTrace+"</td></tr>";
 		
 		mailContent += "</table></body></html>";
@@ -237,98 +210,102 @@ public class EMeasureUtils {
 		
 	}
 	
-	private void putMeasureInfoDetails(int measureId, String sharedPath) throws Exception{
+	private void putMeasureInfoDetails(int measureId, String sharedPath,String accountId) throws Exception{
 		
-		String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/eCQMServices/getECQMInfoById?ids="+measureId;
+		String result="";
+		try {
+			String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/eCQMServices/getECQMInfoById?ids="+measureId;
+			
+			result = restTemplate.getForObject(apiUrl, String.class);
+		} catch (Exception e) {
+			GlaceMailer.sendFailureReport("Error Message: Unable to bring EMeasure Info from hub",accountId,GlaceMailer.Configure.MU);
+			throw e;
+		}
 		
-	    String result = restTemplate.getForObject(apiUrl, String.class);
-		
-	    writeStringToJsonFile(result, measureId, sharedPath);
+	    writeStringToJsonFile(result, measureId, sharedPath,accountId);
 	    
 	}
 	
 	@SuppressWarnings("unchecked")
-	private EMeasure getMeasureInfo(int measureId, String sharedPath){
+	private EMeasure getMeasureInfo(int measureId, String sharedPath,String accountId)throws Exception{
 		
 		EMeasure measureInfo = new EMeasure();
+					
+		String filename = sharedPath+File.separator+"ECQM"+File.separator+measureId+".json";
 		
-		try{
-			
-			String filename = sharedPath+File.separator+"ECQM"+File.separator+measureId+".json";
-			
-			File jsonFile = new File(filename);
-			
-			if(jsonFile.exists() && jsonFile.isFile()){
-				
-				long diff = new Date().getTime() - jsonFile.lastModified();
+		File jsonFile = new File(filename);
+		
+		if(jsonFile.exists() && jsonFile.isFile()){
+			long diff = new Date().getTime() - jsonFile.lastModified();
+			if (diff > (long) 7 * 24 * 60 * 60 * 1000) {
+				jsonFile.delete();
 
-				if (diff > (long) 7 * 24 * 60 * 60 * 1000) {
-					
-					jsonFile.delete();
-					
-					putMeasureInfoDetails(measureId, sharedPath);
-					
-					getMeasureInfo(measureId, sharedPath);
-					
-				}else{
+				putMeasureInfoDetails(measureId, sharedPath,accountId);
 				
-					mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-					
-					List<EMeasure> emeasureInfo = (List<EMeasure>) mapper.readValue(jsonFile, mapper.getTypeFactory().constructCollectionType(List.class, EMeasure.class));
-				
-					measureInfo = emeasureInfo.get(0);
-				
-				}
+				getMeasureInfo(measureId, sharedPath,accountId);
 				
 			}else{
+
+				mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 				
-				putMeasureInfoDetails(measureId, sharedPath);
-				
-				getMeasureInfo(measureId, sharedPath);
-				
+				List<EMeasure> emeasureInfo = (List<EMeasure>) mapper.readValue(jsonFile, mapper.getTypeFactory().constructCollectionType(List.class, EMeasure.class));
+			
+				measureInfo = emeasureInfo.get(0);
+			
 			}
 			
-		}catch(Exception e){
-			e.printStackTrace();
+		}else{
+
+			putMeasureInfoDetails(measureId, sharedPath,accountId);
+			
+			getMeasureInfo(measureId, sharedPath,accountId);
+			
 		}
-		
+			
 		return measureInfo;
 		
 	}
 	
 	@SuppressWarnings("resource")
-	private void writeStringToJsonFile(String jsonContent, int measureId, String sharedPath){
+	private void writeStringToJsonFile(String jsonContent, int measureId, String sharedPath,String accountId) throws Exception{
 		
 		String sharedFolderPath = sharedPath+File.separator+"ECQM";
 		
-		String filename = sharedFolderPath+File.separator+measureId+".json";
+		File ECQMfolder = new File(sharedFolderPath);
 		
-		File f = new File(filename);
-		
-		try{
+		if(ECQMfolder.canRead() && ECQMfolder.canExecute())
+		{
+			String filename = sharedFolderPath+File.separator+measureId+".json";
 			
-			if(!f.exists()){
-
-				if(!f.getParentFile().exists()){
-					f.getParentFile().mkdirs();
+			File f = new File(filename);
+			
+			try{
+				
+				if(!f.exists()){
+	
+					if(!f.getParentFile().exists()){
+						f.getParentFile().mkdirs();
+					}
+					
+					f.createNewFile();
+					
 				}
 				
-				f.createNewFile();
+				FileWriter resultFile = new FileWriter(f);
 				
+				resultFile.write(jsonContent);
+				
+				resultFile.flush();
+				
+				
+			}catch(Exception e){
+				throw e;
 			}
-			
-			FileWriter resultFile = new FileWriter(f);
-			
-			resultFile.write(jsonContent);
-			
-			resultFile.flush();
-			
-			
-		}catch(Exception e){
-			e.printStackTrace();
 		}
-		
-		
+		else{
+			GlaceMailer.sendFailureReport("Error Message: Unable to access shared Folder in "+accountId,accountId,GlaceMailer.Configure.MU);
+			throw new Exception("Unable to access shared Folder in "+accountId);
+		}
 	}
 	
 	public void getMeasureInfo(String data) throws Exception{

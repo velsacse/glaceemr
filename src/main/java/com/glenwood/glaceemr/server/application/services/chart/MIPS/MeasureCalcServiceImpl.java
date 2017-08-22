@@ -1763,7 +1763,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		try 
 		{
 			String sharedFolderPath = sharedFolderBean.getSharedFolderPath().get(accountId).toString();
-			List<EMeasure> emeasureObj=measureUtils.getMeasureBeanDetails(measureId,sharedFolderPath);
+			List<EMeasure> emeasureObj=measureUtils.getMeasureBeanDetails(measureId,sharedFolderPath,accountId);
 			EMeasure eMeasure=emeasureObj.get(0);
 			resultObject.setHighPriority(eMeasure.isHighPriority());
 			resultObject.setOutcome(eMeasure.getType());
@@ -2236,7 +2236,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		for(int i=0;i<ecqmPerformance.size();i++){
 			EMeasure eMeasureObj=null;
 			try {
-				eMeasures= measureUtils.getMeasureBeanDetails(ecqmPerformance.get(i).getMeasureId(), sharedPath);
+				eMeasures= measureUtils.getMeasureBeanDetails(ecqmPerformance.get(i).getMeasureId(), sharedPath,accountId);
 				eMeasureObj=eMeasures.get(0);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -2340,5 +2340,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		return index;
 		
 	}
-
+	
+	
 }

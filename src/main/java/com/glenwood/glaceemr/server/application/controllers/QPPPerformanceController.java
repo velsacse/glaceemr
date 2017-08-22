@@ -111,7 +111,6 @@ public class QPPPerformanceController {
 		Writer writer = new StringWriter();
 		PrintWriter printWriter = new PrintWriter(writer);
 		
-		try{
 			
 			Boolean isIndividual=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
 
@@ -121,7 +120,7 @@ public class QPPPerformanceController {
 			}
 
 			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
-			if(providerInfo!=null){
+			if(providerInfo.size()>0){
 
 				String[] measureIds = providerInfo.get(0).getMeasures().split(",");
 
@@ -129,7 +128,7 @@ public class QPPPerformanceController {
 					cqmMeasures.add(Integer.parseInt(measureIds[i]));
 				}
 
-				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedPath));
+				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedPath,accountId));
 				finalResponse.setMeasureInfo(utils.getMeasureInfo());
 				requestObj = measureService.getQDMRequestObject(accountId,isIndividual,patientID, userId, codeListForQDM, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 
@@ -142,12 +141,21 @@ public class QPPPerformanceController {
 				response.setData(utils.getMeasureDetails().toString());
 
 				ObjectMapper objectMapper = new ObjectMapper();
+				try{
 				String requestString = objectMapper.writeValueAsString(requestObj);
-
 				String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
-
 				responseFromCentralServer = objectMapper.readValue(responseStr, Response.class);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace(printWriter);
 
+					String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Problem with Measure validation server",writer.toString());
+					
+					GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
+					
+					
+				}
 				Map<String,MeasureStatus> measureStatus = responseFromCentralServer.getMeasureStatus();
 
 				responseFromCentralServer.setMeasureStatus(measureStatus);
@@ -173,35 +181,10 @@ public class QPPPerformanceController {
 
 			response.setData(finalResponse);
 			
+			printWriter.flush();
+			printWriter.close();
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating and validating patient QDM" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.USER_LOGIN, "patientId="+patientID, "");
 
-		}catch(Exception e){
-			
-			try {
-				
-				e.printStackTrace(printWriter);
-
-				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, patientID,"Error occurred while getting ECQM status",writer.toString());
-				
-				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
-				
-			} catch (Exception e1) {
-				
-				e1.printStackTrace();
-				
-			}finally{
-
-				printWriter.flush();
-				printWriter.close();
-			
-				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.EXCEPTION,"Error occurred in generating and validating patient QDM" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.USER_LOGIN, "patientId="+patientID, "");
-				
-				e.printStackTrace();
-				
-			}
-			
-		}
-		
 		return response;
 		
 	}
@@ -238,7 +221,7 @@ public class QPPPerformanceController {
 
 			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 
-			if(providerInfo!=null){
+			if(providerInfo.size()>0){
 
 				epMeasureStatus = measureService.getEPMeasuresResponseObject(accountId,isGroup,patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear(), isTrans);
 				
