@@ -230,7 +230,9 @@ public class MUPerformanceRateController {
 				Date startDate = providerInfo.get(0).getMacraProviderConfigurationReportingStart();
 				Date EndDate = providerInfo.get(0).getMacraProviderConfigurationReportingEnd();
 				
-				pqrsreportservice.getPatientServices(providerId, patientID, startDate, EndDate, accountId);
+				int flag=0;
+				
+				pqrsreportservice.getPatientServices(providerId, patientID, startDate, EndDate, accountId,flag);
 				
 				measureService.getEPMeasuresResponseObject(accountId, isIndividual, patientID, userIdForEntries, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear(), false);
 				

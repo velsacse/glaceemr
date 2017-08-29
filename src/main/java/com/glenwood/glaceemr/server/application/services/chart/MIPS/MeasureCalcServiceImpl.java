@@ -2089,9 +2089,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				else if(indicator == 2)
 					performanceind = "Performance Exclusion";
 				else if(indicator == 3)
-					performanceind = "Denominator Exception";
-				else if(indicator == 4)
 					performanceind = "Denominator Exclusion";
+				else if(indicator == 4)
+					performanceind = "Denominator Exception";
 				else 
 					performanceind = "Performance not Met";
 				if(!measureMap.containsKey(measureid)){

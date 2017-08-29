@@ -70,11 +70,13 @@ public class GlaceRulesController {
 
 	@RequestMapping(value = "/getPQRSMeasure", method = RequestMethod.GET)
     @ResponseBody
-	public	EMRResponseBean getPQRSMeasure(@RequestParam(value="providerId", required=true, defaultValue="-1") Integer providerId) throws Exception{
-		String measure=glaceRulesService.getMeasures(providerId);
+    public	EMRResponseBean getPQRSMeasure(@RequestParam(value="providerId", required=true, defaultValue="-1") Integer providerId,
+			@RequestParam(value="patientId", required=true) Integer patientId,
+			@RequestParam(value="accountId", required=true) String accountId) throws Exception{
+		String measure=glaceRulesService.getMeasures(providerId,patientId,accountId);
 		EMRResponseBean result=new EMRResponseBean();
 		result.setData(measure);
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PQRS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "Collected Configured Measures",providerId, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PQRS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "Collected Configured Measures", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return result;
 		
 	}

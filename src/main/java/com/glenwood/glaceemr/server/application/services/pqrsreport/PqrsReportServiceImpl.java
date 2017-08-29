@@ -14,7 +14,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -31,17 +30,19 @@ import com.glenwood.glaceemr.server.application.Bean.MacraProviderQDM;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.HttpConnectionUtils;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Patient;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
-import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
 import com.glenwood.glaceemr.server.application.Bean.pqrs.Claim;
 import com.glenwood.glaceemr.server.application.Bean.pqrs.MeasureStatus;
 import com.glenwood.glaceemr.server.application.Bean.pqrs.PQRSResponse;
-import com.glenwood.glaceemr.server.application.Bean.pqrs.ReportResponse;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.PlaceOfService;
 import com.glenwood.glaceemr.server.application.models.PqrsPatientEntries;
 import com.glenwood.glaceemr.server.application.models.PqrsPatientEntries_;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEntries;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail_;
+import com.glenwood.glaceemr.server.application.models.StaffPinNumberDetails;
+import com.glenwood.glaceemr.server.application.models.StaffPinNumberDetails_;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PqrsMeasureRepository;
 import com.glenwood.glaceemr.server.application.repositories.PqrsPatientEntriesRepository;
@@ -88,15 +89,12 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 
 	@Autowired
 	ProblemListRepository diagnosisRepo;
-	
+
 	@Autowired
 	MeasureCalculationService measureService;
-	
-
 
 	@Override
-	public void getPatientServices(int providerId, int patientId,Date startDate,Date endDate ,String accountID)throws Exception{
-
+	public void getPatientServices(int providerId, int patientId,Date startDate,Date endDate ,String accountID, int flag)throws Exception{
 		Patient patientrequestObj = new Patient();
 		List<Claim>  claimList = new ArrayList<Claim>();
 		List<ServiceDetail> serviceBean = new ArrayList<ServiceDetail>();
@@ -110,7 +108,6 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 		List<String> dxcodes = new ArrayList<String>();
 		List<String> modifiers = new ArrayList<String>();
 
-		List<com.glenwood.glaceemr.server.application.Bean.pqrs.Service> service = new ArrayList<com.glenwood.glaceemr.server.application.Bean.pqrs.Service>();
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<ServiceDetail> cquery = builder.createQuery(ServiceDetail.class);
@@ -129,13 +126,11 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 		cquery.orderBy(builder.desc(roottable.get(ServiceDetail_.serviceDetailDos)));
 
 		serviceBean = em.createQuery(cquery).getResultList();
-		
 		if(serviceBean.size()>0){
-			
+
 			for(int i = 0;i<serviceBean.size();i++){
 				
-				service = new ArrayList<com.glenwood.glaceemr.server.application.Bean.pqrs.Service>();
-
+				List<com.glenwood.glaceemr.server.application.Bean.pqrs.Service> service = new ArrayList<com.glenwood.glaceemr.server.application.Bean.pqrs.Service>();
 				startdate = serviceBean.get(i).getServiceDetailDos();
 				enddate = serviceBean.get(i).getServiceDetailDos();
 				pos = serviceBean.get(i).getPlaceOfService().getPlaceOfServicePlaceName();
@@ -146,10 +141,10 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 				dx4 = HUtil.Nz(serviceBean.get(i).getServiceDetailDx4(),"");
 
 				dxcodes = new ArrayList<String>();
-				if(dx1 != null && !dx1.equals("")){		dxcodes.add(dx1);}
-				if(dx2 != null && !dx2.equals("")){		dxcodes.add(dx2);}
-				if(dx3 != null && !dx3.equals("")){		dxcodes.add(dx3);}
-				if(dx4 != null && !dx4.equals("")){		dxcodes.add(dx4);}
+				if(dx1!=null && !dx1.equals("")){		dxcodes.add(dx1);}
+				if(dx2!=null && !dx2.equals("")){		dxcodes.add(dx2);}
+				if(dx3!=null && !dx3.equals("")){		dxcodes.add(dx3);}
+				if(dx4!=null && !dx4.equals("")){		dxcodes.add(dx4);}
 
 				mod1 = serviceBean.get(i).getServiceDetailModifier1();
 				mod2 = serviceBean.get(i).getServiceDetailModifier2();
@@ -157,30 +152,25 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 				mod4 = serviceBean.get(i).getServiceDetailModifier4();
 
 				modifiers = new ArrayList<String>();
-				if(mod1 != null && !mod1.equals("")){		modifiers.add(mod1);}
-				if(mod2 != null && !mod2.equals("")){		modifiers.add(mod2);}
-				if(mod3 != null && !mod3.equals("")){		modifiers.add(mod3);}
-				if(mod4 != null && !mod4.equals("")){		modifiers.add(mod4);}
-
+				if(mod1!=null && !mod1.equals("")){		modifiers.add(mod1);}
+				if(mod2!=null && !mod2.equals("")){		modifiers.add(mod2);}
+				if(mod3!=null && !mod3.equals("")){		modifiers.add(mod3);}
+				if(mod4!=null && !mod4.equals("")){		modifiers.add(mod4);}
+				//System.out.println("cpt,>>>>>"+cpt+">>>modifiers,>>>>"+modifiers+"dxcode>>>>"+dxcodes);
 				com.glenwood.glaceemr.server.application.Bean.pqrs.Service serviceBeannew = new com.glenwood.glaceemr.server.application.Bean.pqrs.Service(cpt,modifiers,dxcodes);
-				
-				service.add(serviceBeannew);
-				
-				claimsingleBean = new Claim(startdate,enddate,providerId,pos,service);
-				
-				claimList.add(claimsingleBean);
-				
-			}
 
+				service.add(serviceBeannew);
+				claimsingleBean = new Claim(startdate,enddate,providerId,pos,service);
+				claimList.add(claimsingleBean);
+			}
 		}
 
 		ExportQDM qdmData = new ExportQDM();
-		EMeasureUtils utils = new EMeasureUtils();
 		List<Integer> pqrsMeasures = new ArrayList<Integer>();	
 		Request requestObj = new Request();
 		PQRSResponse response = new PQRSResponse();
 
-		String hub_url = measureService.getMeasureValidationServer()+"/glacecds/ECQMServices/validateRegistryReport";
+		String hub_url = "http://test.glaceemr.com/glacecds/ECQMServices/validateRegistryReport";
 
 		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 
@@ -191,7 +181,6 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 			for(int i=0;i<measureIds.length;i++){
 				pqrsMeasures.add(Integer.parseInt(measureIds[i]));
 			}
-			String data = "";
 
 			requestObj.setAccountId(accountID);
 			requestObj.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
@@ -203,7 +192,9 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 			requestObj.setPatient(patientrequestObj);
 			ObjectMapper objectMapper = new ObjectMapper();
 			String requestString = objectMapper.writeValueAsString(requestObj);
+			System.out.println("requestString>>>>>>>>>>>>"+requestString);
 			String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
+			System.out.println("responseStr>>>>>>>>>>>>"+responseStr);
 			response = objectMapper.readValue(responseStr, PQRSResponse.class);
 			response.getAccountId();
 			response.getMeasureStatus();
@@ -213,98 +204,89 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 			TimeZone.setDefault(TimeZone.getTimeZone("EDT"));
 			Date dos = new Date();
 			String measureId = "";
-			int performanceIndicator = -1;
 			String reporting_year = "";
 			int ptnid = -1;
 
-			Map<String,MeasureStatus> measureStatus = new HashMap<String, MeasureStatus>();
 
-			for(int i=0;i<response.getMeasureStatus().size();i++){
-				date = response.getMeasureStatus().keySet();
-				
+
+			Map<String,MeasureStatus> measureStatus = new HashMap<String, MeasureStatus>();
+			date = response.getMeasureStatus().keySet();
+			//for(int i=0;i<response.getMeasureStatus().size();i++){
+			if(response.getMeasureStatus().size()>0){
 				for(Date Key : date){
-					
 					dos = response.getMeasureStatus().get(Key).getVisitDate();
+					System.out.println("dos>>>>>>>"+dos);
 					measureStatus = response.getMeasureStatus().get(Key).getMeasureStatus();
-					
-					for(int j=0;j<measureStatus.size();j++){
+					if(measureStatus.size()>0){
 						Set<String> measureidKey = measureStatus.keySet();
 						for(String measureid : measureidKey){
 							measureId = measureStatus.get(measureid).getMeasureId()+"";
-						}
-					}
-					SimpleDateFormat parseFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
-					Date dateModifedFormat = parseFormat.parse(dos.toString());
-					SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
-					String dos1 = format.format(dateModifedFormat);
-					long patid = response.getPatientId();
-					ptnid = (int) patid;
-					reporting_year = providerInfo.get(0).getMacraProviderConfigurationReportingYear().toString();
+							int denominator = 0;
+							denominator = measureStatus.get(measureid).getDenominator();
+							System.out.println("measureid>>>>>"+measureId+"<<<deno>>"+denominator);
+							if(flag==1)
+								continue;
+							SimpleDateFormat parseFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+							Date dateModifedFormat = parseFormat.parse(dos.toString());
+							SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+							String dos1 = format.format(dateModifedFormat);
+							long patid = response.getPatientId();
+							ptnid = (int) patid;
+							reporting_year = providerInfo.get(0).getMacraProviderConfigurationReportingYear().toString();
+							List<PqrsPatientEntries> pqrsentriesBean = new ArrayList<PqrsPatientEntries>();
+							System.out.println("startDate"+startDate+"enddate"+endDate);
+							pqrsentriesBean = checkEntry(startDate,endDate,patid, providerId, measureId);
 
-					List<PqrsPatientEntries> pqrsentriesBean = new ArrayList<PqrsPatientEntries>();
-					pqrsentriesBean = checkEntry(dos1,patid, providerId, measureId);
+							PqrsPatientEntries pqrsptnEntry = new PqrsPatientEntries();
+							int performanceIndicator = -1;
+							if(pqrsentriesBean.size()>0){
 
-					PqrsPatientEntries pqrsptnEntry = new PqrsPatientEntries();
-				
-					
-					if(pqrsentriesBean.size()>0){
+								for(int index=0;index<pqrsentriesBean.size();index++){
 
-						for(int index=0;index<pqrsentriesBean.size();index++){
-
-							pqrsptnEntry = pqrsentriesBean.get(index);
-							if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() != null)
-							{
-							performanceIndicator = pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator();
+									pqrsptnEntry = pqrsentriesBean.get(0);
+									if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() != null)
+									{
+										performanceIndicator = pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator();
+									}
+									//System.out.println("performanceIndicator from pqrs bean>>>inside loop>>>>>>>>>>>>>>"+performanceIndicator);
+								}
 							}
-							
+						//	System.out.println("performanceIndicator from pqrs bean>>>>>>outside>>>>>>>>>>>"+performanceIndicator);
+							PqrsPatientEntries pqrsptnEntrynew = new PqrsPatientEntries();
+						//	System.out.println("<<<<measureid>>>>>"+measureId+"<<<deno>>"+denominator);
+							if(denominator == 1)
+							{
+								if(performanceIndicator != -1)
+									pqrsptnEntrynew.setPqrsPatientEntriesPerformanceIndicator(performanceIndicator);
+							}
+							System.out.println("before makeentry>>>><<<<<<<measureid>>>"+measureId+"indicator>>>>>>>>>>>>"+pqrsptnEntrynew.getPqrsPatientEntriesPerformanceIndicator()+"deno to makeenrtry"+denominator);
+							makeEntry(response, ptnid, providerId, measureId, reporting_year, pqrsptnEntrynew, denominator );
+
 						}
-
 					}
+
 				}
-			}
-
-			PqrsPatientEntries pqrsptnEntrynew = new PqrsPatientEntries();
-
-			if(response.getMeasureStatus().size()>0){
-				
-			Map<String, MeasureStatus> measureStatusPqrs = response.getMeasureStatus().get(response.getMeasureStatus().keySet().toArray()[0]).getMeasureStatus();
-
-			int denominator = 0;
-			MeasureStatus patientObj = new MeasureStatus();
-			
-			if(measureStatusPqrs.size() >0){
-			
-			 patientObj = measureStatus.get(measureStatusPqrs.keySet().toArray()[0]);
-			 denominator = patientObj.getDenominator();
-			 
-			}
-
-			if(denominator == 1)
-			{
-				if(performanceIndicator != -1)
-					pqrsptnEntrynew.setPqrsPatientEntriesPerformanceIndicator(performanceIndicator);
-			}
-
-			makeEntry(response, ptnid, providerId, measureId, reporting_year, pqrsptnEntrynew, denominator );
 			}
 		}
 
 	}
 
-	public  List<PqrsPatientEntries> checkEntry(String dos,long patid, Integer providerId,String measureId) {
 
+	public  List<PqrsPatientEntries> checkEntry(Date startdate,Date enddate,long patid, Integer providerId,String measureId) {
+
+		//System.out.println("in checkentry>>>>>>>>dos>>"+dos+"<<<<patid>>>>"+patid+"<<<providerId>>>"+providerId+"<<<measure>>>"+measureId);
 		SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 		List<PqrsPatientEntries> pqrsentriesBean = new ArrayList<PqrsPatientEntries>();
 
 		try{
-			Date startDate=formatter.parse(dos);
-			HashMap<Integer, ReportResponse> finalResponse = new HashMap<Integer, ReportResponse>();
+			//Date startDate=formatter.parse(dos);
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<PqrsPatientEntries> query = builder.createQuery(PqrsPatientEntries.class);
 			Root<PqrsPatientEntries> root = query.from(PqrsPatientEntries.class);
 			Predicate predicate;
-			Expression<Date> dosExpr=builder.function("date", Date.class, root.get(PqrsPatientEntries_.pqrsPatientEntriesDos));
-			predicate = builder.and(builder.equal(dosExpr, startDate),
+			//Expression<Date> dosExpr=builder.function("date", Date.class, root.get(PqrsPatientEntries_.pqrsPatientEntriesDos));
+			predicate = builder.and(builder.greaterThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), startdate),
+					builder.lessThanOrEqualTo(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), enddate),
 					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesMeasureId), measureId),
 					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesProviderId), providerId),
 					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesIsActive), true));
@@ -330,16 +312,18 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 
 		Timestamp curr_time = new Timestamp(d.getTime());
 
+		String npi = getNPIForProvider(providerId);
+
+		String tin = getTINForProvider(providerId);
+
 		for(int index = 0;index<response.getMeasureStatus().size();index++){
 
 			Map<String, MeasureStatus> measureStatus = response.getMeasureStatus().get(response.getMeasureStatus().keySet().toArray()[0]).getMeasureStatus();
-
 			for(int i=0;i<measureStatus.size();i++){
 
 				MeasureStatus patientObj = measureStatus.get(measureStatus.keySet().toArray()[i]);
 
 				QualityMeasuresPatientEntries patientData = qualityMeasuresPatientEntriesRepository.findOne(Specifications.where(QPPPerformanceSpecification.isPatientExisting(providerId, measureId, patientId, reportYear, patientObj.getCriteria())));
-
 
 				if(patientData == null || patientData.equals(null)){
 					patientData = new QualityMeasuresPatientEntries();
@@ -350,53 +334,55 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 					patientData.setQualityMeasuresPatientEntriesProviderId(providerId);
 					patientData.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(reportYear));
 					patientData.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
+					patientData.setQualityMeasuresPatientEntriesNpi(npi);
+					patientData.setQualityMeasuresPatientEntriesTin(tin);
 
 					if(denominator == 1){
 
 						patientData.setQualityMeasuresPatientEntriesDenominator(1);
 						patientData.setQualityMeasuresPatientEntriesIpp(1);
-						
+
 						if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() != null && pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() != -1){
 
 							if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() == 1){
-								
+
 								patientData.setQualityMeasuresPatientEntriesNumerator(1);
 								patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorException(0);
-								
+
 							}else if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() == 2){
-								
+
 								patientData.setQualityMeasuresPatientEntriesNumerator(0);
 								patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(1);
 								patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorException(0);
-								
+
 							}else if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() == 3){
-								
+
 								patientData.setQualityMeasuresPatientEntriesNumerator(0);
 								patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(1);
 								patientData.setQualityMeasuresPatientEntriesDenominatorException(0);
-								
+
 							}else if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() == 4){
-								
+
 								patientData.setQualityMeasuresPatientEntriesNumerator(0);
 								patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorException(1);
-								
+
 							}else{
-								
+
 								patientData.setQualityMeasuresPatientEntriesNumerator(0);
 								patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorException(0);
-								
+
 							}
 
 						}else{
-							
+
 							patientData.setQualityMeasuresPatientEntriesNumerator(0);
 							patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(0);
 							patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
@@ -415,59 +401,60 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 					patientData.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
 					patientData.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
 					patientData.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
-
 					qualityMeasuresPatientEntriesRepository.saveAndFlush(patientData);
 
 				}else{
 					patientData.setQualityMeasuresPatientEntriesUpdatedOn(curr_time);
 					patientData.setQualityMeasuresPatientEntriesIpp(patientObj.getIpp());
+					patientData.setQualityMeasuresPatientEntriesNpi(npi);
+					patientData.setQualityMeasuresPatientEntriesTin(tin);
 
 					if(denominator == 1){
 
 						patientData.setQualityMeasuresPatientEntriesDenominator(1);
 						patientData.setQualityMeasuresPatientEntriesIpp(1);
-						
+
 						if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() != null && pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() != -1){
 
 							if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() == 1){
-								
+
 								patientData.setQualityMeasuresPatientEntriesNumerator(1);
 								patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorException(0);
-								
+
 							}else if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() == 2){
-								
+
 								patientData.setQualityMeasuresPatientEntriesNumerator(0);
 								patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(1);
 								patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorException(0);
-								
+
 							}else if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() == 3){
-								
+
 								patientData.setQualityMeasuresPatientEntriesNumerator(0);
 								patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(1);
 								patientData.setQualityMeasuresPatientEntriesDenominatorException(0);
-								
+
 							}else if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() == 4){
-								
+
 								patientData.setQualityMeasuresPatientEntriesNumerator(0);
 								patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorException(1);
-								
+
 							}else{
-								
+
 								patientData.setQualityMeasuresPatientEntriesNumerator(0);
 								patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
 								patientData.setQualityMeasuresPatientEntriesDenominatorException(0);
-								
+
 							}
 
 						}else{
-							
+
 							patientData.setQualityMeasuresPatientEntriesNumerator(0);
 							patientData.setQualityMeasuresPatientEntriesNumeratorExclusion(0);
 							patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
@@ -493,6 +480,63 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 			}
 
 		}
+	}
+
+	/**
+	 * Function to return NPI value for provider
+	 * @param providerId
+	 * @return
+	 */
+
+	public String getNPIForProvider(int providerId){
+
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+		Root<StaffPinNumberDetails> root = cq.from(StaffPinNumberDetails.class);
+
+		cq.select(root.get(StaffPinNumberDetails_.staff_pin_number_details_cctpin_number));
+		cq.where(builder.equal(root.get(StaffPinNumberDetails_.staff_pin_number_details_profileid), providerId));
+
+		List<Object> results = em.createQuery(cq).getResultList();
+
+		String npi = "";
+
+		if(results.size() > 0){
+			npi = results.get(0).toString();
+		}
+
+		return npi;
+
+	}
+
+	/**
+	 * Function to get TIN number based on selected providerId
+	 * 
+	 * @param providerId
+	 * @param accountId
+	 * @param configuredMeasures
+	 * @return
+	 */
+
+	public String getTINForProvider(int providerId){
+
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+		Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
+
+		cq.select(root.get(EmployeeProfile_.empProfileSsn));
+		cq.where(builder.equal(root.get(EmployeeProfile_.empProfileEmpid), providerId));
+
+		List<Object> results = em.createQuery(cq).getResultList();
+
+		String ssn = "";
+
+		if(results.size() > 0){
+			ssn = results.get(0).toString();
+		}
+
+		return ssn;
+
 	}
 
 }
