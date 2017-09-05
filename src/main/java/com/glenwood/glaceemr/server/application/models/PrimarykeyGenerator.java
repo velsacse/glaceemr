@@ -5,8 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "primarykey_generator")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PrimarykeyGenerator {
 	@Id
 	@Column(name="primarykey_generator_tableid")

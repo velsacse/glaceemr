@@ -12,13 +12,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "associate_service_detail")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AssociateServiceDetails {
 	
 	@Column(name="associate_service_detail_id")

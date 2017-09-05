@@ -5,8 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "submit_status")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SubmitStatus {
 	
 	@Column(name="submit_status_id")

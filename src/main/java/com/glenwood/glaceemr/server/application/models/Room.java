@@ -9,8 +9,11 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name="room_details")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Room {
 
 	@Id
