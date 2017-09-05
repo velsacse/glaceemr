@@ -17,9 +17,11 @@ import javax.persistence.SequenceGenerator;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "patient_clinical_elements")
 public class PatientClinicalElements implements Serializable{
 

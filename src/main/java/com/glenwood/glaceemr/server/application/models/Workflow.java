@@ -74,6 +74,12 @@ public class Workflow implements Serializable{
 	@JsonManagedReference
 	@JoinColumn(name="workflow_fromid",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
 	EmployeeProfile empProfileTableFromId;
+	
+	@NotFound(action=NotFoundAction.IGNORE)
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name="workflow_toid",referencedColumnName="emp_profile_empid",insertable=false,updatable=false)
+	EmployeeProfile empProfileTableToId;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference

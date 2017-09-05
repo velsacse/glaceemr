@@ -15,9 +15,11 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "sch_template_time_mapping")
 public class SchedulerTemplateTimeMapping implements Serializable{
 

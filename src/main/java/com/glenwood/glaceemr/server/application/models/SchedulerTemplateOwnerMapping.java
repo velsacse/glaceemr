@@ -8,7 +8,10 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "sch_template_owner_mapping")
 public class SchedulerTemplateOwnerMapping {
 
