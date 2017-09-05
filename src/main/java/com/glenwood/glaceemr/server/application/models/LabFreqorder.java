@@ -5,8 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "lab_freqorder")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LabFreqorder {
 
 	@Column(name="lab_freqorder_id")

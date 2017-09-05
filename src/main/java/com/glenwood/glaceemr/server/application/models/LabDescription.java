@@ -17,11 +17,13 @@ import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "lab_description")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LabDescription implements Serializable {
 
 	@Id

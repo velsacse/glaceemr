@@ -13,9 +13,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "lab_descp_parameters")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LabDescpParameters {
 
 	@Id

@@ -11,11 +11,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "hl7_external_testmapping")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Hl7ExternalTestmapping implements Serializable{
 
 	@Column(name="hl7_external_testmapping_id")

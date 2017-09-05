@@ -15,10 +15,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "hl7_result_inbox")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Hl7ResultInbox {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="hl7_result_inbox_hl7_result_inbox_id_seq")

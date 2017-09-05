@@ -14,9 +14,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "hl7_docs_inbox")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Hl7DocsInbox implements Serializable {
 
 	@Id

@@ -5,8 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "vis_file_mapping")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VisFileMapping {
 	
 	@Id
