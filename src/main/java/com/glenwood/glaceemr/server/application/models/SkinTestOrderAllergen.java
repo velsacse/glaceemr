@@ -14,10 +14,12 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "skin_test_order_allergen")
 public class SkinTestOrderAllergen {
 	
