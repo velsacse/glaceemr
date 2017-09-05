@@ -16,13 +16,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "patient_assessments")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PatientAssessments implements Serializable{
   
 	private static final long serialVersionUID = 1L;

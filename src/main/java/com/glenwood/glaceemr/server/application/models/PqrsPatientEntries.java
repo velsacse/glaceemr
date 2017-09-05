@@ -16,10 +16,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "pqrs_patient_entries")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PqrsPatientEntries {
 
 	@Id

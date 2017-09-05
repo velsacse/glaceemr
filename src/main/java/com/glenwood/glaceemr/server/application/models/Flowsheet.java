@@ -10,10 +10,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "flowsheet")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Flowsheet {
 	
 	@Id

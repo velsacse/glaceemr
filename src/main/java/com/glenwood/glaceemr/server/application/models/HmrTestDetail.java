@@ -8,8 +8,11 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "hmr_test_detail")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HmrTestDetail {
 	
 	@Column(name="hmr_test_detail_id", nullable=false)
