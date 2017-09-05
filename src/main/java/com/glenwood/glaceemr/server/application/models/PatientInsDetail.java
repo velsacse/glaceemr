@@ -17,11 +17,13 @@ import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
  
 
 @Entity
 @Table(name = "patient_ins_detail")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PatientInsDetail {
 
 	@Id
