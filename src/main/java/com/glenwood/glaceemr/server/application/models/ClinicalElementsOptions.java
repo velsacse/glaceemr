@@ -14,8 +14,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "clinical_elements_options")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ClinicalElementsOptions {
 
 	@Id

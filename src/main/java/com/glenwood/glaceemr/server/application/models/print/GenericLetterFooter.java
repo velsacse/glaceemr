@@ -7,8 +7,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "generic_letter_footer")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GenericLetterFooter {
 	
 	@Id

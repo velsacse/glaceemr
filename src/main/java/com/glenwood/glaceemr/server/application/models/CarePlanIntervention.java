@@ -10,8 +10,11 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "careplan_intervention")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CarePlanIntervention{
 	
 	@Id

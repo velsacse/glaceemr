@@ -10,8 +10,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "clinical_system")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ClinicalSystem implements Serializable {
 
 	@Id

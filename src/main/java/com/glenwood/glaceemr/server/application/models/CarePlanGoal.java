@@ -15,11 +15,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name="careplan_goal")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CarePlanGoal {
 	
 	@Id

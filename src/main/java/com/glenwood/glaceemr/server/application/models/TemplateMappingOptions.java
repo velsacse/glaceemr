@@ -8,8 +8,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "template_mapping_options")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TemplateMappingOptions {
 
 	@Id

@@ -13,11 +13,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "clinical_element_template_mapping")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ClinicalElementTemplateMapping implements Serializable{
 
 	private static final long serialVersionUID = 1L;

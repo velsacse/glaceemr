@@ -11,8 +11,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "plan_mapping")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PlanMapping {
 
 	@Id

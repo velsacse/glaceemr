@@ -12,8 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "patient_episode_attribute_details")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PatientEpisodeAttributeDetails {
 
 	@Id

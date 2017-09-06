@@ -11,8 +11,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "pe_element")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PeElement {
 
 	@Column(name="pe_element_id")

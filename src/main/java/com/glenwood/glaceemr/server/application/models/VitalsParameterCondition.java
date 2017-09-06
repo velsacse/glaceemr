@@ -5,8 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "vitals_parameter_condition")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VitalsParameterCondition {
 
 	@Column(name="vitals_parameter_condition_id")

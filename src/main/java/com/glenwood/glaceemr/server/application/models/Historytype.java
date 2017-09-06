@@ -11,10 +11,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "history_type")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Historytype {
 
 	@Id

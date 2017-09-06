@@ -7,9 +7,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 
 @Entity
 @Table(name = "patient_header_details")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PatientHeaderDetails {
 	
 	@Id

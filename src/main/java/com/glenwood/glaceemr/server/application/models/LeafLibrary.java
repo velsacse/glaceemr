@@ -15,8 +15,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "leaf_library")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LeafLibrary {
 
 	

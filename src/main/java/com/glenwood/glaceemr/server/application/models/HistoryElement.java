@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementTemplateMapping;
 import com.glenwood.glaceemr.server.application.models.ClinicalSystem;
@@ -25,6 +26,7 @@ import com.glenwood.glaceemr.server.application.models.ClinicalSystem;
  */
 @Entity
 @Table(name = "history_element")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HistoryElement implements Serializable{
 	
 	

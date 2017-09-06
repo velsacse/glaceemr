@@ -8,8 +8,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "aftercare_ins_mapping")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AftercareInsMapping {
 
 	@Id

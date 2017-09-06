@@ -17,10 +17,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "plan_instruction")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PlanInstruction implements Serializable{
 
 	private static final long serialVersionUID = 1L;

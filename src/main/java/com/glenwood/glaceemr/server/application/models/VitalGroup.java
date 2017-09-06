@@ -9,8 +9,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "vital_group")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VitalGroup {
 
 	@Id

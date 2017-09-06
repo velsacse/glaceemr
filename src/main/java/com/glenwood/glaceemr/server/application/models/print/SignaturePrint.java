@@ -7,8 +7,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "signature_print")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SignaturePrint {
 	
 	@Id

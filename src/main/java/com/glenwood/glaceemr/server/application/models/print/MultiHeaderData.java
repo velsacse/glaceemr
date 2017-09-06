@@ -7,9 +7,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 
 @Entity
 @Table(name = "multi_header_data")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MultiHeaderData {
 
 	@Id

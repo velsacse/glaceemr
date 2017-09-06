@@ -14,8 +14,11 @@ import org.hibernate.annotations.JoinColumnsOrFormulas;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "clinical_text_mapping")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ClinicalTextMapping {
 
 	

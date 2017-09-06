@@ -16,12 +16,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "family_history_disease")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FamilyHistoryDisease {
 
 	@Id

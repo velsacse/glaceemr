@@ -12,10 +12,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "clinical_elements")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ClinicalElements implements Serializable{
 
 	/**

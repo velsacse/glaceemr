@@ -16,10 +16,12 @@ import javax.persistence.Table;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "vitals_parameter")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VitalsParameter {
 
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="vitals_parameter_vitals_parameter_id_seq")
