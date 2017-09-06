@@ -17,11 +17,13 @@ import javax.persistence.SequenceGenerator;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @SuppressWarnings("serial")
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @Entity
 @Table(name = "lab_parameter_code")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LabParameterCode implements Serializable{
 
 	

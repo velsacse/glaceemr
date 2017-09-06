@@ -14,9 +14,11 @@ import org.hibernate.annotations.NotFoundAction;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "hl7_external_test")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Hl7ExternalTest {
 
 	@Id
