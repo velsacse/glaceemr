@@ -522,6 +522,13 @@ public class LabResultsServiceImpl implements LabResultsService {
 					unmapped.setTestNotes(Optional.fromNullable(Strings.emptyToNull("" + labEntries.getLabEntriesResultNotes())).or("" + unmappedResults.getHl7UnmappedresultsTestnotes()));
 					if( labEntries.getLabEntriesRevOn() != null ) {
 						unmapped.setReviewedOn(formatter.format(labEntries.getLabEntriesRevOn()));
+						String reviewedBy=labEntries.getLabEntriesRevBy().toString();
+						List<EmployeeProfile> users = empProfileRepository.findAll(Specifications.where(LabResultsSpecification.getActiveUser()).and(LabResultsSpecification.verifyFullName("Demo")).and(LabResultsSpecification.verifyGroupId()).and(LabResultsSpecification.verifyDocId(reviewedBy)));
+						if(users.size()>0)
+						{
+							EmployeeProfile empData = users.get(0);
+							unmapped.setReviewedBy(empData.getEmpProfileFullname());
+						}
 					}
 					unmapped.setMapStatus(unmappedResults.getHl7UnmappedresultsMapStatus());
 					unmapped.setResultStatus(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsResultStatus())).or(""));

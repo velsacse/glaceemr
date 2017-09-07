@@ -18,6 +18,7 @@ public class UnmappedResults {
 	String finalStatus;
 	String mapStatus;
 	String reviewedOn;
+	String reviewedBy;
 	String resultStatus;
 	String specimenRejectReason;
 	String specimenCollectedDate;
@@ -114,6 +115,12 @@ public class UnmappedResults {
 	}
 	public void setReviewedOn(String reviewedOn) {
 		this.reviewedOn = reviewedOn;
+	}
+	public String getReviewedBy() {
+		return reviewedBy;
+	}
+	public void setReviewedBy(String reviewedBy) {
+		this.reviewedBy = reviewedBy;
 	}
 	public String getResultStatus() {
 		return resultStatus;

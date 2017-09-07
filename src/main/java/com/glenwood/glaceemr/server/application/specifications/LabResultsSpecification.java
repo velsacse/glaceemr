@@ -108,7 +108,17 @@ public class LabResultsSpecification {
 			}	
 		};
 	}
+	public static Specification<EmployeeProfile> verifyDocId(final String reviewedBy) {
+		return new Specification<EmployeeProfile>() {
 
+			@Override
+			public Predicate toPredicate(Root<EmployeeProfile> root, CriteriaQuery<?> query,
+					CriteriaBuilder cb) {
+				Predicate fullName = root.get(EmployeeProfile_.empProfileEmpid).in(reviewedBy);
+				return fullName;
+			}	
+		};
+	}
 	/**
 	 * Specification to get the active result list
 	 * @return
