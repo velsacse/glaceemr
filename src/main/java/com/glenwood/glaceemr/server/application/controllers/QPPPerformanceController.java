@@ -352,7 +352,7 @@ public class QPPPerformanceController {
 	}
 	
 	
-	@RequestMapping(value = "/getPatient", method = RequestMethod.GET)
+	@RequestMapping(value = "/getPatient", method = RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean getPatient(
 			@RequestParam(value="patientId", required=true) String patientId,
