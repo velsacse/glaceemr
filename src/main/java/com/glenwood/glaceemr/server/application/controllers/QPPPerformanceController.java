@@ -11,8 +11,10 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +29,7 @@ import com.glenwood.glaceemr.server.application.Bean.MIPSResponse;
 import com.glenwood.glaceemr.server.application.Bean.MUDashboardBean;
 import com.glenwood.glaceemr.server.application.Bean.MacraProviderQDM;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
+import com.glenwood.glaceemr.server.application.Bean.getPatientBean;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.HttpConnectionUtils;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Response;
@@ -40,6 +43,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEn
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.MeasureCalculationService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
+import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionBean;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
 @RestController
@@ -354,15 +358,7 @@ public class QPPPerformanceController {
 	
 	@RequestMapping(value = "/getPatient", method = RequestMethod.POST)
 	@ResponseBody
-	public EMRResponseBean getPatient(
-			@RequestParam(value="patientId", required=true) String patientId,
-			@RequestParam(value="measureId", required=true) String measureId,
-			@RequestParam(value="criteria", required=true) int criteria,
-			@RequestParam(value="mode", required=true) int mode,
-			@RequestParam(value="empTIN", required=false, defaultValue="") String empTIN,
-			@RequestParam(value="accountId", required=true) String accountId,
-			@RequestParam(value="isNotMet", required=false, defaultValue="false") boolean isNotMet,
-			@RequestParam(value="provider", required=true) Integer provider){
+	public EMRResponseBean getPatient(@RequestBody getPatientBean requestBean)throws JSONException{
 		
 		EMRResponseBean response = new EMRResponseBean();
 		
@@ -371,11 +367,10 @@ public class QPPPerformanceController {
 
 		try{
 		
-			List<MIPSPatientInformation> filtersInfo = measureService.getPatient(patientId,measureId,criteria,provider,empTIN, mode,isNotMet);
-		
+			List<MIPSPatientInformation> filtersInfo = measureService.getPatient(requestBean.getPatientId(),requestBean.getMeasureId(),requestBean.getCriteria(),requestBean.getProvider(),requestBean.getEmpTIN(), requestBean.getMode(),requestBean.getIsNotMet());
 			response.setData(filtersInfo);
 		
-			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting filtered patients list based on measure" , -1, request.getRemoteAddr(),-1,"patientId="+patientId+"&measureId="+measureId+"&providerId="+empTIN,LogUserType.USER_LOGIN, "patientId="+patientId, "");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting filtered patients list based on measure" , -1, request.getRemoteAddr(),-1,"patientId="+requestBean.getPatientId()+"&measureId="+requestBean.getMeasureId()+"&providerId="+requestBean.getEmpTIN(),LogUserType.USER_LOGIN, "patientId="+requestBean.getPatientId(), "");
 		
 		}catch(Exception e){
 			
@@ -383,9 +378,9 @@ public class QPPPerformanceController {
 				
 				e.printStackTrace(printWriter);
 
-				String responseMsg = GlaceMailer.buildMailContentFormat(accountId, -1,"Error occurred while getting filtered patients list",writer.toString());
+				String responseMsg = GlaceMailer.buildMailContentFormat(requestBean.getAccountId(), -1,"Error occurred while getting filtered patients list",writer.toString());
 				
-				GlaceMailer.sendFailureReport(responseMsg,accountId,GlaceMailer.Configure.MU);
+				GlaceMailer.sendFailureReport(responseMsg,requestBean.getAccountId(),GlaceMailer.Configure.MU);
 				
 			} catch (Exception e1) {
 				
@@ -396,7 +391,7 @@ public class QPPPerformanceController {
 				printWriter.flush();
 				printWriter.close();
 			
-				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Error in getting filtered patients list based on measure" , -1, request.getRemoteAddr(),-1,"patientId="+patientId+"&measureId="+measureId+"&providerId="+empTIN,LogUserType.USER_LOGIN, "patientId="+patientId, "");
+				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Error in getting filtered patients list based on measure" , -1, request.getRemoteAddr(),-1,"patientId="+requestBean.getPatientId()+"&measureId="+requestBean.getMeasureId()+"&providerId="+requestBean.getEmpTIN(),LogUserType.USER_LOGIN, "patientId="+requestBean.getPatientId(), "");
 				
 				e.printStackTrace();
 				
