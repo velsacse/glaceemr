@@ -170,7 +170,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 		Request requestObj = new Request();
 		PQRSResponse response = new PQRSResponse();
 
-		String hub_url = "http://test.glaceemr.com/glacecds/ECQMServices/validateRegistryReport";
+		String hub_url = measureService.getMeasureValidationServer()+"/glacecds/ECQMServices/validateRegistryReport";
 
 		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 
@@ -192,9 +192,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 			requestObj.setPatient(patientrequestObj);
 			ObjectMapper objectMapper = new ObjectMapper();
 			String requestString = objectMapper.writeValueAsString(requestObj);
-			System.out.println("requestString>>>>>>>>>>>>"+requestString);
 			String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
-			System.out.println("responseStr>>>>>>>>>>>>"+responseStr);
 			response = objectMapper.readValue(responseStr, PQRSResponse.class);
 			response.getAccountId();
 			response.getMeasureStatus();
@@ -234,7 +232,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 							ptnid = (int) patid;
 							reporting_year = providerInfo.get(0).getMacraProviderConfigurationReportingYear().toString();
 							List<PqrsPatientEntries> pqrsentriesBean = new ArrayList<PqrsPatientEntries>();
-							System.out.println("startDate"+startDate+"enddate"+endDate);
+							//System.out.println("startDate>>>"+startDate+"enddate>>>"+endDate);
 							pqrsentriesBean = checkEntry(startDate,endDate,patid, providerId, measureId);
 
 							PqrsPatientEntries pqrsptnEntry = new PqrsPatientEntries();
@@ -248,12 +246,8 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 									{
 										performanceIndicator = pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator();
 									}
-									//System.out.println("performanceIndicator from pqrs bean>>>inside loop>>>>>>>>>>>>>>"+performanceIndicator);
-								}
-							}
-						//	System.out.println("performanceIndicator from pqrs bean>>>>>>outside>>>>>>>>>>>"+performanceIndicator);
+								
 							PqrsPatientEntries pqrsptnEntrynew = new PqrsPatientEntries();
-						//	System.out.println("<<<<measureid>>>>>"+measureId+"<<<deno>>"+denominator);
 							if(denominator == 1)
 							{
 								if(performanceIndicator != -1)
@@ -261,7 +255,8 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 							}
 							System.out.println("before makeentry>>>><<<<<<<measureid>>>"+measureId+"indicator>>>>>>>>>>>>"+pqrsptnEntrynew.getPqrsPatientEntriesPerformanceIndicator()+"deno to makeenrtry"+denominator);
 							makeEntry(response, ptnid, providerId, measureId, reporting_year, pqrsptnEntrynew, denominator );
-
+								}
+							}
 						}
 					}
 
@@ -274,7 +269,6 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 
 	public  List<PqrsPatientEntries> checkEntry(Date startdate,Date enddate,long patid, Integer providerId,String measureId) {
 
-		//System.out.println("in checkentry>>>>>>>>dos>>"+dos+"<<<<patid>>>>"+patid+"<<<providerId>>>"+providerId+"<<<measure>>>"+measureId);
 		SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 		List<PqrsPatientEntries> pqrsentriesBean = new ArrayList<PqrsPatientEntries>();
 
@@ -288,7 +282,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 			predicate = builder.and(builder.greaterThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), startdate),
 					builder.lessThanOrEqualTo(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), enddate),
 					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesMeasureId), measureId),
-					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesProviderId), providerId),
+					//builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesProviderId), providerId),
 					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesIsActive), true));
 
 			if(patid != 0){
