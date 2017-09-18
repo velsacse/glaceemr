@@ -8,6 +8,7 @@ public class MUPerformanceBean {
 	String npi;
 	Date startDate;
 	Date endDate;
+	String submissionMethod;
 	String cmsId;
 	String title;
 	String measureId;
@@ -21,7 +22,7 @@ public class MUPerformanceBean {
 	long denominatorExceptionCount;
 	double performanceRate;
 	double reportingRate;
-	double points;
+	int points;
 	
 	public MUPerformanceBean(){
 		
@@ -44,7 +45,7 @@ public class MUPerformanceBean {
 		this.denominatorExceptionCount = denominatorExceptionCount;
 		this.performanceRate = performanceRate;
 		this.reportingRate = reportingRate;
-		this.points = points;
+		this.points = (int)points;
 		this.npi = npi;
 		this.providerName = providerName;
 		this.startDate = startDate;
@@ -74,6 +75,14 @@ public class MUPerformanceBean {
 
 	public void setMeasureId(String measureId) {
 		this.measureId = measureId;
+	}
+
+	public String getSubmissionMethod() {
+		return submissionMethod;
+	}
+
+	public void setSubmissionMethod(String submissionMethod) {
+		this.submissionMethod = submissionMethod;
 	}
 
 	public int getCriteria() {
@@ -156,11 +165,11 @@ public class MUPerformanceBean {
 		this.reportingRate = reportingRate;
 	}
 
-	public double getPoints() {
+	public int getPoints() {
 		return points;
 	}
 
-	public void setPoints(double points) {
+	public void setPoints(int points) {
 		this.points = points;
 	}
 

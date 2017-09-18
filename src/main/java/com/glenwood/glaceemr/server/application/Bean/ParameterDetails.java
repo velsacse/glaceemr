@@ -1,34 +1,79 @@
 package com.glenwood.glaceemr.server.application.Bean;
 
+import java.util.Date;
+
 public class ParameterDetails {
 
-	int lab_entries_parameter_testdetailid;
-	String lab_parameter_code_value;
-	String lab_entries_parameter_value;
+	int labEntriesParameterTestdetailid;
+	String labParameterCodeValue;
+	String labEntriesParameterName;
+	int labEntriesParameterStatus;
+	String labEntriesParameterCodeSystem;
+	String labEntriesParameterValue;
+	Date labEntriesParameterDate;
 	
-	public int getLab_entries_parameter_testdetailid() {
-		return lab_entries_parameter_testdetailid;
+	public int getLabEntriesParameterTestdetailid() {
+		return labEntriesParameterTestdetailid;
 	}
-	public void setLab_entries_parameter_testdetailid(
-			int lab_entries_parameter_testdetailid) {
-		this.lab_entries_parameter_testdetailid = lab_entries_parameter_testdetailid;
+	public void setLabEntriesParameterTestdetailid(
+			int labEntriesParameterTestdetailid) {
+		this.labEntriesParameterTestdetailid = labEntriesParameterTestdetailid;
 	}
-	public String getLab_parameter_code_value() {
-		return lab_parameter_code_value;
+	public String getLabParameterCodeValue() {
+		return labParameterCodeValue;
 	}
-	public void setLab_parameter_code_value(String lab_parameter_code_value) {
-		this.lab_parameter_code_value = lab_parameter_code_value;
+	public void setLabParameterCodeValue(String labParameterCodeValue) {
+		this.labParameterCodeValue = labParameterCodeValue;
 	}
-	public String getLab_entries_parameter_value() {
-		return lab_entries_parameter_value;
+	public String getLabEntriesParameterName() {
+		return labEntriesParameterName;
 	}
-	public void setLab_entries_parameter_value(String lab_entries_parameter_value) {
-		this.lab_entries_parameter_value = lab_entries_parameter_value;
+	public void setLabEntriesParameterName(String labEntriesParameterName) {
+		this.labEntriesParameterName = labEntriesParameterName;
 	}
-	public ParameterDetails(int lab_entries_parameter_testdetailid,String lab_parameter_code_value,String lab_entries_parameter_value){
+	public int getLabEntriesParameterStatus() {
+		return labEntriesParameterStatus;
+	}
+	public void setLabEntriesParameterStatus(int labEntriesParameterStatus) {
+		this.labEntriesParameterStatus = labEntriesParameterStatus;
+	}
+	public String getLabEntriesParameterCodeSystem() {
+		return labEntriesParameterCodeSystem;
+	}
+	public void setLabEntriesParameterCodeSystem(
+			String labEntriesParameterCodeSystem) {
+		this.labEntriesParameterCodeSystem = labEntriesParameterCodeSystem;
+	}
+	public String getLabEntriesParameterValue() {
+		return labEntriesParameterValue;
+	}
+	public void setLabEntriesParameterValue(String labEntriesParameterValue) {
+		this.labEntriesParameterValue = labEntriesParameterValue;
+	}
+	public Date getLabEntriesParameterDate() {
+		return labEntriesParameterDate;
+	}
+	public void setLabEntriesParameterDate(Date labEntriesParameterDate) {
+		this.labEntriesParameterDate = labEntriesParameterDate;
+	}
+	public ParameterDetails(int labEntriesParameterTestdetailid,
+			String labParameterCodeValue, String labEntriesParameterName,
+			int labEntriesParameterStatus,
+			String labEntriesParameterCodeSystem,
+			String labEntriesParameterValue, Date labEntriesParameterDate) {
 		super();
-		this.lab_entries_parameter_testdetailid=lab_entries_parameter_testdetailid;
-		this.lab_parameter_code_value=lab_parameter_code_value;
-		this.lab_entries_parameter_value=lab_entries_parameter_value;
+		
+		this.labEntriesParameterTestdetailid = labEntriesParameterTestdetailid;
+		if(labParameterCodeValue!=null && !labParameterCodeValue.equals(null))
+		this.labParameterCodeValue = labParameterCodeValue;
+		this.labEntriesParameterName = labEntriesParameterName;
+		this.labEntriesParameterStatus = 3;
+		if(labEntriesParameterCodeSystem!=null && !labEntriesParameterCodeSystem.equals(null))
+		this.labEntriesParameterCodeSystem = labEntriesParameterCodeSystem;
+		if(labEntriesParameterValue!=null && !labEntriesParameterCodeSystem.equals(null))
+		this.labEntriesParameterValue = labEntriesParameterValue;
+		this.labEntriesParameterDate = labEntriesParameterDate;
 	}
+	
+	
 }

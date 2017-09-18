@@ -11,5 +11,7 @@ public interface MUPerformanceRateService{
 
 	void addToMacraMeasuresRate(Integer providerId, List<MIPSPerformanceBean> providerPerformance, int reportingYear, 
 			Date startDate, Date endDate, boolean isACI);
+
+	String getLastUpdatedDate();
 	
 }

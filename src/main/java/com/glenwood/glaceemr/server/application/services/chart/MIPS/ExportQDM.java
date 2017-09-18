@@ -40,6 +40,7 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Negation;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Patient;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Procedure;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.QDM;
+import com.glenwood.glaceemr.server.application.models.AlertEvent_;
 import com.glenwood.glaceemr.server.application.models.CNMCodeSystem;
 import com.glenwood.glaceemr.server.application.models.CNMCodeSystem_;
 import com.glenwood.glaceemr.server.application.models.CarePlanIntervention;
@@ -185,25 +186,28 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		String cptCodeListString = "", hcpcsCodeListString = ""; 
 		
-		if(encounterCodeList.containsKey("CPT") && encounterCodeList.get("CPT").length() > 0){
-			
-			cptCodeListString = encounterCodeList.get("CPT").toString();
-			
-			cptCodes = Arrays.asList(cptCodeListString.split(","));
-			
-		}
-		
-		if(encounterCodeList.containsKey("HCPCS") && encounterCodeList.get("HCPCS").length() > 0){
-			
-			hcpcsCodeListString = encounterCodeList.get("HCPCS").toString();
-			
-			if(cptCodes.size() == 0){
-				cptCodes = Arrays.asList(hcpcsCodeListString.split(","));
-			}else{
-				String completeCodeList = encounterCodeList.get("CPT").toString().concat(",".concat(hcpcsCodeListString));
-				cptCodes = Arrays.asList(completeCodeList.split(","));
+		if(encounterCodeList!=null)
+		{	
+			if(encounterCodeList.containsKey("CPT") && encounterCodeList.get("CPT").length() > 0){
+				
+				cptCodeListString = encounterCodeList.get("CPT").toString();
+				
+				cptCodes = Arrays.asList(cptCodeListString.split(","));
+				
 			}
 			
+			if(encounterCodeList.containsKey("HCPCS") && encounterCodeList.get("HCPCS").length() > 0){
+				
+				hcpcsCodeListString = encounterCodeList.get("HCPCS").toString();
+				
+				if(cptCodes.size() == 0){
+					cptCodes = Arrays.asList(hcpcsCodeListString.split(","));
+				}else{
+					String completeCodeList = encounterCodeList.get("CPT").toString().concat(",".concat(hcpcsCodeListString));
+					cptCodes = Arrays.asList(completeCodeList.split(","));
+				}
+				
+			}
 		}
 		
 		if(cptCodes.size()==0)
@@ -251,28 +255,13 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		cq.where(restrictions);
 		
-		CriteriaBuilder builder1 = em.getCriteriaBuilder();
-		CriteriaQuery<EncounterQDM> cq1 = builder1.createQuery(EncounterQDM.class);
-		Root<Encounter> encounterRoot = cq1.from(Encounter.class);
-		Join<Encounter, Chart> encounterChartJoin1 = encounterRoot.join(Encounter_.chart,JoinType.INNER);
-		Predicate prediByPatientId=builder.equal(encounterChartJoin1.get(Chart_.chartPatientid), patientID);
-		encounterChartJoin1.on(prediByPatientId);
-		cq1.orderBy(builder1.desc(encounterRoot.get(Encounter_.encounterId)));
-		Selection[] selections1= new Selection[] {
-				encounterRoot.get(Encounter_.encounterDate),
-				encounterRoot.get(Encounter_.encounterClosedDate),
-		};
-		cq1.select(builder1.construct(EncounterQDM.class,selections1));
 		List<EncounterQDM> encounterObj = new ArrayList<EncounterQDM>();
-		List<EncounterQDM> encounterObj1 = new ArrayList<EncounterQDM>();
 		
 		List<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter> encounterQDM = new ArrayList<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter>();
 		
 		try{
 			
 			encounterObj = em.createQuery(cq).getResultList();
-			encounterObj1= em.createQuery(cq1).setMaxResults(1).getResultList();
-			Boolean cptThere=false;
 			
 			com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter encObject;
 			
@@ -281,39 +270,18 @@ Root<Encounter> root = cq.from(Encounter.class);
 				officeVisitEncounters.add(encounterObj.get(i).getEncounterId());
 				
 				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
-				
-				if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(encounterObj.get(i).getCode())) {
-					
+							
 					encObject.setCode(encounterObj.get(i).getCode());
+					if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(encounterObj.get(i).getCode()))
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
-					encObject.setStartDate(encounterObj.get(i).getStartDate());
-					if(encounterObj.get(i).getEndDate()==null)
-					{
-						Calendar cal = new GregorianCalendar();
-						cal.setTime(encounterObj.get(i).getStartDate());
-						cal.set(Calendar.HOUR_OF_DAY, 24);  
-						cal.set(Calendar.MINUTE, 0);  
-						cal.set(Calendar.SECOND, 0);  
-						cal.set(Calendar.MILLISECOND, 0); 
-						encObject.setEndDate(cal.getTime());
-					}
-					else
-					encObject.setEndDate(encounterObj.get(i).getEndDate());
-					encounterQDM.add(i, encObject);
-					
-					cptThere=true;
-					
-				}else if(cptCodeListString.length() > 0 && cptCodeListString.contains( encounterObj.get(i).getCode() )){
-					
-					encObject.setCode(encounterObj.get(i).getCode());
+					else if(cptCodeListString.length() > 0 && cptCodeListString.contains( encounterObj.get(i).getCode() ))
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
 					encObject.setStartDate(encounterObj.get(i).getStartDate());
 					if(encounterObj.get(i).getEndDate()==null)
 					{
-						
 						Calendar cal = new GregorianCalendar();
 						cal.setTime(encounterObj.get(i).getStartDate());
-						cal.set(Calendar.HOUR_OF_DAY, 24);  
+						cal.set(Calendar.HOUR_OF_DAY, 23);  
 						cal.set(Calendar.MINUTE, 0);  
 						cal.set(Calendar.SECOND, 0);  
 						cal.set(Calendar.MILLISECOND, 0); 
@@ -322,25 +290,9 @@ Root<Encounter> root = cq.from(Encounter.class);
 					else
 					encObject.setEndDate(encounterObj.get(i).getEndDate());
 					encounterQDM.add(i, encObject);
-					
-					cptThere=true;
-					
-				}
-				
+			
 			}
 			
-			/*int encCount = getEncounterCountForPatient(em, patientID, providerId, startDate, endDate);
-			
-			if(cptThere==false && encCount > 0){
-			
-				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
-				encObject.setCode("99213");
-				encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
-				if(encounterObj1.size()!=0)
-				encObject.setStartDate(encounterObj1.get(0).getStartDate());
-				encounterQDM.add(encObject);
-				
-			}*/
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -418,7 +370,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			if(diagnosisObj.get(i).getProblemListResolvedDate()!=null){
 				assessmentObj.setEndDate(diagnosisObj.get(i).getProblemListResolvedDate());
 			}
-			
+			if(diagnosisObj.get(i).getProblemListCodingSystemid()!=null)
 			assessmentQDM.add(i, assessmentObj);
 						
 		}
@@ -449,7 +401,7 @@ Root<Encounter> root = cq.from(Encounter.class);
         
         Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
         Predicate patId=builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
-//        Predicate status=root.get(Prescription_.docPrescStatus).in(1,2);
+        Predicate status=builder.notEqual(root.get(Prescription_.docPrescStatus),13);
        
         cq.select(builder.construct(MedicationQDM.class, root.get(Prescription_.rxname),
                 root.get(Prescription_.rxstrength),
@@ -470,10 +422,10 @@ Root<Encounter> root = cq.from(Encounter.class);
             cal.add(Calendar.YEAR, range);
             Date startDate = cal.getTime();
             Predicate dateRange=builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate);
-           	cq.where(builder.and(patId,dateRange));
+           	cq.where(builder.and(patId,dateRange,status));
         }
         else{
-            cq.where(builder.and(patId));
+            cq.where(builder.and(patId,status));
         }
         
         cq.distinct(true);
@@ -532,7 +484,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
 		Predicate patId=builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
-//		Predicate status=root.get(Prescription_.docPrescStatus).in(1,2);
+		Predicate status=builder.notEqual(root.get(Prescription_.docPrescStatus),13);
 //		Predicate activeMed=builder.equal(root.get(Prescription_.docPrescIsActive), true);
 		cq.select(builder.construct(MedicationQDM.class, root.get(Prescription_.rxname),
 				root.get(Prescription_.rxstrength),
@@ -553,10 +505,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 			cal.add(Calendar.YEAR, range);
 			Date startDate = cal.getTime();
 			Predicate dateRange=builder.or(builder.equal(root.get(Prescription_.docPrescIsActive), true),builder.between(root.get(Prescription_.docPrescInactivatedOn),startDate , endDate));
-			cq.where(builder.and(patId,dateRange));	
+			cq.where(builder.and(patId,dateRange,status));	
 		}
 		else{
-			cq.where(builder.and(patId));
+			cq.where(builder.and(patId,status));
 		}
 
 		cq.distinct(true);
@@ -595,11 +547,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 	
 	@SuppressWarnings("rawtypes")
 	public List<InvestigationQDM> getInvestigationQDM(EntityManager em,Boolean considerProvider, int patientID, int providerId, Date startDate, Date endDate) {
+		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<InvestigationQDM> cq = builder.createQuery(InvestigationQDM.class);
-		
 		Root<LabEntries> root = cq.from(LabEntries.class);
-		
 		Join<LabEntries, Encounter> EncLabJoin = root.join(LabEntries_.encounter, JoinType.INNER);
 		Join<Encounter, Chart> EncChartJoin = EncLabJoin.join(Encounter_.chartTable, JoinType.INNER);
 		Join<LabEntries, LabDescription> labEntriesDescJoin = root.join(LabEntries_.labDescriptionTable, JoinType.INNER);
@@ -630,17 +581,9 @@ Root<Encounter> root = cq.from(Encounter.class);
 			};
 		
 		cq.where(restrictions);
-		
 		List<InvestigationQDM> procedureForLabs = new ArrayList<InvestigationQDM>();
+		procedureForLabs = em.createQuery(cq).getResultList();
 		
-		try{
-			
-			procedureForLabs = em.createQuery(cq).getResultList();
-			
-		}catch(Exception e){
-			e.printStackTrace();			
-		}
-
 		/*********************Investigation details only from labEntries***********************/
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<InvestigationQDM> cq2 = cb.createQuery(InvestigationQDM.class);
@@ -655,7 +598,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				labCode1,
 				rootLabEntries.get(LabEntries_.labEntriesTestDesc),
 				rootLabEntries.get(LabEntries_.labEntriesTestStatus),
-				builder.selectCase().when(cb.equal(rootLabEntries.get(LabEntries_.labEntriesLoinc),"-1"), cb.literal(54)).otherwise(cb.literal(51)),
+				cb.selectCase().when(cb.equal(rootLabEntries.get(LabEntries_.labEntriesLoinc),"-1"), cb.literal(54)).otherwise(cb.literal(51)),
 				rootLabEntries.get(LabEntries_.labEntriesOrdOn),
 				rootLabEntries.get(LabEntries_.labEntriesPerfOn),
 		};
@@ -674,81 +617,64 @@ Root<Encounter> root = cq.from(Encounter.class);
 		simpleLabEntries = em.createQuery(cq2).getResultList();
 		
 		procedureForLabs.addAll(simpleLabEntries);
-		
-		
-		
-		List<Integer> labEntriesTestDetailId=new ArrayList<Integer>();
-		labEntriesTestDetailId.add(000000);
-		for(int i=0;i<procedureForLabs.size();i++){
-			labEntriesTestDetailId.add(procedureForLabs.get(i).getLabEntriesTestdetailId());
-		}
+		/*******************************************Lab parameter details***************************************/
 		CriteriaBuilder builder1 = em.getCriteriaBuilder();
 		CriteriaQuery<ParameterDetails> cq1 = builder1.createQuery(ParameterDetails.class);
-		
 		Root<LabEntriesParameter> root1 = cq1.from(LabEntriesParameter.class);
-		Predicate byIsActive=builder.equal(root1.get(LabEntriesParameter_.labEntriesParameterIsactive), true);
+		
 		Join<LabEntriesParameter, LabParameters> joinLabentriesparameterLabparameter = root1.join(LabEntriesParameter_.labParametersTable, JoinType.INNER);
-		Predicate byIsActive1=builder.equal(joinLabentriesparameterLabparameter.get(LabParameters_.labParametersIsactive), true);
-		joinLabentriesparameterLabparameter.on(byIsActive1);
+		Join<LabEntriesParameter,Chart> joinChart = root1.join(LabEntriesParameter_.chart1,JoinType.INNER);
 		Join<LabParameters, LabParameterCode> joinLabparametersLabparametercode=joinLabentriesparameterLabparameter.join(LabParameters_.labParamCode, JoinType.INNER);
+		
+		Predicate byPatientId=builder1.equal(joinChart.get(Chart_.chartPatientid), patientID);
+		joinChart.on(byPatientId);
+		Predicate byIsActive1=builder1.equal(joinLabentriesparameterLabparameter.get(LabParameters_.labParametersIsactive), true);
+		joinLabentriesparameterLabparameter.on(byIsActive1);
+		Predicate byIsActive=builder1.equal(root1.get(LabEntriesParameter_.labEntriesParameterIsactive), true);
+		Predicate byCode=builder1.equal(joinLabparametersLabparametercode.get(LabParameterCode_.labParameterCodeSystem), builder1.literal("LOINC"));
+		joinLabparametersLabparametercode.on(byCode);
+		Predicate predicateForParametersByDate = builder1.between(root1.get(LabEntriesParameter_.labEntriesParameterDate), startDate, endDate);
+		
 		Selection[] selection= new Selection[] {
 				root1.get(LabEntriesParameter_.labEntriesParameterTestdetailid),
 				joinLabparametersLabparametercode.get(LabParameterCode_.labParameterCodeValue),
-				root1.get(LabEntriesParameter_.labEntriesParameterValue)
+				root1.get(LabEntriesParameter_.labEntriesParameterName),
+				builder1.literal(3),
+				joinLabparametersLabparametercode.get(LabParameterCode_.labParameterCodeSystem),
+				root1.get(LabEntriesParameter_.labEntriesParameterValue),
+				root1.get(LabEntriesParameter_.labEntriesParameterDate)
 		};
 		cq1.select(builder1.construct(ParameterDetails.class,selection));
-		Predicate byCode=builder1.equal(joinLabparametersLabparametercode.get(LabParameterCode_.labParameterCodeSystem), builder1.literal("LOINC"));
-		joinLabparametersLabparametercode.on(byCode);
-		
-		Predicate predicateForParameters = root1.get(LabEntriesParameter_.labEntriesParameterTestdetailid).in(labEntriesTestDetailId);
-		Predicate predicateForParametersByDate = builder.between(root1.get(LabEntriesParameter_.labEntriesParameterDate), startDate, endDate);
-		
-		cq1.where(byIsActive,predicateForParameters,predicateForParametersByDate);
+		cq1.where(byIsActive,predicateForParametersByDate);
 		List<ParameterDetails> parameterDetails=em.createQuery(cq1).getResultList();
-		List<InvestigationQDM> completeInvestigationDetails=new ArrayList<InvestigationQDM>();
-		String code="";
-		String codeDescription;
-		Integer status;
-		Integer companyId;
-		Date createdOn;
-		Date performeOn;
-		String resultValue;
-		InvestigationQDM investigationObj=null;
-		for(int i=0;i<procedureForLabs.size();i++){
-			for(int j=0;j<parameterDetails.size();j++){
-					
-					if(procedureForLabs.get(i).getLabEntriesTestdetailId()==parameterDetails.get(j).getLab_entries_parameter_testdetailid()){
-					if(parameterDetails.get(j).getLab_parameter_code_value()!=null)
-					code=parameterDetails.get(j).getLab_parameter_code_value();
-					}
-					else
-					code=procedureForLabs.get(i).getCode();
-					codeDescription=procedureForLabs.get(i).getCodeDescription();
-					status=procedureForLabs.get(i).getStatus();
-					companyId=procedureForLabs.get(i).getCompanyId();
-					createdOn=procedureForLabs.get(i).getCreatedOn();
-					performeOn=procedureForLabs.get(i).getPerformeOn();
-					if(procedureForLabs.get(i).getLabEntriesConfirmTestStatus()!=0)
-					resultValue=Integer.toString(procedureForLabs.get(i).getLabEntriesConfirmTestStatus());
-					else
-					resultValue=Integer.toString(procedureForLabs.get(i).getLabEntriesStatus());
-					if(procedureForLabs.get(i).getLabEntriesTestdetailId()==parameterDetails.get(j).getLab_entries_parameter_testdetailid())
-					resultValue=parameterDetails.get(j).getLab_entries_parameter_value();
-					investigationObj=new InvestigationQDM(resultValue, code, codeDescription, status, companyId, createdOn, performeOn);
-					
-					
-				
-				
-			}
-			
-			if(parameterDetails.size() == 0){
-				completeInvestigationDetails = procedureForLabs;
-			}else{
-				completeInvestigationDetails.add(investigationObj);
-			}
-			
-		}
 		
+		List<InvestigationQDM> completeInvestigationDetails=new ArrayList<InvestigationQDM>();
+		
+		if(parameterDetails.size()!=0)
+		{
+			for(int i=0;i<parameterDetails.size();i++)
+			{
+				InvestigationQDM eachParameter=new InvestigationQDM(parameterDetails.get(i).getLabEntriesParameterValue(), parameterDetails.get(i).getLabParameterCodeValue(), parameterDetails.get(i).getLabEntriesParameterName(), parameterDetails.get(i).getLabEntriesParameterStatus(), parameterDetails.get(i).getLabEntriesParameterCodeSystem(), parameterDetails.get(i).getLabEntriesParameterDate(), parameterDetails.get(i).getLabEntriesParameterDate());
+				completeInvestigationDetails.add(eachParameter);
+			}
+			for(int i=0;i<procedureForLabs.size();i++)
+			{
+				Boolean duplicate=false;
+				for(int j=0;j<parameterDetails.size();j++)
+				{
+					if(procedureForLabs.get(i).getLabEntriesTestdetailId()==parameterDetails.get(j).getLabEntriesParameterTestdetailid())
+						duplicate=true;
+				}
+				if(!duplicate)
+				{
+					completeInvestigationDetails.add(procedureForLabs.get(i));
+				}
+			}
+		}
+		else
+		{
+			completeInvestigationDetails=procedureForLabs;
+		}
 		return completeInvestigationDetails;
 	}
 	
@@ -858,17 +784,20 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Predicate byPatient=builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId);
 		cq.where(byPatient);
 		List<Object[]> result = em.createQuery(cq).setMaxResults(1).getResultList();
-		patientObj.setPatientId(Integer.parseInt((result.get(0)[0].toString())));
-		patientObj.setFirstName(result.get(0)[1].toString());
-		patientObj.setLastName(result.get(0)[2].toString());
-		patientObj.setDob((Date)result.get(0)[3]);
-		
-		if((int)result.get(0)[4] == 2){
-			patientObj.setGender("F");
-		}else if((int)result.get(0)[4] == 1){
-			patientObj.setGender("M");
-		}else{
-			patientObj.setGender("TG");
+		if(result.size()>0)
+		{	
+			patientObj.setPatientId(Integer.parseInt((result.get(0)[0].toString())));
+			patientObj.setFirstName(result.get(0)[1].toString());
+			patientObj.setLastName(result.get(0)[2].toString());
+			patientObj.setDob((Date)result.get(0)[3]);
+			
+			if((int)result.get(0)[4] == 2){
+				patientObj.setGender("F");
+			}else if((int)result.get(0)[4] == 1){
+				patientObj.setGender("M");
+			}else{
+				patientObj.setGender("TG");
+			}
 		}
 		
 	}
@@ -894,12 +823,12 @@ Root<Encounter> root = cq.from(Encounter.class);
 				rooth413.get(ReferralDetails_.referral_details_ord_on).alias("Referred Date"),
 				rooth413.get(ReferralDetails_.referralOrderOn).alias("Ordered Date"),
 				rooth413.get(ReferralDetails_.referralReviewedOn).alias("Reviewed On"),
-				rooth413.get(ReferralDetails_.referral_details_patientid).alias("Status")
+				rooth413.get(ReferralDetails_.referralCriticalStatus).alias("Status")
 		};
 		
 		cq.select(builder.construct(ReferralQDM.class,selections));
 		
-		Predicate predicateByPatientId=builder.equal(rooth413.get(ReferralDetails_.referral_details_myalert),patientId);
+		Predicate predicateByPatientId=builder.equal(rooth413.get(ReferralDetails_.referral_details_patientid),patientId);
 		Predicate byProvider=builder.equal(rooth413.get(ReferralDetails_.referralOrderBy), providerId);
 		Predicate byDateRange = builder.between(rooth413.get(ReferralDetails_.referralOrderOn), startDate, endDate);
 		

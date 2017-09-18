@@ -5,8 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "macra_configuration")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MacraConfiguration {
 
 	@Id

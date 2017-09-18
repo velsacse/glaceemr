@@ -10,6 +10,7 @@ public class InvestigationQDM {
 	String codeDescription;
 	Integer status;
 	Integer companyId;
+	String stringCompanyId;
 	Date createdOn;
 	Date performeOn;
 	String resultValue;
@@ -26,15 +27,17 @@ public class InvestigationQDM {
 		this.codeDescription = codeDescription;
 		this.status = status;
 		this.createdOn = createdOn;
-		this.companyId = companyId;
+		this.stringCompanyId = companyId.toString();
 		
 		if(performeOn!=null){
 			this.performeOn = performeOn;
 		}
+		else
+			this.performeOn=createdOn;
 		
 	}
 	
-public InvestigationQDM(String resultValue,String code, String codeDescription, Integer status, Integer companyId, Date createdOn, Date performeOn) {
+public InvestigationQDM(String resultValue,String code, String codeDescription, Integer status, String companyId, Date createdOn, Date performeOn) {
 		
 		super();
 		this.resultValue=resultValue;
@@ -42,11 +45,12 @@ public InvestigationQDM(String resultValue,String code, String codeDescription, 
 		this.codeDescription = codeDescription;
 		this.status = status;
 		this.createdOn = createdOn;
-		this.companyId = companyId;
+		this.stringCompanyId = companyId;
 		
 		if(performeOn!=null){
 			this.performeOn = performeOn;
-		}
+		}else
+			this.performeOn=createdOn;
 		
 	}
 
@@ -56,6 +60,14 @@ public InvestigationQDM(String resultValue,String code, String codeDescription, 
 
 public void setLabEntriesStatus(int labEntriesStatus) {
 	this.labEntriesStatus = labEntriesStatus;
+}
+
+public String getStringCompanyId() {
+	return stringCompanyId;
+}
+
+public void setStringCompanyId(String stringCompanyId) {
+	this.stringCompanyId = stringCompanyId;
 }
 
 public int getLabEntriesConfirmTestStatus() {

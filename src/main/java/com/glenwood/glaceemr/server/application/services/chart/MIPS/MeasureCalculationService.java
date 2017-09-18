@@ -88,7 +88,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<MUPerformanceBean> getAnalyticsPerformanceReport(int providerId, String accountId, String configuredMeasures);
+	List<MUPerformanceBean> getAnalyticsPerformanceReport(int providerId, String accountId, String configuredMeasures, int submissionMethod,String sharedPath) throws Exception;
 	
 	/**
 	 * Function to get MIPS Performance details based on NPI value
@@ -187,4 +187,6 @@ public interface MeasureCalculationService {
 	void getDashBoardDetails(int providerId,  String accountId, String tinValue, String configuredMeasures, String aciMeasures, boolean byNpi, MUDashboardBean providerDashboard,String sharedPath);
 	
 	String getMeasureValidationServer();
+
+	
 }

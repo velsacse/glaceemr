@@ -1016,11 +1016,15 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		cq.select(root.get(MacraConfiguration_.macraConfigurationType));
 		cq.where(yearPredicate);
 		List<Object> result=em.createQuery(cq).getResultList();
-		if(Integer.parseInt(result.get(0).toString())==0){
-			return true;}
-		else{
-			return false;
+		if(result.size()>0)
+		{	
+			if(Integer.parseInt(result.get(0).toString())==0){
+				return true;}
+			else{
+				return false;
+			}
 		}
+		else return false;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -1376,7 +1380,17 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 						temp.add(results.get(k));
 					}
 				}
-				finalResult.addAll(temp);
+				ArrayList<MIPSPerformanceBean> finalTemp=new ArrayList<MIPSPerformanceBean>();
+				for(int k=1;k<=temp.size();k++)
+				{
+					for(int l=0;l<temp.size();l++)
+					{
+						if(temp.get(l).getCriteria()==k)
+							finalTemp.add(temp.get(l));
+					}
+					
+				}
+				finalResult.addAll(finalTemp);
 				c.add(measureId);
 			}
 			else if(a.contains(results.get(j).getMeasureId()) && !b.contains(results.get(j).getMeasureId()))
@@ -1719,12 +1733,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				resultObject.setReportingRate(reportingRate);
 				resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
 				resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
-				resultObject.setIppPatientsList(getPatientListByCriteria(1, providerId, measureId));
-				resultObject.setDenominatorPatientsList(getPatientListByCriteria(2, providerId, measureId));
-				resultObject.setDenominatorExclusionPatientsList(getPatientListByCriteria(3, providerId, measureId));
-				resultObject.setDenominatorExceptionPatientsList(getPatientListByCriteria(4, providerId, measureId));
-				resultObject.setNumeratorPatientsList(getPatientListByCriteria(5, providerId, measureId));
-				resultObject.setNumeratorExclusionPatientsList(getPatientListByCriteria(6, providerId, measureId));
+				resultObject.setIppPatientsList(getPatientListByCriteria(1, providerId, measureId,resultObject.getCriteria()));
+				resultObject.setDenominatorPatientsList(getPatientListByCriteria(2, providerId, measureId,resultObject.getCriteria()));
+				resultObject.setDenominatorExclusionPatientsList(getPatientListByCriteria(3, providerId, measureId,resultObject.getCriteria()));
+				resultObject.setDenominatorExceptionPatientsList(getPatientListByCriteria(4, providerId, measureId,resultObject.getCriteria()));
+				resultObject.setNumeratorPatientsList(getPatientListByCriteria(5, providerId, measureId,resultObject.getCriteria()));
+				resultObject.setNumeratorExclusionPatientsList(getPatientListByCriteria(6, providerId, measureId,resultObject.getCriteria()));
 
 			}
 
@@ -1821,7 +1835,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	}
 
-	private String getPatientListByCriteria(int criteriaId, int providerId, String measureId){
+	private String getPatientListByCriteria(int criteriaId, int providerId, String measureId,int criteria){
 
 		String patientsList = "";
 
@@ -1850,12 +1864,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		Predicate byProviderId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), providerId);
 		Predicate byReportingYear = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear), reportingYear);		
-
+		Predicate byCriteria=builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesCriteria), criteria);
 		if(!measureId.equals("")){
 			Predicate byMeasureId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), measureId);
-			cq.where(builder.and(byProviderId, byMeasureId, byReportingYear, condition));
+			cq.where(builder.and(byProviderId, byMeasureId, byReportingYear, condition,byCriteria));
 		}else{
-			cq.where(builder.and(byProviderId, byReportingYear, condition));
+			cq.where(builder.and(byProviderId, byReportingYear, condition,byCriteria));
 		}
 
 		cq.select(builder.coalesce(builder.function("string_agg", String.class, root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesPatientId).as(String.class),builder.literal(",")),""));
@@ -2112,8 +2126,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MUPerformanceBean> getAnalyticsPerformanceReport(int providerId, String accountId, String configuredMeasures){
-
+	public List<MUPerformanceBean> getAnalyticsPerformanceReport(int providerId, String accountId, String configuredMeasures,int submissionMethod,String sharedPath) throws Exception{
+		EMeasureUtils eMeasureUtils=new EMeasureUtils();
+		
 		Calendar now = Calendar.getInstance();
 		int reportingYear = now.get(Calendar.YEAR);
 
@@ -2142,7 +2157,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumerator),0),
 			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusion),0),
 			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorException),0),
-			root.get(MacraMeasuresRate_.macraMeasuresRatePerformance),
+			root.get(MacraMeasuresRate_.macraMeasuresRateReporting),
 			root.get(MacraMeasuresRate_.macraMeasuresRateReporting),
 			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRatePoints),0),
 			root.get(MacraMeasuresRate_.macraMeasuresRateNpi),
@@ -2186,9 +2201,23 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			}else{
 				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
 			}
-
+			if(cmsIdNTitle.contains("CMS"))
+			{	
+				EMeasure eMeasureObj=null;
+				List<EMeasure> eMeasures=new ArrayList<EMeasure>();
+				eMeasures= eMeasureUtils.getMeasureBeanDetails(measureId, sharedPath,accountId);
+				eMeasureObj=eMeasures.get(0);
+				
+				resultObject.setPoints(getPointsByBenchMark(resultObject.getReportingRate()/100, eMeasureObj));
+			}
 			resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
 			resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
+			if(submissionMethod==2)
+			resultObject.setSubmissionMethod("EHR");
+			else if(submissionMethod==1)
+			resultObject.setSubmissionMethod("Claims");
+			else if(submissionMethod==3)
+			resultObject.setSubmissionMethod("Registry");
 
 		}
 

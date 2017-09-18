@@ -225,7 +225,7 @@ public class MUPerformanceRateController {
 
 			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 
-			if(providerInfo!=null && providerInfo.get(0).getMacraProviderConfigurationReportingMethod()!=2){
+			if(providerInfo.size()>0 && providerInfo.get(0).getMacraProviderConfigurationReportingMethod()!=2){
 				
 				Date startDate = providerInfo.get(0).getMacraProviderConfigurationReportingStart();
 				Date EndDate = providerInfo.get(0).getMacraProviderConfigurationReportingEnd();
@@ -238,7 +238,7 @@ public class MUPerformanceRateController {
 				
 				measureService.getEPMeasuresResponseObject(accountId, isIndividual, patientID, userIdForEntries, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear(), true);
 				
-			}else if(providerInfo!=null){
+			}else if(providerInfo.size()>0){
 			
 				String[] measureIds = providerInfo.get(0).getMeasures().split(",");
 
@@ -434,13 +434,16 @@ public class MUPerformanceRateController {
 	@RequestMapping(value = "/getMIPSPerformanceRate", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean macraPerformanceRate(@RequestParam(value="reportingYear", required=true) int reportingYear,
-			@RequestParam(value="accountID", required=true) String accountID){
+			@RequestParam(value="accountID", required=true) String accountID,
+			@RequestParam(value="sharedPath", required=true) String sharedPath) throws Exception{
 		
 		String aciMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3";
 		
 		String aciTransMeasures = "ACI_TRANS_EP_1,ACI_TRANS_SM_1,ACI_TRANS_PEA_1,ACI_TRANS_PEA_2,ACI_TRANS_HIE_1,ACI_TRANS_PSE_1,ACI_TRANS_MR_1";
 		
 		List<MacraProviderQDM> providers = new ArrayList<MacraProviderQDM>();
+		providers = providerConfService.getProviderReportingInfo(reportingYear);
+		String lastModifiedOn=performanceService.getLastUpdatedDate();
 		
 		int providerId = -1;
 		
@@ -452,7 +455,7 @@ public class MUPerformanceRateController {
 		
 			List<MacraProviderQDM> providerInfo = null;
 			
-			providers = providerConfService.getProviderReportingInfo(reportingYear);
+			
 
 			for(int i=0;i<providers.size();i++){
 				
@@ -464,13 +467,13 @@ public class MUPerformanceRateController {
 				
 				if(providerInfo != null){
 					
-					providerPerformance.put("ECQM", measureService.getAnalyticsPerformanceReport(providerId, accountID, providerInfo.get(0).getMeasures()));
+					providerPerformance.put("ECQM", measureService.getAnalyticsPerformanceReport(providerId, accountID, providerInfo.get(0).getMeasures(),providerInfo.get(0).getMacraProviderConfigurationReportingMethod(),sharedPath));
 					
 				}
 				
-				providerPerformance.put("ACI", measureService.getAnalyticsPerformanceReport(providerId, accountID, aciMeasures));
+				providerPerformance.put("ACI", measureService.getAnalyticsPerformanceReport(providerId, accountID, aciMeasures,providerInfo.get(0).getMacraProviderConfigurationReportingMethod(),sharedPath));
 				
-				providerPerformance.put("ACI Transition", measureService.getAnalyticsPerformanceReport(providerId, accountID, aciTransMeasures));
+				providerPerformance.put("ACI Transition", measureService.getAnalyticsPerformanceReport(providerId, accountID, aciTransMeasures,providerInfo.get(0).getMacraProviderConfigurationReportingMethod(),sharedPath));
 				
 				finalReportingBean.put(providerId ,providerPerformance);
 				
@@ -485,6 +488,7 @@ public class MUPerformanceRateController {
 		MUAttestationBean finalResponse = new MUAttestationBean();
 		
 		finalResponse.setReportingYear(reportingYear);
+		finalResponse.setLastModifiedDate(lastModifiedOn);
 		finalResponse.setReportingStatus(finalReportingBean);
 		
 		EMRResponseBean response = new EMRResponseBean();

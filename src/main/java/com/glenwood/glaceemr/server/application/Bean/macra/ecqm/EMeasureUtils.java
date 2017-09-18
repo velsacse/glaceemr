@@ -218,7 +218,7 @@ public class EMeasureUtils {
 			
 			result = restTemplate.getForObject(apiUrl, String.class);
 		} catch (Exception e) {
-			GlaceMailer.sendFailureReport("Error Message: Unable to bring EMeasure Info from hub",accountId,GlaceMailer.Configure.MU);
+			GlaceMailer.sendFailureReport("Error Message: Unable to bring EMeasure Info from hub(Connectivity Problem)",accountId,GlaceMailer.Configure.MU);
 			throw e;
 		}
 		
@@ -242,7 +242,7 @@ public class EMeasureUtils {
 
 				putMeasureInfoDetails(measureId, sharedPath,accountId);
 				
-				getMeasureInfo(measureId, sharedPath,accountId);
+				measureInfo=getMeasureInfo(measureId, sharedPath,accountId);
 				
 			}else{
 
@@ -258,7 +258,7 @@ public class EMeasureUtils {
 
 			putMeasureInfoDetails(measureId, sharedPath,accountId);
 			
-			getMeasureInfo(measureId, sharedPath,accountId);
+			measureInfo=getMeasureInfo(measureId, sharedPath,accountId);
 			
 		}
 			
@@ -270,11 +270,12 @@ public class EMeasureUtils {
 	private void writeStringToJsonFile(String jsonContent, int measureId, String sharedPath,String accountId) throws Exception{
 		
 		String sharedFolderPath = sharedPath+File.separator+"ECQM";
-		
+		File sharedFile=new File(sharedPath);
 		File ECQMfolder = new File(sharedFolderPath);
 		
-		if(ECQMfolder.canRead() && ECQMfolder.canExecute())
+		if(sharedFile.canRead() && sharedFile.canExecute())
 		{
+
 			String filename = sharedFolderPath+File.separator+measureId+".json";
 			
 			File f = new File(filename);
@@ -296,6 +297,7 @@ public class EMeasureUtils {
 				resultFile.write(jsonContent);
 				
 				resultFile.flush();
+				resultFile.close();
 				
 				
 			}catch(Exception e){
@@ -475,9 +477,9 @@ public class EMeasureUtils {
 				
 				labTestObj.setCode(eachObj.getCode());
 				labTestObj.setResultValue(eachObj.getResultValue());
-				if(eachObj.getCompanyId() == 54){
+				if(eachObj.getStringCompanyId().equals("54")){
 					labTestObj.setCodeSystemOID("2.16.840.1.113883.6.96");
-				}else if(eachObj.getCompanyId() == 51){
+				}else if(eachObj.getStringCompanyId().equals("51") || eachObj.getStringCompanyId().equals("LOINC")){
 					labTestObj.setCodeSystemOID("2.16.840.1.113883.6.1");
 				}
 				
@@ -497,8 +499,16 @@ public class EMeasureUtils {
 					n.setDescription("Refusal of treatment by patient (situation)");
 					labTestObj.setNegation(n);
 				}else{
-					labTestObj.setStartDate(eachObj.getPerformeOn());
-					labTestObj.setEndDate(eachObj.getPerformeOn());
+					if(eachObj.getPerformeOn()!=null)
+					{
+						labTestObj.setStartDate(eachObj.getPerformeOn());
+						labTestObj.setEndDate(eachObj.getPerformeOn());
+					}
+					else
+					{
+						labTestObj.setStartDate(eachObj.getCreatedOn());
+						labTestObj.setEndDate(eachObj.getCreatedOn());
+					}
 				}
 				
 				labTestQDM.add(labTestObj);
@@ -526,9 +536,9 @@ public class EMeasureUtils {
 				
 				diagnosticStudyObj.setCode(eachObj.getCode());
 				diagnosticStudyObj.setResultValue(eachObj.getResultValue());
-				if(eachObj.getCompanyId() == 54){
+				if(eachObj.getStringCompanyId().equals("54")){
 					diagnosticStudyObj.setCodeSystemOID("2.16.840.1.113883.6.96");
-				}else if(eachObj.getCompanyId() == 51){
+				}else if(eachObj.getStringCompanyId().equals("51") || eachObj.getStringCompanyId().equals("LOINC")){
 					diagnosticStudyObj.setCodeSystemOID("2.16.840.1.113883.6.1");
 				}
 				
@@ -548,8 +558,16 @@ public class EMeasureUtils {
 					n.setDescription("Refusal of treatment by patient (situation)");
 					diagnosticStudyObj.setNegation(n);
 				}else{
-					diagnosticStudyObj.setStartDate(eachObj.getPerformeOn());
-					diagnosticStudyObj.setEndDate(eachObj.getPerformeOn());
+					if(eachObj.getPerformeOn()!=null)
+					{
+						diagnosticStudyObj.setStartDate(eachObj.getPerformeOn());
+						diagnosticStudyObj.setEndDate(eachObj.getPerformeOn());
+					}
+					else
+					{
+						diagnosticStudyObj.setStartDate(eachObj.getCreatedOn());
+						diagnosticStudyObj.setEndDate(eachObj.getCreatedOn());
+					}
 				}
 				
 				diagnosticStudyQDM.add(diagnosticStudyObj);
@@ -580,9 +598,9 @@ public class EMeasureUtils {
 				
 				physicalExamObj.setCode(eachObj.getCode());
 				physicalExamObj.setResultValue(eachObj.getResultValue());
-				if(eachObj.getCompanyId() == 54){
+				if(eachObj.getStringCompanyId().equals("54")){
 					physicalExamObj.setCodeSystemOID("2.16.840.1.113883.6.96");
-				}else if(eachObj.getCompanyId() == 51){
+				}else if(eachObj.getStringCompanyId().equals("51") || eachObj.getStringCompanyId().equals("LOINC")){
 					physicalExamObj.setCodeSystemOID("2.16.840.1.113883.6.1");
 				}
 				
@@ -602,8 +620,16 @@ public class EMeasureUtils {
 					n.setDescription("Refusal of treatment by patient (situation)");
 					physicalExamObj.setNegation(n);
 				}else{
-					physicalExamObj.setStartDate(eachObj.getPerformeOn());
-					physicalExamObj.setEndDate(eachObj.getPerformeOn());
+					if(eachObj.getPerformeOn()!=null)
+					{
+						physicalExamObj.setStartDate(eachObj.getPerformeOn());
+						physicalExamObj.setEndDate(eachObj.getPerformeOn());
+					}
+					else
+					{
+						physicalExamObj.setStartDate(eachObj.getCreatedOn());
+						physicalExamObj.setEndDate(eachObj.getCreatedOn());
+					}
 				}
 				
 				physicalExamQDM.add(physicalExamObj);
@@ -633,9 +659,9 @@ public class EMeasureUtils {
 				
 				interventionObj.setCode(eachObj.getCode());
 				interventionObj.setCode(eachObj.getResultValue());
-				if(eachObj.getCompanyId() == 54){
+				if(eachObj.getStringCompanyId().equals("54")){
 					interventionObj.setCodeSystemOID("2.16.840.1.113883.6.96");
-				}else if(eachObj.getCompanyId() == 51){
+				}else if(eachObj.getStringCompanyId().equals("51") || eachObj.getStringCompanyId().equals("LOINC")){
 					interventionObj.setCodeSystemOID("2.16.840.1.113883.6.1");
 				}
 				
@@ -655,8 +681,16 @@ public class EMeasureUtils {
 					n.setDescription("Refusal of treatment by patient (situation)");
 					interventionObj.setNegation(n);
 				}else{
-					interventionObj.setStartDate(eachObj.getPerformeOn());
-					interventionObj.setEndDate(eachObj.getPerformeOn());
+					if(eachObj.getPerformeOn()!=null)
+					{
+						interventionObj.setStartDate(eachObj.getPerformeOn());
+						interventionObj.setEndDate(eachObj.getPerformeOn());
+					}
+					else
+					{
+						interventionObj.setStartDate(eachObj.getCreatedOn());
+						interventionObj.setEndDate(eachObj.getCreatedOn());
+					}
 				}
 				
 				interventionQDM.add(interventionObj);
@@ -684,9 +718,9 @@ public class EMeasureUtils {
 
 				procedureObj.setCode(eachObj.getCode());
 				procedureObj.setResultValue(eachObj.getResultValue());
-				if(eachObj.getCompanyId() == 54){
+				if(eachObj.getCompanyId().equals("54")){
 					procedureObj.setCodeSystemOID("2.16.840.1.113883.6.96");
-				}else if(eachObj.getCompanyId() == 51){
+				}else if(eachObj.getStringCompanyId().equals("51") || eachObj.getStringCompanyId().equals("LOINC")){
 					procedureObj.setCodeSystemOID("2.16.840.1.113883.6.1");
 				}
 
@@ -706,8 +740,16 @@ public class EMeasureUtils {
 					n.setDescription("Refusal of treatment by patient (situation)");
 					procedureObj.setNegation(n);
 				}else{
-					procedureObj.setStartDate(eachObj.getPerformeOn());
-					procedureObj.setEndDate(eachObj.getPerformeOn());
+					if(eachObj.getPerformeOn()!=null)
+					{
+						procedureObj.setStartDate(eachObj.getPerformeOn());
+						procedureObj.setEndDate(eachObj.getPerformeOn());
+					}
+					else
+					{
+						procedureObj.setStartDate(eachObj.getCreatedOn());
+						procedureObj.setEndDate(eachObj.getCreatedOn());
+					}
 				}
 
 				procedureQDM.add(procedureObj);

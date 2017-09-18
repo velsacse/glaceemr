@@ -12,9 +12,11 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "quality_measures_provider_mapping")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class QualityMeasuresProviderMapping {
 
 	@Id

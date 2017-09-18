@@ -196,28 +196,42 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 	@Override
 	public List<MacraProviderQDM> getCompleteProviderInfo(
 			Integer providerId) throws Exception {
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<MacraProviderQDM> cq = builder.createQuery(MacraProviderQDM.class);
-		Root<MacraProviderConfiguration> rootMacraProviderConfiguration = cq.from(MacraProviderConfiguration.class);
-		Join<MacraProviderConfiguration,QualityMeasuresProviderMapping> joinProviderConfigurationProviderMapping=rootMacraProviderConfiguration.join(MacraProviderConfiguration_.qualityMeasuresProviderMappingTable,JoinType.INNER);
-		Predicate predicateByProviderId =builder.equal(rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationProviderId),providerId);
-		joinProviderConfigurationProviderMapping.on(predicateByProviderId);
-		Selection[] selections= new Selection[] {
-				rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationProviderId).alias("Provider"),
-				rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingYear).alias("Year"),
-				rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingStart).alias("Start Date"),
-				rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingEnd).alias("End Date"),
-				rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingMethod).alias("Rep method"),
-				builder.function("string_agg", String.class, joinProviderConfigurationProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),builder.literal(","))
-		};
-		cq.multiselect(selections);
-		cq.groupBy(rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationProviderId),
-					rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingYear),
-					rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingStart),
-					rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingEnd),
-					rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingMethod)
-				);
-		List<MacraProviderQDM> providerInfo=em.createQuery(cq).getResultList();
+		List<MacraProviderQDM> providerInfo=new ArrayList<MacraProviderQDM>();
+		
+		/**********************************Check for configuration****************************/
+		CriteriaBuilder confiBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Integer>  confiCQ = confiBuilder.createQuery(Integer.class);
+		Root<MacraProviderConfiguration> confiMacraProviderConfiguration = confiCQ.from(MacraProviderConfiguration.class);
+		Predicate byProviderId =confiBuilder.equal(confiMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationProviderId),providerId);
+		confiCQ.select(confiMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingYear));
+		confiCQ.where(byProviderId);
+		List<Integer> configured=em.createQuery(confiCQ).getResultList();
+		
+		if(configured.size()!=0)
+		{	
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<MacraProviderQDM> cq = builder.createQuery(MacraProviderQDM.class);
+			Root<MacraProviderConfiguration> rootMacraProviderConfiguration = cq.from(MacraProviderConfiguration.class);
+			Join<MacraProviderConfiguration,QualityMeasuresProviderMapping> joinProviderConfigurationProviderMapping=rootMacraProviderConfiguration.join(MacraProviderConfiguration_.qualityMeasuresProviderMappingTable,JoinType.INNER);
+			Predicate predicateByProviderId =builder.equal(rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationProviderId),providerId);
+			joinProviderConfigurationProviderMapping.on(predicateByProviderId);
+			Selection[] selections= new Selection[] {
+					rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationProviderId).alias("Provider"),
+					rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingYear).alias("Year"),
+					rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingStart).alias("Start Date"),
+					rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingEnd).alias("End Date"),
+					rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingMethod).alias("Rep method"),
+					builder.function("string_agg", String.class, joinProviderConfigurationProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),builder.literal(","))
+			};
+			cq.multiselect(selections);
+			cq.groupBy(rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationProviderId),
+						rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingYear),
+						rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingStart),
+						rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingEnd),
+						rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingMethod)
+					);
+			providerInfo=em.createQuery(cq).getResultList();
+		}
 		return providerInfo;
 		
 	}

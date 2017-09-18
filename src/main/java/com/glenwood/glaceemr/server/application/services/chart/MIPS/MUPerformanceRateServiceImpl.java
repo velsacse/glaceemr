@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
@@ -295,6 +296,13 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 		
 		return ssn;
 		
+	}
+
+	@Override
+	public String getLastUpdatedDate() {
+		Query query = em.createNativeQuery(" select to_char(max(macra_measures_rate_updated_on),'mm/dd/yyyy hh12:mm:ss AM') from macra_measures_rate");
+		System.out.println("result..............."+query.getSingleResult());
+		return (String) query.getSingleResult();
 	}
 	
 }

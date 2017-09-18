@@ -122,7 +122,7 @@ public class QPPPerformanceController {
 				providerId=-1;
 				userId=-1;
 			}
-
+			
 			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 			if(providerInfo.size()>0){
 

@@ -10,11 +10,13 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @Table(name = "quality_measures_patient_entries_history")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class QualityMeasuresPatientEntriesHistory {
 
 	@Id

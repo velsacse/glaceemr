@@ -14,10 +14,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "macra_provider_configuration")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MacraProviderConfiguration implements Serializable{
 
 	private static final long serialVersionUID = 1L;
