@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.services.fax;
 
 import java.util.List;
+import com.glenwood.glaceemr.server.application.models.FaxBox;
 import com.glenwood.glaceemr.server.application.models.FaxInbox;
 import com.glenwood.glaceemr.server.application.models.FaxOutbox;
 /**
@@ -11,9 +12,9 @@ import com.glenwood.glaceemr.server.application.models.FaxOutbox;
 public interface FaxService {
 
 	
-	public List<FaxOutbox> getOutboxDetails(Integer fax_outbox_folderid, Integer userId,Integer pageNo);
+	public List<FaxOutbox> getOutboxDetails(Integer fax_outbox_folderid, Integer userId,Integer pageNo,Integer pageSize);	
 
-	public List<FaxInboxBean> getInboxDetails(Integer fax_inbox_folderid, Integer fax_inbox_statusid,Integer fax_inbox_forwardeduserid, Integer fax_inbox_location,int pageNo);
+	public List<FaxInboxBean> getInboxDetails(Integer fax_inbox_folderid, Integer fax_inbox_statusid,Integer fax_inbox_forwardeduserid, Integer fax_inbox_location,int pageNo,int pageSize);
 	
 	public List<FaxFolderBean> getFaxFolderCount(Integer fax_location,Integer userId);
 
@@ -32,5 +33,16 @@ public interface FaxService {
 	public List<FaxSignListBean> getSignatureDetails(Integer empId);
 
 	public  String lastFaxReceivedTime(Integer userId);
+	
+	public List<FaxBox> getFaxLocation();
 
+	public List<FaxInboxBean> markReadAlert(Integer faxId,Integer userId);
+	
+	public List<FaxInboxBean> markUnReadAlert(Integer faxId,Integer userId);
+
+	public List<FaxInboxBean> searchFax(String nameString, String faxFolder,
+			String faxTab, String faxLocation,String ForwardUserId);
+	
+	public List<FaxOutbox> outBoxSearch(String nameString, String faxFolder,
+			String faxTab, String faxLocation,String ForwardUserId);
 }

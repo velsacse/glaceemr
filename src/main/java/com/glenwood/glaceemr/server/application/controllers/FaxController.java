@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
+import com.glenwood.glaceemr.server.application.models.FaxOutbox;
+import com.glenwood.glaceemr.server.application.services.fax.FaxInboxBean;
 import com.glenwood.glaceemr.server.application.services.fax.FaxService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
@@ -35,9 +39,10 @@ public class FaxController {
 	@ResponseBody
 	public  EMRResponseBean getOutboxDetails(@RequestParam(value="folderId",required=true,defaultValue="2")Integer fax_outbox_folderid,
 			@RequestParam(value="userId",required=true,defaultValue="-1")Integer userId,
-			@RequestParam(value="pageNo",required=true,defaultValue="1")Integer pageNo) throws Exception{
+			@RequestParam(value="pageNo",required=true,defaultValue="1")Integer pageNo,
+			@RequestParam(value="pageSize",required=false,defaultValue="1")Integer pageSize) throws Exception{
 		    EMRResponseBean emrResponse = new EMRResponseBean();
-		    emrResponse.setData(faxService.getOutboxDetails(fax_outbox_folderid,userId,pageNo));
+			emrResponse.setData(faxService.getOutboxDetails(fax_outbox_folderid,userId,pageNo,pageSize));
 		return emrResponse;
 	}
 	
@@ -58,10 +63,12 @@ public class FaxController {
 			@RequestParam(value="faxStatusId",required=false,defaultValue="-1")Integer fax_inbox_statusid,
 			@RequestParam(value="forwaredUserId",required=true,defaultValue="0")Integer fax_inbox_forwardeduserid,
 			@RequestParam(value="faxLocation",required=false,defaultValue="1")Integer fax_inbox_location,
-			@RequestParam(value="pageNo",required=true,defaultValue="1")int pageNo) throws Exception{
+			@RequestParam(value="pageNo",required=true,defaultValue="1")int pageNo,
+			@RequestParam(value="pageSize",required=false,defaultValue="1")int pageSize)throws Exception{
 		    EMRResponseBean  emrResponse = new EMRResponseBean();
-		    emrResponse.setData(faxService.getInboxDetails(fax_inbox_folderid,fax_inbox_statusid,fax_inbox_forwardeduserid,fax_inbox_location,pageNo));
-		return emrResponse;
+			emrResponse.setData(faxService.getInboxDetails(fax_inbox_folderid,fax_inbox_statusid,fax_inbox_forwardeduserid,fax_inbox_location,pageNo,pageSize));
+
+		    return emrResponse;
 	}
 
 	/**
@@ -222,4 +229,91 @@ public class FaxController {
 		    emrResponse.setData(faxService.lastFaxReceivedTime(userId));
 		return emrResponse ;
 	}
+	
+	/**
+	 * API to get the Fax Location
+	 * @param 
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/getFaxLocation",method=RequestMethod.GET)
+	@ResponseBody
+	public  EMRResponseBean getFaxLocation(
+			@RequestParam(value="userId",required=true,defaultValue="-1")Integer userId) throws Exception{
+		EMRResponseBean emrResponse=new EMRResponseBean();
+		emrResponse.setData(faxService.getFaxLocation());
+		return emrResponse;
+	}
+
+	/**
+	 * API to read the Fax
+	 * @param 
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/markReadFax",method=RequestMethod.GET)
+	@ResponseBody
+	public  EMRResponseBean markReadFax(
+			@RequestParam(value="faxId",required=true,defaultValue="-1")Integer faxId,
+			@RequestParam(value="userId",required=true,defaultValue="-1")Integer userId) throws Exception{
+		List<FaxInboxBean> readFax=faxService.markReadAlert(faxId,userId);
+		EMRResponseBean readFaxBean=new EMRResponseBean();
+		readFaxBean.setData(readFax);
+		return readFaxBean;
+	}
+
+	/**
+	 * API to unread the Fax
+	 * @param 
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/markUnReadFax",method=RequestMethod.GET)
+	@ResponseBody
+	public  EMRResponseBean markUnReadFax(
+			@RequestParam(value="faxId",required=true,defaultValue="-1")Integer faxId,
+			@RequestParam(value="userId",required=true,defaultValue="-1")Integer userId) throws Exception{
+		List<FaxInboxBean> unReadFax=faxService.markUnReadAlert(faxId,userId);
+		EMRResponseBean unReadFaxBean=new EMRResponseBean();
+		unReadFaxBean.setData(unReadFax);
+		return unReadFaxBean;
+	}
+
+	
+	/**
+	 * API to search the Fax
+	 * @param 
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/search",method=RequestMethod.GET)
+	@ResponseBody
+	public  EMRResponseBean search(
+			@RequestParam(value="nameString",required=true,defaultValue="-1")String nameString,
+			@RequestParam(value="faxFolder",required=true,defaultValue="2")String faxFolder,
+			@RequestParam(value="faxTab",required=true,defaultValue="-1")String faxTab,
+			@RequestParam(value="faxLocation",required=true,defaultValue="-1")String faxLocation,
+			@RequestParam(value="forwaredUserId",required=true,defaultValue="0")String forwaredUserId) throws Exception{
+		List<FaxInboxBean> searchFax=faxService.searchFax(nameString,faxFolder,faxTab,faxLocation,forwaredUserId);
+		EMRResponseBean searchFaxBean=new EMRResponseBean();
+		searchFaxBean.setData(searchFax);
+		return searchFaxBean;
+	}
+	
+	@RequestMapping(value="/outBoxSearch",method=RequestMethod.GET)
+	@ResponseBody
+	public  EMRResponseBean outBoxSearch(
+			@RequestParam(value="nameString",required=true,defaultValue="-1")String nameString,
+			@RequestParam(value="faxFolder",required=true,defaultValue="2")String faxFolder,
+			@RequestParam(value="faxTab",required=true,defaultValue="-1")String faxTab,
+			@RequestParam(value="faxLocation",required=true,defaultValue="-1")String faxLocation,
+			@RequestParam(value="forwaredUserId",required=true,defaultValue="0")String forwaredUserId) throws Exception{
+		List<FaxOutbox> searchFax=faxService.outBoxSearch(nameString,faxFolder,faxTab,faxLocation,forwaredUserId);
+		EMRResponseBean searchFaxBean=new EMRResponseBean();
+		searchFaxBean.setData(searchFax);
+		return searchFaxBean;
+	}
+
+
+	
 }

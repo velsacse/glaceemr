@@ -1,11 +1,11 @@
 package com.glenwood.glaceemr.server.application.specifications;
 
-import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaBuilder.Trimspec;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
@@ -273,5 +273,72 @@ public static Specification<FaxOutbox> getSelectedFaxDetails1(final List<Integer
 		};
 		
 	}
+
+public static Specification<FaxInbox> readFax(final Integer faxId){
+	return new Specification<FaxInbox>() {
+		@Override
+		public Predicate toPredicate(Root<FaxInbox> root,
+				CriteriaQuery<?> cq, CriteriaBuilder cb) {
+			Predicate predicate=cq.where(cb.equal(root.get(FaxInbox_.fax_inbox_id),faxId)).getRestriction();
+			return predicate;
+		}
+	};
+}
+
+@SuppressWarnings("unused")
+public static Predicate getReadFax(final Integer faxId,Root<FaxInbox> root,CriteriaQuery<?> cq, CriteriaBuilder cb){
+	
+	Join<FaxInbox, FaxFolder> faxFolderjoin = root.join(FaxInbox_.faxFolder,JoinType.INNER);
+	Join<FaxInbox, InFaxStatus> statusjoin = root.join(FaxInbox_.faxStatus,JoinType.INNER);
+	Join<FaxInbox, FaxType> faxTypejoin = root.join(FaxInbox_.faxType,JoinType.INNER);
+	Join<FaxInbox, EmployeeProfile> empProfile1join = root.join(FaxInbox_.emplopyeeProfile,JoinType.LEFT);
+	Join<FaxInbox, EmployeeProfile> empProfile2join = root.join(FaxInbox_.emplopyeeProfile1,JoinType.LEFT);
+	Predicate condition = null;
+	condition = cb.and(cb.equal(root.get(FaxInbox_.fax_inbox_id),faxId));
+	return cq.where(condition).getRestriction();
+	
+}
+
+@SuppressWarnings("unused")
+public static Expression<Boolean> getSearchFax(String nameString,int faxFolder, int faxTab, int faxLocation,int forwardUserId, Root<FaxInbox> root, CriteriaQuery<Object> cq,CriteriaBuilder cb) {
+
+	Join<FaxInbox, FaxFolder> faxFolderjoin = root.join(FaxInbox_.faxFolder,JoinType.INNER);
+	Join<FaxInbox, InFaxStatus> statusjoin = root.join(FaxInbox_.faxStatus,JoinType.INNER);
+	Join<FaxInbox, FaxType> faxTypejoin = root.join(FaxInbox_.faxType,JoinType.INNER);
+	Join<FaxInbox, EmployeeProfile> empProfile1join = root.join(FaxInbox_.emplopyeeProfile,JoinType.LEFT);
+	Join<FaxInbox, EmployeeProfile> empProfile2join = root.join(FaxInbox_.emplopyeeProfile1,JoinType.LEFT);
+	Predicate condition = null;
+	if(faxTab == 1){
+		condition = cb.and(cb.like(cb.lower(cb.trim(Trimspec.BOTH,root.get(FaxInbox_.fax_inbox_tsid))),
+				nameString.trim().toLowerCase()+"%"), cb.equal(root.get(FaxInbox_.fax_inbox_folderid),faxFolder),cb.equal(root.get(FaxInbox_.fax_inbox017Faxbox),faxLocation),cb.equal(root.get(FaxInbox_.fax_inbox_forwardeduserid),0));
+	}else{
+		condition = cb.and(cb.like(cb.lower(cb.trim(Trimspec.BOTH,root.get(FaxInbox_.fax_inbox_tsid))),
+				nameString.trim().toLowerCase()+"%"), cb.equal(root.get(FaxInbox_.fax_inbox_folderid),faxFolder),cb.equal(root.get(FaxInbox_.fax_inbox017Faxbox),faxLocation),cb.equal(root.get(FaxInbox_.fax_inbox_forwardeduserid),forwardUserId));
+	}
+	;
+	return cq.where(condition).getRestriction();
+}
+
+@SuppressWarnings("unused")
+public static Expression<Boolean> getOutBoxSearchFax(String nameString,int faxFolder, int faxTab, int faxLocation,int forwardUserId, Root<FaxOutbox> root, CriteriaQuery<Object> cq,CriteriaBuilder cb) {
+
+	Join<FaxOutbox, FaxFolder> h496join= root.join(FaxOutbox_.faxFolder,JoinType.INNER);
+	Join<FaxOutbox, FaxStatus> statusjoin= root.join(FaxOutbox_.faxStatus,JoinType.INNER);
+	Join<FaxOutbox, EmployeeProfile> empProfile1join= root.join(FaxOutbox_.chart_users_1,JoinType.LEFT);
+	Join<FaxOutbox, EmployeeProfile> empProfile2join= root.join(FaxOutbox_.chart_users_2,JoinType.LEFT);
+	Join<FaxOutbox, EmployeeProfile> empProfile3join= root.join(FaxOutbox_.chart_users_3,JoinType.LEFT);
+	Predicate condition = null;
+	if(faxTab == 1){
+		condition = cb.and(cb.like(cb.lower(cb.trim(Trimspec.BOTH,root.get(FaxOutbox_.fax_outbox_recipientname))),
+				nameString.trim().toLowerCase()+"%"),cb.equal(root.get(FaxOutbox_.fax_outbox_folderid),faxFolder),cb.equal(root.get(FaxOutbox_.fax_outbox023Faxbox),faxLocation));
+	}else{
+
+		condition = cb.and(cb.like(cb.lower(cb.trim(Trimspec.BOTH,root.get(FaxOutbox_.fax_outbox_recipientname))),
+				nameString.trim().toLowerCase()+"%"),cb.equal(root.get(FaxOutbox_.fax_outbox_folderid),faxFolder),cb.equal(root.get(FaxOutbox_.fax_outbox023Faxbox),faxLocation),cb.equal(root.get(FaxOutbox_.fax_outbox_forwardedto),forwardUserId),cb.equal(root.get(FaxOutbox_.fax_outbox_createdby),forwardUserId));
+	}
+	
+	return cq.where(condition).getRestriction();
+}
+
 
 }
