@@ -718,7 +718,7 @@ public class EMeasureUtils {
 
 				procedureObj.setCode(eachObj.getCode());
 				procedureObj.setResultValue(eachObj.getResultValue());
-				if(eachObj.getCompanyId().equals("54")){
+				if(eachObj.getStringCompanyId().equals("54")){
 					procedureObj.setCodeSystemOID("2.16.840.1.113883.6.96");
 				}else if(eachObj.getStringCompanyId().equals("51") || eachObj.getStringCompanyId().equals("LOINC")){
 					procedureObj.setCodeSystemOID("2.16.840.1.113883.6.1");
