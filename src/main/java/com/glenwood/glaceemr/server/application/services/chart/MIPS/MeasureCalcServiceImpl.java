@@ -1437,7 +1437,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			cq.groupBy(root.get(MacraMeasuresRate_.macraMeasuresRateTin),
 					root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
 					root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
-					root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear));
+					root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
+					root.get(MacraMeasuresRate_.macraMeasuresRatePerformance));
 
 			Selection[] selections= new Selection[] {
 
@@ -1952,11 +1953,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		Predicate byEmpTin=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesTin), empTin);
 
 		Predicate isDenom = builder.greaterThanOrEqualTo(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator), 1);
-		Predicate isNotNumer = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator), 0);
+//		Predicate isNotNumer = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator), 0);
 		Predicate isNotDenomExc = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion), 0);
 		Predicate isNotDenomExcep = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException), 0);
 		Predicate isNotNumerExc = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion), 0);
-
+		Predicate isPartialMet = builder.notEqual(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator),joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator));
+		
 		if(mode == 0){
 			joinQualityMeasuresPatientEntries.on(byMeasureId, byCriteria,byNpi);
 		}else if(mode == 1){
@@ -1989,7 +1991,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		};
 
 		if(isNotMet){
-			cq.where(isDenom,isNotNumer,isNotDenomExc,isNotDenomExcep,isNotNumerExc,byPatientId);
+			cq.where(isDenom,isNotDenomExc,isNotDenomExcep,isNotNumerExc,byPatientId,isPartialMet);
 		}else{
 			cq.where(byPatientId);
 		}

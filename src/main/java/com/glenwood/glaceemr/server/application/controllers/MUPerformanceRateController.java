@@ -434,8 +434,7 @@ public class MUPerformanceRateController {
 	@RequestMapping(value = "/getMIPSPerformanceRate", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean macraPerformanceRate(@RequestParam(value="reportingYear", required=true) int reportingYear,
-			@RequestParam(value="accountID", required=true) String accountID,
-			@RequestParam(value="sharedPath", required=true) String sharedPath) throws Exception{
+			@RequestParam(value="accountID", required=true) String accountID) throws Exception{
 		
 		String aciMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3";
 		
@@ -454,8 +453,7 @@ public class MUPerformanceRateController {
 		try{
 		
 			List<MacraProviderQDM> providerInfo = null;
-			
-			
+			String sharedPath=sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
 
 			for(int i=0;i<providers.size();i++){
 				
