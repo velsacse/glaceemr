@@ -2371,6 +2371,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		return index;
 		
 	}
-	
+	@Override
+	public String getMIPSMeasureDetails(String measureId,String accountId) throws Exception {
+		String getMIPSData = getCMSIdAndTitle(measureId,accountId); 
+		return getMIPSData;
+	}
 	
 }

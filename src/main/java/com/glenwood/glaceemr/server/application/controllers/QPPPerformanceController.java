@@ -516,4 +516,19 @@ public class QPPPerformanceController {
 		
 	}
 	
+	@RequestMapping(value="/fetchMeasureDetails", method= RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getMIPSMeasureDetails(
+			//@RequestParam(value="patientId", required=false) int patientId,
+			//@RequestParam(value="encounterId", required=false) int encounterId,
+			//@RequestParam(value="providerId", required=false) int providerId,
+			@RequestParam(value="accountId", required=false) String accountId,
+			@RequestParam(value="measureId", required=true) String measureId) throws Exception{
+		String resData = measureService.getMIPSMeasureDetails(measureId,accountId);
+		EMRResponseBean response = new EMRResponseBean();
+		response.setData(resData);
+		return response;
+		
+	}
+	
 }

@@ -188,5 +188,6 @@ public interface MeasureCalculationService {
 	
 	String getMeasureValidationServer();
 
+	String getMIPSMeasureDetails(String measureId, String accountId) throws Exception;
 	
 }
