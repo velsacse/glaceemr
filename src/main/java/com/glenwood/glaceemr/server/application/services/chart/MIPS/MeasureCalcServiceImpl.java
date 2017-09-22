@@ -2064,7 +2064,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			Root<PqrsPatientEntries> root = cq.from(PqrsPatientEntries.class);
 
 			cq.where(builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesPatientId), patientID),
-					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesProviderId), providerId),
+					//builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesProviderId), providerId),
 					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesIsActive), true),
 					builder.greaterThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), startDate),
 					builder.lessThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), endDate));

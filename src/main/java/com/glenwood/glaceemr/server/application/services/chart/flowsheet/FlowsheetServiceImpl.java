@@ -36,6 +36,7 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.ChartStatus;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
@@ -55,7 +56,6 @@ import com.glenwood.glaceemr.server.application.models.FlowsheetParam_;
 import com.glenwood.glaceemr.server.application.models.FlowsheetType;
 import com.glenwood.glaceemr.server.application.models.FlowsheetType_;
 import com.glenwood.glaceemr.server.application.models.Flowsheet_;
-import com.glenwood.glaceemr.server.application.models.ChartStatus;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTestmapping;
@@ -109,6 +109,7 @@ import com.glenwood.glaceemr.server.application.models.VaccineReport;
 import com.glenwood.glaceemr.server.application.models.VaccineReport_;
 import com.glenwood.glaceemr.server.application.models.VitalsParameter;
 import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
+import com.glenwood.glaceemr.server.application.repositories.ChartStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsOptionsRepository;
 import com.glenwood.glaceemr.server.application.repositories.ClinicalElementsRepository;
 import com.glenwood.glaceemr.server.application.repositories.CoreClassHierarchyRepository;
@@ -121,7 +122,6 @@ import com.glenwood.glaceemr.server.application.repositories.FlowsheetLabReposit
 import com.glenwood.glaceemr.server.application.repositories.FlowsheetParamRepository;
 import com.glenwood.glaceemr.server.application.repositories.FlowsheetRepository;
 import com.glenwood.glaceemr.server.application.repositories.FlowsheetTypeRepository;
-import com.glenwood.glaceemr.server.application.repositories.ChartStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.IcdmRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabDescpParametersRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabDescriptionRepository;
@@ -387,10 +387,9 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}
 
 	@Override
-	public FlowsheetBean getFlowsheetData(Integer flowsheetTypeParam,Integer flowsheetId, Integer patientId,Integer encounterId) throws Exception {
-		//logger.debug("Request to get the complete flowsheet details based on flowsheet id and patient Id:Inside service Impl");
+	public FlowsheetBean getFlowsheetData(Integer flowsheetTypeParam,Integer flowsheetId, Integer patientId,Integer encounterId, Integer chartId) throws Exception {
 		FlowsheetBean fBean=new FlowsheetBean();
-		Integer chartId=-1;
+	//	Integer chartId=-1;
 		Integer count=0;
 		if(flowsheetTypeParam==-1)
 			fBean.setFlowsheetList(getFlowsheetNames(patientId));
@@ -400,9 +399,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			fBean.setChartBased(false);
 		else
 		{
-			chartId=getChartId(patientId);
-			
-			if(chartId!=-1){
+			//chartId=getChartId(patientId);
+						if(chartId!=-1){
 				count=getCount(chartId);
 				if(count>0){
 				encounterId=getlatestEncounterId(chartId);
@@ -477,8 +475,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				if(rstList!=null)
 					startDate = Optional.fromNullable(rstList).or("").toString();
 			}
-			fBean.setLabData(formLabData(flowsheetId, startDate, patientId,encounterId,patgender));
-			fBean.setParamData(formLabParameters(flowsheetId, startDate, patientId,encounterId,patgender));
+			fBean.setLabData(formLabData(flowsheetId, startDate, patientId,encounterId,patgender,chartId));
+			fBean.setParamData(formLabParameters(flowsheetId, startDate, patientId,encounterId,patgender,chartId));
 			fBean.setParamDateArr(paramPerformedDate);
 			fBean.setDrugData(formDrugData(patientId,flowsheetId, startDate,encounterId,patgender));
 			//			fBean.setNotesData(formNotesData(flowsheetId));
@@ -836,7 +834,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return standardCode;
 	}
 
-	public ArrayList<FS_LabBean> formLabData(int flowsheetId,String startDate, Integer patientId,Integer encounterId,Integer patgender) throws Exception{
+	public ArrayList<FS_LabBean> formLabData(int flowsheetId,String startDate, Integer patientId,Integer encounterId,Integer patgender,Integer chartId) throws Exception{
 	
 		
 		List<Integer> groupIds=getFlowsheetLabGroupId(flowsheetId,patientId);
@@ -863,7 +861,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		if(!testIdString.equals(""))
 			testIdString = testIdString.substring(0, testIdString.length()-1);
 		//if(testIds.size()>0){
-		ArrayList<FS_LabBean>labdata = getLabsData(patientId, flowsheetId, encounterId,testIds,groupIds);
+		ArrayList<FS_LabBean>labdata = getLabsData(patientId, flowsheetId, encounterId,testIds,groupIds,chartId);
 		//ArrayList<FS_LabBean>labEntries = new ArrayList<FS_LabBean>();
 		for(int i=0;i<labdata.size();i++){
 			int grupId = -1;
@@ -904,7 +902,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				performedOrdersGrupId.add(key);
 			}
 		}
-		Integer chartId= getChartId(patientId);
+		//Integer chartId= getChartId(patientId);
 		//List<Chart> charts=chartRepository.findAll(Specifications.where(ChartSpecification.patientId(patientId)));
 		//chartId=charts.get(0).getChartId();
 
@@ -1000,7 +998,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}
 
 
-	private Integer getChartId(Integer patientId) {
+	/*private Integer getChartId(Integer patientId) {
 
 		Integer chartId = -1;
 		CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -1016,7 +1014,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		}
 		return chartId;
 
-	}
+	}*/
 
 	private Integer getPatientGender(Integer patientId) {
 		Integer gender = -1;
@@ -1216,12 +1214,12 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}
 
 
-	private ArrayList<FS_LabBean> getLabsData (int patientId, int flowSheetId, int encounterId,List<Integer>testIds,List<Integer>groupIds) throws Exception{
+	private ArrayList<FS_LabBean> getLabsData (int patientId, int flowSheetId, int encounterId,List<Integer>testIds,List<Integer>groupIds,Integer chartId) throws Exception{
 
-		Integer chartId = -1;
+		//Integer chartId = -1;
 		Date encounterDate=null;
 		Short encounterStatus=0;
-		chartId=getLabChartId(patientId);
+		//chartId=getLabChartId(patientId);
 		if(encounterId!=-1){
 			encounterStatus=getEncounterStatusforLab(encounterId);
 			encounterDate=getencounterDateforLab(encounterId);
@@ -1664,7 +1662,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		return tempFlowSheetData;
 	}
 
-	public ArrayList<FS_LabParameterBean> formLabParameters (int flowsheetId, String startDate,Integer patientId,Integer encounterId,Integer patgender) throws Exception {
+	public ArrayList<FS_LabParameterBean> formLabParameters (int flowsheetId, String startDate,Integer patientId,Integer encounterId,Integer patgender,Integer chartId) throws Exception {
 		paramPerformedDate = new ArrayList<String> ();
 		// getting list of codes and there code system
 		List<Integer> groupIds=getFlowsheetParamGroupId(flowsheetId,patientId);
@@ -1682,7 +1680,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 			paramIds[0]=-2;
 		}
 		//getting the chart id
-	    Integer chartId= getChartId(patientId);
+	   // Integer chartId= getChartId(patientId);
 
 		/*Encounter encounterEntity=null;
 		//getting the encounter details
@@ -3844,8 +3842,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}
 
 	@Override
-	public List<FlowsheetBean> getRecommendedLabs(Integer chartId, Integer patientId,
-			Integer encounterId) throws Exception {
+	public List<FlowsheetBean> getRecommendedLabs(Integer chartId, Integer patientId,Integer encounterId) throws Exception {
 		List<FlowsheetBean> fBeanList=new ArrayList<FlowsheetBean>();
 		List<FlowsheetNameBean> flowSheetIds =getFlowsheetNames(patientId);
 		FlowsheetNameBean hsh_flowSheetIds = null; 
@@ -4910,34 +4907,34 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	}
 
 	@Override
-	public List<FlowsheetBean> getFlowsheetDataList(Integer flowsheetType,String dxCode,Integer patientId,Integer encounterId) throws Exception {
-		ArrayList<FlowsheetBean> flowsheets= new ArrayList<FlowsheetBean> (); 
+	public List<FlowsheetBean> getFlowsheetDataList(Integer flowsheetType,String dxCode,Integer patientId,Integer encounterId,Integer chartId) throws Exception {
+				ArrayList<FlowsheetBean> flowsheets= new ArrayList<FlowsheetBean> (); 
 		if(flowsheetType!=-1){
 			List<Flowsheet> flowsheetIds = flowsheetRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetType(flowsheetType)).and(FlowsheetSpecification.flowsheetIsactive(true)));
 			int flowsheetId;
 			for (int i=0; i < flowsheetIds.size(); i++){
 				flowsheetId = Optional.fromNullable(flowsheetIds.get(i).getFlowsheetId()).or(-1);
-				flowsheets.add(getFlowsheetData(flowsheetType,flowsheetId, patientId, encounterId));
+				flowsheets.add(getFlowsheetData(flowsheetType,flowsheetId, patientId, encounterId,chartId));
 			}
 		}else{
 			List<FlowsheetDx> flowsheetIds = flowsheetDxRepository.findAll(Specifications.where(FlowsheetSpecification.flowsheetDxCode(dxCode)));
 			int flowsheetId;
 			for (int i=0; i < flowsheetIds.size(); i++){
 				flowsheetId = Optional.fromNullable(flowsheetIds.get(i).getFlowsheetDxMapid()).or(-1);
-				flowsheets.add(getFlowsheetData(flowsheetType,flowsheetId, patientId, encounterId));
+				flowsheets.add(getFlowsheetData(flowsheetType,flowsheetId, patientId, encounterId,chartId));
 			}
 		}
 		return flowsheets;
 	}
 
 	@Override
-	public List<FlowsheetBean> getFlowsheetDataListOverdue(Integer patientId,Integer encounterId) throws Exception {
+	public List<FlowsheetBean> getFlowsheetDataListOverdue(Integer patientId,Integer encounterId,Integer chartId) throws Exception {
 		ArrayList<FlowsheetBean> flowsheets= new ArrayList<FlowsheetBean> (); 
 		List<FlowsheetNameBean> flowsheetIds = getFlowsheetNames(patientId);;
 		int flowsheetId;
 		for (int i=0; i < flowsheetIds.size(); i++){
 			flowsheetId = Optional.fromNullable(flowsheetIds.get(i).getFlowsheetId()).or(-1);
-			flowsheets.add(getFlowsheetData(-1,flowsheetId, patientId, encounterId));
+			flowsheets.add(getFlowsheetData(-1,flowsheetId, patientId, encounterId,chartId));
 		}
 		return flowsheets;
 	}
@@ -4945,7 +4942,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 	@Override
 	public List<OverdueAlert> overdueLabs(Integer patientId, Integer chartId, Integer encounterId) throws Exception{
 		List<FlowsheetBean> overdueData= new ArrayList<FlowsheetBean>();
-		overdueData = 	getFlowsheetDataListOverdue(patientId, encounterId);
+		overdueData = 	getFlowsheetDataListOverdue(patientId, encounterId,chartId);
 		List<OverdueAlert>  overduecollection = new ArrayList<OverdueAlert>();
 		for(FlowsheetBean groupone : overdueData){
 
@@ -5133,15 +5130,15 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 		}
 	}
 
-	public FlowsheetBean getFlowsheetDataSOAP(Integer flowsheetTypeParam,Integer flowsheetId, Integer patientId,Integer encounterId) throws Exception{
+	public FlowsheetBean getFlowsheetDataSOAP(Integer flowsheetTypeParam,Integer flowsheetId, Integer patientId,Integer encounterId,Integer chartId) throws Exception{
 		//logger.debug("Request to get the flowsheet details for labs and params section for a particular flowsheet for a patient.:: inside service Impl");
 		FlowsheetBean fBean=new FlowsheetBean();
-		Integer chartId=-1;
+	//	Integer chartId=-1;
 		Integer count=0;
 		if(encounterId!=-1)
 			fBean.setChartBased(false);
 		else		{
-			chartId=getChartId(patientId);
+		//	chartId=getChartId(patientId);
 			
 			if(chartId!=-1){
 				count=getCount(chartId);
@@ -5208,8 +5205,8 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 				if(rstList!=null)
 					startDate = Optional.fromNullable(rstList).or("").toString();
 			}
-			fBean.setLabData(formLabData(flowsheetId, startDate, patientId,encounterId,patgender));
-			fBean.setParamData(formLabParameters(flowsheetId, startDate, patientId,encounterId,patgender));
+			fBean.setLabData(formLabData(flowsheetId, startDate, patientId,encounterId,patgender,chartId));
+			fBean.setParamData(formLabParameters(flowsheetId, startDate, patientId,encounterId,patgender,chartId));
 			fBean.setParamDateArr(paramPerformedDate);
 			fBean.setClinicalVitalsData(formClinicalElementsData(flowsheetId, startDate, patientId,encounterId,patgender));
 			fBean.setVitalDateArr(clinicalVitalParamDate);
@@ -5236,10 +5233,3 @@ public class FlowsheetServiceImpl implements FlowsheetService{
       return encId;
 	}
 }
-
-
-
-
-
-
-

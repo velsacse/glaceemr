@@ -73,12 +73,12 @@ public class FlowsheetController {
 	public EMRResponseBean getFlowsheetsDetails(
 			 @RequestParam(value="flowsheetId", required=true, defaultValue="-1") Integer flowsheetId,
 			 @RequestParam(value="patientId", required=true, defaultValue="-1") Integer patientId,
-			 @RequestParam(value="encounterId", required=true, defaultValue="-1") Integer encounterId) throws Exception{
+			 @RequestParam(value="encounterId", required=true, defaultValue="-1") Integer encounterId,
+				@RequestParam(value="chartId", required=true, defaultValue="-1") Integer chartId)throws Exception{
 		//logger.debug("Begin of request to get the complete flowsheet details based on flowsheet id and patient Id.");
-//		FlowsheetBean flowsheetData = flowsheetService.getFlowsheetData(-1,flowsheetId,patientId,encounterId);
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FLOWSHEET,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully loaded data for flowsheet for the patient having PatientId="+patientId,sessionMap.getUserID(),request.getRemoteAddr(),patientId,"encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
+	//	auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FLOWSHEET,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully loaded data for flowsheet for the patient having PatientId="+patientId,sessionMap.getUserID(),request.getRemoteAddr(),patientId,"encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
-		 emrResponseBean.setData(flowsheetService.getFlowsheetData(-1,flowsheetId,patientId,encounterId));
+		 emrResponseBean.setData(flowsheetService.getFlowsheetData(-1,flowsheetId,patientId,encounterId,chartId));
 		return emrResponseBean;
 	}
 	
@@ -97,13 +97,14 @@ public class FlowsheetController {
 			 @RequestParam(value="flowsheetType", required=true, defaultValue="-1") Integer flowsheetType,
 			  @RequestParam(value="patientId", required=true, defaultValue="-1") Integer patientId,
 			  @RequestParam(value="encounterId", required=true, defaultValue="-1") Integer encounterId,
-			  @RequestParam(value="dxCode", required=true, defaultValue="") String dxCode) throws Exception{
+			  @RequestParam(value="dxCode", required=true, defaultValue="") String dxCode,
+			  @RequestParam(value="chartId", required=true, defaultValue="-1") Integer chartId) throws Exception{
 		//logger.debug("Begin of request to get the complete flowsheet details based on flowsheet id and patient Id for multiple sheets.");
 //		List<FlowsheetBean> flowsheetData = flowsheetService.getFlowsheetDataList(flowsheetType,dxCode,patientId,encounterId);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FLOWSHEET,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully loaded data for flowsheet type="+flowsheetType+" for the patient having PatientId="+patientId,sessionMap.getUserID(),request.getRemoteAddr(),patientId,"encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 		//logger.debug("End of request to get the complete flowsheet details based on flowsheet id and patient Id for multiple sheets.");
 	        EMRResponseBean emrResponseBean=new EMRResponseBean();
-			emrResponseBean.setData(flowsheetService.getFlowsheetDataList(flowsheetType,dxCode,patientId,encounterId));
+			emrResponseBean.setData(flowsheetService.getFlowsheetDataList(flowsheetType,dxCode,patientId,encounterId,chartId));
 	        
 	        return emrResponseBean;
 	}
@@ -194,14 +195,15 @@ public class FlowsheetController {
 	public EMRResponseBean getFlowsheetsDetailsSOAP(
 			 @RequestParam(value="flowsheetId", required=true, defaultValue="-1") Integer flowsheetId,
 			 @RequestParam(value="patientId", required=true, defaultValue="-1") Integer patientId,
-			 @RequestParam(value="encounterId", required=true, defaultValue="-1") Integer encounterId) throws Exception{
+			 @RequestParam(value="encounterId", required=true, defaultValue="-1") Integer encounterId,
+			 @RequestParam(value="chartId", required=true, defaultValue="-1") Integer chartId) throws Exception{
 		logger.debug("Begin of request to get the flowsheet details for labs and params section for a particular flowsheet for a patient");
 //		FlowsheetBean flowsheetData = flowsheetService.getFlowsheetDataSOAP(-1,flowsheetId,patientId,encounterId);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.FLOWSHEET,LogActionType.VIEW,1,Log_Outcome.SUCCESS,"Successfully loaded data for flowsheet="+flowsheetId+" for the patient having PatientId="+patientId,sessionMap.getUserID(),request.getRemoteAddr(),patientId,"encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to get the complete flowsheet details based on flowsheet id and patient Id.");
 		
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
-		emrResponseBean.setData(flowsheetService.getFlowsheetDataSOAP(-1,flowsheetId,patientId,encounterId));
+		emrResponseBean.setData(flowsheetService.getFlowsheetDataSOAP(-1,flowsheetId,patientId,encounterId,chartId));
         
         return emrResponseBean;
 	}
