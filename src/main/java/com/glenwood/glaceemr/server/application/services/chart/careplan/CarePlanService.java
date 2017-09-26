@@ -49,13 +49,15 @@ public interface CarePlanService{
 	void updateCarePlanIntervention(Integer patientId, Integer encounterId, Integer interventionId,  String editedNotes, Integer orderedBy,	Integer performedBy,Integer notDoneBy, String notDoneReason, Integer userId, Integer status, String perfOn, String orderedOn);
 
 	Map<String, Object> getEditCarePlanIntervention(Integer patientId, Integer encounterId, Integer intervenId);
-
-	List<CarePlanInterventionBean> saveInterventionData(CarePlanInterventionBean carePlanInterventionBean);
+	
+	void saveInterventionData(List<CarePlanInterventionBean> carePlanInterventionBean);
+	//List<CarePlanInterventionBean> saveInterventionData(CarePlanInterventionBean carePlanInterventionBean);
 	
 	Map<String, Object> getCarePlanSummaryData(Integer patientId, Integer episodeId, Integer encounterId, Integer episodeTypeId);
 	
 	void saveCarePlanSummaryData(String completeJSON,Integer userId) throws Exception;
 
-
+	List<CarePlanInterventionBean> fetchInterventionPlanData(Integer goalId,Integer concernId,
+			Integer CategoryId, Integer patientId, Integer encounterId,Integer intervenId);
 	
 }

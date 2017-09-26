@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -246,12 +247,18 @@ public class CarePlanController {
 	/**
 	 * To insert intervention data from care plan tab
 	 * @param patientId,encounterId,description,snomedCode
-	 * @throws Exception
+	 * @throws JSONException 
+	 * @throws Exceptions
 	 */
 	@RequestMapping(value ="/SaveCarePlanInterventionData", method = RequestMethod.POST)
 	@ResponseBody
-	public EMRResponseBean saveInterventionData(@RequestBody CarePlanInterventionBean carePlanInterventionBean){
-		List<CarePlanInterventionBean> carePlanInterventions = carePlanService.saveInterventionData(carePlanInterventionBean);
+	public EMRResponseBean saveInterventionData(@RequestBody List<CarePlanInterventionBean> carePlanInterventionBean,
+			@RequestParam(value="patientId", required=true) Integer patientId,
+			@RequestParam(value="encounterId", required=true) Integer encounterId) throws JSONException{
+		//String test="";
+		//JSONArray json=new JSONArray(test);
+		carePlanService.saveInterventionData(carePlanInterventionBean);
+		List<CarePlanInterventionBean> carePlanInterventions=carePlanService.fetchInterventionPlanData(-1,-1,-1,patientId,encounterId,-1);
 		EMRResponseBean bean= new EMRResponseBean();
 		bean.setData(carePlanInterventions);
 		return bean;		
