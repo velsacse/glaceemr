@@ -15,6 +15,8 @@ public class CarePlanInterventionBean {
 	String interventionDescription;
 	String interventionCode;
 	String interventionCodeName;
+	String interventionCodeSystem;
+	String interventionCodeSystemName;
 	String interventionProblemCode;
 	String interventionProblemCodeSystem;
 	String interventionProblemCodeSystemDescription;
@@ -161,6 +163,18 @@ public class CarePlanInterventionBean {
 	}
 	public void setInterventionCodeName(String interventionCodeName) {
 		this.interventionCodeName = interventionCodeName;
+	}
+	public String getInterventionCodeSystem() {
+		return interventionCodeSystem;
+	}
+	public void setInterventionCodeSystem(String interventionCodeSystem) {
+		this.interventionCodeSystem = interventionCodeSystem;
+	}
+	public String getInterventionCodeSystemName() {
+		return interventionCodeSystemName;
+	}
+	public void setInterventionCodeSystemName(String interventionCodeSystemName) {
+		this.interventionCodeSystemName = interventionCodeSystemName;
 	}
 	public String getInterventionProblemCode() {
 		return interventionProblemCode;

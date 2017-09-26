@@ -513,7 +513,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		Map<String,Object> listsMap=new HashMap<String,Object>();
 		listsMap.put("concernsList", fetchCarePlanConcerns(-1,patientId,-1,episodeId));
 		listsMap.put("goalsList", fetchCarePlanGoalBean(-1,-1,patientId,encounterId,episodeId));
-		listsMap.put("interventionsList", fetchInterventionData(-1,-1,-1,patientId,encounterId));
+		listsMap.put("interventionsList", fetchInterventionPlanData(-1,-1,-1,patientId,encounterId,-1));
 		listsMap.put("unitsList",getUnitsOfMeasures() );
 		listsMap.put("vitalsList", getVitalParameters());
 		listsMap.put("shortcutsList", fetchCarePlanShortcuts(episodeTypeId));
@@ -533,7 +533,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 * @param encounterId
 	 * @return List
 	 */
-	@SuppressWarnings("rawtypes")
+	/*@SuppressWarnings("rawtypes")
 	public List<CarePlanInterventionBean> fetchInterventionData(Integer goalId,Integer concernId,
 			Integer categoryId, Integer patientId, Integer encounterId){
 		
@@ -581,7 +581,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 
 		List<CarePlanInterventionBean> interventions=entityManager.createQuery(cq).getResultList();
 		return interventions;
-	}
+	}*/
 
 	/**
 	 * To get vital elements of particular encounterId
@@ -1415,29 +1415,38 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	}
 
 @Override
-public List<CarePlanInterventionBean> saveInterventionData(CarePlanInterventionBean carePlanInterventionBean) {
-	java.util.Date today =new java.util.Date();
-	//Map<String,Object> listsMap=new HashMap<String,Object>();
-	CarePlanIntervention carePlanIntervention = new CarePlanIntervention();
-	if(carePlanInterventionBean.getInterventionId()!=-1)
-		carePlanIntervention.setCareplanInterventionId(carePlanInterventionBean.getInterventionId());
-		carePlanIntervention.setCareplanInterventionPatientId(carePlanInterventionBean.getInterventionPatientId());
-		carePlanIntervention.setCareplanInterventionEncounterId(carePlanInterventionBean.getInterventionEncounterId());
-		carePlanIntervention.setCareplanInterventionConcernId(carePlanInterventionBean.getInterventionConcernId());
-		carePlanIntervention.setCareplanInterventionGoalId(carePlanInterventionBean.getInterventionGoalId());
-		carePlanIntervention.setCareplanInterventionCategoryId(carePlanInterventionBean.getInterventionCategoryId());
-		carePlanIntervention.setCareplanInterventionDescription(carePlanInterventionBean.getInterventionDescription());
-		carePlanIntervention.setCareplanInterventionCode(carePlanInterventionBean.getInterventionCode());
-		carePlanIntervention.setCareplanInterventionCodeSystemName("SNOMED");
-		carePlanIntervention.setCareplanInterventionCodeSystem("2.16.840.1.113883.6.96");
-		carePlanIntervention.setCareplanInterventionStatus(1);
-		carePlanIntervention.setCareplanInterventionOrderedBy(carePlanInterventionBean.getInterventionOrderedBy());
-		carePlanIntervention.setCareplanInterventionOrderedOn(new Timestamp(today.getTime()));
-		carePlanIntervention.setCareplanInterventionNotes(carePlanInterventionBean.getInterventionNotes());
-		carePlanInterventionRepository.save(carePlanIntervention);
-		List<CarePlanInterventionBean> carePlanInterventions=fetchInterventionData(-1,-1,-1,carePlanInterventionBean.getInterventionPatientId(),carePlanInterventionBean.getInterventionEncounterId());
-		return carePlanInterventions;
-
+public void saveInterventionData(List<CarePlanInterventionBean> carePlanInterventionBeans) {
+	List<CarePlanInterventionBean> carePlanInterventions=new ArrayList<CarePlanInterventionBean>();
+	for(CarePlanInterventionBean carePlanInterventionBean : carePlanInterventionBeans){
+		java.util.Date today =new java.util.Date();
+		//Map<String,Object> listsMap=new HashMap<String,Object>();
+		CarePlanIntervention carePlanIntervention = new CarePlanIntervention();
+		if(carePlanInterventionBean.getInterventionId()!=-1)
+			carePlanIntervention.setCareplanInterventionId(carePlanInterventionBean.getInterventionId());
+			carePlanIntervention.setCareplanInterventionPatientId(carePlanInterventionBean.getInterventionPatientId());
+			carePlanIntervention.setCareplanInterventionEncounterId(carePlanInterventionBean.getInterventionEncounterId());
+			carePlanIntervention.setCareplanInterventionConcernId(carePlanInterventionBean.getInterventionConcernId());
+			carePlanIntervention.setCareplanInterventionGoalId(carePlanInterventionBean.getInterventionGoalId());
+			carePlanIntervention.setCareplanInterventionCategoryId(carePlanInterventionBean.getInterventionCategoryId());
+			carePlanIntervention.setCareplanInterventionDescription(carePlanInterventionBean.getInterventionDescription());
+			carePlanIntervention.setCareplanInterventionCode(carePlanInterventionBean.getInterventionCode());
+			carePlanIntervention.setCareplanInterventionCodeSystemName(carePlanInterventionBean.getInterventionCodeSystemName());
+			carePlanIntervention.setCareplanInterventionCodeSystem(carePlanInterventionBean.getInterventionCodeSystem());
+			carePlanIntervention.setCareplanInterventionStatus(carePlanInterventionBean.getInterventionStatus());
+			carePlanIntervention.setCareplanInterventionOrderedBy(carePlanInterventionBean.getInterventionOrderedBy());
+			if(carePlanInterventionBean.getInterventionOrderedBy()!=null)
+			carePlanIntervention.setCareplanInterventionOrderedOn(new Timestamp(today.getTime()));
+			carePlanIntervention.setCareplanInterventionPerformedBy(carePlanInterventionBean.getInterventionPerformedBy());
+			if(carePlanInterventionBean.getInterventionPerformedBy()!=null)
+			carePlanIntervention.setCareplanInterventionPerformedOn(new Timestamp(today.getTime()));
+			carePlanIntervention.setCareplanInterventionNotes(carePlanInterventionBean.getInterventionNotes());
+			carePlanIntervention.setCareplanInterventionNotDoneType(carePlanInterventionBean.getInterventionNotDoneType());
+			carePlanIntervention.setCareplanInterventionNotDoneDescription(carePlanInterventionBean.getInterventionNotDoneDescription());
+			carePlanIntervention.setCareplanInterventionNotDoneCode(carePlanInterventionBean.getInterventionNotDoneCode());
+			carePlanIntervention.setCareplanInterventionNotDoneCodeSystem(carePlanInterventionBean.getInterventionNotDoneCodeSystem());
+			carePlanInterventionRepository.save(carePlanIntervention);
+			// carePlanInterventions.addAll(fetchInterventionData(-1,-1,-1,carePlanInterventionBean.getInterventionPatientId(),carePlanInterventionBean.getInterventionEncounterId()));}
+	}
 }
 
 public List<CarePlanSummaryBean> fetchCarePlanSummaryBean(Integer goalId,Integer concernId,
