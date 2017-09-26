@@ -371,7 +371,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				assessmentObj.setEndDate(diagnosisObj.get(i).getProblemListResolvedDate());
 			}
 			if(diagnosisObj.get(i).getProblemListCodingSystemid()!=null)
-			assessmentQDM.add(i, assessmentObj);
+			assessmentQDM.add(assessmentObj);
 						
 		}
 		
