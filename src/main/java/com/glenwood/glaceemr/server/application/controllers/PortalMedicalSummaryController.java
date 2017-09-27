@@ -1,5 +1,8 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -359,6 +362,112 @@ public class PortalMedicalSummaryController {
 		
 		return responseBean;
 		
+	}
+	
+	@RequestMapping(value = "/getemailresponse", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getemailresponse(@RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+			@RequestParam(value="chartId", required=false, defaultValue="") int chartId,
+			@RequestParam(value="fromDate", required=false, defaultValue="") String fromDate,
+			@RequestParam(value="toDate", required=false, defaultValue="") String  toDate,
+			@RequestParam(value="email", required=false, defaultValue="") String  email,
+			@RequestParam(value="comments", required=false, defaultValue="") String  comments,
+			@RequestParam(value="encounterids", required=false, defaultValue="") String  encounterids,
+			@RequestParam(value="accountId", required=false, defaultValue="") String  accountId,
+			@RequestParam(value="Transmitcheckboxflag", required=false, defaultValue="") int Transmitcheckboxflag) throws Exception{
+		EMRResponseBean responseBean=new EMRResponseBean();
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			Date formattedFromDate = null;
+			Date one=null;
+			Timestamp ts1=null; 
+			Timestamp ts2=null; 
+			String time1="";
+			String time2="";
+			try{
+				@SuppressWarnings("deprecation")
+				Date sample = new Date(fromDate);
+				String fromdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(sample);
+				ts1 = Timestamp.valueOf(fromdate);
+				time1=ts1+"";
+			}catch (Exception e){ e.printStackTrace(); }
+			Date formattedToDate = null;
+			try{
+
+				@SuppressWarnings("deprecation")
+				Date sample = new Date(toDate);
+				String todate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(sample);
+				formattedToDate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(todate);
+				ts2 = Timestamp.valueOf(todate);
+				time2=ts2+"";
+			}catch (Exception e){ e.printStackTrace(); }
+			responseBean.setData(portalMedicalSummaryService.getemailresponse(patientId, chartId,time1,time2,email,comments,encounterids,accountId,Transmitcheckboxflag));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving Encounter  l"
+					+ ""
+					+ ""
+					+ ""
+					+ ""     
+					+ "ist!");
+			return responseBean;
+		}
+	}
+	@RequestMapping(value = "/EncountersByPatient1", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean EncountersByPatient1(@RequestParam(value="patientId", required=false, defaultValue="") int patientId,
+			@RequestParam(value="chartId", required=false, defaultValue="") int chartId,
+			@RequestParam(value="fromDate", required=false, defaultValue="") String fromDate,
+			@RequestParam(value="toDate", required=false, defaultValue="") String  toDate,
+			@RequestParam(value="offset", required=false, defaultValue="") int offset,
+			@RequestParam(value="pageindex", required=false, defaultValue="") int pageindex) throws Exception{
+		EMRResponseBean responseBean=new EMRResponseBean();
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		Timestamp ts1=null; 
+		Timestamp ts2=null;
+		if((fromDate!=null)&&(toDate!=null))
+		{
+			SimpleDateFormat sdf3 = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+
+			Date formattedFromDate = null;
+			Date one=null;
+
+			try{
+				@SuppressWarnings("deprecation")
+				Date sample = new Date(fromDate);
+				String fromdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(sample);
+				ts1 = Timestamp.valueOf(fromdate);
+			}catch (Exception e){ e.printStackTrace(); }
+			Date formattedToDate = null;
+			try{
+
+				@SuppressWarnings("deprecation")
+				Date sample = new Date(toDate);
+				String todate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(sample);
+				formattedToDate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(todate);
+				ts2 = Timestamp.valueOf(todate);
+			}catch (Exception e){ e.printStackTrace(); }
+
+		}
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalMedicalSummaryService.getEncounterList1(patientId, chartId,ts1,ts2,offset,pageindex));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in retrieving Encounter  list!");
+			return responseBean;
+		}
 	}
 	
 }

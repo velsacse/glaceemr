@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.services.portal.portalMedicalSummary;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +18,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,8 @@ import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.HttpConnectionUtils;
+import com.glenwood.glaceemr.server.application.Bean.mailer.GlaceMailer;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.CurrentMedication;
 import com.glenwood.glaceemr.server.application.models.CurrentMedication_;
@@ -39,6 +43,8 @@ import com.glenwood.glaceemr.server.application.models.PatientAllergies_;
 import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
+import com.glenwood.glaceemr.server.application.models.PatientRegistrationBean;
+import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PortalConfigurationBean;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
@@ -76,6 +82,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEn
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.portal.portalAppointments.PortalAppointmentsService;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.SharedFolderUtil;
+import com.glenwood.glaceemr.server.application.services.portal.portalSettings.AjaxConnect;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalBillingConfigFields;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalSettingsService;
 import com.glenwood.glaceemr.server.application.specifications.ChartSpecification;
@@ -592,5 +599,99 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 			em.close();
 		}
 	}
+	
+	@Override
+	public String getemailresponse(int patientId, int chartId, String fromDate, String toDate, String email,
+			String comments,String encounterids,String accountId,int Transmitcheckboxflag) throws Exception {
+		// TODO Auto-generated method stub
+		String subject="";
+		String tomcatURL="";
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<PatientRegistrationBean> criteriaQuery = builder.createQuery(PatientRegistrationBean.class);
+		Root<PatientRegistration> root = criteriaQuery.from(PatientRegistration.class);
+		criteriaQuery.select(builder.construct(PatientRegistrationBean.class, 
+				root.get(PatientRegistration_.patientRegistrationFirstName),
+				root.get(PatientRegistration_.patientRegistrationMidInitial),
+				root.get(PatientRegistration_.patientRegistrationLastName)
+				));
+		criteriaQuery.where(builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId)).distinct(true);
+		List<PatientRegistrationBean> PatientRegistrationList = em.createQuery(criteriaQuery).getResultList();
+
+		if(Transmitcheckboxflag==1)
+		{
+			subject= "::"+HUtil.Nz(PatientRegistrationList.get(0).getPatientRegistrationFirstName(),"")+" "+
+					HUtil.Nz(PatientRegistrationList.get(0).getPatientRegistrationMidInitial(),"")+" "+
+					HUtil.Nz(PatientRegistrationList.get(0).getPatientRegistrationLastName(),"")+"  Sent Clinical Summary ";
+		}
+		else if(Transmitcheckboxflag==2)
+		{
+
+			subject= HUtil.Nz(PatientRegistrationList.get(0).getPatientRegistrationFirstName(),"")+" "+
+					HUtil.Nz(PatientRegistrationList.get(0).getPatientRegistrationMidInitial(),"")+" "+
+					HUtil.Nz(PatientRegistrationList.get(0).getPatientRegistrationLastName(),"")+"  Sent Clinical Summary Via Secure Messaging";
+
+		}
+		String fileName="";
+		if(accountId.trim().equalsIgnoreCase("glace"))
+		{
+			String accountDetails = HttpConnectionUtils.postData("https://sso.glaceemr.com/TestSSOAccess?accountId="+accountId, "", HttpConnectionUtils.HTTP_CONNECTION_MODE,"text/plain");
+			String url="http://192.168.2.240:8000/GlaceDeveloper/GenerateCDAServlet";
+			String querystring="patientId="+patientId+"&fromDate="+fromDate.trim()+"&toDate="+toDate.trim()+"&mode=3&encounterids="+encounterids.trim()+"&email=1";
+			AjaxConnect ajax=new AjaxConnect();
+			fileName=ajax.sendPost(url,querystring);
+		}else{
+
+			String accountDetails = HttpConnectionUtils.postData("https://sso.glaceemr.com/TestSSOAccess?accountId="+accountId, "", HttpConnectionUtils.HTTP_CONNECTION_MODE,"");
+			JSONObject json= new JSONObject(accountDetails);
+			tomcatURL=json.getString("Glace_tomcat_URL");
+			String querystring="patientId="+patientId+"&fromDate="+fromDate.trim()+"&toDate="+toDate.trim()+"&mode=3&encounterids="+encounterids.trim()+"&email=1";
+			AjaxConnect ajax=new AjaxConnect();
+			fileName=ajax.sendPost(tomcatURL,querystring);
+		}
+
+		String responsemessage=GlaceMailer.sendMail(email, comments, accountId,subject,fileName);
+		return responsemessage;
+	}
+
+
+	public List<Encounter> getEncounterList1(int patientId, int chartId,Date fromDate,Date toDate,int offset,int pageindex) {try
+	{
+		logger.error("Vitals API started");
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Integer> criteriaQuery1 = builder.createQuery(Integer.class);
+		CriteriaQuery<Encounter> criteriaQuery = builder.createQuery(Encounter.class);
+		Root<Encounter> root = criteriaQuery.from(Encounter.class);
+		Join<Encounter,EmployeeProfile> EncounterEmployeeProfilejoin=root.join(Encounter_.empProfileEmpId,JoinType.INNER);
+		criteriaQuery.select(builder.construct(Encounter.class, 
+				root.get((Encounter_.encounterDate)),
+				root.get((Encounter_.encounterId)),
+				EncounterEmployeeProfilejoin.get((EmployeeProfile_.empProfileFullname))
+				));
+		if(!HUtil.Nz(fromDate,"").equals("") && !HUtil.Nz(toDate,"").equals(""))
+			criteriaQuery.where(builder.and(builder.equal(root.get(Encounter_.encounterChartid), chartId),builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,root.get(Encounter_.encounterDate)),fromDate),
+					builder.lessThan(builder.function("DATE", Date.class,root.get(Encounter_.encounterDate)),toDate))).orderBy(builder.desc(root.get(Encounter_.encounterDate))).distinct(true);
+		else if( !HUtil.Nz(toDate,"").equals(""))
+			criteriaQuery.where(builder.and(builder.equal(root.get(Encounter_.encounterChartid), chartId),
+					builder.lessThan(builder.function("DATE", Date.class,root.get(Encounter_.encounterDate)),toDate))).orderBy(builder.desc(root.get(Encounter_.encounterDate))).distinct(true);
+		else if(!HUtil.Nz(fromDate,"").equals("") && !HUtil.Nz(toDate,"").equals(""))
+			criteriaQuery.where(builder.and(builder.equal(root.get(Encounter_.encounterChartid), chartId),builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,root.get(Encounter_.encounterDate)),fromDate))).orderBy(builder.desc(root.get(Encounter_.encounterDate))).distinct(true);
+		else
+			criteriaQuery.where(builder.and(builder.equal(root.get(Encounter_.encounterChartid),chartId))).orderBy(builder.desc(root.get(Encounter_.encounterDate))).distinct(true);
+
+		List<Encounter> EncounterList = em.createQuery(criteriaQuery).setFirstResult(offset).setMaxResults(pageindex).getResultList();
+		logger.info("Vital Summary result size: "+EncounterList.size());
+
+		return EncounterList;
+	}
+	catch(Exception exception)
+	{
+		logger.error("Vital  API failed");
+		exception.printStackTrace();
+		return null;
+	}
+	finally
+	{
+		em.close();
+	}}
 
 }
