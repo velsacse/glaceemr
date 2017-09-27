@@ -643,7 +643,7 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 
 			String accountDetails = HttpConnectionUtils.postData("https://sso.glaceemr.com/TestSSOAccess?accountId="+accountId, "", HttpConnectionUtils.HTTP_CONNECTION_MODE,"");
 			JSONObject json= new JSONObject(accountDetails);
-			tomcatURL=json.getString("Glace_tomcat_URL");
+			tomcatURL=json.getString("Glace_tomcat_URL")+"/GenerateCDAServlet";
 			String querystring="patientId="+patientId+"&fromDate="+fromDate.trim()+"&toDate="+toDate.trim()+"&mode=3&encounterids="+encounterids.trim()+"&email=1";
 			AjaxConnect ajax=new AjaxConnect();
 			fileName=ajax.sendPost(tomcatURL,querystring);
