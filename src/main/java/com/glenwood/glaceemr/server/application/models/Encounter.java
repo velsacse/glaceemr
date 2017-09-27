@@ -197,6 +197,23 @@ public class Encounter implements Serializable {
 	public Encounter(){
 		super();
 	}
+	
+	public Encounter( Date encounterDate, int encounterId,String empProfileFullname){
+		try {
+			if(encounterDate!=null)
+			{
+				this.encounterDate = (Timestamp)encounterDate;
+			}
+			this.empProfileEmpId = new EmployeeProfile();
+			this.empProfileEmpId.setEmpProfileFullname(empProfileFullname);
+			this.encounterId= encounterId;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	 
+	
 	public Encounter(Long encounter_service_doctor,Date encounterDate,Integer encounterPos){
 		Timestamp timeStamp = new Timestamp(encounterDate.getTime());
 		this.encounter_service_doctor=encounter_service_doctor;

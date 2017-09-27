@@ -1,9 +1,14 @@
 package com.glenwood.glaceemr.server.application.services.portal.portalMedicalSummary;
 
+import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+
+import org.json.JSONException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
 import com.glenwood.glaceemr.server.application.models.PortalConfigurationBean;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
@@ -92,5 +97,9 @@ public interface PortalMedicalSummaryService {
 
 	
 	public void putLog(int patientId, int chartId);
+	
+	public List<Encounter> getEncounterList1(int patientId, int chartId,Date fromDate,Date toDate,int offset,int pageindex);
+	public String getemailresponse(int patientId, int chartId, String fromDate, String toDate, String email,
+			String comments,String encounterids,String accountId,int Transmitcheckboxflag) throws IOException, JSONException, Exception;
 	
 }

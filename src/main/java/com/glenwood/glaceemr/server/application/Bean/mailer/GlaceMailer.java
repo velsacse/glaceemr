@@ -1,7 +1,15 @@
 package com.glenwood.glaceemr.server.application.Bean.mailer;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -128,6 +136,95 @@ public class GlaceMailer {
 		
 		return mailContent;
 		
+	}
+	
+public static String  sendMail(String email, String comments,String accId,String Subject,String filename) throws IOException, JSONException {
+		
+		
+	    String URL ="https://mailer1.glaceemr.com/Mailer/sendMail";
+		
+		String charSet = "UTF-8";
+		
+		String boundary = "===" + System.currentTimeMillis() + "===";
+		
+		MultipartUtility multipartUtility=new MultipartUtility(URL, charSet, boundary);
+		
+		HttpURLConnection httpURLConnection;
+
+		String accountId=accId;
+		
+		String mailpassword="demopwd0";
+
+		int mailtype=4;		
+
+		String subject=Subject;
+
+		String[] toids = {email};
+
+		String[] ccids = {""};
+
+		String[] bccid={""};
+
+		String htmlbody=comments;
+
+		String plaintext="";
+
+		File f3=new File(filename);
+
+		ArrayList<File> f= new ArrayList<File>();	
+
+		f.add(f3);
+
+		MailerResponse rb=new MailerResponse(mailtype,"donotreply@glenwoodsystems.com"
+				,toids,ccids,bccid,subject,htmlbody,plaintext,accountId,mailpassword);
+		JSONObject jsonInString=new JSONObject();
+
+        jsonInString.put("mailtype", rb.getmailtype());
+
+        jsonInString.put("sender", rb.getSender());
+
+        jsonInString.put("to", rb.getTo());
+
+        jsonInString.put("cc", rb.getCc());
+
+        jsonInString.put("bcc", rb.getBcc());
+
+        jsonInString.put("subject",rb.getSubject());
+
+        jsonInString.put("plaintext",rb.getPlaintext());
+
+        jsonInString.put("htmlbody", rb.getHtmlbody());
+
+        jsonInString.put("accountId", rb.getAccountId());
+
+        jsonInString.put("mailpassword", rb.getMailpassword());
+
+
+		multipartUtility.addFormField("mailerResp", jsonInString.toString());
+		
+	    multipartUtility.addFilePart("attachments",f);
+		
+		httpURLConnection = multipartUtility.execute();
+		
+		httpURLConnection.connect();
+	String resmessage="";
+		
+		String responsemessage=httpURLConnection.getResponseMessage();
+		if(httpURLConnection.getResponseCode()==200) {
+			InputStream inputStream = httpURLConnection.getInputStream();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+			StringBuilder out = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				out.append(line);
+			}
+			resmessage=out.toString();   
+			reader.close();
+		}
+		
+		
+		return resmessage;
+	
 	}
 	
 }
