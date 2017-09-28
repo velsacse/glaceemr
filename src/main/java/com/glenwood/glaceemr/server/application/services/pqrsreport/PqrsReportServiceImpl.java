@@ -174,116 +174,106 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 
 		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 
-		if(providerInfo!=null){
+        if(providerInfo!=null){
 
-			String[] measureIds = providerInfo.get(0).getMeasures().split(",");
+            String[] measureIds = providerInfo.get(0).getMeasures().split(",");
 
-			for(int i=0;i<measureIds.length;i++){
-				pqrsMeasures.add(Integer.parseInt(measureIds[i]));
-			}
+            for(int i=0;i<measureIds.length;i++){
+                pqrsMeasures.add(Integer.parseInt(measureIds[i]));
+            }
 
-			requestObj.setAccountId(accountID);
-			requestObj.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
-			requestObj.setStartDate(providerInfo.get(0).getMacraProviderConfigurationReportingStart());
-			requestObj.setEndDate(providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
-			requestObj.setMeasureIds(pqrsMeasures);
-			patientrequestObj = qdmData.getRequestQDM(em,patientInfoRepo, diagnosisRepo, patientId, providerId);
-			patientrequestObj.setClaims(claimList);
-			requestObj.setPatient(patientrequestObj);
-			ObjectMapper objectMapper = new ObjectMapper();
-			String requestString = objectMapper.writeValueAsString(requestObj);
-			String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
-			response = objectMapper.readValue(responseStr, PQRSResponse.class);
-			response.getAccountId();
-			response.getMeasureStatus();
-			response.getPatientId();
+            requestObj.setAccountId(accountID);
+            requestObj.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
+            requestObj.setStartDate(providerInfo.get(0).getMacraProviderConfigurationReportingStart());
+            requestObj.setEndDate(providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
+            requestObj.setMeasureIds(pqrsMeasures);
+            patientrequestObj = qdmData.getRequestQDM(em,patientInfoRepo, diagnosisRepo, patientId, providerId);
+            patientrequestObj.setClaims(claimList);
+            requestObj.setPatient(patientrequestObj);
+            ObjectMapper objectMapper = new ObjectMapper();
+            String requestString = objectMapper.writeValueAsString(requestObj);
+            //System.out.println("requestString>>>>>>>>>>>>"+requestString);
+            String responseStr = HttpConnectionUtils.postData(hub_url, requestString, HttpConnectionUtils.HTTP_CONNECTION_MODE,"application/json");
+            //System.out.println("responseStr>>>>>>>>>>>>"+responseStr);
+            response = objectMapper.readValue(responseStr, PQRSResponse.class);
+            response.getAccountId();
+            response.getMeasureStatus();
+            response.getPatientId();
 
-			Set<Date> date ;
-			TimeZone.setDefault(TimeZone.getTimeZone("EDT"));
-			Date dos = new Date();
-			String measureId = "";
-			String reporting_year = "";
-			int ptnid = -1;
+            Set<Date> date ;
+            TimeZone.setDefault(TimeZone.getTimeZone("EDT"));
+            Date dos = new Date();
+            String measureId = "";
+            String reporting_year = "";
+            int ptnid = -1;
 
+            Map<String,MeasureStatus> measureStatus = new HashMap<String, MeasureStatus>();
+            date = response.getMeasureStatus().keySet();
+          if(response.getMeasureStatus().size()>0){
+                for(Date Key : date){
+                    dos = response.getMeasureStatus().get(Key).getVisitDate();
+                    System.out.println("dos>>>>>>>>>>>"+dos);
+                    measureStatus = response.getMeasureStatus().get(Key).getMeasureStatus();
+                    if(measureStatus.size()>0){
+                        Set<String> measureidKey = measureStatus.keySet();
+                        
+                        for(String measureid : measureidKey){
+                            measureId = measureStatus.get(measureid).getMeasureId()+"";
+                            int denominator = 0;
+                            denominator = measureStatus.get(measureid).getDenominator();
+                            System.out.println("measureid>>>>>"+measureId+"<<<deno>>"+denominator);
+                            if(flag==1)
+                                continue;
+                            long patid = response.getPatientId();
+                            ptnid = (int) patid;
+                            reporting_year = providerInfo.get(0).getMacraProviderConfigurationReportingYear().toString();
+                            
+                            List<PqrsPatientEntries> pqrsentriesBean = new ArrayList<PqrsPatientEntries>();
+                            PqrsPatientEntries pqrsptnEntrynew = new PqrsPatientEntries();
 
+                            if(denominator == 1){
+                            pqrsentriesBean = checkEntry(startDate,endDate,patid, measureId);
+                            PqrsPatientEntries pqrsptnEntry = new PqrsPatientEntries();
+                            int performanceIndicator = -1;
+                            System.out.println("pqrsentriesBean.size()>>>>>>>>>>>"+pqrsentriesBean.size());
+                            if(pqrsentriesBean.size()>0){
+                                for(int index=0;index<pqrsentriesBean.size();index++){
+                                    pqrsptnEntry = pqrsentriesBean.get(0);
+                                    if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() != null)
+                                    {
+                                        performanceIndicator = pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator();
+                                    }
+                            
+                                if(performanceIndicator != -1)
+                                    pqrsptnEntrynew.setPqrsPatientEntriesPerformanceIndicator(performanceIndicator);
+                            }
+                            System.out.println("pqrsptnEntryIndicator()>>>inside for >>>>>"+pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator());
+                            }
+                            }
+                            makeEntry(measureStatus, ptnid, providerId, measureId, reporting_year, pqrsptnEntrynew, denominator );
+                            System.out.println("before makeentry>>>><<<<<<<measureid>>>"+measureId+"indicator>>>>>>>>>>>>"+pqrsptnEntrynew.getPqrsPatientEntriesPerformanceIndicator()+"deno to makeenrtry"+denominator);
+                        }
+                    }
 
-			Map<String,MeasureStatus> measureStatus = new HashMap<String, MeasureStatus>();
-			date = response.getMeasureStatus().keySet();
-			//for(int i=0;i<response.getMeasureStatus().size();i++){
-			if(response.getMeasureStatus().size()>0){
-				for(Date Key : date){
-					dos = response.getMeasureStatus().get(Key).getVisitDate();
-					System.out.println("dos>>>>>>>"+dos);
-					measureStatus = response.getMeasureStatus().get(Key).getMeasureStatus();
-					if(measureStatus.size()>0){
-						Set<String> measureidKey = measureStatus.keySet();
-						for(String measureid : measureidKey){
-							measureId = measureStatus.get(measureid).getMeasureId()+"";
-							int denominator = 0;
-							denominator = measureStatus.get(measureid).getDenominator();
-							System.out.println("measureid>>>>>"+measureId+"<<<deno>>"+denominator);
-							if(flag==1)
-								continue;
-							SimpleDateFormat parseFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
-							Date dateModifedFormat = parseFormat.parse(dos.toString());
-							SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
-							String dos1 = format.format(dateModifedFormat);
-							long patid = response.getPatientId();
-							ptnid = (int) patid;
-							reporting_year = providerInfo.get(0).getMacraProviderConfigurationReportingYear().toString();
-							List<PqrsPatientEntries> pqrsentriesBean = new ArrayList<PqrsPatientEntries>();
-							//System.out.println("startDate>>>"+startDate+"enddate>>>"+endDate);
-							pqrsentriesBean = checkEntry(startDate,endDate,patid, providerId, measureId);
+                }
+            }
+        }
 
-							PqrsPatientEntries pqrsptnEntry = new PqrsPatientEntries();
-							int performanceIndicator = -1;
-							if(pqrsentriesBean.size()>0){
-
-								for(int index=0;index<pqrsentriesBean.size();index++){
-
-									pqrsptnEntry = pqrsentriesBean.get(0);
-									if(pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator() != null)
-									{
-										performanceIndicator = pqrsptnEntry.getPqrsPatientEntriesPerformanceIndicator();
-									}
-								
-							PqrsPatientEntries pqrsptnEntrynew = new PqrsPatientEntries();
-							if(denominator == 1)
-							{
-								if(performanceIndicator != -1)
-									pqrsptnEntrynew.setPqrsPatientEntriesPerformanceIndicator(performanceIndicator);
-							}
-							System.out.println("before makeentry>>>><<<<<<<measureid>>>"+measureId+"indicator>>>>>>>>>>>>"+pqrsptnEntrynew.getPqrsPatientEntriesPerformanceIndicator()+"deno to makeenrtry"+denominator);
-							makeEntry(response, ptnid, providerId, measureId, reporting_year, pqrsptnEntrynew, denominator );
-								}
-							}
-						}
-					}
-
-				}
-			}
-		}
-
-	}
+    }
 
 
-	public  List<PqrsPatientEntries> checkEntry(Date startdate,Date enddate,long patid, Integer providerId,String measureId) {
+	public  List<PqrsPatientEntries> checkEntry(Date startdate,Date enddate,long patid, String measureId) {
 
 		SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 		List<PqrsPatientEntries> pqrsentriesBean = new ArrayList<PqrsPatientEntries>();
 
 		try{
-			//Date startDate=formatter.parse(dos);
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<PqrsPatientEntries> query = builder.createQuery(PqrsPatientEntries.class);
 			Root<PqrsPatientEntries> root = query.from(PqrsPatientEntries.class);
 			Predicate predicate;
-			//Expression<Date> dosExpr=builder.function("date", Date.class, root.get(PqrsPatientEntries_.pqrsPatientEntriesDos));
-			predicate = builder.and(builder.greaterThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), startdate),
-					builder.lessThanOrEqualTo(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), enddate),
-					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesMeasureId), measureId),
-					//builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesProviderId), providerId),
-					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesIsActive), true));
+			predicate = builder.and(builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesMeasureId), measureId),
+									builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesIsActive), true));
 
 			if(patid != 0){
 				predicate =	builder.and(predicate,(builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesPatientId), patid)));}
@@ -300,7 +290,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 
 	}
 
-	public void makeEntry(PQRSResponse  response,int patientId, Integer providerId,String measureId,String reportYear,PqrsPatientEntries pqrsptnEntry, int denominator) {
+	public void makeEntry(Map<String, MeasureStatus>  measureStatus,int patientId, Integer providerId,String measureId,String reportYear,PqrsPatientEntries pqrsptnEntry, int denominator) {
 
 		Date d = new Date();
 
@@ -310,16 +300,17 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 
 		String tin = getTINForProvider(providerId);
 
-		for(int index = 0;index<response.getMeasureStatus().size();index++){
-
+		/*for(int index = 0;index<response.getMeasureStatus().size();index++){
 			Map<String, MeasureStatus> measureStatus = response.getMeasureStatus().get(response.getMeasureStatus().keySet().toArray()[0]).getMeasureStatus();
 			for(int i=0;i<measureStatus.size();i++){
-
-				MeasureStatus patientObj = measureStatus.get(measureStatus.keySet().toArray()[i]);
-
+			MeasureStatus patientObj = measureStatus.get(measureStatus.keySet().toArray()[i]);*/
+		
+		MeasureStatus patientObj = measureStatus.get(measureId);
+		
 				QualityMeasuresPatientEntries patientData = qualityMeasuresPatientEntriesRepository.findOne(Specifications.where(QPPPerformanceSpecification.isPatientExisting(providerId, measureId, patientId, reportYear, patientObj.getCriteria())));
 
 				if(patientData == null || patientData.equals(null)){
+					
 					patientData = new QualityMeasuresPatientEntries();
 
 					patientData.setQualityMeasuresPatientEntriesPatientId(patientId);
@@ -470,10 +461,10 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 
 					qualityMeasuresPatientEntriesRepository.saveAndFlush(patientData);
 				}
-
-			}
-
-		}
+				System.out.println("provider id>>>>>>"+patientData.getQualityMeasuresPatientEntriesProviderId());
+				System.out.println("measureid>>>>>>"+patientData.getQualityMeasuresPatientEntriesMeasureId());
+				System.out.println("denominator>>>>>>"+patientData.getQualityMeasuresPatientEntriesDenominator());
+		
 	}
 
 	/**

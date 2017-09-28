@@ -92,7 +92,7 @@ public class GlaceMailer {
 
 		String subject = "MIPSPerformance Job Report failed for "+accId;
 
-		String[] toids = {"harikrishna@glenwoodsystems.com","ranjitha@glenwoodsystems.com"};
+		String[] toids = {"harikrishna@glenwoodsystems.com","ranjitha@glenwoodsystems.com","pratheeba@glenwoodsystems.com"};
 
 		String[] ccids = {"ganesh@glenwoodsystems.com"};
 
