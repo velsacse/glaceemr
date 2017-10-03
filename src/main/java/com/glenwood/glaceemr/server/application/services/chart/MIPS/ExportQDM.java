@@ -876,9 +876,9 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Predicate predicateBytestStatus=builder.greaterThan(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),2);
 		Predicate predicateBytestStatus1=builder.notEqual(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),7);
 		Predicate byProvider=builder.equal(EncLabJoin.get(Encounter_.encounter_service_doctor), providerId);
-		Predicate byDateRange = builder.between(joinLabdescLabentries.get(LabEntries_.labEntriesPerfOn), startDate, endDate);
+//		Predicate byDateRange = builder.between(joinLabdescLabentries.get(LabEntries_.labEntriesPerfOn), startDate, endDate);
 		
-		cq.where(predicateBytestStatus,predicateBytestStatus1,byDateRange);
+		cq.where(predicateBytestStatus,predicateBytestStatus1);
 		
 		cq.distinct(true);
 		
