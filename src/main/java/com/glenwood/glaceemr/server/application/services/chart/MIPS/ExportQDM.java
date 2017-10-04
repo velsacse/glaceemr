@@ -889,7 +889,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Root<CvxVaccineGroupMapping> rootTable=cq1.from(CvxVaccineGroupMapping.class);
 		cq1.select(builder1.construct(CVXVaccineGroupMappingBean.class,
 				builder.coalesce(rootTable.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingCvxCode),"").alias("CVX"),
-				builder.coalesce(rootTable.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingUncertainFormulationCvx),"").alias("Vaccine Group CVX")
+				builder.coalesce(rootTable.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingUncertainFormulationCvx),"").alias("Vaccine Group CVX"),
+				builder.coalesce(rootTable.get(CvxVaccineGroupMapping_.cvxVaccineGroupMappingVaccineGroupCode),"")
 				));
 		List<Object> resultlist1=em.createQuery(cq1).getResultList();
 		List<CVXVaccineGroupMappingBean> vaccGroupMappingDetails=new ArrayList<CVXVaccineGroupMappingBean>();
@@ -914,7 +915,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					if((immunizationDetails.get(i).getLabDescriptionCvx()!=null) && (vaccGroupMappingDetails.get(j).getCvx_vaccine_group_mapping_cvx_code()!=null)){
 						if(immunizationDetails.get(i).getLabDescriptionCvx().equals(vaccGroupMappingDetails.get(j).getCvx_vaccine_group_mapping_cvx_code())){
 							vaccId=immunizationDetails.get(i).getLabEntriesTestId();
-							vaccName=immunizationDetails.get(i).getLabDescriptionTestDesc();
+							vaccName=immunizationDetails.get(i).getLabDescriptionTestDesc()+"("+vaccGroupMappingDetails.get(j).getCvxVaccineGroupMappingVaccineGroupCode()+")";
 							if(immunizationDetails.get(i).getLabEntriesPerfOn()!=null)
 							performedDate=immunizationDetails.get(i).getLabEntriesPerfOn();
 							status=immunizationDetails.get(i).getStatus();
@@ -959,7 +960,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				if(!(vaccReportObj.get(i).getLabDescriptionCvx().equals(null)) && (!vaccGroupMappingDetails.get(j).getCvx_vaccine_group_mapping_cvx_code().equals(null)))
 					if(vaccReportObj.get(i).getLabDescriptionCvx().equals(vaccGroupMappingDetails.get(j).getCvx_vaccine_group_mapping_cvx_code())){
 						vaccId=vaccReportObj.get(i).getVaccineReportVaccineId();
-						vaccName=vaccReportObj.get(i).getLabDescriptionTestDesc();
+						vaccName=vaccReportObj.get(i).getLabDescriptionTestDesc()+"("+vaccGroupMappingDetails.get(j).getCvxVaccineGroupMappingVaccineGroupCode()+")";
 						if(vaccReportObj.get(i).getVaccineReportGivenDate()!=null)
 						performedDate=vaccReportObj.get(i).getVaccineReportGivenDate();
 						cvx=vaccGroupMappingDetails.get(j).getCvx_vaccine_group_mapping_cvx_code();
@@ -974,9 +975,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 
 		for(int i=0;i<immuFirstQueryResult.size();i++){
 			com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Immunization immuObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Immunization();
-			immuObject.setCode(immuFirstQueryResult.get(i).getCvx());
-			immuObject.setCodeSystem(immuFirstQueryResult.get(i).getVaccName());
+			immuObject.setCode(immuFirstQueryResult.get(i).getGroupCVX());
+			immuObject.setCodeSystem("CVX");
 			immuObject.setCodeSystemOID("2.16.840.1.113883.12.292");
+			immuObject.setDescription(immuFirstQueryResult.get(i).getVaccName());
 			if(immuFirstQueryResult.get(i).getPerformedDate()!=null)
 			{
 				immuObject.setStartDate(immuFirstQueryResult.get(i).getPerformedDate());

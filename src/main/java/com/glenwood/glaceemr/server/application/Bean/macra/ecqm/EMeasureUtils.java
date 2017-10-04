@@ -225,9 +225,99 @@ public class EMeasureUtils {
 	    writeStringToJsonFile(result, measureId, sharedPath,accountId);
 	    
 	}
-	
+	public String getValueSetOID(String code,EMeasure eMeasure)
+	{
+		String valueSetString="";
+		CQMSpecification specification = null;
+		HashMap<String, Category> qdmCatagory = null;
+		
+		String qdmCategoryNames[] = null;
+		
+		specification = eMeasure.getSpecification();
+		qdmCatagory=specification.getQdmCategory();
+		
+		qdmCategoryNames = new String[qdmCatagory.keySet().size()];
+		
+		for(int k=0;k<qdmCatagory.keySet().size();k++){
+
+			String categoryName = qdmCatagory.keySet().toArray()[k].toString();
+			qdmCategoryNames[k] = categoryName;
+			
+		}
+
+		for(int i=0;i<qdmCatagory.size();i++){
+			
+			Category c = qdmCatagory.get(qdmCategoryNames[i]);
+			List<Valueset> valueSetList=c.getValueSet();
+			for(int eachValueSet=0;eachValueSet<valueSetList.size();eachValueSet++)
+			{
+				Valueset valueSet =valueSetList.get(eachValueSet);
+				List<CodeSet> codeSetList=valueSet.getCodeSetList();
+				for(int eachCodeSet=0;eachCodeSet<codeSetList.size();eachCodeSet++)
+				{
+					CodeSet codeSet=codeSetList.get(eachCodeSet);
+					List<Code> codeList=codeSet.getCodeList();
+					for(int eachCode=0;eachCode<codeList.size();eachCode++)
+					{
+						if(codeList.get(eachCode).getCode().equals(code))
+						{
+							valueSetString=valueSet.getOid();
+							valueSetString+="&&&"+valueSet.getName();
+						}
+					}
+				}
+				
+			}
+		}
+		
+		return valueSetString;
+		
+		
+	}
+	public String getCodeAndCodeSystem(String valueSetOID,EMeasure eMeasure)
+	{
+		String codeAndCodeSystem="";
+		CQMSpecification specification = null;
+		HashMap<String, Category> qdmCatagory = null;
+		
+		String qdmCategoryNames[] = null;
+		
+		specification = eMeasure.getSpecification();
+		qdmCatagory=specification.getQdmCategory();
+		
+		qdmCategoryNames = new String[qdmCatagory.keySet().size()];
+		
+		for(int k=0;k<qdmCatagory.keySet().size();k++){
+
+			String categoryName = qdmCatagory.keySet().toArray()[k].toString();
+			qdmCategoryNames[k] = categoryName;
+			
+		}
+		for(int i=0;i<qdmCatagory.size();i++){
+			
+			Category c = qdmCatagory.get(qdmCategoryNames[i]);
+			List<Valueset> valueSetList=c.getValueSet();
+			for(int eachValueSet=0;eachValueSet<valueSetList.size();eachValueSet++)
+			{
+				Valueset valueSet =valueSetList.get(eachValueSet);
+				if(valueSetOID.equals(valueSet.getOid()))
+				{
+					List<CodeSet> codeSetList=valueSet.getCodeSetList();
+					for(int eachCodeSet=0;eachCodeSet<codeSetList.size();eachCodeSet++)
+					{
+						if(codeSetList.get(eachCodeSet).getCodeSystem().equals("SNOMEDCT") || codeSetList.get(eachCodeSet).getCodeSystem().equals("LOINC"))
+						{	
+							codeAndCodeSystem=codeSetList.get(eachCodeSet).getCodeList().get(0).getCode()+"&&&"+codeSetList.get(eachCodeSet).getCodeSystemOID();
+							return codeAndCodeSystem;
+						}
+					}
+				}
+			}
+		}
+		return codeAndCodeSystem;
+	}
 	@SuppressWarnings("unchecked")
-	private EMeasure getMeasureInfo(int measureId, String sharedPath,String accountId)throws Exception{
+	public EMeasure getMeasureInfo(int measureId, String sharedPath,String accountId)throws Exception{
 		
 		EMeasure measureInfo = new EMeasure();
 					
@@ -473,7 +563,7 @@ public class EMeasureUtils {
 			eachObj = patientInvestigationData.get(i);
 			labTestObj = new LabTest();
 			
-			if(eachObj.getCode()!=null && eachObj.getCode()!="" && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 				
 				labTestObj.setCode(eachObj.getCode());
 				labTestObj.setResultValue(eachObj.getResultValue());
@@ -532,7 +622,7 @@ public class EMeasureUtils {
 			eachObj = patientInvestigationData.get(i);
 			diagnosticStudyObj = new DiagnosticStudy();
 			
-			if(eachObj.getCode()!=null && eachObj.getCode()!="" && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 				
 				diagnosticStudyObj.setCode(eachObj.getCode());
 				diagnosticStudyObj.setResultValue(eachObj.getResultValue());
@@ -594,7 +684,7 @@ public class EMeasureUtils {
 			eachObj = patientInvestigationData.get(i);
 			physicalExamObj = new PhysicalExam();
 			
-			if(eachObj.getCode()!=null && eachObj.getCode()!="" && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 				
 				physicalExamObj.setCode(eachObj.getCode());
 				physicalExamObj.setResultValue(eachObj.getResultValue());
@@ -649,13 +739,12 @@ public class EMeasureUtils {
 		InvestigationQDM eachObj = null;
 		Intervention interventionObj;
 		List<Intervention> interventionQDM = new ArrayList<Intervention>();
-		
 		for(int i=0;i<patientInvestigationData.size();i++){
 			
 			eachObj = patientInvestigationData.get(i);
 			interventionObj = new Intervention();
 			
-			if(eachObj.getCode()!=null && eachObj.getCode()!="" && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 				
 				interventionObj.setCode(eachObj.getCode());
 				interventionObj.setCode(eachObj.getResultValue());
@@ -708,13 +797,12 @@ public class EMeasureUtils {
 		InvestigationQDM eachObj = null;
 		Procedure procedureObj;
 		List<Procedure> procedureQDM = new ArrayList<Procedure>();
-
 		for(int i=0;i<patientInvestigationData.size();i++){
 
 			eachObj = patientInvestigationData.get(i);
 			procedureObj = new Procedure();
 			
-			if(eachObj.getCode()!=null && eachObj.getCode()!="" && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 
 				procedureObj.setCode(eachObj.getCode());
 				procedureObj.setResultValue(eachObj.getResultValue());
@@ -801,7 +889,7 @@ public class EMeasureUtils {
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			assessmentObj=new Assessment();
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 				assessmentObj.setCode(eachObj.getCode());
 				assessmentObj.setCodeSystem(eachObj.getCodeSystem());
 				assessmentObj.setCodeSystemOID(eachObj.getCodeSystemOID());
@@ -822,7 +910,7 @@ public class EMeasureUtils {
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			phyExamObj=new PhysicalExam();
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 				phyExamObj.setCode(eachObj.getCode());
 				phyExamObj.setCodeSystem(eachObj.getCodeSystem());
 				phyExamObj.setCodeSystemOID(eachObj.getCodeSystemOID());
@@ -845,7 +933,7 @@ public class EMeasureUtils {
 			eachObj=clinicalData.get(i);
 			procedureObj =new Procedure();
 			
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 				procedureObj.setCode(eachObj.getCode());
 				procedureObj.setCodeSystem(eachObj.getCodeSystem());
 				procedureObj.setCodeSystemOID(eachObj.getCodeSystemOID());
@@ -866,7 +954,7 @@ public class EMeasureUtils {
 			eachObj=clinicalData.get(i);
 			functionalStatusObj =new FunctionalStatus();
 			
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 				functionalStatusObj.setCode(eachObj.getCode());
 				functionalStatusObj.setCodeSystem(eachObj.getCodeSystem());
 				functionalStatusObj.setCodeSystemOID(eachObj.getCodeSystemOID());
@@ -886,7 +974,7 @@ public class EMeasureUtils {
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			interventionObj =new Intervention();
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 				interventionObj.setCode(eachObj.getCode());
 				interventionObj.setCodeSystem(eachObj.getCodeSystem());
 				interventionObj.setCodeSystemOID(eachObj.getCodeSystemOID());
@@ -917,7 +1005,7 @@ public class EMeasureUtils {
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			diagnosticObj =new DiagnosticStudy();
-			if( !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(eachObj.getCode()) && eachObj.getCode()!="" && eachObj.getCode()!=null && eachObj.getCode().length() > 0){
+			if(eachObj.getCode()!=null && !eachObj.getCode().equals("") && !eachObj.getCode().equals("0") && !eachObj.getCode().equals("00000") && codeList.contains(","+eachObj.getCode()+",") && eachObj.getCode().length() > 0){
 				diagnosticObj.setCode(eachObj.getCode());
 				diagnosticObj.setCodeSystem(eachObj.getCodeSystem());
 				diagnosticObj.setCodeSystemOID(eachObj.getCodeSystemOID());
