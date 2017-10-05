@@ -16,6 +16,7 @@ public class MIPSPatientInformation {
 	String city;
 	String state;
 	String zip;
+	String phoneNo;
 	int ipp;
 	int denominator;
 	int denominatorExclusion;
@@ -23,7 +24,7 @@ public class MIPSPatientInformation {
 	int numeratorExclusion;
 	int denominatorException;
 
-	public MIPSPatientInformation(int patientId, String accountNo,String lastName, String firstName, String dob, String gender,String race, String ethnicity, String address1, String address2,String city, String state, String zip,int ipp,int denominator,int denominatorExclusion,int numerator,int numeratorExclusion,int denominatorException){
+	public MIPSPatientInformation(int patientId, String accountNo,String lastName, String firstName, String dob, String gender,String race, String ethnicity, String address1, String address2,String city, String state, String zip,String phoneNo,int ipp,int denominator,int denominatorExclusion,int numerator,int numeratorExclusion,int denominatorException){
 		super();
 		this.patientId = patientId;
 		this.accountNo = accountNo;
@@ -38,6 +39,7 @@ public class MIPSPatientInformation {
 		this.city = city;
 		this.state = state;
 		this.zip = zip;
+		this.phoneNo = phoneNo;
 		this.ipp=ipp;
 		this.denominator=denominator;
 		this.denominatorExclusion=denominatorExclusion;
@@ -47,7 +49,7 @@ public class MIPSPatientInformation {
 	}
 	public MIPSPatientInformation(int patientId, String accountNo,
 			String lastName, String firstName, String dob, String gender,
-			String race, String ethnicity, String address1, String address2,
+			String race, String ethnicity,String phoneNo, String address1, String address2,
 			String city, String state, String zip) {
 		super();
 		this.patientId = patientId;
@@ -63,6 +65,7 @@ public class MIPSPatientInformation {
 		this.city = city;
 		this.state = state;
 		this.zip = zip;
+		this.phoneNo = phoneNo;
 	}
 
 	public int getPatientId() {
@@ -169,6 +172,12 @@ public class MIPSPatientInformation {
 		this.zip = zip;
 	}
 
+	public String getPhoneNo() {
+		return phoneNo;
+	}
+	public void setPhoneNo(String phoneNo) {
+		this.phoneNo = phoneNo;
+	}
 	public int getIpp() {
 		return ipp;
 	}

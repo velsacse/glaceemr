@@ -3,6 +3,8 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.Bean.EPMeasureBean;
+import com.glenwood.glaceemr.server.application.Bean.GeneratePDFDetails;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPerformanceBean;
 import com.glenwood.glaceemr.server.application.Bean.MIPSResponse;
@@ -35,6 +38,7 @@ import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Response;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
 import com.glenwood.glaceemr.server.application.Bean.mailer.GlaceMailer;
+import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
@@ -529,6 +533,49 @@ public class QPPPerformanceController {
 		response.setData(resData);
 		return response;
 		
+	}
+	
+	@RequestMapping(value = "/generatePDF", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean generatePDF(
+			@RequestParam(value = "provId", required = true) int provId,
+			@RequestParam(value = "measureid", required = true)String measureid,
+			@RequestParam(value = "accountId", required = true)String accountId,
+			@RequestParam(value = "criteriaId", required = true)int criteriaId,
+			@RequestParam(value = "tinId", required= true)String tinId,
+			@RequestParam(value = "criterias", required = true)int criterias,
+			@RequestParam(value = "isNotMet", required= true)boolean isNotMet)throws Exception
+	{	
+		EMRResponseBean result=new EMRResponseBean();
+		String fileName;
+		Date reportingStart = null,reportingEnd = null;
+		Integer ReportingMethod = null;
+		String submissionMethod = null;String reportEnd = null,reportStart = null;
+		GeneratePDFDetails generatePDFDetails=new GeneratePDFDetails();
+		if(provId!=-1){
+			List<MacraProviderConfiguration> groupData = providerConfService.getProviderInfo(provId);
+			reportingStart= groupData.get(0).getMacraProviderConfigurationReportingStart();
+			reportingEnd= groupData.get(0).getMacraProviderConfigurationReportingEnd();
+			ReportingMethod=groupData.get(0).getMacraProviderConfigurationReportingMethod();
+
+			if(ReportingMethod==1)
+				submissionMethod = "Claims";
+			else if(ReportingMethod==2)
+				submissionMethod = "EHR";
+			else if(ReportingMethod==3)
+				submissionMethod = "Registry";
+
+			SimpleDateFormat reportingDate= new SimpleDateFormat("MM/dd/yyyy");
+			reportEnd=reportingDate.format(reportingEnd);
+			reportStart=reportingDate.format(reportingStart);
+			generatePDFDetails.setSubmissionMethod(submissionMethod);
+			generatePDFDetails.setReportStart(reportStart);
+			generatePDFDetails.setReportEnd(reportEnd);
+		}
+
+		fileName = measureService.generatePDFFile(generatePDFDetails,provId,measureid,accountId,criteriaId,tinId,criterias,isNotMet);
+		result.setData(fileName);
+		return result;
 	}
 	
 }

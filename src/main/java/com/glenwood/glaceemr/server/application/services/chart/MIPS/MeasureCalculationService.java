@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.glenwood.glaceemr.server.application.Bean.EPMeasureBean;
+import com.glenwood.glaceemr.server.application.Bean.GeneratePDFDetails;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPerformanceBean;
 import com.glenwood.glaceemr.server.application.Bean.MUDashboardBean;
@@ -190,4 +191,6 @@ public interface MeasureCalculationService {
 
 	String getMIPSMeasureDetails(String measureId, String accountId) throws Exception;
 	
+	String generatePDFFile(GeneratePDFDetails generatePDFDetails,int provId, String measureid,String accountId, int criteriaId,String tinId,int criterias,boolean isNotMet) throws Exception;
+
 }

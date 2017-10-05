@@ -1,6 +1,10 @@
 package com.glenwood.glaceemr.server.application.services.chart.MIPS;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -18,6 +22,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
@@ -38,6 +43,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glenwood.glaceemr.server.application.Bean.ClinicalDataQDM;
 import com.glenwood.glaceemr.server.application.Bean.EPMeasureBean;
+import com.glenwood.glaceemr.server.application.Bean.GeneratePDFDetails;
 import com.glenwood.glaceemr.server.application.Bean.InvestigationQDM;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPerformanceBean;
@@ -1698,7 +1704,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 					if(numeratorCount != 0 || denominatorExceptionCount != 0 || denominatorExclusionCount!=0){
 
-						reportingRate =  Double.valueOf(""+numeratorCount+denominatorExceptionCount+denominatorExclusionCount) / denominatorCount;
+						denominatorCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
+	
+						reportingRate =  Double.valueOf(""+numeratorCount) / denominatorCount;
 						reportingRate =  Double.valueOf(newFormat.format(reportingRate));
 					}
 
@@ -1981,6 +1989,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				builder.coalesce(root.get(PatientRegistration_.patientRegistrationCity), "-"),
 				builder.coalesce(root.get(PatientRegistration_.patientRegistrationStateName), "-"),
 				builder.coalesce(root.get(PatientRegistration_.patientRegistrationZip), "-"),
+				builder.coalesce(root.get(PatientRegistration_.patientRegistrationPhoneNo),"-"),
 				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesIpp),
 				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator),
 				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion),
@@ -2305,6 +2314,197 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		providerDashboard.setAciPoints(aciPoints);
 		providerDashboard.setEcqmPoints(ecqmPoints);
 		
+	}
+	
+	public String getProviderName(Integer provider) throws Exception {
+
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<EmployeeProfile> rootEmployeeProfile = cq.from(EmployeeProfile.class);
+		cq.select(rootEmployeeProfile.get(EmployeeProfile_.empProfileFullname));
+		cq.where(builder.equal(rootEmployeeProfile.get(EmployeeProfile_.empProfileEmpid),provider));
+		Query query=em.createQuery(cq);
+		String providerName=(String) query.getSingleResult();
+		return providerName;
+
+	}
+	
+	private String getPatienttoPrint(int criteriaId, int providerId, String measureId,String tinId){
+
+		String patientsList = "";
+
+		Calendar now = Calendar.getInstance();
+		int reportingYear = now.get(Calendar.YEAR);
+
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<String> cq = builder.createQuery(String.class);
+		Root<QualityMeasuresPatientEntries> root = cq.from(QualityMeasuresPatientEntries.class);
+
+		Predicate condition = null;
+
+		if(criteriaId == 1){
+			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesIpp), 1);
+		}else if(criteriaId == 2){
+			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator), 1);
+		}else if(criteriaId == 3){
+			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion), 1);
+		}else if(criteriaId == 4){
+			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException), 1);
+		}else if(criteriaId == 5){
+			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator), 1);
+		}else if(criteriaId == 6){
+			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion), 1);
+		}
+
+		List<Predicate> predicates = new ArrayList<>();
+		Predicate byMeasureId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), measureId);
+		Predicate byProviderId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), providerId);
+		Predicate byReportingYear = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear), reportingYear);		
+		Predicate byTinId=builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesTin), tinId);
+		
+		
+		predicates.add(byReportingYear);
+		predicates.add(condition);
+		if(!measureId.equals("")){
+			predicates.add(byMeasureId);
+		}
+		if(!tinId.equals("-1"))
+			predicates.add(byTinId);
+		else
+			predicates.add(byProviderId);
+
+		cq.select(builder.coalesce(builder.function("string_agg", String.class, root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesPatientId).as(String.class),builder.literal(",")),""));
+		cq.where(predicates.toArray(new Predicate[predicates.size()]));
+		patientsList = em.createQuery(cq).getResultList().get(0); 
+
+		return patientsList;
+
+	}
+	
+	@Override
+	
+	public  String generatePDFFile(GeneratePDFDetails generatePDFDetails,int provId, String measureid,String accountId, int criteriaId,String tinId,int criterias,boolean isNotMet) throws Exception{
+
+		String CMSIdAndTitle=getCMSIdAndTitle(measureid, accountId);
+		String cmsID=CMSIdAndTitle.split("&&&")[0];
+		String measureName=CMSIdAndTitle.split("&&&")[1];
+		String measureType=null,providerName,submissionMethod,reportingStart,reportingEnd;
+
+
+		if(criteriaId == 1){
+			measureType="IPP";
+		}else if(criteriaId == 2){
+			measureType="Denominator";
+		}else if(criteriaId == 3){
+			measureType="Denominator Exclusion";
+		}else if(criteriaId == 4){
+			measureType="Denominator Exception";
+		}else if(criteriaId == 5){
+			measureType="Numerator";
+		}else if(criteriaId == 6){
+			measureType="Numerator Exclusion";
+		}
+
+		String PDFData="";
+		PDFData+="<html><style> table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse;}</style><body><h3><center>"+measureName+" - "+measureType+" Patient List </center></h3>";
+
+		if(provId!=-1){
+			providerName = getProviderName(provId);
+			submissionMethod = generatePDFDetails.getSubmissionMethod();
+			reportingStart =generatePDFDetails.getReportStart();
+			reportingEnd = generatePDFDetails.getReportEnd();
+			PDFData+="<div><table><tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
+
+		}
+		else
+			PDFData+="<div><table><tr><th> Tin Number</th> <td>:&nbsp</td>  <td>"+tinId+"</tr></table></div>";
+
+		String patientList= getPatienttoPrint(criteriaId,provId,measureid,tinId);
+		List<MIPSPatientInformation> totalPatientList = null;
+
+		if(!tinId.equals("-1")){
+			totalPatientList = getPatient(patientList,measureid, criterias,provId, tinId, -1, isNotMet); 
+		}
+		else{
+			totalPatientList = getPatient(patientList,measureid, criterias,provId, tinId, 1, isNotMet);
+		}
+
+		PDFData+="<table class=beta width=100% cellpadding=5 cellspacing=5> <tr>  <th>Account No.</th>   <th>Last Name</th>   <th>First Name</th>  <th>DOB</th>   <th>Gender</th> <th>Phone Number</th>   </tr><br>";
+		String accountNo = null, lastName = null, firstName = null,dob = null,gender = null,phoneNo = null;
+
+		for(int i=0;i<totalPatientList.size();i++)
+		{
+			accountNo = totalPatientList.get(i).getAccountNo();
+			lastName = totalPatientList.get(i).getLastName();
+			firstName = totalPatientList.get(i).getFirstName();
+			dob = totalPatientList.get(i).getDob();
+			gender = totalPatientList.get(i).getGender();
+			phoneNo = totalPatientList.get(i).getPhoneNo();
+
+			PDFData+="<tr> <td align=left >"+accountNo+"</td>  <td align=left>"+lastName+"</td>  <td align=left>"+firstName+"</td>   <td align=left>"+dob+"</td>    <td align=left>"+gender+"</td> <td align=left>"+phoneNo+"</td> </tr>";
+		}
+		PDFData+="</table> </body></html>";
+		Map sharedPath = sharedFolderBean.getSharedFolderPath();
+		String sharePath=sharedPath.toString();
+		sharePath=sharePath.replace("{glace=", "");
+		sharePath=sharePath.replace("}", "");
+
+		String FileName = cmsID+System.currentTimeMillis();
+		String HTMLFilePath=generateHTMLFilePath(sharePath,PDFData,FileName);
+		String s=null;	
+		File patientDir = new File(sharePath+"/ECQMPDF/");
+		patientDir.setWritable(true, false);
+		patientDir.setExecutable(true, false);
+		if (!patientDir.exists()){
+			patientDir.mkdir();
+		}
+		Process p2 = Runtime.getRuntime().exec("/usr/local/bin/wkhtmltopdf "+HTMLFilePath+" "+sharePath+"/ECQMPDF/"+FileName+".pdf");
+		BufferedReader stdInput2 = new BufferedReader(new  InputStreamReader(p2.getInputStream()));
+		BufferedReader stdError2 = new BufferedReader(new InputStreamReader(p2.getErrorStream()));
+		while ((s = stdInput2.readLine()) != null) {
+			//System.out.println(s);
+		}
+		while ((s = stdError2.readLine()) != null) {
+
+		}
+		return FileName;
+	}
+	
+	
+	public String generateHTMLFilePath(String sharePath,String DatatoSave,String fileName)
+	{
+	File saveDir = new File(sharePath+"/ECQMPDF/");
+	saveDir.setWritable(true, false);
+	saveDir.setExecutable(true, false);
+	String filename="";
+	try{
+		if (!saveDir.exists()){
+		        saveDir.mkdir();
+		}
+		filename =sharePath+"/ECQMPDF/"+fileName+".html";
+		File obj=new File(sharePath+"/ECQMPDF/"+fileName+".html");
+		if(!obj.canExecute())
+		{
+		obj.setExecutable(true);
+		}
+		else
+		if(!obj.canWrite())
+		{
+			obj.setWritable(true);
+		}
+		else
+		if(!obj.canRead())
+		{
+		obj.setReadable(true, false);
+		}
+		FileWriter fstream = new FileWriter(obj);
+		BufferedWriter out = new BufferedWriter(fstream);
+		out.write(DatatoSave);
+		out.close();
+	}catch (Exception e){ //Catch exception if any
+		e.printStackTrace();
+	}
+	return filename;
 	}
 	
 	private int getPointsByReporting(double reportingRate){
