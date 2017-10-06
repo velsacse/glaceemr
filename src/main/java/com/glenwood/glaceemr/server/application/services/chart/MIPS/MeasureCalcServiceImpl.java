@@ -101,6 +101,7 @@ import com.glenwood.glaceemr.server.application.repositories.PatientMeasureStatu
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.ProblemListRepository;
 import com.glenwood.glaceemr.server.application.specifications.QPPPerformanceSpecification;
+import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
 
 @Service
 @Transactional
@@ -2329,136 +2330,154 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	}
 	
-	private String getPatienttoPrint(int criteriaId, int providerId, String measureId,String tinId){
-
-		String patientsList = "";
-
-		Calendar now = Calendar.getInstance();
-		int reportingYear = now.get(Calendar.YEAR);
-
+	private List<MIPSPatientInformation> getPatienttoPrint(int criteriaId, int providerId, String measureId,String tinId,int measureCriteria){
+		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<String> cq = builder.createQuery(String.class);
-		Root<QualityMeasuresPatientEntries> root = cq.from(QualityMeasuresPatientEntries.class);
+		CriteriaQuery<MIPSPatientInformation> cq = builder.createQuery(MIPSPatientInformation.class);
+		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
+		Join<PatientRegistration,QualityMeasuresPatientEntries> joinQualityMeasuresPatientEntries=root.join(PatientRegistration_.qualityMeasuresPatientEntries,JoinType.INNER);
 
-		Predicate condition = null;
-
-		if(criteriaId == 1){
-			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesIpp), 1);
-		}else if(criteriaId == 2){
-			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator), 1);
-		}else if(criteriaId == 3){
-			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion), 1);
-		}else if(criteriaId == 4){
-			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException), 1);
-		}else if(criteriaId == 5){
-			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator), 1);
-		}else if(criteriaId == 6){
-			condition = builder.greaterThanOrEqualTo(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion), 1);
-		}
-
+		String npiValue = getNPIForProvider(providerId);
 		List<Predicate> predicates = new ArrayList<>();
-		Predicate byMeasureId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), measureId);
-		Predicate byProviderId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), providerId);
-		Predicate byReportingYear = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear), reportingYear);		
-		Predicate byTinId=builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesTin), tinId);
-		
-		
-		predicates.add(byReportingYear);
-		predicates.add(condition);
-		if(!measureId.equals("")){
-			predicates.add(byMeasureId);
-		}
+//		Predicate byPatientId = root.get(PatientRegistration_.patientRegistrationId).in(Arrays.asList(patientId.split(",")));
+		predicates.add(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), measureId));
+		predicates.add(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesCriteria), measureCriteria));
+//		predicates.add(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNpi), npiValue);
 		if(!tinId.equals("-1"))
-			predicates.add(byTinId);
+			predicates.add(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesTin), tinId));
 		else
-			predicates.add(byProviderId);
+			predicates.add(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), providerId));
+		
+		if(criteriaId == 1){
+			predicates.add(builder.greaterThanOrEqualTo(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesIpp), 1));
+		}else if(criteriaId == 2){
+			predicates.add(builder.greaterThanOrEqualTo(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator), 1));
+		}else if(criteriaId == 3){
+			predicates.add(builder.greaterThanOrEqualTo(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion), 1));
+		}else if(criteriaId == 4){
+			predicates.add(builder.greaterThanOrEqualTo(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException), 1));
+		}else if(criteriaId == 5){
+			predicates.add(builder.greaterThanOrEqualTo(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator), 1));
+		}else if(criteriaId == 6){
+			predicates.add(builder.greaterThanOrEqualTo(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion), 1));
+		}else if(criteriaId == 7){
+			predicates.add(builder.greaterThanOrEqualTo(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator), 1));
+			predicates.add(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion), 0));
+			predicates.add(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException), 0));
+			predicates.add(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion), 0));
+			predicates.add(builder.notEqual(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator),joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator)));
+			
+		}
+		
+		Selection[] selections= new Selection[] {
+				root.get(PatientRegistration_.patientRegistrationId),
+				root.get(PatientRegistration_.patientRegistrationAccountno),
+				root.get(PatientRegistration_.patientRegistrationLastName),
+				root.get(PatientRegistration_.patientRegistrationFirstName),
+				builder.function("to_mmddyyyy",Date.class,root.get(PatientRegistration_.patientRegistrationDob)),
+				builder.selectCase().when(builder.equal(root.get(PatientRegistration_.patientRegistrationSex),1),"Male").when(builder.equal(root.get(PatientRegistration_.patientRegistrationSex),2),"Female").otherwise("TG").as(String.class),
+				root.get(PatientRegistration_.patientRegistrationRace),
+				root.get(PatientRegistration_.patientRegistrationEthnicity),
+				builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress1), ""),
+				builder.coalesce(root.get(PatientRegistration_.patientRegistrationAddress2), ""),
+				builder.coalesce(root.get(PatientRegistration_.patientRegistrationCity), "-"),
+				builder.coalesce(root.get(PatientRegistration_.patientRegistrationStateName), "-"),
+				builder.coalesce(root.get(PatientRegistration_.patientRegistrationZip), "-"),
+				builder.coalesce(root.get(PatientRegistration_.patientRegistrationPhoneNo),""),
+				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesIpp),
+				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator),
+				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion),
+				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator),
+				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion),
+				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException)
 
-		cq.select(builder.coalesce(builder.function("string_agg", String.class, root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesPatientId).as(String.class),builder.literal(",")),""));
+		};
+
 		cq.where(predicates.toArray(new Predicate[predicates.size()]));
-		patientsList = em.createQuery(cq).getResultList().get(0); 
-
-		return patientsList;
+		cq.distinct(true);
+		cq.orderBy(builder.asc(root.get(PatientRegistration_.patientRegistrationLastName)),builder.asc(root.get(PatientRegistration_.patientRegistrationFirstName)));
+		cq.select(builder.construct(MIPSPatientInformation.class,selections));
+		
+		List<MIPSPatientInformation> patientDetailsWithResults = em.createQuery(cq).getResultList();
+		return patientDetailsWithResults;
 
 	}
 	
 	@Override
 	
-	public  String generatePDFFile(GeneratePDFDetails generatePDFDetails,int provId, String measureid,String accountId, int criteriaId,String tinId,int criterias,boolean isNotMet) throws Exception{
+	public  String generatePDFFile(GeneratePDFDetails generatePDFDetails,int provId, String measureid,String accountId, int criteriaId,String tinId,int measureCriteria,boolean isNotMet) throws Exception{
 
 		String CMSIdAndTitle=getCMSIdAndTitle(measureid, accountId);
 		String cmsID=CMSIdAndTitle.split("&&&")[0];
 		String measureName=CMSIdAndTitle.split("&&&")[1];
 		String measureType=null,providerName,submissionMethod,reportingStart,reportingEnd;
-
-
-		if(criteriaId == 1){
-			measureType="IPP";
-		}else if(criteriaId == 2){
-			measureType="Denominator";
-		}else if(criteriaId == 3){
-			measureType="Denominator Exclusion";
-		}else if(criteriaId == 4){
-			measureType="Denominator Exception";
-		}else if(criteriaId == 5){
-			measureType="Numerator";
-		}else if(criteriaId == 6){
-			measureType="Numerator Exclusion";
-		}
-
 		String PDFData="";
-		PDFData+="<html><style> table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse;}</style><body><h3><center>"+measureName+" - "+measureType+" Patient List </center></h3>";
-
-		if(provId!=-1){
-			providerName = getProviderName(provId);
-			submissionMethod = generatePDFDetails.getSubmissionMethod();
-			reportingStart =generatePDFDetails.getReportStart();
-			reportingEnd = generatePDFDetails.getReportEnd();
-			PDFData+="<div><table><tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
-
+		try{
+			if(criteriaId == 1){
+				measureType="IPP";
+			}else if(criteriaId == 2){
+				measureType="Denominator";
+			}else if(criteriaId == 3){
+				measureType="Denominator Exclusion";
+			}else if(criteriaId == 4){
+				measureType="Denominator Exception";
+			}else if(criteriaId == 5){
+				measureType="Numerator";
+			}else if(criteriaId == 6){
+				measureType="Numerator Exclusion";
+			}else if(criteriaId == 7){
+				measureType="Not Met";
+			}
+	
+			
+			PDFData+="<html><style> table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse;}</style><body><h3><center>"+measureName+" - "+measureType+" Patient List </center></h3>";
+	
+			if(provId!=-1){
+				providerName = getProviderName(provId);
+				submissionMethod = generatePDFDetails.getSubmissionMethod();
+				reportingStart =generatePDFDetails.getReportStart();
+				reportingEnd = generatePDFDetails.getReportEnd();
+				PDFData+="<div><table><tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
+	
+			}
+			else
+				PDFData+="<div><table><tr><th> Tin Number</th> <td>:&nbsp</td>  <td>"+tinId+"</tr></table></div>";
+	
+			List<MIPSPatientInformation> totalPatientList= getPatienttoPrint(criteriaId,provId,measureid,tinId,measureCriteria);
+	
+	
+			PDFData+="<table class=beta width=100% cellpadding=5 cellspacing=5> <tr>  <th>Account No.</th>   <th>Last Name</th>   <th>First Name</th>  <th>DOB</th>   <th>Gender</th> <th>Phone Number</th>   </tr><br>";
+			String accountNo = null, lastName = null, firstName = null,dob = null,gender = null,phoneNo = null;
+	
+			for(int i=0;i<totalPatientList.size();i++)
+			{
+				accountNo = totalPatientList.get(i).getAccountNo();
+				lastName = totalPatientList.get(i).getLastName();
+				firstName = totalPatientList.get(i).getFirstName();
+				dob = totalPatientList.get(i).getDob();
+				gender = totalPatientList.get(i).getGender();
+				phoneNo = totalPatientList.get(i).getPhoneNo();
+	
+				PDFData+="<tr> <td align=left >"+accountNo+"</td>  <td align=left>"+lastName+"</td>  <td align=left>"+firstName+"</td>   <td align=left>"+dob+"</td>    <td align=left>"+gender+"</td> <td align=left>"+phoneNo+"</td> </tr>";
+			}
+			PDFData+="</table> </body></html>";
 		}
-		else
-			PDFData+="<div><table><tr><th> Tin Number</th> <td>:&nbsp</td>  <td>"+tinId+"</tr></table></div>";
-
-		String patientList= getPatienttoPrint(criteriaId,provId,measureid,tinId);
-		List<MIPSPatientInformation> totalPatientList = null;
-
-		if(!tinId.equals("-1")){
-			totalPatientList = getPatient(patientList,measureid, criterias,provId, tinId, -1, isNotMet); 
+		catch(Exception e){
+			PDFData="";
 		}
-		else{
-			totalPatientList = getPatient(patientList,measureid, criterias,provId, tinId, 1, isNotMet);
-		}
-
-		PDFData+="<table class=beta width=100% cellpadding=5 cellspacing=5> <tr>  <th>Account No.</th>   <th>Last Name</th>   <th>First Name</th>  <th>DOB</th>   <th>Gender</th> <th>Phone Number</th>   </tr><br>";
-		String accountNo = null, lastName = null, firstName = null,dob = null,gender = null,phoneNo = null;
-
-		for(int i=0;i<totalPatientList.size();i++)
-		{
-			accountNo = totalPatientList.get(i).getAccountNo();
-			lastName = totalPatientList.get(i).getLastName();
-			firstName = totalPatientList.get(i).getFirstName();
-			dob = totalPatientList.get(i).getDob();
-			gender = totalPatientList.get(i).getGender();
-			phoneNo = totalPatientList.get(i).getPhoneNo();
-
-			PDFData+="<tr> <td align=left >"+accountNo+"</td>  <td align=left>"+lastName+"</td>  <td align=left>"+firstName+"</td>   <td align=left>"+dob+"</td>    <td align=left>"+gender+"</td> <td align=left>"+phoneNo+"</td> </tr>";
-		}
-		PDFData+="</table> </body></html>";
-		Map sharedPath = sharedFolderBean.getSharedFolderPath();
-		String sharePath=sharedPath.toString();
-		sharePath=sharePath.replace("{glace=", "");
-		sharePath=sharePath.replace("}", "");
+		String sharedPath = sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
+		
 
 		String FileName = cmsID+System.currentTimeMillis();
-		String HTMLFilePath=generateHTMLFilePath(sharePath,PDFData,FileName);
+		String HTMLFilePath=generateHTMLFilePath(sharedPath,PDFData,FileName);
 		String s=null;	
-		File patientDir = new File(sharePath+"/ECQMPDF/");
+		File patientDir = new File(sharedPath+"/ECQMPDF/");
 		patientDir.setWritable(true, false);
 		patientDir.setExecutable(true, false);
 		if (!patientDir.exists()){
 			patientDir.mkdir();
 		}
-		Process p2 = Runtime.getRuntime().exec("/usr/local/bin/wkhtmltopdf "+HTMLFilePath+" "+sharePath+"/ECQMPDF/"+FileName+".pdf");
+		Process p2 = Runtime.getRuntime().exec("/usr/local/bin/wkhtmltopdf "+HTMLFilePath+" "+sharedPath+"/ECQMPDF/"+FileName+".pdf");
 		BufferedReader stdInput2 = new BufferedReader(new  InputStreamReader(p2.getInputStream()));
 		BufferedReader stdError2 = new BufferedReader(new InputStreamReader(p2.getErrorStream()));
 		while ((s = stdInput2.readLine()) != null) {

@@ -77,7 +77,7 @@ public class QPPPerformanceController {
 		
 		measureService.saveMeasureDetails(userId, patientID, measureStatus, true);
 		
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.UPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in saving measure status details" , -1, request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
+	auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.UPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in saving measure status details" , -1, request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");
 		
 	}
 	
@@ -191,7 +191,7 @@ public class QPPPerformanceController {
 			
 			printWriter.flush();
 			printWriter.close();
-			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating and validating patient QDM" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.USER_LOGIN, "patientId="+patientID, "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating and validating patient QDM" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.USER_LOGIN, "patientId="+patientID, "");
 
 		return response;
 		
@@ -239,7 +239,7 @@ public class QPPPerformanceController {
 
 			response.setData(epMeasureStatus);
 
-			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating EP Measure details" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.USER_LOGIN, "patientId="+patientID, "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating EP Measure details" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.USER_LOGIN, "patientId="+patientID, "");
 			
 		}catch(Exception e){
 			
@@ -260,7 +260,7 @@ public class QPPPerformanceController {
 				printWriter.flush();
 				printWriter.close();
 			
-				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.EXCEPTION,"Error occurred while generating EP Measure details" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.USER_LOGIN, "patientId="+patientID, "");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.EXCEPTION,"Error occurred while generating EP Measure details" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.USER_LOGIN, "patientId="+patientID, "");
 				
 				e.printStackTrace();
 				
@@ -326,7 +326,7 @@ public class QPPPerformanceController {
 
 			response.setData(performanceObj);
 			
-			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating MIPS Performance Report" , -1, request.getRemoteAddr(),-1,"isACIReport="+isACIReport+"&providerId="+providerId,LogUserType.USER_LOGIN, "", "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating MIPS Performance Report" , -1, request.getRemoteAddr(),-1,"isACIReport="+isACIReport+"&providerId="+providerId,LogUserType.USER_LOGIN, "", "");
 
 		}catch(Exception e){
 			
@@ -347,7 +347,7 @@ public class QPPPerformanceController {
 				printWriter.flush();
 				printWriter.close();
 			
-				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Error in generating MIPS Performance Report" , -1, request.getRemoteAddr(),-1,"isACIReport="+isACIReport+"&providerId="+providerId,LogUserType.USER_LOGIN, "", "");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Error in generating MIPS Performance Report" , -1, request.getRemoteAddr(),-1,"isACIReport="+isACIReport+"&providerId="+providerId,LogUserType.USER_LOGIN, "", "");
 				
 				e.printStackTrace();
 				
@@ -374,7 +374,7 @@ public class QPPPerformanceController {
 			List<MIPSPatientInformation> filtersInfo = measureService.getPatient(requestBean.getPatientId(),requestBean.getMeasureId(),requestBean.getCriteria(),requestBean.getProvider(),requestBean.getEmpTIN(), requestBean.getMode(),requestBean.getIsNotMet());
 			response.setData(filtersInfo);
 		
-			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting filtered patients list based on measure" , -1, request.getRemoteAddr(),-1,"patientId="+requestBean.getPatientId()+"&measureId="+requestBean.getMeasureId()+"&providerId="+requestBean.getEmpTIN(),LogUserType.USER_LOGIN, "patientId="+requestBean.getPatientId(), "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting filtered patients list based on measure" , -1, request.getRemoteAddr(),-1,"patientId="+requestBean.getPatientId()+"&measureId="+requestBean.getMeasureId()+"&providerId="+requestBean.getEmpTIN(),LogUserType.USER_LOGIN, "patientId="+requestBean.getPatientId(), "");
 		
 		}catch(Exception e){
 			
@@ -395,7 +395,7 @@ public class QPPPerformanceController {
 				printWriter.flush();
 				printWriter.close();
 			
-				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Error in getting filtered patients list based on measure" , -1, request.getRemoteAddr(),-1,"patientId="+requestBean.getPatientId()+"&measureId="+requestBean.getMeasureId()+"&providerId="+requestBean.getEmpTIN(),LogUserType.USER_LOGIN, "patientId="+requestBean.getPatientId(), "");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Error in getting filtered patients list based on measure" , -1, request.getRemoteAddr(),-1,"patientId="+requestBean.getPatientId()+"&measureId="+requestBean.getMeasureId()+"&providerId="+requestBean.getEmpTIN(),LogUserType.USER_LOGIN, "patientId="+requestBean.getPatientId(), "");
 				
 				e.printStackTrace();
 				
@@ -430,7 +430,7 @@ public class QPPPerformanceController {
 
 		response.setData(performanceObj);
 		
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating MIPS Performance Report by NPI" , -1, request.getRemoteAddr(),-1,"isACIReport="+isACIReport+"&providerId="+providerId,LogUserType.USER_LOGIN, "", "");
+	auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating MIPS Performance Report by NPI" , -1, request.getRemoteAddr(),-1,"isACIReport="+isACIReport+"&providerId="+providerId,LogUserType.USER_LOGIN, "", "");
 		
 		}catch(Exception e){
 			
@@ -451,7 +451,7 @@ public class QPPPerformanceController {
 				printWriter.flush();
 				printWriter.close();
 				
-				auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Error in generating MIPS Performance Report by NPI" , -1, request.getRemoteAddr(),-1,"isACIReport="+isACIReport+"&providerId="+providerId,LogUserType.USER_LOGIN, "", "");
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.FAILURE ,"Error in generating MIPS Performance Report by NPI" , -1, request.getRemoteAddr(),-1,"isACIReport="+isACIReport+"&providerId="+providerId,LogUserType.USER_LOGIN, "", "");
 				
 				e.printStackTrace();
 				
@@ -552,6 +552,7 @@ public class QPPPerformanceController {
 		Integer ReportingMethod = null;
 		String submissionMethod = null;String reportEnd = null,reportStart = null;
 		GeneratePDFDetails generatePDFDetails=new GeneratePDFDetails();
+		try{
 		if(provId!=-1){
 			List<MacraProviderConfiguration> groupData = providerConfService.getProviderInfo(provId);
 			reportingStart= groupData.get(0).getMacraProviderConfigurationReportingStart();
@@ -574,6 +575,10 @@ public class QPPPerformanceController {
 		}
 
 		fileName = measureService.generatePDFFile(generatePDFDetails,provId,measureid,accountId,criteriaId,tinId,criterias,isNotMet);
+		}
+		catch(Exception e){
+			fileName="";
+		}
 		result.setData(fileName);
 		return result;
 	}
