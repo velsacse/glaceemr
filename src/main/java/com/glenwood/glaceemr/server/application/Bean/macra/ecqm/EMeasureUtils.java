@@ -557,6 +557,7 @@ public class EMeasureUtils {
 		InvestigationQDM eachObj = null;
 		LabTest labTestObj;
 		List<LabTest> labTestQDM = new ArrayList<LabTest>();
+		codeList=","+codeList+",";
 		
 		for(int i=0;i<patientInvestigationData.size();i++){
 			
@@ -616,7 +617,7 @@ public class EMeasureUtils {
 		InvestigationQDM eachObj = null;
 		DiagnosticStudy diagnosticStudyObj;
 		List<DiagnosticStudy> diagnosticStudyQDM = new ArrayList<DiagnosticStudy>();
-		
+		codeList=","+codeList+",";
 		for(int i=0;i<patientInvestigationData.size();i++){
 			
 			eachObj = patientInvestigationData.get(i);
@@ -678,7 +679,7 @@ public class EMeasureUtils {
 		InvestigationQDM eachObj = null;
 		PhysicalExam physicalExamObj;
 		List<PhysicalExam> physicalExamQDM = new ArrayList<PhysicalExam>();
-		
+		codeList=","+codeList+",";
 		for(int i=0;i<patientInvestigationData.size();i++){
 			
 			eachObj = patientInvestigationData.get(i);
@@ -739,6 +740,7 @@ public class EMeasureUtils {
 		InvestigationQDM eachObj = null;
 		Intervention interventionObj;
 		List<Intervention> interventionQDM = new ArrayList<Intervention>();
+		codeList=","+codeList+",";
 		for(int i=0;i<patientInvestigationData.size();i++){
 			
 			eachObj = patientInvestigationData.get(i);
@@ -797,6 +799,8 @@ public class EMeasureUtils {
 		InvestigationQDM eachObj = null;
 		Procedure procedureObj;
 		List<Procedure> procedureQDM = new ArrayList<Procedure>();
+		codeList=","+codeList+",";
+		
 		for(int i=0;i<patientInvestigationData.size();i++){
 
 			eachObj = patientInvestigationData.get(i);
@@ -886,6 +890,7 @@ public class EMeasureUtils {
 		ClinicalDataQDM eachObj= null;
 		Assessment assessmentObj;
 		List<Assessment> assessmentList=new ArrayList<Assessment>();
+		codeList=","+codeList+",";
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			assessmentObj=new Assessment();
@@ -929,6 +934,8 @@ public class EMeasureUtils {
 		ClinicalDataQDM eachObj= null;
 		Procedure procedureObj;
 		List<Procedure> procedureList=new ArrayList<Procedure>();
+		codeList=","+codeList+",";
+		
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			procedureObj =new Procedure();
@@ -950,6 +957,8 @@ public class EMeasureUtils {
 		ClinicalDataQDM eachObj= null;
 		FunctionalStatus functionalStatusObj;
 		List<FunctionalStatus> functionalStatusList=new ArrayList<FunctionalStatus>();
+		codeList=","+codeList+",";
+		
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			functionalStatusObj =new FunctionalStatus();
@@ -971,6 +980,8 @@ public class EMeasureUtils {
 		ClinicalDataQDM eachObj= null;
 		Intervention interventionObj;
 		List<Intervention> interventionList=new ArrayList<Intervention>();
+		codeList=","+codeList+",";
+		
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			interventionObj =new Intervention();
@@ -1002,6 +1013,8 @@ public class EMeasureUtils {
 		ClinicalDataQDM eachObj= null;
 		DiagnosticStudy diagnosticObj;
 		List<DiagnosticStudy> diagnosticList=new ArrayList<DiagnosticStudy>();
+		codeList=","+codeList+",";
+		
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			diagnosticObj =new DiagnosticStudy();
