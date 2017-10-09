@@ -278,7 +278,7 @@ public class MUPerformanceRateController {
 
 				List<MeasureStatus> responseToSave = new ArrayList<MeasureStatus>();
 
-				for(int i=0;i<measureIds.length;i++){
+				for(int i=0;i<measureStatus.keySet().toArray().length;i++){
 
 					String measureID = measureStatus.keySet().toArray()[i].toString();
 					
