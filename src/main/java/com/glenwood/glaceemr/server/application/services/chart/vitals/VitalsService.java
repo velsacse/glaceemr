@@ -18,4 +18,5 @@ public interface VitalsService  {
 	
 	public String getNotes(Integer patientId, Integer encounterId, String gwId);
 
+	public void insertvitals(Integer patientId,Integer encounterId,Boolean isDischargeVitals,Integer admssEpisode);
 }

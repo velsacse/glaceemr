@@ -53,13 +53,24 @@ public class VitalsController {
 	@RequestMapping(value="/VitalGroups",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getVitalGroups(@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId,
-			@RequestParam(value="groupId") Integer groupId) throws Exception{
+			@RequestParam(value="groupId") Integer groupId,
+			@RequestParam(value="encounterId" ,defaultValue="-1", required=false)Integer encounterId,
+			@RequestParam(value="dischargeVitals", defaultValue="false", required=false) Boolean isDischargeVitals,
+			@RequestParam(value="admssEpisode", defaultValue="-1", required=false) Integer admssEpisode,
+			@RequestParam(value="isFromVitals", defaultValue="0", required=false) Integer isFromVitals) throws Exception{
 		
 		EMRResponseBean emrResponseBean= new EMRResponseBean();
 		try{
 			patientId=Integer.parseInt(Optional.fromNullable(patientId+"").or("-1"));
 			groupId=Integer.parseInt(Optional.fromNullable(groupId+"").or("-1"));
 			emrResponseBean.setData(vitalService.getActiveVitalsGroup(patientId,groupId));
+			encounterId=Integer.parseInt(Optional.fromNullable(encounterId+"").or("-1"));
+			isDischargeVitals=Boolean.parseBoolean(Optional.fromNullable(isDischargeVitals+"").or("false"));
+			admssEpisode=Integer.parseInt(Optional.fromNullable(admssEpisode+"").or("-1"));
+			if(isFromVitals==1){
+				vitalService.insertvitals(patientId,encounterId,isDischargeVitals,admssEpisode);
+			}
+			
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.VITALS, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Vital Groups viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "groupId="+groupId, LogUserType.USER_LOGIN, "", "");
 		}catch(Exception e){
 			e.printStackTrace();

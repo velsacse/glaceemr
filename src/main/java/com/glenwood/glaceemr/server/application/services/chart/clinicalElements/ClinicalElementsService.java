@@ -11,6 +11,7 @@ public interface ClinicalElementsService {
 	
 	public List<ClinicalElementsOptions> getClinicalElementOptions(String gwid);
 	public ClinicalDataBean setVitalsClinicalData(String gwidPattern,Integer patientId,Integer encounterId,Boolean isDischargeVitals,Integer admssEpisode,short patientSex,Integer ageinDay);
+	public void setVitalsClinicalDataLoadWithLastVisit(String gwidPattern,Integer patientId, Integer encounterId, Boolean isDischargeVitals,Integer admssEpisode, short patientSex, Integer ageinDay);
 	public boolean isClinicalElemActive(String gwid);
 	public ClinicalTextMapping getClinicalTextMapping(String gwid);
 	public ClinicalElements getClinicalElement(String gwid);

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.glenwood.glaceemr.server.application.models.ClinicalElements;
 import com.glenwood.glaceemr.server.application.models.ClinicalElementsOptions;
 import com.glenwood.glaceemr.server.application.models.ClinicalTextMapping;
+import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
@@ -47,6 +48,8 @@ import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.
 import com.glenwood.glaceemr.server.application.services.chart.dischargeVitals.DischargeVitalBean;
 import com.glenwood.glaceemr.server.application.services.chart.print.TextFormatter;
 import com.glenwood.glaceemr.server.application.specifications.DischargeVitalSpecification;
+import com.glenwood.glaceemr.server.application.specifications.EncounterEntitySpecification;
+import com.glenwood.glaceemr.server.application.specifications.PatientClinicalElementsSpecification;
 import com.glenwood.glaceemr.server.application.specifications.VitalsSpecification;
 import com.glenwood.glaceemr.server.utils.DateUtil;
 import com.glenwood.glaceemr.server.utils.HUtil;
@@ -1071,6 +1074,14 @@ public class VitalsServiceImpl implements VitalsService {
 		return prepareJsonfromBeans(vitalGrpInfo,patientId,encounterId,patientSex,ageinYears);
 	}
 
+	public void insertvitals(Integer patientId,Integer encounterId,Boolean isDischargeVitals,Integer admssEpisode){
+		try{
+			clinicalElementsService.setVitalsClinicalDataLoadWithLastVisit("02002%",patientId,encounterId,isDischargeVitals,admssEpisode,patientSex, ageinDay);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
 	private CustomVitalGroup prepareJsonfromBeans(CustomVitalGroup vitalGrpInfo,Integer patientId, Integer encounterId,short patientSex,int patientAge) throws Exception {
 		int groupId = -1;
 		LinkedHashMap<Integer,VitalGroupBean> vitalGroupHashMap = vitalDataBean.getVitals();

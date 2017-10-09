@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -143,7 +144,6 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 	@Override
 	public ClinicalDataBean setVitalsClinicalData(String gwidPattern,Integer patientId, Integer encounterId, Boolean isDischargeVitals,Integer admssEpisode, short patientSex, Integer ageinDay) {
 		clinicalDataBean.setClinicalData(clinicalElementsRepository.findAll(Specifications.where(ClinicalElementsSpecification.getClinicalElementsByGWIDPattern(clinicalDataBean.clientId,gwidPattern,ageinDay, patientSex)).and(ClinicalElementsSpecification.defaultAgePed(-1)).or(ClinicalElementsSpecification.patientAgePed(ageinDay))));
-		
 		List<PatientClinicalElements> patientData=Collections.emptyList();
 		List<PatientClinicalHistory> patientHistoryData=null;
 		if(!isDischargeVitals.booleanValue()){
@@ -169,6 +169,31 @@ public class ClinicalElementsServiceImpl implements ClinicalElementsService{
 		
 		return clinicalDataBean;
 		
+	}
+	
+	
+	public void setVitalsClinicalDataLoadWithLastVisit(String gwidPattern,Integer patientId, Integer encounterId, Boolean isDischargeVitals,Integer admssEpisode, short patientSex, Integer ageinDay) {
+		if(!isDischargeVitals.booleanValue()){
+			List<Encounter> enc= encounterEntityRepository.findAll(EncounterEntitySpecification.getPrevEncHavingData(patientId,encounterId));
+			List<PatientClinicalElements> patientData=Collections.emptyList();
+			if(enc.size()>0 && enc.get(0)!=null){
+				if(patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPatClinicalDataByGWIDPattern(clinicalDataBean.clientId,patientId,encounterId,gwidPattern)).size()>0){
+				}else{
+					patientData=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getPrevEncounterPatVitalData(clinicalDataBean.clientId,patientId, enc.get(0).getEncounterId(), gwidPattern));
+				}
+			}
+			if(patientData.size()>0 && patientData.get(0)!=null){
+				for(Integer i=0;i<patientData.size();i++){
+					PatientClinicalElements patientClinicalElements=new PatientClinicalElements();
+					patientClinicalElements.setPatientClinicalElementsPatientid(patientData.get(i).getPatientClinicalElementsPatientid());
+					patientClinicalElements.setPatientClinicalElementsChartid(patientData.get(i).getPatientClinicalElementsChartid());
+					patientClinicalElements.setPatientClinicalElementsEncounterid(encounterId);
+					patientClinicalElements.setPatientClinicalElementsGwid(patientData.get(i).getPatientClinicalElementsGwid());
+					patientClinicalElements.setPatientClinicalElementsValue(patientData.get(i).getPatientClinicalElementsValue());
+					patientClinicalElementsRepository.save(patientClinicalElements);
+				}
+			}
+		}
 	}
 
 	@Override
