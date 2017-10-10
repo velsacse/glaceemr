@@ -39,7 +39,7 @@ public class GeneratedBillsHistoryDetails {
 	private String generated_bills_history_details_billrefno;
 
 	@Column(name="generated_bills_history_details_current_genetateddate")
-	private Date generated_bills_history_details_current_genetateddate;
+	private Date generatedDate;
 
 	@Column(name="generated_bills_history_details_patientid")
 	private Long generated_bills_history_details_patientid;
@@ -115,12 +115,22 @@ public class GeneratedBillsHistoryDetails {
 		this.generated_bills_history_details_billrefno = generated_bills_history_details_billrefno;
 	}
 
+	
+	public Date getGenerated_bills_history_details_current_genetateddate() {
+		return generatedDate;
+	}
+
+	public void setGenerated_bills_history_details_current_genetateddate(
+			Date generated_bills_history_details_current_genetateddate) {
+		this.generatedDate = generated_bills_history_details_current_genetateddate;
+	}
+
 	public Date getgenerated_bills_history_details_current_genetateddate() {
-		return generated_bills_history_details_current_genetateddate;
+		return generatedDate;
 	}
 
 	public void setgenerated_bills_history_details_current_genetateddate(Date generated_bills_history_details_current_genetateddate) {
-		this.generated_bills_history_details_current_genetateddate = generated_bills_history_details_current_genetateddate;
+		this.generatedDate = generated_bills_history_details_current_genetateddate;
 	}
 
 	public Long getgenerated_bills_history_details_patientid() {

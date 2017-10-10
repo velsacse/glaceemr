@@ -162,10 +162,10 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<SchedulerAppointment> root = cq.from(SchedulerAppointment.class);
 		Join<SchedulerAppointment, PatientRegistration> joinPatientRegistration=root.join("patRegPatientId",JoinType.LEFT);
-		Join<SchedulerAppointment, AppReferenceValues> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
-		Join<SchedulerAppointment, AppReferenceValues> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
+		Join<SchedulerAppointment, AppReferenceValues> joinH113Status=root.join("App_Reference_ValuesApptStatus",JoinType.LEFT);
+		Join<SchedulerAppointment, AppReferenceValues> joinH113Type=root.join("App_Reference_ValuesApptType",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerAppointmentParameter> joinSchApptParam=root.join("schApptParam",JoinType.LEFT);
-		Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, AppReferenceValues> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
+		Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, AppReferenceValues> joinH113Reason=joinSchApptParam.join("App_Reference_ValuesReason",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerResource> joinSchResLoc=root.join("schResLoc",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerResource> joinSchResProvider=root.join("schResProvider",JoinType.LEFT);
 		Join<SchedulerAppointment, ReferringDoctor> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);
@@ -564,10 +564,10 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<SchedulerAppointment> root = cq.from(SchedulerAppointment.class);
 		Join<SchedulerAppointment, PatientRegistration> joinPatientRegistration=root.join("patRegPatientId",JoinType.LEFT);
-		Join<SchedulerAppointment, AppReferenceValues> joinH113Status=root.join("h113ApptStatus",JoinType.LEFT);
-		Join<SchedulerAppointment, AppReferenceValues> joinH113Type=root.join("h113ApptType",JoinType.LEFT);
+		Join<SchedulerAppointment, AppReferenceValues> joinH113Status=root.join("App_Reference_ValuesApptStatus",JoinType.LEFT);
+		Join<SchedulerAppointment, AppReferenceValues> joinH113Type=root.join("App_Reference_ValuesApptType",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerAppointmentParameter> joinSchApptParam=root.join("schApptParam",JoinType.LEFT);
-		Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, AppReferenceValues> joinH113Reason=joinSchApptParam.join("h113Reason",JoinType.LEFT);
+		Join<Join<SchedulerAppointment, SchedulerAppointmentParameter>, AppReferenceValues> joinH113Reason=joinSchApptParam.join("App_Reference_ValuesReason",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerResource> joinSchResLoc=root.join("schResLoc",JoinType.LEFT);
 		Join<SchedulerAppointment, SchedulerResource> joinSchResProvider=root.join("schResProvider",JoinType.LEFT);
 		Join<SchedulerAppointment, ReferringDoctor> joinSchRefDrId=root.join("schRefDrId",JoinType.LEFT);

@@ -549,7 +549,7 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 	public InsuranceFilterBean getInsuranceListList(InsuranceFilterBean insFilterBean) {
 		
 		List<InsCompAddr> insList=insCompAddrRepository.findAll(InsuranceSpecification.getInsurancesBy(insFilterBean));
-		insFilterBean.setInsuranceList(insList);
+		//insFilterBean.setInsuranceList(insList);
 		
 		insFilterBean.setTotalInsurancesCount(insCompAddrRepository.count(InsuranceSpecification.getInsurancesBy(insFilterBean)));
 				

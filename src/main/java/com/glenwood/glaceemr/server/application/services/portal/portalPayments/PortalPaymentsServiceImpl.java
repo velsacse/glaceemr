@@ -190,7 +190,7 @@ public class PortalPaymentsServiceImpl implements PortalPaymentsService{
 
          ReceiptDetail receipt =new ReceiptDetail();
          
-         PaymentResponse paymentResponse=applicationContext.getBean(PaymentResponse.class);
+         PaymentResponse paymentResponse=new PaymentResponse();
 
          try {
              ObjectMapper mapper=new ObjectMapper();

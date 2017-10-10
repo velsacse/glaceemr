@@ -252,8 +252,9 @@ public class PortalPaymentsSpecification {
 
 
 	public static Pageable createPortalStatementHistoryPageRequestByDescDate(int pageIndex, int offset) {
-
-		return new PageRequest(pageIndex, offset, Sort.Direction.DESC,"h093003");
+		
+		return new PageRequest(pageIndex, offset, Sort.Direction.DESC, "generatedDate");
+		
 	}
 	
 	

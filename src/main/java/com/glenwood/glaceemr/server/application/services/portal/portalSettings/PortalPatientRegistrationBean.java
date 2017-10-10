@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.services.portal.portalSettings;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PortalPatientRegistrationBean {
 
 	int patientId;

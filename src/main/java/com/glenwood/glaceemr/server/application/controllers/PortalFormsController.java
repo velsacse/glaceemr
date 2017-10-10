@@ -246,12 +246,14 @@ public class PortalFormsController {
 			responseBean.setData(portalFormsService
 					.getIncompletePatientConsentFormsDetails(patientId,
 							chartId, fileTemplateId));
+			
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseBean.setSuccess(false);
 			responseBean.setData("Error in retrieving consent form details!");
 			return responseBean;
+			
 		}
 	}
 

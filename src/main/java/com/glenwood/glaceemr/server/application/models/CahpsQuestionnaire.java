@@ -44,7 +44,7 @@ public class CahpsQuestionnaire {
 	@Column(name="cahps_questionnaire_group_description")
 	private String cahpsQuestionnaireGroupDescription;
 	
-	@OneToMany(fetch=FetchType.EAGER, mappedBy="cahpsQuestionnaire")
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="cahpsQuestionnaire")
 	@JsonManagedReference
 	List<CahpsQuestionnaireChoice> cahpsQuestionnaireChoiceList;
 	
