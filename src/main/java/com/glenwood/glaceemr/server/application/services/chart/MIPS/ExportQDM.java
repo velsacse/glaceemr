@@ -1664,14 +1664,15 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Predicate byProviderId  = builder.equal(joinEncounter.get(Encounter_.encounter_service_doctor), providerId);
 		Predicate byOrderedDate = builder.between(root.get(Prescription_.docPrescOrderedDate), startDate, endDate);
 		Predicate byPatientId	= builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
+		Predicate byStatus = root.get(Prescription_.docPrescPatientId).in(1,2);
 		
 		cq.multiselect(root.get(Prescription_.rxname).alias("Medication"),
 				builder.coalesce(root.get(Prescription_.docPrescIsEPrescSent),0).alias("IsSentElectronically"));
 		
 		if(isGroup)
-			cq.where(byProviderId,byOrderedDate,byPatientId);
+			cq.where(byProviderId,byOrderedDate,byPatientId,byStatus);
 		else
-			cq.where(byOrderedDate,byPatientId);
+			cq.where(byOrderedDate,byPatientId,byStatus);
 		
 		List<Object[]> result=em.createQuery(cq).getResultList();
 		
