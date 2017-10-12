@@ -114,5 +114,6 @@ public interface AuditLogConstants{
 	public static final int PatientPortal=131;
 	public static final int Referral=132;
 	public static final int AlertsConfiguration=133;
+	public static final int DirectMessage=134;
 
 }
