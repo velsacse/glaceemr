@@ -248,7 +248,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			EMeasureUtils measureUtils = new EMeasureUtils();		
 			Patient requestObj = new Patient();
 
-			String startDate="12/31/2015";
+			String startDate="12/31/2013";
 			String endDate="12/31/2017";
 
 			SimpleDateFormat format=new SimpleDateFormat("MM/dd/yyyy");

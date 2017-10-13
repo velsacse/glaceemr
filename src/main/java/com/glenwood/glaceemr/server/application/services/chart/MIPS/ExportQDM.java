@@ -1342,7 +1342,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			else
 				cqForLoinc.where(restrictions);
 			cqForLoinc.distinct(true);   
-			clinicalDataLOINC = em.createQuery(cqForLoinc).setMaxResults(500).getResultList();
+			clinicalDataLOINC = em.createQuery(cqForLoinc).getResultList();
 
 			for(ClinicalDataQDM clinicalDataQDM: clinicalDataLOINC){
 
