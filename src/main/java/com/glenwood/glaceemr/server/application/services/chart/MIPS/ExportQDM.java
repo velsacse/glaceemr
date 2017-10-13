@@ -439,7 +439,7 @@ Root<Encounter> root = cq.from(Encounter.class);
         	MedicationOrder eachMedObj = new MedicationOrder();
         	MedicationQDM eachData=(MedicationQDM) result.get(i);
             
-        	int cmd=(Integer.parseInt(eachData.getDays()) * (Integer.parseInt(eachData.getRefills())+1));
+        	int cmd=(Integer.parseInt(eachData.getDays().trim()) * (Integer.parseInt(eachData.getRefills().trim())+1));
             eachData.setCMD(cmd);
             
             eachMedObj.setCode(eachData.getCode());
@@ -522,7 +522,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			ActiveMedication eachMedObj = new ActiveMedication();
 			MedicationQDM eachData=(MedicationQDM) result.get(i);
 
-			int cmd=(Integer.parseInt(eachData.getDays()) * (Integer.parseInt(eachData.getRefills())+1));
+			int cmd=(Integer.parseInt(eachData.getDays().trim()) * (Integer.parseInt(eachData.getRefills().trim())+1));
 			eachData.setCMD(cmd);
 
 			eachMedObj.setCode(eachData.getCode());
