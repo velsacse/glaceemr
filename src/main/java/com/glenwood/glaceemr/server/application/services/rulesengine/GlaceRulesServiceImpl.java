@@ -50,13 +50,13 @@ public class GlaceRulesServiceImpl implements GlaceRulesService{
 		}
 		url=ajaxcall.sendGet("https://hub-icd10.glaceemr.com/DataGateway/PQRSServices/getPQRSMeasuresInfo?measureIds="+temp);
 		
-		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+		/*List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
 
 			Date startDate = providerInfo.get(0).getMacraProviderConfigurationReportingStart();
 			Date EndDate = providerInfo.get(0).getMacraProviderConfigurationReportingEnd();
 			int flag = 1;
 		
-			pqrsReportService.getPatientServices(providerId, patientId, startDate, EndDate, accountId,flag);
+			pqrsReportService.getPatientServices(providerId, patientId, startDate, EndDate, accountId,flag);*/
 
 			return url;
 
