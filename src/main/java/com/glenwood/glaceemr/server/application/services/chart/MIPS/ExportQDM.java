@@ -547,11 +547,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 	
 	@SuppressWarnings("rawtypes")
 	public List<InvestigationQDM> getInvestigationQDM(EntityManager em,Boolean considerProvider, int patientID, int providerId, Date startDate, Date endDate) {
-		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<InvestigationQDM> cq = builder.createQuery(InvestigationQDM.class);
 		Root<LabEntries> root = cq.from(LabEntries.class);
-		Join<LabEntries, Encounter> EncLabJoin = root.join(LabEntries_.encounter, JoinType.INNER);
+		Join<LabEntries, Encounter> EncLabJoin = root.join(LabEntries_.encounter, JoinType.LEFT);
 		Join<Encounter, Chart> EncChartJoin = EncLabJoin.join(Encounter_.chartTable, JoinType.INNER);
 		Join<LabEntries, LabDescription> labEntriesDescJoin = root.join(LabEntries_.labDescriptionTable, JoinType.INNER);
 		Join<LabDescription, Hl7ExternalTestmapping> labDescExtrnTestMappingJoin = labEntriesDescJoin.join(LabDescription_.hl7ExternalTestmappingTable, JoinType.LEFT);

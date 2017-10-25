@@ -248,7 +248,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			EMeasureUtils measureUtils = new EMeasureUtils();		
 			Patient requestObj = new Patient();
 
-			String startDate="12/31/2013";
+			String startDate="12/31/2007";
 			String endDate="12/31/2017";
 
 			SimpleDateFormat format=new SimpleDateFormat("MM/dd/yyyy");
@@ -488,11 +488,16 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				epObject.setStatus("Not Applicable");
 			}else{
 
-				if(doneCount!=totalCount){
+				if(doneCount!=totalCount && totalCount>1 && doneCount>1){
 					epObject.setStatus("Show Description");
 					epObject.setDescription(ePrescResult.split(" &&&& ")[0].concat(" ".concat(ePrescResult.split(" &&&& ")[1])));
 					epObject.setShortDescription(ePrescResult.split(" &&&& ")[0]);
-				}else{
+				}
+				else if(doneCount!=totalCount && totalCount>0){
+					epObject.setStatus("Not Completed");
+					epObject.setDescription(ePrescResult.split(" &&&& ")[0].concat(" ".concat(ePrescResult.split(" &&&& ")[1])));
+				
+				}else if(doneCount==totalCount && totalCount>0){
 					epObject.setStatus("Completed");
 					epObject.setDescription(ePrescResult.split(" &&&& ")[0].concat(" ".concat(ePrescResult.split(" &&&& ")[1])));
 				}
@@ -968,11 +973,16 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				int doneCount  = Integer.parseInt(result.split(" &&&& ")[0].split("/")[0].replaceAll(" ",""));
 				int totalCount = Integer.parseInt(result.split(" &&&& ")[0].split("/")[1].replaceAll(" ",""));
 
-				if(doneCount!=totalCount){
+				if(doneCount!=totalCount && totalCount>1 && doneCount>1){
 					epObject.setStatus("Show Description");
 					epObject.setDescription(result.split(" &&&& ")[0].concat(" ".concat(result.split(" &&&& ")[1])));
 					epObject.setShortDescription(result.split(" &&&& ")[0]);
-				}else{
+				}
+				else if(doneCount!=totalCount && totalCount>0){
+					epObject.setStatus("Not Completed");
+					epObject.setDescription(result.split(" &&&& ")[0].concat(" ".concat(result.split(" &&&& ")[1])));
+				
+				}else if(doneCount==totalCount && totalCount>0) {
 					epObject.setStatus("Completed");
 					epObject.setDescription(result.split(" &&&& ")[0].concat(" ".concat(result.split(" &&&& ")[1])));
 				}
@@ -2132,106 +2142,107 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		return pqrsResponsearray;
 	}
 	
-	@SuppressWarnings("rawtypes")
-	@Override
-	public List<MUPerformanceBean> getAnalyticsPerformanceReport(int providerId, String accountId, String configuredMeasures,int submissionMethod,String sharedPath) throws Exception{
-		EMeasureUtils eMeasureUtils=new EMeasureUtils();
-		
-		Calendar now = Calendar.getInstance();
-		int reportingYear = now.get(Calendar.YEAR);
+		@SuppressWarnings("rawtypes")
+		@Override
+		public List<MUPerformanceBean> getAnalyticsPerformanceReport(int providerId, String accountId, String configuredMeasures,int submissionMethod,String sharedPath) throws Exception{
+			EMeasureUtils eMeasureUtils=new EMeasureUtils();
+			
+			Calendar now = Calendar.getInstance();
+			int reportingYear = now.get(Calendar.YEAR);
 
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<MUPerformanceBean> cq = builder.createQuery(MUPerformanceBean.class);
-		Root<MacraMeasuresRate> root = cq.from(MacraMeasuresRate.class);
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<MUPerformanceBean> cq = builder.createQuery(MUPerformanceBean.class);
+			Root<MacraMeasuresRate> root = cq.from(MacraMeasuresRate.class);
 
-		Join<MacraMeasuresRate, EmployeeProfile> joinEmp = root.join(MacraMeasuresRate_.empProfileTable, JoinType.INNER);
-		Join<EmployeeProfile, MacraProviderConfiguration> macraConfig = joinEmp.join(EmployeeProfile_.macraProviderConfiguration, JoinType.INNER);
-		
-		Predicate byProviderId = builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateProviderId), providerId);
-		Predicate byReportingYear = builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear), reportingYear);		
-		Predicate byConfiguredMeasures = root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId).in(Arrays.asList(configuredMeasures.split(",")));
+			Join<MacraMeasuresRate, EmployeeProfile> joinEmp = root.join(MacraMeasuresRate_.empProfileTable, JoinType.INNER);
+			Join<EmployeeProfile, MacraProviderConfiguration> macraConfig = joinEmp.join(EmployeeProfile_.macraProviderConfiguration, JoinType.INNER);
+			
+			Predicate byProviderId = builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateProviderId), providerId);
+			Predicate byReportingYear = builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear), reportingYear);		
+			Predicate byConfiguredMeasures = root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId).in(Arrays.asList(configuredMeasures.split(",")));
 
-		cq.where(builder.and(byProviderId, byReportingYear, byConfiguredMeasures));
+			cq.where(builder.and(byProviderId, byReportingYear, byConfiguredMeasures));
 
-		Selection[] aci_selections= new Selection[] {
+			Selection[] aci_selections= new Selection[] {
 
-			joinEmp.get(EmployeeProfile_.empProfileFullname),
-			root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
-			root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
-			root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
-			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateIpp),0),
-			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominator),0),
-			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExclusion),0),
-			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumerator),0),
-			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusion),0),
-			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorException),0),
-			root.get(MacraMeasuresRate_.macraMeasuresRateReporting),
-			root.get(MacraMeasuresRate_.macraMeasuresRateReporting),
-			builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRatePoints),0),
-			root.get(MacraMeasuresRate_.macraMeasuresRateNpi),
-			macraConfig.get(MacraProviderConfiguration_.macraProviderConfigurationReportingStart),
-			macraConfig.get(MacraProviderConfiguration_.macraProviderConfigurationReportingEnd)
-				
-		};
+				joinEmp.get(EmployeeProfile_.empProfileFullname),
+				root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
+				root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
+				root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
+				builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateIpp),0),
+				builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominator),0),
+				builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExclusion),0),
+				builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumerator),0),
+				builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusion),0),
+				builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorException),0),
+				root.get(MacraMeasuresRate_.macraMeasuresRateReporting),
+				root.get(MacraMeasuresRate_.macraMeasuresRateReporting),
+				builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRatePoints),0),
+				root.get(MacraMeasuresRate_.macraMeasuresRateNpi),
+				macraConfig.get(MacraProviderConfiguration_.macraProviderConfigurationReportingStart),
+				macraConfig.get(MacraProviderConfiguration_.macraProviderConfigurationReportingEnd)
+					
+			};
 
-		cq.multiselect(aci_selections);
+			cq.multiselect(aci_selections);
 
-		List<MUPerformanceBean> results = em.createQuery(cq).getResultList();
+			List<MUPerformanceBean> results = em.createQuery(cq).getResultList();
 
-		for(int i=0;i<results.size();i++){
+			for(int i=0;i<results.size();i++){
 
-			MUPerformanceBean resultObject = results.get(i);
+				MUPerformanceBean resultObject = results.get(i);
 
-			String measureId = resultObject.getMeasureId();
+				String measureId = resultObject.getMeasureId();
 
-			String cmsIdNTitle = "";
+				String cmsIdNTitle = "";
 
-			if(configuredMeasures.contains("ACI_TRANS_EP_1") || configuredMeasures.contains("ACI_EP_1")){
-				
-				if(measureId.equals("ACI_TRANS_EP_1") || measureId.equals("ACI_EP_1")){
-					cmsIdNTitle = measureId.concat("&&&Electronic Prescribing");						
-				}else if(measureId.equals("ACI_TRANS_SM_1") || measureId.equals("ACI_CCTPE_2")){
-					cmsIdNTitle = measureId.concat("&&&Secure Messaging");						
-				}else if(measureId.equals("ACI_TRANS_PEA_1") || measureId.equals("ACI_PEA_1")){
-					cmsIdNTitle = measureId.concat("&&&Patient Electronic Access");						
-				}else if(measureId.equals("ACI_TRANS_PEA_2") || measureId.equals("ACI_CCTPE_1")){
-					cmsIdNTitle = measureId.concat("&&&View, Download and Transmit (VDT)");						
-				}else if(measureId.equals("ACI_TRANS_HIE_1") || measureId.equals("ACI_HIE_1")){
-					cmsIdNTitle = measureId.concat("&&&Health Information Exchange");						
-				}else if(measureId.equals("ACI_TRANS_PSE_1") || measureId.equals("ACI_PEA_2")){
-					cmsIdNTitle = measureId.concat("&&&Patient-Specific Education");						
-				}else if(measureId.equals("ACI_TRANS_MR_1") || measureId.equals("ACI_HIE_3")){
-					cmsIdNTitle = measureId.concat("&&&Medication Reconcilation");						
+				if(configuredMeasures.contains("ACI_TRANS_EP_1") || configuredMeasures.contains("ACI_EP_1")){
+					
+					if(measureId.equals("ACI_TRANS_EP_1") || measureId.equals("ACI_EP_1")){
+						cmsIdNTitle = measureId.concat("&&&Electronic Prescribing");						
+					}else if(measureId.equals("ACI_TRANS_SM_1") || measureId.equals("ACI_CCTPE_2")){
+						cmsIdNTitle = measureId.concat("&&&Secure Messaging");						
+					}else if(measureId.equals("ACI_TRANS_PEA_1") || measureId.equals("ACI_PEA_1")){
+						cmsIdNTitle = measureId.concat("&&&Patient Electronic Access");						
+					}else if(measureId.equals("ACI_TRANS_PEA_2") || measureId.equals("ACI_CCTPE_1")){
+						cmsIdNTitle = measureId.concat("&&&View, Download and Transmit (VDT)");						
+					}else if(measureId.equals("ACI_TRANS_HIE_1") || measureId.equals("ACI_HIE_1")){
+						cmsIdNTitle = measureId.concat("&&&Health Information Exchange");						
+					}else if(measureId.equals("ACI_TRANS_PSE_1") || measureId.equals("ACI_PEA_2")){
+						cmsIdNTitle = measureId.concat("&&&Patient-Specific Education");						
+					}else if(measureId.equals("ACI_TRANS_MR_1") || measureId.equals("ACI_HIE_3")){
+						cmsIdNTitle = measureId.concat("&&&Medication Reconcilation");						
+					}else{
+						cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+					}
+					
 				}else{
 					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
 				}
-				
-			}else{
-				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+				if(cmsIdNTitle.contains("CMS"))
+				{	
+					EMeasure eMeasureObj=null;
+					List<EMeasure> eMeasures=new ArrayList<EMeasure>();
+					eMeasures= eMeasureUtils.getMeasureBeanDetails(measureId, sharedPath,accountId);
+					eMeasureObj=eMeasures.get(0);
+					
+					resultObject.setPoints(getPointsByBenchMark(resultObject.getReportingRate()/100, eMeasureObj));
+				}
+				resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
+				resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
+				if(submissionMethod==2)
+				resultObject.setSubmissionMethod("EHR");
+				else if(submissionMethod==1)
+				resultObject.setSubmissionMethod("Claims");
+				else if(submissionMethod==3)
+				resultObject.setSubmissionMethod("Registry");
+
 			}
-			if(cmsIdNTitle.contains("CMS"))
-			{	
-				EMeasure eMeasureObj=null;
-				List<EMeasure> eMeasures=new ArrayList<EMeasure>();
-				eMeasures= eMeasureUtils.getMeasureBeanDetails(measureId, sharedPath,accountId);
-				eMeasureObj=eMeasures.get(0);
-				
-				resultObject.setPoints(getPointsByBenchMark(resultObject.getReportingRate()/100, eMeasureObj));
-			}
-			resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
-			resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
-			if(submissionMethod==2)
-			resultObject.setSubmissionMethod("EHR");
-			else if(submissionMethod==1)
-			resultObject.setSubmissionMethod("Claims");
-			else if(submissionMethod==3)
-			resultObject.setSubmissionMethod("Registry");
+
+			return results;
 
 		}
-
-		return results;
-
-	}
+	
 	
 	@Override
 	public String getMeasureValidationServer() {

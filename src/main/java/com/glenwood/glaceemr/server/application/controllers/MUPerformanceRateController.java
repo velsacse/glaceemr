@@ -10,6 +10,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -127,7 +128,8 @@ public class MUPerformanceRateController {
 					}
 
 				}else if(mode == 1){
-
+					System.out.println("Date is>>>>>>>>>>>>>>>>>>>>>>"+new Date());
+//					TimeZone.setDefault(TimeZone.getTimeZone("EST"));
 					patientsList.put(providerId, performanceService.getPatientsSeen(providerId, new Date(), null));
 
 				}else if(mode == 2){

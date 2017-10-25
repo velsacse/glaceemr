@@ -77,7 +77,7 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
         for(int i=0;i<result.size();i++){
             patients.add(Integer.parseInt(result.get(i).toString()));
         }
-        
+        System.out.println("patient seen by dos size>>>>>>>>>>>>>>>>>>"+result.size());
         return patients;
 		
 	}
@@ -120,7 +120,7 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
         		builder.equal(joinchartEncounter.get(Encounter_.encounter_service_doctor),providerId));
         
         List<Object> result = em.createQuery(cq).getResultList();
-        
+        System.out.println("patient seen by encounter size>>>>>>>>>>>>>>>>>>>>>>>."+result.size());
         for(int i=0;i<result.size();i++){
             patients.add(Integer.parseInt(result.get(i).toString()));
         }
@@ -164,7 +164,7 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
             cq.select(root.get(PatientRegistration_.patientRegistrationId));
             
             List<Object> result = em.createQuery(cq).getResultList();
-            
+            System.out.println("final patient seen size is>>>>>>>>>>>>>>>>>"+result.size());
             for(int i=0;i<result.size();i++){
             	patientsList.add(Integer.parseInt(result.get(i).toString()));
             }
