@@ -52,7 +52,6 @@ public class ClinicalDataQDM {
 	public void setNotDoneCodeSystemOID(String notDoneCodeSystemOID) {
 		this.notDoneCodeSystemOID = notDoneCodeSystemOID;
 	}
-	
 	public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,String resultCode,String optionValue,String patientResult,String resultValue) {	
 		super();	
 		this.code = code;
@@ -63,6 +62,19 @@ public class ClinicalDataQDM {
 		this.optionValue = optionValue;	
 		this.patientResult=patientResult;
 		this.resultValue = resultValue;	
+		
+	}
+	public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,String resultCode,String optionValue,String patientResult,String resultValue,Date recordedDate) {	
+		super();	
+		this.code = code;
+		this.patientId=patientId;
+		this.codeSystem = codeSystem;
+		this.elementName = elementName;
+		this.resultCode = resultCode;
+		this.optionValue = optionValue;	
+		this.patientResult=patientResult;
+		this.resultValue = resultValue;	
+		this.recordedDate=recordedDate;
 		
 	}
 	public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,Date recordedDate,String resultCode,String resultValue,String optionValue,String patientResult) {	

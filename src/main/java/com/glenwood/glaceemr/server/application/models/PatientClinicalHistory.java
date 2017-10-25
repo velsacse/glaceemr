@@ -49,6 +49,9 @@ public class PatientClinicalHistory {
 	@JoinColumn(name="patient_clinical_history_gwid",referencedColumnName="clinical_text_mapping_textbox_gwid",insertable = false, updatable = false)
 	private ClinicalTextMapping clinicalTextMapping;
 	
+	@ManyToOne(fetch=FetchType.LAZY,optional=false)
+	@JoinColumn(name="patient_clinical_history_encounterid",referencedColumnName="encounter_id",insertable = false, updatable = false)
+	private Encounter encounter;
 	
 	public ClinicalElements getClinicalElement() {
 		return clinicalElement;

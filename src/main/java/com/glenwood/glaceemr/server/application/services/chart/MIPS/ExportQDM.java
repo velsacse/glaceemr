@@ -1449,6 +1449,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		CriteriaBuilder builder=em.getCriteriaBuilder();
 		CriteriaQuery<ClinicalDataQDM> cq=builder.createQuery(ClinicalDataQDM.class);
 		Root<PatientClinicalHistory> root = cq.from(PatientClinicalHistory.class);
+		Join<PatientClinicalHistory,Encounter> joinEncounter=root.join(PatientClinicalHistory_.encounter,JoinType.INNER);
 		Join<PatientClinicalHistory, ClinicalElements> clinicalElementsJoin = root.join(PatientClinicalHistory_.clinicalElement, JoinType.INNER);
 		clinicalElementsJoin.on(clinicalElementsJoin.get(ClinicalElements_.clinicalElementsGwid).in(gwids));
 		Join<ClinicalElements, ClinicalElementsOptions> clinicalElementsOptionsJoin = clinicalElementsJoin.join(ClinicalElements_.clinicalElementsOptions, JoinType.INNER);
@@ -1471,7 +1472,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 				clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsSnomed).alias("resultcode"),
 				clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue).alias("optionvalue"),
 				root.get(PatientClinicalHistory_.patientClinicalHistoryValue).alias("value"),
-				clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName).alias("resultvalue")
+				clinicalElementsOptionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName).alias("resultvalue"),
+				joinEncounter.get(Encounter_.encounterDate)
 		};
 
 		cq.select(builder.construct(ClinicalDataQDM.class,selections));
@@ -1504,6 +1506,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			QDMObj.setCode(eachObj.getResultCode());
 			QDMObj.setCodeSystem(eachObj.getCodeSystem());
 			QDMObj.setCodeSystemOID("2.16.840.1.113883.6.96");
+			QDMObj.setStartDate(eachObj.getRecordedDate());
 			tobaccoStatus.add(QDMObj);
 		}
 
