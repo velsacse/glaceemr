@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.math.BigInteger;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,16 +25,16 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 public class AssociateServiceDetails {
 	
 	@Column(name="associate_service_detail_id")
-	private Long associateServiceDetailId;
+	private BigInteger associateServiceDetailId;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "associate_service_detail_associate_service_detail_id_seq")
 	@SequenceGenerator(name = "associate_service_detail_associate_service_detail_id_seq", sequenceName = "associate_service_detail_associate_service_detail_id_seq", allocationSize = 1)
 	@Column(name="associate_service_detail_service_id")
-	private Integer associateServiceDetailServiceId;
+	private BigInteger associateServiceDetailServiceId;
 	
 	@Column(name="associate_service_detail_problem_id")
-	private Long associateServiceDetailProblemId;
+	private BigInteger associateServiceDetailProblemId;
 
 	@Column(name="associate_service_detail_currentstatus")
 	private String associateServiceDetailCurrentstatus;
@@ -77,17 +79,17 @@ public class AssociateServiceDetails {
 	private Integer h555555;
 
 	@Column(name="associate_service_detail_unknown9")
-	private Long associateServiceDetailUnknown9;
+	private BigInteger associateServiceDetailUnknown9;
 	
 	@Column(name="associate_service_detail_third_ins_resubmit")
-	private Integer associateServiceDetailThirdInsResubmit;
+	private BigInteger associateServiceDetailThirdInsResubmit;
 		
-	public Integer getAssociateServiceDetailThirdInsResubmit() {
+	public BigInteger getAssociateServiceDetailThirdInsResubmit() {
 		return associateServiceDetailThirdInsResubmit;
 	}
 
 	public void setAssociateServiceDetailThirdInsResubmit(
-			Integer associateServiceDetailThirdInsResubmit) {
+			BigInteger associateServiceDetailThirdInsResubmit) {
 		this.associateServiceDetailThirdInsResubmit = associateServiceDetailThirdInsResubmit;
 	}
 
@@ -103,29 +105,29 @@ public class AssociateServiceDetails {
 	@JoinColumn(name="associate_service_detail_unknown3", referencedColumnName="caseno" , insertable=false, updatable=false)
 	private CaseTab caseTab;
 	
-	public Long getAssociateServiceDetailId() {
+	public BigInteger getAssociateServiceDetailId() {
 		return associateServiceDetailId;
 	}
 
-	public void setAssociateServiceDetailId(Long associateServiceDetailId) {
+	public void setAssociateServiceDetailId(BigInteger associateServiceDetailId) {
 		this.associateServiceDetailId = associateServiceDetailId;
 	}
 
-	public Integer getAssociateServiceDetailServiceId() {
+	public BigInteger getAssociateServiceDetailServiceId() {
 		return associateServiceDetailServiceId;
 	}
 
 	public void setAssociateServiceDetailServiceId(
-			Integer associateServiceDetailServiceId) {
+			BigInteger associateServiceDetailServiceId) {
 		this.associateServiceDetailServiceId = associateServiceDetailServiceId;
 	}
 
-	public Long getAssociateServiceDetailProblemId() {
+	public BigInteger getAssociateServiceDetailProblemId() {
 		return associateServiceDetailProblemId;
 	}
 
 	public void setAssociateServiceDetailProblemId(
-			Long associateServiceDetailProblemId) {
+			BigInteger associateServiceDetailProblemId) {
 		this.associateServiceDetailProblemId = associateServiceDetailProblemId;
 	}
 
@@ -253,12 +255,12 @@ public class AssociateServiceDetails {
 		this.h555555 = h555555;
 	}
 
-	public Long getAssociateServiceDetailUnknown9() {
+	public BigInteger getAssociateServiceDetailUnknown9() {
 		return associateServiceDetailUnknown9;
 	}
 
 	public void setAssociateServiceDetailUnknown9(
-			Long associateServiceDetailUnknown9) {
+			BigInteger associateServiceDetailUnknown9) {
 		this.associateServiceDetailUnknown9 = associateServiceDetailUnknown9;
 	}
 

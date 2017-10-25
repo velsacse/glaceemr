@@ -1,4 +1,5 @@
 package com.glenwood.glaceemr.server.application.services.chart.charges;
+import java.math.BigInteger;
 /**
  * Charges service methods implementation 
  * @author Tarun
@@ -434,8 +435,8 @@ public class ChargesServicesImpl implements ChargesServices{
 	public void aSDEntityCreation(List<PrimarykeyGenerator> serviceprimarykey_generator, int maxAssociate) {
 		try {
 			AssociateServiceDetails associateServiceInsert=new AssociateServiceDetails();
-			associateServiceInsert.setAssociateServiceDetailId(Long.valueOf(maxAssociate));
-			associateServiceInsert.setAssociateServiceDetailServiceId(serviceprimarykey_generator.get(0).getprimarykey_generator_rowcount());
+			associateServiceInsert.setAssociateServiceDetailId(BigInteger.valueOf((maxAssociate)));
+			associateServiceInsert.setAssociateServiceDetailServiceId(BigInteger.valueOf(serviceprimarykey_generator.get(0).getprimarykey_generator_rowcount()));
 			associateServiceInsert.setAssociateServiceDetailSpecialDx("");
 			reqeustToSaveAssociateServiceDetail(associateServiceInsert);
 		} catch (Exception e) {
