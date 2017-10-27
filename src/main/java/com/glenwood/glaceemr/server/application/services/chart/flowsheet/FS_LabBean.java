@@ -45,7 +45,7 @@ public class FS_LabBean implements Comparable<FS_LabBean> {
 		}
 		this.testDetailId = labEntriesTestdetailId + "";
 		this.status = labEntriesTestStatus + "";
-		this.resultNotes = labEntriesResultNotes;
+		this.resultNotes = labEntriesResultNotes.replaceAll("\r", "");
 		if (labEntriesOrdOn != null) {
 			this.orderedOn = new SimpleDateFormat("MM/dd/yyyy")
 					.format(labEntriesOrdOn);
@@ -72,7 +72,7 @@ public class FS_LabBean implements Comparable<FS_LabBean> {
 			this.performedOn = "";
 		}
 		this.status = "3";
-		this.resultNotes = labEntriesResultNotes;
+		this.resultNotes = labEntriesResultNotes.replaceAll("\r", "");;
 
 	}
 
@@ -90,7 +90,7 @@ public class FS_LabBean implements Comparable<FS_LabBean> {
 			this.performedOn = "";
 		}
 		this.status = "8";
-		this.resultNotes = labEntriesResultNotes;
+		this.resultNotes = labEntriesResultNotes.replaceAll("\r", "");;
 
 	}
 
