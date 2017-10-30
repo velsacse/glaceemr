@@ -9,10 +9,14 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONArray;
@@ -362,6 +366,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 	}
 
 	@Override
+	@Transactional
 	public PortalRegistrationResponse registerExistingUserForPortal(PortalPatientRegistrationBean registrationBean, String practiceId) throws IOException, JSONException {
 		
 		PortalRegistrationResponse regResponse=new PortalRegistrationResponse();
@@ -370,9 +375,21 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 		if(registrationBean.getPatientId()!=-1){
 			patientDetails=portalMedicalSummaryService.getPatientPersonalDetails(registrationBean.getPatientId());
 			if(registrationBean.getPatRegEmailId()!=null){
-		patientDetails.setPatientRegistrationMailId(registrationBean.getPatRegEmailId());
-		patientDetails=patientRegistrationRepository.saveAndFlush(patientDetails);
-		}
+				
+				patientDetails.setPatientRegistrationMailId(registrationBean.getPatRegEmailId());
+				//em.getTransaction().begin();
+				CriteriaBuilder builder = em.getCriteriaBuilder();
+				CriteriaUpdate<PatientRegistration> cup = builder.createCriteriaUpdate(PatientRegistration.class);
+				Root<PatientRegistration> p = cup.from(PatientRegistration.class);
+				cup.set(p.get(PatientRegistration_.patientRegistrationMailId), registrationBean.getPatRegEmailId());
+				Predicate patientIdPredicate = builder.equal(p.get(PatientRegistration_.patientRegistrationId), registrationBean.getPatientId());
+				cup.where(patientIdPredicate);
+				
+				Query query = em.createQuery(cup);
+			    query.executeUpdate();
+			    //em.getTransaction().commit();
+				//patientDetails = patientRegistrationRepository.saveAndFlush(patientDetails);
+			}
 		
 		PatientPortalUser portalUser=findByPatientId(registrationBean.getPatientId());
 		portalUser.setpatient_portal_user_name(registrationBean.getPatRegPreferredUsername());
