@@ -23,12 +23,19 @@ public class ClinicalDataQDM {
 	private String notDoneDesc;
 	private String notDoneCode;
 	private String notDoneCodeSystemOID;
+	private String gwid;
 	/*private Date orderedDate;
 	private Date performedDate;*/
 	
 	
 	public int getStatus() {
 		return Status;
+	}
+	public String getGwid() {
+		return gwid;
+	}
+	public void setGwid(String gwid) {
+		this.gwid = gwid;
 	}
 	public void setStatus(int status) {
 		Status = status;
@@ -64,7 +71,7 @@ public class ClinicalDataQDM {
 		this.resultValue = resultValue;	
 		
 	}
-	public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,String resultCode,String optionValue,String patientResult,String resultValue,Date recordedDate) {	
+	public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,String resultCode,String resultCodeSystem,String optionValue,String patientResult,String resultValue,Date recordedDate) {	
 		super();	
 		this.code = code;
 		this.patientId=patientId;
@@ -75,9 +82,10 @@ public class ClinicalDataQDM {
 		this.patientResult=patientResult;
 		this.resultValue = resultValue;	
 		this.recordedDate=recordedDate;
+		this.resultCodeSystem=resultCodeSystem;
 		
 	}
-	public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,Date recordedDate,String resultCode,String resultValue,String optionValue,String patientResult) {	
+	public ClinicalDataQDM(int patientId,String code, String codeSystem,String elementName,Date recordedDate,String resultCode,String resultValue,String optionValue,String patientResult,String gwid) {	
 		super();	
 		this.patientId=patientId;
 		this.code = code;
@@ -87,7 +95,8 @@ public class ClinicalDataQDM {
 		this.resultCode = resultCode;
 		this.resultValue = resultValue;	
 		this.optionValue = optionValue;	
-		this.patientResult=patientResult;				
+		this.patientResult=patientResult;	
+		this.gwid=gwid;
 	}
 		
 	public ClinicalDataQDM(String elementName,String code,String codeSystem,String codeSystemOID,int Status,Date orderedDate,Date performedDate,String notDoneDesc,String notDoneCode,String notDoneCodeSystemOID)
