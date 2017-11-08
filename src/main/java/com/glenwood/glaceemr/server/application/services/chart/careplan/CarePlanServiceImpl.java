@@ -1,7 +1,9 @@
 package com.glenwood.glaceemr.server.application.services.chart.careplan;
 
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +36,8 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.glenwood.glaceemr.server.application.models.CNMCodeSystem;
+import com.glenwood.glaceemr.server.application.models.CNMCodeSystem_;
 import com.glenwood.glaceemr.server.application.models.CarePlanConcern;
 import com.glenwood.glaceemr.server.application.models.CarePlanConcernShortcut;
 import com.glenwood.glaceemr.server.application.models.CarePlanConcernShortcut_;
@@ -44,8 +48,12 @@ import com.glenwood.glaceemr.server.application.models.CarePlanGoalShortcut_;
 import com.glenwood.glaceemr.server.application.models.CarePlanGoal_;
 import com.glenwood.glaceemr.server.application.models.CarePlanIntervention;
 import com.glenwood.glaceemr.server.application.models.CarePlanIntervention_;
+import com.glenwood.glaceemr.server.application.models.CarePlanLog;
+import com.glenwood.glaceemr.server.application.models.CarePlanLog_;
 import com.glenwood.glaceemr.server.application.models.CarePlanOutcome;
 import com.glenwood.glaceemr.server.application.models.CarePlanOutcome_;
+import com.glenwood.glaceemr.server.application.models.CarePlanRecommendedIntervention;
+import com.glenwood.glaceemr.server.application.models.CarePlanRecommendedIntervention_;
 import com.glenwood.glaceemr.server.application.models.CarePlanSummary;
 import com.glenwood.glaceemr.server.application.models.CarePlanSummary_;
 import com.glenwood.glaceemr.server.application.models.Chart;
@@ -61,23 +69,29 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.EncounterPlan;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
+import com.glenwood.glaceemr.server.application.models.FrequentInterventions;
+import com.glenwood.glaceemr.server.application.models.FrequentInterventions_;
 import com.glenwood.glaceemr.server.application.models.GeneralShortcut;
 import com.glenwood.glaceemr.server.application.models.GeneralShortcut_;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements;
 import com.glenwood.glaceemr.server.application.models.PatientClinicalElements_;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalFindings;
+import com.glenwood.glaceemr.server.application.models.PatientClinicalFindings_;
 import com.glenwood.glaceemr.server.application.models.UnitsOfMeasure;
 import com.glenwood.glaceemr.server.application.models.UnitsOfMeasure_;
-import com.glenwood.glaceemr.server.application.models.VitalGroup;
-import com.glenwood.glaceemr.server.application.models.VitalGroup_;
 import com.glenwood.glaceemr.server.application.models.VitalsParameter;
 import com.glenwood.glaceemr.server.application.models.VitalsParameter_;
 import com.glenwood.glaceemr.server.application.repositories.CarePlanConcernRepository;
 import com.glenwood.glaceemr.server.application.repositories.CarePlanGoalRepository;
+import com.glenwood.glaceemr.server.application.repositories.CarePlanLogRepository;
 import com.glenwood.glaceemr.server.application.repositories.CarePlanOutcomeRepository;
 import com.glenwood.glaceemr.server.application.repositories.CarePlanInterventionRepository;
+import com.glenwood.glaceemr.server.application.repositories.CarePlanRecommendedInterventionRepository;
 import com.glenwood.glaceemr.server.application.repositories.CarePlanSummaryRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterPlanRepository;
+import com.glenwood.glaceemr.server.application.repositories.FrequentInterventionsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientClinicalFindingsRepository;
 import com.glenwood.glaceemr.server.application.services.chart.clinicalElements.ClinicalConstants;
 import com.glenwood.glaceemr.server.application.specifications.EncounterSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PatientClinicalElementsSpecification;
@@ -109,7 +123,18 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	
 	@Autowired
 	CarePlanSummaryRepository carePlanSummaryRepository;
+	
+	@Autowired
+	CarePlanRecommendedInterventionRepository carePlanRecommendedInterventionRepository;
+	
+	@Autowired
+	CarePlanLogRepository carePlanLogRepository;
 
+	@Autowired
+	FrequentInterventionsRepository FrequentInterventionsRepository;
+	
+	@Autowired
+	PatientClinicalFindingsRepository patientClinicalFindingsRepository;
 	/**
 	 * To fetch care plan concerns
 	 * @param concernId
@@ -118,7 +143,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 * @return List
 	 */
 	@Override
-	public List<CarePlanConcern> fetchCarePlanConcerns(Integer concernId,Integer patientId,Integer categoryId,Integer episodeId) {
+	public List<CarePlanConcern> fetchCarePlanConcerns(Integer concernId,Integer patientId,Integer categoryId,Integer episodeId,Integer encounterId,String frmDate,String toDate) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<CarePlanConcern> cq = builder.createQuery(CarePlanConcern.class);
 		Root<CarePlanConcern> root = cq.from(CarePlanConcern.class);
@@ -131,8 +156,31 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 			predicates.add(builder.equal(root.get(CarePlanConcern_.carePlanConcernId), concernId));
 		if(episodeId!=-1)
 			predicates.add(builder.equal(root.get(CarePlanConcern_.careplanConcernEpisodeId), episodeId));
+		if(frmDate!=null && !(frmDate.equalsIgnoreCase("-1"))) {
+			Date fromDate = null;
+			try {
+				fromDate=new SimpleDateFormat("MM/dd/yyyy").parse(frmDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			predicates.add(builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,root.get(CarePlanConcern_.carePlanConcernCreatedOn)),fromDate));
+		}
+		if(toDate!=null && !(toDate.equalsIgnoreCase("-1"))) {
+			Date tDate = null;
+			try {
+				tDate=new SimpleDateFormat("MM/dd/yyyy").parse(toDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			predicates.add(builder.lessThanOrEqualTo(builder.function("DATE", Date.class,root.get(CarePlanConcern_.carePlanConcernCreatedBy)),tDate));
+		}
+		
+		predicates.add(builder.equal(root.get(CarePlanConcern_.carePlanConcernStatus), 1));
+		
+		/*if(episodeId==-1 && encounterId!=-1)
+			predicates.add(builder.equal(root.get(CarePlanConcern_.careplanConcernEncounterId), encounterId));
 		predicates.add(builder.equal(root.get(CarePlanConcern_.carePlanConcernStatus),1));
-		cq.where(predicates.toArray(new Predicate[predicates.size()]));
+		*/cq.where(predicates.toArray(new Predicate[predicates.size()]));
 		List<CarePlanConcern> concerns=entityManager.createQuery(cq).getResultList();
 		return concerns;
 	}
@@ -146,11 +194,12 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 * @return List
 	 */
 	@Override
-	public List<CarePlanGoal> fetchCarePlanGoals(Integer goalId,Integer concernId,
-			Integer patientId, Integer encounterId) {
+	public List<CarePlanGoalBean> fetchCarePlanGoals(Integer goalId,Integer concernId,
+			Integer patientId, Integer encounterId,Integer episodeId,String frmDate,String toDate) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<CarePlanGoal> cq = builder.createQuery(CarePlanGoal.class);
+		CriteriaQuery<CarePlanGoalBean> cq = builder.createQuery(CarePlanGoalBean.class);
 		Root<CarePlanGoal> root = cq.from(CarePlanGoal.class);
+		Join<CarePlanGoal,CarePlanConcern> concernJoin=root.join(CarePlanGoal_.carePlanConcern,JoinType.LEFT);
 		List<Predicate> predicates = new ArrayList<>();
 		if(patientId!=-1)
 			predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalPatientId), patientId));
@@ -160,9 +209,60 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 			predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalConcernId), concernId));
 		if(goalId!=-1)
 			predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalId), goalId));
+		if(episodeId!=-1)
+			predicates.add(builder.equal(root.get(CarePlanGoal_.careplanGoalEpisodeId), episodeId));
+		if(frmDate!=null && !(frmDate.equalsIgnoreCase("-1"))) {
+			Date fromDate = null;
+			try {
+				fromDate=new SimpleDateFormat("MM/dd/yyyy").parse(frmDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			predicates.add(builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,root.get(CarePlanGoal_.carePlanGoalCreatedOn)),fromDate));
+		}
+		if(toDate!=null && !(toDate.equalsIgnoreCase("-1"))) {
+			Date tDate = null;
+			try {
+				tDate=new SimpleDateFormat("MM/dd/yyyy").parse(toDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			predicates.add(builder.lessThanOrEqualTo(builder.function("DATE", Date.class,root.get(CarePlanGoal_.carePlanGoalCreatedOn)),tDate));
+		}
+		
+		Selection[] selections=new Selection[]{
+				root.get(CarePlanGoal_.carePlanGoalId),
+				root.get(CarePlanGoal_.carePlanGoalPatientId),
+				root.get(CarePlanGoal_.carePlanGoalEncounterId),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalConcernId),-1),
+				concernJoin.get(CarePlanConcern_.carePlanConcernDesc),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalPriority),0),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalType),-1),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalTerm),0),
+				root.get(CarePlanGoal_.carePlanGoalProviderId),
+				root.get(CarePlanGoal_.carePlanGoalDesc),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalCode),""),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalCodeDescription),""),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalCodeOperator),""),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalValue),""),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalUnit),""),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalStatus),0),
+				root.get(CarePlanGoal_.carePlanGoalTargetDate),
+				root.get(CarePlanGoal_.carePlanGoalNextReviewDate),
+				root.get(CarePlanGoal_.carePlanGoalNotes),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalType),-1),
+				root.get(CarePlanGoal_.carePlanGoalFrom),
+				root.get(CarePlanGoal_.carePlanGoalResultStatus),
+				root.get(CarePlanGoal_.careplanGoalEpisodeId),
+				root.get(CarePlanGoal_.carePlanGoalOrder),
+				root.get(CarePlanGoal_.carePlanGoalValueOne),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalAssistanceStatus),0),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalLevelStatus),0)
+		};
+		cq.select(builder.construct(CarePlanGoalBean.class, selections));
 		predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalStatus),1));
 		cq.where(predicates.toArray(new Predicate[predicates.size()]));
-		List<CarePlanGoal> concerns=entityManager.createQuery(cq).getResultList();
+		List<CarePlanGoalBean> concerns=entityManager.createQuery(cq).getResultList();
 		return concerns;
 	}
 
@@ -183,9 +283,11 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		Join<CarePlanGoal,CarePlanConcern> concernJoin=root.join(CarePlanGoal_.carePlanConcern,JoinType.LEFT);
 		Join<CarePlanGoal,CarePlanOutcome> outcomeJoin=root.join(CarePlanGoal_.carePlanOutcome,JoinType.LEFT);
 		if(encounterId!=-1)
-		outcomeJoin.on(builder.equal(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeEncounterId),encounterId));
-
-		final Subquery<Integer> subquery = cq.subquery(Integer.class);
+			outcomeJoin.on(builder.equal(builder.function("DATE", Date.class, outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeReviewDate)),getEncounterDate(encounterId)));
+		else
+			outcomeJoin.on(builder.equal(builder.function("DATE", Date.class, outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeReviewDate)),new Date()));
+/*			outcomeJoin.on(builder.equal(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeReviewDate),new Date()));
+*/		final Subquery<Integer> subquery = cq.subquery(Integer.class);
 		final Root<CarePlanOutcome> carePlanOutcome = subquery.from(CarePlanOutcome.class);
 		subquery.select(builder.max(carePlanOutcome.get(CarePlanOutcome_.carePlanOutcomeId)));
 		subquery.groupBy(carePlanOutcome.get(CarePlanOutcome_.carePlanOutcomeGoalId));
@@ -199,6 +301,8 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 
 		
 		List<Predicate> predicates = new ArrayList<>();
+		List<Predicate> predicatesForStatus = new ArrayList<>();
+
 		if(patientId!=-1)
 			predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalPatientId), patientId));
 		//if(encounterId!=-1)
@@ -209,8 +313,10 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 			predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalId), goalId));
 		if(episodeId!=-1)
 			predicates.add(builder.equal(root.get(CarePlanGoal_.careplanGoalEpisodeId),episodeId));
-		predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalStatus),1));
-        
+	/*	if(episodeId==-1 && encounterId!=-1)
+			predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalEncounterId), encounterId));
+		*/predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalStatus),1));
+		predicates.add(builder.or(root.get(CarePlanGoal_.carePlanGoalResultStatus).in(0,1),root.get(CarePlanGoal_.carePlanGoalResultStatus).isNull()));
 		
 		//		predicates.add(builder.or(builder.in(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeId)).value(subquery),builder.isNull(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeId))));
 		
@@ -238,6 +344,10 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 				builder.coalesce(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeProgress),0),
 				root.get(CarePlanGoal_.carePlanGoalResultStatus),
 				root.get(CarePlanGoal_.careplanGoalEpisodeId),
+				root.get(CarePlanGoal_.carePlanGoalOrder),
+				root.get(CarePlanGoal_.carePlanGoalValueOne),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalAssistanceStatus),0),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalLevelStatus),0)
 		};
 		cq.select(builder.construct(CarePlanGoalBean.class, selections));
 		cq.where(builder.and(predicates.toArray(new Predicate[predicates.size()])));
@@ -256,7 +366,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 */
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<CarePlanOutcomeBean> fetchCarePlanOutcomes(Integer outcomeId,Integer goalId, Integer patientId, Integer encounterId,Integer episodeId) {
+	public List<CarePlanOutcomeBean> fetchCarePlanOutcomes(Integer outcomeId,Integer goalId, Integer patientId, Integer encounterId,Integer episodeId,String frmDate,String toDate) {
 		
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<CarePlanOutcomeBean> cq = builder.createQuery(CarePlanOutcomeBean.class);
@@ -287,12 +397,102 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 			predicates.add(builder.equal(root.get(CarePlanOutcome_.carePlanOutcomeId), outcomeId));
 		if(episodeId!=-1)
 			predicates.add(builder.equal(outcomeJoin.get(CarePlanGoal_.careplanGoalEpisodeId), episodeId));
-
+		if(frmDate!=null && !(frmDate.equalsIgnoreCase("-1"))) {
+			Date fromDate = null;
+			try {
+				fromDate=new SimpleDateFormat("MM/dd/yyyy").parse(frmDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			predicates.add(builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,root.get(CarePlanOutcome_.carePlanOutcomeCreatedOn)),fromDate));
+		}
+		if(toDate!=null && !(toDate.equalsIgnoreCase("-1"))) {
+			Date tDate = null;
+			try {
+				tDate=new SimpleDateFormat("MM/dd/yyyy").parse(toDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			predicates.add(builder.lessThanOrEqualTo(builder.function("DATE", Date.class,root.get(CarePlanOutcome_.carePlanOutcomeCreatedOn)),tDate));
+		}
 		cq.select(builder.construct(CarePlanOutcomeBean.class, selections));
 		cq.where(predicates.toArray(new Predicate[predicates.size()]));
 		cq.orderBy(builder.desc(root.get(CarePlanOutcome_.carePlanOutcomeId)));
 		List<CarePlanOutcomeBean> outcomes=entityManager.createQuery(cq).getResultList();
 		return outcomes;
+	}
+	
+	/**
+	 * To fetch care plan outcomes
+	 * @param outcomeId
+	 * @param goalId
+	 * @param patientId
+	 * @param encounterId
+	 * @return List
+	 */
+	@SuppressWarnings("rawtypes")
+	@Override
+	public List<CarePlanGoalBean> fetchCarePlanOutcomesForCDA(Integer outcomeId,Integer goalId, Integer patientId, Integer encounterId,Integer episodeId,String frmDate,String toDate) {
+		
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<CarePlanGoalBean> cq = builder.createQuery(CarePlanGoalBean.class);
+		Root<CarePlanGoal> root = cq.from(CarePlanGoal.class);
+		Join<CarePlanGoal,CarePlanOutcome> outcomeJoin=root.join(CarePlanGoal_.carePlanOutcome,JoinType.LEFT);
+		if(encounterId!=-1)
+			outcomeJoin.on(builder.equal(builder.function("DATE", Date.class, outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeReviewDate)),getEncounterDate(encounterId)));
+		else
+			outcomeJoin.on(builder.equal(builder.function("DATE", Date.class, outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeReviewDate)),new Date()));
+		final Subquery<Integer> subquery = cq.subquery(Integer.class);
+		final Root<CarePlanOutcome> carePlanOutcome = subquery.from(CarePlanOutcome.class);
+		subquery.select(builder.max(carePlanOutcome.get(CarePlanOutcome_.carePlanOutcomeId)));
+		subquery.groupBy(carePlanOutcome.get(CarePlanOutcome_.carePlanOutcomeGoalId));
+		
+		List<Predicate> predicates = new ArrayList<>();
+		List<Predicate> predicatesForStatus = new ArrayList<>();
+
+		if(patientId!=-1)
+			predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalPatientId), patientId));
+		if(goalId!=-1)
+			predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalId), goalId));
+		if(episodeId!=-1)
+			predicates.add(builder.equal(root.get(CarePlanGoal_.careplanGoalEpisodeId),episodeId));
+		predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalStatus),1));
+		predicates.add(builder.or(root.get(CarePlanGoal_.carePlanGoalResultStatus).in(0,1),root.get(CarePlanGoal_.carePlanGoalResultStatus).isNull()));
+		
+
+		Selection[] selections=new Selection[]{
+				root.get(CarePlanGoal_.carePlanGoalId),
+				root.get(CarePlanGoal_.carePlanGoalPatientId),
+				root.get(CarePlanGoal_.carePlanGoalEncounterId),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalConcernId),-1),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalPriority),0),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalType),-1),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalTerm),0),
+				root.get(CarePlanGoal_.carePlanGoalProviderId),
+				root.get(CarePlanGoal_.carePlanGoalDesc),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalCode),""),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalCodeDescription),""),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalCodeOperator),""),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalValue),""),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalUnit),""),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalStatus),0),
+				root.get(CarePlanGoal_.carePlanGoalTargetDate),
+				root.get(CarePlanGoal_.carePlanGoalNextReviewDate),
+				root.get(CarePlanGoal_.carePlanGoalNotes),
+				root.get(CarePlanGoal_.carePlanGoalFrom),
+				builder.coalesce(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeProgress),0),
+				root.get(CarePlanGoal_.carePlanGoalResultStatus),
+				root.get(CarePlanGoal_.careplanGoalEpisodeId),
+				root.get(CarePlanGoal_.carePlanGoalOrder),
+				root.get(CarePlanGoal_.carePlanGoalValueOne),
+				outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeCreatedBy),
+				outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeCreatedOn)
+		};
+		cq.select(builder.construct(CarePlanGoalBean.class, selections));
+		cq.where(builder.and(predicates.toArray(new Predicate[predicates.size()])));
+		cq.orderBy(builder.asc(root.get(CarePlanGoal_.carePlanGoalId)));
+		List<CarePlanGoalBean> concerns=entityManager.createQuery(cq).getResultList();
+		return concerns;
 	}
 	
 	/**
@@ -302,7 +502,6 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 */
 	@Override
 	public List<CarePlanConcern> saveCarePlanConcern(CarePlanConcernBean carePlanConcernJSON) {
-		
 		CarePlanConcern carePlanConcern=new CarePlanConcern();
 		if(carePlanConcernJSON.getConcernId()!=-1)
 			carePlanConcern.setCarePlanConcernId(carePlanConcernJSON.getConcernId());
@@ -326,8 +525,10 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		carePlanConcern.setCarePlanConcernCreatedOn(carePlanConcernRepository.findCurrentTimeStamp());
 		carePlanConcern.setCareplanConcernEpisodeId(carePlanConcernJSON.getEpisodeId());
 		carePlanConcern.setCarePlanConcernFrom(carePlanConcernJSON.getConcernFrom());
+		carePlanConcern.setCareplanConcernEncounterId(carePlanConcernJSON.getEncounterId());
+		carePlanConcern.setCarePlanConcernModifiedOn(carePlanConcernRepository.findCurrentTimeStamp());
 		carePlanConcernRepository.saveAndFlush(carePlanConcern);
-		List<CarePlanConcern> carePlanConcerns=fetchCarePlanConcerns(-1,carePlanConcernJSON.getConcernPatientId(),-1,carePlanConcernJSON.getEpisodeId());
+		List<CarePlanConcern> carePlanConcerns=fetchCarePlanConcerns(-1,carePlanConcernJSON.getConcernPatientId(),-1,carePlanConcernJSON.getEpisodeId(),carePlanConcernJSON.getEncounterId(),"-1","-1");
 		return carePlanConcerns;
 	}
 
@@ -355,14 +556,16 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		carePlanGoal.setCarePlanGoalDesc(carePlanGoalData.getCarePlanGoalDesc());
 		carePlanGoal.setCarePlanGoalCode(carePlanGoalData.getCarePlanGoalCode());
 		carePlanGoal.setCarePlanGoalCodeDescription(carePlanGoalData.getCarePlanGoalCodeDescription());
-		carePlanGoal.setCarePlanGoalCodeSystem("2.16.840.1.113883.6.96");
-		carePlanGoal.setCarePlanGoalCodeSystemName("SNOMED");
+		carePlanGoal.setCarePlanGoalCodeSystem("2.16.840.1.113883.6.1");
+		carePlanGoal.setCarePlanGoalCodeSystemName("LOINC");
 		carePlanGoal.setCarePlanGoalCodeOperator(carePlanGoalData.getCarePlanGoalCodeOperator());
 		carePlanGoal.setCarePlanGoalValue(carePlanGoalData.getCarePlanGoalValue());
 		carePlanGoal.setCarePlanGoalUnit(carePlanGoalData.getCarePlanGoalUnit());		
 		carePlanGoal.setCarePlanGoalStatus(carePlanGoalData.getCarePlanGoalStatus());
 		carePlanGoal.setCareplanGoalEpisodeId(carePlanGoalData.getEpisodeId());
 		carePlanGoal.setCareplanGoalResultStatus(carePlanGoalData.getCarePlanGoalResultStatus());
+		carePlanGoal.setCarePlanGoalOrder(carePlanGoalData.getCarePlanGoalOrder());
+		carePlanGoal.setCarePlanGoalValueOne(carePlanGoalData.getCarePlanGoalValueOne());
 
 
 		try{
@@ -390,7 +593,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		carePlanGoal.setCarePlanGoalCreatedBy(carePlanGoalData.getCarePlanGoalCreatedBy());
 		carePlanGoal.setCarePlanGoalModifiedBy(carePlanGoalData.getCarePlanGoalModifiedBy());
 		carePlanGoal.setCarePlanGoalCreatedOn(carePlanConcernRepository.findCurrentTimeStamp());
-		carePlanGoal.setCarePlanGoalCreatedOn(carePlanConcernRepository.findCurrentTimeStamp());
+		carePlanGoal.setCarePlanGoalModifiedOn(carePlanConcernRepository.findCurrentTimeStamp());
 		carePlanGoalRepository.saveAndFlush(carePlanGoal);
 	
 		List<CarePlanGoalBean> carePlanGoals=fetchCarePlanGoalBean(-1,-1,carePlanGoalData.getCarePlanGoalPatientId(),carePlanGoalData.getCarePlanGoalEncounterId(),carePlanGoalData.getEpisodeId());
@@ -411,7 +614,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 * @return List
 	 */
 	@SuppressWarnings("deprecation")
-	public List<CarePlanGoalBean>  saveCarePlanOutcomes(Integer goalId,Integer providerId,Integer patientId,Integer encounterId,Integer progress,String reviewDate,String targetDate,String notes,Integer status,Integer episodeId) {
+	public List<CarePlanGoalBean>  saveCarePlanOutcomes(Integer goalId,Integer providerId,Integer patientId,Integer encounterId,Integer progress,String reviewDate,String targetDate,String notes,Integer status,Integer episodeId,Integer goalAssisStatus,Integer goalLevelStatus) {
 		CarePlanOutcome carePlanOutcome=new CarePlanOutcome();
 		carePlanOutcome.setCarePlanOutcomeGoalId(goalId);
 		carePlanOutcome.setCarePlanOutcomePatientId(patientId);
@@ -430,7 +633,10 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 			catch(Exception e){}
 		}
 		else {
-			carePlanOutcome.setCarePlanOutcomeReviewDate(new Timestamp(new java.sql.Date(getEncounterDate(encounterId).getTime()).getTime()));
+			if(encounterId!=-1)
+				carePlanOutcome.setCarePlanOutcomeReviewDate(new Timestamp(new java.sql.Date(getEncounterDate(encounterId).getTime()).getTime()));
+			else
+				carePlanOutcome.setCarePlanOutcomeReviewDate(carePlanOutcomeRepository.findCurrentTimeStamp());
 		}
 		carePlanOutcome.setCarePlanOutcomeCreatedBy(providerId);
 		carePlanOutcome.setCarePlanOutcomeModifiedBy(providerId);
@@ -449,6 +655,13 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 					cu.set(rootCriteria.get(CarePlanGoal_.carePlanGoalTargetDate),new Timestamp(targetDateToSave.getTime()) );
 				}
 				cu.set(rootCriteria.get(CarePlanGoal_.carePlanGoalResultStatus), status);
+				if(goalAssisStatus!=-1)
+					cu.set(rootCriteria.get(CarePlanGoal_.carePlanGoalAssistanceStatus), goalAssisStatus);
+				if(goalLevelStatus!=-1)
+					cu.set(rootCriteria.get(CarePlanGoal_.carePlanGoalLevelStatus), goalLevelStatus);
+				cu.set(rootCriteria.get(CarePlanGoal_.carePlanGoalModifiedBy), providerId);
+				cu.set(rootCriteria.get(CarePlanGoal_.careplanGoalMasteredDate), carePlanGoalRepository.findCurrentTimeStamp());
+				cu.set(rootCriteria.get(CarePlanGoal_.carePlanGoalModifiedOn), carePlanGoalRepository.findCurrentTimeStamp());
 				cu.where(cb.equal(rootCriteria.get(CarePlanGoal_.carePlanGoalId),goalId),
 						cb.equal(rootCriteria.get(CarePlanGoal_.carePlanGoalPatientId),patientId));
 				this.entityManager.createQuery(cu).executeUpdate();
@@ -456,17 +669,25 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		catch(Exception e){}
 		}	
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<CarePlanGoal> carePlanQuery = builder.createQuery(CarePlanGoal.class);
-		Root<CarePlanGoal> carePlanRoot = carePlanQuery.from(CarePlanGoal.class);
-		Join<CarePlanGoal,CarePlanOutcome> outcomeJoin=carePlanRoot.join(CarePlanGoal_.carePlanOutcome,JoinType.INNER);
+		CriteriaQuery<CarePlanOutcome> carePlanQuery = builder.createQuery(CarePlanOutcome.class);
+		Root<CarePlanOutcome> outcomeJoin = carePlanQuery.from(CarePlanOutcome.class);
+		/*Join<CarePlanGoal,CarePlanOutcome> outcomeJoin=carePlanRoot.join(CarePlanGoal_.carePlanOutcome,JoinType.INNER);
 		outcomeJoin.on(builder.equal(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeEncounterId),encounterId));
-		List<Predicate> predicatesForGoal = new ArrayList<>();
-		predicatesForGoal.add(builder.equal(carePlanRoot.get(CarePlanGoal_.carePlanGoalPatientId), patientId));
-		predicatesForGoal.add(builder.equal(carePlanRoot.get(CarePlanGoal_.carePlanGoalId), goalId));
-		predicatesForGoal.add(builder.equal(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeEncounterId),encounterId));
+		*/List<Predicate> predicatesForGoal = new ArrayList<>();
+		/*	
+		predicatesForGoal.add(builder.equal(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeEncounterId),encounterId));*/
+		predicatesForGoal.add(builder.equal(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomePatientId), patientId));
+		predicatesForGoal.add(builder.equal(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeGoalId), goalId));
+		if(encounterId!=-1) {
+			predicatesForGoal.add(builder.equal(builder.function("DATE", Date.class, outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeReviewDate)),getEncounterDate(encounterId)));
+		}
+		else  {
+			predicatesForGoal.add(builder.equal(builder.function("DATE", Date.class, outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeReviewDate)),new Date()));
+		}
+		predicatesForGoal.add(builder.equal(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeProviderId),providerId));
 
 		carePlanQuery.where(builder.and(predicatesForGoal.toArray(new Predicate[predicatesForGoal.size()])));
-		List<CarePlanGoal> goals=entityManager.createQuery(carePlanQuery).getResultList();
+		List<CarePlanOutcome> goals=entityManager.createQuery(carePlanQuery).getResultList();
 
 		if(goals.size()>0) {
 			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -474,7 +695,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 			Root<CarePlanOutcome> rootCriteria = cu.from(CarePlanOutcome.class);
 			if(progress!=-1)
 				cu.set(rootCriteria.get(CarePlanOutcome_.carePlanOutcomeProgress),progress);
-			cu.set(rootCriteria.get(CarePlanOutcome_.carePlanOutcomeProviderId),providerId);
+			cu.set(rootCriteria.get(CarePlanOutcome_.carePlanOutcomeEncounterId),encounterId);
 			cu.set(rootCriteria.get(CarePlanOutcome_.carePlanOutcomeModifiedBy),providerId);
 			cu.set(rootCriteria.get(CarePlanOutcome_.carePlanOutcomeModifiedOn),carePlanOutcomeRepository.findCurrentTimeStamp());
 			if(!reviewDate.equalsIgnoreCase("-1")) {
@@ -488,9 +709,17 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 			else {
 				cu.set(rootCriteria.get(CarePlanOutcome_.carePlanOutcomeReviewDate),new Timestamp(getEncounterDate(encounterId).getTime()));
 			}
-			cu.where(cb.equal(rootCriteria.get(CarePlanOutcome_.carePlanOutcomeGoalId),goalId),
-					cb.equal(rootCriteria.get(CarePlanOutcome_.carePlanOutcomePatientId),patientId),
-					cb.equal(rootCriteria.get(CarePlanOutcome_.carePlanOutcomeEncounterId),encounterId));
+			if(encounterId!=-1) {
+				cu.where(cb.equal(rootCriteria.get(CarePlanOutcome_.carePlanOutcomeGoalId),goalId),
+						cb.equal(rootCriteria.get(CarePlanOutcome_.carePlanOutcomePatientId),patientId),
+						cb.equal(builder.function("DATE", Date.class, rootCriteria.get(CarePlanOutcome_.carePlanOutcomeReviewDate)),getEncounterDate(encounterId)));
+				
+			}
+			else {
+				cu.where(cb.equal(rootCriteria.get(CarePlanOutcome_.carePlanOutcomeGoalId),goalId),
+						cb.equal(rootCriteria.get(CarePlanOutcome_.carePlanOutcomePatientId),patientId),
+						cb.equal(builder.function("DATE", Date.class, rootCriteria.get(CarePlanOutcome_.carePlanOutcomeReviewDate)),new Date()));
+			}
 			this.entityManager.createQuery(cu).executeUpdate();
 		}
 		else {
@@ -511,7 +740,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	public Map<String, Object> getCarePlanInitialData(Integer patientId,
 			Integer encounterId,Integer episodeId, Integer episodeTypeId, Integer previousEpisodeId) {
 		Map<String,Object> listsMap=new HashMap<String,Object>();
-		listsMap.put("concernsList", fetchCarePlanConcerns(-1,patientId,-1,episodeId));
+		listsMap.put("concernsList", fetchCarePlanConcerns(-1,patientId,-1,episodeId,encounterId,"-1","-1"));
 		listsMap.put("goalsList", fetchCarePlanGoalBean(-1,-1,patientId,encounterId,episodeId));
 		listsMap.put("interventionsList", fetchInterventionPlanData(-1,-1,-1,patientId,encounterId,-1));
 		listsMap.put("unitsList",getUnitsOfMeasures() );
@@ -520,6 +749,11 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		listsMap.put("previousVisitShortcutsList", fetchPreviousCarePlanGoalShortcuts(patientId,episodeTypeId,previousEpisodeId));
 		listsMap.put("employeeList", fetchEmployeeList());
 		listsMap.put("lastVisitProgress",getLastVisitProgressStatus(patientId,encounterId,episodeId));
+		listsMap.put("recommIntervention", fetchRecommIntervention(patientId,encounterId,episodeId,"-1","-1"));
+		listsMap.put("reviewStatus", fetchCarePlanLog(patientId));
+		listsMap.put("healthStatus", getCarePlanStatus(patientId, encounterId, episodeId));
+
+		
 		//listsMap.put("getCarePlanSummary",getCarePlanSummaryData(patientId,episodeId,encounterId));
 		return listsMap;
 	}
@@ -532,8 +766,8 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 * @param patientId
 	 * @param encounterId
 	 * @return List
-	 */
-	/*@SuppressWarnings("rawtypes")
+	 *//*
+	@SuppressWarnings("rawtypes")
 	public List<CarePlanInterventionBean> fetchInterventionData(Integer goalId,Integer concernId,
 			Integer categoryId, Integer patientId, Integer encounterId){
 		
@@ -588,31 +822,42 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 * @param encounterId
 	 * @return List
 	 */
-	private List<Object[]> getVitals(Integer encounterId) {
+	private List<Object[]> getVitals(Integer patientID) {
+		List<String> GwIDs= new ArrayList<String>();
+		GwIDs.addAll(Arrays.asList("0000200200100026000", "0000200200100029000", "0000200200100028000", "0000200200100034000", "0000200200100030000", "0000200200100032000", "0000200200100031000", "0000200200100037000", "0000200200100036000", "0000200200100033000", "0000200200100076000", "0000200200100075000", "0000200200100035000","0000200200100027000","0000200200100023000","0000200200100024000","0000200200100025000","0000200200100020000","0000200200100038000","0000200200100278000","0000200200100022000"));
 		CriteriaBuilder builder= entityManager.getCriteriaBuilder();
 		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
 		Root<PatientClinicalElements> root= query.from(PatientClinicalElements.class);
+		Join<PatientClinicalElements, Encounter> encJoin= root.join(PatientClinicalElements_.encounter, JoinType.INNER);
 		Join<PatientClinicalElements, VitalsParameter> vitalJoin= root.join(PatientClinicalElements_.vitalsParameter, JoinType.INNER);
 		Join<PatientClinicalElements, ClinicalElements> clinicalJoin= root.join(PatientClinicalElements_.clinicalElement, JoinType.INNER);
 		Join<VitalsParameter, UnitsOfMeasure> unitsJoin= vitalJoin.join(VitalsParameter_.unitsOfMeasureTable, JoinType.LEFT);
-		Join<VitalsParameter, VitalGroup> groupJoin= vitalJoin.join(VitalsParameter_.vitalGroup, JoinType.INNER);
-		Join<ClinicalElements, ClinicalElementsOptions> optionsJoin= clinicalJoin.join(ClinicalElements_.clinicalElementsOptions, JoinType.LEFT);
+/*		Join<VitalsParameter, VitalGroup> groupJoin= vitalJoin.join(VitalsParameter_.vitalGroup, JoinType.INNER);
+*/		Join<ClinicalElements, ClinicalElementsOptions> optionsJoin= clinicalJoin.join(ClinicalElements_.clinicalElementsOptions, JoinType.LEFT);
 		Join<ClinicalElements, ClinicalTextMapping> textJoin= clinicalJoin.join(ClinicalElements_.clinicalTextMappings, JoinType.LEFT);
-
+		Join<ClinicalElements, CNMCodeSystem> cnmJoin= clinicalJoin.join(ClinicalElements_.cnmCodeSystems, JoinType.LEFT);
+		
 		query.multiselect(vitalJoin.get(VitalsParameter_.vitalsParameterName),
 				root.get(PatientClinicalElements_.patientClinicalElementsGwid),
 				root.get(PatientClinicalElements_.patientClinicalElementsValue),
 				unitsJoin.get(UnitsOfMeasure_.unitsOfMeasureCode),
 				optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsName),
 				clinicalJoin.get(ClinicalElements_.clinicalElementsDatatype),
-				textJoin.get(ClinicalTextMapping_.clinicalTextMappingAssociatedElement));
+				textJoin.get(ClinicalTextMapping_.clinicalTextMappingAssociatedElement),
+				builder.coalesce(cnmJoin.get(CNMCodeSystem_.cnmCodeSystemCode),""),
+				builder.coalesce(cnmJoin.get(CNMCodeSystem_.cnmCodeSystemOid),""));
 
-		query.where(builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId),
+		query.where(builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientID),
 				builder.or(builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsValue),optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsValue)),
-						builder.isNull(optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsGwid))));
+						builder.isNull(optionsJoin.get(ClinicalElementsOptions_.clinicalElementsOptionsGwid))),
+						root.get(PatientClinicalElements_.patientClinicalElementsGwid).in(GwIDs));
 
-		query.orderBy(builder.asc(groupJoin.get(VitalGroup_.vitalGroupOrderby)),
+		/*query.orderBy(builder.asc(groupJoin.get(VitalGroup_.vitalGroupOrderby)),
 				builder.asc(vitalJoin.get(VitalsParameter_.vitalsParameterId)));
+*/
+
+		query.orderBy(builder.asc(root.get(PatientClinicalElements_.patientClinicalElementsGwid)),
+				builder.desc(encJoin.get(Encounter_.encounterDate)));
 
 		List<Object[]> result= entityManager.createQuery(query).getResultList();
 
@@ -637,14 +882,33 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 * @param vitalsList
 	 * @return List
 	 */
-	private List<VitalsParameter> getVitalParameters(){
+	private List<Object> getVitalParameters(){
+		List<String> GwIDs= new ArrayList<String>();
+		GwIDs.addAll(Arrays.asList("0000200200100075000","0000200200100076000","0000200200100038000","0000200200100025000","0000200200100020000","0000200200100023000","0000200200100024000","0000200200100278000"));
 		CriteriaBuilder builder= entityManager.getCriteriaBuilder();
-		CriteriaQuery<VitalsParameter> query= builder.createQuery(VitalsParameter.class);
+		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
 		Root<VitalsParameter> root = query.from(VitalsParameter.class);
-		query.where(builder.equal(root.get(VitalsParameter_.vitalsParameterIsactive),true));
+		Join<VitalsParameter, CNMCodeSystem> cnmJoin= root.join(VitalsParameter_.cnmCodeSystem, JoinType.LEFT);
+/*		Join<VitalsParameter, UnitsOfMeasure> unitsJoin= root.join(VitalsParameter_.unitsOfMeasureTable, JoinType.LEFT);
+*/		query.multiselect(root.get(VitalsParameter_.vitalsParameterName),
+				builder.coalesce(cnmJoin.get(CNMCodeSystem_.cnmCodeSystemCode),""),
+				builder.coalesce(cnmJoin.get(CNMCodeSystem_.cnmCodeSystemOid),""));
+		query.where(builder.equal(root.get(VitalsParameter_.vitalsParameterIsactive),true),
+				root.get(VitalsParameter_.vitalsParameterGwId).in(GwIDs));
 		query.orderBy(builder.asc(root.get(VitalsParameter_.vitalsParameterName)));
-		List<VitalsParameter> vitals=entityManager.createQuery(query).getResultList();
-		return vitals;
+		List<Object[]> vitals=entityManager.createQuery(query).getResultList();
+		List<Object>  parsedVitalParameters=new ArrayList<Object>();
+	    for(Object[]  vitalValues:vitals){
+	    	Map<String, String> parsedObject=new HashMap<String, String>();
+	    	try {
+				parsedObject.put("vitalsParameterName", vitalValues[0].toString());
+				parsedObject.put("cnmCodeSystemCode", vitalValues[1].toString());	
+				parsedObject.put("cnmCodeSystemOid", vitalValues[2].toString());	
+				parsedVitalParameters.add(parsedObject);
+			} catch (Exception e) {
+			}
+	    }
+		return parsedVitalParameters;
 	}
 	
 	/**
@@ -655,59 +919,72 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 */
 	private JSONArray parseVitals(List<Object[]> vitalsList) throws JSONException {
 		JSONArray vitals= new JSONArray();
+		String encBasedGwid="";
+		long bpCount=0;
 		for(int i=0; i<vitalsList.size(); i++){
 			JSONObject vital= new JSONObject();
 			Object[] vitalsObj= vitalsList.get(i);
-			String name= vitalsObj[0].toString();
-			String gwid= vitalsObj[1].toString();
-			String value= vitalsObj[2].toString();
-			String units= vitalsObj[3].toString();
-			String optionname= vitalsObj[4]!= null? vitalsObj[4].toString(): "";
-			int datatype= Integer.parseInt(vitalsObj[5].toString());
-			String assgwid= vitalsObj[6]!= null? vitalsObj[6].toString(): "";
-			if(datatype == ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_SINGLEOPTION){
-				value= optionname;
-			}else if(datatype == ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_SINGLEOPTION){
-				if(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("t"))
-					value= "Yes";
-				else
-					value= "No";
-			}
-			else if(name.toLowerCase().contains("systolic")){
-				for(int j=0; j<vitalsList.size(); j++){
-					Object[] tmpvitalsObj= vitalsList.get(j);
-					String tmpassgwid= tmpvitalsObj[1]!= null? tmpvitalsObj[1].toString(): "";
-					if(assgwid.equals(tmpassgwid)){
-						String tmpvalue= tmpvitalsObj[2].toString();
-						value= value+"/"+tmpvalue;
-						break;
+			if(!encBasedGwid.equalsIgnoreCase(vitalsObj[1].toString())) {
+				if((!(vitalsObj[0].toString().toLowerCase().contains("systolic")) && !(vitalsObj[0].toString().toLowerCase().contains("diastolic"))) || (bpCount==0)) {
+					String name= vitalsObj[0].toString();
+					String gwid= vitalsObj[1].toString();
+					encBasedGwid=gwid;
+					String value= vitalsObj[2].toString();
+					String units= vitalsObj[3].toString();
+					String optionname= vitalsObj[4]!= null? vitalsObj[4].toString(): "";
+					int datatype= Integer.parseInt(vitalsObj[5].toString());
+					String assgwid= vitalsObj[6]!= null? vitalsObj[6].toString(): "";
+					String code= vitalsObj[7].toString();
+					String codeSystem= vitalsObj[8].toString();
+					if(datatype == ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_SINGLEOPTION){
+						value= optionname;
+					}else if(datatype == ClinicalConstants.CLINICAL_ELEMENT_DATATYPE_SINGLEOPTION){
+						if(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("t"))
+							value= "Yes";
+						else
+							value= "No";
 					}
-				}
-			}else if(name.equalsIgnoreCase("height")){
-				String dispUnit= getDisplayUnit("0000200200100023000");
-				value= HUtil.heightConversion(value, dispUnit);
-			}else if(name.equalsIgnoreCase("weight")){
-				String dispUnit= getDisplayUnit("0000200200100024000");
-				value= HUtil.weightConversion(value, dispUnit);
-			}
+					else if(name.toLowerCase().contains("systolic") && bpCount==0){
+						for(int j=0; j<vitalsList.size(); j++){
+							Object[] tmpvitalsObj= vitalsList.get(j);
+							String tmpassgwid= tmpvitalsObj[1]!= null? tmpvitalsObj[1].toString(): "";
+							if(assgwid.equals(tmpassgwid)){
+								String tmpvalue= tmpvitalsObj[2].toString();
+								value= value+"/"+tmpvalue;
+								break;
+							}
+						}
+					}else if(name.equalsIgnoreCase("height")){
+						String dispUnit= getDisplayUnit("0000200200100023000");
+						value= HUtil.heightConversion(value, dispUnit);
+					}else if(name.equalsIgnoreCase("weight")){
+						String dispUnit= getDisplayUnit("0000200200100024000");
+						value= HUtil.weightConversion(value, dispUnit);
+					}
 
-			if(!name.toLowerCase().contains("diastolic")){
-				if(!name.equalsIgnoreCase("Height") && !name.equalsIgnoreCase("Weight")){
-					if(name.contains("systolic")){
-						name = name.substring(0,name.indexOf("systolic"))+"BP (mmHg)";
-					}else if(name.contains("Systolic")){
-						name = name.substring(0,name.indexOf("Systolic"))+"BP (mmHg)";
-					}
-					if(value.indexOf(".")!=-1 && value.indexOf(",")==-1){
-						double doubleValue = Double.parseDouble(value);
-						DecimalFormat f = new DecimalFormat("##.00");
-						value = f.format(doubleValue).toString();
-					}
+					if(!name.toLowerCase().contains("diastolic")){
+						if(!name.equalsIgnoreCase("Height") && !name.equalsIgnoreCase("Weight")){
+							if(name.contains("systolic")  && bpCount==0){
+								bpCount++;
+								name = name.substring(0,name.indexOf("systolic"))+"BP (mmHg)";
+							}else if(name.contains("Systolic")  && bpCount==0){
+								bpCount++;
+								name = name.substring(0,name.indexOf("Systolic"))+"BP (mmHg)";
+							}
+							if(value.indexOf(".")!=-1 && value.indexOf(",")==-1){
+								double doubleValue = Double.parseDouble(value);
+								DecimalFormat f = new DecimalFormat("##.00");
+								value = f.format(doubleValue).toString();
+							}
+						}
+						vital.put("Unit", units);
+						vital.put("DisplayName", name);
+						vital.put("Value", value);
+						vital.put("Code", code);
+						vital.put("CodeSystem", codeSystem);
+						vitals.put(vital);
 				}
-				vital.put("Unit", units);
-				vital.put("DisplayName", name);
-				vital.put("Value", value);
-				vitals.put(vital);
+				}
 			}
 		}
 		return vitals;
@@ -738,7 +1015,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	 * @return String
 	 */
 	public String getVitals(Integer patientId,Integer encounterId){
-		List<Object[]> vitals= getVitals(encounterId);
+		List<Object[]> vitals= getVitals(patientId);
 		JSONArray vitalsArr=null;
 		try {
 			vitalsArr = parseVitals(vitals);
@@ -819,7 +1096,8 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 				Root<CarePlanConcern> rootConcernPatient=concernPatientQuery.from(CarePlanConcern.class);
 				predicates.add(builder.equal(rootConcernPatient.get(CarePlanConcern_.carePlanConcernPatientId),patientId));
 				predicates.add(builder.equal(rootConcernPatient.get(CarePlanConcern_.carePlanConcernCategoryId),categoryId));
-				predicates.add(builder.equal(rootConcernPatient.get(CarePlanConcern_.careplanConcernEpisodeId),episodeId));
+				if(episodeId!=-1)
+					predicates.add(builder.equal(rootConcernPatient.get(CarePlanConcern_.careplanConcernEpisodeId),episodeId));
 				predicates.add(builder.like(rootConcernPatient.get(CarePlanConcern_.carePlanConcernDesc),concernShortcut.getCarePlanConcernShortcutDesc()));
 				concernPatientQuery.where(predicates.toArray(new Predicate[predicates.size()]));
 				List<CarePlanConcern> concernPatient=entityManager.createQuery(concernPatientQuery).getResultList();
@@ -849,7 +1127,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 					carePlanConcern.setCarePlanConcernCreatedOn(carePlanConcernRepository.findCurrentTimeStamp());
 					carePlanConcern.setCareplanConcernEpisodeId(episodeId);
 					carePlanConcern.setCarePlanConcernFrom(categoryId);
-
+					carePlanConcern.setCareplanConcernEncounterId(encounterId);
 					carePlanConcernRepository.saveAndFlush(carePlanConcern);
 					concernShortcutId=carePlanConcern.getCarePlanConcernId();
 					
@@ -973,9 +1251,9 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 
 	@Override
 	public Map<String, Object> getCarePlanProgressInitialData(Integer patientId,
-			Integer encounterId,Integer episodeId, String gwid) {
+			Integer encounterId,Integer episodeId, String gwid) throws ParseException {
 		Map<String,Object> listsMap=new HashMap<String,Object>();
-		listsMap.put("concernsList", fetchCarePlanConcerns(-1,patientId,-1,episodeId));
+		listsMap.put("concernsList", fetchCarePlanConcerns(-1,patientId,-1,episodeId,encounterId,"-1","-1"));
 		listsMap.put("goalsList", fetchCarePlanGoalBean(-1,-1,patientId,encounterId,episodeId));
 		listsMap.put("unitsList",getUnitsOfMeasures() );
 		listsMap.put("vitalsList", getVitalParameters());
@@ -983,7 +1261,11 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		listsMap.put("planData", getPlanData(encounterId));
 		listsMap.put("hpiShortcut", getShortcuts(1));
 		listsMap.put("planShortcut", getShortcuts(5));
+		listsMap.put("assesmentShortcut", getShortcuts(115));
 		listsMap.put("lastVisitProgress",getLastVisitProgressStatus(patientId,encounterId,episodeId));
+		listsMap.put("encounterList",getEncounterListForEpisode(episodeId,patientId,encounterId));
+
+		
 		return listsMap;
 	}
 	
@@ -992,7 +1274,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		patientElem=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getByPatEncGwId(patientId, encounterId,gwid));
 		/*if((patientElem=patientClinicalElementsRepository.findAll(PatientClinicalElementsSpecification.getByPatEncGwId(patientId, encounterId,gwid))).size()>0){
 			System.out.println(" entering if");
-			subjectiveData=patientElem.get(0).getPatientClinicalElementsValue();
+			subjectiveData=patientElem.get(0).getPatientClinicalElementsValcarue();
 			if(patientElem.size()>1)
 			subjectiveData+=","+patientElem.get(1).getPatientClinicalElementsValue();
 		}*/
@@ -1023,9 +1305,9 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		List<Predicate> predicates = new ArrayList<>();
 		if(patientId!=-1)
 			predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalPatientId), patientId));
-		if(categoryId!=-1)
-		      predicates.add(builder.equal(concernJoin.get(CarePlanConcern_.carePlanConcernCategoryId),categoryId ));predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalStatus),1));
-		if(previousEpisodeId!=-1)
+		/*if(categoryId!=-1)
+		      predicates.add(builder.equal(concernJoin.get(CarePlanConcern_.carePlanConcernCategoryId),categoryId ));
+		*/
 			  predicates.add(builder.equal(root.get(CarePlanGoal_.careplanGoalEpisodeId),previousEpisodeId ));
 		predicates.add(builder.equal(root.get(CarePlanGoal_.carePlanGoalStatus),1));
 		predicates.add(builder.or(builder.in(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeId)).value(subquery),builder.isNull(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeId))));
@@ -1054,6 +1336,11 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 				builder.coalesce(outcomeJoin.get(CarePlanOutcome_.carePlanOutcomeProgress),0),
 				root.get(CarePlanGoal_.carePlanGoalResultStatus),
 				root.get(CarePlanGoal_.careplanGoalEpisodeId),
+				root.get(CarePlanGoal_.carePlanGoalOrder),
+				root.get(CarePlanGoal_.carePlanGoalValueOne),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalAssistanceStatus),0),
+				builder.coalesce(root.get(CarePlanGoal_.carePlanGoalLevelStatus),0)
+				
 		};
 		
 		cq.select(builder.construct(CarePlanGoalBean.class, selections));
@@ -1189,7 +1476,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		return listsMap;
 	}
 	@Override
-	public List<CarePlanInterventionBean> fetchCarePlanInterventions(Integer patientId, Integer encounterId, Integer interventionMode, String dxCode) {
+	public List<CarePlanInterventionBean> fetchCarePlanInterventions(Integer patientId, Integer encounterId, Integer interventionMode, String dxCode,Integer Status,String frmDate,String toDate) {
 		/*CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<CarePlanIntervention> cq = builder.createQuery(CarePlanIntervention.class);
 		Root<CarePlanIntervention> root = cq.from(CarePlanIntervention.class);
@@ -1211,6 +1498,28 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 			predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionPatientId), patientId));
 		if(encounterId!=-1)
 			predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionEncounterId), encounterId));
+		if(interventionMode!=0 && dxCode!=null)
+			predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionProblemCode), dxCode));
+		if(Status!=null && Status!=-1)
+			predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionStatus), Status));
+		if(frmDate!=null && !(frmDate.equalsIgnoreCase("-1"))) {
+			Date fromDate = null;
+			try {
+				fromDate=new SimpleDateFormat("MM/dd/yyyy").parse(frmDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			predicates.add(builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,root.get(CarePlanIntervention_.carePlanInterventionCreatedOn)),fromDate));
+		}
+		if(toDate!=null && !(toDate.equalsIgnoreCase("-1"))) {
+			Date tDate = null;
+			try {
+				tDate=new SimpleDateFormat("MM/dd/yyyy").parse(toDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			predicates.add(builder.lessThanOrEqualTo(builder.function("DATE", Date.class,root.get(CarePlanIntervention_.carePlanInterventionCreatedOn)),tDate));
+		}
 		Selection[] selectedColumns = new Selection[]{
 				root.get(CarePlanIntervention_.carePlanInterventionId),
 				root.get(CarePlanIntervention_.carePlanInterventionPatientId),
@@ -1258,54 +1567,55 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 	}
 
 
-	public List<CarePlanInterventionBean> fetchInterventionPlanData(Integer goalId,Integer concernId,
-			Integer CategoryId, Integer patientId, Integer encounterId,Integer intervenId){
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<CarePlanInterventionBean> cq = builder.createQuery(CarePlanInterventionBean.class);
-		Root<CarePlanIntervention> root = cq.from(CarePlanIntervention.class);
+public List<CarePlanInterventionBean> fetchInterventionPlanData(Integer goalId,Integer concernId,
+		Integer CategoryId, Integer patientId, Integer encounterId,Integer intervenId){
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaQuery<CarePlanInterventionBean> cq = builder.createQuery(CarePlanInterventionBean.class);
+	Root<CarePlanIntervention> root = cq.from(CarePlanIntervention.class);
 
-		List<Predicate> predicates = new ArrayList<>();
-		if(patientId!=-1)
-			predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionPatientId), patientId));
-		if(encounterId!=-1)
-			predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionEncounterId), encounterId));
-		if(concernId!=-1)
-			predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionConcernId), concernId));
-		if(goalId!=-1)
-			predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionGoalId), goalId));
-		if(CategoryId!=-1)
-			predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionCategoryId), CategoryId));
-		if(intervenId!=-1)
-			predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionId), intervenId));
-		Selection[] selectedColumns = new Selection[]{
-				root.get(CarePlanIntervention_.carePlanInterventionId),
-				root.get(CarePlanIntervention_.carePlanInterventionPatientId),
-				root.get(CarePlanIntervention_.carePlanInterventionEncounterId),
-				root.get(CarePlanIntervention_.carePlanInterventionConcernId),
-				root.get(CarePlanIntervention_.carePlanInterventionGoalId),
-				root.get(CarePlanIntervention_.carePlanInterventionCategoryId),
-				root.get(CarePlanIntervention_.carePlanInterventionDescription),
-				root.get(CarePlanIntervention_.carePlanInterventionCode),
-				root.get(CarePlanIntervention_.carePlanInterventionCodeName),
-				root.get(CarePlanIntervention_.carePlanInterventionProblemCode),
-				root.get(CarePlanIntervention_.carePlanInterventionProblemCodeSystem),
-				root.get(CarePlanIntervention_.carePlanInterventionProblemCodeSystemDescription),
-				root.get(CarePlanIntervention_.carePlanInterventionStatus),
-				root.get(CarePlanIntervention_.carePlanInterventionOrderedBy),
-				root.get(CarePlanIntervention_.carePlanInterventionOrderedOn),
-				root.get(CarePlanIntervention_.carePlanInterventionPerformedBy),
-				root.get(CarePlanIntervention_.carePlanInterventionPerformedOn),
-				root.get(CarePlanIntervention_.carePlanInterventionNotDoneType),
-				root.get(CarePlanIntervention_.carePlanInterventionNotDoneDescription),
-				root.get(CarePlanIntervention_.carePlanInterventionNotDoneCode),
-				root.get(CarePlanIntervention_.carePlanInterventionNotDoneCodeSystem),
-				root.get(CarePlanIntervention_.carePlanInterventionNotes)
-		};
-		cq.select(builder.construct(CarePlanInterventionBean.class, selectedColumns));
-		cq.where(predicates.toArray(new Predicate[predicates.size()]));
-		List<CarePlanInterventionBean> interventions=entityManager.createQuery(cq).getResultList();
-		return interventions;
-	}
+	List<Predicate> predicates = new ArrayList<>();
+	if(patientId!=-1)
+		predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionPatientId), patientId));
+	if(encounterId!=-1)
+		predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionEncounterId), encounterId));
+	if(concernId!=-1)
+		predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionConcernId), concernId));
+	if(goalId!=-1)
+		predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionGoalId), goalId));
+	if(CategoryId!=-1)
+		predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionCategoryId), CategoryId));
+	if(intervenId!=-1)
+		predicates.add(builder.equal(root.get(CarePlanIntervention_.carePlanInterventionId), intervenId));
+	Selection[] selectedColumns = new Selection[]{
+			root.get(CarePlanIntervention_.carePlanInterventionId),
+			root.get(CarePlanIntervention_.carePlanInterventionPatientId),
+			root.get(CarePlanIntervention_.carePlanInterventionEncounterId),
+			root.get(CarePlanIntervention_.carePlanInterventionConcernId),
+			root.get(CarePlanIntervention_.carePlanInterventionGoalId),
+			root.get(CarePlanIntervention_.carePlanInterventionCategoryId),
+			root.get(CarePlanIntervention_.carePlanInterventionDescription),
+			root.get(CarePlanIntervention_.carePlanInterventionCode),
+			root.get(CarePlanIntervention_.carePlanInterventionCodeName),
+			root.get(CarePlanIntervention_.carePlanInterventionProblemCode),
+			root.get(CarePlanIntervention_.carePlanInterventionProblemCodeSystem),
+			root.get(CarePlanIntervention_.carePlanInterventionProblemCodeSystemDescription),
+			root.get(CarePlanIntervention_.carePlanInterventionStatus),
+			root.get(CarePlanIntervention_.carePlanInterventionOrderedBy),
+			root.get(CarePlanIntervention_.carePlanInterventionOrderedOn),
+			root.get(CarePlanIntervention_.carePlanInterventionPerformedBy),
+			root.get(CarePlanIntervention_.carePlanInterventionPerformedOn),
+			root.get(CarePlanIntervention_.carePlanInterventionNotDoneType),
+			root.get(CarePlanIntervention_.carePlanInterventionNotDoneDescription),
+			root.get(CarePlanIntervention_.carePlanInterventionNotDoneCode),
+			root.get(CarePlanIntervention_.carePlanInterventionNotDoneCodeSystem),
+			root.get(CarePlanIntervention_.carePlanInterventionNotes)
+	};
+	cq.select(builder.construct(CarePlanInterventionBean.class, selectedColumns));
+	cq.where(predicates.toArray(new Predicate[predicates.size()]));
+	List<CarePlanInterventionBean> interventions=entityManager.createQuery(cq).getResultList();
+	return interventions;
+}
+
 
 
 	@Override
@@ -1479,10 +1789,11 @@ public List<CarePlanSummaryBean> fetchCarePlanSummaryBean(Integer goalId,Integer
 			goalJoin.get(CarePlanGoal_.carePlanGoalId),
 			root.get(CarePlanSummary_.carePlanSummaryGoalProgress),
 			goalJoin.get(CarePlanGoal_.carePlanGoalResultStatus),
+			goalJoin.get(CarePlanGoal_.carePlanGoalOrder),
 	};
 	cq.select(builder.construct(CarePlanSummaryBean.class, selections));
 	cq.where(builder.and(predicates.toArray(new Predicate[predicates.size()])));
-	cq.orderBy(builder.asc(root.get(CarePlanSummary_.carePlanSummaryId)));
+	cq.orderBy(builder.asc(goalJoin.get(CarePlanGoal_.carePlanGoalOrder)));
 	List<CarePlanSummaryBean> concerns=entityManager.createQuery(cq).getResultList();
 	return concerns;
 
@@ -1571,7 +1882,7 @@ public Date getEncounterDate(Integer encounterId) {
 	if(resultList.size()>0)
 		encounterDate= (Date) resultList.get(0);
 	try{
-		SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/yyyy HH:mm:ss");
+		SimpleDateFormat ft = new SimpleDateFormat ("MM/dd/yyyy");
 		encounterDate = new Date (ft.format(encounterDate));
 	}
 	catch(Exception e){}
@@ -1631,9 +1942,13 @@ public List<Object[]> getLastVisitProgressStatus(Integer patientId,Integer encou
 	Root<Encounter> root = cq.from(Encounter.class);
 	Join<Encounter, Chart> chartJoin=root.join(Encounter_.chart,JoinType.INNER);
 	cq.select(builder.max(root.get(Encounter_.encounterId)));
+	if(episodeId!=-1)
 	cq.where(builder.and(builder.equal(root.get(Encounter_.encounterPatientEpisodeid),episodeId),
 			builder.equal(chartJoin.get(Chart_.chartPatientid),patientId),
 			builder.notEqual(root.get(Encounter_.encounterId),encounterId)));
+	else
+		cq.where(builder.and(builder.equal(chartJoin.get(Chart_.chartPatientid),patientId),
+				builder.notEqual(root.get(Encounter_.encounterId),encounterId)));
 	Integer previousEncId = 	entityManager.createQuery(cq).getResultList().get(0);
 	if(previousEncId.SIZE>0) {
 		CriteriaQuery<Object[]> outcomeQuery = builder.createQuery(Object[].class);
@@ -1645,4 +1960,483 @@ public List<Object[]> getLastVisitProgressStatus(Integer patientId,Integer encou
 	return progress;
 }
 
+/**
+ * To save care plan concern from given Bean
+ * @param CarePlanConcernBean
+ * @return List
+ */
+@Override
+public Map<String, Object> saveConcernAndGoal(CarePlanConcernBean carePlanConcernJSON,int previousEpisodeId) {
+	CarePlanConcern carePlanConcern=new CarePlanConcern();
+	if(carePlanConcernJSON.getConcernId()!=-1)
+		carePlanConcern.setCarePlanConcernId(carePlanConcernJSON.getConcernId());
+	carePlanConcern.setCarePlanConcernCategoryId(carePlanConcernJSON.getConcernCategoryId());
+	carePlanConcern.setCarePlanConcernPatientId(carePlanConcernJSON.getConcernPatientId());
+	carePlanConcern.setCarePlanConcernProviderId(carePlanConcernJSON.getConcernProviderId());
+	carePlanConcern.setCarePlanConcernType(carePlanConcernJSON.getConcernType());
+	carePlanConcern.setCarePlanConcernCode(carePlanConcernJSON.getConcernCode());
+	carePlanConcern.setCarePlanConcernCodeSystem(carePlanConcernJSON.getConcernCodeSystem());
+	carePlanConcern.setCarePlanConcernCodeSystemName(carePlanConcernJSON.getConcernCodeSystemName());
+	carePlanConcern.setCarePlanConcernCodeDesc(carePlanConcernJSON.getConcernCodeDesc());
+	carePlanConcern.setCarePlanConcernPriority(carePlanConcernJSON.getConcernPriority());
+	carePlanConcern.setCarePlanConcernValue(carePlanConcernJSON.getConcernValue());
+	carePlanConcern.setCarePlanConcernUnit(carePlanConcernJSON.getConcernUnit());
+	carePlanConcern.setCarePlanConcernDesc(carePlanConcernJSON.getConcernDesc());
+	carePlanConcern.setCarePlanConcernNotes(carePlanConcernJSON.getConcernNotes());
+	carePlanConcern.setCarePlanConcernStatus(carePlanConcernJSON.getConcernStatus());
+	carePlanConcern.setCarePlanConcernStatusUpdatedDate(carePlanConcernRepository.findCurrentTimeStamp());
+	carePlanConcern.setCarePlanConcernCreatedBy(carePlanConcernJSON.getConcernCreatedBy());
+	carePlanConcern.setCarePlanConcernModifiedBy(carePlanConcernJSON.getConcernModifiedBy());
+	carePlanConcern.setCarePlanConcernCreatedOn(carePlanConcernRepository.findCurrentTimeStamp());
+	carePlanConcern.setCareplanConcernEpisodeId(carePlanConcernJSON.getEpisodeId());
+	carePlanConcern.setCarePlanConcernFrom(carePlanConcernJSON.getConcernFrom());
+	carePlanConcern.setCareplanConcernEncounterId(carePlanConcernJSON.getEncounterId());
+	carePlanConcern.setCarePlanConcernModifiedOn(carePlanConcernRepository.findCurrentTimeStamp());
+	carePlanConcernRepository.saveAndFlush(carePlanConcern);
+	if(carePlanConcernJSON.getConcernId()!=-1) {
+		try{
+			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+			CriteriaUpdate<CarePlanGoal> cu = cb.createCriteriaUpdate(CarePlanGoal.class);
+			Root<CarePlanGoal> rootCriteria = cu.from(CarePlanGoal.class);
+			cu.set(rootCriteria.get(CarePlanGoal_.carePlanGoalStatus), carePlanConcernJSON.getConcernStatus());
+			cu.where(cb.equal(rootCriteria.get(CarePlanGoal_.carePlanGoalConcernId),carePlanConcernJSON.getConcernId()),
+					cb.equal(rootCriteria.get(CarePlanGoal_.carePlanGoalPatientId),carePlanConcernJSON.getConcernPatientId()));
+			this.entityManager.createQuery(cu).executeUpdate();
+		}
+	catch(Exception e){}
+	}	
+	Map<String, Object> listsMap = getCarePlanInitialData(carePlanConcernJSON.getConcernPatientId(),carePlanConcernJSON.getEncounterId(),carePlanConcernJSON.getEpisodeId(),carePlanConcernJSON.getConcernCategoryId(),previousEpisodeId);
+	return listsMap;	
+	}
+
+@Override
+public Map<String, Object> showInactiveConcerns(int patientId, int encounterId,
+		int episodeId) {
+	// TODO Auto-generated method stub
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaQuery<CarePlanConcern> cq = builder.createQuery(CarePlanConcern.class);
+	Root<CarePlanConcern> root = cq.from(CarePlanConcern.class);
+	Join<CarePlanConcern, CarePlanGoal> goalJoin = root.join(CarePlanConcern_.carePlanGoal,JoinType.INNER);
+	
+	return null;
 }
+
+@Override
+public List<CarePlanRecommendedIntervention> saveCarePlanRecommendedIntervention(
+		CarePlanRecommendedInterventionBean carePlanRecommendedInterventionJson) {
+	// TODO Auto-generated method stub
+	CarePlanRecommendedIntervention carePlanRecommendedIntervention = new CarePlanRecommendedIntervention();
+	if(carePlanRecommendedInterventionJson.getRecommInterventionId()!=-1)
+		carePlanRecommendedIntervention.setCarePlanRecommendedInterventionId(carePlanRecommendedInterventionJson.getRecommInterventionId());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionPatientId(carePlanRecommendedInterventionJson.getRecommInterventionPatientId());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionEncounterId(carePlanRecommendedInterventionJson.getRecommInterventionEncounterId());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionEpisodeId(carePlanRecommendedInterventionJson.getRecommInterventionEpisodeId());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionCategoryId(carePlanRecommendedInterventionJson.getRecommInterventionCategoryId());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionConcernId(carePlanRecommendedInterventionJson.getRecommInterventionConcernId());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionGoalId(carePlanRecommendedInterventionJson.getRecommInterventionGoalId());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionDescription(carePlanRecommendedInterventionJson.getRecommInterventionDescription());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionNotes(carePlanRecommendedInterventionJson.getRecommInterventionNotes());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionCode(carePlanRecommendedInterventionJson.getRecommInterventionCode());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionCodeSystem(carePlanRecommendedInterventionJson.getRecommInterventionCodeSystem());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionCodeSystemName(carePlanRecommendedInterventionJson.getRecommInterventionCodeSystemname());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionCreatedBy(carePlanRecommendedInterventionJson.getRecommInterventionCreatedBy());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionModifiedBy(carePlanRecommendedInterventionJson.getRecommInterventionModifiedBy());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionRecommendedBy(carePlanRecommendedInterventionJson.getRecommInterventionRecommendedBy());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionCreatedOn(carePlanRecommendedInterventionRepository.findCurrentTimeStamp());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionModifiedOn(carePlanRecommendedInterventionRepository.findCurrentTimeStamp());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionRecommendedOn(carePlanRecommendedInterventionRepository.findCurrentTimeStamp());
+	carePlanRecommendedIntervention.setCarePlanRecommendedInterventionStatus(carePlanRecommendedInterventionJson.getRecommInterventionStatus());
+	carePlanRecommendedIntervention.setCareplanRecommendedInterventionResponsibleParty(carePlanRecommendedInterventionJson.getRecommResponsibleParty());
+	
+	carePlanRecommendedInterventionRepository.saveAndFlush(carePlanRecommendedIntervention);
+	List<CarePlanRecommendedIntervention> recommInterventions=fetchRecommIntervention(carePlanRecommendedInterventionJson.getRecommInterventionPatientId(),carePlanRecommendedInterventionJson.getRecommInterventionEncounterId(),carePlanRecommendedInterventionJson.getRecommInterventionEpisodeId(),"-1","-1");
+	return recommInterventions;
+}
+
+@Override
+public List<CarePlanRecommendedIntervention> fetchRecommIntervention(
+		Integer patientId, Integer encounterId, Integer episodeId,String frmDate,String toDate) {
+	// TODO Auto-generated method stub
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaQuery<CarePlanRecommendedIntervention> cq = builder.createQuery(CarePlanRecommendedIntervention.class);
+	Root<CarePlanRecommendedIntervention> root = cq.from(CarePlanRecommendedIntervention.class);
+	Join<CarePlanRecommendedIntervention,CarePlanConcern> concernJoin = root.join(CarePlanRecommendedIntervention_.carePlanRecommConcern,JoinType.LEFT);
+	Join<CarePlanRecommendedIntervention, CarePlanGoal> goalJoin = root.join(CarePlanRecommendedIntervention_.carePlanRecommGoal,JoinType.LEFT);
+	List<Predicate> predicates = new ArrayList<>();
+	if(patientId!=-1)
+		predicates.add(builder.equal(root.get(CarePlanRecommendedIntervention_.carePlanRecommendedInterventionPatientId),patientId));
+	if(encounterId!=-1)
+		predicates.add(builder.equal(root.get(CarePlanRecommendedIntervention_.carePlanRecommendedInterventionEncounterId),encounterId));
+	if(episodeId!=-1)
+		predicates.add(builder.equal(root.get(CarePlanRecommendedIntervention_.carePlanRecommendedInterventionEpisodeId),episodeId));
+	if(frmDate!=null && !(frmDate.equalsIgnoreCase("-1"))) {
+		Date fromDate = null;
+		try {
+			fromDate=new SimpleDateFormat("MM/dd/yyyy").parse(frmDate);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		predicates.add(builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,root.get(CarePlanRecommendedIntervention_.carePlanRecommendedInterventionCreatedOn)),fromDate));
+	}
+	if(toDate!=null && !(toDate.equalsIgnoreCase("-1"))) {
+		Date tDate = null;
+		try {
+			tDate=new SimpleDateFormat("MM/dd/yyyy").parse(toDate);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		predicates.add(builder.lessThanOrEqualTo(builder.function("DATE", Date.class,root.get(CarePlanRecommendedIntervention_.carePlanRecommendedInterventionCreatedOn)),tDate));
+	}
+	cq.where(predicates.toArray(new Predicate[predicates.size()]));
+	List<CarePlanRecommendedIntervention> recommInterventions=entityManager.createQuery(cq).getResultList();
+	return recommInterventions;
+}
+
+@Override
+public void deleteCarePlanRecommIntervention(Integer patientId, Integer encounterId, Integer delVal) {
+	// TODO Auto-generated method stub
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaDelete<CarePlanRecommendedIntervention> delete = builder.createCriteriaDelete(CarePlanRecommendedIntervention.class);
+	Root<CarePlanRecommendedIntervention> root = delete.from(CarePlanRecommendedIntervention.class);
+	if(patientId!=-1) {
+	delete.where(builder.and(
+			builder.equal(root.get(CarePlanRecommendedIntervention_.carePlanRecommendedInterventionId), delVal),
+			builder.equal(root.get(CarePlanRecommendedIntervention_.carePlanRecommendedInterventionPatientId), patientId)));
+			this.entityManager.createQuery(delete).executeUpdate();
+	}
+}
+
+@Override
+public List<Object[]> saveCarePlanLog(Integer patientId,Integer userId,Boolean reviewStatus) {
+	// TODO Auto-generated method stub
+	CarePlanLog carePlanLog = new CarePlanLog();
+	carePlanLog.setCarePlanlogPatientId(patientId);
+	carePlanLog.setCarePlanlogReviewedBy(userId);
+	carePlanLog.setCarePlanlogReviewedOn(carePlanLogRepository.findCurrentTimeStamp());
+	carePlanLog.setCarePlanlogReviewed(reviewStatus);
+	carePlanLogRepository.saveAndFlush(carePlanLog);
+	List<Object[]> carePlanLogList = fetchCarePlanLog(patientId);
+	return carePlanLogList;
+}
+
+public List<Object[]> fetchCarePlanLog(Integer patientId) {
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+	Root<CarePlanLog> root = cq.from(CarePlanLog.class);
+	Join<CarePlanLog, EmployeeProfile> empJoin = root.join(CarePlanLog_.empProfile,JoinType.INNER);
+	cq.multiselect(root.get(CarePlanLog_.carePlanlogPatientId),
+			root.get(CarePlanLog_.carePlanlogReviewedBy),
+			root.get(CarePlanLog_.carePlanlogReviewedOn),
+			empJoin.get(EmployeeProfile_.empProfileFullname));
+	cq.where(builder.equal(root.get(CarePlanLog_.carePlanlogPatientId),patientId));
+	cq.orderBy(builder.desc(root.get(CarePlanLog_.carePlanLogId)));
+	List<Object[]> carePlanLogList = entityManager.createQuery(cq).getResultList();
+	return carePlanLogList;
+}
+
+@Override
+public Map<String, Object> getCarePlanPrint(Integer patientId,
+		Integer encounterId, Integer episodeId) {
+	// TODO Auto-generated method stub
+	Map<String,Object> listsMap=new HashMap<String,Object>();
+	listsMap.put("concernsList", fetchCarePlanConcerns(-1,patientId,-1,episodeId,encounterId,"-1","-1"));
+	listsMap.put("logList", fetchCarePlanLog(patientId));
+	listsMap.put("goalList", fetchCarePlanGoals(-1, -1, patientId, encounterId,episodeId,"-1","-1"));
+	listsMap.put("recommList",fetchRecommIntervention(patientId, encounterId, episodeId,"-1","-1"));
+	listsMap.put("healthStatus", getCarePlanStatus(patientId, encounterId, episodeId));
+	return listsMap;
+}
+@Override
+public void addFrequentIntervention(String elementName, String snomed,
+		Integer userId,Integer providerId, Integer isfrmconfig) throws Exception {
+	java.util.Date today =new java.util.Date();
+	FrequentInterventions freqIntervention = new FrequentInterventions();
+	freqIntervention.setFrequentinterventionsdescription(elementName);
+	freqIntervention.setFrequentinterventionscode(snomed);
+	freqIntervention.setFrequentinterventionscodesystemoid("2.16.840.1.113883.6.96");
+	if(providerId!=0)
+		freqIntervention.setFrequentinterventionsuserid(providerId);
+	else
+		freqIntervention.setFrequentinterventionsuserid(userId);
+	freqIntervention.setFrequentinterventionsstatus(1);
+	if(isfrmconfig==1)
+		freqIntervention.setFrequentinterventionsgroup("-1");
+	else
+		freqIntervention.setFrequentinterventionsgroup("Others");
+	freqIntervention.setFrequentinterventionscreatedby(userId);
+	freqIntervention.setFrequentinterventionscreatedon(new Timestamp(today.getTime()));
+	FrequentInterventionsRepository.save(freqIntervention);
+}
+
+@Override
+public List<Object> fetchFrequentInterventions(Integer userId) {
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+	Root<FrequentInterventions> root = cq.from(FrequentInterventions.class);
+	Predicate predicates ;
+	if(userId!=-1){
+		predicates=builder.equal(root.get(FrequentInterventions_.frequentinterventionsuserid), userId);
+		cq.where(predicates);
+	}/*else{
+		predicates=builder.equal(root.get(FrequentInterventions_.frequentinterventionsuserid), -1);
+	}*/
+	cq.multiselect(root.get(FrequentInterventions_.frequentinterventionsid),root.get(FrequentInterventions_.frequentinterventionscode),root.get(FrequentInterventions_.frequentinterventionsdescription),root.get(FrequentInterventions_.frequentinterventionsgroup));
+	cq.orderBy(builder.asc(root.get(FrequentInterventions_.frequentinterventionsgroup)),
+			builder.asc(root.get(FrequentInterventions_.frequentinterventionsdescription)));
+	List<Object[]> result= entityManager.createQuery(cq).getResultList();
+	List<Object>  parsedShrotcuts=new ArrayList<Object>();
+	for(Object[]  freqList:result){
+		Map<String, String> parsedObject=new HashMap<String, String>();
+		try {
+			parsedObject.put("freqInterventionId", freqList[0].toString());
+			parsedObject.put("freqInterventionCode", freqList[1].toString());	
+			parsedObject.put("freqInterventionDesc", freqList[2].toString());	
+			parsedObject.put("freqInterventionGroup", freqList[3].toString());
+			parsedShrotcuts.add(parsedObject);
+		} catch (Exception e) {
+		}
+	}
+	return parsedShrotcuts;
+}
+
+@Override
+public void deleteFrequentIntervention(int delid) {
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaDelete<FrequentInterventions> delete = builder.createCriteriaDelete(FrequentInterventions.class);
+	Root<FrequentInterventions> root = delete.from(FrequentInterventions.class);
+	if(delid!=-1) {
+	delete.where(builder.equal(root.get(FrequentInterventions_.frequentinterventionsid), delid));
+			this.entityManager.createQuery(delete).executeUpdate();
+	}
+}
+
+@Override
+public void UpdateFrequentInterventionGroup(Integer groupVal, String groupName) {
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaUpdate<FrequentInterventions> update = builder.createCriteriaUpdate(FrequentInterventions.class);
+	Root<FrequentInterventions> root = update.from(FrequentInterventions.class);
+	update.set(root.get(FrequentInterventions_.frequentinterventionsgroup), groupName);
+	update.where(builder.equal(root.get(FrequentInterventions_.frequentinterventionsid), groupVal));
+	this.entityManager.createQuery(update).executeUpdate();
+}
+
+@Override
+public Map<String, Object> FrequentInterventionGroups(String groupName) {
+	Map<String,Object> listsMap=new HashMap<String,Object>();
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+	Root<FrequentInterventions> root = cq.from(FrequentInterventions.class);
+	Predicate predicates ;
+	cq.multiselect(root.get(FrequentInterventions_.frequentinterventionsgroup));
+	if(!groupName.equals("-1") && !groupName.equals("null") ){
+		predicates = builder.like(builder.lower(builder.trim(root.get(FrequentInterventions_.frequentinterventionsgroup))),groupName.toLowerCase().trim()+"%");
+		cq.where(predicates);
+	}
+	cq.orderBy(builder.asc(root.get(FrequentInterventions_.frequentinterventionsgroup)));
+	cq.distinct(true);
+	List<Object[]> result= entityManager.createQuery(cq).getResultList();
+	listsMap.put("groups", result);
+	return listsMap;
+}
+
+@Override
+public List<Object> getCarePlanStatus(Integer patientId, Integer encounterId,Integer episodeId) {
+	CriteriaBuilder builder= entityManager.getCriteriaBuilder();
+	CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
+	Root<PatientClinicalFindings> root = query.from(PatientClinicalFindings.class);
+	query.multiselect(root.get(PatientClinicalFindings_.patientClinicalFindingsStatus),
+			root.get(PatientClinicalFindings_.patientClinicalFindingsDescription));
+	List<Predicate> predicates = new ArrayList<Predicate>();
+	if(encounterId!=-1) {
+		predicates.add(builder.equal(root.get(PatientClinicalFindings_.patientClinicalFindingsEncounterId),encounterId));
+		predicates.add(builder.equal(builder.function("DATE",Date.class,root.get(PatientClinicalFindings_.patientClinicalFindingsDate)),getEncounterDate(encounterId)));
+	}
+	else
+		predicates.add(builder.equal(builder.function("DATE",Date.class,root.get(PatientClinicalFindings_.patientClinicalFindingsDate)),new Date()));
+	if(episodeId!=-1)
+		predicates.add(builder.equal(root.get(PatientClinicalFindings_.patientClinicalFindingsEpisodeId),episodeId));
+	query.where(builder.and(predicates.toArray(new Predicate[predicates.size()])));
+	query.orderBy(builder.desc(root.get(PatientClinicalFindings_.patientClinicalFindingsId)));
+	List<Object[]> healthStatus=entityManager.createQuery(query).getResultList();
+	List<Object>  healthStatusResult=new ArrayList<Object>();
+    for(Object[]  healthStatusValues:healthStatus){
+    	Map<String, String> parsedObject=new HashMap<String, String>();
+    	try {
+			parsedObject.put("healthStatus", healthStatusValues[0].toString());
+			parsedObject.put("healthStatusDesc", healthStatusValues[1].toString());	
+			healthStatusResult.add(parsedObject);
+		} catch (Exception e) {
+		}
+    }
+	return healthStatusResult;
+	/*		List<String> GwIDs= new ArrayList<String>();
+		GwIDs.addAll(Arrays.asList("0000200200100075000","0000200200100076000","0000200200100038000","0000200200100025000","0000200200100020000","0000200200100023000","0000200200100024000"));
+		CriteriaBuilder builder= entityManager.getCriteriaBuilder();
+		CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
+		Root<VitalsParameter> root = query.from(VitalsParameter.class);
+		Join<VitalsParameter, CNMCodeSystem> cnmJoin= root.join(VitalsParameter_.cnmCodeSystem, JoinType.LEFT);
+		query.multiselect(root.get(VitalsParameter_.vitalsParameterName),
+				builder.coalesce(cnmJoin.get(CNMCodeSystem_.cnmCodeSystemCode),""),
+				builder.coalesce(cnmJoin.get(CNMCodeSystem_.cnmCodeSystemOid),""));
+		query.where(builder.equal(root.get(VitalsParameter_.vitalsParameterIsactive),true),
+				root.get(VitalsParameter_.vitalsParameterGwId).in(GwIDs));
+		query.orderBy(builder.asc(root.get(VitalsParameter_.vitalsParameterName)));
+		List<Object[]> vitals=entityManager.createQuery(query).getResultList();
+		List<Object>  parsedVitalParameters=new ArrayList<Object>();
+	    for(Object[]  vitalValues:vitals){
+	    	Map<String, String> parsedObject=new HashMap<String, String>();
+	    	try {
+				parsedObject.put("vitalsParameterName", vitalValues[0].toString());
+				parsedObject.put("cnmCodeSystemCode", vitalValues[1].toString());	
+				parsedObject.put("cnmCodeSystemOid", vitalValues[2].toString());	
+				parsedVitalParameters.add(parsedObject);
+			} catch (Exception e) {
+			}
+	    }
+		return parsedVitalParameters;*/
+	
+}
+@Override
+public void saveCarePlanStatus(Integer patientId, Integer encounterId,
+		Integer episodeId, String Description,Integer userId,Integer Status,String code) {
+	// TODO Auto-generated method stub
+	
+	PatientClinicalFindings patientClinicalFindings = new PatientClinicalFindings();
+	patientClinicalFindings.setPatientClinicalFindingsPatientId(patientId);
+	patientClinicalFindings.setPatientClinicalFindingsEncounterId(encounterId);
+	patientClinicalFindings.setPatientClinicalFindingsEpisodeId(episodeId);
+	patientClinicalFindings.setPatientClinicalFindingsCreatedBy(userId);
+	patientClinicalFindings.setPatientClinicalFindingsModifiedBy(userId);
+	if(encounterId!=-1) 
+		patientClinicalFindings.setPatientClinicalFindingsDate(new Timestamp(getEncounterDate(encounterId).getTime()));
+	else
+		patientClinicalFindings.setPatientClinicalFindingsDate(patientClinicalFindingsRepository.findCurrentTimeStamp());
+	patientClinicalFindings.setPatientClinicalFindingsCreatedOn(patientClinicalFindingsRepository.findCurrentTimeStamp());
+	patientClinicalFindings.setPatientClinicalFindingsModifiedOn(patientClinicalFindingsRepository.findCurrentTimeStamp());
+	patientClinicalFindings.setPatientClinicalFindingsDescription(Description);
+	patientClinicalFindings.setPatientClinicalFindingsStatus(Status);
+	patientClinicalFindings.setPatientClinicalFindingsIsactive(true);
+	patientClinicalFindings.setPatientClinicalFindingsCodeSystem("2.16.840.1.113883.6.96");
+	patientClinicalFindings.setPatientClinicalFindingsCode(code);
+	
+	
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaQuery<PatientClinicalFindings> findingsQuery = builder.createQuery(PatientClinicalFindings.class);
+	Root<PatientClinicalFindings> root = findingsQuery.from(PatientClinicalFindings.class);
+	List<Predicate> predicatesForStatus = new ArrayList<>();
+	predicatesForStatus.add(builder.equal(root.get(PatientClinicalFindings_.patientClinicalFindingsPatientId),patientId));
+	if(encounterId!=-1) {
+		predicatesForStatus.add(builder.equal(builder.function("DATE",Date.class,root.get(PatientClinicalFindings_.patientClinicalFindingsDate)),getEncounterDate(encounterId)));
+	}
+	else
+		predicatesForStatus.add(builder.equal(builder.function("DATE",Date.class,root.get(PatientClinicalFindings_.patientClinicalFindingsDate)),new Date()));
+	if(episodeId!=-1)
+		predicatesForStatus.add(builder.equal(root.get(PatientClinicalFindings_.patientClinicalFindingsEpisodeId),episodeId));
+	if(encounterId!=-1)
+		predicatesForStatus.add(builder.equal(root.get(PatientClinicalFindings_.patientClinicalFindingsEncounterId),encounterId));
+	findingsQuery.where(builder.and(predicatesForStatus.toArray(new Predicate[predicatesForStatus.size()])));
+	List<PatientClinicalFindings> statusQuery=entityManager.createQuery(findingsQuery).getResultList();
+	if(statusQuery.size()>0) {
+		CriteriaUpdate<PatientClinicalFindings> cu = builder.createCriteriaUpdate(PatientClinicalFindings.class);
+		Root<PatientClinicalFindings> rootCriteria = cu.from(PatientClinicalFindings.class);
+		if(encounterId!=-1)
+			cu.set(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsDate),new Timestamp(getEncounterDate(encounterId).getTime()));
+		else
+			cu.set(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsDate),patientClinicalFindingsRepository.findCurrentTimeStamp());
+		cu.set(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsDescription), Description);
+		cu.set(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsStatus),Status);
+		cu.set(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsModifiedBy),userId);
+		cu.set(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsModifiedOn),patientClinicalFindingsRepository.findCurrentTimeStamp());
+		cu.set(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsCodeSystem),"2.16.840.1.113883.6.96");
+		cu.set(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsCode),code);
+
+		List<Predicate> predicatesForUpdate = new ArrayList<>();
+		if(patientId!=-1)
+			predicatesForUpdate.add(builder.equal(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsPatientId),patientId));
+		if(encounterId!=-1)
+			predicatesForUpdate.add(builder.equal(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsEncounterId),encounterId));
+		if(episodeId!=-1)
+			predicatesForUpdate.add(builder.equal(rootCriteria.get(PatientClinicalFindings_.patientClinicalFindingsEpisodeId),episodeId));
+		cu.where(builder.and(predicatesForUpdate.toArray(new Predicate[predicatesForUpdate.size()])));
+		this.entityManager.createQuery(cu).executeUpdate();
+	}
+	else {
+		patientClinicalFindingsRepository.saveAndFlush(patientClinicalFindings);
+	}
+}
+
+public List<Object> getEncounterListForEpisode(Integer epId,Integer patientId,Integer encounterId) throws ParseException {
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaQuery<Object[]> encListQuery = builder.createQuery(Object[].class);
+	Root<Encounter> root = encListQuery.from(Encounter.class);
+	Join<Encounter,Chart> encJoin = root.join(Encounter_.chart,JoinType.INNER);
+	encListQuery.multiselect(root.get(Encounter_.encounterId),root.get(Encounter_.encounterDate));
+	encListQuery.where(builder.equal(root.get(Encounter_.encounterPatientEpisodeid),epId),
+			builder.equal(encJoin.get(Chart_.chartPatientid),patientId),builder.notEqual(root.get(Encounter_.encounterId), encounterId));
+	List<Object[]> encListResult=entityManager.createQuery(encListQuery).getResultList();
+	List<Object>  encListResultArray=new ArrayList<Object>();
+
+	SimpleDateFormat encDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    SimpleDateFormat parsedEncDate = new SimpleDateFormat("MM/dd/yyyy");
+
+	for(Object[] result:encListResult){
+		Map<String, String> encListResultObject=new HashMap<String, String>();
+		Date date = encDate.parse(result[1].toString());
+		try {
+			encListResultObject.put("encounterId", result[0].toString());
+		encListResultObject.put("encounterDate", parsedEncDate.format(date).toString());	
+			encListResultArray.add(encListResultObject);
+		} catch (Exception e) {
+		}
+	}
+	return encListResultArray;
+}
+
+
+public List<Object> getImportShortcuts(Integer patientId,Integer encounterId) {
+	List<String> GwIDs= new ArrayList<String>();
+	GwIDs.addAll(Arrays.asList("0000100200000000000","0000100463001002000"));
+	
+	CriteriaBuilder builder= entityManager.getCriteriaBuilder();
+	CriteriaQuery<Object[]> query= builder.createQuery(Object[].class);
+	Root<PatientClinicalElements> root= query.from(PatientClinicalElements.class);
+	query.multiselect(root.get(PatientClinicalElements_.patientClinicalElementsGwid),
+			builder.coalesce(root.get(PatientClinicalElements_.patientClinicalElementsValue),""));
+	query.where(builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsPatientid),patientId),
+			builder.equal(root.get(PatientClinicalElements_.patientClinicalElementsEncounterid),encounterId),
+			root.get(PatientClinicalElements_.patientClinicalElementsGwid).in(GwIDs));
+	List<Object[]> valueResult=entityManager.createQuery(query).getResultList();
+	List<Object> valueArray = new ArrayList<Object>();
+	
+	for(Object[] result:valueResult) {
+		Map<String, String> valueObject=new HashMap<String, String>();
+		valueObject.put("elementGwid",result[0].toString());
+		valueObject.put("elementValue",result[1].toString());
+		valueArray.add(valueObject);
+	}
+	String planData = getPlanData(encounterId);
+	Map<String, String> planObject=new HashMap<String, String>();
+	planObject.put("elementGwid","planData");
+	planObject.put("elementValue",planData);
+	valueArray.add(planObject);
+	return valueArray;
+}
+public List<CarePlanGoalBean>  saveAssistanceStatus(Integer patientId,Integer episodeId,Integer goalId,Integer providerId,Integer status,Integer LevelStatus,Integer encounterId) {
+	CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+	CriteriaUpdate<CarePlanGoal> cu = cb.createCriteriaUpdate(CarePlanGoal.class);
+	Root<CarePlanGoal> root = cu.from(CarePlanGoal.class);
+	if(status!=-1)
+		cu.set(root.get(CarePlanGoal_.carePlanGoalAssistanceStatus), status);
+	if(LevelStatus!=-1)
+		cu.set(root.get(CarePlanGoal_.carePlanGoalLevelStatus), LevelStatus);
+	cu.set(root.get(CarePlanGoal_.carePlanGoalModifiedBy), providerId);
+	cu.set(root.get(CarePlanGoal_.careplanGoalMasteredDate), carePlanGoalRepository.findCurrentTimeStamp());
+	cu.set(root.get(CarePlanGoal_.carePlanGoalModifiedOn), carePlanGoalRepository.findCurrentTimeStamp());
+	cu.where(cb.equal(root.get(CarePlanGoal_.carePlanGoalId),goalId),
+			cb.equal(root.get(CarePlanGoal_.carePlanGoalPatientId),patientId));
+	this.entityManager.createQuery(cu).executeUpdate();
+	List<CarePlanGoalBean> goals = fetchCarePlanGoalBean(-1, -1, patientId,encounterId, episodeId);
+	return goals;
+}
+}
+

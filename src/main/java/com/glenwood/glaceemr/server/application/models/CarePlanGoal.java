@@ -106,6 +106,15 @@ public class CarePlanGoal {
 	@Column(name="careplan_goal_modified_by")
 	private Integer carePlanGoalModifiedBy;
 	
+	@Column(name="careplan_goal_mastered_date")		
+	private Timestamp careplanGoalMasteredDate;		
+			
+	@Column(name="careplan_goal_order")		
+	private Integer carePlanGoalOrder;		
+			
+	@Column(name="careplan_goal_value_one")		
+	private String carePlanGoalValueOne;		
+
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="careplan_goal_modified_on")
 	private Timestamp carePlanGoalModifiedOn;
@@ -120,8 +129,18 @@ public class CarePlanGoal {
 	@OneToMany(mappedBy="carePlanGoal")
 	List<CarePlanOutcome> carePlanOutcome;
 	
+	@OneToMany(mappedBy="carePlanRecommGoal")		
+	List<CarePlanRecommendedIntervention> carePlanRecommIntervention;
+
 	@Column(name="careplan_goal_result_status")
 	private Integer carePlanGoalResultStatus;
+	
+	@Column(name="careplan_goal_assistance_status")
+	private Integer carePlanGoalAssistanceStatus;
+	
+	@Column(name="careplan_goal_level_status")
+	private Integer carePlanGoalLevelStatus;
+	
 	
 	public Integer getCarePlanGoalId() {
 		return carePlanGoalId;
@@ -346,4 +365,45 @@ public class CarePlanGoal {
 	public void setCareplanGoalResultStatus(Integer carePlanGoalResultStatus) {
 		this.carePlanGoalResultStatus = carePlanGoalResultStatus;
 	}
+	public Integer getCarePlanGoalOrder() {		
+		return carePlanGoalOrder;		
+	}		
+		
+	public void setCarePlanGoalOrder(Integer carePlanGoalOrder) {		
+		this.carePlanGoalOrder = carePlanGoalOrder;		
+	}		
+		
+	public Timestamp getCareplanGoalMasteredDate() {		
+		return careplanGoalMasteredDate;		
+	}		
+		
+	public void setCareplanGoalMasteredDate(Timestamp careplanGoalMasteredDate) {		
+		this.careplanGoalMasteredDate = careplanGoalMasteredDate;		
+	}		
+		
+	public String getCarePlanGoalValueOne() {		
+		return carePlanGoalValueOne;		
+	}		
+		
+	public void setCarePlanGoalValueOne(String carePlanGoalValueOne) {		
+		this.carePlanGoalValueOne = carePlanGoalValueOne;		
+	}
+
+	public Integer getCarePlanGoalAssistanceStatus() {
+		return carePlanGoalAssistanceStatus;
+	}
+
+	public void setCarePlanGoalAssistanceStatus(Integer carePlanGoalAssistanceStatus) {
+		this.carePlanGoalAssistanceStatus = carePlanGoalAssistanceStatus;
+	}
+
+	public Integer getCarePlanGoalLevelStatus() {
+		return carePlanGoalLevelStatus;
+	}
+
+	public void setCarePlanGoalLevelStatus(Integer carePlanGoalLevelStatus) {
+		this.carePlanGoalLevelStatus = carePlanGoalLevelStatus;
+	}
+	
+	
 }

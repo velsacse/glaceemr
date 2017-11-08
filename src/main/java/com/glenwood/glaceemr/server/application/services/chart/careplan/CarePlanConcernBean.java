@@ -24,6 +24,7 @@ public class CarePlanConcernBean {
 	String concernModifiedOn;
 	Integer episodeId;
 	Integer concernFrom;
+	Integer encounterId;
 	
 	public Integer getConcernId() {
 		return concernId;
@@ -157,4 +158,11 @@ public class CarePlanConcernBean {
 	public void setConcernFrom(Integer concernFrom) {
 		this.concernFrom = concernFrom;
 	}
+	public Integer getEncounterId() {
+		return encounterId;
+	}
+	public void setEncounterId(Integer encounterId) {
+		this.encounterId = encounterId;
+	}
+	
 }

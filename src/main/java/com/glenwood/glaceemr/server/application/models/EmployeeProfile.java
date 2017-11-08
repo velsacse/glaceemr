@@ -22,7 +22,6 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -601,5 +600,8 @@ public class EmployeeProfile implements Serializable {
 	@OneToMany(mappedBy="empProfileTable")
 	@JsonManagedReference
 	private List<MacraMeasuresRate> macraMeasuresRate;
+	
+	@OneToMany(mappedBy="empProfile")
+	private List<CarePlanLog> carePlanLog;
 	
 }

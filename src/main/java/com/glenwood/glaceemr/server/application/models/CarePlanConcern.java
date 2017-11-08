@@ -93,9 +93,14 @@ public class CarePlanConcern {
 	@Column(name="careplan_concern_episodeId")
 	private Integer careplanConcernEpisodeId;
 	
+	@Column(name="careplan_concern_encounterId")		
+	private Integer careplanConcernEncounterId;
+	
 	@OneToMany(mappedBy="carePlanConcern")
 	List<CarePlanGoal> carePlanGoal;
 	
+	@OneToMany(mappedBy="carePlanRecommConcern")		
+	List<CarePlanRecommendedIntervention> carePlanRecommIntervention;
 	
 	public Integer getCarePlanConcernId() {
 		return carePlanConcernId;
@@ -265,6 +270,14 @@ public class CarePlanConcern {
 
 	public void setCareplanConcernEpisodeId(Integer careplanConcernEpisodeId) {
 		this.careplanConcernEpisodeId = careplanConcernEpisodeId;
+	}		
+	
+	public Integer getCareplanConcernEncounterId() {		
+		return careplanConcernEncounterId;		
+	}		
+		
+	public void setCareplanConcernEncounterId(Integer careplanConcernEncounterId) {		
+		this.careplanConcernEncounterId = careplanConcernEncounterId;
 	}
 
 	public Integer getCarePlanConcernFrom() {

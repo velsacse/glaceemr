@@ -1,6 +1,8 @@
 package com.glenwood.glaceemr.server.application.models;
 
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -77,6 +80,9 @@ public class VitalsParameter {
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "vitals_parameter_gw_id",referencedColumnName="vitals_parameter_condition_gw_id",insertable = false, updatable = false)
 	private VitalsParameterCondition vitalsParameterCondition;
+	
+	@OneToMany(mappedBy="cnmCodeSystem",fetch=FetchType.LAZY)
+	List<CNMCodeSystem> cnmCodeSystem;	
 	
 	public VitalGroup getVitalGroup() {
 		return vitalGroup;

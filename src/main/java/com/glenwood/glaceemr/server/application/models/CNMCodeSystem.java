@@ -12,6 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "cnm_code_system")
 public class CNMCodeSystem {
@@ -38,6 +40,11 @@ public class CNMCodeSystem {
 	@JoinColumn(name = "cnm_code_system_gwid", referencedColumnName = "clinical_elements_gwid", insertable = false, updatable = false)
 	private  ClinicalElements clinicalElements;
 
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonManagedReference
+	@JoinColumn(name = "cnm_code_system_gwid", referencedColumnName = "vitals_parameter_gw_id", insertable = false, updatable = false)
+	private VitalsParameter cnmCodeSystem;
+	
 	public ClinicalElements getClinicalElements() {
 		return clinicalElements;
 	}

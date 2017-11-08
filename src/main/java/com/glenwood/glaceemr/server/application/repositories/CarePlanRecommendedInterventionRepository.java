@@ -6,11 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import com.glenwood.glaceemr.server.application.models.CarePlanGoal;
-
+import com.glenwood.glaceemr.server.application.models.CarePlanRecommendedIntervention;
 
 @Repository
-public interface CarePlanGoalRepository extends JpaRepository<CarePlanGoal, Integer>,JpaSpecificationExecutor<CarePlanGoal> {
+public interface CarePlanRecommendedInterventionRepository extends JpaRepository<CarePlanRecommendedIntervention, Integer>,JpaSpecificationExecutor<CarePlanRecommendedIntervention> {
 	@Query("select current_timestamp() from Users pb where pb.userId=1")
 	   Timestamp findCurrentTimeStamp();
 }
+

@@ -14,11 +14,12 @@ public class CarePlanOutcomeBean {
 	Integer outcomeProgress;
 	String outcomeReviewedBy;
 	Integer outcomeStatus;
+	Integer goalResultStatus;
 
 	public CarePlanOutcomeBean(Integer outcomeId, Integer outcomeGoalId,
 			Date outcomeReviewDate, Date outcomeTargetDate,
 			String outcomeNotes, Integer outcomeProgress,
-			String outcomeReviewedBy, Integer outcomeStatus) {	
+			String outcomeReviewedBy, Integer outcomeStatus,Integer goalResultStatus) {	
 
 		super();
 		DateFormat timeFormat = new SimpleDateFormat("MM/dd/yyyy");
@@ -36,6 +37,7 @@ public class CarePlanOutcomeBean {
 		this.outcomeProgress = outcomeProgress;
 		this.outcomeReviewedBy = outcomeReviewedBy;
 		this.outcomeStatus = outcomeStatus;
+		this.goalResultStatus=goalResultStatus;
 	}
 
 	public Integer getOutcomeId() {
@@ -86,4 +88,13 @@ public class CarePlanOutcomeBean {
 	public void setOutcomeStatus(Integer outcomeStatus) {
 		this.outcomeStatus = outcomeStatus;
 	}
+
+	public Integer getGoalResultStatus() {
+		return goalResultStatus;
+	}
+
+	public void setGoalResultStatus(Integer goalResultStatus) {
+		this.goalResultStatus = goalResultStatus;
+	}
+	
 }
