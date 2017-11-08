@@ -126,7 +126,7 @@ public interface QPPConfigurationService {
 	 * @throws Exception
 	 */
 	
-	List<MIPSPatientInformation> getFilteredDetails(String patientId,Integer ageFrom,Integer ageTo,Integer ageCriteria,String raceCode,String ethnicityCode,String gender,Integer insCompanyId,String currMeasureId,String dxCodes) throws Exception;
+	List<MIPSPatientInformation> getFilteredDetails(String patientId,Integer ageFrom,Integer ageTo,Integer ageCriteria,String raceCode,String ethnicityCode,String gender,Integer insCompanyId,String currMeasureId,String dxCodes,int posId,int insId) throws Exception;
 	
 	/**
 	 * Function to get diagnosis list for filtering patient details in MIPS Performance Report

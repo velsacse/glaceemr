@@ -133,10 +133,12 @@ public class QPPConfigurationController {
 			@RequestParam(value = "insCompanyId", required = false, defaultValue = "-1") Integer insCompanyId,
 			@RequestParam(value = "ageCriteria", required = false, defaultValue = "-1") Integer ageCriteria,
 			@RequestParam(value = "currMeasureId", required = true) String currMeasureId,
-			@RequestParam(value = "dxCodes", required = false,defaultValue = "-1")String dxCodes)throws Exception {
+			@RequestParam(value = "dxCodes", required = false,defaultValue = "-1")String dxCodes,
+			@RequestParam(value = "posId", required = false,defaultValue = "-1")int posId,
+			@RequestParam(value = "insId", required = false,defaultValue = "-1")int insId)throws Exception {
 		
 		EMRResponseBean result=new EMRResponseBean();
-		List<MIPSPatientInformation> filteredDetails=QppConfigurationService.getFilteredDetails(patientId,ageFrom,ageTo,ageCriteria,raceCode,ethnicityCode,gender,insCompanyId,currMeasureId,dxCodes);
+		List<MIPSPatientInformation> filteredDetails=QppConfigurationService.getFilteredDetails(patientId,ageFrom,ageTo,ageCriteria,raceCode,ethnicityCode,gender,insCompanyId,currMeasureId,dxCodes,posId,insId);
 		result.setData(filteredDetails);
 
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting patients based on selected filters" , -1, request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN, "", "");

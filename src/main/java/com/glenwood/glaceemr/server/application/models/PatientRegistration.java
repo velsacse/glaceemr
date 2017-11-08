@@ -25,7 +25,6 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -2290,6 +2289,11 @@ public class PatientRegistration implements Serializable {
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="patientRegistrationTable")
 	@JsonManagedReference
 	List<Chart> alertTable;
+	
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+	@JoinColumn(name="patient_registration_id",referencedColumnName="chart_patientid",insertable=false,updatable=false)
+	@JsonManagedReference
+	private Chart chartIds;
 	
 	public List<Chart> getAlertTable() {
 		return alertTable;

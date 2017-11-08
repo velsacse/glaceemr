@@ -13,6 +13,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
@@ -32,12 +33,16 @@ import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.CodeSet;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasure;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.Valueset;
+import com.glenwood.glaceemr.server.application.models.BillingConfigTable;
+import com.glenwood.glaceemr.server.application.models.BillingConfigTable_;
 import com.glenwood.glaceemr.server.application.models.Billinglookup;
 import com.glenwood.glaceemr.server.application.models.Billinglookup_;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
+import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
 import com.glenwood.glaceemr.server.application.models.LabParameterCode;
@@ -47,8 +52,14 @@ import com.glenwood.glaceemr.server.application.models.LabParameters_;
 import com.glenwood.glaceemr.server.application.models.MacraConfiguration;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration_;
+import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
+import com.glenwood.glaceemr.server.application.models.PatientInsDetail_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
+import com.glenwood.glaceemr.server.application.models.PosTable;
+import com.glenwood.glaceemr.server.application.models.PosTable_;
+import com.glenwood.glaceemr.server.application.models.PosType;
+import com.glenwood.glaceemr.server.application.models.PosType_;
 import com.glenwood.glaceemr.server.application.models.ProblemList;
 import com.glenwood.glaceemr.server.application.models.ProblemList_;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEntries;
@@ -303,7 +314,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 	
 	@Override
 	public HashMap<String,Object> getFilterDetails() throws Exception {
-		
+
 		HashMap<String,Object> raceDetails=new HashMap<String,Object>();
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
@@ -360,6 +371,50 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		cq6.where(builder6.equal(rootBillinglookup6.get(Billinglookup_.blookGroup), 756),builder6.equal(rootBillinglookup6.get(Billinglookup_.billinglookupKeycode),builder6.literal("2186-5")));
 		List<Object> result6=em.createQuery(cq6).getResultList();
 		raceDetails.put("NotHispanicOrLatino", result6);
+		
+		CriteriaBuilder builder7 = em.getCriteriaBuilder();
+		CriteriaQuery<String> cq7 = builder.createQuery(String.class);
+		Root<PosTable> rootPosTable = cq7.from(PosTable.class);
+		Join<PosTable,PosType> joinPosTablePosType=rootPosTable.join(PosTable_.posType,JoinType.INNER);
+		cq7.multiselect(joinPosTablePosType.get(PosType_.posTypeTypeName));
+		cq7.where(builder7.equal(rootPosTable.get(PosTable_.posTableIsActive),true),
+				builder7.notEqual(rootPosTable.get(PosTable_.posTablePosCode),40));
+		cq7.distinct(true);
+		List<String> result7=em.createQuery(cq7).getResultList();
+		
+		CriteriaBuilder builder8 = em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> cq8 = builder.createQuery(Object[].class);
+		Root<PosTable> rootPosTable1 = cq8.from(PosTable.class);
+		Join<PosTable,PosType> joinPosTablePosType1=rootPosTable1.join(PosTable_.posType,JoinType.INNER);
+		cq8.multiselect(joinPosTablePosType1.get(PosType_.posTypeTypeName),rootPosTable1.get(PosTable_.posTableFacilityComments),rootPosTable1.get(PosTable_.posTableRelationId));
+		cq8.where(builder8.equal(rootPosTable1.get(PosTable_.posTableIsActive),true),
+				builder8.notEqual(rootPosTable1.get(PosTable_.posTablePosCode),40));
+		cq8.orderBy(builder8.asc(joinPosTablePosType1.get(PosType_.posTypeTypeId)));
+		List<Object[]> result8=em.createQuery(cq8).getResultList();
+		HashMap<Object, Object> posDetails=new HashMap<Object, Object>();
+		
+		for(int name=0;name<result7.size();name++)
+		{
+			String posType=result7.get(name);
+			ArrayList<String> temp=new ArrayList<String>();
+			for(int i=0;i<result8.size();i++){
+				if(posType.equals(result8.get(i)[0].toString())){
+					temp.add(result8.get(i)[1].toString()+"&&&"+result8.get(i)[2].toString());
+				}
+			}
+			posDetails.put(posType, temp);
+		}
+		raceDetails.put("POS", posDetails);
+		
+		
+		CriteriaBuilder builder9 = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq9= builder.createQuery();
+		Root<BillingConfigTable> rootBillingConfigTable = cq9.from(BillingConfigTable.class);
+		cq9.multiselect(rootBillingConfigTable.get(BillingConfigTable_.billingConfigTableConfigId),rootBillingConfigTable.get(BillingConfigTable_.billingConfigTableLookupDesc));
+		cq9.where(builder9.equal(rootBillingConfigTable.get(BillingConfigTable_.billingConfigTableLookupId), 5004),
+				builder9.equal(rootBillingConfigTable.get(BillingConfigTable_.billingConfigTableIsActive), true));
+		List<Object> result9 = em.createQuery(cq9).getResultList();	
+		raceDetails.put("PatientInsurance", result9);
 
 		return raceDetails;
 		
@@ -367,7 +422,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MIPSPatientInformation> getFilteredDetails(String patientId,Integer ageFrom,Integer ageTo,Integer ageCriteria,String raceCode,String ethnicityCode,String gender,Integer insCompanyId,String currMeasureId,String dxCodes) throws Exception {
+	public List<MIPSPatientInformation> getFilteredDetails(String patientId,Integer ageFrom,Integer ageTo,Integer ageCriteria,String raceCode,String ethnicityCode,String gender,Integer insCompanyId,String currMeasureId,String dxCodes,int posId,int insId) throws Exception {
 		List<Object> raceResult=new ArrayList<Object>();
 		List<Object> ethnicityResult=new ArrayList<Object>();
 		String raceResultCodes="";
@@ -415,8 +470,22 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		Join<PatientRegistration,QualityMeasuresPatientEntries> joinQualityMeasuresPatientEntries=rootPatientRegistration.join(PatientRegistration_.qualityMeasuresPatientEntries,JoinType.INNER);
 		Predicate byMeasureId=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId), currMeasureId);
 		joinQualityMeasuresPatientEntries.on(byMeasureId);
-		Join<PatientRegistration,ProblemList> joinProblemList=rootPatientRegistration.join(PatientRegistration_.problemList,JoinType.INNER);
 		
+		Join<PatientRegistration,ProblemList> joinProblemList = null;
+		if(!dxCodes.equals("-1")){
+		joinProblemList=rootPatientRegistration.join(PatientRegistration_.problemList,JoinType.INNER);
+		}
+		
+		Join<PatientRegistration,Chart> joinChartPatientEntries;
+		Join<Chart,Encounter> encounterChartJoin = null;
+		if(posId!=-1){
+		joinChartPatientEntries=rootPatientRegistration.join(PatientRegistration_.chartIds,JoinType.INNER);
+		encounterChartJoin = joinChartPatientEntries.join(Chart_.encounterTable,JoinType.INNER);
+		}
+		Join<PatientRegistration,PatientInsDetail> joinPatientInsDetail = null;
+		if(insId!=-1){
+		joinPatientInsDetail = rootPatientRegistration.join(PatientRegistration_.patientInsuranceTable,JoinType.INNER);
+		}
 		Selection[] selections= new Selection[] {
 				rootPatientRegistration.get(PatientRegistration_.patientRegistrationId),
 				rootPatientRegistration.get(PatientRegistration_.patientRegistrationAccountno),
@@ -431,6 +500,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 				builder.coalesce(rootPatientRegistration.get(PatientRegistration_.patientRegistrationCity), "-"),
 				builder.coalesce(rootPatientRegistration.get(PatientRegistration_.patientRegistrationStateName), "-"),
 				builder.coalesce(rootPatientRegistration.get(PatientRegistration_.patientRegistrationZip), "-"),
+				builder.coalesce(rootPatientRegistration.get(PatientRegistration_.patientRegistrationPhoneNo),""),
 				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesIpp),
 				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator),
 				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion),
@@ -479,6 +549,11 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 			predicates.add(builder.equal(joinProblemList.get(ProblemList_.problemListIsactive),true));
 			predicates.add(builder.equal(joinProblemList.get(ProblemList_.problemListIsresolved),false));
 		}
+		if(posId!=-1)
+			predicates.add(builder.equal(encounterChartJoin.get(Encounter_.encounterPos), posId));
+		if(insId!=-1)	
+			predicates.add(builder.equal(joinPatientInsDetail.get(PatientInsDetail_.patientInsDetailPlantype), insId));
+		
 		cq.where(predicates.toArray(new Predicate[predicates.size()]));
 		cq.distinct(true);
 		List<MIPSPatientInformation> patientsList=em.createQuery(cq).getResultList();

@@ -186,13 +186,11 @@ public class QPPPerformanceController {
 			}else{
 
 			}
-
 			response.setData(finalResponse);
 			
 			printWriter.flush();
 			printWriter.close();
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating and validating patient QDM" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.USER_LOGIN, "patientId="+patientID, "");
-
 		return response;
 		
 	}
@@ -232,11 +230,11 @@ public class QPPPerformanceController {
 			if(providerInfo.size()>0){
 
 				epMeasureStatus = measureService.getEPMeasuresResponseObject(accountId,isGroup,patientID, userId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), providerInfo.get(0).getMacraProviderConfigurationReportingYear(), isTrans);
-				
+				//epMeasureStatus = null;
 			}else{
 
 			}
-
+			
 			response.setData(epMeasureStatus);
 
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating EP Measure details" , -1, request.getRemoteAddr(),-1,"patientId="+patientID+"&providerId="+providerId,LogUserType.USER_LOGIN, "patientId="+patientID, "");
@@ -582,5 +580,58 @@ public class QPPPerformanceController {
 		result.setData(fileName);
 		return result;
 	}
-	
+	@RequestMapping(value = "/mipsPerformancePDF", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean mipsPerformancePDF(@RequestParam(value = "provId", required = true) int provId,
+			@RequestParam(value = "measureid", required = true)String measureid,
+			@RequestParam(value = "accountId", required = true)String accountId,
+			@RequestParam(value = "tinId", required= true)String tinId,
+			@RequestParam(value="isACIReport", required=false, defaultValue="false") boolean isACIReport)throws Exception
+	{
+		EMRResponseBean result=new EMRResponseBean();
+		String fileName;
+		Date reportingStart = null,reportingEnd = null;
+		Integer ReportingMethod = null;
+		String submissionMethod = null;String reportEnd = null,reportStart = null;
+		GeneratePDFDetails generatePDFDetails=new GeneratePDFDetails();
+		String configuredMeasures = null;
+		Calendar now = Calendar.getInstance();
+		int reportingYear = now.get(Calendar.YEAR);	
+		try{
+		if(provId!=-1){
+			List<MacraProviderConfiguration> groupData = providerConfService.getProviderInfo(provId);
+			reportingStart= groupData.get(0).getMacraProviderConfigurationReportingStart();
+			reportingEnd= groupData.get(0).getMacraProviderConfigurationReportingEnd();
+			ReportingMethod=groupData.get(0).getMacraProviderConfigurationReportingMethod();
+
+			if(ReportingMethod==1)
+				submissionMethod = "Claims";
+			else if(ReportingMethod==2)
+				submissionMethod = "EHR";
+			else if(ReportingMethod==3)
+				submissionMethod = "Registry";
+
+			SimpleDateFormat reportingDate= new SimpleDateFormat("MM/dd/yyyy");
+			reportEnd=reportingDate.format(reportingEnd);
+			reportStart=reportingDate.format(reportingStart);
+			generatePDFDetails.setSubmissionMethod(submissionMethod);
+			generatePDFDetails.setReportStart(reportStart);
+			generatePDFDetails.setReportEnd(reportEnd);
+			List<MacraProviderQDM> providerInfo = new ArrayList<MacraProviderQDM>();
+			providerInfo = providerConfService.getCompleteProviderInfo(provId);
+			configuredMeasures = providerInfo.get(0).getMeasures();
+		}
+		else
+			configuredMeasures = providerConfService.getCompleteTinInfo(tinId, reportingYear);
+
+		fileName = measureService.mipsPDFfile(generatePDFDetails,provId,configuredMeasures,accountId,tinId,isACIReport,true);
+		
+		}
+		catch(Exception e)
+		{
+			fileName="";
+		}
+		result.setData(fileName);
+		return result;
+	}
 }

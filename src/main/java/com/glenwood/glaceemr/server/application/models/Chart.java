@@ -144,6 +144,11 @@ public class Chart implements Serializable{
 	@OneToMany(mappedBy="chart")
     @JsonManagedReference
     List<ChartcenterEncounter> chartCenterEncounter;
+	
+	@OneToMany(mappedBy="chartIds")
+	@JsonManagedReference
+	List<PatientRegistration> patientRegistration;
+    
 
 	public List<DirectEmailLog> getDirectEmailLogTable() {
 		return directEmailLogTable;

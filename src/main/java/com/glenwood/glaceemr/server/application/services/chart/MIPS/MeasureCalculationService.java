@@ -193,4 +193,8 @@ public interface MeasureCalculationService {
 	
 	String generatePDFFile(GeneratePDFDetails generatePDFDetails,int provId, String measureid,String accountId, int criteriaId,String tinId,int criterias,boolean isNotMet) throws Exception;
 
+	String mipsPDFfile(GeneratePDFDetails generatePDFDetails, int provId,
+			String configuredMeasures, String accountId,String tinId, boolean isACIReport,
+			boolean isOrderBy) throws Exception;
+
 }

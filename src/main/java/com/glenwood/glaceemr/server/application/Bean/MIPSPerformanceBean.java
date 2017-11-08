@@ -38,8 +38,8 @@ public class MIPSPerformanceBean {
 	Boolean highPriority;
 	String Outcome;
 	
-	/*long notMetPatients;
-	String notMetPatientsList;*/
+	long notMetPatients;
+	//String notMetPatientsList;
 	
 	public MIPSPerformanceBean(){
 		
@@ -50,7 +50,6 @@ public class MIPSPerformanceBean {
 			int denominatorExclusionCount, int numeratorCount,
 			int numeratorExclusionCount, int denominatorExceptionCount, double performanceRate,
 			double reportingRate, double points, String tin, String providerName) {
-		
 		this.measureId = measureId;
 		this.criteria = criteria;
 		this.reportingYear = reportingYear;
@@ -77,7 +76,7 @@ public class MIPSPerformanceBean {
 			int denominatorExceptionCount,
 			String denominatorExceptionPatientsList, double performanceRate,
 			double reportingRate, double points) {
-		
+
 		this.measureId = measureId;
 		this.criteria = criteria;
 		this.reportingYear = reportingYear;
@@ -108,7 +107,7 @@ public class MIPSPerformanceBean {
 			int denominatorExceptionCount,
 			String denominatorExceptionPatientsList, double performanceRate,
 			double reportingRate) {
-		
+
 		this.measureId = measureId;
 		this.criteria = criteria;
 		this.reportingYear = reportingYear;
@@ -136,8 +135,9 @@ public class MIPSPerformanceBean {
 			String numeratorPatientsList, long numeratorExclusionCount,
 			String numeratorExclusionPatientsList,
 			long denominatorExceptionCount,
-			String denominatorExceptionPatientsList) {
-		
+			String denominatorExceptionPatientsList,double performanceRate,
+			double reportingRate) {
+
 		this.tin = tin;
 		this.measureId = measureId;
 		this.criteria = criteria;
@@ -154,6 +154,8 @@ public class MIPSPerformanceBean {
 		this.numeratorExclusionPatientsList = numeratorExclusionPatientsList;
 		this.denominatorExceptionCount = denominatorExceptionCount;
 		this.denominatorExceptionPatientsList = denominatorExceptionPatientsList;
+		this.performanceRate = performanceRate;
+		this.reportingRate = reportingRate;
 		
 	}
 	
@@ -165,7 +167,7 @@ public class MIPSPerformanceBean {
 			String numeratorExclusionPatientsList,
 			long denominatorExceptionCount,
 			String denominatorExceptionPatientsList) {
-		
+
 		this.measureId = measureId;
 		this.criteria = criteria;
 		this.reportingYear = reportingYear;
@@ -188,7 +190,7 @@ public class MIPSPerformanceBean {
 			long ippCount, long denominatorCount,
 			long denominatorExclusionCount, long numeratorCount,
 			long numeratorExclusionCount, long denominatorExceptionCount) {
-		
+
 		this.measureId = measureId;
 		this.criteria = criteria;
 		this.reportingYear = reportingYear;
@@ -199,6 +201,37 @@ public class MIPSPerformanceBean {
 		this.numeratorExclusionCount = numeratorExclusionCount;
 		this.denominatorExceptionCount = denominatorExceptionCount;
 		
+	}
+	
+	public MIPSPerformanceBean(String measureId, int criteria,
+			int reportingYear, long ippCount, String ippPatientsList,
+			long denominatorCount, String denominatorPatientsList,
+			long denominatorExclusionCount,
+			String denominatorExclusionPatientsList, long numeratorCount,
+			String numeratorPatientsList, long numeratorExclusionCount,
+			String numeratorExclusionPatientsList,
+			long denominatorExceptionCount,
+			String denominatorExceptionPatientsList, double performanceRate,
+			double reportingRate) {
+		super();
+		
+		this.measureId = measureId;
+		this.criteria = criteria;
+		this.reportingYear = reportingYear;
+		this.ippCount = ippCount;
+		this.ippPatientsList = ippPatientsList;
+		this.denominatorCount = denominatorCount;
+		this.denominatorPatientsList = denominatorPatientsList;
+		this.denominatorExclusionCount = denominatorExclusionCount;
+		this.denominatorExclusionPatientsList = denominatorExclusionPatientsList;
+		this.numeratorCount = numeratorCount;
+		this.numeratorPatientsList = numeratorPatientsList;
+		this.numeratorExclusionCount = numeratorExclusionCount;
+		this.numeratorExclusionPatientsList = numeratorExclusionPatientsList;
+		this.denominatorExceptionCount = denominatorExceptionCount;
+		this.denominatorExceptionPatientsList = denominatorExceptionPatientsList;
+		this.performanceRate = performanceRate;
+		this.reportingRate = reportingRate;
 	}
 	
 	public double getPoints() {
@@ -289,7 +322,7 @@ public class MIPSPerformanceBean {
 		this.reportingYear = reportingYear;
 	}
 	
-	/*public long getNotMetPatients() {
+	public long getNotMetPatients() {
 		return notMetPatients;
 	}
 
@@ -297,7 +330,7 @@ public class MIPSPerformanceBean {
 		this.notMetPatients = notMetPatients;
 	}
 
-	public String getNotMetPatientsList() {
+	/*public String getNotMetPatientsList() {
 		return notMetPatientsList;
 	}
 

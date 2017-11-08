@@ -1242,7 +1242,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		cq.groupBy(root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
 				root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
 				root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
-				root.get(MacraMeasuresRate_.macraMeasuresRatePerformance));
+				root.get(MacraMeasuresRate_.macraMeasuresRatePerformance),
+				root.get(MacraMeasuresRate_.macraMeasuresRateReporting));
 
 		Selection[] selections= new Selection[] {
 
@@ -1261,7 +1262,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusionlist),builder.literal(",")),
 				builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorException),0)),
 				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExceptionlist),builder.literal(",")),
-
+				root.get(MacraMeasuresRate_.macraMeasuresRatePerformance),
+				root.get(MacraMeasuresRate_.macraMeasuresRateReporting),
 		};
 
 		cq.multiselect(selections);
@@ -1320,23 +1322,25 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			long denominatorCount = resultObject.getDenominatorCount();
 			long denominatorExclusionCount = resultObject.getDenominatorExclusionCount();
 			long denominatorExceptionCount = resultObject.getDenominatorExceptionCount();
-
+			long numeratorExclusionCount = resultObject.getNumeratorExclusionCount();
+			long notMetCount = denominatorCount - (numeratorCount+denominatorExclusionCount+denominatorExceptionCount+numeratorExclusionCount);
+			double denomCount,numCount;
 			try{
 
 				if(numeratorCount != 0 || denominatorExceptionCount != 0 || denominatorExclusionCount!=0){
 
-					reportingRate =  Double.valueOf(""+numeratorCount+denominatorExceptionCount+denominatorExclusionCount) / denominatorCount;
+					denomCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
+					numCount=numeratorCount-numeratorExclusionCount;
+					reportingRate =  Double.valueOf(numCount/denomCount)*100;
 					reportingRate =  Double.valueOf(newFormat.format(reportingRate));
-
 				}
 
 				if(numeratorCount > 0){
 
-					denominatorCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
-
-					performanceRate =  Double.valueOf(""+numeratorCount) / denominatorCount;
+					denomCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
+					numCount=numeratorCount-numeratorExclusionCount;
+					performanceRate =  Double.valueOf(numCount/denomCount)*100;
 					performanceRate =  Double.valueOf(newFormat.format(performanceRate));
-
 				}
 
 				if(reportingRate > 0 && reportingRate%10 != 0){
@@ -1357,7 +1361,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				performanceRate = 0;
 				reportingRate = 0;
 			}
-
+			resultObject.setNotMetPatients(notMetCount);
 			resultObject.setReportingRate(reportingRate);
 			resultObject.setPerformanceRate(performanceRate);
 			resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
@@ -1455,7 +1459,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
 					root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
 					root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
-					root.get(MacraMeasuresRate_.macraMeasuresRatePerformance));
+					root.get(MacraMeasuresRate_.macraMeasuresRatePerformance),
+					root.get(MacraMeasuresRate_.macraMeasuresRateReporting));
 
 			Selection[] selections= new Selection[] {
 
@@ -1475,7 +1480,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusionlist),builder.literal(",")),
 					builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorException),0)),
 					builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExceptionlist),builder.literal(",")),
-
+					root.get(MacraMeasuresRate_.macraMeasuresRatePerformance),
+					root.get(MacraMeasuresRate_.macraMeasuresRateReporting)
 			};
 
 			cq.multiselect(selections);
@@ -1531,21 +1537,24 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				long denominatorCount = resultObject.getDenominatorCount();
 				long denominatorExclusionCount = resultObject.getDenominatorExclusionCount();
 				long denominatorExceptionCount = resultObject.getDenominatorExceptionCount();
-
+				long numeratorExclusionCount = resultObject.getNumeratorExclusionCount();
+				long notMetCount = denominatorCount - (numeratorCount+denominatorExclusionCount+denominatorExceptionCount+numeratorExclusionCount );
+				double denomCount,numCount;
 				try{
 
 					if(numeratorCount != 0 || denominatorExceptionCount != 0 || denominatorExclusionCount!=0){
 
-						reportingRate =  Double.valueOf(""+numeratorCount+denominatorExceptionCount+denominatorExclusionCount) / denominatorCount;
+						denomCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
+						numCount=numeratorCount-numeratorExclusionCount;
+						reportingRate =  Double.valueOf((numCount/denomCount)*100);
 						reportingRate =  Double.valueOf(newFormat.format(reportingRate));
-
 					}
 
 					if(numeratorCount > 0){
 
-						denominatorCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
-
-						performanceRate =  Double.valueOf(""+numeratorCount) / denominatorCount;
+						denomCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
+						numCount=numeratorCount-numeratorExclusionCount;
+						performanceRate =  Double.valueOf(numCount/denomCount)*100;
 						performanceRate =  Double.valueOf(newFormat.format(performanceRate));
 
 					}
@@ -1568,7 +1577,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					performanceRate = 0;
 					reportingRate = 0;
 				}
-
+				
+				resultObject.setNotMetPatients(notMetCount);
 				resultObject.setReportingRate(reportingRate);
 				resultObject.setPerformanceRate(performanceRate);
 				resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
@@ -1705,23 +1715,26 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				long numeratorCount = resultObject.getNumeratorCount();
 				long denominatorCount = resultObject.getDenominatorCount();
+				long numeratorExclusionCount = resultObject.getNumeratorExclusionCount();
 				long denominatorExclusionCount = resultObject.getDenominatorExclusionCount();
 				long denominatorExceptionCount = resultObject.getDenominatorExceptionCount();
+				double denomCount,numCount;
 				try{
 
 					if(numeratorCount != 0 || denominatorExceptionCount != 0 || denominatorExclusionCount!=0){
 
-						denominatorCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
-	
-						reportingRate =  Double.valueOf(""+numeratorCount) / denominatorCount;
+						denomCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
+						numCount=numeratorCount-numeratorExclusionCount;
+						reportingRate =  Double.valueOf((numCount/denomCount)*100);
 						reportingRate =  Double.valueOf(newFormat.format(reportingRate));
+
 					}
 
 					if(numeratorCount > 0){
 
-						denominatorCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
-
-						performanceRate =  Double.valueOf(""+numeratorCount) / denominatorCount;
+						denomCount = denominatorCount - denominatorExclusionCount - denominatorExceptionCount;
+						numCount=numeratorCount-numeratorExclusionCount;
+						performanceRate =  Double.valueOf((numCount/denomCount)*100);
 						performanceRate =  Double.valueOf(newFormat.format(performanceRate));
 					}
 
@@ -2444,15 +2457,35 @@ System.out.println("configuredMeasures>>>>>>>>>>>>>"+configuredMeasures);
 	}
 	
 	@Override
-	
 	public  String generatePDFFile(GeneratePDFDetails generatePDFDetails,int provId, String measureid,String accountId, int criteriaId,String tinId,int measureCriteria,boolean isNotMet) throws Exception{
-
-		String CMSIdAndTitle=getCMSIdAndTitle(measureid, accountId);
-		String cmsID=CMSIdAndTitle.split("&&&")[0];
-		String measureName=CMSIdAndTitle.split("&&&")[1];
-		String measureType=null,providerName,submissionMethod,reportingStart,reportingEnd;
 		String PDFData="";
+		String cmsID = null;
+		String measureName;
 		try{
+			String CMSIdAndTitle;
+
+			if(measureid.equals("ACI_TRANS_EP_1") || measureid.equals("ACI_EP_1")){
+				CMSIdAndTitle = measureid.concat("&&&Electronic Prescribing");						
+			}else if(measureid.equals("ACI_TRANS_SM_1") || measureid.equals("ACI_CCTPE_2")){
+				CMSIdAndTitle = measureid.concat("&&&Secure Messaging");						
+			}else if(measureid.equals("ACI_TRANS_PEA_1") || measureid.equals("ACI_PEA_1")){
+				CMSIdAndTitle = measureid.concat("&&&Patient Electronic Access");						
+			}else if(measureid.equals("ACI_TRANS_PEA_2") || measureid.equals("ACI_CCTPE_1")){
+				CMSIdAndTitle = measureid.concat("&&&View, Download and Transmit (VDT)");						
+			}else if(measureid.equals("ACI_TRANS_HIE_1") || measureid.equals("ACI_HIE_1")){
+				CMSIdAndTitle = measureid.concat("&&&Health Information Exchange");						
+			}else if(measureid.equals("ACI_TRANS_PSE_1") || measureid.equals("ACI_PEA_2")){
+				CMSIdAndTitle = measureid.concat("&&&Patient-Specific Education");						
+			}else if(measureid.equals("ACI_TRANS_MR_1") || measureid.equals("ACI_HIE_3")){
+				CMSIdAndTitle = measureid.concat("&&&Medication Reconcilation");						
+			}else{
+				CMSIdAndTitle = getCMSIdAndTitle(measureid, accountId);
+			}
+
+			cmsID=CMSIdAndTitle.split("&&&")[0];
+			measureName=CMSIdAndTitle.split("&&&")[1];
+			String measureType=null,providerName,submissionMethod,reportingStart,reportingEnd;
+
 			if(criteriaId == 1){
 				measureType="IPP";
 			}else if(criteriaId == 2){
@@ -2468,27 +2501,23 @@ System.out.println("configuredMeasures>>>>>>>>>>>>>"+configuredMeasures);
 			}else if(criteriaId == 7){
 				measureType="Not Met";
 			}
-	
-			
+
 			PDFData+="<html><style> table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse;}</style><body><h3><center>"+measureName+" - "+measureType+" Patient List </center></h3>";
-	
+
 			if(provId!=-1){
 				providerName = getProviderName(provId);
 				submissionMethod = generatePDFDetails.getSubmissionMethod();
 				reportingStart =generatePDFDetails.getReportStart();
 				reportingEnd = generatePDFDetails.getReportEnd();
 				PDFData+="<div><table><tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
-	
 			}
 			else
-				PDFData+="<div><table><tr><th> Tin Number</th> <td>:&nbsp</td>  <td>"+tinId+"</tr></table></div>";
-	
+				PDFData+="<div><table><tr><th> Tin Number</th> <td>:&nbsp</td>  <td>"+tinId+"</td></tr></table></div>";
+
 			List<MIPSPatientInformation> totalPatientList= getPatienttoPrint(criteriaId,provId,measureid,tinId,measureCriteria);
-	
-	
 			PDFData+="<table class=beta width=100% cellpadding=5 cellspacing=5> <tr>  <th>Account No.</th>   <th>Last Name</th>   <th>First Name</th>  <th>DOB</th>   <th>Gender</th> <th>Phone Number</th>   </tr><br>";
 			String accountNo = null, lastName = null, firstName = null,dob = null,gender = null,phoneNo = null;
-	
+
 			for(int i=0;i<totalPatientList.size();i++)
 			{
 				accountNo = totalPatientList.get(i).getAccountNo();
@@ -2497,7 +2526,7 @@ System.out.println("configuredMeasures>>>>>>>>>>>>>"+configuredMeasures);
 				dob = totalPatientList.get(i).getDob();
 				gender = totalPatientList.get(i).getGender();
 				phoneNo = totalPatientList.get(i).getPhoneNo();
-	
+
 				PDFData+="<tr> <td align=left >"+accountNo+"</td>  <td align=left>"+lastName+"</td>  <td align=left>"+firstName+"</td>   <td align=left>"+dob+"</td>    <td align=left>"+gender+"</td> <td align=left>"+phoneNo+"</td> </tr>";
 			}
 			PDFData+="</table> </body></html>";
@@ -2506,8 +2535,6 @@ System.out.println("configuredMeasures>>>>>>>>>>>>>"+configuredMeasures);
 			PDFData="";
 		}
 		String sharedPath = sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
-		
-
 		String FileName = cmsID+System.currentTimeMillis();
 		String HTMLFilePath=generateHTMLFilePath(sharedPath,PDFData,FileName);
 		String s=null;	
@@ -2542,6 +2569,117 @@ System.out.println("configuredMeasures>>>>>>>>>>>>>"+configuredMeasures);
 		}
 		filename =sharePath+"/ECQMPDF/"+fileName+".html";
 		File obj=new File(sharePath+"/ECQMPDF/"+fileName+".html");
+		if(!obj.canExecute())
+		{
+		obj.setExecutable(true);
+		}
+		else
+		if(!obj.canWrite())
+		{
+			obj.setWritable(true);
+		}
+		else
+		if(!obj.canRead())
+		{
+		obj.setReadable(true, false);
+		}
+		FileWriter fstream = new FileWriter(obj);
+		BufferedWriter out = new BufferedWriter(fstream);
+		out.write(DatatoSave);
+		out.close();
+	}catch (Exception e){ //Catch exception if any
+		e.printStackTrace();
+	}
+	return filename;
+	}
+	
+	@Override
+	public String mipsPDFfile(GeneratePDFDetails generatePDFDetails,int provId, String configuredMeasures,String accountId,String tinId,boolean isACIReport, boolean isOrderBy) throws Exception
+	{
+		String providerName,submissionMethod,reportingStart,reportingEnd;
+		String PDFData="";String FileName = null;String provName=null;
+		try{
+			List<MIPSPerformanceBean> PatientList;
+			PDFData+="<html><style> table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse;}</style><body><h3><center> MIPS Performance Report </center></h3>";
+	
+			if(provId!=-1){
+				providerName = getProviderName(provId);
+				submissionMethod = generatePDFDetails.getSubmissionMethod();
+				reportingStart =generatePDFDetails.getReportStart();
+				reportingEnd = generatePDFDetails.getReportEnd();
+				PDFData+="<div><table><tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
+				PatientList = getMeasureRateReportByNPI(provId, accountId,configuredMeasures,isACIReport,isOrderBy);
+				provName = providerName.replaceAll("\\s","");
+				FileName = provName+"_"+System.currentTimeMillis();
+			}
+			else{
+				PDFData+="<div><table><tr><th> Tin Number</th> <td>:&nbsp</td> <td>"+tinId+"</td> </tr></table></div>";
+				PatientList = getGroupPerformanceCount(tinId,configuredMeasures,accountId,isACIReport,isOrderBy);
+				FileName = "GroupPerformance_"+tinId;
+			}
+			
+			PDFData+="<table class=beta width=100% cellpadding=8 cellspacing=8> <tr>  <th>Measure Name </th>   <th>IPP</th>   <th> DENOM</th>  <th>DENEX</th>   <th>NUMER</th> <th>DENEXCEP</th>  <th>NUMEREX</th> <th>Not Met</th> <th>Rate</th> </tr><br>";
+			long ipp = 0;
+			long denom = 0;
+			long denex = 0;
+			long num = 0;
+			long denexcep = 0;
+			long numex = 0;
+			double rate = 0.00;
+			long notmet = 0;
+			String measureName= null;
+			for(int i=0;i<PatientList.size();i++)
+			{
+				measureName = PatientList.get(i).getTitle();
+				ipp = PatientList.get(i).getIppCount();
+				denom = PatientList.get(i).getDenominatorCount();
+				denex = PatientList.get(i).getDenominatorExclusionCount();
+				num = PatientList.get(i).getNumeratorCount();
+				denexcep = PatientList.get(i).getDenominatorExceptionCount();
+				numex = PatientList.get(i).getNumeratorExclusionCount();
+				notmet = PatientList.get(i).getNotMetPatients();
+				rate = PatientList.get(i).getPerformanceRate();
+				
+				PDFData+="<tr> <td align=left>"+measureName+"</td>  <td align=center>"+ipp+"</td>  <td align=center>"+denom+"</td>   <td align=center>"+denex+"</td>    <td align=center>"+num+"</td> <td align=center>"+denexcep+"</td> <td align=center>"+numex+"</td> <td align=center>"+notmet+" </td> <td align=center>"+rate+"%</td></tr>";
+			}
+			PDFData+="</table> </body></html>";
+		}
+		catch(Exception e){
+			PDFData="";
+		}
+		String sharedPath = sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
+		String HTMLFilePath=generateMipsHTMLFilePath(sharedPath,PDFData,FileName);
+		String s=null;	
+		File patientDir = new File(sharedPath+"/MIPSPDF/");
+		patientDir.setWritable(true, false);
+		patientDir.setExecutable(true, false);
+		if (!patientDir.exists()){
+			patientDir.mkdir();
+		}
+		Process p2 = Runtime.getRuntime().exec("/usr/local/bin/wkhtmltopdf "+HTMLFilePath+" "+sharedPath+"/MIPSPDF/"+FileName+".pdf");
+		BufferedReader stdInput2 = new BufferedReader(new  InputStreamReader(p2.getInputStream()));
+		BufferedReader stdError2 = new BufferedReader(new InputStreamReader(p2.getErrorStream()));
+		while ((s = stdInput2.readLine()) != null) {
+			//System.out.println(s);
+		}
+		while ((s = stdError2.readLine()) != null) {
+
+		}
+		return FileName;
+	}
+	
+	public String generateMipsHTMLFilePath(String sharePath,String DatatoSave,String fileName)
+	{
+	File saveDir = new File(sharePath+"/MIPSPDF/");
+	saveDir.setWritable(true, false);
+	saveDir.setExecutable(true, false);
+	String filename="";
+	try{
+		if (!saveDir.exists()){
+		        saveDir.mkdir();
+		}
+		filename =sharePath+"/MIPSPDF/"+fileName+".html";
+		File obj=new File(sharePath+"/MIPSPDF/"+fileName+".html");
 		if(!obj.canExecute())
 		{
 		obj.setExecutable(true);
