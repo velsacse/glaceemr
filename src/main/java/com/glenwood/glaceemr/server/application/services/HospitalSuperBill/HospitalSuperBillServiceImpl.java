@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.services.HospitalSuperBill;
 
+import java.math.BigInteger;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -128,7 +129,7 @@ public class HospitalSuperBillServiceImpl implements HospitalSuperbillService {
 						if(service.get(j).getServiceDetailDos().equals(admissionList.get(i).getAdmissionDate())||service.get(j).getServiceDetailDos().after(admissionList.get(i).getAdmissionDate())){
 							flag = 1;
 							AdmisssionInfo.setServiceDetailDos(service.get(j).getServiceDetailDos());
-							AdmisssionInfo.setServiceDetailId(service.get(j).getServiceDetailId());
+							AdmisssionInfo.setServiceDetailId((service.get(j).getServiceDetailId()));
 							AdmisssionInfo.setServiceDetailPatientid(service.get(j).getServiceDetailPatientid());
 							AdmisssionInfo.setServiceDetailBdoctorid(service.get(j).getServiceDetailBdoctorid());
 							AdmisssionInfo.setServiceDetailCharges(service.get(j).getServiceDetailCharges());

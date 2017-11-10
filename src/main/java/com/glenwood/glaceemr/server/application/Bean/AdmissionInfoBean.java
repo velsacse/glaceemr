@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.Bean;
 
+import java.math.BigInteger;
 import java.sql.Date;
 
 public class AdmissionInfoBean {
@@ -8,8 +9,8 @@ public class AdmissionInfoBean {
 	private String patientRegistrationMidInitial;
 	private String patientRegistrationFirstName;
 	private Date serviceDetailDos;
-	private Integer serviceDetailId;
-	private Integer serviceDetailPatientid;
+	private BigInteger serviceDetailId;
+	private BigInteger serviceDetailPatientid;
 	private String serviceDetailModifier1;
 	private String serviceDetailModifier2;
 	private Integer serviceDetailSdoctorid;
@@ -65,16 +66,16 @@ public class AdmissionInfoBean {
 	public void setServiceDetailDos(Date serviceDetailDos) {
 		this.serviceDetailDos = serviceDetailDos;
 	}
-	public Integer getServiceDetailId() {
+	public BigInteger getServiceDetailId() {
 		return serviceDetailId;
 	}
-	public void setServiceDetailId(Integer serviceDetailId) {
+	public void setServiceDetailId(BigInteger serviceDetailId) {
 		this.serviceDetailId = serviceDetailId;
 	}
-	public Integer getServiceDetailPatientid() {
+	public BigInteger getServiceDetailPatientid() {
 		return serviceDetailPatientid;
 	}
-	public void setServiceDetailPatientid(Integer serviceDetailPatientid) {
+	public void setServiceDetailPatientid(BigInteger serviceDetailPatientid) {
 		this.serviceDetailPatientid = serviceDetailPatientid;
 	}
 	public Integer getPosTablePlaceId() {

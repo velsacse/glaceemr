@@ -311,8 +311,8 @@ public class ChargesServicesImpl implements ChargesServices{
 		if(duplicateChk){
 			ServiceDetail serviceInformation=new ServiceDetail();
 			try {
-				serviceInformation.setServiceDetailId(-1);
-				serviceInformation.setServiceDetailPatientid(saveServicesBean.getPatientid());
+				 serviceInformation.setServiceDetailId(BigInteger.valueOf(-1));
+				serviceInformation.setServiceDetailPatientid(BigInteger.valueOf(saveServicesBean.getPatientid()));
 				DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 				java.util.Date dateofService = (java.util.Date)formatter.parse(saveServicesBean.getDateofService());
 				java.util.Date dosFrom = (java.util.Date)formatter.parse(saveServicesBean.getDateofFrom());

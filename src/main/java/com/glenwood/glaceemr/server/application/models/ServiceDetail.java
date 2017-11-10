@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.util.List;
 
@@ -36,10 +37,10 @@ public class ServiceDetail {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "service_detail_service_detail_id_seq")
     @SequenceGenerator(name = "service_detail_service_detail_id_seq", sequenceName = "service_detail_service_detail_id_seq", allocationSize = 1)
 	@Column(name="service_detail_id")
-	private Integer serviceDetailId;
+	private BigInteger serviceDetailId;
 
 	@Column(name="service_detail_patientid")
-	private Integer serviceDetailPatientid;
+	private BigInteger serviceDetailPatientid;
 
 	@Column(name="service_detail_submit_status")
 	private String serviceDetailSubmitStatus;
@@ -561,19 +562,19 @@ public class ServiceDetail {
 		this.posTable = posTable;
 	}
     
-	public Integer getServiceDetailId() {
+	public BigInteger getServiceDetailId() {
 		return serviceDetailId;
 	}
 
-	public void setServiceDetailId(Integer serviceDetailId) {
+	public void setServiceDetailId(BigInteger serviceDetailId) {
 		this.serviceDetailId = serviceDetailId;
 	}
 
-	public Integer getServiceDetailPatientid() {
+	public BigInteger getServiceDetailPatientid() {
 		return serviceDetailPatientid;
 	}
 
-	public void setServiceDetailPatientid(Integer serviceDetailPatientid) {
+	public void setServiceDetailPatientid(BigInteger serviceDetailPatientid) {
 		this.serviceDetailPatientid = serviceDetailPatientid;
 	}
 
@@ -1665,7 +1666,7 @@ public class ServiceDetail {
 
 
 	public void setServiceDetailDx18desc(String serviceDetailDx18desc) {
-		this.serviceDetailDx18desc = serviceDetailDx18desc;
+		 this.serviceDetailDx18desc = serviceDetailDx18desc;
 	}
 
 
