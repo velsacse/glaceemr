@@ -214,44 +214,36 @@ Root<Encounter> root = cq.from(Encounter.class);
 			cptCodes.add("000000");
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<EncounterQDM> cq = builder.createQuery(EncounterQDM.class);
-		
-		Root<Encounter> root = cq.from(Encounter.class);
-		
-		Join<Encounter, Chart> encounterChartJoin = root.join(Encounter_.chart,JoinType.INNER);
-		Join<Chart, ServiceDetail> chartServiceJoin = encounterChartJoin.join(Chart_.serviceDetail,JoinType.INNER);
+		Root<Chart> root = cq.from(Chart.class);
+		Join<Chart, ServiceDetail> chartServiceJoin = root.join(Chart_.serviceDetail,JoinType.INNER);
+		Join<Chart, Encounter> encounterChartJoin = root.join(Chart_.encounterTable,JoinType.LEFT);
 		Join<ServiceDetail, Cpt> serviceCptJoin = chartServiceJoin.join(ServiceDetail_.cpt,JoinType.INNER);
+		
+		Expression<Date> encounterStartDate = builder.<Date>selectCase().when(encounterChartJoin.get(Encounter_.encounterDate).isNull(),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)).otherwise(encounterChartJoin.get(Encounter_.encounterDate));
+		Expression<Date> encounterEndDate = builder.<Date>selectCase().when(encounterChartJoin.get(Encounter_.encounterDate).isNull(),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)).otherwise(encounterChartJoin.get(Encounter_.encounterClosedDate));
+		Expression<Integer> indicator = builder.<Integer>selectCase().when(encounterChartJoin.get(Encounter_.encounterDate).isNull(),0).otherwise(1);
 		
 		Selection[] selections= new Selection[] {
 				serviceCptJoin.get(Cpt_.cptCptcode),
-				root.get(Encounter_.encounterId),
-				root.get(Encounter_.encounterDate),
-				root.get(Encounter_.encounterClosedDate),
+				chartServiceJoin.get(ServiceDetail_.serviceDetailId),
+				encounterStartDate,
+				encounterEndDate,
+				chartServiceJoin.get(ServiceDetail_.serviceDetailDx1),
+				indicator
 		};
 		
 		cq.select(builder.construct(EncounterQDM.class,selections));
 		
 		Predicate[] restrictions = null;
 		
-		if(considerProvider){
-			
-			restrictions = new Predicate[] {
-					builder.equal(encounterChartJoin.get(Chart_.chartPatientid), patientID),
+		restrictions = new Predicate[] {
+					builder.equal(root.get(Chart_.chartPatientid), patientID),
 					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
 					builder.equal(chartServiceJoin.get(ServiceDetail_.sdoctors), providerId),
-					builder.between(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)), startDate, endDate),
-					builder.equal(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)),builder.function("DATE", Date.class,chartServiceJoin.get(ServiceDetail_.serviceDetailDos))),
+					builder.or(builder.between(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)), startDate, endDate),builder.between(chartServiceJoin.get(ServiceDetail_.serviceDetailDos), startDate, endDate)),
+					builder.or(builder.equal(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)),encounterChartJoin.get(Encounter_.encounterDate).isNull()),
 			};
-			
-		}else{
-			
-			restrictions = new Predicate[] {
-					builder.equal(encounterChartJoin.get(Chart_.chartPatientid), patientID),
-					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
-					builder.between(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)), startDate, endDate),
-					builder.equal(builder.function("DATE", Date.class, root.get(Encounter_.encounterDate)),builder.function("DATE", Date.class,chartServiceJoin.get(ServiceDetail_.serviceDetailDos))),
-			};
-			
-		}
+		
 		
 		cq.where(restrictions);
 		
@@ -289,7 +281,26 @@ Root<Encounter> root = cq.from(Encounter.class);
 					}
 					else
 					encObject.setEndDate(encounterObj.get(i).getEndDate());
-					encounterQDM.add(i, encObject);
+					if(encounterObj.get(i).getIndicator()==0)
+					{
+						Calendar cal = new GregorianCalendar();
+						cal.setTime(encounterObj.get(i).getStartDate());
+						cal.set(Calendar.HOUR_OF_DAY, 04);  
+						cal.set(Calendar.MINUTE, 0);  
+						cal.set(Calendar.SECOND, 0);  
+						cal.set(Calendar.MILLISECOND, 0); 
+						encObject.setStartDate(cal.getTime());
+						cal.set(Calendar.HOUR_OF_DAY, 23);  
+						encObject.setEndDate(cal.getTime());
+						
+					}
+					if(encounterObj.get(i).getDxCode()!=null && !encounterObj.get(i).getDxCode().equals(null) && !encounterObj.get(i).getDxCode().equals(""))
+					{
+						encObject.setPrincipalDiagnosisCode(encounterObj.get(i).getDxCode());
+						encObject.setPrincipalDiagnosisCodeSystemOID("2.16.840.1.113883.6.90");
+					}
+						
+						encounterQDM.add(i, encObject);
 			
 			}
 			
