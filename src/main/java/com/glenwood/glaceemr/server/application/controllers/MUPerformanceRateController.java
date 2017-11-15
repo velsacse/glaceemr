@@ -3,6 +3,7 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -91,7 +92,8 @@ public class MUPerformanceRateController {
 			@RequestParam(value="accountID", required=true) String accountID,
 			@RequestParam(value="startDate", required=false) Date startDate,
 			@RequestParam(value="endDate", required=false) Date endDate,
-			@RequestParam(value="mode", required=true) int mode){
+			@RequestParam(value="mode", required=true) int mode,
+			@RequestParam(value="triggerDate", required=false) String triggerDate){
 
 		HashMap<Integer, List<Integer>> patientsList = new HashMap<Integer, List<Integer>>();
 		
@@ -106,7 +108,7 @@ public class MUPerformanceRateController {
 		PrintWriter printWriter = new PrintWriter(writer);
 		
 		try{
-
+			
 			providers = providerConfService.getProviderReportingInfo(reportingYear);
 
 			for(int i=0;i<providers.size();i++){
@@ -128,9 +130,9 @@ public class MUPerformanceRateController {
 					}
 
 				}else if(mode == 1){
-					System.out.println("Date is>>>>>>>>>>>>>>>>>>>>>>"+new Date());
-//					TimeZone.setDefault(TimeZone.getTimeZone("EST"));
-					patientsList.put(providerId, performanceService.getPatientsSeen(providerId, new Date(), null));
+					SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+					Date date = formatter.parse(triggerDate);
+					patientsList.put(providerId, performanceService.getPatientsSeen(providerId, date, null));
 
 				}else if(mode == 2){
 
@@ -353,9 +355,9 @@ public class MUPerformanceRateController {
 			providerPerformance = new ArrayList<MIPSPerformanceBean>();
 			
 			if(!isMonthlyReport){
-				patientsSeenByProvider = getPatientsSeen(reportingYear, accountID, null, null, 3);
+				patientsSeenByProvider = getPatientsSeen(reportingYear, accountID, null, null, 3,null);
 			}else{
-				patientsSeenByProvider = getPatientsSeen(reportingYear, accountID, null, null, 2);
+				patientsSeenByProvider = getPatientsSeen(reportingYear, accountID, null, null, 2,null);
 			}
 			
 			for(int i=0;i<patientsSeenByProvider.keySet().size();i++){
