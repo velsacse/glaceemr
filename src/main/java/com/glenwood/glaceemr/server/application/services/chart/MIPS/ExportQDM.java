@@ -1353,6 +1353,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				cqForLoinc.where(restrictions);
 			cqForLoinc.distinct(true);   
 			clinicalDataLOINC = em.createQuery(cqForLoinc).getResultList();
+			System.out.println("clinicalDataLOINC size>>>>>>>>>>"+clinicalDataLOINC.size());
 			for(ClinicalDataQDM clinicalDataQDM: clinicalDataLOINC){
 
 				clinicalDataQDM.setEndDate(endDate);
@@ -1364,8 +1365,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 					clinicaldataFinal.add(clinicalDataQDM);
 				}  
 				else if(clinicalDataQDM.getOptionValue().equalsIgnoreCase(clinicalDataQDM.getPatientResult())){
+					System.out.println("code is>>>>>>>>>>>>>"+clinicalDataQDM.getCode());
+					System.out.println("gwid>>>>>>>>>>>>>>>>"+clinicalDataQDM.getGwid());
 					if(clinicalDataQDM.getGwid().equals("0000100303000000015") || clinicalDataQDM.getGwid().equals("0000100303000000013"))
 					{
+						System.out.println("going to add into tobacco details..........");
 						QDM QDMObj=new QDM();
 						QDMObj.setCode(clinicalDataQDM.getResultCode());
 						QDMObj.setCodeSystem("SNOMED");
@@ -1379,6 +1383,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					clinicaldataFinal.add(clinicalDataQDM);
 				}
 			}
+			System.out.println("tobaccoDetails size>>>>>>>>>>>>"+tobaccoDetails.size());
 			requestObj.setTobaccoStatusList(tobaccoDetails);
 		}  
 		
