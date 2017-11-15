@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Fetch;
@@ -33,18 +34,19 @@ import com.glenwood.glaceemr.server.application.models.Cpt;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.ExpectedCptAmount;
-import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
-import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
-import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.NonServiceDetails;
+import com.glenwood.glaceemr.server.application.models.PatientAssessments;
 import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PosTable;
+import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
 import com.glenwood.glaceemr.server.application.models.Quickcpt;
 import com.glenwood.glaceemr.server.application.models.Quickcpt_;
+import com.glenwood.glaceemr.server.application.models.ReferringDoctor;
 import com.glenwood.glaceemr.server.application.models.SaveServicesBean;
 import com.glenwood.glaceemr.server.application.models.ServiceDetail;
+import com.glenwood.glaceemr.server.application.models.ServiceDetail_;
 import com.glenwood.glaceemr.server.application.models.SubmitStatus;
 import com.glenwood.glaceemr.server.application.models.UpdateServiceBean;
 import com.glenwood.glaceemr.server.application.repositories.AssociateServiceDetailsRepository;
@@ -52,15 +54,15 @@ import com.glenwood.glaceemr.server.application.repositories.CptRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmployeeProfileRepository;
 import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
 import com.glenwood.glaceemr.server.application.repositories.ExpectedCptAmountRepository;
-import com.glenwood.glaceemr.server.application.repositories.ReferringDoctorRepository;
-import com.glenwood.glaceemr.server.application.repositories.PrimarykeyGeneratorRepository;
-import com.glenwood.glaceemr.server.application.repositories.PatientAssessmentsRepository;
 import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.NonServiceDetailsRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientAssessmentsRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientInsDetailRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.repositories.PosTableRepository;
+import com.glenwood.glaceemr.server.application.repositories.PrimarykeyGeneratorRepository;
 import com.glenwood.glaceemr.server.application.repositories.QuickCptRepository;
+import com.glenwood.glaceemr.server.application.repositories.ReferringDoctorRepository;
 import com.glenwood.glaceemr.server.application.repositories.ServiceDetailRepository;
 import com.glenwood.glaceemr.server.application.repositories.SubmitStatusRepository;
 import com.glenwood.glaceemr.server.application.specifications.ChargesSpecification;
@@ -123,6 +125,9 @@ public class ChargesServicesImpl implements ChargesServices{
 	
 	@Autowired
 	SessionMap sessionMap;
+	
+	@PersistenceContext
+	EntityManager em;
 	
 	@Override
 	public ChargesPageBasicDetailsBean findAllBasicDetails(Integer patientId) {
@@ -421,21 +426,40 @@ public class ChargesServicesImpl implements ChargesServices{
 	public void requestToSaveService(ServiceDetail createdEntity) {
 		try {
 			serviceDetailRepository.save(createdEntity);
-			List<PrimarykeyGenerator> serviceprimarykey_generator=primarykey_generatorRepository.findAll(ChargesSpecification.getServiceDetailMaxId());
-			List<PrimarykeyGenerator> associateprimarykey_generator=primarykey_generatorRepository.findAll(ChargesSpecification.getAssociateServiceDetailMaxId());
-			Integer associateprimarykey_generator_rowcount=associateprimarykey_generator.get(0).getprimarykey_generator_rowcount();
-			associateprimarykey_generator.get(0).setprimarykey_generator_rowcount(associateprimarykey_generator_rowcount+1);
-			primarykey_generatorRepository.saveAndFlush(associateprimarykey_generator.get(0));
-			aSDEntityCreation(serviceprimarykey_generator,associateprimarykey_generator_rowcount+1);
+			
+			//List<PrimarykeyGenerator> serviceprimarykey_generator=primarykey_generatorRepository.findAll(ChargesSpecification.getServiceDetailMaxId());
+			//List<PrimarykeyGenerator> associateprimarykey_generator=primarykey_generatorRepository.findAll(ChargesSpecification.getAssociateServiceDetailMaxId());
+		//	Integer associateprimarykey_generator_rowcount=associateprimarykey_generator.get(0).getprimarykey_generator_rowcount();
+			//associateprimarykey_generator.get(0).setprimarykey_generator_rowcount(associateprimarykey_generator_rowcount+1);
+			//primarykey_generatorRepository.saveAndFlush(associateprimarykey_generator.get(0));
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Integer> query = builder.createQuery(Integer.class);
+			Root<ServiceDetail> root = query.from(ServiceDetail.class);
+			query.multiselect(builder.greatest(root.get(ServiceDetail_.serviceDetailId)));
+			Integer assId = em.createQuery(query).getSingleResult();
+			aSDEntityCreationnew(assId);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void aSDEntityCreationnew(Integer maxAssociate) {
+		try {
+			AssociateServiceDetails associateServiceInsert=new AssociateServiceDetails();
+			associateServiceInsert.setAssociateServiceDetailServiceId(BigInteger.valueOf(maxAssociate));
+			associateServiceInsert.setAssociateServiceDetailSpecialDx("");
+			reqeustToSaveAssociateServiceDetail(associateServiceInsert);
+			
+		}
+		catch (Exception e) {
+			// TODO: handle exception
 		}
 	}
 
 	public void aSDEntityCreation(List<PrimarykeyGenerator> serviceprimarykey_generator, int maxAssociate) {
 		try {
 			AssociateServiceDetails associateServiceInsert=new AssociateServiceDetails();
-			associateServiceInsert.setAssociateServiceDetailId(BigInteger.valueOf((maxAssociate)));
+			//associateServiceInsert.setAssociateServiceDetailId(BigInteger.valueOf((maxAssociate)));
 			associateServiceInsert.setAssociateServiceDetailServiceId(BigInteger.valueOf(serviceprimarykey_generator.get(0).getprimarykey_generator_rowcount()));
 			associateServiceInsert.setAssociateServiceDetailSpecialDx("");
 			reqeustToSaveAssociateServiceDetail(associateServiceInsert);
