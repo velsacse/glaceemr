@@ -433,20 +433,20 @@ public class ChargesServicesImpl implements ChargesServices{
 			//associateprimarykey_generator.get(0).setprimarykey_generator_rowcount(associateprimarykey_generator_rowcount+1);
 			//primarykey_generatorRepository.saveAndFlush(associateprimarykey_generator.get(0));
 			CriteriaBuilder builder = em.getCriteriaBuilder();
-			CriteriaQuery<Integer> query = builder.createQuery(Integer.class);
+			CriteriaQuery<BigInteger> query = builder.createQuery(BigInteger.class);
 			Root<ServiceDetail> root = query.from(ServiceDetail.class);
 			query.multiselect(builder.greatest(root.get(ServiceDetail_.serviceDetailId)));
-			Integer assId = em.createQuery(query).getSingleResult();
+			BigInteger assId = em.createQuery(query).getSingleResult();
 			aSDEntityCreationnew(assId);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void aSDEntityCreationnew(Integer maxAssociate) {
+	public void aSDEntityCreationnew(BigInteger maxAssociate) {
 		try {
 			AssociateServiceDetails associateServiceInsert=new AssociateServiceDetails();
-			associateServiceInsert.setAssociateServiceDetailServiceId(BigInteger.valueOf(maxAssociate));
+			associateServiceInsert.setAssociateServiceDetailServiceId(maxAssociate);
 			associateServiceInsert.setAssociateServiceDetailSpecialDx("");
 			reqeustToSaveAssociateServiceDetail(associateServiceInsert);
 			
