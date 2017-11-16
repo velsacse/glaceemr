@@ -435,7 +435,7 @@ public class ChargesServicesImpl implements ChargesServices{
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<BigInteger> query = builder.createQuery(BigInteger.class);
 			Root<ServiceDetail> root = query.from(ServiceDetail.class);
-			query.multiselect(builder.greatest(root.get(ServiceDetail_.serviceDetailId)));
+			query.select(builder.function("max",BigInteger.class,root.get(ServiceDetail_.serviceDetailId)));
 			BigInteger assId = em.createQuery(query).getSingleResult();
 			aSDEntityCreationnew(assId);
 		} catch (Exception e) {
