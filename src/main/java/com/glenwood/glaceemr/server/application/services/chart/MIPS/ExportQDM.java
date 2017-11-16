@@ -225,7 +225,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		Selection[] selections= new Selection[] {
 				serviceCptJoin.get(Cpt_.cptCptcode),
-				chartServiceJoin.get(ServiceDetail_.serviceDetailId),
+				builder.coalesce(encounterChartJoin.get(Encounter_.encounterId),-1),
 				encounterStartDate,
 				encounterEndDate,
 				chartServiceJoin.get(ServiceDetail_.serviceDetailDx1),
