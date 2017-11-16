@@ -24,12 +24,13 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AssociateServiceDetails {
 	
-	@Column(name="associate_service_detail_id")
-	private BigInteger associateServiceDetailId;
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "associate_service_detail_associate_service_detail_id_seq")
 	@SequenceGenerator(name = "associate_service_detail_associate_service_detail_id_seq", sequenceName = "associate_service_detail_associate_service_detail_id_seq", allocationSize = 1)
+	@Column(name="associate_service_detail_id")
+	private BigInteger associateServiceDetailId;
+
+	
 	@Column(name="associate_service_detail_service_id")
 	private BigInteger associateServiceDetailServiceId;
 	
