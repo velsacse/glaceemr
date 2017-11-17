@@ -8,6 +8,7 @@ public class EncounterQDM {
 	String code;
 	Date startDate;
 	Date endDate;
+	Date serviceDate;
 	String dxCode;
 	Integer indicator;
 	
@@ -15,15 +16,20 @@ public class EncounterQDM {
 		super();
 	}
 
-	public EncounterQDM(String code, Integer encounterId, Date startDate, Date endDate,String dxCode,Integer indicator){
+	public EncounterQDM(String code, Integer encounterId, Date startDate, Date endDate,Date serviceDate,String dxCode,Integer indicator){
 
 		
 		this.encounterId = encounterId;
 		this.code = code;
 		if(startDate!=null)
-		this.startDate = startDate;
-		if(endDate != null){
-			this.endDate = endDate;
+		{
+			this.startDate = startDate;
+			if(endDate != null){
+				this.endDate = endDate;
+			}
+		}
+		else{
+			this.serviceDate=serviceDate;
 		}
 		if(dxCode!=null)
 		this.dxCode=dxCode;
@@ -52,6 +58,14 @@ public class EncounterQDM {
 	}
 	
 	
+	public Date getServiceDate() {
+		return serviceDate;
+	}
+
+	public void setServiceDate(Date serviceDate) {
+		this.serviceDate = serviceDate;
+	}
+
 	public String getDxCode() {
 		return dxCode;
 	}

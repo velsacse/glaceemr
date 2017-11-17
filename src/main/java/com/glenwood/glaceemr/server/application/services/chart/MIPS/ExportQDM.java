@@ -219,15 +219,14 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Join<Chart, Encounter> encounterChartJoin = root.join(Chart_.encounterTable,JoinType.LEFT);
 		Join<ServiceDetail, Cpt> serviceCptJoin = chartServiceJoin.join(ServiceDetail_.cpt,JoinType.INNER);
 		
-		Expression<Date> encounterStartDate = builder.<Date>selectCase().when(encounterChartJoin.get(Encounter_.encounterDate).isNull(),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)).otherwise(encounterChartJoin.get(Encounter_.encounterDate));
-		Expression<Date> encounterEndDate = builder.<Date>selectCase().when(encounterChartJoin.get(Encounter_.encounterDate).isNull(),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)).otherwise(encounterChartJoin.get(Encounter_.encounterClosedDate));
 		Expression<Integer> indicator = builder.<Integer>selectCase().when(encounterChartJoin.get(Encounter_.encounterDate).isNull(),0).otherwise(1);
 		
 		Selection[] selections= new Selection[] {
 				serviceCptJoin.get(Cpt_.cptCptcode),
 				builder.coalesce(encounterChartJoin.get(Encounter_.encounterId),-1),
-				encounterStartDate,
-				encounterEndDate,
+				encounterChartJoin.get(Encounter_.encounterDate),
+				encounterChartJoin.get(Encounter_.encounterClosedDate),
+				chartServiceJoin.get(ServiceDetail_.serviceDetailDos),
 				chartServiceJoin.get(ServiceDetail_.serviceDetailDx1),
 				indicator
 		};
@@ -268,23 +267,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
 					else if(cptCodeListString.length() > 0 && cptCodeListString.contains( encounterObj.get(i).getCode() ))
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
-					encObject.setStartDate(encounterObj.get(i).getStartDate());
-					if(encounterObj.get(i).getEndDate()==null)
-					{
-						Calendar cal = new GregorianCalendar();
-						cal.setTime(encounterObj.get(i).getStartDate());
-						cal.set(Calendar.HOUR_OF_DAY, 23);  
-						cal.set(Calendar.MINUTE, 0);  
-						cal.set(Calendar.SECOND, 0);  
-						cal.set(Calendar.MILLISECOND, 0); 
-						encObject.setEndDate(cal.getTime());
-					}
-					else
-					encObject.setEndDate(encounterObj.get(i).getEndDate());
+					
 					if(encounterObj.get(i).getIndicator()==0)
 					{
 						Calendar cal = new GregorianCalendar();
-						cal.setTime(encounterObj.get(i).getStartDate());
+						cal.setTime(encounterObj.get(i).getServiceDate());
 						cal.set(Calendar.HOUR_OF_DAY, 04);  
 						cal.set(Calendar.MINUTE, 0);  
 						cal.set(Calendar.SECOND, 0);  
@@ -293,6 +280,21 @@ Root<Encounter> root = cq.from(Encounter.class);
 						cal.set(Calendar.HOUR_OF_DAY, 23);  
 						encObject.setEndDate(cal.getTime());
 						
+					}
+					else{
+						encObject.setStartDate(encounterObj.get(i).getStartDate());
+						if(encounterObj.get(i).getEndDate()==null)
+						{
+							Calendar cal = new GregorianCalendar();
+							cal.setTime(encounterObj.get(i).getStartDate());
+							cal.set(Calendar.HOUR_OF_DAY, 23);  
+							cal.set(Calendar.MINUTE, 0);  
+							cal.set(Calendar.SECOND, 0);  
+							cal.set(Calendar.MILLISECOND, 0); 
+							encObject.setEndDate(cal.getTime());
+						}
+						else
+						encObject.setEndDate(encounterObj.get(i).getEndDate());
 					}
 					if(encounterObj.get(i).getDxCode()!=null && !encounterObj.get(i).getDxCode().equals(null) && !encounterObj.get(i).getDxCode().equals(""))
 					{
@@ -1226,7 +1228,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		if(snomedCodeList.size()>0){
 			CriteriaQuery<ClinicalDataQDM> cqForSnomed = builder.createQuery(ClinicalDataQDM.class);      
 			Root<PatientClinicalElements> root = cqForSnomed.from(PatientClinicalElements.class);
-			Join<PatientClinicalElements, Encounter> EncElementJoin = root.join(PatientClinicalElements_.encounter, JoinType.INNER);
+			Join<PatientClinicalElements, Encounter> EncElementJoin = root.join(PatientClinicalElements_.encounter, JoinType.LEFT);
 			Join<Encounter, Chart> EncChartJoin = EncElementJoin.join(Encounter_.chartTable, JoinType.INNER);
 			Join<PatientClinicalElements, ClinicalElements> clinicalElementsJoin = root.join(PatientClinicalElements_.clinicalElement, JoinType.INNER);
 			Join<ClinicalElements, ClinicalElementsOptions> clinicalElementsOptionsJoin = clinicalElementsJoin.join(ClinicalElements_.clinicalElementsOptions, JoinType.LEFT);
@@ -1305,7 +1307,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		if(loincCodeList.size()>0){                                  
 			CriteriaQuery<ClinicalDataQDM> cqForLoinc = builder.createQuery(ClinicalDataQDM.class);      
 			Root<PatientClinicalElements> root = cqForLoinc.from(PatientClinicalElements.class);
-			Join<PatientClinicalElements, Encounter> EncElementJoin = root.join(PatientClinicalElements_.encounter, JoinType.INNER);
+			Join<PatientClinicalElements, Encounter> EncElementJoin = root.join(PatientClinicalElements_.encounter, JoinType.LEFT);
 			Join<Encounter, Chart> EncChartJoin = EncElementJoin.join(Encounter_.chartTable, JoinType.INNER);
 			Join<PatientClinicalElements, ClinicalElements> clinicalElementsJoin = root.join(PatientClinicalElements_.clinicalElement, JoinType.INNER);
 			Join<ClinicalElements, ClinicalElementsOptions> clinicalElementsOptionsJoin = clinicalElementsJoin.join(ClinicalElements_.clinicalElementsOptions, JoinType.LEFT);
