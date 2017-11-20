@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.sql.Date;
 
@@ -26,8 +27,9 @@ import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 @Entity
 @Table(name = "hl7_unmappedresults")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Hl7Unmappedresults {
+public class Hl7Unmappedresults implements Serializable{
 
+   private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="hl7_unmappedresults_hl7_unmappedresults_id_seq")
 	@SequenceGenerator(name ="hl7_unmappedresults_hl7_unmappedresults_id_seq", sequenceName="hl7_unmappedresults_hl7_unmappedresults_id_seq", allocationSize=1)

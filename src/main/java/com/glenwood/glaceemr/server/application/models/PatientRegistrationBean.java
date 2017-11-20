@@ -1,5 +1,7 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.util.Date;
+
 public class PatientRegistrationBean {
 
 
@@ -364,7 +366,21 @@ public class PatientRegistrationBean {
 	private Integer patientRegistrationPatientpracticerel;
 
 	private Integer patientRegistrationStudycode;
-	
+
+	private Date patientRegisDob;
+
+
+	public PatientRegistrationBean(){
+
+	}
+	public PatientRegistrationBean(String patientRegistrationFirstName,String patientRegistrationLastName,String patientRegistrationAccountno,Date patientRegisDob){
+		this.patientRegistrationFirstName=patientRegistrationFirstName;
+		this.patientRegistrationLastName=patientRegistrationLastName;
+		this.patientRegistrationAccountno=patientRegistrationAccountno;
+		this.patientRegisDob=patientRegisDob;
+
+	}
+
 	public Integer getPatientRegistrationId() {
 		return patientRegistrationId;
 	}
@@ -1890,4 +1906,11 @@ public class PatientRegistrationBean {
 		this.patientRegistrationDobtime = patientRegistrationDobtime;
 	}
 
+	public Date getPatientRegisDob() {
+		return patientRegisDob;
+	}
+
+	public void setPatientRegisDob(Date patientRegisDob) {
+		this.patientRegisDob = patientRegisDob;
+	}
 }

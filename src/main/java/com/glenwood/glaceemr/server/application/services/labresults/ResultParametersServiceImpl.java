@@ -20,6 +20,7 @@ import java.util.Vector;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
@@ -27,6 +28,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.persistence.criteria.Predicate;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.glenwood.glaceemr.server.application.Bean.LabEntriesParameterBean;
+import com.glenwood.glaceemr.server.application.Bean.LabParametersBean;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
@@ -57,8 +61,12 @@ import com.glenwood.glaceemr.server.application.models.Hl7Unmappedresults;
 import com.glenwood.glaceemr.server.application.models.Hl7Unmappedresults_;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
+import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
+import com.glenwood.glaceemr.server.application.models.LabParameterCode;
+import com.glenwood.glaceemr.server.application.models.LabParameterCode_;
 import com.glenwood.glaceemr.server.application.models.LabParameters;
+import com.glenwood.glaceemr.server.application.models.LabParameters_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.repositories.EncounterEntityRepository;
@@ -116,6 +124,9 @@ public class ResultParametersServiceImpl implements ResultParametersService {
 
 	@Autowired
 	EntityManagerFactory emf ;
+	
+	@PersistenceContext
+	EntityManager em;
 
 	Session session;
 
@@ -450,23 +461,24 @@ public class ResultParametersServiceImpl implements ResultParametersService {
 					paramUnits = replaceXMLChars(paramUnits);					//	C - Corrected Result.
 					normalRange = replaceXMLChars(normalRange);
 					codingSystem = replaceXMLChars(normalRange);
-					List<LabParameters> labParamsList = labParametersRepository.findAll(LabResultsSpecification.verifyParamCodeAndSystem(paramCode, codingSystem));
+					
+					LabParametersBean labParamsListData=labParamListData(paramCode, codingSystem);
 					boolean isflowsheet = false;
 					String flowsheeturl = "";
-					if( labParamsList.size() > 0 ) {
-						LabParameters labParams = labParamsList.get(0);
-						isflowsheet	= Boolean.parseBoolean(Optional.fromNullable(Strings.emptyToNull("" + labParams.getLabParametersIsflowsheetneeded())).or("false"));
-						flowsheeturl = Optional.fromNullable(Strings.emptyToNull("" + labParams.getLabParametersFlowsheeturl())).or("");
+					if(labParamsListData!=null) {
+						isflowsheet	= Boolean.parseBoolean(Optional.fromNullable(Strings.emptyToNull("" + labParamsListData.getLabParametersIsflowsheetneeded())).or("false"));
+						flowsheeturl = Optional.fromNullable(Strings.emptyToNull("" + labParamsListData.getLabParametersFlowsheeturl())).or("");
 					}
 					String	fileScanId = "-1";
 					String isPdf = "0";
 					String	paramEntryId = "-1";
-					List<LabEntriesParameter> entriesParamList = labEntriesParametersRepository.findAll(LabResultsSpecification.getParamData(testDetailId, paramName.replaceAll("'","")));
-					if( entriesParamList.size() > 0 ) {
-						LabEntriesParameter entriesParam = entriesParamList.get(0);
-						isPdf = Optional.fromNullable(Strings.emptyToNull("" + entriesParam.getLabEntriesParameterIspdf())).or("-1");
-						fileScanId = Optional.fromNullable(Strings.emptyToNull("" + entriesParam.getLabEntriesParameterFilenameScanid())).or("-1");
-						paramEntryId = Optional.fromNullable(Strings.emptyToNull("" + entriesParam.getLabEntriesParameterId())).or("-1");
+					LabEntriesParameterBean entriesParamListData=entriesParamListData(testDetailId, paramName.replaceAll("'",""));
+
+					if(entriesParamListData!=null) {
+						
+						isPdf = Optional.fromNullable(Strings.emptyToNull("" + entriesParamListData.getLabEntriesParameterIspdf())).or("-1");
+						fileScanId = Optional.fromNullable(Strings.emptyToNull("" + entriesParamListData.getLabEntriesParameterFilenameScanid())).or("-1");
+						paramEntryId = Optional.fromNullable(Strings.emptyToNull("" + entriesParamListData.getLabEntriesParameterId())).or("-1");
 						int categoryId = Integer.parseInt(Optional.fromNullable(Strings.emptyToNull("" + getScanGroupId(testDetailId))).or("-1"));
 						paramObj.setCategoryId("" + categoryId);
 						paramObj.setIsPDF(isPdf);
@@ -497,6 +509,62 @@ public class ResultParametersServiceImpl implements ResultParametersService {
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}	
+	}
+
+	private LabEntriesParameterBean entriesParamListData(
+			String testDetailId, String displayName) {
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<LabEntriesParameter> root = cq.from(LabEntriesParameter.class);
+			Join<LabEntriesParameter, LabParameters> join = root.join(LabEntriesParameter_.labParametersTable,JoinType.INNER);
+			Predicate checkTestId = builder.equal(root.get(LabEntriesParameter_.labEntriesParameterTestdetailid), testDetailId);
+			Predicate checkIsActive = builder.equal(root.get(LabEntriesParameter_.labEntriesParameterIsactive), true);
+			Predicate checkDisplayName = builder.like(join.get(LabParameters_.labParametersDisplayname), displayName);
+
+			cq.multiselect(builder.construct(LabEntriesParameterBean.class, root.get(LabEntriesParameter_.labEntriesParameterIspdf),
+					root.get(LabEntriesParameter_.labEntriesParameterFilenameScanid),
+					root.get(LabEntriesParameter_.labEntriesParameterId)));		
+			cq.where(checkTestId, checkIsActive, checkDisplayName);
+
+			List<Object> inboxList=em.createQuery(cq).getResultList();
+			LabEntriesParameterBean eachObj=new LabEntriesParameterBean();
+			if(!inboxList.isEmpty())
+			eachObj=(LabEntriesParameterBean) inboxList.get(0);
+			return eachObj;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}finally{
+			em.close();
+		}
+	}
+
+	public LabParametersBean labParamListData(String paramCode,
+			String codingSystem) {
+		
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<LabParameters> root = cq.from(LabParameters.class);
+			Join<LabParameters, LabParameterCode> join = root.join(LabParameters_.labParameterCodeTable,JoinType.INNER);
+			Predicate checkCode = builder.equal(join.get(LabParameterCode_.labParameterCodeValue), paramCode);
+			Predicate checkSystem = builder.equal(join.get(LabParameterCode_.labParameterCodeSystem), codingSystem);
+			cq.multiselect(builder.construct(LabParametersBean.class, root.get(LabParameters_.labParametersIsflowsheetneeded),
+					root.get(LabParameters_.labParametersFlowsheeturl)));		
+			cq.where(checkCode,checkSystem);
+			List<Object> resultList =em.createQuery(cq).getResultList();
+			
+			LabParametersBean eachObj=new LabParametersBean();
+			if(!resultList.isEmpty())
+				 eachObj=(LabParametersBean) resultList.get(0);
+			return eachObj;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}finally{
+			em.close();
+		}
 	}
 
 	/**

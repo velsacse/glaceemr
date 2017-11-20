@@ -35,10 +35,19 @@ public class Specimen {
 
 	@Column(name="specimen_condition")
 	private String specimenCondition;
-	
+
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="specimen_date")
 	private Timestamp specimenDate;
+
+	public Specimen(){
+
+	}
+	public Specimen(String specimenSource,String specimenCondition,Timestamp specimenDate){
+		this.specimenSource=specimenSource;
+		this.specimenCondition=specimenCondition;
+		this.specimenDate=specimenDate;
+	}
 
 	public Integer getSpecimenId() {
 		return specimenId;

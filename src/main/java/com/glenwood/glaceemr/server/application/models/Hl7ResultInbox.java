@@ -130,6 +130,35 @@ public class Hl7ResultInbox {
 		this.hl7ResultInboxPlacedDate = hl7ResultInboxPlacedDate;
 		
 	}
+	
+	public Hl7ResultInbox(String hl7ResultInboxAccountno,
+			Integer hl7ResultInboxId,	
+			String hl7ResultInboxFirstname,	
+			String hl7ResultInboxLastname, 
+			Integer hl7ResultInboxStatus,
+			Date hl7ResultInboxPlacedDate,
+			Integer hl7ResultInboxReviewed,
+			Integer hl7ResultInboxPrelimresultId,
+			String hl7ResultInboxLabaccessionno,
+			String hl7ResultInboxPlacerorderno,
+			String hl7ResultInboxPlacergroupno,
+			Integer hl7ResultInboxDocumentid,
+			Integer hl7ResultInboxLabcompanyid) {
+		this.hl7ResultInboxAccountno = hl7ResultInboxAccountno;
+		this.hl7ResultInboxId = hl7ResultInboxId;
+		this.hl7ResultInboxFirstname = hl7ResultInboxFirstname;
+		this.hl7ResultInboxLastname = hl7ResultInboxLastname;
+		this.hl7ResultInboxStatus = hl7ResultInboxStatus;
+		this.hl7ResultInboxPlacedDate = hl7ResultInboxPlacedDate;
+		this.hl7ResultInboxReviewed = hl7ResultInboxReviewed;
+		this.hl7ResultInboxPrelimresultId=hl7ResultInboxPrelimresultId;
+		this.hl7ResultInboxLabaccessionno=hl7ResultInboxLabaccessionno;
+		this.hl7ResultInboxPlacerorderno=hl7ResultInboxPlacerorderno;
+		this.hl7ResultInboxPlacergroupno=hl7ResultInboxPlacergroupno;
+		this.hl7ResultInboxDocumentid=hl7ResultInboxDocumentid;
+		this.hl7ResultInboxLabcompanyid=hl7ResultInboxLabcompanyid;
+	}
+
 
 	public Integer getHl7ResultInboxId() {
 		return hl7ResultInboxId;

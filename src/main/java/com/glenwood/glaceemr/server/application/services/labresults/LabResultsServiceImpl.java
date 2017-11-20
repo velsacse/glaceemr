@@ -29,9 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
+import com.glenwood.glaceemr.server.application.Bean.LabEntriesDetailsBean;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.FileDetails_;
 import com.glenwood.glaceemr.server.application.models.FileName;
@@ -50,16 +52,22 @@ import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
 import com.glenwood.glaceemr.server.application.models.LabEntries_;
 import com.glenwood.glaceemr.server.application.models.LabcompanyDetails;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
+import com.glenwood.glaceemr.server.application.models.PatientRegistrationBean;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator;
 import com.glenwood.glaceemr.server.application.models.PrimarykeyGenerator_;
 import com.glenwood.glaceemr.server.application.models.Specimen;
+import com.glenwood.glaceemr.server.application.models.Specimen_;
 import com.glenwood.glaceemr.server.application.repositories.ChartRepository;
 import com.glenwood.glaceemr.server.application.repositories.EmpProfileRepository;
+import com.glenwood.glaceemr.server.application.repositories.EncounterRepository;
+import com.glenwood.glaceemr.server.application.repositories.FileDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.FileNameRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7DocsInboxRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7ResultInboxRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7UnmappedResultsRepository;
+import com.glenwood.glaceemr.server.application.repositories.Hl7importCompaniesRepository;
+import com.glenwood.glaceemr.server.application.repositories.LabCompanyDetailsRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabEntriesParameterRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabEntriesRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabParametersRepository;
@@ -147,6 +155,19 @@ public class LabResultsServiceImpl implements LabResultsService {
 	
 	@Autowired
 	AuditTrailSaveService auditTrailSaveService;
+	
+	@Autowired
+	FileDetailsRepository fileDetailsRepository;
+	
+	@Autowired
+	Hl7importCompaniesRepository hl7ImportCompaniesRepository;
+	
+	@Autowired
+	EncounterRepository encounterRepository;
+	
+	@Autowired
+	LabCompanyDetailsRepository labCompanyDetailsRepository;
+
 
 	private Logger logger = Logger.getLogger(InvestigationSummaryServiceImpl.class);
 	String rootPath;
@@ -200,13 +221,11 @@ public class LabResultsServiceImpl implements LabResultsService {
 	@Override
 	public List<ResultList> getListOfResults(String doctorId, String isReviewed, String orderedDate, Integer pageNo,Integer pageSize) {
 		ArrayList<Integer> list = new ArrayList<Integer>();
-//		EntityManager em = emf.createEntityManager();
+
 		try{
 		for (int j = 0; j < doctorId.split(",").length; j++) {
 			list.add(Integer.parseInt( doctorId.split(",")[j]));
-		}
-//		List<Hl7ResultInbox> resultInboxList = resultsRepository.findAll(Specifications.where(LabResultsSpecification.getActiveResult()).and(LabResultsSpecification.verifyReviewedStatus(isReviewed)).and(LabResultsSpecification.verifyOrdBy(list)));
-		
+		}		
 		CriteriaBuilder cbuilder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cqry = cbuilder.createQuery();
 		Root<Hl7ResultInbox> rootHl7ResultInbox = cqry.from(Hl7ResultInbox.class);
@@ -216,13 +235,11 @@ public class LabResultsServiceImpl implements LabResultsService {
 		Predicate reviewedResult = cbuilder.equal(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxReviewed), Integer.parseInt(isReviewed));
 		
 		Join<Hl7ResultInbox, Hl7Unmappedresults> resultsJoin = rootHl7ResultInbox.join(Hl7ResultInbox_.hl7UnmappedResults,JoinType.INNER);
+		@SuppressWarnings("unused")
 		Join<Hl7ResultInbox, PatientRegistration> patJoin = rootHl7ResultInbox.join(Hl7ResultInbox_.patientRegistration,JoinType.LEFT);
 		
 		Predicate hl7unmapResActive = cbuilder.equal(resultsJoin.get(Hl7Unmappedresults_.hl7UnmappedresultsIsactive), true);
 		resultsJoin.on(hl7unmapResActive);
-		
-//		Predicate patRegRestriction = cbuilder.equal(cbuilder.upper(patJoin.get(PatientRegistration_.patientRegistrationAccountno)), cbuilder.upper(rootHl7ResultInbox.get(Hl7ResultInbox_.hl7ResultInboxAccountno)));
-//		patJoin.on(patRegRestriction);
 		
 		Predicate checkOrdBy = resultsJoin.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdbyDocid).in(list);
 		cqry.where(activeResult,reviewedResult,checkOrdBy,hl7unmapResActive);
@@ -243,6 +260,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 			query.setFirstResult((pageNo-1)*pageSize);	// Page no (offset)
 			query.setMaxResults(pageSize);		// Page size (No of results)
 		}
+		@SuppressWarnings("unchecked")
 		List<Object> obj=query.getResultList();
 		
 		List<Hl7ResultInbox> resultInboxList = new ArrayList<Hl7ResultInbox>();
@@ -381,22 +399,24 @@ public class LabResultsServiceImpl implements LabResultsService {
 
 	private List<Hl7UnmappedresultsBean> getHl7UnmappedResults(Integer hl7ResultInboxId) {
 		try{
-			
+
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Object> cq = builder.createQuery();
 			Root<Hl7Unmappedresults> root = cq.from(Hl7Unmappedresults.class);
 			cq.select(builder.construct(Hl7UnmappedresultsBean.class, root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdbyFirstname),
 					root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdbyLastname),
-					root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdDate)))
+					root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdDate),
+					root.get(Hl7Unmappedresults_.hl7UnmappedresultsTestdetailId)))
 					.where(builder.equal(root.get(Hl7Unmappedresults_.hl7UnmappedresultsFilewiseId),hl7ResultInboxId));
-			
+
 			List<Hl7UnmappedresultsBean> resData= new ArrayList<Hl7UnmappedresultsBean>(); 
 			List<Object> resultList = em.createQuery(cq).getResultList();
 			for(int i=0;i<resultList.size();i++){
 				Hl7UnmappedresultsBean hl7unmappedresults = (Hl7UnmappedresultsBean) resultList.get(i);
 				Hl7UnmappedresultsBean resultsData = new Hl7UnmappedresultsBean(hl7unmappedresults.getHl7UnmappedresultsOrdbyFirstname(),
 						hl7unmappedresults.getHl7UnmappedresultsOrdbyLastname(),
-						hl7unmappedresults.getHl7UnmappedresultsOrdDate());
+						hl7unmappedresults.getHl7UnmappedresultsOrdDate(),
+						hl7unmappedresults.getHl7UnmappedresultsTestDetailId());
 				resData.add(resultsData);
 			}
 			return resData;
@@ -406,7 +426,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 		} finally {
 			em.close();
 		}
-		
+
 	}
 
 	/**
@@ -472,13 +492,47 @@ public class LabResultsServiceImpl implements LabResultsService {
 	 */
 	@Override
 	public ResultDetails getPatientResultData(String hl7FileId) {
-		List<Hl7ResultInbox> resultInboxList = resultsRepository.findAll(LabResultsSpecification.checkHl7Id(hl7FileId));
+		List<Hl7ResultInbox> resultInboxList=checkHl7Id(hl7FileId);
 		ResultDetails patientResults = new ResultDetails();
 		setPatientResults(patientResults, resultInboxList,hl7FileId);		
 		return patientResults;
 	}
 
+	public List<Hl7ResultInbox> checkHl7Id(String hl7FileId) {
+
+		List<Hl7ResultInbox> beanList=new ArrayList<Hl7ResultInbox>();
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Hl7ResultInbox> root = cq.from(Hl7ResultInbox.class);
+		Predicate verifyId = root.get(Hl7ResultInbox_.hl7ResultInboxId).in(Integer.parseInt(hl7FileId));
+		Predicate verifyIsActive = builder.equal(root.get(Hl7ResultInbox_.hl7ResultInboxIsactive), true);	
+		cq.select(builder.construct(Hl7ResultInbox.class,root.get(Hl7ResultInbox_.hl7ResultInboxAccountno),
+				root.get(Hl7ResultInbox_.hl7ResultInboxId),
+				root.get(Hl7ResultInbox_.hl7ResultInboxFirstname),
+				root.get(Hl7ResultInbox_.hl7ResultInboxLastname),
+				root.get(Hl7ResultInbox_.hl7ResultInboxStatus),
+				root.get(Hl7ResultInbox_.hl7ResultInboxPlacedDate),
+				root.get(Hl7ResultInbox_.hl7ResultInboxReviewed),
+				root.get(Hl7ResultInbox_.hl7ResultInboxPrelimresultId),
+				root.get(Hl7ResultInbox_.hl7ResultInboxLabaccessionno),
+				root.get(Hl7ResultInbox_.hl7ResultInboxPlacerorderno),
+				root.get(Hl7ResultInbox_.hl7ResultInboxPlacergroupno),
+				root.get(Hl7ResultInbox_.hl7ResultInboxDocumentid),
+				root.get(Hl7ResultInbox_.hl7ResultInboxLabcompanyid)));
+		cq.where(verifyId,verifyIsActive);
+		cq.orderBy(builder.asc(root.get(Hl7ResultInbox_.hl7ResultInboxId)));
+
+		List<Object> inboxList=em.createQuery(cq).getResultList();
+		for(int i=0;i<inboxList.size();i++){
+			Hl7ResultInbox eachObj=(Hl7ResultInbox) inboxList.get(i);
+			beanList.add(eachObj);
+		}
+		return beanList;
+	}
+
+
 	private void setPatientResults(ResultDetails patientResults, List<Hl7ResultInbox> resultInboxList,String hl7FileId) {
+		
 		for (int i = 0; i < resultInboxList.size(); i++) {
 			Hl7ResultInbox resultInbox = resultInboxList.get(i);
 			patientResults.setPatientId(getPatientId(resultInbox.getHl7ResultInboxAccountno()));
@@ -493,49 +547,51 @@ public class LabResultsServiceImpl implements LabResultsService {
 			patientResults.setLabAccessionNo(Optional.fromNullable(Strings.emptyToNull("" + resultInbox.getHl7ResultInboxLabaccessionno())).or(""));
 			patientResults.setPlacerOrderNo(Optional.fromNullable(Strings.emptyToNull("" + resultInbox.getHl7ResultInboxPlacerorderno())).or(""));
 			patientResults.setPlacerGroupNo(Optional.fromNullable(Strings.emptyToNull("" + resultInbox.getHl7ResultInboxPlacergroupno())).or(""));
-			Hl7importCompanies importCompanies = resultInbox.getImportCompanies();
+			Hl7importCompanies importCompanies =hl7ImportCompaniesRepository.findOne(resultInbox.getHl7ResultInboxLabcompanyid());
 			patientResults.setLabCompany(Optional.fromNullable(Strings.emptyToNull("" + importCompanies.getLabcompanyname())).or(""));
 			patientResults.setLabCompanyId(Optional.fromNullable(Strings.emptyToNull("" + importCompanies.getId())).or("-1"));
-			List<Hl7Unmappedresults> unmappedResultsList = resultInbox.getHl7UnmappedResults();
+
+			List<Hl7UnmappedresultsBean> unmappedResultsList = gethl7UnmappedresultsDataList(hl7FileId,"",0);
 			List<UnmappedResults> unmappedList = new ArrayList<UnmappedResults>();
 			for (int j = 0; j < unmappedResultsList.size(); j++) {
 				UnmappedResults unmapped = new UnmappedResults();
-				Hl7Unmappedresults unmappedResults = unmappedResultsList.get(j);
+				Hl7UnmappedresultsBean unmappedResults = unmappedResultsList.get(j);
 				unmapped.setUnMappedId("" + unmappedResults.getHl7UnmappedresultsId());
 				unmapped.setDelOrdDate("" + unmappedResults.getHl7UnmappedresultsOrdDate());
 				unmapped.setOrderedDate(formatter.format(unmappedResults.getHl7UnmappedresultsOrdDate()));
-				unmapped.setPerformedDate(Optional.fromNullable(Strings.emptyToNull(formatter.format(unmappedResults.getHl7UnmappedresultsPerformeddate()))).or(formatter.format(unmappedResults.getHl7UnmappedresultsOrdDate())));
-				EmployeeProfile empProfile = unmappedResults.getEmpProfile();
+				if(unmappedResults.getHl7UnmappedresultsPerformeddate() !=null){
+					unmapped.setPerformedDate(formatter.format(unmappedResults.getHl7UnmappedresultsPerformeddate()));
+				}else{
+					unmapped.setPerformedDate(formatter.format(unmappedResults.getHl7UnmappedresultsOrdDate()));
+				}
+				String empProfileName=getEmpProfileFullName(String.valueOf(unmappedResults.getHl7UnmappedresultsOrdbyDocid()));
+
 				if( unmappedResults.getHl7UnmappedresultsOrdbyDocid() == -1) {
 					unmapped.setOrderBy(unmappedResults.getHl7UnmappedresultsOrdbyFirstname() + " " + unmappedResults.getHl7UnmappedresultsOrdbyLastname());	
 				} else {
-					unmapped.setOrderBy(empProfile.getEmpProfileFullname());
+					unmapped.setOrderBy(empProfileName);
 				}
 				unmapped.setTestName(unmappedResults.getHl7UnmappedresultsLabname());
 				unmapped.setResultXML(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsResult())).or(""));
-				unmapped.setTestDetailId(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsTestdetailId())).or("-1"));
-				if( unmappedResults.getLabEntriesUnmapped() != null ) {
-					LabEntries labEntries = unmappedResults.getLabEntriesUnmapped();
+				unmapped.setTestDetailId(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsTestDetailId())).or("-1"));
+				LabEntriesDetailsBean labEntries=getLabEntriesData(unmappedResults.getHl7UnmappedresultsTestDetailId());
+				if( labEntries!= null ) {
 					unmapped.setTestStatus(Optional.fromNullable(Strings.emptyToNull("" + labEntries.getLabEntriesTestStatus())).or("" + unmappedResults.getHl7UnmappedresultsTestStatus()));
 					unmapped.setPrelimStatus(Optional.fromNullable(Strings.emptyToNull("" + labEntries.getLabEntriesPrelimTestStatus())).or("0"));
 					unmapped.setFinalStatus(Optional.fromNullable(Strings.emptyToNull("" + labEntries.getLabEntriesConfirmTestStatus())).or("0"));
 					unmapped.setTestNotes(Optional.fromNullable(Strings.emptyToNull("" + labEntries.getLabEntriesResultNotes())).or("" + unmappedResults.getHl7UnmappedresultsTestnotes()));
 					if( labEntries.getLabEntriesRevOn() != null ) {
-						unmapped.setReviewedOn(formatter.format(labEntries.getLabEntriesRevOn()));
+						unmapped.setReviewedOn(Optional.fromNullable(Strings.emptyToNull("" + formatter.format(labEntries.getLabEntriesRevOn()))).or(""));
 						String reviewedBy=labEntries.getLabEntriesRevBy().toString();
-						List<EmployeeProfile> users = empProfileRepository.findAll(Specifications.where(LabResultsSpecification.getActiveUser()).and(LabResultsSpecification.verifyFullName("Demo")).and(LabResultsSpecification.verifyGroupId()).and(LabResultsSpecification.verifyDocId(reviewedBy)));
-						if(users.size()>0)
-						{
-							EmployeeProfile empData = users.get(0);
-							unmapped.setReviewedBy(empData.getEmpProfileFullname());
-						}
+						String empProfileFullName=getEmpProfileFullName(reviewedBy);
+						unmapped.setReviewedBy(empProfileFullName);
 					}
 					unmapped.setMapStatus(unmappedResults.getHl7UnmappedresultsMapStatus());
 					unmapped.setResultStatus(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsResultStatus())).or(""));
 					String collectionDate = "";
 					String specimenDate = "";
-					if( labEntries.getLabEntriesSepcimenId() != -1 ) {
-						Specimen specimen = labEntries.getSpecimen();
+					if( labEntries.getLabEntriesSepcimenId()!=null &&  labEntries.getLabEntriesSepcimenId() != -1 ) {
+						Specimen specimen = getSpecimenInfo(labEntries.getLabEntriesSepcimenId());
 						if( specimen != null ) {
 							unmapped.setSpecimenSource(Optional.fromNullable(Strings.emptyToNull("" + specimen.getSpecimenSource())).or(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsSrcOfSpecimen())).or("")));
 							unmapped.setSpecimenCondition(Optional.fromNullable(Strings.emptyToNull("" + specimen.getSpecimenCondition())).or(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsCondOfSpecimen())).or("")));
@@ -556,12 +612,9 @@ public class LabResultsServiceImpl implements LabResultsService {
 							unmapped.setSpecimenCollectedDate("");
 						}
 					}
-					if( labEntries.getFileDetails() != null ) {
-						List<FileDetails> fileDetailsList = labEntries.getFileDetails();
-						if( fileDetailsList.size() > 0 ) {
-							FileDetails fileDetails = fileDetailsList.get(0);
-							unmapped.setCategoryId("" + Optional.fromNullable(Strings.emptyToNull("" + fileDetails.getFiledetailsCategoryid())).or("-1"));
-						}
+					String fileDetailCategoryId=getFileDetailsList(labEntries.getLabEntriesTestdetailId());
+					if( fileDetailCategoryId != null ) {
+						unmapped.setCategoryId("" + Optional.fromNullable(Strings.emptyToNull(fileDetailCategoryId)).or("-1"));
 					} else {
 						unmapped.setCategoryId("-1");
 					}
@@ -582,13 +635,15 @@ public class LabResultsServiceImpl implements LabResultsService {
 					}
 					unmapped.setCategoryId("-1");
 				}
+				
 				unmapped.setSpecimenRejectReason(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsSpecimenRejectreason())).or(""));
 				unmapped.setResultsCopiesTo(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsResultscopiesto())).or(""));
 				unmapped.setRelevantClinicalInfo(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsRelevantClinicalInfo())).or(""));
 				unmapped.setPrelimTestId("" + unmappedResults.getHl7UnmappedresultsPrelimtestId());
 				unmapped.setLocCompDetId("" + unmappedResults.getHl7UnmappedresultsLabcompDetailid());
 				unmapped.setIsPDF(Optional.fromNullable(Strings.emptyToNull("" + unmappedResults.getHl7UnmappedresultsIspdf())).or("0"));
-				LabcompanyDetails compDetails = unmappedResults.getLabCompanyDetails();				
+				
+				LabcompanyDetails compDetails =labCompanyDetailsRepository.findOne(unmappedResults.getHl7UnmappedresultsLabcompDetailid());							
 				if( compDetails != null ) {
 					unmapped.setLabCompName(Optional.fromNullable(Strings.emptyToNull("" + compDetails.getLabcompanyDetailsLabname())).or(""));
 					unmapped.setLabCompDirector(Optional.fromNullable(Strings.emptyToNull("" + compDetails.getLabcompanyDetailsDirectorName())).or(""));
@@ -611,7 +666,166 @@ public class LabResultsServiceImpl implements LabResultsService {
 			patientResults.setDocumentId(Optional.fromNullable(Strings.emptyToNull("" + resultInbox.getHl7ResultInboxDocumentid())).or("-1"));
 			patientResults.setUnmappedResults(unmappedList);
 		}
+		
 	}
+
+	private String getFileDetailsList(Integer labEntriesTestdetailId) {
+
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();	
+			Root<FileDetails> root = cq.from(FileDetails.class);
+			cq.select(root.get(FileDetails_.filedetailsCategoryid));
+			Predicate fileEntityId =builder.equal(root.get(FileDetails_.filedetailsEntityid),labEntriesTestdetailId);
+			cq.where(fileEntityId);
+			String fileDetailsCategoryId = "" + em.createQuery(cq).getFirstResult();
+			return fileDetailsCategoryId;
+		} catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			em.close();
+		}
+	}
+
+	private Specimen getSpecimenInfo(Integer labEntriesSepcimenId) {
+
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();	
+			Root<Specimen> root = cq.from(Specimen.class);
+			cq.multiselect(builder.construct(Specimen.class, root.get(Specimen_.specimenSource)),
+					root.get(Specimen_.specimenCondition),
+					root.get(Specimen_.specimenDate));
+			Predicate specimenId =builder.equal(root.get(Specimen_.specimenId),labEntriesSepcimenId);
+			cq.where(specimenId);
+	
+			List<Object> specimenList=em.createQuery(cq).getResultList();
+			Specimen eachObj=new Specimen();
+			if(!specimenList.isEmpty())
+				eachObj=(Specimen) specimenList.get(0);
+			return eachObj;			
+		} catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			em.close();
+		}
+	}
+	
+	private LabEntriesDetailsBean getLabEntriesData(Integer hl7UnmappedresultsTestDetailId) {
+
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();	
+			Root<LabEntries> root = cq.from(LabEntries.class);
+			cq.multiselect(builder.construct(LabEntriesDetailsBean.class,root.get(LabEntries_.labEntriesTestStatus),
+					root.get(LabEntries_.labEntriesPrelimTestStatus),
+					root.get(LabEntries_.labEntriesConfirmTestStatus),
+					root.get(LabEntries_.labEntriesResultNotes),
+					root.get(LabEntries_.labEntriesRevOn),
+					root.get(LabEntries_.labEntriesRevBy),
+					root.get(LabEntries_.labEntriesSepcimenId),
+					root.get(LabEntries_.labEntriesTestdetailId)));
+			Predicate testDetailId =builder.equal(root.get(LabEntries_.labEntriesTestdetailId),hl7UnmappedresultsTestDetailId);
+			cq.where(testDetailId);
+			List<Object> resultList=em.createQuery(cq).getResultList();
+			LabEntriesDetailsBean eachObj=new LabEntriesDetailsBean();
+			if(!resultList.isEmpty())
+				eachObj=(LabEntriesDetailsBean) resultList.get(0);
+			return eachObj;
+		}  catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			em.close();
+		}
+	}
+
+
+	private String getEmpProfileFullName(String reviewedBy) {
+
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();		
+			Root<EmployeeProfile> root = cq.from(EmployeeProfile.class);
+			Predicate isActive = builder.equal(root.get(EmployeeProfile_.empProfileIsActive), true);	
+			Predicate reviewed = root.get(EmployeeProfile_.empProfileEmpid).in(reviewedBy);
+			cq.select(root.get(EmployeeProfile_.empProfileFullname));
+			cq.where(isActive,reviewed);
+			String empFullName = "" ;
+			List<Object> resultList = em.createQuery(cq).getResultList();
+			for (int i = 0; i < resultList.size(); i++) {
+				empFullName = resultList.get(i).toString();
+			}
+			return empFullName;
+		} catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			em.close();
+		}
+	}
+
+	public List<Hl7UnmappedresultsBean> gethl7UnmappedresultsDataList(
+			String hl7FileId,String testName,int value) {
+
+		List<Hl7UnmappedresultsBean> beanList=new ArrayList<Hl7UnmappedresultsBean>();
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery();
+		Root<Hl7Unmappedresults> root = cq.from(Hl7Unmappedresults.class);
+		Join<Hl7Unmappedresults, Hl7ResultInbox> unmappedJoin = root.join(Hl7Unmappedresults_.hl7ResultInbox, JoinType.INNER);
+		unmappedJoin.on(builder.equal(root.get(Hl7Unmappedresults_.hl7UnmappedresultsIsactive), true));	
+		Predicate verifyId = unmappedJoin.get(Hl7ResultInbox_.hl7ResultInboxId).in(Integer.parseInt(hl7FileId));
+		Predicate verifyIsActive = builder.equal(unmappedJoin.get(Hl7ResultInbox_.hl7ResultInboxIsactive), true);
+		Predicate nameCheck = builder.like(root.get(Hl7Unmappedresults_.hl7UnmappedresultsLabname), testName);
+		cq.select(builder.construct(Hl7UnmappedresultsBean.class, root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdbyFirstname),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdbyLastname),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdDate),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsTestdetailId),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsId),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsPerformeddate),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdbyDocid),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsLabname),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsResult),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsMapStatus),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsResultStatus),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsSpecimenCollectedDate),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsSrcOfSpecimen),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsCondOfSpecimen),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsTestStatus),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsPrelimStatus),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsFinalStatus),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsTestnotes),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsSpecimenRejectreason),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsResultscopiesto),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsRelevantClinicalInfo),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsPrelimtestId),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsLabcompDetailid),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsIspdf),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsExtTestcode),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsFilename),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsRequisitionId),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsIsfasting),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsCollectionVolume),
+				root.get(Hl7Unmappedresults_.hl7UnmappedresultsFilewiseId)
+				));
+        if(value==1){
+        	cq.where(verifyId,verifyIsActive,nameCheck);
+        }else{
+        	cq.where(verifyId,verifyIsActive);
+        }
+		cq.orderBy(builder.asc(root.get(Hl7Unmappedresults_.hl7UnmappedresultsOrdDate)),builder.asc(unmappedJoin.get(Hl7ResultInbox_.hl7ResultInboxId)),builder.asc(root.get(Hl7Unmappedresults_.hl7UnmappedresultsId)));
+
+		List<Object> inboxList=em.createQuery(cq).getResultList();
+		for(int i=0;i<inboxList.size();i++){
+			Hl7UnmappedresultsBean eachObj=(Hl7UnmappedresultsBean) inboxList.get(i);
+			beanList.add(eachObj);
+		}
+
+		return beanList;
+	}
+
 
 	/**
 	 * Method to get patient id
@@ -893,6 +1107,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 	 * @return
 	 */
 	private String getLabEncounterId(Integer matchedTestDetailId) {
+		String encounterId="";
 		EntityManager em = emf.createEntityManager();
 		try {
 			CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -900,7 +1115,10 @@ public class LabResultsServiceImpl implements LabResultsService {
 			Root<LabEntries> root = cq.from(LabEntries.class);
 			cq.select(root.get(LabEntries_.labEntriesEncounterId));
 			cq.where(builder.equal(root.get(LabEntries_.labEntriesTestdetailId),matchedTestDetailId));
-			String encounterId = "" + em.createQuery(cq).getSingleResult();
+			List<Object> objList = em.createQuery(cq).getResultList();
+			if(!objList.isEmpty()){
+				encounterId = (String) objList.get(0);
+			}
 			return encounterId;
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -917,18 +1135,18 @@ public class LabResultsServiceImpl implements LabResultsService {
 	 * @param hl7FileId
 	 */
 	private void updatePatientInfo(String patientId, Integer hl7FileId, Integer flag) {
-		List<PatientRegistration> patientDataList = registrationRepository.findAll(LabResultsSpecification.getPatientData(patientId));
-		if( patientDataList.size() > 0 ) {
-			PatientRegistration patientData = patientDataList.get(0);
-			String patientFName = patientData.getPatientRegistrationFirstName();
-			String patientLName = patientData.getPatientRegistrationLastName();
-			String patientAccNo = patientData.getPatientRegistrationAccountno();
+		
+		PatientRegistrationBean patientDataList=getPatientDetails(patientId);
+		if(patientDataList!=null ) {
+			String patientFName = patientDataList.getPatientRegistrationFirstName();
+			String patientLName = patientDataList.getPatientRegistrationLastName();
+			String patientAccNo = patientDataList.getPatientRegistrationAccountno();
 			List<Hl7ResultInbox> resultsList = resultsRepository.findAll(LabResultsSpecification.getResultsData(hl7FileId));
 			for( Hl7ResultInbox patientResultData : resultsList ) {
 				patientResultData.setHl7ResultInboxAccountno(patientAccNo);
 				patientResultData.setHl7ResultInboxFirstname(patientFName);
 				patientResultData.setHl7ResultInboxLastname(patientLName);
-				patientResultData.setHl7ResultInboxDob(patientData.getPatientRegistrationDob());
+				patientResultData.setHl7ResultInboxDob(patientDataList.getPatientRegisDob());
 				if( flag == 0 ) {
 					patientResultData.setHl7ResultInboxStatus(1);
 				} else if( flag == 1 ) {
@@ -936,6 +1154,32 @@ public class LabResultsServiceImpl implements LabResultsService {
 				}
 				resultsRepository.saveAndFlush(patientResultData);
 			}
+		}
+	}
+	
+	public PatientRegistrationBean getPatientDetails(String patientId) {
+		try {
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<PatientRegistration> root = cq.from(PatientRegistration.class);
+			Predicate patientIdVal = builder.equal(root.get(PatientRegistration_.patientRegistrationId), patientId);
+
+			cq.multiselect(builder.construct(PatientRegistrationBean.class, root.get(PatientRegistration_.patientRegistrationFirstName),
+					root.get(PatientRegistration_.patientRegistrationLastName),
+					root.get(PatientRegistration_.patientRegistrationAccountno),
+					root.get(PatientRegistration_.patientRegistrationDob)));		
+			cq.where(patientIdVal);
+
+			List<Object> patientRegistraionList=em.createQuery(cq).getResultList();
+			PatientRegistrationBean eachObj=new PatientRegistrationBean();
+			if(!patientRegistraionList.isEmpty())
+				eachObj=(PatientRegistrationBean) patientRegistraionList.get(0);
+			return eachObj;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}finally{
+			em.close();
 		}
 	}
 
@@ -953,7 +1197,10 @@ public class LabResultsServiceImpl implements LabResultsService {
 			Root<Hl7ResultInbox> root = cq.from(Hl7ResultInbox.class);
 			cq.select(root.get(Hl7ResultInbox_.hl7ResultInboxDocumentid));
 			cq.where(builder.equal(root.get(Hl7ResultInbox_.hl7ResultInboxId),hl7FileId));
-			documentId = Integer.parseInt("" + em.createQuery(cq).getSingleResult());
+			List<Object> objList = em.createQuery(cq).getResultList();
+			if(!objList.isEmpty()){
+				documentId = (int) objList.get(0);
+			}
 			return documentId;
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -977,7 +1224,10 @@ public class LabResultsServiceImpl implements LabResultsService {
 			Root<Hl7importCompanies> root = cq.from(Hl7importCompanies.class);
 			cq.select(root.get(Hl7importCompanies_.labcompanyname));
 			cq.where(builder.equal(root.get(Hl7importCompanies_.id),labCompId));
-			labCompanyName = "" + em.createQuery(cq).getSingleResult();
+			List<Object> objList = em.createQuery(cq).getResultList();
+			if(!objList.isEmpty()){
+				labCompanyName = (String) objList.get(0);
+			}
 			if( labCompanyName.equals("") || labCompanyName.equals(null) ) {
 				labCompanyName = "Labcorp";
 			}
@@ -1004,7 +1254,10 @@ public class LabResultsServiceImpl implements LabResultsService {
 			Root<Hl7ResultInbox> root = cq.from(Hl7ResultInbox.class);
 			cq.select(root.get(Hl7ResultInbox_.hl7ResultInboxLabcompanyid));
 			cq.where(builder.equal(root.get(Hl7ResultInbox_.hl7ResultInboxId),hl7FileId));
-			labCompanyId = Integer.parseInt("" + em.createQuery(cq).getSingleResult());
+			List<Object> objList = em.createQuery(cq).getResultList();
+			if(!objList.isEmpty()){
+				labCompanyId = (int)objList.get(0);
+			}
 			return labCompanyId;
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -1019,6 +1272,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 	 * @return
 	 */
 	private String getPatientChart() {
+		String chartId="";
 		EntityManager em = emf.createEntityManager();
 		try {
 			CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -1026,7 +1280,11 @@ public class LabResultsServiceImpl implements LabResultsService {
 			Root<PrimarykeyGenerator> root = cq.from(PrimarykeyGenerator.class);
 			cq.select(root.get(PrimarykeyGenerator_.primarykey_generator_rowcount));
 			cq.where(builder.equal(root.get(PrimarykeyGenerator_.primarykey_generator_tablename),"chart"));
-			return "" + em.createQuery(cq).getSingleResult();
+			List<Object> objList = em.createQuery(cq).getResultList();
+			if(!objList.isEmpty()){
+				chartId = String.valueOf(objList.get(0));
+			}
+			return chartId;
 		} catch(Exception e) {
 			e.printStackTrace();
 			return null;
@@ -1034,6 +1292,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 			em.close();
 		}
 	}
+
 
 	/**
 	 * Method to get chart id based on patient id
@@ -1050,9 +1309,9 @@ public class LabResultsServiceImpl implements LabResultsService {
 			Root<Chart> root = cq.from(Chart.class);
 			cq.select(root.get(Chart_.chartId));
 			cq.where(builder.equal(root.get(Chart_.chartPatientid),patientId));
-			chartId = "" + em.createQuery(cq).getSingleResult();
-			if( chartId.equals(null)) {
-				chartId = "-1";
+			List<Object> objList = em.createQuery(cq).getResultList();
+			if(!objList.isEmpty()){
+				chartId = String.valueOf(objList.get(0));
 			}
 			return chartId;
 		} catch(Exception e) {
@@ -1171,7 +1430,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 		if( HL7IdList.startsWith(",")) {
 			HL7IdList = HL7IdList.substring(1);
 		}
-		List<Hl7ResultInbox> resultInboxList = resultsRepository.findAll(LabResultsSpecification.getUnmappedResults(HL7IdList));
+		List<Hl7ResultInbox> resultInboxList=checkHl7Id(hl7FileId);
 		ResultDetails patientResults = new ResultDetails();
 		setPatientResults(patientResults, resultInboxList,hl7FileId);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.LABINTERFACE,LogActionType.VIEW, -1,Log_Outcome.SUCCESS,"Success in getting the previous orders for a result" , -1,
@@ -1440,6 +1699,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 	}
 
 	private String getIsPdf(String hl7FileId) {
+		String isPdf="";
 		EntityManager em = emf.createEntityManager();
 		try {
 			CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -1447,7 +1707,11 @@ public class LabResultsServiceImpl implements LabResultsService {
 			Root<Hl7Unmappedresults> root = cq.from(Hl7Unmappedresults.class);
 			cq.select(root.get(Hl7Unmappedresults_.hl7UnmappedresultsIspdf));
 			cq.where(builder.equal(root.get(Hl7Unmappedresults_.hl7UnmappedresultsId), hl7FileId));
-			return "" + em.createQuery(cq).getSingleResult();
+			List<Object> objList = em.createQuery(cq).getResultList();
+			if(!objList.isEmpty()){
+				isPdf = String.valueOf(objList.get(0));
+			}	
+			return isPdf;
 		} catch(Exception e) {
 			e.printStackTrace();
 			return null;
@@ -1455,7 +1719,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 			em.close();
 		}
 	}
-
+	
 	@Override
 	public List<LabEntries> getOrderedList(String orderedOn, String patientId) {
 		orderedOn = parseDate(orderedOn);
@@ -1501,14 +1765,19 @@ public class LabResultsServiceImpl implements LabResultsService {
 	}
 
 	private int getInboxStatus(int hl7FileId) {
+		int isPdf=-1;
 		EntityManager em = emf.createEntityManager();
 		try {
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Object> cq = builder.createQuery();
 			Root<Hl7ResultInbox> root = cq.from(Hl7ResultInbox.class);
 			cq.select(root.get(Hl7ResultInbox_.hl7ResultInboxStatus));
-			cq.where(builder.equal(root.get(Hl7ResultInbox_.hl7ResultInboxId), hl7FileId));
-			return Integer.parseInt("" + em.createQuery(cq).getSingleResult());
+			cq.where(builder.equal(root.get(Hl7ResultInbox_.hl7ResultInboxId), hl7FileId));				
+			List<Object> objList = em.createQuery(cq).getResultList();
+			if(!objList.isEmpty()){
+				isPdf = (int)objList.get(0);
+			}	
+			return isPdf;
 		} catch(Exception e) {
 			e.printStackTrace();
 			return -1;
@@ -1594,6 +1863,7 @@ public class LabResultsServiceImpl implements LabResultsService {
 	}
 
 	private String getFileName(String documentId) {
+		String fileName="";
 		EntityManager em = emf.createEntityManager();
 		try {
 			CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -1601,7 +1871,11 @@ public class LabResultsServiceImpl implements LabResultsService {
 			Root<Hl7DocsInbox> root = cq.from(Hl7DocsInbox.class);
 			cq.select(root.get(Hl7DocsInbox_.hl7DocsInboxFilename));
 			cq.where(builder.equal(root.get(Hl7DocsInbox_.hl7DocsInboxId), Integer.parseInt(documentId)));
-			return "" + em.createQuery(cq).getSingleResult();
+			List<Object> objList = em.createQuery(cq).getResultList();
+			if(!objList.isEmpty()){
+				fileName = (String)objList.get(0);
+			}	
+			return fileName;
 		} catch(Exception e) {
 			e.printStackTrace();
 			return null;
