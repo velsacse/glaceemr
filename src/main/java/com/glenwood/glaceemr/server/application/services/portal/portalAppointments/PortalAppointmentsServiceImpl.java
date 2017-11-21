@@ -31,6 +31,7 @@ import com.glenwood.glaceemr.server.application.models.AppReferenceValues;
 import com.glenwood.glaceemr.server.application.models.AppReferenceValues_;
 import com.glenwood.glaceemr.server.application.models.AppointmentDetailsBean;
 import com.glenwood.glaceemr.server.application.models.ApptRequestBean;
+import com.glenwood.glaceemr.server.application.models.BookingConfig;
 import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
@@ -57,6 +58,7 @@ import com.glenwood.glaceemr.server.application.models.SchedulerTemplateDetail;
 import com.glenwood.glaceemr.server.application.models.SchedulerTemplateTimeMapping;
 import com.glenwood.glaceemr.server.application.models.Workflow;
 import com.glenwood.glaceemr.server.application.models.Workflow_;
+import com.glenwood.glaceemr.server.application.repositories.BookingConfigRepository;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
 import com.glenwood.glaceemr.server.application.repositories.AppReferenceValuesRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientPortalAlertConfigRespository;
@@ -140,6 +142,9 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 	
 	@Autowired
 	SessionMap sessionMap;
+	
+	@Autowired
+	BookingConfigRepository BookingConfigRepository;
 
 	@Override
 	public List<SchedulerAppointment> getPatientFutureAppointmentsList(int patientId, int pageOffset, int pageIndex) {
@@ -216,6 +221,7 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 
 			e.printStackTrace();
 		}
+		
 		
 		Date defaultDate=dateFormat.parse("1900/01/01");
 		
@@ -839,6 +845,11 @@ public Integer getLatestPortalApptRequestId(int patientId) {
 			AuditTrailEnumConstants.LogUserType.PATIENT_LOGIN,"Patient with id "+patientId+" requested latest portal appointment request Id","");
    
 	return apptID;
+}
+
+public List<BookingConfig> getBookingConfigDetails() {
+	List<BookingConfig> BookingConfigDetailsList=BookingConfigRepository.findAll();
+	return BookingConfigDetailsList;
 }
 
 

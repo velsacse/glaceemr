@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.ApptRequestBean;
+import com.glenwood.glaceemr.server.application.models.BookingConfig;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointment;
 import com.glenwood.glaceemr.server.application.models.SchedulerApptBookingBean;
 import com.glenwood.glaceemr.server.application.services.portal.portalAppointments.PortalAppointmentsService;
@@ -72,6 +73,7 @@ public class PortalAppointmentsController {
 			return responseBean;
 		}
 	}
+	
 	
 	/**
 	 * Appointment list of a patient appointments.
@@ -389,6 +391,18 @@ public class PortalAppointmentsController {
 			return responseBean;
 		}
 		
+	}
+	
+	@RequestMapping(value="/Appointment/getBookingConfiguration",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getBookingConfiguration(){
+
+		List<BookingConfig> BookingconfigDetailsResultList=portalAppointmentsService.getBookingConfigDetails();
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		emrResponseBean.setData(BookingconfigDetailsResultList);
+		//auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting Scheduler resource categories.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+
+		return emrResponseBean;
 	}
 
 	

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.glenwood.glaceemr.server.application.models.AlertEvent;
 import com.glenwood.glaceemr.server.application.models.AppointmentDetailsBean;
 import com.glenwood.glaceemr.server.application.models.ApptRequestBean;
+import com.glenwood.glaceemr.server.application.models.BookingConfig;
 import com.glenwood.glaceemr.server.application.models.PortalApptRequest;
 import com.glenwood.glaceemr.server.application.models.PortalSchedulerAppointmentBean;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointment;
@@ -51,4 +52,7 @@ public interface PortalAppointmentsService {
 	List<SchedulerAppointment> getPatientTotalAppointmentsList(int patientId, int pageOffset, int pageIndex);
 
 	List<PortalSchedulerAppointmentBean> getPatientAppointments(int patientId, int pageOffset, int pageIndex, String apptType) throws ParseException, JsonProcessingException;	
+
+	List<BookingConfig> getBookingConfigDetails();
+	
 }
