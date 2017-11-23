@@ -958,9 +958,6 @@ public class Prescription implements Serializable{
 	@Column(name="doc_presc_rxnorm_code")
 	private String docPrescRxnormCode;
 
-	@Column(name="doc_presc_rxnorm_cd")
-	private String docPrescRxnormCD;
-	
 	@Column(name="doc_presc_base_dose")
 	private String docPrescBaseDose;
 
@@ -1038,15 +1035,6 @@ public class Prescription implements Serializable{
 
 	public void setModifiedDose(ModifiedDose modifiedDose) {
 		this.modifiedDose = modifiedDose;
-	}
-
-	
-	public String getDocPrescRxnormCD() {
-		return docPrescRxnormCD;
-	}
-
-	public void setDocPrescRxnormCD(String docPrescRxnormCD) {
-		this.docPrescRxnormCD = docPrescRxnormCD;
 	}
 
 	public LeafPatient getLeafPatient() {
