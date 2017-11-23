@@ -1300,8 +1300,10 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 				}
 			}
 			}
+			headerRowCount=headerRowCount+1;
 			// Content of PDF
 			String contentHTML=URLDecoder.decode(databean.getHtmlData(),"UTF-8");
+			contentHTML = contentHTML.replaceAll("[^\\x00-\\x7F^\\xB0]", "");
 
 			//Filepath of PDF file
 			String fileName=sharedFolderPath+"/"+databean.getFileName();
