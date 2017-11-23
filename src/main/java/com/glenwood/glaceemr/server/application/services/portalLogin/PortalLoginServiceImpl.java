@@ -177,8 +177,8 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 
 		patientDetails=patientRegistrationRepository.saveAndFlush(patientDetails);//creating an entry in patient_registration table
 		
-		/*Execute testtableh213() db function to update the patient_registration max id in h213 table*/
-		executeTesttableh213();
+		/*Execute testtableprimarykey_generator() db function to update the patient_registration max id in h213 table*/
+		executeTesttablePrimaryKeyGenerator();
 		
 		Chart patientChart=new Chart();
 		
@@ -355,12 +355,12 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 	}
 	
 	
-	public void executeTesttableh213(){
+	public void executeTesttablePrimaryKeyGenerator(){
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<PrimarykeyGenerator> root = cq.from(PrimarykeyGenerator.class);
-		cq.select(builder.function("testtableh213", String.class));
+		cq.select(builder.function("testtableprimarykey_generator", String.class));
 		
 		em.createQuery(cq).getResultList();
 	}
@@ -368,7 +368,7 @@ public class PortalLoginServiceImpl implements PortalLoginService {
 	@Override
 	@Transactional
 	public PortalRegistrationResponse registerExistingUserForPortal(PortalPatientRegistrationBean registrationBean, String practiceId) throws IOException, JSONException {
-		
+		 
 		PortalRegistrationResponse regResponse=new PortalRegistrationResponse();
 		PatientRegistration patientDetails;
 		

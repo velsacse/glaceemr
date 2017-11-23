@@ -16,7 +16,6 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
             registerFunction("depositbalance",  new StandardSQLFunction("depositbalance", StandardBasicTypes.DOUBLE));
             registerFunction("insbalance",  new StandardSQLFunction("insbalance", StandardBasicTypes.DOUBLE));
             registerFunction("familybalance",  new StandardSQLFunction("familybalance", StandardBasicTypes.STRING));
-            registerFunction("testtableh213",  new StandardSQLFunction("testtableh213", StandardBasicTypes.STRING));
             registerFunction("chart_fn",  new StandardSQLFunction("chart_fn", StandardBasicTypes.STRING));
             registerFunction("insert_fn",  new StandardSQLFunction("insert_fn", StandardBasicTypes.STRING));
             registerFunction("getapptpara",  new StandardSQLFunction("getapptpara", StandardBasicTypes.STRING));
@@ -27,5 +26,6 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
             registerFunction("age",new StandardSQLFunction("age",StandardBasicTypes.STRING));
             registerFunction("date_part",new StandardSQLFunction("date_part",StandardBasicTypes.INTEGER));
             registerFunction("format_name",new StandardSQLFunction("format_name",StandardBasicTypes.STRING));
+            registerFunction("testtableprimarykey_generator",  new StandardSQLFunction("testtableprimarykey_generator", StandardBasicTypes.STRING));
         }
 }

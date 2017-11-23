@@ -733,7 +733,7 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 		schApptParam.setSchApptParameterId(getNewSchApptParameterId());
 		schedulerAppointmentParameterRepository.saveAndFlush(schApptParam);
 		
-		executeTesttableh213();
+		executeTesttablePrimaryKeyGenerator();
 				
 		
 		/*Creating an alert for the booked appointment*/
@@ -799,12 +799,12 @@ public class PortalAppointmentsServiceImpl implements PortalAppointmentsService{
 	}
 	
 	
-public void executeTesttableh213(){
+public void executeTesttablePrimaryKeyGenerator(){
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<PrimarykeyGenerator> root = cq.from(PrimarykeyGenerator.class);
-		cq.select(builder.function("testtableh213", String.class));
+		cq.select(builder.function("testtableprimarykey_generator", String.class));
 		
 		em.createQuery(cq).getResultList();
 	}

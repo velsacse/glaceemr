@@ -377,7 +377,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 		schApptParam.setSchApptParameterId(getNewSchApptParameterId());
 		schedulerAppointmentParameterRepository.saveAndFlush(schApptParam);
 
-		executeTesttableh213();
+		executeTesttablePrimaryKeyGenerator();
 
 		return appointment;
 	}
@@ -392,11 +392,11 @@ public class SchedulerServiceImpl implements SchedulerService{
 		return Integer.parseInt(obj.get(0).toString());
 	}
 
-	public void executeTesttableh213(){
+	public void executeTesttablePrimaryKeyGenerator(){
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object> cq = builder.createQuery();
 		Root<PrimarykeyGenerator> root = cq.from(PrimarykeyGenerator.class);
-		cq.select(builder.function("testtableh213", String.class));
+		cq.select(builder.function("testtableprimarykey_generator", String.class));
 		em.createQuery(cq).getResultList();
 	}
 
