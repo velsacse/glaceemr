@@ -406,23 +406,19 @@ Root<Encounter> root = cq.from(Encounter.class);
         CriteriaQuery<Object> cq = builder.createQuery();
         
         Root<Prescription> root = cq.from(Prescription.class);
-        
-        Join<Prescription, NdcPkgProduct> prescNdcJoin=root.join(Prescription_.ndcPkgProduct,JoinType.INNER);
-        Join<NdcPkgProduct, XrefGenproductSynRxnorm> ndcNormJoin=prescNdcJoin.join(NdcPkgProduct_.xrefGenproductSynRxnorm,JoinType.INNER);
         Join<Prescription, MedStatus> prescStatusJoin=root.join(Prescription_.medstatus,JoinType.INNER);
-        ndcNormJoin.on(ndcNormJoin.get(XrefGenproductSynRxnorm_.rxcui).in(codeList));
         
-        Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
         Predicate patId=builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
         Predicate status=builder.notEqual(root.get(Prescription_.docPrescStatus),13);
-       
+        Predicate byRXNorm=builder.or(root.get(Prescription_.docPrescRxnormCode).in(codeList),root.get(Prescription_.docPrescRxnormCD).in(codeList));
+        Expression<String> rxNormcode = builder.<String>selectCase().when(root.get(Prescription_.docPrescRxnormCode).in(codeList),root.get(Prescription_.docPrescRxnormCode)).otherwise(root.get(Prescription_.docPrescRxnormCD));
         cq.select(builder.construct(MedicationQDM.class, root.get(Prescription_.rxname),
                 root.get(Prescription_.rxstrength),
                 root.get(Prescription_.rxform),
                 root.get(Prescription_.docPrescRoute),
                 prescStatusJoin.get(MedStatus_.medStatusName),
                 root.get(Prescription_.rxfreq),
-                ndcNormJoin.get(XrefGenproductSynRxnorm_.rxcui),
+                rxNormcode,
                 builder.selectCase().when(builder.notEqual(builder.coalesce(root.get(Prescription_.noofrefills), ""), ""), root.get(Prescription_.noofrefills)).otherwise("0"),
                 builder.selectCase().when(builder.notEqual(builder.coalesce(root.get(Prescription_.noofdays), ""), ""), root.get(Prescription_.noofdays)).otherwise("0"),
                 root.get(Prescription_.docPrescOrderedDate),
@@ -435,10 +431,10 @@ Root<Encounter> root = cq.from(Encounter.class);
             cal.add(Calendar.YEAR, range);
             Date startDate = cal.getTime();
             Predicate dateRange=builder.between(root.get(Prescription_.docPrescOrderedDate),startDate , endDate);
-           	cq.where(builder.and(patId,dateRange,status));
+           	cq.where(builder.and(patId,dateRange,status,byRXNorm));
         }
         else{
-            cq.where(builder.and(patId,status));
+            cq.where(builder.and(patId,status,byRXNorm));
         }
         
         cq.distinct(true);
@@ -467,7 +463,7 @@ Root<Encounter> root = cq.from(Encounter.class);
             eachMedObj.setRefills(Integer.parseInt(eachData.getRefills()));
             eachMedObj.setRoute(eachData.getRoute());
             eachMedObj.setOrderDate(eachData.getOrderDate());
-            
+            if(eachMedObj.getStartDate()!=null)
             medicationObj.add(eachMedObj);
             
         }
@@ -489,23 +485,20 @@ Root<Encounter> root = cq.from(Encounter.class);
 		CriteriaQuery<Object> cq = builder.createQuery();
 
 		Root<Prescription> root = cq.from(Prescription.class);
-
-		Join<Prescription, NdcPkgProduct> prescNdcJoin=root.join(Prescription_.ndcPkgProduct,JoinType.INNER);
-		Join<NdcPkgProduct, XrefGenproductSynRxnorm> ndcNormJoin=prescNdcJoin.join(NdcPkgProduct_.xrefGenproductSynRxnorm,JoinType.INNER);
-		Join<Prescription, MedStatus> prescStatusJoin=root.join(Prescription_.medstatus,JoinType.INNER);
-		ndcNormJoin.on(ndcNormJoin.get(XrefGenproductSynRxnorm_.rxcui).in(codeList));
+        Join<Prescription, MedStatus> prescStatusJoin=root.join(Prescription_.medstatus,JoinType.INNER);
 		
-		Predicate byProvider=builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
 		Predicate patId=builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
 		Predicate status=builder.notEqual(root.get(Prescription_.docPrescStatus),13);
-//		Predicate activeMed=builder.equal(root.get(Prescription_.docPrescIsActive), true);
+		Predicate byRXNorm=builder.or(root.get(Prescription_.docPrescRxnormCode).in(codeList),root.get(Prescription_.docPrescRxnormCD).in(codeList));
+        Expression<String> rxNormcode = builder.<String>selectCase().when(root.get(Prescription_.docPrescRxnormCode).in(codeList),root.get(Prescription_.docPrescRxnormCode)).otherwise(root.get(Prescription_.docPrescRxnormCD));
+        
 		cq.select(builder.construct(MedicationQDM.class, root.get(Prescription_.rxname),
 				root.get(Prescription_.rxstrength),
 				root.get(Prescription_.rxform),
 				root.get(Prescription_.docPrescRoute),
 				prescStatusJoin.get(MedStatus_.medStatusName),
 				root.get(Prescription_.rxfreq),
-				ndcNormJoin.get(XrefGenproductSynRxnorm_.rxcui),
+				rxNormcode,
 				builder.selectCase().when(builder.notEqual(builder.coalesce(root.get(Prescription_.noofrefills), ""), ""), root.get(Prescription_.noofrefills)).otherwise("0"),
 				builder.selectCase().when(builder.notEqual(builder.coalesce(root.get(Prescription_.noofdays), ""), ""), root.get(Prescription_.noofdays)).otherwise("0"),
 				root.get(Prescription_.docPrescOrderedDate),
@@ -518,10 +511,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 			cal.add(Calendar.YEAR, range);
 			Date startDate = cal.getTime();
 			Predicate dateRange=builder.or(builder.equal(root.get(Prescription_.docPrescIsActive), true),builder.between(root.get(Prescription_.docPrescInactivatedOn),startDate , endDate));
-			cq.where(builder.and(patId,dateRange,status));	
+			cq.where(builder.and(patId,dateRange,status,byRXNorm));	
 		}
 		else{
-			cq.where(builder.and(patId,status));
+			cq.where(builder.and(patId,status,byRXNorm));
 		}
 
 		cq.distinct(true);
@@ -550,6 +543,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			eachMedObj.setRefills(Integer.parseInt(eachData.getRefills()));
 			eachMedObj.setRoute(eachData.getRoute());
 
+			if(eachMedObj.getStartDate()!=null)
 			medicationObj.add(eachMedObj);
 
 		}
@@ -838,7 +832,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		cq.select(builder.construct(ReferralQDM.class,selections));
 		
-		Predicate predicateByPatientId=builder.equal(rooth413.get(ReferralDetails_.referral_details_patientid),patientId);
+		Predicate predicateByPatientId=builder.equal(rooth413.get(ReferralDetails_.referral_details_myalert),patientId);
 		Predicate byProvider=builder.equal(rooth413.get(ReferralDetails_.referralOrderBy), providerId);
 		Predicate byDateRange = builder.between(rooth413.get(ReferralDetails_.referralOrderOn), startDate, endDate);
 		
@@ -869,7 +863,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		Root<LabDescription> rootlabDescription= cq.from(LabDescription.class);
 		Join<LabDescription, LabEntries> joinLabdescLabentries=rootlabDescription.join(LabDescription_.labEntriesTable,JoinType.INNER);
-		Join<LabEntries, Encounter> EncLabJoin = joinLabdescLabentries.join(LabEntries_.encounter, JoinType.INNER);
 		Join<LabEntries, Chart> joinLabentriesChart=joinLabdescLabentries.join(LabEntries_.chart,JoinType.INNER);
 		
 		Predicate predicateByPatientId=builder.equal(joinLabentriesChart.get(Chart_.chartPatientid),patientId);
@@ -885,7 +878,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 				));
 		Predicate predicateBytestStatus=builder.greaterThan(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),2);
 		Predicate predicateBytestStatus1=builder.notEqual(joinLabdescLabentries.get(LabEntries_.labEntriesTestStatus),7);
-		Predicate byProvider=builder.equal(EncLabJoin.get(Encounter_.encounter_service_doctor), providerId);
 //		Predicate byDateRange = builder.between(joinLabdescLabentries.get(LabEntries_.labEntriesPerfOn), startDate, endDate);
 		
 		cq.where(predicateBytestStatus,predicateBytestStatus1);
@@ -1142,7 +1134,6 @@ Root<Encounter> root = cq.from(Encounter.class);
     }*/
 	
 	public List<Procedure> getMedicationsReviewed(EntityManager em,Boolean considerProvider,int providerId,int patientId,Date date1,Date date2,ArrayList<Integer> officeVisitEncounters){
-		
 		List<Procedure> reviewedVisits = new ArrayList<Procedure>();
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
