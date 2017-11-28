@@ -1904,7 +1904,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 			if(alertStatus != 0 && alertStatus == 1){
 				joinae = root.join(AlertCategory_.alertEventCategoryId,JoinType.INNER);
 			}
-			else if(alertStatus != 0)
+			else if(alertStatus != 0)	
 			{
 				joinarchive = root.join(AlertCategory_.alertArchiveCategoryId,JoinType.INNER);
 			}
@@ -2347,7 +2347,7 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 		read = joinae.join(AlertEvent_.empProfileTableReadBy,JoinType.LEFT);
 		modified = joinae.join(AlertEvent_.empProfileTableModifiedBy,JoinType.LEFT);
 		patReg = joinae.join(AlertEvent_.patientRegistration,JoinType.LEFT);
-		pharmDetails = joinae.join(AlertEvent_.pharmDetails,JoinType.LEFT);
+		//pharmDetails = joinae.join(AlertEvent_.pharmDetails,JoinType.LEFT);
 		joinae.on(joinPredList.toArray(new Predicate[] {}));
 		
 		cq.multiselect(builder.construct(AlertArchiveBean.class, builder.coalesce(room.get(Room_.roomName), builder.literal("-")),
