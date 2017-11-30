@@ -36,6 +36,8 @@ import com.glenwood.glaceemr.server.application.models.PortalPatientPaymentsSumm
 import com.glenwood.glaceemr.server.application.models.PortalSchedulerAppointmentBean;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.SavePatientDemographicsBean;
+import com.glenwood.glaceemr.server.application.models.SecPassUpdateBean;
+import com.glenwood.glaceemr.server.application.models.SecQuesUpdateBean;
 import com.glenwood.glaceemr.server.application.repositories.AlertEventRepository;
 import com.glenwood.glaceemr.server.application.repositories.BillingConfigTableRepository;
 import com.glenwood.glaceemr.server.application.repositories.BillinglookupRepository;
@@ -63,6 +65,7 @@ import com.glenwood.glaceemr.server.application.services.portalLogin.PortalLogin
 import com.glenwood.glaceemr.server.application.specifications.InsuranceSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalLoginSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalSettingsSpecification;
+import com.glenwood.glaceemr.server.utils.MD5;
 import com.glenwood.glaceemr.server.utils.SessionMap;
 
 
@@ -554,6 +557,80 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 		insFilterBean.setTotalInsurancesCount(insCompAddrRepository.count(InsuranceSpecification.getInsurancesBy(insFilterBean)));
 				
 		return insFilterBean;
+	}
+	
+	@Override
+	public InitialSettings getSharedFolderPath() {
+		InitialSettings settings = initialSettingsRepository.findOne(PortalSettingsSpecification.getSharedFolderPath());
+		return settings;
+	}
+	
+	@Override
+	public SecQuesResponseBean saveSecurityQuesChanges(SecQuesUpdateBean UpdateH809Bean){
+		
+		//H809 H809Bean = new H809();
+		
+		PatientPortalUser H809Bean=h809Repository.findOne(PortalLoginSpecification.patientById(String.valueOf(UpdateH809Bean.getPatientId())));
+		
+		H809Bean.setpatient_portal_user_patient_id(UpdateH809Bean.getPatientId());
+		H809Bean.setSecurityQuestion1(UpdateH809Bean.getSecurityQuestion1());
+		H809Bean.setSecurityQuestion2(UpdateH809Bean.getSecurityQuestion2());
+		H809Bean.setSecurityQuestion3(UpdateH809Bean.getSecurityQuestion3());
+		H809Bean.setSecurityAnswer1(UpdateH809Bean.getSecurityAnswer1());
+		H809Bean.setSecurityAnswer2(UpdateH809Bean.getSecurityAnswer2());
+		H809Bean.setSecurityAnswer3(UpdateH809Bean.getSecurityAnswer3());
+		
+		
+		h809Repository.saveAndFlush(H809Bean);
+		
+		SecQuesResponseBean SecQuesResponse = new SecQuesResponseBean();
+		SecQuesResponse.setSuccess(true);
+		SecQuesResponse.setMessage("Updated Security Questions Successfully");
+		
+		return SecQuesResponse;
+		
+	}
+	
+	public SecPassResponseBean updatepassword(SecPassUpdateBean secPassBean){
+		
+		PatientPortalUser H809Bean=h809Repository.findOne(PortalLoginSpecification.patientById(String.valueOf(secPassBean.getPatientId())));
+		
+		SecPassResponseBean secPassResponse = new SecPassResponseBean();
+		
+		if(!H809Bean.getpatient_portal_user_password().equals(secPassBean.getOldPassword())){
+			secPassResponse.setSuccess(false);
+			secPassResponse.setMessage("Incorrect Old Password");
+		}else{
+			H809Bean.setpatient_portal_user_password(secPassBean.getNewPassword());
+			H809Bean.setpatient_portal_userToken("-1");
+			MD5 md5 = new MD5();
+			md5.setHashString(secPassBean.getNewPassword());
+			String encryptedPassword=md5.getHashString();
+			H809Bean.setpatient_portal_user_password_hash(encryptedPassword);
+			h809Repository.saveAndFlush(H809Bean);
+			
+			secPassResponse.setSuccess(true);
+			secPassResponse.setMessage("Password Updated Successfully");
+			
+		}
+		return secPassResponse;
+		
+	}
+	
+	public SecQuesUpdateBean getUserSecurityQuestions(long patientId){
+		
+		PatientPortalUser H809Bean=h809Repository.findOne(PortalLoginSpecification.patientById(String.valueOf(patientId)));
+		
+		SecQuesUpdateBean secQuesBean = new SecQuesUpdateBean();
+		secQuesBean.setPatientId(patientId);
+		secQuesBean.setSecurityQuestion1(H809Bean.getSecurityQuestion1());
+		secQuesBean.setSecurityQuestion2(H809Bean.getSecurityQuestion2());
+		secQuesBean.setSecurityQuestion3(H809Bean.getSecurityQuestion3());
+		secQuesBean.setSecurityAnswer1(H809Bean.getSecurityAnswer1());
+		secQuesBean.setSecurityAnswer2(H809Bean.getSecurityAnswer2());
+		secQuesBean.setSecurityAnswer3(H809Bean.getSecurityAnswer3());
+		
+		return secQuesBean;
 	}
 
 }

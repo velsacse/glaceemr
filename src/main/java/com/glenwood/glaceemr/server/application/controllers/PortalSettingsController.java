@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
 import com.glenwood.glaceemr.server.application.models.SavePatientDemographicsBean;
+import com.glenwood.glaceemr.server.application.models.SecPassUpdateBean;
+import com.glenwood.glaceemr.server.application.models.SecQuesUpdateBean;
 import com.glenwood.glaceemr.server.application.services.employee.EmployeeService;
 import com.glenwood.glaceemr.server.application.services.portal.portalSettings.PortalSettingsService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
@@ -265,6 +267,69 @@ public class PortalSettingsController {
 			return responseBean;
 		}		
 	}
+	
+	@RequestMapping(value = "/saveSecurityQuesChanges", method = RequestMethod.POST, consumes="application/json")
+	@ResponseBody
+	public  EMRResponseBean saveSecurityQuesChanges(@RequestBody SecQuesUpdateBean SecQuesUpdateBean) throws Exception{
+
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.saveSecurityQuesChanges(SecQuesUpdateBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in Updating Security Questions!");
+			return responseBean;
+		}
+	}
+	
+	@RequestMapping(value="/updatePassword", method = RequestMethod.POST, consumes = "application/json")
+	@ResponseBody
+	public EMRResponseBean updatepassword(@RequestBody SecPassUpdateBean secPassBean) throws Exception{
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.updatepassword(secPassBean));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in Updating Password!");
+			return responseBean;
+		}
+		
+	}
+	
+	@RequestMapping(value="/getUserSecurityQuestions", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getUserSecurityQuestions(@RequestParam(value="patientId", required=false, defaultValue="") long patientId) throws Exception{
+		
+		responseBean.setCanUserAccess(true);
+		responseBean.setIsAuthorizationPresent(true);
+		responseBean.setLogin(true);
+		System.out.println("\nInside getUserSecurityQuestions in Springs\n");
+		try {
+			responseBean.setSuccess(true);
+			responseBean.setData(portalSettingsService.getUserSecurityQuestions(patientId));
+			return responseBean;
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseBean.setSuccess(false);
+			responseBean.setData("Error in Retrieving Security Questions");
+			return responseBean;
+		}
+		
+	}
+	
 	
 	
 }
