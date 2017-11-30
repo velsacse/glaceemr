@@ -14,6 +14,8 @@ import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PortalNotificationAlertsBean;
 import com.glenwood.glaceemr.server.application.models.PosTable;
 import com.glenwood.glaceemr.server.application.models.SavePatientDemographicsBean;
+import com.glenwood.glaceemr.server.application.models.SecPassUpdateBean;
+import com.glenwood.glaceemr.server.application.models.SecQuesUpdateBean;
 
 public interface PortalSettingsService {
 
@@ -41,5 +43,13 @@ public interface PortalSettingsService {
 	List<PatientPortalFeatureConfig> getPortalFeatureConfig(boolean isActiveFeatureItemList);
 
 	InsuranceFilterBean getInsuranceListList(InsuranceFilterBean insFilterBean);
+	
+	InitialSettings getSharedFolderPath();
+	
+	SecQuesResponseBean saveSecurityQuesChanges(SecQuesUpdateBean H809Bean);
+	
+	SecPassResponseBean updatepassword(SecPassUpdateBean secPassBean);
+	
+	SecQuesUpdateBean getUserSecurityQuestions(long patientId);
 	
 }

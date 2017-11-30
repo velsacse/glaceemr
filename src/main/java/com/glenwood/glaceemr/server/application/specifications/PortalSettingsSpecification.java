@@ -85,6 +85,26 @@ public class PortalSettingsSpecification {
 	/**
 	 * @return list of available Language options  
 	 */	
+	public static Specification<InitialSettings> getSharedFolderPath()
+	   {
+		   return new Specification<InitialSettings>() {
+
+			@Override
+			public Predicate toPredicate(Root<InitialSettings> root,
+					CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				
+				Predicate practicePredicate=cq.where(cb.equal(root.get(InitialSettings_.initialSettingsOptionType), 4)).getRestriction();
+				Predicate sharedFolderPredicate = cq.where(cb.equal(root.get(InitialSettings_.initialSettingsOptionName),"Shared Folder Path")).getRestriction();
+				
+				return cb.and(practicePredicate,sharedFolderPredicate);
+			}
+			   
+		};
+	   }
+	
+	/**
+	 * @return list of available Language options  
+	 */	
 	public static Specification<InitialSettings> getPracticeDetails(final String optionName)
 	   {
 		   return new Specification<InitialSettings>() {
