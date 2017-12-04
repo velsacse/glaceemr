@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -15,6 +16,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 
@@ -635,7 +637,7 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 		if(accountId.trim().equalsIgnoreCase("glace"))
 		{
 			String accountDetails = HttpConnectionUtils.postData("https://sso.glaceemr.com/TestSSOAccess?accountId="+accountId, "", HttpConnectionUtils.HTTP_CONNECTION_MODE,"text/plain");
-			String url="http://192.168.2.240:8000/GlaceDeveloper/GenerateCDAServlet";
+			String url="http://192.168.2.53:8000/GlaceDeveloper/GenerateCDAServlet";
 			String querystring="patientId="+patientId+"&fromDate="+fromDate.trim()+"&toDate="+toDate.trim()+"&mode=3&encounterids="+encounterids.trim()+"&email=1";
 			AjaxConnect ajax=new AjaxConnect();
 			fileName=ajax.sendPost(url,querystring);
@@ -656,30 +658,27 @@ public class PortalMedicalSummaryServiceImpl implements PortalMedicalSummaryServ
 
 	public List<Encounter> getEncounterList1(int patientId, int chartId,Date fromDate,Date toDate,int offset,int pageindex) {try
 	{
-		logger.error("Vitals API started");
+		logger.error("encounter API started");
+		  TimeZone.setDefault(TimeZone.getTimeZone("EDT"));
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Integer> criteriaQuery1 = builder.createQuery(Integer.class);
 		CriteriaQuery<Encounter> criteriaQuery = builder.createQuery(Encounter.class);
 		Root<Encounter> root = criteriaQuery.from(Encounter.class);
 		Join<Encounter,EmployeeProfile> EncounterEmployeeProfilejoin=root.join(Encounter_.empProfileEmpId,JoinType.INNER);
+		List<Predicate> predicates = new ArrayList<>();
 		criteriaQuery.select(builder.construct(Encounter.class, 
 				root.get((Encounter_.encounterDate)),
 				root.get((Encounter_.encounterId)),
 				EncounterEmployeeProfilejoin.get((EmployeeProfile_.empProfileFullname))
 				));
-		if(!HUtil.Nz(fromDate,"").equals("") && !HUtil.Nz(toDate,"").equals(""))
-			criteriaQuery.where(builder.and(builder.equal(root.get(Encounter_.encounterChartid), chartId),builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,root.get(Encounter_.encounterDate)),fromDate),
-					builder.lessThan(builder.function("DATE", Date.class,root.get(Encounter_.encounterDate)),toDate))).orderBy(builder.desc(root.get(Encounter_.encounterDate))).distinct(true);
-		else if( !HUtil.Nz(toDate,"").equals(""))
-			criteriaQuery.where(builder.and(builder.equal(root.get(Encounter_.encounterChartid), chartId),
-					builder.lessThan(builder.function("DATE", Date.class,root.get(Encounter_.encounterDate)),toDate))).orderBy(builder.desc(root.get(Encounter_.encounterDate))).distinct(true);
-		else if(!HUtil.Nz(fromDate,"").equals("") && !HUtil.Nz(toDate,"").equals(""))
-			criteriaQuery.where(builder.and(builder.equal(root.get(Encounter_.encounterChartid), chartId),builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,root.get(Encounter_.encounterDate)),fromDate))).orderBy(builder.desc(root.get(Encounter_.encounterDate))).distinct(true);
-		else
-			criteriaQuery.where(builder.and(builder.equal(root.get(Encounter_.encounterChartid),chartId))).orderBy(builder.desc(root.get(Encounter_.encounterDate))).distinct(true);
-
+		predicates.add(builder.and(builder.equal(root.get(Encounter_.encounterChartid),chartId),builder.equal(root.get(Encounter_.encounterType), 1)));
+		 if( !HUtil.Nz(toDate,"").equals(""))
+			predicates.add(builder.lessThan(builder.function("DATE", Date.class,root.get(Encounter_.encounterDate)),toDate));
+		 if(!HUtil.Nz(fromDate,"").equals("") && !HUtil.Nz(toDate,"").equals(""))
+			predicates.add(builder.and(builder.greaterThanOrEqualTo(builder.function("DATE", Date.class,root.get(Encounter_.encounterDate)),fromDate)));
+		 criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
+		 criteriaQuery.orderBy(builder.desc(root.get(Encounter_.encounterDate))).distinct(true);
 		List<Encounter> EncounterList = em.createQuery(criteriaQuery).setFirstResult(offset).setMaxResults(pageindex).getResultList();
-		logger.info("Vital Summary result size: "+EncounterList.size());
+		logger.info("Encounter result size: "+EncounterList.size());
 
 		return EncounterList;
 	}

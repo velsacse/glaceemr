@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -421,18 +422,35 @@ public class PortalMedicalSummaryController {
 	}
 	@RequestMapping(value = "/EncountersByPatient1", method = RequestMethod.GET)
 	@ResponseBody
-	public EMRResponseBean EncountersByPatient1(@RequestParam(value="patientId", required=false, defaultValue="") int patientId,
-			@RequestParam(value="chartId", required=false, defaultValue="") int chartId,
+	public EMRResponseBean EncountersByPatient1(@RequestParam(value="patientId", required=false, defaultValue="-1") int patientId,
+			@RequestParam(value="chartId", required=false, defaultValue="-1") int chartId,
 			@RequestParam(value="fromDate", required=false, defaultValue="") String fromDate,
 			@RequestParam(value="toDate", required=false, defaultValue="") String  toDate,
-			@RequestParam(value="offset", required=false, defaultValue="") int offset,
-			@RequestParam(value="pageindex", required=false, defaultValue="") int pageindex) throws Exception{
+			@RequestParam(value="offset", required=false, defaultValue="0") int offset,
+			@RequestParam(value="pageindex", required=false, defaultValue="0") int pageindex,
+			@RequestParam(value="fromLegacy", required=false, defaultValue="0") int flag) throws Exception{
 		EMRResponseBean responseBean=new EMRResponseBean();
 		responseBean.setCanUserAccess(true);
 		responseBean.setIsAuthorizationPresent(true);
 		responseBean.setLogin(true);
-		Timestamp ts1=null; 
-		Timestamp ts2=null;
+		Timestamp timestampFromDate=null; 
+		Timestamp timestampToDate=null;
+		Date fromdateTemp = null;
+		Date todateTemp= null;
+		
+		if(flag==1){
+			 TimeZone.setDefault(TimeZone.getTimeZone("EDT"));
+			if((!fromDate.equals(""))&&(!toDate.equals("")))
+			{
+		SimpleDateFormat format1 = new SimpleDateFormat("MM/dd/yyyy");
+		SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date date = format1.parse(fromDate);
+		 fromdateTemp=format2.parse(format2.format(date));
+		Date date1 = format1.parse(toDate);
+		 todateTemp=format2.parse(format2.format(date1));
+			}
+		 
+		}else{
 		if((fromDate!=null)&&(toDate!=null))
 		{
 			SimpleDateFormat sdf3 = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
@@ -444,7 +462,7 @@ public class PortalMedicalSummaryController {
 				@SuppressWarnings("deprecation")
 				Date sample = new Date(fromDate);
 				String fromdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(sample);
-				ts1 = Timestamp.valueOf(fromdate);
+				timestampFromDate = Timestamp.valueOf(fromdate);
 			}catch (Exception e){ e.printStackTrace(); }
 			Date formattedToDate = null;
 			try{
@@ -453,14 +471,20 @@ public class PortalMedicalSummaryController {
 				Date sample = new Date(toDate);
 				String todate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(sample);
 				formattedToDate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(todate);
-				ts2 = Timestamp.valueOf(todate);
+				timestampToDate = Timestamp.valueOf(todate);
 			}catch (Exception e){ e.printStackTrace(); }
 
+		}
 		}
 
 		try {
 			responseBean.setSuccess(true);
-			responseBean.setData(portalMedicalSummaryService.getEncounterList1(patientId, chartId,ts1,ts2,offset,pageindex));
+			if(flag==1){
+				responseBean.setData(portalMedicalSummaryService.getEncounterList1(patientId, chartId,fromdateTemp,todateTemp,offset,pageindex));
+			}else{
+				responseBean.setData(portalMedicalSummaryService.getEncounterList1(patientId, chartId,timestampFromDate,timestampToDate,offset,pageindex));
+			}
+			
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
