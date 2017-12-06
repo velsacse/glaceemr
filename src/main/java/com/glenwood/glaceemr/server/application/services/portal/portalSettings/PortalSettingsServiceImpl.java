@@ -5,6 +5,11 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.text.WordUtils;
@@ -26,6 +31,7 @@ import com.glenwood.glaceemr.server.application.models.PatientPortalUser;
 import com.glenwood.glaceemr.server.application.models.PatientPortalAlertConfig;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr;
+import com.glenwood.glaceemr.server.application.models.InsCompAddr_;
 import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
 import com.glenwood.glaceemr.server.application.models.PatientPortalFeatureConfig;
 import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
@@ -146,6 +152,9 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 	
 	@Autowired
 	HttpServletRequest request;
+	
+	@PersistenceContext
+	EntityManager em;
 	
 
 	@Override
@@ -631,6 +640,21 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 		secQuesBean.setSecurityAnswer3(H809Bean.getSecurityAnswer3());
 		
 		return secQuesBean;
+	}
+	
+	public List<String> getInsuranceNames(String searchKey) {
+		
+		//List<InsCompAddr> insList=insCompAddrRepository.findAll();
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<String> cq = builder.createQuery(String.class);
+		Root<InsCompAddr> rootInsCompAddr = cq.from(InsCompAddr.class);
+		cq.where(builder.notEqual(rootInsCompAddr.get(InsCompAddr_.insCompAddrInsName), ""));
+		cq.where(builder.like(rootInsCompAddr.get(InsCompAddr_.insCompAddrInsName), "%"+searchKey+"%"));
+		cq.select(rootInsCompAddr.get(InsCompAddr_.insCompAddrInsName));
+		cq.distinct(true);
+		List<String> criteriaList= em.createQuery(cq).getResultList();
+		return criteriaList;
+	
 	}
 
 }
