@@ -67,12 +67,17 @@ public class SkinTestFormShortcut {
 	@Column(name="skin_test_form_shortcut_created_on")
 	private Timestamp skinTestFormShortcutCreatedOn;
 
+	
 	@Column(name="skin_test_form_shortcut_last_modified_by")
 	private Integer skinTestFormShortcutLastModifiedBy;
 
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="skin_test_form_shortcut_last_modified_on")
 	private Timestamp skinTestFormShortcutLastModifiedOn;
+	
+	@Column(name="skin_test_form_shortcut_default_read_value")
+	private String skinTestFormShortcutdefaultreadvalue;
+	
 	
 	@OneToMany(mappedBy="skinTestFormShortcut")
 	List<SkinTestFormShortcutCategoryDetails> skinTestFormShortcutCategoryDetails;
@@ -226,5 +231,16 @@ public class SkinTestFormShortcut {
 	public void setSkinTestFormShortcutNotes(String skinTestFormShortcutNotes) {
 		this.skinTestFormShortcutNotes = skinTestFormShortcutNotes;
 	}
+		
+	
+	public String getskinTestFormShortcutdefaultreadvalue() {
+		return skinTestFormShortcutdefaultreadvalue;
+	}
+
+	public void setskinTestFormShortcutdefaultreadvalue(String skinTestFormShortcutdefaultreadvalue) {
+		this.skinTestFormShortcutdefaultreadvalue = skinTestFormShortcutdefaultreadvalue;
+	}
+	
+	
 
 }
