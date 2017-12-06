@@ -145,6 +145,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 		skinTestFormShortcut.setSkinTestFormShortcutIntradermalPseudopodiaNeeded(otherDetails.getBoolean("ipValue"));
 		skinTestFormShortcut.setSkinTestFormShortcutScoringNotes(otherDetails.getString("scoringNotes"));
 		skinTestFormShortcut.setSkinTestFormShortcutNotes(otherDetails.getString("notes"));
+		skinTestFormShortcut.setskinTestFormShortcutdefaultreadvalue(otherDetails.getString("defaulttextbox"));
 		SkinTestFormShortcut savedShortcut = skinTestFormShortcutRepository.saveAndFlush(skinTestFormShortcut);
 		for(int i=0; i<data.length();i++) {
 			SkinTestFormShortcutCategoryDetails formShortcutDetails = new SkinTestFormShortcutCategoryDetails();
@@ -252,7 +253,8 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 			skinTestShortcutBean.setSkinTestFormShortcutIntradermalPseudopodiaNeeded(shortcut.getSkinTestFormShortcutIntradermalPseudopodiaNeeded());
 			skinTestShortcutBean.setSkinTestFormShortcutScoringNotes(shortcut.getSkinTestFormShortcutScoringNotes());
 			skinTestShortcutBean.setSkinTestFormShortcutNotes(shortcut.getSkinTestFormShortcutNotes());
-			
+			skinTestShortcutBean.setSkinTestFormShortcutdefaultreadvalue(shortcut.getskinTestFormShortcutdefaultreadvalue());
+
 			final HashMap<Integer,ConcentrateGroupBean> concentrateGroup = new HashMap<Integer,ConcentrateGroupBean>();
 			for(SkinTestFormShortcutCategoryDetails categoryDetails:shortcut.getSkinTestFormShortcutCategoryDetails()) {
 				ConcentrateGroupBean concentrateGroupBean = new ConcentrateGroupBean();
@@ -415,6 +417,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 			skinTestOrder.setSkinTestOrderOrderingPhysician(skinTestOrderSaveJSON.getServiceDoctor());
 			skinTestOrder.setSkinTestOrderOrderingLocation(skinTestOrderSaveJSON.getPos());
 			skinTestOrder.setSkinTestOrderNotes(skinTestOrderSaveJSON.getOrderNotes());
+			//skinTestOrder.setskinTestOrderDefaultReadValue(skinTestOrderSaveJSON.getDefaultReadValue());
 			orderId = skinTestOrderRepository.saveAndFlush(skinTestOrder).getSkinTestOrderId();
 			saveShortcutForPatient(skinTestOrderSaveJSON,orderId);
 			List<String> concentrationsList = skinTestOrderSaveJSON.getConcentrationList();
@@ -432,13 +435,24 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 			entrySaveJSON.setNewEntry(true);
 			entrySaveJSON.setBilledStatus(0);
 			entrySaveJSON.setIsAllergensRecorded(false);
+			if(skinTestOrderSaveJSON.getDefaultReadValue()!=""){
+				entrySaveJSON.setPrickFlag(false);
+				entrySaveJSON.setIntradermalFlag(false);
+				Integer Value = Integer.parseInt(skinTestOrderSaveJSON.getDefaultReadValue());
+				for(int r=1;r<=Value;r++){
+					entrySaveJSON.setDefaultReadValue(r+"");
+					saveSkinTestOrderEntry(entrySaveJSON);
+				}
+			}
 			if(skinTestOrderSaveJSON.getPrickFlag()) {
 				entrySaveJSON.setPrickFlag(true);
 				entrySaveJSON.setIntradermalFlag(false);
+				entrySaveJSON.setDefaultReadValue("");
 				saveSkinTestOrderEntry(entrySaveJSON);
 			}
 			int intradermalCount = 0;
 			if(skinTestOrderSaveJSON.getIntradermalFlag()) {
+				entrySaveJSON.setDefaultReadValue("");
 				if(concentrationsList!=null&&concentrationsList.size()>0)
 					intradermalCount = concentrationsList.size();
 				else
@@ -482,7 +496,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		
+
 		skinTestOrderEntry.setSkinTestOrderEntryTestDate(testDate);
 		skinTestOrderEntry.setSkinTestOrderEntryTestPerformedTechnician(skinTestOrderEntrySaveJSON.getTechnician());
 		skinTestOrderEntry.setSkinTestOrderEntryDiluentWhealvalue(skinTestOrderEntrySaveJSON.getDiluentWhealValue());
@@ -497,11 +511,16 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 		skinTestOrderEntry.setSkinTestOrderEntryHistaminePseudopodia(skinTestOrderEntrySaveJSON.getHistaminePseudopodia());
 		skinTestOrderEntry.setSkinTestOrderEntryOrderingPhysician(skinTestOrderEntrySaveJSON.getServiceDoctor());
 		skinTestOrderEntry.setSkinTestOrderEntryOrderingLocation(skinTestOrderEntrySaveJSON.getPos());
-		if(skinTestOrderEntrySaveJSON.getPrickFlag())
-			skinTestOrderEntry.setSkinTestOrderEntryTypeOfTest("Prick");
-		else {
-			skinTestOrderEntry.setSkinTestOrderEntryTypeOfTest("Intradermal");
-			skinTestOrderEntry.setSkinTestOrderEntryConcentration(skinTestOrderEntrySaveJSON.getConcentration());
+		//skinTestOrderEntry.setSkinTestOrderEntryDefaultRead(skinTestOrderEntrySaveJSON.getDefaultReadValue());
+		if(skinTestOrderEntrySaveJSON.getDefaultReadValue()!=""){
+			skinTestOrderEntry.setSkinTestOrderEntryTypeOfTest("Reading"+skinTestOrderEntrySaveJSON.getDefaultReadValue());
+		}else{
+			if(skinTestOrderEntrySaveJSON.getPrickFlag())
+				skinTestOrderEntry.setSkinTestOrderEntryTypeOfTest("Prick");
+			else {
+				skinTestOrderEntry.setSkinTestOrderEntryTypeOfTest("Intradermal");
+				skinTestOrderEntry.setSkinTestOrderEntryConcentration(skinTestOrderEntrySaveJSON.getConcentration());
+			}
 		}
 		SkinTestOrderEntry entry = skinTestOrderEntryRepository.saveAndFlush(skinTestOrderEntry);
 		SkinTestOrderDetailsSaveJSON skinTestOrderDetailsSaveJSON = new SkinTestOrderDetailsSaveJSON();
@@ -583,6 +602,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 				skinTestOrderDetails.setSkinTestOrderDetailsPseudopodia(skinTestResult.isPseudopodia());
 				skinTestOrderDetails.setSkinTestOrderDetailsModifiedBy(skinTestOrderDetailsSaveJSON.getLoginId());
 				skinTestOrderDetails.setSkinTestOrderDetailsModifiedOn(skinTestOrderRepository.findCurrentTimeStamp());
+				skinTestOrderDetails.setSkinTestOrderDetailsReadValue(skinTestResult.getReadValue());
 				skinTestOrderDetailsRepository.saveAndFlush(skinTestOrderDetails);
 			}
 			SkinTestOrder skinTestOrder = skinTestOrderRepository.findOne(orderId);

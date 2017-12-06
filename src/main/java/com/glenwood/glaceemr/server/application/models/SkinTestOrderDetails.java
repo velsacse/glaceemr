@@ -75,6 +75,9 @@ public class SkinTestOrderDetails {
 	@Column(name="skin_test_order_details_modified_on")
 	private Timestamp skinTestOrderDetailsModifiedOn;
 	
+	@Column(name="skin_test_order_details_read_value")
+	private Boolean skinTestOrderDetailsReadValue;
+	
 	@ManyToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name="skin_test_order_details_skin_test_order_entry_id",referencedColumnName="skin_test_order_entry_id",insertable=false,updatable=false)
 	@JsonBackReference
@@ -222,6 +225,15 @@ public class SkinTestOrderDetails {
 
 	public void setSkinTestOrderEntry(SkinTestOrderEntry skinTestOrderEntry) {
 		this.skinTestOrderEntry = skinTestOrderEntry;
+	}
+
+	public Boolean getSkinTestOrderDetailsReadValue() {
+		return skinTestOrderDetailsReadValue;
+	}
+
+	public void setSkinTestOrderDetailsReadValue(
+			Boolean skinTestOrderDetailsReadValue) {
+		this.skinTestOrderDetailsReadValue = skinTestOrderDetailsReadValue;
 	}
 	
 	

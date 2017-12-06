@@ -46,6 +46,7 @@ public class SkinTestOrderSaveJSON {
 	Integer serviceDoctor;
 	Integer pos;
 	String orderNotes;
+	String defaultReadValue;
 	/*String diluentWhealValue;
 	String diluentFlareValue;
 	String diluentGrade;
@@ -376,4 +377,11 @@ public class SkinTestOrderSaveJSON {
 	public void setOrderNotes(String orderNotes) {
 		this.orderNotes = orderNotes;
 	}
+	public String getDefaultReadValue() {
+		return defaultReadValue;
+	}
+	public void setDefaultReadValue(String defaultReadValue) {
+		this.defaultReadValue = defaultReadValue;
+	}
+
 }

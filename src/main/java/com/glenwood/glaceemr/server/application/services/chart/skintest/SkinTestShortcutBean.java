@@ -16,6 +16,13 @@ public class SkinTestShortcutBean {
 	private Boolean skinTestFormShortcutIntradermalPseudopodiaNeeded;
 	private String skinTestFormShortcutScoringNotes;
 	private String skinTestFormShortcutNotes;
+	private String skinTestFormShortcutdefaultreadvalue;
+	/**
+	 * 
+	 */
+	
+
+	
 	
 	Map<Integer, ConcentrateGroupBean> concentrateGroupBean;
 
@@ -135,4 +142,14 @@ public class SkinTestShortcutBean {
 	public String toString() {
 		return "sheet name: "+skinTestFormShortcutName+"Categories: "+concentrateGroupBean.toString();
 	}
+
+	public String getSkinTestFormShortcutdefaultreadvalue() {
+		return skinTestFormShortcutdefaultreadvalue;
+	}
+
+	public void setSkinTestFormShortcutdefaultreadvalue(
+			String skinTestFormShortcutdefaultreadvalue) {
+		this.skinTestFormShortcutdefaultreadvalue = skinTestFormShortcutdefaultreadvalue;
+	}
+	
 }

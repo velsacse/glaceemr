@@ -32,6 +32,8 @@ public class SkinTestOrderEntrySaveJSON {
 	Boolean histamineErythema = null;
 	Boolean histaminePseudopodia = null;
 	Integer units;
+	String defaultReadValue;
+
 	List<SkinTestResultJSON> results;
 	
 	public Integer getLoginId() {
@@ -204,4 +206,11 @@ public class SkinTestOrderEntrySaveJSON {
 	public void setIsAllergensRecorded(Boolean isAllergensRecorded) {
 		this.isAllergensRecorded = isAllergensRecorded;
 	}
+	public String getDefaultReadValue() {
+		return defaultReadValue;
+	}
+	public void setDefaultReadValue(String defaultReadValue) {
+		this.defaultReadValue = defaultReadValue;
+	}
+	
 }

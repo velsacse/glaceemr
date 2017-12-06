@@ -8,6 +8,7 @@ public class SkinTestResult {
 	String flare;
 	Boolean erythema;
 	Boolean pseudopodia;
+	Boolean readValue;
 	
 	public Integer getconcentrateGroupId() {
 		return concentrateGroupId;
@@ -45,4 +46,11 @@ public class SkinTestResult {
 	public void setPseudopodia(Boolean pseudopodia) {
 		this.pseudopodia = pseudopodia;
 	}
+	public Boolean getReadValue() {
+		return readValue;
+	}
+	public void setReadValue(Boolean readValue) {
+		this.readValue = readValue;
+	}
+	
 }
