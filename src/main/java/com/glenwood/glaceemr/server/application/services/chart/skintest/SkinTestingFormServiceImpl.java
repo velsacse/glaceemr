@@ -512,7 +512,7 @@ public class SkinTestingFormServiceImpl implements SkinTestingFormService {
 		skinTestOrderEntry.setSkinTestOrderEntryOrderingPhysician(skinTestOrderEntrySaveJSON.getServiceDoctor());
 		skinTestOrderEntry.setSkinTestOrderEntryOrderingLocation(skinTestOrderEntrySaveJSON.getPos());
 		//skinTestOrderEntry.setSkinTestOrderEntryDefaultRead(skinTestOrderEntrySaveJSON.getDefaultReadValue());
-		if(skinTestOrderEntrySaveJSON.getDefaultReadValue()!=""){
+		if(skinTestOrderEntrySaveJSON.getDefaultReadValue()!="" && skinTestOrderEntrySaveJSON.getDefaultReadValue()!=null && skinTestOrderEntrySaveJSON.getDefaultReadValue()!="null"){
 			skinTestOrderEntry.setSkinTestOrderEntryTypeOfTest("Reading"+skinTestOrderEntrySaveJSON.getDefaultReadValue());
 		}else{
 			if(skinTestOrderEntrySaveJSON.getPrickFlag())
