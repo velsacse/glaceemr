@@ -15,14 +15,13 @@ public class MacraProviderQDM {
 			Integer macraProviderConfigurationReportingYear,
 			Date macraProviderConfigurationReportingStart,
 			Date macraProviderConfigurationReportingEnd,
-			Integer macraProviderConfigurationReportingMethod, String measures) {
+			Integer macraProviderConfigurationReportingMethod) {
 		super();
 		this.macraProviderConfigurationProviderId = macraProviderConfigurationProviderId;
 		this.macraProviderConfigurationReportingYear = macraProviderConfigurationReportingYear;
 		this.macraProviderConfigurationReportingStart = macraProviderConfigurationReportingStart;
 		this.macraProviderConfigurationReportingEnd = macraProviderConfigurationReportingEnd;
 		this.macraProviderConfigurationReportingMethod = macraProviderConfigurationReportingMethod;
-		this.measures = measures;
 	}
 
 	public Integer getMacraProviderConfigurationProviderId() {

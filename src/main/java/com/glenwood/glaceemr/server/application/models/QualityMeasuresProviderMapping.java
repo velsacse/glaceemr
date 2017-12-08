@@ -11,6 +11,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -34,6 +37,10 @@ public class QualityMeasuresProviderMapping {
 	@Column(name="quality_measures_provider_mapping_measure_id")
 	private String qualityMeasuresProviderMappingMeasureId;
 
+	@Column(name="quality_measures_provider_mapping_cmsId")
+	private String qualityMeasuresProviderMappingCMSId;
+
+	
 	public Integer getQualityMeasuresProviderMappingId() {
 		return qualityMeasuresProviderMappingId;
 	}
@@ -70,9 +77,19 @@ public class QualityMeasuresProviderMapping {
 		this.qualityMeasuresProviderMappingMeasureId = qualityMeasuresProviderMappingMeasureId;
 	}
 	
+	public String getQualityMeasuresProviderMappingCMSId() {
+		return qualityMeasuresProviderMappingCMSId;
+	}
+
+	public void setQualityMeasuresProviderMappingCMSId(
+			String qualityMeasuresProviderMappingCMSId) {
+		this.qualityMeasuresProviderMappingCMSId = qualityMeasuresProviderMappingCMSId;
+	}
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonBackReference
-	@JoinColumn(name="quality_measures_provider_mapping_provider_id",referencedColumnName="macra_provider_configuration_provider_id",insertable=false,updatable=false)
-    MacraProviderConfiguration macraProviderConfiguration;
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JoinColumn(name="quality_measures_provider_mapping_provider_id", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
+	private EmployeeProfile empProfile;
 	
 }

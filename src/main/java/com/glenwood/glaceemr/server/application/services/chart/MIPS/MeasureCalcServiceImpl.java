@@ -175,6 +175,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 				patientData.setQualityMeasuresPatientEntriesPatientId(patientId);
 				patientData.setQualityMeasuresPatientEntriesMeasureId(measureId);
+				if(!patientObj.getCmsId().equals("N/A"))
+				patientData.setQualityMeasuresPatientEntriesCMSId(patientObj.getCmsId());
 				patientData.setQualityMeasuresPatientEntriesCriteria(patientObj.getCriteria());
 				patientData.setQualityMeasuresPatientEntriesProviderId(providerId);
 				patientData.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(patientObj.getReportingYear()));
@@ -212,6 +214,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 			patientLogObj.setQualityMeasuresPatientEntriesPatientId(patientId);
 			patientLogObj.setQualityMeasuresPatientEntriesMeasureId(measureId);
+			if(!patientObj.getCmsId().equals("N/A"))
+			patientLogObj.setQualityMeasuresPatientEntriesHistoryCMSId(patientObj.getCmsId());
 			patientLogObj.setQualityMeasuresPatientEntriesHistoryCriteria(patientObj.getCriteria());
 			patientLogObj.setQualityMeasuresPatientEntriesProviderId(providerId);
 			patientLogObj.setQualityMeasuresPatientEntriesReportingYear(Integer.parseInt(patientObj.getReportingYear()));
@@ -1046,10 +1050,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MIPSPerformanceBean> getMeasureRateReport(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy){
-
-		Calendar now = Calendar.getInstance();
-		int reportingYear = now.get(Calendar.YEAR);
+	public List<MIPSPerformanceBean> getMeasureRateReport(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy,Integer reportingYear){
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MIPSPerformanceBean> cq = builder.createQuery(MIPSPerformanceBean.class);
@@ -1150,7 +1151,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 			}else{
 				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
-				addPointsAndPriorityStatus(measureId, accountId, resultObject);
+				addPointsAndPriorityStatus(reportingYear,measureId, accountId, resultObject);
 			}
 
 			resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
@@ -1222,10 +1223,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MIPSPerformanceBean> getMeasureRateReportByNPI(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy){
-
-		Calendar now = Calendar.getInstance();
-		int reportingYear = now.get(Calendar.YEAR);
+	public List<MIPSPerformanceBean> getMeasureRateReportByNPI(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy,Integer reportingYear){
 
 		String npiId = getNPIForProvider(providerId);
 
@@ -1308,7 +1306,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 			}else{
 				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
-				addPointsAndPriorityStatus(measureId, accountId, resultObject);
+				addPointsAndPriorityStatus(reportingYear,measureId, accountId, resultObject);
 			}
 
 			DecimalFormat newFormat = new DecimalFormat("#0.00");
@@ -1433,7 +1431,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MIPSPerformanceBean> getGroupPerformanceCount(String tinValue, String configuredMeasures, String accountId,boolean isACIReport, boolean isOrderBy){
+	public List<MIPSPerformanceBean> getGroupPerformanceCount(String tinValue, String configuredMeasures, String accountId,boolean isACIReport, boolean isOrderBy,Integer reportingYear){
 		List<MIPSPerformanceBean> finalResult=new ArrayList<MIPSPerformanceBean>();
 		List<MIPSPerformanceBean> results = new ArrayList<MIPSPerformanceBean>();
 
@@ -1441,9 +1439,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		PrintWriter printWriter = new PrintWriter(writer);
 
 		try{
-
-			Calendar now = Calendar.getInstance();
-			int reportingYear = now.get(Calendar.YEAR);
 
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<MIPSPerformanceBean> cq = builder.createQuery(MIPSPerformanceBean.class);
@@ -1522,7 +1517,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					
 				}else{
 					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
-					addPointsAndPriorityStatus(measureId, accountId, resultObject);
+					addPointsAndPriorityStatus(reportingYear,measureId, accountId, resultObject);
 				}
 
 				DecimalFormat newFormat = new DecimalFormat("#0.00");
@@ -1800,13 +1795,13 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	}
 
-	public void addPointsAndPriorityStatus(String measureId, String accountId,MIPSPerformanceBean resultObject)
+	public void addPointsAndPriorityStatus(Integer reportingYear,String measureId, String accountId,MIPSPerformanceBean resultObject)
 	{
 		EMeasureUtils measureUtils = new EMeasureUtils();
 		try 
 		{
 			String sharedFolderPath = sharedFolderBean.getSharedFolderPath().get(accountId).toString();
-			List<EMeasure> emeasureObj=measureUtils.getMeasureBeanDetails(measureId,sharedFolderPath,accountId);
+			List<EMeasure> emeasureObj=measureUtils.getMeasureBeanDetails(reportingYear,measureId,sharedFolderPath,accountId);
 			EMeasure eMeasure=emeasureObj.get(0);
 			resultObject.setHighPriority(eMeasure.isHighPriority());
 			resultObject.setOutcome(eMeasure.getType());
@@ -1965,7 +1960,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode, boolean isNotMet) {
-
+System.out.println("patient llist query>>>>>>>>>>>>>.");
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MIPSPatientInformation> cq = builder.createQuery(MIPSPatientInformation.class);
 		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
@@ -2157,12 +2152,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MUPerformanceBean> getAnalyticsPerformanceReport(int providerId, String accountId, String configuredMeasures,int submissionMethod,String sharedPath) throws Exception{
+	public List<MUPerformanceBean> getAnalyticsPerformanceReport(Integer reportingYear,int providerId, String accountId, String configuredMeasures,int submissionMethod,String sharedPath) throws Exception{
 		EMeasureUtils eMeasureUtils=new EMeasureUtils();
 		
-		Calendar now = Calendar.getInstance();
-		int reportingYear = now.get(Calendar.YEAR);
-System.out.println("configuredMeasures>>>>>>>>>>>>>"+configuredMeasures);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MUPerformanceBean> cq = builder.createQuery(MUPerformanceBean.class);
 		
@@ -2271,7 +2263,7 @@ System.out.println("configuredMeasures>>>>>>>>>>>>>"+configuredMeasures);
 			{	
 				EMeasure eMeasureObj=null;
 				List<EMeasure> eMeasures=new ArrayList<EMeasure>();
-				eMeasures= eMeasureUtils.getMeasureBeanDetails(measureId, sharedPath,accountId);
+				eMeasures= eMeasureUtils.getMeasureBeanDetails(reportingYear,measureId, sharedPath,accountId);
 				eMeasureObj=eMeasures.get(0);
 				
 				resultObject.setPoints(getPointsByBenchMark(resultObject.getReportingRate()/100, eMeasureObj));
@@ -2310,27 +2302,29 @@ System.out.println("configuredMeasures>>>>>>>>>>>>>"+configuredMeasures);
 		
 		if(byNpi){
 			
-			ecqmPerformance = getMeasureRateReportByNPI(providerId, accountId, configuredMeasures, false, true);
-			aciPerformance = getMeasureRateReportByNPI(providerId, accountId, aciMeasures, true, true);
+			ecqmPerformance = getMeasureRateReportByNPI(providerId, accountId, configuredMeasures, false, true,providerDashboard.getReportingYear());
+			aciPerformance = getMeasureRateReportByNPI(providerId, accountId, aciMeasures, true, true,providerDashboard.getReportingYear());
 			
 		}else if(!tinValue.equals("")){
 
-			ecqmPerformance = getGroupPerformanceCount(tinValue, configuredMeasures, accountId, false, true);
-			aciPerformance = getGroupPerformanceCount(tinValue, aciMeasures, accountId, true, true);
+			ecqmPerformance = getGroupPerformanceCount(tinValue, configuredMeasures, accountId, false, true,providerDashboard.getReportingYear());
+			aciPerformance = getGroupPerformanceCount(tinValue, aciMeasures, accountId, true, true,providerDashboard.getReportingYear());
 			
 		}else{
 			
-			ecqmPerformance = getMeasureRateReport(providerId, accountId, configuredMeasures, false, true);
-			aciPerformance = getMeasureRateReport(providerId, accountId, aciMeasures, true, true);
+			ecqmPerformance = getMeasureRateReport(providerId, accountId, configuredMeasures, false, true,providerDashboard.getReportingYear());
+			aciPerformance = getMeasureRateReport(providerId, accountId, aciMeasures, true, true,providerDashboard.getReportingYear());
 			
 		}
 		
 		List<MIPSPerformanceBean> temp=new ArrayList<MIPSPerformanceBean>();
+		if(ecqmPerformance.size()==0)
+			providerDashboard.setMessage("No Measure's credit recorded for the reporting year "+providerDashboard.getReportingYear());
 		List<EMeasure> eMeasures=new ArrayList<EMeasure>();
 		for(int i=0;i<ecqmPerformance.size();i++){
 			EMeasure eMeasureObj=null;
 			try {
-				eMeasures= measureUtils.getMeasureBeanDetails(ecqmPerformance.get(i).getMeasureId(), sharedPath,accountId);
+				eMeasures= measureUtils.getMeasureBeanDetails(providerDashboard.getReportingYear(),ecqmPerformance.get(i).getMeasureId(), sharedPath,accountId);
 				eMeasureObj=eMeasures.get(0);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -2608,13 +2602,13 @@ System.out.println("configuredMeasures>>>>>>>>>>>>>"+configuredMeasures);
 				reportingStart =generatePDFDetails.getReportStart();
 				reportingEnd = generatePDFDetails.getReportEnd();
 				PDFData+="<div><table><tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
-				PatientList = getMeasureRateReportByNPI(provId, accountId,configuredMeasures,isACIReport,isOrderBy);
+				PatientList = getMeasureRateReportByNPI(provId, accountId,configuredMeasures,isACIReport,isOrderBy,2017);
 				provName = providerName.replaceAll("\\s","");
 				FileName = provName+"_"+System.currentTimeMillis();
 			}
 			else{
 				PDFData+="<div><table><tr><th> Tin Number</th> <td>:&nbsp</td> <td>"+tinId+"</td> </tr></table></div>";
-				PatientList = getGroupPerformanceCount(tinId,configuredMeasures,accountId,isACIReport,isOrderBy);
+				PatientList = getGroupPerformanceCount(tinId,configuredMeasures,accountId,isACIReport,isOrderBy,2017);
 				FileName = "GroupPerformance_"+tinId;
 			}
 			

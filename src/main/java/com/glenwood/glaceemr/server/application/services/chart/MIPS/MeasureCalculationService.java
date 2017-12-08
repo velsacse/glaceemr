@@ -78,7 +78,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<MIPSPerformanceBean> getMeasureRateReport(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy);
+	List<MIPSPerformanceBean> getMeasureRateReport(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy,Integer reportingYear);
 	
 	/**
 	 * Function to return provider based performance for analytics dashboard 
@@ -89,7 +89,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<MUPerformanceBean> getAnalyticsPerformanceReport(int providerId, String accountId, String configuredMeasures, int submissionMethod,String sharedPath) throws Exception;
+	List<MUPerformanceBean> getAnalyticsPerformanceReport(Integer year,int providerId, String accountId, String configuredMeasures, int submissionMethod,String sharedPath) throws Exception;
 	
 	/**
 	 * Function to get MIPS Performance details based on NPI value
@@ -101,7 +101,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<MIPSPerformanceBean> getMeasureRateReportByNPI(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy);
+	List<MIPSPerformanceBean> getMeasureRateReportByNPI(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy,Integer year);
 	
 	/**
 	 * Function to get provider based performance details and store it in macra_measures_rate table
@@ -125,7 +125,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<MIPSPerformanceBean> getGroupPerformanceCount(String tinValue, String configuredMeasures, String accountId,boolean isACIReport, boolean isOrderBy);
+	List<MIPSPerformanceBean> getGroupPerformanceCount(String tinValue, String configuredMeasures, String accountId,boolean isACIReport, boolean isOrderBy,Integer reportingYear);
 
 	/**
 	 * 

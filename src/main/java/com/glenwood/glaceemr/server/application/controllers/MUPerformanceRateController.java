@@ -203,7 +203,8 @@ public class MUPerformanceRateController {
 	public boolean generateAndValidateQDM(
 			@RequestParam(value="accountId", required=true) String accountId,
 			@RequestParam(value="patientID", required=true) int patientID,
-			@RequestParam(value="providerId", required=true) int providerId) throws Exception
+			@RequestParam(value="providerId", required=true) int providerId,
+			@RequestParam(value="reportingYear", required=true) Integer reportingYear) throws Exception
 	{
 	
 		EMeasureUtils utils = new EMeasureUtils();
@@ -219,7 +220,7 @@ public class MUPerformanceRateController {
 		
 		try{
 
-			Boolean isIndividual=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
+			Boolean isIndividual=measureService.checkGroupOrIndividual(reportingYear);
 
 			int userIdForEntries = providerId;
 
@@ -227,7 +228,7 @@ public class MUPerformanceRateController {
 				providerId=-1;
 			}
 
-			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
 
 			if(providerInfo.size()>0 && providerInfo.get(0).getMacraProviderConfigurationReportingMethod()!=2){
 				
@@ -251,7 +252,7 @@ public class MUPerformanceRateController {
 				}
 				HashMap<String, HashMap<String, String>> codeListForQDM;
 				try{
-				codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString(),accountId));
+				codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(reportingYear,providerInfo.get(0).getMeasures(), sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString(),accountId));
 				}
 				catch(Exception e)
 				{
@@ -364,7 +365,7 @@ public class MUPerformanceRateController {
 				
 				Integer providerId = (Integer) patientsSeenByProvider.keySet().toArray()[i]; 
 				
-				providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+				providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
 				
 				providerPerformance = measureService.getPerformanceCount(providerId, "", providerInfo.get(0).getMeasures(), accountID);
 
@@ -465,17 +466,17 @@ public class MUPerformanceRateController {
 				
 				providerId = providers.get(i).getMacraProviderConfigurationProviderId();
 				
-				providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+				providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
 				
 				if(providerInfo != null){
 					
-					providerPerformance.put("ECQM", measureService.getAnalyticsPerformanceReport(providerId, accountID, providerInfo.get(0).getMeasures(),providerInfo.get(0).getMacraProviderConfigurationReportingMethod(),sharedPath));
+					providerPerformance.put("ECQM", measureService.getAnalyticsPerformanceReport(reportingYear,providerId, accountID, providerInfo.get(0).getMeasures(),providerInfo.get(0).getMacraProviderConfigurationReportingMethod(),sharedPath));
 					
 				}
 				
-				providerPerformance.put("ACI", measureService.getAnalyticsPerformanceReport(providerId, accountID, aciMeasures,providerInfo.get(0).getMacraProviderConfigurationReportingMethod(),sharedPath));
+				providerPerformance.put("ACI", measureService.getAnalyticsPerformanceReport(reportingYear,providerId, accountID, aciMeasures,providerInfo.get(0).getMacraProviderConfigurationReportingMethod(),sharedPath));
 				
-				providerPerformance.put("ACI Transition", measureService.getAnalyticsPerformanceReport(providerId, accountID, aciTransMeasures,providerInfo.get(0).getMacraProviderConfigurationReportingMethod(),sharedPath));
+				providerPerformance.put("ACI Transition", measureService.getAnalyticsPerformanceReport(reportingYear,providerId, accountID, aciTransMeasures,providerInfo.get(0).getMacraProviderConfigurationReportingMethod(),sharedPath));
 				
 				finalReportingBean.put(providerId ,providerPerformance);
 				

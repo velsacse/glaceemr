@@ -34,7 +34,8 @@ public interface QPPConfigurationService {
 	 * @throws Exception
 	 */
 	
-	List<MacraProviderConfiguration> getProviderInfo(Integer providerId)throws Exception;
+	List<ConfigurationDetails> getProviderInfo(Integer providerId,Integer year)throws Exception;
+	
 	
 	/**
 	 * Function to get configured measures info for employee
@@ -55,7 +56,7 @@ public interface QPPConfigurationService {
 	 * @throws Exception
 	 */
 	
-	List<QualityMeasuresProviderMapping> getMeasureIds(Integer providerId)throws Exception;
+	List<ConfigurationDetails> getMeasureIds(Integer providerId,Integer year)throws Exception;
 	
 	/**
 	 * Function to save measure configuration for the selected provider 
@@ -86,7 +87,7 @@ public interface QPPConfigurationService {
 	 * @throws Exception
 	 */
 	
-	List<MacraProviderQDM> getCompleteProviderInfo(Integer providerId)throws Exception;
+	List<MacraProviderQDM> getCompleteProviderInfo(Integer providerId,Integer year)throws Exception;
 	
 	/**
 	 * Function to get MACRA configuration for all providers in given reporting year

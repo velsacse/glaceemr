@@ -96,6 +96,10 @@ public class CurrentMedication {
 	@Column(name="current_medication_modified_on")
 	private Timestamp currentMedicationModifiedOn;
 
+	@Column(name="current_medication_rxnorm_cd")
+	private String currentMedicationRXNormCD;
+
+	
 	@Column(name="current_medication_intake")
 	private String currentMedicationIntake;
 
@@ -235,6 +239,14 @@ public class CurrentMedication {
 
 	public void setCurrentMedicationIsChronic(Boolean currentMedicationIsChronic) {
 		this.currentMedicationIsChronic = currentMedicationIsChronic;
+	}
+
+	public String getCurrentMedicationRXNormCD() {
+		return currentMedicationRXNormCD;
+	}
+
+	public void setCurrentMedicationRXNormCD(String currentMedicationRXNormCD) {
+		this.currentMedicationRXNormCD = currentMedicationRXNormCD;
 	}
 
 	public Integer getCurrentMedicationOrderBy() {

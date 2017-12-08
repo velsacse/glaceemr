@@ -183,7 +183,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 		String hub_url = measureService.getMeasureValidationServer()+"/glacecds/ECQMServices/validateRegistryReport";
 		//String hub_url = "http://192.168.2.52:3080/glacecds/ECQMServices/validateRegistryReport";
 
-		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(2017,providerId);
 
         if(providerInfo!=null){
 

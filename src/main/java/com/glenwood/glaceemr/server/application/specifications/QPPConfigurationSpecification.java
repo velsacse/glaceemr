@@ -21,7 +21,7 @@ import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMa
 
 public class QPPConfigurationSpecification {
 	
-	public static Specification<MacraProviderConfiguration> getProviderData(final Integer providerId){
+	public static Specification<MacraProviderConfiguration> getProviderData(final Integer providerId,final Integer year){
 		return new Specification<MacraProviderConfiguration>() {
 
 			@Override
@@ -29,7 +29,9 @@ public class QPPConfigurationSpecification {
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				Predicate predicateByProviderId = cb.equal(
 						root.get(MacraProviderConfiguration_.macraProviderConfigurationProviderId),providerId);
-				Predicate providerDetails=cb.and(predicateByProviderId);
+				Predicate predicateByyear = cb.equal(
+						root.get(MacraProviderConfiguration_.macraProviderConfigurationReportingYear),year);
+				Predicate providerDetails=cb.and(predicateByProviderId,predicateByyear);
 				return providerDetails;
 			}
 		};
@@ -65,14 +67,15 @@ public class QPPConfigurationSpecification {
 		};
 		
 	}
-	public static Specification<MacraProviderConfiguration> getProviderObj(final Integer providerId){
+	public static Specification<MacraProviderConfiguration> getProviderObj(final Integer providerId,final Integer year){
 		return new Specification<MacraProviderConfiguration>() {
 
 			@Override
 			public Predicate toPredicate(Root<MacraProviderConfiguration> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 				Predicate predicateByproviderId=cb.equal(root.get(MacraProviderConfiguration_.macraProviderConfigurationProviderId),providerId);
-				Predicate providerObj=cb.and(predicateByproviderId);
+				Predicate predicateByYear=cb.equal(root.get(MacraProviderConfiguration_.macraProviderConfigurationReportingYear),year);
+				Predicate providerObj=cb.and(predicateByproviderId,predicateByYear);
 				return providerObj;
 			}
 		};

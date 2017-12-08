@@ -170,7 +170,7 @@ public class EMeasureUtils {
 		
 	}
 	
-	public List<EMeasure> getMeasureBeanDetails(String measureIds, String sharedPath,String accountId) throws Exception{
+	public List<EMeasure> getMeasureBeanDetails(Integer year,String measureIds, String sharedPath,String accountId) throws Exception{
 
 		List<EMeasure> measureInfo = new ArrayList<EMeasure>();
 		Writer writer = new StringWriter();
@@ -180,7 +180,7 @@ public class EMeasureUtils {
 			
 			int measureId = Integer.parseInt(measureIds.split(",")[i]);
 
-			measureInfo.add(getMeasureInfo(measureId, sharedPath,accountId));
+			measureInfo.add(getMeasureInfo(year,measureId, sharedPath,accountId));
 
 		}
 
@@ -210,7 +210,7 @@ public class EMeasureUtils {
 		
 	}
 	
-	private void putMeasureInfoDetails(int measureId, String sharedPath,String accountId) throws Exception{
+	private void putMeasureInfoDetails(Integer year,int measureId, String sharedPath,String accountId) throws Exception{
 		
 		String result="";
 		try {
@@ -222,7 +222,7 @@ public class EMeasureUtils {
 			throw e;
 		}
 		
-	    writeStringToJsonFile(result, measureId, sharedPath,accountId);
+	    writeStringToJsonFile(year,result, measureId, sharedPath,accountId);
 	    
 	}
 	public String getValueSetOID(String code,EMeasure eMeasure)
@@ -317,11 +317,11 @@ public class EMeasureUtils {
 		return codeAndCodeSystem;
 	}
 	@SuppressWarnings("unchecked")
-	public EMeasure getMeasureInfo(int measureId, String sharedPath,String accountId)throws Exception{
+	public EMeasure getMeasureInfo(Integer year,int measureId, String sharedPath,String accountId)throws Exception{
 		
 		EMeasure measureInfo = new EMeasure();
 					
-		String filename = sharedPath+File.separator+"ECQM"+File.separator+measureId+".json";
+		String filename = sharedPath+File.separator+"ECQM"+File.separator+year+File.separator+measureId+".json";
 		
 		File jsonFile = new File(filename);
 		
@@ -330,9 +330,9 @@ public class EMeasureUtils {
 			if (diff > (long) 7 * 24 * 60 * 60 * 1000) {
 				jsonFile.delete();
 
-				putMeasureInfoDetails(measureId, sharedPath,accountId);
+				putMeasureInfoDetails(year,measureId, sharedPath,accountId);
 				
-				measureInfo=getMeasureInfo(measureId, sharedPath,accountId);
+				measureInfo=getMeasureInfo(year,measureId, sharedPath,accountId);
 				
 			}else{
 
@@ -346,9 +346,9 @@ public class EMeasureUtils {
 			
 		}else{
 
-			putMeasureInfoDetails(measureId, sharedPath,accountId);
+			putMeasureInfoDetails(year,measureId, sharedPath,accountId);
 			
-			measureInfo=getMeasureInfo(measureId, sharedPath,accountId);
+			measureInfo=getMeasureInfo(year,measureId, sharedPath,accountId);
 			
 		}
 			
@@ -357,16 +357,15 @@ public class EMeasureUtils {
 	}
 	
 	@SuppressWarnings("resource")
-	private void writeStringToJsonFile(String jsonContent, int measureId, String sharedPath,String accountId) throws Exception{
+	private void writeStringToJsonFile(Integer year,String jsonContent, int measureId, String sharedPath,String accountId) throws Exception{
 		
-		String sharedFolderPath = sharedPath+File.separator+"ECQM";
+		String filePath = sharedPath+File.separator+"ECQM"+File.separator+year;
 		File sharedFile=new File(sharedPath);
-		File ECQMfolder = new File(sharedFolderPath);
 		
 		if(sharedFile.canRead() && sharedFile.canExecute())
 		{
 
-			String filename = sharedFolderPath+File.separator+measureId+".json";
+			String filename = filePath+File.separator+measureId+".json";
 			
 			File f = new File(filename);
 			

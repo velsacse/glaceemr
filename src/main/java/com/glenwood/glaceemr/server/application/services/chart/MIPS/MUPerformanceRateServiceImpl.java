@@ -194,7 +194,8 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 				measureRate = new MacraMeasuresRate();
 				
 			}
-			
+			if(!performanceByMeasure.getCmsId().equals("N/A"))
+			measureRate.setMacraMeasuresRateCMSId(performanceByMeasure.getCmsId());
 			measureRate.setMacraMeasuresRateMeasureId(performanceByMeasure.getMeasureId());
 			measureRate.setMacraMeasuresRateCriteria(performanceByMeasure.getCriteria());
 			measureRate.setMacraMeasuresRateMeasureType(1);

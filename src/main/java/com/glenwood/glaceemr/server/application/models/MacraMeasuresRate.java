@@ -103,6 +103,9 @@ public class MacraMeasuresRate {
 	@Column(name="macra_measures_rate_tin")
 	private String macraMeasuresRateTin;
 
+	@Column(name="macra_measures_rate_cmsId")
+	private String macraMeasuresRateCMSId;
+	
 	@Column(name="macra_measures_rate_points")
 	private Double macraMeasuresRatePoints;
 	
@@ -150,6 +153,15 @@ public class MacraMeasuresRate {
 
 	public void setMacraMeasuresRateMeasureId(String macraMeasuresRateMeasureId) {
 		this.macraMeasuresRateMeasureId = macraMeasuresRateMeasureId;
+	}
+
+	
+	public String getMacraMeasuresRateCMSId() {
+		return macraMeasuresRateCMSId;
+	}
+
+	public void setMacraMeasuresRateCMSId(String macraMeasuresRateCMSId) {
+		this.macraMeasuresRateCMSId = macraMeasuresRateCMSId;
 	}
 
 	public Integer getMacraMeasuresRateMeasureType() {

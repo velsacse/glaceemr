@@ -1,11 +1,15 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "macra_configuration")
@@ -56,5 +60,8 @@ public class MacraConfiguration {
 	public void setMacraConfigurationApm(Boolean macraConfigurationApm) {
 		this.macraConfigurationApm = macraConfigurationApm;
 	}
+	@OneToMany(mappedBy="macraConf")
+	@JsonManagedReference
+	private List<MacraProviderConfiguration> macraProviderConf;
 	
 }

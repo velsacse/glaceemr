@@ -25,6 +25,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEn
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.chart.MIPS.ConfigurationDetails;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
@@ -68,18 +69,19 @@ public class QPPConfigurationController {
 	@RequestMapping(value = "/getProviderInfo", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getProviderInfo(
-			@RequestParam(value = "provider", required = true) Integer provider)throws Exception {
+			@RequestParam(value = "provider", required = true) Integer provider,
+			@RequestParam(value = "year", required = true) Integer year)throws Exception {
 
 		EMRResponseBean result=new EMRResponseBean();
 
 		if(!provider.equals(null)){
 
-			List<MacraProviderConfiguration> groupData = QppConfigurationService.getProviderInfo(provider);
+			List<ConfigurationDetails> groupData = QppConfigurationService.getProviderInfo(provider,year);
 			result.setData(groupData);
 
 		}
 
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting MACRA configuration details for provider" , -1, request.getRemoteAddr(),-1,"providerId="+provider,LogUserType.USER_LOGIN, "", "");
+//		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting MACRA configuration details for provider" , -1, request.getRemoteAddr(),-1,"providerId="+provider,LogUserType.USER_LOGIN, "", "");
 		
 		return result;
 
@@ -88,9 +90,10 @@ public class QPPConfigurationController {
 	@RequestMapping(value = "/getMeasureIds", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getIndividualMeasureIds(
-			@RequestParam(value = "providerId", required = true) Integer providerId)throws Exception {
+			@RequestParam(value = "providerId", required = true) Integer providerId,
+			@RequestParam(value = "year", required = true)Integer year)throws Exception {
 		EMRResponseBean result=new EMRResponseBean();
-		List<QualityMeasuresProviderMapping> indiMeasureids=QppConfigurationService.getMeasureIds(providerId);
+		List<ConfigurationDetails> indiMeasureids=QppConfigurationService.getMeasureIds(providerId,year);
 		result.setData(indiMeasureids);
 		return result;
 	}
@@ -104,7 +107,7 @@ public class QPPConfigurationController {
 		
 		QppConfigurationService.addMeasuresToProvider(measureIds,providerId,prgmYear);
 		
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.CREATEORUPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in saving measure configuration for provider" , -1, request.getRemoteAddr(),-1,"measures="+measureIds,LogUserType.USER_LOGIN, "", "");
+//		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.CREATEORUPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in saving measure configuration for provider" , -1, request.getRemoteAddr(),-1,"measures="+measureIds,LogUserType.USER_LOGIN, "", "");
 		
 	}
 	

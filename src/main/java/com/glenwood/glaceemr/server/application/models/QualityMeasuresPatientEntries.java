@@ -38,6 +38,9 @@ public class QualityMeasuresPatientEntries {
 	@Column(name="quality_measures_patient_entries_measure_id")
 	private String qualityMeasuresPatientEntriesMeasureId;
 
+	@Column(name="quality_measures_patient_entries_cmsId")
+	private String qualityMeasuresPatientEntriesCMSId;
+	
 	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="quality_measures_patient_entries_updated_on")
 	private Timestamp qualityMeasuresPatientEntriesUpdatedOn;
@@ -115,6 +118,15 @@ public class QualityMeasuresPatientEntries {
 	public void setQualityMeasuresPatientEntriesMeasureId(
 			String qualityMeasuresPatientEntriesMeasureId) {
 		this.qualityMeasuresPatientEntriesMeasureId = qualityMeasuresPatientEntriesMeasureId;
+	}
+	
+	public String getQualityMeasuresPatientEntriesCMSId() {
+		return qualityMeasuresPatientEntriesCMSId;
+	}
+
+	public void setQualityMeasuresPatientEntriesCMSId(
+			String qualityMeasuresPatientEntriesCMSId) {
+		this.qualityMeasuresPatientEntriesCMSId = qualityMeasuresPatientEntriesCMSId;
 	}
 
 	public Timestamp getQualityMeasuresPatientEntriesUpdatedOn() {

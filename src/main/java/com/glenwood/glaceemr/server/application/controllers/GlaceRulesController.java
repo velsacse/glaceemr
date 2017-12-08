@@ -108,7 +108,7 @@ public class GlaceRulesController {
 		
 		String hub_url = measureService.getMeasureValidationServer()+"/glacecds/ECQMServices/validateRegistryReport";
 
-		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(2017,providerId);
 
 		if(providerInfo!=null){
 

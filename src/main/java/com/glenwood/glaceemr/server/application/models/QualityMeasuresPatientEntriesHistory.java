@@ -77,6 +77,10 @@ public class QualityMeasuresPatientEntriesHistory {
 	@Column(name="quality_measures_patient_entries_history_tin")
 	private String qualityMeasuresPatientEntriesHistoryTin;
 
+	@Column(name="quality_measures_patient_entries_history_cmsid")
+	private String qualityMeasuresPatientEntriesHistoryCMSId;
+
+	
 	public Integer getQualityMeasuresPatientEntriesId() {
 		return qualityMeasuresPatientEntriesId;
 	}
@@ -111,6 +115,15 @@ public class QualityMeasuresPatientEntriesHistory {
 	public void setQualityMeasuresPatientEntriesMeasureId(
 			String qualityMeasuresPatientEntriesMeasureId) {
 		this.qualityMeasuresPatientEntriesMeasureId = qualityMeasuresPatientEntriesMeasureId;
+	}
+	
+	public String getQualityMeasuresPatientEntriesHistoryCMSId() {
+		return qualityMeasuresPatientEntriesHistoryCMSId;
+	}
+
+	public void setQualityMeasuresPatientEntriesHistoryCMSId(
+			String qualityMeasuresPatientEntriesHistoryCMSId) {
+		this.qualityMeasuresPatientEntriesHistoryCMSId = qualityMeasuresPatientEntriesHistoryCMSId;
 	}
 
 	public Timestamp getQualityMeasuresPatientEntriesUpdatedOn() {

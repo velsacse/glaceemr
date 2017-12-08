@@ -6,7 +6,7 @@ import java.util.List;
 public class MUDashboardBean {
 
 	private int reportingYear;
-	
+	private String message;
 	private Date startDate;
 	private Date endDate;
 	
@@ -46,6 +46,15 @@ public class MUDashboardBean {
 	
 	public void setAciMeasures(List<MIPSPerformanceBean> aciMeasures) {
 		this.aciMeasures = aciMeasures;
+	}
+	
+	
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	public Date getStartDate() {

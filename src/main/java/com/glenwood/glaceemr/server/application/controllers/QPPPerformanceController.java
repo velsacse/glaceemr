@@ -3,7 +3,7 @@ package com.glenwood.glaceemr.server.application.controllers;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.sql.Date;
+import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -45,6 +45,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEn
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
+import com.glenwood.glaceemr.server.application.services.chart.MIPS.ConfigurationDetails;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.MeasureCalculationService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionBean;
@@ -127,7 +128,7 @@ public class QPPPerformanceController {
 				userId=-1;
 			}
 			
-			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,Calendar.getInstance().get(Calendar.YEAR));
 			if(providerInfo.size()>0){
 
 				String[] measureIds = providerInfo.get(0).getMeasures().split(",");
@@ -136,7 +137,7 @@ public class QPPPerformanceController {
 					cqmMeasures.add(Integer.parseInt(measureIds[i]));
 				}
 
-				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(providerInfo.get(0).getMeasures(), sharedPath,accountId));
+				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(Calendar.getInstance().get(Calendar.YEAR),providerInfo.get(0).getMeasures(), sharedPath,accountId));
 				finalResponse.setMeasureInfo(utils.getMeasureInfo());
 				requestObj = measureService.getQDMRequestObject(accountId,isIndividual,patientID, userId, codeListForQDM, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 
@@ -180,7 +181,6 @@ public class QPPPerformanceController {
 					responseToSave.add(measureStatus.get(measureID));
 
 				}
-
 				measureService.saveMeasureDetails(savedUser, patientID, responseToSave, true);
 
 			}else{
@@ -225,7 +225,7 @@ public class QPPPerformanceController {
 				userId=-1;
 			}
 
-			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,Calendar.getInstance().get(Calendar.YEAR));
 
 			if(providerInfo.size()>0){
 
@@ -279,7 +279,8 @@ public class QPPPerformanceController {
 			@RequestParam(value="tinValue", required=false, defaultValue="") String tinValue,
 			@RequestParam(value="measureId", required=false, defaultValue="") String measureId,
 			@RequestParam(value="isACIReport", required=false, defaultValue="false") boolean isACIReport,
-			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans) throws Exception{
+			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans,
+			@RequestParam(value="reportingYear", required=true) int reportingYear) throws Exception{
 		
 		EMRResponseBean response = new EMRResponseBean();
 		
@@ -289,9 +290,6 @@ public class QPPPerformanceController {
 		String configuredMeasures = "";
 		
 		try{
-
-			Calendar now = Calendar.getInstance();
-			int reportingYear = now.get(Calendar.YEAR);	
 
 			List<MacraProviderQDM> providerInfo = new ArrayList<MacraProviderQDM>();
 
@@ -305,23 +303,36 @@ public class QPPPerformanceController {
 				
 			}else{
 				if(mode!=2){
-					providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+					providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
+					if(providerInfo.size()>0)
 					configuredMeasures = providerInfo.get(0).getMeasures();
+						
 				}else{
 					configuredMeasures = providerConfService.getCompleteTinInfo(tinValue, reportingYear);
 				}
 			}
-			
-			List<MIPSPerformanceBean> performanceObj = null;
-
-			if(mode == 0){
-				performanceObj = measureService.getMeasureRateReportByNPI(providerId, accountId, configuredMeasures,isACIReport, true);
-			}else if(mode == 1){
-				performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport, true);
-			}else{
-				performanceObj = measureService.getGroupPerformanceCount(tinValue,configuredMeasures, accountId,isACIReport, true);
+			List<MIPSPerformanceBean> performanceObj = new ArrayList<MIPSPerformanceBean>();
+			if(configuredMeasures.equals(""))
+			{
+				MIPSPerformanceBean emptyObj=new MIPSPerformanceBean();
+				emptyObj.setMessage("No Measures Configured for the Reporting Year "+reportingYear);
+				performanceObj.add(emptyObj);
 			}
-
+			else
+			{if(mode == 0){
+				performanceObj = measureService.getMeasureRateReportByNPI(providerId, accountId, configuredMeasures,isACIReport, true,reportingYear);
+			}else if(mode == 1){
+				performanceObj = measureService.getMeasureRateReport(providerId, accountId, configuredMeasures,isACIReport, true,reportingYear);
+			}else{
+				performanceObj = measureService.getGroupPerformanceCount(tinValue,configuredMeasures, accountId,isACIReport, true,reportingYear);
+			}
+			}
+			if(performanceObj.size()==0)
+			{
+				MIPSPerformanceBean emptyObj=new MIPSPerformanceBean();
+				emptyObj.setMessage("No Measure's credit recorded for the reporting year "+reportingYear);
+				performanceObj.add(emptyObj);
+			}
 			response.setData(performanceObj);
 			
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating MIPS Performance Report" , -1, request.getRemoteAddr(),-1,"isACIReport="+isACIReport+"&providerId="+providerId,LogUserType.USER_LOGIN, "", "");
@@ -405,7 +416,7 @@ public class QPPPerformanceController {
 		
 	}
 	
-	@RequestMapping(value = "/getMIPSPerformanceRateByNPI", method = RequestMethod.GET)
+	/*@RequestMapping(value = "/getMIPSPerformanceRateByNPI", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getMIPSPerformanceRateByNPI(
 			@RequestParam(value="providerId", required=true) int providerId,
@@ -420,7 +431,7 @@ public class QPPPerformanceController {
 
 		try{
 		
-		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,Calendar.getInstance().get(Calendar.YEAR));
 		
 		String configuredMeasures = providerInfo.get(0).getMeasures();
 		
@@ -460,7 +471,7 @@ public class QPPPerformanceController {
 		return response;
 		
 	}
-	
+	*/
 	@RequestMapping(value = "/getDashBoardDetails", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getMUDashboardDetails(
@@ -469,11 +480,12 @@ public class QPPPerformanceController {
 			@RequestParam(value="tinValue", required=false, defaultValue="") String tinValue,
 			@RequestParam(value="sharedPath", required=true) String sharedPath,
 			@RequestParam(value="isByNpi", required=false, defaultValue="false") boolean byNpi,
-			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans) throws Exception{
+			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans,
+			@RequestParam(value="reportingYear", required=true) Integer reportingYear) throws Exception{
 		
 		EMRResponseBean response = new EMRResponseBean();
 		MUDashboardBean providerDashboard = new MUDashboardBean();
-		
+		String message="";
 		try{
 			
 			String aciMeasures = "";
@@ -484,16 +496,16 @@ public class QPPPerformanceController {
 				aciMeasures = "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3";
 			}
 			
-			Boolean isIndividual=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
+			Boolean isIndividual=measureService.checkGroupOrIndividual(reportingYear);
 
 			if(!isIndividual){
 				providerId=-1;
 			}
 
-			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId);
+			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
 			
-			if(providerInfo!=null){
-				
+			if(providerInfo.size()>0){
+				providerDashboard.setMessage("Success");
 				providerDashboard.setReportingYear(providerInfo.get(0).getMacraProviderConfigurationReportingYear());
 				providerDashboard.setStartDate(providerInfo.get(0).getMacraProviderConfigurationReportingStart());
 				providerDashboard.setEndDate(providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
@@ -502,8 +514,9 @@ public class QPPPerformanceController {
 				
 			}else{
 				
-				measureService.getDashBoardDetails(providerId, accountId, tinValue, "", aciMeasures, byNpi, providerDashboard,sharedPath);
-				
+				//measureService.getDashBoardDetails(providerId, accountId, tinValue, "", aciMeasures, byNpi, providerDashboard,sharedPath);
+				message="No Measures Configured for the Reporting year "+reportingYear;
+				providerDashboard.setMessage(message);
 			}
 			
 		}catch(Exception e){
@@ -552,7 +565,7 @@ public class QPPPerformanceController {
 		GeneratePDFDetails generatePDFDetails=new GeneratePDFDetails();
 		try{
 		if(provId!=-1){
-			List<MacraProviderConfiguration> groupData = providerConfService.getProviderInfo(provId);
+			List<ConfigurationDetails> groupData = providerConfService.getProviderInfo(provId,2017);
 			reportingStart= groupData.get(0).getMacraProviderConfigurationReportingStart();
 			reportingEnd= groupData.get(0).getMacraProviderConfigurationReportingEnd();
 			ReportingMethod=groupData.get(0).getMacraProviderConfigurationReportingMethod();
@@ -599,7 +612,7 @@ public class QPPPerformanceController {
 		int reportingYear = now.get(Calendar.YEAR);	
 		try{
 		if(provId!=-1){
-			List<MacraProviderConfiguration> groupData = providerConfService.getProviderInfo(provId);
+			List<ConfigurationDetails> groupData = providerConfService.getProviderInfo(provId,2017);
 			reportingStart= groupData.get(0).getMacraProviderConfigurationReportingStart();
 			reportingEnd= groupData.get(0).getMacraProviderConfigurationReportingEnd();
 			ReportingMethod=groupData.get(0).getMacraProviderConfigurationReportingMethod();
@@ -618,7 +631,7 @@ public class QPPPerformanceController {
 			generatePDFDetails.setReportStart(reportStart);
 			generatePDFDetails.setReportEnd(reportEnd);
 			List<MacraProviderQDM> providerInfo = new ArrayList<MacraProviderQDM>();
-			providerInfo = providerConfService.getCompleteProviderInfo(provId);
+			providerInfo = providerConfService.getCompleteProviderInfo(provId,Calendar.getInstance().get(Calendar.YEAR));
 			configuredMeasures = providerInfo.get(0).getMeasures();
 		}
 		else

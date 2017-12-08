@@ -7,7 +7,7 @@ public class MIPSPerformanceBean {
 	String measureId;
 	int criteria;
 	int reportingYear;
-	
+	String message;
 	long ippCount;
 	String ippPatientsList;
 	
@@ -45,6 +45,14 @@ public class MIPSPerformanceBean {
 		
 	}
 	
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 	public MIPSPerformanceBean(String measureId, int criteria,int reportingYear,
 			int ippCount, int denominatorCount,
 			int denominatorExclusionCount, int numeratorCount,
