@@ -3,7 +3,7 @@ package com.glenwood.glaceemr.server.application.Bean;
 import java.util.Date;
 
 public class MedicationQDM {
-//	int id;
+	int id;
 	String description;
 	String dose;
 	String form;
@@ -132,7 +132,7 @@ public class MedicationQDM {
 		CMD = cMD;
 	}
 
-	public MedicationQDM(Integer id,String description,String dose,String form,String route,String status,String frequency,String code,String refills,String days,Date orderDate,Date startDate){
+	public MedicationQDM(String description,String dose,String form,String route,String status,String frequency,String code,String refills,String days,Date orderDate,Date startDate){
 //		this.id=id;
 		this.description=description;
 		this.dose=dose;
@@ -153,13 +153,13 @@ public class MedicationQDM {
 		this.reviewStatus=reviewStatus;
 	}
 
-	/*public int getId() {
+	public int getId() {
 		return id;
 	}
 
 	public void setId(int id) {
 		this.id = id;
-	}*/
+	}
 	
 	
 }
