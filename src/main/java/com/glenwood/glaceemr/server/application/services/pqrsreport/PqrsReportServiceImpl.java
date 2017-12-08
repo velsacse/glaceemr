@@ -311,7 +311,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 			Map<String, MeasureStatus> measureStatus = response.getMeasureStatus().get(response.getMeasureStatus().keySet().toArray()[0]).getMeasureStatus();
 			for(int i=0;i<measureStatus.size();i++){
 			MeasureStatus patientObj = measureStatus.get(measureStatus.keySet().toArray()[i]);*/
-		
+		System.out.println("denominator>>>>>>>value from hub>>>>"+denominator);
 		MeasureStatus patientObj = measureStatus.get(measureId);
 		
 				QualityMeasuresPatientEntries patientData = qualityMeasuresPatientEntriesRepository.findOne(Specifications.where(QPPPerformanceSpecification.isPatientExisting(providerId, measureId, patientId, reportYear, patientObj.getCriteria())));
@@ -400,7 +400,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 					patientData.setQualityMeasuresPatientEntriesIpp(patientObj.getIpp());
 					patientData.setQualityMeasuresPatientEntriesNpi(npi);
 					patientData.setQualityMeasuresPatientEntriesTin(tin);
-
+					System.out.println("denominator from table>>>"+patientData.getQualityMeasuresPatientEntriesDenominator());
 					if(denominator > 0){
 
 						patientData.setQualityMeasuresPatientEntriesDenominator(1);
@@ -453,7 +453,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 							patientData.setQualityMeasuresPatientEntriesDenominatorException(0);
 						}
 
-					}else{
+					}/*else{
 						patientData.setQualityMeasuresPatientEntriesDenominator(0);
 						patientData.setQualityMeasuresPatientEntriesIpp(0);
 						patientData.setQualityMeasuresPatientEntriesNumerator(0);
@@ -461,7 +461,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 						patientData.setQualityMeasuresPatientEntriesDenominatorExclusion(0);
 						patientData.setQualityMeasuresPatientEntriesDenominatorException(0);
 					}
-
+*/
 					patientData.setQualityMeasuresPatientEntriesMeasurePopulation(patientObj.getMeasurePopulation());
 					patientData.setQualityMeasuresPatientEntriesMeasurePopulationExclusion(patientObj.getMeasurePopulationExclusion());
 					patientData.setQualityMeasuresPatientEntriesMeasureObservation(new Double(patientObj.getMeasureObservation()).intValue());
@@ -470,7 +470,7 @@ public class PqrsReportServiceImpl implements PqrsReportService{
 				}
 				System.out.println("provider id>>>>>>"+patientData.getQualityMeasuresPatientEntriesProviderId());
 				System.out.println("measureid>>>>>>"+patientData.getQualityMeasuresPatientEntriesMeasureId());
-				System.out.println("denominator>>>>>>"+patientData.getQualityMeasuresPatientEntriesDenominator());
+				System.out.println("denominator>>>>after setting in table>>"+patientData.getQualityMeasuresPatientEntriesDenominator());
 		
 	}
 
