@@ -593,6 +593,7 @@ public class QPPPerformanceController {
 		result.setData(fileName);
 		return result;
 	}
+	
 	@RequestMapping(value = "/mipsPerformancePDF", method = RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean mipsPerformancePDF(@RequestParam(value = "provId", required = true) int provId,
@@ -645,6 +646,159 @@ public class QPPPerformanceController {
 			fileName="";
 		}
 		result.setData(fileName);
+		return result;
+	}
+	
+	@RequestMapping(value = "/mipsReport", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean mipsReport(@RequestParam(value = "provId", required = true) int provId,
+			@RequestParam(value = "reportingYear", required = true) Integer year,
+			@RequestParam(value = "accountId", required = true)String accountId,
+			@RequestParam(value = "measureid", required = true)String measureid,
+			@RequestParam(value = "tinId", required= true)String tinId,
+			@RequestParam(value="isByNpi", required=false, defaultValue="false") boolean byNpi,
+			@RequestParam(value="mode", required=false, defaultValue="1") int mode,
+			@RequestParam(value="isACIReport", required=false, defaultValue="false") boolean isACIReport,
+			@RequestParam(value="practiceName",required=true)String practiceName,
+			@RequestParam(value="sharedPath", required=true) String sharedPath,
+			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans)throws Exception
+	{
+		EMRResponseBean result=new EMRResponseBean();
+		String fileName = null;
+		Date reportingStart = null,reportingEnd = null;
+		Integer ReportingMethod = null;
+		String submissionMethod = null;String reportEnd = null,reportStart = null;
+		GeneratePDFDetails generatePDFDetails=new GeneratePDFDetails();
+		MUDashboardBean providerDashboard = new MUDashboardBean();
+		String configuredMeasures = null;
+		Calendar now = Calendar.getInstance();
+		int reportingYear = now.get(Calendar.YEAR);	
+		try{
+			List<MacraProviderQDM> providerInfo = new ArrayList<MacraProviderQDM>();
+
+			EMRResponseBean  emrResponse=getMIPSPerformanceRate(provId, accountId, mode, tinId, measureid, isACIReport, false,year);
+			List<MIPSPerformanceBean> aciMeasures= (List<MIPSPerformanceBean>) emrResponse.getData();
+			generatePDFDetails.setAciMeasureInfo(aciMeasures);
+
+			EMRResponseBean  Response=getMIPSPerformanceRate(provId, accountId, mode, tinId, measureid, isACIReport, true,year);
+			List<MIPSPerformanceBean> aciTransMeasures= (List<MIPSPerformanceBean>) Response.getData();
+			generatePDFDetails.setAciTransMeasureInfo(aciTransMeasures);
+
+			if(provId!=-1){
+				List<ConfigurationDetails> groupData = providerConfService.getProviderInfo(provId,year);
+				reportingStart= groupData.get(0).getMacraProviderConfigurationReportingStart();
+				reportingEnd= groupData.get(0).getMacraProviderConfigurationReportingEnd();
+				ReportingMethod=groupData.get(0).getMacraProviderConfigurationReportingMethod();
+
+				if(ReportingMethod==1)
+					submissionMethod = "Claims";
+				else if(ReportingMethod==2)
+					submissionMethod = "EHR";
+				else if(ReportingMethod==3)
+					submissionMethod = "Registry";
+
+				SimpleDateFormat reportingDate= new SimpleDateFormat("MM/dd/yyyy");
+				reportEnd=reportingDate.format(reportingEnd);
+				reportStart=reportingDate.format(reportingStart);
+				generatePDFDetails.setSubmissionMethod(submissionMethod);
+				generatePDFDetails.setReportStart(reportStart);
+				generatePDFDetails.setReportEnd(reportEnd);
+				providerInfo = providerConfService.getCompleteProviderInfo(provId,year);
+				configuredMeasures = providerInfo.get(0).getMeasures();
+				result = getMUDashboardDetails(provId, accountId, tinId, sharedPath, byNpi, isTrans,year);
+
+			}
+			else{
+				configuredMeasures = providerConfService.getCompleteTinInfo(tinId, reportingYear);
+				result = getMUDashboardDetails(provId, accountId, tinId, sharedPath, byNpi, isTrans,year);
+			}
+			providerDashboard=(MUDashboardBean) result.getData();
+			generatePDFDetails.setDashboardInfo(providerDashboard);
+			fileName = measureService.mipsReportPDF(generatePDFDetails,provId,configuredMeasures,accountId,tinId,isACIReport,true,practiceName,year);
+
+		}
+		catch(Exception e)
+		{
+			fileName="";
+		}
+		result.setData(fileName);
+		return result;
+	}
+	
+	@RequestMapping(value = "/mipsReportwithPatientInfo", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean mipsReportwithPatientInfo(@RequestParam(value = "provId", required = true) int provId,
+			@RequestParam(value = "reportingYear", required = true) Integer year,
+			@RequestParam(value = "accountId", required = true)String accountId,
+			@RequestParam(value = "measureid", required = true)String measureid,
+			@RequestParam(value = "tinId", required= true)String tinId,
+			@RequestParam(value="isByNpi", required=false, defaultValue="false") boolean byNpi,
+			@RequestParam(value="mode", required=false, defaultValue="1") int mode,
+			@RequestParam(value="isACIReport", required=false, defaultValue="false") boolean isACIReport,
+			@RequestParam(value="practiceName",required=true)String practiceName,
+			@RequestParam(value="sharedPath", required=true) String sharedPath,
+			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans)throws Exception
+	{
+		EMRResponseBean result=new EMRResponseBean();
+		String fileName = null;
+		Date reportingStart = null,reportingEnd = null;
+		Integer ReportingMethod = null;
+		String submissionMethod = null;String reportEnd = null,reportStart = null;
+		GeneratePDFDetails generatePDFDetails=new GeneratePDFDetails();
+		MUDashboardBean providerDashboard = new MUDashboardBean();
+		String configuredMeasures = null;
+		Calendar now = Calendar.getInstance();
+		int reportingYear = now.get(Calendar.YEAR);	
+		try{
+			List<MacraProviderQDM> providerInfo = new ArrayList<MacraProviderQDM>();
+
+			EMRResponseBean  emrResponse=getMIPSPerformanceRate(provId, accountId, mode, tinId, measureid, isACIReport, false,year);
+			List<MIPSPerformanceBean> aciMeasures= (List<MIPSPerformanceBean>) emrResponse.getData();
+			generatePDFDetails.setAciMeasureInfo(aciMeasures);
+
+			EMRResponseBean  Response=getMIPSPerformanceRate(provId, accountId, mode, tinId, measureid, isACIReport, true,year);
+			List<MIPSPerformanceBean> aciTransMeasures= (List<MIPSPerformanceBean>) Response.getData();
+			generatePDFDetails.setAciTransMeasureInfo(aciTransMeasures);
+
+			if(provId!=-1){
+				List<ConfigurationDetails> groupData = providerConfService.getProviderInfo(provId,year);
+				reportingStart= groupData.get(0).getMacraProviderConfigurationReportingStart();
+				reportingEnd= groupData.get(0).getMacraProviderConfigurationReportingEnd();
+				ReportingMethod=groupData.get(0).getMacraProviderConfigurationReportingMethod();
+
+				if(ReportingMethod==1)
+					submissionMethod = "Claims";
+				else if(ReportingMethod==2)
+					submissionMethod = "EHR";
+				else if(ReportingMethod==3)
+					submissionMethod = "Registry";
+
+				SimpleDateFormat reportingDate= new SimpleDateFormat("MM/dd/yyyy");
+				reportEnd=reportingDate.format(reportingEnd);
+				reportStart=reportingDate.format(reportingStart);
+				generatePDFDetails.setSubmissionMethod(submissionMethod);
+				generatePDFDetails.setReportStart(reportStart);
+				generatePDFDetails.setReportEnd(reportEnd);
+				providerInfo = providerConfService.getCompleteProviderInfo(provId,year);
+				configuredMeasures = providerInfo.get(0).getMeasures();
+				result = getMUDashboardDetails(provId, accountId, tinId, sharedPath, byNpi, isTrans,year);
+
+			}
+			else{
+				configuredMeasures = providerConfService.getCompleteTinInfo(tinId, reportingYear);
+				result = getMUDashboardDetails(provId, accountId, tinId, sharedPath, byNpi, isTrans,year);
+			}
+			providerDashboard=(MUDashboardBean) result.getData();
+			generatePDFDetails.setDashboardInfo(providerDashboard);
+			fileName = measureService.mipsReportwithPatientInfo(generatePDFDetails,provId,configuredMeasures,accountId,tinId,isACIReport,true,practiceName,year);
+
+		}
+		catch(Exception e)
+		{
+			fileName="";
+		}
+		result.setData(fileName);
+
 		return result;
 	}
 }

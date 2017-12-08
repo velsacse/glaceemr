@@ -40,7 +40,9 @@ public class MIPSPerformanceBean {
 	
 	long notMetPatients;
 	//String notMetPatientsList;
-	
+	double ecqmPoints;
+	Boolean isInverseMeasure;
+	String submissionMethod;
 	public MIPSPerformanceBean(){
 		
 	}
@@ -460,5 +462,30 @@ public class MIPSPerformanceBean {
 	public void setProviderName(String providerName) {
 		this.providerName = providerName;
 	}
+
+	public double getEcqmPoints() {
+		return ecqmPoints;
+	}
+
+	public void setEcqmPoints(double ecqmPoints) {
+		this.ecqmPoints = ecqmPoints;
+	}
+
+	public Boolean getIsInverseMeasure() {
+		return isInverseMeasure;
+	}
+
+	public void setIsInverseMeasure(Boolean isInverseMeasure) {
+		this.isInverseMeasure = isInverseMeasure;
+	}
+
+	public String getSubmissionMethod() {
+		return submissionMethod;
+	}
+
+	public void setSubmissionMethod(String submissionMethod) {
+		this.submissionMethod = submissionMethod;
+	}
 		
+	
 }

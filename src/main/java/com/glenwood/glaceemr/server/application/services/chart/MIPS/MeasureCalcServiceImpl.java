@@ -14,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,6 +49,7 @@ import com.glenwood.glaceemr.server.application.Bean.GeneratePDFDetails;
 import com.glenwood.glaceemr.server.application.Bean.InvestigationQDM;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPerformanceBean;
+import com.glenwood.glaceemr.server.application.Bean.MUAttestationBean;
 import com.glenwood.glaceemr.server.application.Bean.MUDashboardBean;
 import com.glenwood.glaceemr.server.application.Bean.MUPerformanceBean;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
@@ -83,6 +86,8 @@ import com.glenwood.glaceemr.server.application.models.MacraMeasuresRate;
 import com.glenwood.glaceemr.server.application.models.MacraMeasuresRate_;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration_;
+import com.glenwood.glaceemr.server.application.models.MuAttestationObjectives;
+import com.glenwood.glaceemr.server.application.models.MuAttestationObjectives_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
 import com.glenwood.glaceemr.server.application.models.PqrsPatientEntries;
@@ -1151,6 +1156,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 			}else{
 				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+				String submissionMethod = bringSubmissionMethod(reportingYear);
+				resultObject.setSubmissionMethod(submissionMethod);
 				addPointsAndPriorityStatus(reportingYear,measureId, accountId, resultObject);
 			}
 
@@ -1159,7 +1166,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		}
 		
-		finalResult=arrangeItForCriteria(results);
+		List<MIPSPerformanceBean> sortByMeasurePoints=arrangeItByMeasurePoints(results);
+		finalResult=arrangeItForCriteria(sortByMeasurePoints);
 		return finalResult;
 
 	}
@@ -1306,6 +1314,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				
 			}else{
 				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+				String submissionMethod = bringSubmissionMethod(reportingYear);
+				resultObject.setSubmissionMethod(submissionMethod);
 				addPointsAndPriorityStatus(reportingYear,measureId, accountId, resultObject);
 			}
 
@@ -1367,11 +1377,29 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			resultObject.setPoints(points);
 
 		}
-		List<MIPSPerformanceBean> finalResult=arrangeItForCriteria(results);
+		List<MIPSPerformanceBean> sortByMeasurePoints=arrangeItByMeasurePoints(results);
+		List<MIPSPerformanceBean> finalResult=arrangeItForCriteria(sortByMeasurePoints);
 		return finalResult;
 
 	}
-
+	
+	private List<MIPSPerformanceBean> arrangeItByMeasurePoints(List<MIPSPerformanceBean> results )
+	{
+		if(results.size()>0)
+		{ 
+			Collections.sort(results,new Comparator<MIPSPerformanceBean>() {
+				@Override
+				public int compare(final MIPSPerformanceBean object1, final MIPSPerformanceBean object2) {
+					Double value1 = object1.getEcqmPoints();
+					Double value2 = object2.getEcqmPoints();
+					return value2.compareTo(value1);
+				}
+			});
+		}
+		  
+		return results;
+	}
+	
 	private List<MIPSPerformanceBean> arrangeItForCriteria(List<MIPSPerformanceBean> results) 
 	{
 		
@@ -1517,6 +1545,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					
 				}else{
 					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+					String submissionMethod = bringSubmissionMethod(reportingYear);
+					resultObject.setSubmissionMethod(submissionMethod);
 					addPointsAndPriorityStatus(reportingYear,measureId, accountId, resultObject);
 				}
 
@@ -1580,7 +1610,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
 				resultObject.setPoints(points);
 				
-				finalResult=arrangeItForCriteria(results);
+				List<MIPSPerformanceBean> sortByMeasurePoints=arrangeItByMeasurePoints(results);
+				finalResult=arrangeItForCriteria(sortByMeasurePoints);
 			}
 
 		}catch(Exception e){
@@ -1806,6 +1837,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			resultObject.setHighPriority(eMeasure.isHighPriority());
 			resultObject.setOutcome(eMeasure.getType());
 			resultObject.setPoints(getPointsByBenchMark(resultObject.getPerformanceRate(), eMeasure));
+			resultObject.setEcqmPoints(getMeasurePoints(resultObject.getPerformanceRate(),resultObject.getSubmissionMethod(), eMeasure));
 		} 
 		catch (Exception e) 
 		{
@@ -1814,6 +1846,26 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 
 	}
+	
+	private String bringSubmissionMethod(int reportingYear)
+	{
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<String> cq = builder.createQuery(String.class);
+		Root<MacraProviderConfiguration> rootMacraProviderConfiguration = cq.from(MacraProviderConfiguration.class);
+		
+		Predicate byReportingYear = builder.equal(rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingYear), reportingYear);		
+		
+		cq.where(builder.and(byReportingYear));
+		cq.select(builder.selectCase().when(builder.equal(rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingMethod),1),"Claims")
+					   .when(builder.equal(rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingMethod),2),"EHR")
+					   .when(builder.equal(rootMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingMethod),3),"Registry/QCDR").otherwise("-").as(String.class));
+
+		List<String> submissionMethod= em.createQuery(cq).getResultList();
+		
+		return submissionMethod.get(0);
+		
+	}
+	
 	
 	private String getCMSIdAndTitle(String measureId, String accountId){
 
@@ -1960,7 +2012,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode, boolean isNotMet) {
-System.out.println("patient llist query>>>>>>>>>>>>>.");
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MIPSPatientInformation> cq = builder.createQuery(MIPSPatientInformation.class);
 		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
@@ -2431,6 +2482,11 @@ System.out.println("patient llist query>>>>>>>>>>>>>.");
 				builder.coalesce(root.get(PatientRegistration_.patientRegistrationStateName), "-"),
 				builder.coalesce(root.get(PatientRegistration_.patientRegistrationZip), "-"),
 				builder.coalesce(root.get(PatientRegistration_.patientRegistrationPhoneNo),""),
+				builder.selectCase().when(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator),1),"Num")
+				.when(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion),1),"DenExcl")
+				.when(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException),1),"DenExcep")
+				.when(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion),1),"NumExcl")
+				.when(builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator),1),"Den").otherwise("Ipp").as(String.class),
 				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesIpp),
 				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator),
 				joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorExclusion),
@@ -2496,17 +2552,16 @@ System.out.println("patient llist query>>>>>>>>>>>>>.");
 				measureType="Not Met";
 			}
 
-			PDFData+="<html><style> table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse;}</style><body><h3><center>"+measureName+" - "+measureType+" Patient List </center></h3>";
-
+			PDFData+="<html><style>table.alpha{font-size:12px;} table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse;font-size:12px;} </style><body><h3><center>"+measureName+" - "+measureType+" Patient List </center></h3>";
 			if(provId!=-1){
 				providerName = getProviderName(provId);
 				submissionMethod = generatePDFDetails.getSubmissionMethod();
 				reportingStart =generatePDFDetails.getReportStart();
 				reportingEnd = generatePDFDetails.getReportEnd();
-				PDFData+="<div><table><tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
+				PDFData+="<div><table class=alpha><tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
 			}
 			else
-				PDFData+="<div><table><tr><th> Tin Number</th> <td>:&nbsp</td>  <td>"+tinId+"</td></tr></table></div>";
+				PDFData+="<div><table class=alpha><tr><th> Tin Number</th> <td>:&nbsp</td>  <td>"+tinId+"</td></tr></table></div>";
 
 			List<MIPSPatientInformation> totalPatientList= getPatienttoPrint(criteriaId,provId,measureid,tinId,measureCriteria);
 			PDFData+="<table class=beta width=100% cellpadding=5 cellspacing=5> <tr>  <th>Account No.</th>   <th>Last Name</th>   <th>First Name</th>  <th>DOB</th>   <th>Gender</th> <th>Phone Number</th>   </tr><br>";
@@ -2594,20 +2649,19 @@ System.out.println("patient llist query>>>>>>>>>>>>>.");
 		String PDFData="";String FileName = null;String provName=null;
 		try{
 			List<MIPSPerformanceBean> PatientList;
-			PDFData+="<html><style> table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse;}</style><body><h3><center> MIPS Performance Report </center></h3>";
-	
+			PDFData+="<html><head><style> table.alpha{font-size:12px} table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse; font-size:12px;} .beta tbody th:first-child {width:250px} </style></head>";	
 			if(provId!=-1){
 				providerName = getProviderName(provId);
 				submissionMethod = generatePDFDetails.getSubmissionMethod();
 				reportingStart =generatePDFDetails.getReportStart();
 				reportingEnd = generatePDFDetails.getReportEnd();
-				PDFData+="<div><table><tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
+				PDFData+="<div><table class=alpha ><tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
 				PatientList = getMeasureRateReportByNPI(provId, accountId,configuredMeasures,isACIReport,isOrderBy,2017);
 				provName = providerName.replaceAll("\\s","");
 				FileName = provName+"_"+System.currentTimeMillis();
 			}
 			else{
-				PDFData+="<div><table><tr><th> Tin Number</th> <td>:&nbsp</td> <td>"+tinId+"</td> </tr></table></div>";
+				PDFData+="<div><table class=alpha ><tr><th> Tin Number</th> <td>:&nbsp</td> <td>"+tinId+"</td> </tr></table></div>";
 				PatientList = getGroupPerformanceCount(tinId,configuredMeasures,accountId,isACIReport,isOrderBy,2017);
 				FileName = "GroupPerformance_"+tinId;
 			}
@@ -2698,6 +2752,796 @@ System.out.println("patient llist query>>>>>>>>>>>>>.");
 	return filename;
 	}
 	
+	public List<MUAttestationBean> getAttestationObjectives()
+	{
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<MUAttestationBean> cq = builder.createQuery(MUAttestationBean.class);;
+		Root<MuAttestationObjectives> rootMuAttestationObjectives = cq.from(MuAttestationObjectives.class);
+		Selection[] objectives= new Selection[] {
+				rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveMeasureid),
+				rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveStatus),
+		};
+		cq.orderBy(builder.asc(rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveId)));		
+		cq.select(builder.construct(MUAttestationBean.class,objectives));
+		List<MUAttestationBean> objectivesList = em.createQuery(cq).getResultList();
+		return objectivesList;
+	}
+	
+	@Override
+	public String mipsReportPDF(GeneratePDFDetails generatePDFDetails,int provId,String configuredMeasures,String accountId,String tinId,boolean isACIReport, boolean isOrderBy,String practiceName,Integer year) throws Exception
+	{
+		String providerName,submissionMethod,reportingStart,reportingEnd;
+		String PDFData="";String FileName = null;String provName=null;
+		try{
+			List<MIPSPerformanceBean> PatientList;
+			List<MIPSPerformanceBean> aciMeasureList;
+			List<MIPSPerformanceBean> ecqmMeasureList = null;
+			MUDashboardBean providerDashboard = new MUDashboardBean();
+			List<MIPSPerformanceBean> aciMeasures = new ArrayList<MIPSPerformanceBean>();
+			List<MIPSPerformanceBean> aciTransMeasures = new ArrayList<MIPSPerformanceBean>();
+			List<MUAttestationBean> objectiveMeasureList= getAttestationObjectives();
+			double ecqmRate =0,aciRate=0;
+			providerDashboard=generatePDFDetails.getDashboardInfo();
+			ecqmMeasureList = providerDashboard.getEcqmMeasures();
+			aciMeasures=generatePDFDetails.getAciMeasureInfo();
+			aciTransMeasures=generatePDFDetails.getAciTransMeasureInfo();
+			int aciPoints = providerDashboard.getAciPoints();
+			int ecqmPoints = providerDashboard.getEcqmPoints();
+			aciMeasureList=providerDashboard.getAciMeasures();
+			
+			PDFData+="<html><head>"; 
+			PDFData+="<style> .break { page-break-before: always; } table.alpha{font-size:12px} table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse; font-size:12px;} .beta tbody th:first-child {width:250px} ";
+			PDFData+="table.totalscore,.totalscore td,.totalscore th{font-size:12px; border:1px solid lightgrey; border-collapse:collapse;width:200}";
+			PDFData+="table.measureScore,.measureScore td,.measureScore th{font-size:12px; border:1px solid lightgrey; border-collapse:collapse;width:600}";
+			PDFData+="table.qualitymeasures,.qualitymeasures td,.qualitymeasures th{font-size:12px; border:1px solid lightgrey; border-collapse:collapse;width:385;}.qualitymeasures tr{border-bottom:1pt solid black;}";
+			PDFData+="table.measures,.measures td{width:800; vertical-align:top}";
+			PDFData+="table.aciTransitionMeasures,.aciTransitionMeasures td,.aciTransitionMeasures th{font-size:12px; border:1px solid lightgrey; border-collapse:collapse;width:385}";
+			PDFData+="table.acimeasure,.acimeasure td,.acimeasure th{border:1px solid lightgrey; border-collapse:collapse; font-size:12px;} .acimeasure tbody th:first-child {width:350px} ";
+			PDFData+="div.rate{margin-left: 10px;width: 80px;background-color: #EFEFEF;border: 1px solid #EFEFF4;height: 30px;}";
+
+			for(int i=0;i<ecqmMeasureList.size();i++)
+			{
+				ecqmRate = ecqmMeasureList.get(i).getPerformanceRate();
+				PDFData+="label.ecqmrate {width:'"+ecqmRate+"%';float: left;line-height: 30px;height: 30px;background-color: #696969; color: #fff;font-weight: bold; display: inline-block;}";
+			}
+			for(int i=0;i<aciMeasureList.size();i++)
+			{
+				aciRate=aciMeasureList.get(i).getPerformanceRate();
+				PDFData+="label.acirate {width:'"+aciRate+"%';float: left;line-height: 30px;height: 30px;background-color: #696969; color: #fff;font-weight: bold; display: inline-block;}";
+			}
+			PDFData+="</style></head><body><table><thead><h3><center>"+practiceName+"</center></h3></thead>";
+			PDFData+="<div><table class=alpha>";
+			
+			// header row:
+			
+			double totalPoints = ((((double)ecqmPoints / 60.0) * 100 * 0.60)+ (((double)aciPoints / 100.0) * 100 * 0.25)+ ((40 / 40) * 100 * 0.15));
+			
+			if(provId!=-1){
+				providerName = getProviderName(provId);
+				submissionMethod = generatePDFDetails.getSubmissionMethod();
+				reportingStart =generatePDFDetails.getReportStart();
+				reportingEnd = generatePDFDetails.getReportEnd();
+				PDFData+="<tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Reporting Year</td><td>:&nbsp</td><td>2017</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
+				PatientList = getMeasureRateReportByNPI(provId, accountId,configuredMeasures,isACIReport,isOrderBy,year);
+				provName = providerName.replaceAll("\\s","");
+				FileName = provName+"_"+System.currentTimeMillis()+"_1";
+			}
+			else{
+				PDFData+="<tr><td> Tin Number</td> <td>:&nbsp</td> <td>"+tinId+"</td> </tr></table></div>";
+				PatientList = getGroupPerformanceCount(tinId,configuredMeasures,accountId,isACIReport,isOrderBy,year);
+				FileName = "GroupPerformance_"+tinId+"_1";
+			}
+			PDFData+="<br><center><table class=totalscore><tr><th align=center>Total Score</th></tr><tr><td align=center>"+totalPoints+"/100</td></tr></table></center>&nbsp";
+			PDFData+="<center><table class=measureScore><tr><th align=center>Quality Measures</th><th align=center> ACI Transition Measures</th><th align=center>Improvement Activities</th></tr><tr><td align=center>"+ecqmPoints+"/60</td><td align=center>"+aciPoints+"/100</td><td align=center>40/40</td></tr></table></center>&nbsp";
+			PDFData+="<center><table class=measures><tr><td align=left><table class=qualitymeasures><tr><th align=center; colspan=2>Quality Measures</th></tr>";
+			
+			String ecqmMeasureName,aciTransitionMeasureName;
+			//double ecqmRate,aciRate;
+			for(int i=0;i<ecqmMeasureList.size();i++)
+			{
+				ecqmMeasureName=ecqmMeasureList.get(i).getTitle();
+				ecqmRate = ecqmMeasureList.get(i).getPerformanceRate();
+				PDFData+="<tr><td>"+ecqmMeasureName+"</td><td align=right><div class=rate><label class=ecqmrate>"+ecqmRate+"%</label></div></td></tr>";
+			}
+			PDFData+="</table></td>&nbsp&nbsp<td align=right><table class=aciTransitionMeasures><tr><th colspan=2 > ACI Transition Measures</th></tr>";
+			for(int i=0;i<aciMeasureList.size();i++)
+			{
+				aciTransitionMeasureName=aciMeasureList.get(i).getTitle();
+				aciRate=aciMeasureList.get(i).getPerformanceRate();
+				PDFData+="<tr><td>"+aciTransitionMeasureName+"</td><td align=right><div class=rate><label class=acirate>"+aciRate+"%</label></div></td></tr>";
+			}
+			
+			PDFData+="</table></td></tr></table></center>&nbsp";
+			PDFData+="<h3 class='break'><center><br><br>Quality Measures</center></h3><br>";
+			PDFData+="<table class=beta width=100% cellpadding=5 cellspacing=5> <tr>  <th>Measure Name </th>   <th>IPP</th>   <th> DENOM</th>  <th>DENEX</th>   <th>NUMER</th> <th>DENEXCEP</th>  <th>NUMEREX</th> <th>Not Met</th> <th>Rate</th> </tr>";
+			
+			long ipp = 0;
+			long denom = 0;
+			long denex = 0;
+			long num = 0;
+			long denexcep = 0;
+			long numex = 0;
+			double rate = 0.00;
+			long notmet = 0;
+			
+			String measureName= null;
+			for(int i=0;i<PatientList.size();i++)
+			{
+				measureName = PatientList.get(i).getTitle();
+				ipp = PatientList.get(i).getIppCount();
+				denom = PatientList.get(i).getDenominatorCount();
+				denex = PatientList.get(i).getDenominatorExclusionCount();
+				num = PatientList.get(i).getNumeratorCount();
+				denexcep = PatientList.get(i).getDenominatorExceptionCount();
+				numex = PatientList.get(i).getNumeratorExclusionCount();
+				notmet = PatientList.get(i).getNotMetPatients();
+				rate = PatientList.get(i).getPerformanceRate();
+				PDFData+="<tr> <td align=left>"+measureName+"</td>  <td align=center><font color=blue>"+ipp+"</font></td>  <td align=center><font color=blue>"+denom+"</font></td>   <td align=center><font color=blue>"+denex+"</font></td>    <td align=center><font color=blue>"+num+"</font></td> <td align=center><font color=blue>"+denexcep+"</font></td> <td align=center><font color=blue>"+numex+"</font></td> <td align=center><font color=blue>"+notmet+"</font> </td> <td align=center><font color=green>"+rate+"%</font></td></tr>";
+				
+			}
+			PDFData+="</table>";
+			
+			// <---- ACI Transition Measures------>
+			PDFData+="<h3 class='break'><center><br><br>ACI Transition Measures</center></h3><br>";
+			String objMeasureId; boolean objMeasureStatus;
+			int aciTrans_baseScoreCount = 0,aciTrans_performancePoints = 0,aciTrans_bonusPoints = 0,aciTrans_basePoints=0,aciTrans_TotalPoints = 0;
+			int aciTransMeasurePoints;String aciTransCmsID=null;
+			for(int i=0;i<objectiveMeasureList.size();i++){
+				objMeasureId=objectiveMeasureList.get(i).getObjectiveMeasureId();
+				objMeasureStatus=objectiveMeasureList.get(i).isObjectiveStauts();
+
+				if(objMeasureId.equals("ACI_TRANS_PPHI_1"))
+				{
+					if(objMeasureStatus==true)
+						aciTrans_baseScoreCount++;
+				}
+				if(objMeasureId.equals("ACI_TRANS_PHCDRR_1"))
+				{
+					if(objMeasureStatus==true)
+						aciTrans_performancePoints+=10;
+				}
+				if(objMeasureId.equals("ACI_TRANS_PHCDRR_2"))
+				{
+					if(objMeasureStatus==true)
+						aciTrans_bonusPoints+=5;
+				}
+				if(objMeasureId.equals("ACI_IMPRO_1"))
+				{
+					if(objMeasureStatus==true)
+						aciTrans_bonusPoints+=10;
+				}
+			}
+			
+			for(int i=0;i<aciTransMeasures.size();i++)
+			{
+				aciTransMeasurePoints =(int) aciTransMeasures.get(i).getPoints();
+				aciTransCmsID=aciTransMeasures.get(i).getCmsId();
+				if(!aciTransCmsID.equals("ACI_TRANS_EP_1"))
+					aciTrans_performancePoints+=aciTransMeasurePoints;
+			}
+				if (aciTrans_baseScoreCount == 4) {
+					aciTrans_basePoints = 50;
+				} else {
+					aciTrans_basePoints = 0;
+				}
+				
+				if (aciTrans_basePoints == 0) {
+					aciTrans_TotalPoints = 0;
+				} else {
+					aciTrans_TotalPoints = aciTrans_basePoints + aciTrans_performancePoints + aciTrans_bonusPoints;
+				}
+			
+			PDFData+="<center><table class=totalscore><tr><th align=center>Total Score</th></tr><tr><td align=center>"+aciTrans_TotalPoints+"/155</td></tr></table></center>&nbsp";
+			PDFData+="<center><table class=measureScore><tr><th align=center>Base Score</th><th align=center> Performance Score</th><th align=center>Bonus Score</th></tr><tr><td align=center>"+aciTrans_basePoints+"/50</td><td align=center>"+aciTrans_performancePoints+"/90</td><td align=center>"+aciTrans_bonusPoints+"/15</td></tr></table></center>&nbsp";
+			PDFData+="</table>";
+			PDFData+= "&nbsp<table class=acimeasure width=100% cellpadding=5 cellspacing=5><tr><th>Measure Name </th>   <th>DENOM</th>   <th> NUMER</th>  <th>NOT MET</th>   <th>RATE</th> <th>BASE SCORE</th>  <th>POINTS</th></tr>";
+			String aciTransMeasureName=null;
+
+			long aciTransDenom,aciTransNumer,aciTransNotMet;
+
+			double aciTransMeasureRate;
+			for(int i=0;i<aciTransMeasures.size();i++)
+			{
+				aciTransMeasureName=aciTransMeasures.get(i).getTitle();
+				aciTransCmsID=aciTransMeasures.get(i).getCmsId();
+				aciTransDenom=aciTransMeasures.get(i).getDenominatorCount();
+				aciTransNumer=aciTransMeasures.get(i).getNumeratorCount();
+				aciTransNotMet=aciTransMeasures.get(i).getNotMetPatients();
+				aciTransMeasureRate=aciTransMeasures.get(i).getPerformanceRate();
+				PDFData+="<tr><td align=left>"+aciTransMeasureName+"("+aciTransCmsID+")</td><td align=center><font color=blue>"+aciTransDenom+"</font></td><td align=center><font color=blue>"+aciTransNumer+"</font></td><td align=center><font color=blue>"+aciTransNotMet+"</font></td><td align=center><font color=green>"+aciTransMeasureRate+"%</font></td>";
+				if (aciTransCmsID.equals("ACI_TRANS_EP_1")|| aciTransCmsID.equals("ACI_TRANS_HIE_1")|| aciTransCmsID.equals("ACI_TRANS_PEA_1"))
+				{
+					if(aciTransNumer>=1)
+					{
+						PDFData+="<td align=center><font color=green>ACHIEVED</font></td>";
+					}
+					else
+						PDFData+="<td align=center><font color=red>NOT ACHIEVED</font></td>";
+				}
+				else
+					PDFData+="<td align=center>N/A</td>";
+
+				if(aciTransCmsID.equals("ACI_TRANS_EP_1")){
+					PDFData+="<td align=center>N/A</td></tr>";
+				}
+				else{
+					aciTransMeasurePoints =(int) aciTransMeasures.get(i).getPoints();
+					PDFData+="<td align=center>"+aciTransMeasurePoints+"</td></tr>";
+				}
+
+			}
+			PDFData+="</table>";
+			
+			//<------ Aci Measures------->
+			PDFData+="<h3 class='break'><center><br><br>ACI Measures</center></h3><br>";
+			String aciCmsID; int aciMeasurePoints;
+			int aci_baseScoreCount = 0,aci_performancePoints = 0,aci_bonusPoints = 0,aci_basePoints=0,aci_TotalPoints = 0;
+			for(int i=0;i<objectiveMeasureList.size();i++){
+				objMeasureId=objectiveMeasureList.get(i).getObjectiveMeasureId();
+				objMeasureStatus=objectiveMeasureList.get(i).isObjectiveStauts();
+
+				if(objMeasureId.equals("ACI_TRANS_PPHI_1"))
+				{
+					if(objMeasureStatus==true)
+						aci_baseScoreCount++;
+				}
+				if(objMeasureId.equals("ACI_TRANS_PHCDRR_1"))
+				{
+					if(objMeasureStatus==true)
+						aci_performancePoints+=10;
+				}
+				if(objMeasureId.equals("ACI_TRANS_PHCDRR_2"))
+				{
+					if(objMeasureStatus==true)
+						aci_bonusPoints+=5;
+				}
+				if(objMeasureId.equals("ACI_IMPRO_1"))
+				{
+					if(objMeasureStatus==true)
+						aci_bonusPoints+=10;
+				}
+			}
+			
+			for(int i=0;i<aciMeasures.size();i++)
+			{
+				aciMeasurePoints =(int) aciMeasures.get(i).getPoints();
+				aciCmsID=aciMeasures.get(i).getCmsId();
+				if(!aciCmsID.equals("ACI_EP_1"))
+					aci_performancePoints+=aciMeasurePoints;
+			}
+				if (aci_baseScoreCount == 4) {
+					aci_basePoints = 50;
+				} else {
+					aci_basePoints = 0;
+				}
+				
+				if (aci_basePoints == 0) {
+					aci_TotalPoints = 0;
+				} else {
+					aci_TotalPoints = aci_basePoints + aci_performancePoints + aci_bonusPoints;
+				}
+			
+			PDFData+="<center><table class=totalscore><tr><th align=center>Total Score</th></tr><tr><td align=center>"+aci_TotalPoints+"/155</td></tr></table></center>&nbsp";
+			PDFData+="<center><table class=measureScore><tr><th align=center>Base Score</th><th align=center> Performance Score</th><th align=center>Bonus Score</th></tr><tr><td align=center>"+aci_basePoints+"/50</td><td align=center>"+aci_performancePoints+"/90</td><td align=center>"+aci_bonusPoints+"/15</td></tr></table></center>&nbsp";
+			PDFData+="</table>";
+			
+			PDFData+= "&nbsp<table class=acimeasure width=100% cellpadding=5 cellspacing=5><tr><th>Measure Name </th>   <th>DENOM</th>   <th> NUMER</th>  <th>NOT MET</th>   <th>RATE</th> <th>BASE SCORE</th>  <th>POINTS</th></tr>";
+			String aciMeasureName=null;
+
+			long aciDenom,aciNumer,aciNotMet;
+			
+			double aciMeasureRate;
+			for(int i=0;i<aciMeasures.size();i++)
+			{
+				aciMeasureName=aciMeasures.get(i).getTitle();
+				aciCmsID=aciMeasures.get(i).getCmsId();
+				aciDenom=aciMeasures.get(i).getDenominatorCount();
+				aciNumer=aciMeasures.get(i).getNumeratorCount();
+				aciNotMet=aciMeasures.get(i).getNotMetPatients();
+				aciMeasureRate=aciMeasures.get(i).getPerformanceRate();
+				PDFData+="<tr><td align=left>"+aciMeasureName+"("+aciCmsID+")</td><td align=center><font color=blue>"+aciDenom+"</font></td><td align=center><font color=blue>"+aciNumer+"</font></td><td align=center><font color=blue>"+aciNotMet+"</font></td><td align=center><font color=green>"+aciMeasureRate+"%</font></td>";
+				if (aciCmsID.equals("ACI_EP_1")|| aciCmsID.equals("ACI_HIE_1")|| aciCmsID.equals("ACI_PEA_1"))
+				{
+					if(aciNumer>=1)
+					{
+						PDFData+="<td align=center><font color=green>ACHIEVED</font></td>";
+					}
+					else
+						PDFData+="<td align=center><font color=red>NOT ACHIEVED</font></td>";
+				}
+				else
+					PDFData+="<td align=center>N/A</td>";
+
+				if(aciCmsID.equals("ACI_EP_1")){
+					PDFData+="<td align=center>N/A</td></tr>";
+				}
+				else{
+					aciMeasurePoints =(int) aciMeasures.get(i).getPoints();
+					PDFData+="<td align=center>"+aciMeasurePoints+"</td></tr>";
+				}
+
+			}
+			PDFData+="</table>&nbsp";
+			
+			PDFData+="</body></html>";
+			System.out.println(PDFData);
+		}
+		
+		catch(Exception e){
+			PDFData="";
+		}
+		String sharedPath = sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
+		String HTMLFilePath=generateMipsReportHTMLFilePath(sharedPath,PDFData,FileName);
+		String s=null;	
+		File patientDir = new File(sharedPath+"/MipsReportPDF/");
+		patientDir.setWritable(true, false);
+		patientDir.setExecutable(true, false);
+		if (!patientDir.exists()){
+			patientDir.mkdir();
+		}
+		Process p2 = Runtime.getRuntime().exec("/usr/local/bin/wkhtmltopdf "+HTMLFilePath+" "+sharedPath+"/MipsReportPDF/"+FileName+".pdf");
+		BufferedReader stdInput2 = new BufferedReader(new  InputStreamReader(p2.getInputStream()));
+		BufferedReader stdError2 = new BufferedReader(new InputStreamReader(p2.getErrorStream()));
+		while ((s = stdInput2.readLine()) != null) {
+			//System.out.println(s);
+		}
+		while ((s = stdError2.readLine()) != null) {
+
+		}
+		return FileName;
+	}
+	
+	public String generateMipsReportHTMLFilePath(String sharePath,String DatatoSave,String fileName)
+	{
+	File saveDir = new File(sharePath+"/MipsReportPDF/");
+	saveDir.setWritable(true, false);
+	saveDir.setExecutable(true, false);
+	String filename="";
+	try{
+		if (!saveDir.exists()){
+		        saveDir.mkdir();
+		}
+		filename =sharePath+"/MipsReportPDF/"+fileName+".html";
+		File obj=new File(sharePath+"/MipsReportPDF/"+fileName+".html");
+		if(!obj.canExecute())
+		{
+		obj.setExecutable(true);
+		}
+		else
+		if(!obj.canWrite())
+		{
+			obj.setWritable(true);
+		}
+		else
+		if(!obj.canRead())
+		{
+		obj.setReadable(true, false);
+		}
+		FileWriter fstream = new FileWriter(obj);
+		BufferedWriter out = new BufferedWriter(fstream);
+		out.write(DatatoSave);
+		out.close();
+	}catch (Exception e){ //Catch exception if any
+		e.printStackTrace();
+	}
+	return filename;
+	}
+	
+	public List<Integer> getCriteria(String measureId)
+	{
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Integer> cq = builder.createQuery(Integer.class);
+		Root<QualityMeasuresPatientEntries> rootQualityMeasuresPatientEntries = cq.from(QualityMeasuresPatientEntries.class);
+		cq.where(builder.equal(rootQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId),measureId));
+		cq.distinct(true);
+		cq.select(rootQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesCriteria));
+		List<Integer> criteriaList= em.createQuery(cq).getResultList();
+		return criteriaList;
+
+	}
+	@Override
+	public String mipsReportwithPatientInfo(GeneratePDFDetails generatePDFDetails,int provId,String configuredMeasures,String accountId,String tinId,boolean isACIReport, boolean isOrderBy,String practiceName,Integer year) throws Exception
+	{
+		String providerName,submissionMethod,reportingStart,reportingEnd;
+		String PDFData="";String FileName = null;String provName=null;
+		try{
+			List<MIPSPerformanceBean> measureList;
+			List<MIPSPerformanceBean> aciMeasureList;
+			List<MIPSPerformanceBean> ecqmMeasureList = null;
+			MUDashboardBean providerDashboard = new MUDashboardBean();
+			List<MIPSPerformanceBean> aciMeasures = new ArrayList<MIPSPerformanceBean>();
+			List<MIPSPerformanceBean> aciTransMeasures = new ArrayList<MIPSPerformanceBean>();
+			List<MUAttestationBean> objectiveMeasureList= getAttestationObjectives();
+			String sharedPath = sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
+			double ecqmRate,aciRate;
+			providerDashboard=generatePDFDetails.getDashboardInfo();
+			ecqmMeasureList = providerDashboard.getEcqmMeasures();
+			aciMeasures=generatePDFDetails.getAciMeasureInfo();
+			aciTransMeasures=generatePDFDetails.getAciTransMeasureInfo();
+			int aciPoints = providerDashboard.getAciPoints();
+			int ecqmPoints = providerDashboard.getEcqmPoints();
+			aciMeasureList=providerDashboard.getAciMeasures();
+			PDFData+="<html><head><style> .break { page-break-before: always; } table.alpha{font-size:12px} table.beta,.beta td,.beta th{border:1px solid lightgrey; border-collapse:collapse; font-size:12px;} .beta tbody th:first-child {width:250px} ";
+			PDFData+="table.patientlist,.patientlist td,.patientlist th{border:1px solid lightgrey; border-collapse:collapse; font-size:12px;} .patientlist tbody td:first-child {width:10px}";
+			PDFData+="table.totalscore,.totalscore td,.totalscore th{font-size:12px; border:1px solid lightgrey; border-collapse:collapse;width:200}";
+			PDFData+="table.measureScore,.measureScore td,.measureScore th{font-size:12px; border:1px solid lightgrey; border-collapse:collapse;width:600}";
+			PDFData+="table.qualitymeasures,.qualitymeasures td,.qualitymeasures th{font-size:12px; border:1px solid lightgrey; border-collapse:collapse;width:385;}.qualitymeasures tr{border-bottom:1pt solid black;}";
+			PDFData+="table.measures,.measures td{width:800; vertical-align:top}";
+			PDFData+="table.aciTransitionMeasures,.aciTransitionMeasures td,.aciTransitionMeasures th{font-size:12px; border:1px solid lightgrey; border-collapse:collapse;width:385}";
+			PDFData+="table.acimeasure,.acimeasure td,.acimeasure th{border:1px solid lightgrey; border-collapse:collapse; font-size:12px;} .acimeasure tbody th:first-child {width:350px} ";
+			PDFData+="div.rate{margin-left: 10px;width: 80px;background-color: #EFEFEF;border: 1px solid #EFEFF4;height: 30px;}";
+
+			for(int i=0;i<ecqmMeasureList.size();i++)
+			{
+				ecqmRate =  ecqmMeasureList.get(i).getPerformanceRate();
+				PDFData+="label.ecqmrate {width:'"+ecqmRate+"%';float: left;line-height: 30px;height: 30px;background-color: #696969; color: #fff;font-weight: bold; display: inline-block;}";
+			}
+			for(int i=0;i<aciMeasureList.size();i++)
+			{
+				aciRate=aciMeasureList.get(i).getPerformanceRate();
+				PDFData+="label.acirate {width:'"+aciRate+"%';float: left;line-height: 30px;height: 30px;background-color: #696969; color: #fff;font-weight: bold; display: inline-block;}";
+			}
+
+			PDFData+="</style></head><body><table><thead><h3><center>"+practiceName+"</center></h3></thead>";
+			PDFData+="<div><table class=alpha>";
+			// header row:
+
+			double totalPoints = ((((double)ecqmPoints / 60.0) * 100 * 0.60)+ (((double)aciPoints / 100.0) * 100 * 0.25)+ ((40 / 40) * 100 * 0.15));
+
+			if(provId!=-1){
+				providerName = getProviderName(provId);
+				submissionMethod = generatePDFDetails.getSubmissionMethod();
+				reportingStart =generatePDFDetails.getReportStart();
+				reportingEnd = generatePDFDetails.getReportEnd();
+				PDFData+="<tr><td>Provider Name</td><td>:&nbsp</td><td>"+providerName+"</td></tr><tr><td>Reporting Year</td><td>:&nbsp</td><td>2017</td></tr><tr><td>Submission Method</td><td>:&nbsp</td><td>"+submissionMethod+"</td></tr><tr><td>Reporting Period</td><td>:&nbsp</td><td>"+reportingStart+" - "+reportingEnd+"</td></tr></table></div>";
+				measureList = getMeasureRateReportByNPI(provId, accountId,configuredMeasures,isACIReport,isOrderBy,year);
+				provName = providerName.replaceAll("\\s","");
+				FileName = provName+"_"+System.currentTimeMillis()+"_1";
+			}
+			else{
+				PDFData+="<tr><td> Tin Number</td> <td>:&nbsp</td> <td>"+tinId+"</td> </tr></table></div>";
+				measureList = getGroupPerformanceCount(tinId,configuredMeasures,accountId,isACIReport,isOrderBy,year);
+				FileName = "GroupPerformance_"+tinId+"_1";
+			}
+			PDFData+="<br><center><table class=totalscore><tr><th align=center>Total Score</th></tr><tr><td align=center>"+totalPoints+"/100</td></tr></table></center>&nbsp";
+			PDFData+="<center><table class=measureScore><tr><th align=center>Quality Measures</th><th align=center> ACI Transition Measures</th><th align=center>Improvement Activities</th></tr><tr><td align=center>"+ecqmPoints+"/60</td><td align=center>"+aciPoints+"/100</td><td align=center>40/40</td></tr></table></center>&nbsp";
+			PDFData+="<center><table class=measures><tr><td align=left><table class=qualitymeasures><tr><th align=center; colspan=2>Quality Measures</th></tr>";
+
+			String ecqmMeasureName,aciTransitionMeasureName;
+			for(int i=0;i<ecqmMeasureList.size();i++)
+			{
+				ecqmMeasureName=ecqmMeasureList.get(i).getTitle();
+				ecqmRate = ecqmMeasureList.get(i).getPerformanceRate();
+				PDFData+="<tr><td>"+ecqmMeasureName+"</td><td align=right><div class='rate'><label class='ecqmrate'>"+ecqmRate+"%</label></div></td></tr>";
+			}
+			PDFData+="</table></td>&nbsp&nbsp<td align=right><table class=aciTransitionMeasures><tr><th colspan=2 > ACI Transition Measures</th></tr>";
+			for(int i=0;i<aciMeasureList.size();i++)
+			{
+				aciTransitionMeasureName=aciMeasureList.get(i).getTitle();
+				aciRate=aciMeasureList.get(i).getPerformanceRate();
+				PDFData+="<tr><td>"+aciTransitionMeasureName+"</td><td align=right><div class=rate><label class='acirate'>"+aciRate+"%</label></div></td></tr>";
+			}
+
+			PDFData+="</table></td></tr></table></center>&nbsp";
+			PDFData+="<h3 class='break'><center><br><br>Quality Measures</center></h3><br>";
+			PDFData+="<table class=beta width=100% cellpadding=5 cellspacing=5> <tr>  <th>Measure Name </th>   <th>IPP</th>   <th> DENOM</th>  <th>DENEX</th>   <th>NUMER</th> <th>DENEXCEP</th>  <th>NUMEREX</th> <th>Not Met</th> <th>Rate</th> </tr>";
+
+			long ipp = 0;
+			long denom = 0;
+			long denex = 0;
+			long num = 0;
+			long denexcep = 0;
+			long numex = 0;
+			double rate = 0.00;
+			long notmet = 0;
+
+			String measureName= null;
+			for(int i=0;i<measureList.size();i++)
+			{
+				measureName = measureList.get(i).getTitle();
+				ipp = measureList.get(i).getIppCount();
+				denom = measureList.get(i).getDenominatorCount();
+				denex = measureList.get(i).getDenominatorExclusionCount();
+				num = measureList.get(i).getNumeratorCount();
+				denexcep = measureList.get(i).getDenominatorExceptionCount();
+				numex = measureList.get(i).getNumeratorExclusionCount();
+				notmet = measureList.get(i).getNotMetPatients();
+				rate = measureList.get(i).getPerformanceRate();
+				PDFData+="<tr> <td align=left>"+measureName+"</td>  <td align=center><font color=blue>"+ipp+"</font></td>  <td align=center><font color=blue>"+denom+"</font></td>   <td align=center><font color=blue>"+denex+"</font></td>    <td align=center><font color=blue>"+num+"</font></td> <td align=center><font color=blue>"+denexcep+"</font></td> <td align=center><font color=blue>"+numex+"</font></td> <td align=center><font color=blue>"+notmet+"</font> </td> <td align=center><font color=green>"+rate+"%</font></td></tr>";
+
+			}
+			PDFData+="</table>";
+			// <---- ACI Transition Measures------>
+			PDFData+="<h3 class='break'><center><br><br>ACI Transition Measures</center></h3><br>";
+			String objMeasureId; boolean objMeasureStatus;
+			int aciTrans_baseScoreCount = 0,aciTrans_performancePoints = 0,aciTrans_bonusPoints = 0,aciTrans_basePoints=0,aciTrans_TotalPoints = 0;
+			int aciTransMeasurePoints;String aciTransCmsID=null;
+			for(int i=0;i<objectiveMeasureList.size();i++){
+				objMeasureId=objectiveMeasureList.get(i).getObjectiveMeasureId();
+				objMeasureStatus=objectiveMeasureList.get(i).isObjectiveStauts();
+
+				if(objMeasureId.equals("ACI_TRANS_PPHI_1"))
+				{
+					if(objMeasureStatus==true)
+						aciTrans_baseScoreCount++;
+				}
+				if(objMeasureId.equals("ACI_TRANS_PHCDRR_1"))
+				{
+					if(objMeasureStatus==true)
+						aciTrans_performancePoints+=10;
+				}
+				if(objMeasureId.equals("ACI_TRANS_PHCDRR_2"))
+				{
+					if(objMeasureStatus==true)
+						aciTrans_bonusPoints+=5;
+				}
+				if(objMeasureId.equals("ACI_IMPRO_1"))
+				{
+					if(objMeasureStatus==true)
+						aciTrans_bonusPoints+=10;
+				}
+			}
+
+			for(int i=0;i<aciTransMeasures.size();i++)
+			{
+				aciTransMeasurePoints =(int) aciTransMeasures.get(i).getPoints();
+				aciTransCmsID=aciTransMeasures.get(i).getCmsId();
+				if(!aciTransCmsID.equals("ACI_TRANS_EP_1"))
+					aciTrans_performancePoints+=aciTransMeasurePoints;
+			}
+			if (aciTrans_baseScoreCount == 4) {
+				aciTrans_basePoints = 50;
+			} else {
+				aciTrans_basePoints = 0;
+			}
+
+			if (aciTrans_basePoints == 0) {
+				aciTrans_TotalPoints = 0;
+			} else {
+				aciTrans_TotalPoints = aciTrans_basePoints + aciTrans_performancePoints + aciTrans_bonusPoints;
+			}
+
+			PDFData+="<center><table class=totalscore><tr><th align=center>Total Score</th></tr><tr><td align=center>"+aciTrans_TotalPoints+"/155</td></tr></table></center>&nbsp";
+			PDFData+="<center><table class=measureScore><tr><th align=center>Base Score</th><th align=center> Performance Score</th><th align=center>Bonus Score</th></tr><tr><td align=center>"+aciTrans_basePoints+"/50</td><td align=center>"+aciTrans_performancePoints+"/90</td><td align=center>"+aciTrans_bonusPoints+"/15</td></tr></table></center>&nbsp";
+			PDFData+="</table>";
+			PDFData+= "&nbsp<table class=acimeasure width=100% cellpadding=5 cellspacing=5><tr><th>Measure Name </th>   <th>DENOM</th>   <th> NUMER</th>  <th>NOT MET</th>   <th>RATE</th> <th>BASE SCORE</th>  <th>POINTS</th></tr>";
+			String aciTransMeasureName=null;
+
+			long aciTransDenom,aciTransNumer,aciTransNotMet;
+
+			double aciTransMeasureRate;
+			for(int i=0;i<aciTransMeasures.size();i++)
+			{
+				aciTransMeasureName=aciTransMeasures.get(i).getTitle();
+				aciTransCmsID=aciTransMeasures.get(i).getCmsId();
+				aciTransDenom=aciTransMeasures.get(i).getDenominatorCount();
+				aciTransNumer=aciTransMeasures.get(i).getNumeratorCount();
+				aciTransNotMet=aciTransMeasures.get(i).getNotMetPatients();
+				aciTransMeasureRate=aciTransMeasures.get(i).getPerformanceRate();
+				PDFData+="<tr><td align=left>"+aciTransMeasureName+"("+aciTransCmsID+")</td><td align=center><font color=blue>"+aciTransDenom+"</font></td><td align=center><font color=blue>"+aciTransNumer+"</font></td><td align=center><font color=blue>"+aciTransNotMet+"</font></td><td align=center><font color=green>"+aciTransMeasureRate+"%</font></td>";
+				if (aciTransCmsID.equals("ACI_TRANS_EP_1")|| aciTransCmsID.equals("ACI_TRANS_HIE_1")|| aciTransCmsID.equals("ACI_TRANS_PEA_1"))
+				{
+					if(aciTransNumer>=1)
+					{
+						PDFData+="<td align=center><font color=green>ACHIEVED</font></td>";
+					}
+					else
+						PDFData+="<td align=center><font color=red>NOT ACHIEVED</font></td>";
+				}
+				else
+					PDFData+="<td align=center>N/A</td>";
+
+				if(aciTransCmsID.equals("ACI_TRANS_EP_1")){
+					PDFData+="<td align=center>N/A</td></tr>";
+				}
+				else{
+					aciTransMeasurePoints =(int) aciTransMeasures.get(i).getPoints();
+					PDFData+="<td align=center>"+aciTransMeasurePoints+"</td></tr>";
+				}
+
+			}
+			PDFData+="</table>";
+
+			//<------ Aci Measures------->
+			PDFData+="<h3 class='break'><center><br><br>ACI Measures</center></h3><br>";
+			String aciCmsID; int aciMeasurePoints;
+			int aci_baseScoreCount = 0,aci_performancePoints = 0,aci_bonusPoints = 0,aci_basePoints=0,aci_TotalPoints = 0;
+			for(int i=0;i<objectiveMeasureList.size();i++){
+				objMeasureId=objectiveMeasureList.get(i).getObjectiveMeasureId();
+				objMeasureStatus=objectiveMeasureList.get(i).isObjectiveStauts();
+
+				if(objMeasureId.equals("ACI_TRANS_PPHI_1"))
+				{
+					if(objMeasureStatus==true)
+						aci_baseScoreCount++;
+				}
+				if(objMeasureId.equals("ACI_TRANS_PHCDRR_1"))
+				{
+					if(objMeasureStatus==true)
+						aci_performancePoints+=10;
+				}
+				if(objMeasureId.equals("ACI_TRANS_PHCDRR_2"))
+				{
+					if(objMeasureStatus==true)
+						aci_bonusPoints+=5;
+				}
+				if(objMeasureId.equals("ACI_IMPRO_1"))
+				{
+					if(objMeasureStatus==true)
+						aci_bonusPoints+=10;
+				}
+			}
+
+			for(int i=0;i<aciMeasures.size();i++)
+			{
+				aciMeasurePoints =(int) aciMeasures.get(i).getPoints();
+				aciCmsID=aciMeasures.get(i).getCmsId();
+				if(!aciCmsID.equals("ACI_EP_1"))
+					aci_performancePoints+=aciMeasurePoints;
+			}
+			if (aci_baseScoreCount == 4) {
+				aci_basePoints = 50;
+			} else {
+				aci_basePoints = 0;
+			}
+
+			if (aci_basePoints == 0) {
+				aci_TotalPoints = 0;
+			} else {
+				aci_TotalPoints = aci_basePoints + aci_performancePoints + aci_bonusPoints;
+			}
+
+			PDFData+="<center><table class=totalscore><tr><th align=center>Total Score</th></tr><tr><td align=center>"+aci_TotalPoints+"/155</td></tr></table></center>&nbsp";
+			PDFData+="<center><table class=measureScore><tr><th align=center>Base Score</th><th align=center> Performance Score</th><th align=center>Bonus Score</th></tr><tr><td align=center>"+aci_basePoints+"/50</td><td align=center>"+aci_performancePoints+"/90</td><td align=center>"+aci_bonusPoints+"/15</td></tr></table></center>&nbsp";
+			PDFData+="</table>";
+
+			PDFData+= "&nbsp<table class=acimeasure width=100% cellpadding=5 cellspacing=5><tr><th>Measure Name </th>   <th>DENOM</th>   <th> NUMER</th>  <th>NOT MET</th>   <th>RATE</th> <th>BASE SCORE</th>  <th>POINTS</th></tr>";
+			String aciMeasureName=null;
+
+			long aciDenom,aciNumer,aciNotMet;
+
+			double aciMeasureRate;
+			for(int i=0;i<aciMeasures.size();i++)
+			{
+				aciMeasureName=aciMeasures.get(i).getTitle();
+				aciCmsID=aciMeasures.get(i).getCmsId();
+				aciDenom=aciMeasures.get(i).getDenominatorCount();
+				aciNumer=aciMeasures.get(i).getNumeratorCount();
+				aciNotMet=aciMeasures.get(i).getNotMetPatients();
+				aciMeasureRate=aciMeasures.get(i).getPerformanceRate();
+				PDFData+="<tr><td align=left>"+aciMeasureName+"("+aciCmsID+")</td><td align=center><font color=blue>"+aciDenom+"</font></td><td align=center><font color=blue>"+aciNumer+"</font></td><td align=center><font color=blue>"+aciNotMet+"</font></td><td align=center><font color=green>"+aciMeasureRate+"%</font></td>";
+				if (aciCmsID.equals("ACI_EP_1")|| aciCmsID.equals("ACI_HIE_1")|| aciCmsID.equals("ACI_PEA_1"))
+				{
+					if(aciNumer>=1)
+					{
+						PDFData+="<td align=center><font color=green>ACHIEVED</font></td>";
+					}
+					else
+						PDFData+="<td align=center><font color=red>NOT ACHIEVED</font></td>";
+				}
+				else
+					PDFData+="<td align=center>N/A</td>";
+
+				if(aciCmsID.equals("ACI_EP_1")){
+					PDFData+="<td align=center>N/A</td></tr>";
+				}
+				else{
+					aciMeasurePoints =(int) aciMeasures.get(i).getPoints();
+					PDFData+="<td align=center>"+aciMeasurePoints+"</td></tr>";
+				}
+
+			}
+			PDFData+="</table>&nbsp";
+			int criteriaId = 2;
+			String measureId ;
+			int measureCriteria = 0;
+			String configMeasures[]=configuredMeasures.split(",");
+			List<MIPSPatientInformation> totalPatientList = null;
+			for(int i=0;i<configMeasures.length;i++)
+			{
+				measureId = configMeasures[i];
+				List<Integer> CriteriaList = getCriteria(measureId);
+				for(int l=0;l<CriteriaList.size();l++)
+				{
+					measureCriteria=CriteriaList.get(l);
+					totalPatientList= getPatienttoPrint(criteriaId,provId,measureId,tinId,measureCriteria);
+					measureName = getCMSIdAndTitle(measureId,accountId).split("&&&")[1];
+					PDFData+="<br><br><table class='break'><th><br>"+measureName+"</th></table>";
+					String accountNo = null, lastName = null, firstName = null,dob = null,gender = null,phoneNo = null,status=null;
+					PDFData+="<table class=patientlist width=100% cellpadding=5 cellspacing=5> <tr>  ";
+					PDFData+= "<td></td><th>Account No.</th>   <th>Last Name</th>   <th>First Name</th>  <th>DOB</th>   <th>Gender</th> <th>Phone Number</th>   </tr><br><tr>";
+					for(int j=0;j<totalPatientList.size();j++)
+					{
+						accountNo = totalPatientList.get(j).getAccountNo();
+						lastName = totalPatientList.get(j).getLastName();
+						firstName = totalPatientList.get(j).getFirstName();
+						dob = totalPatientList.get(j).getDob();
+						gender = totalPatientList.get(j).getGender();
+						phoneNo = totalPatientList.get(j).getPhoneNo();
+						status = totalPatientList.get(j).getStatus();
+						PDFData+= "<td>";
+						if(status.equals("Num"))
+							PDFData+=" <img src='"+sharedPath+"/Images/met.png' alt='no IMG' height='18px' width='18px' />";
+						else if(status.equals("ParMet"))
+							PDFData+=" <img src='"+sharedPath+"/Images/partiallymet.png' alt='no IMG' height='18px' width='18px' />";
+						else if(status.equals("DenExcl"))
+							PDFData+=" <img src='"+sharedPath+"/Images/denexc.png' alt='no IMG' height='18px' width='18px' />";
+						else if(status.equals("DenExcep"))
+							PDFData+=" <img src='"+sharedPath+"/Images/exception.png' alt='no IMG' height='18px' width='18px' />";
+						else if(status.equals("NumExcl"))
+							PDFData+=" <img src='"+sharedPath+"/Images/numexc.png' alt='no IMG' height='18px' width='18px' />";
+						else if(status.equals("Den"))
+							PDFData+=" <img src='"+sharedPath+"/Images/notmet.png' alt='no IMG' height='18px' width='18px' />";
+						//else if(status.equals("Ipp"))
+						PDFData+="</td>";
+						PDFData+=" <td align=left >"+accountNo+"</td>  <td align=left>"+lastName+"</td>  <td align=left>"+firstName+"</td>   <td align=left>"+dob+"</td>    <td align=left>"+gender+"</td> <td align=left>"+phoneNo+"</td> </tr>";
+					}
+					PDFData+="</table>";
+				}
+			}
+			PDFData+="</body></html>";
+		}
+		
+		catch(Exception e){
+			PDFData="";
+		}
+		String sharedPath = sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
+		String HTMLFilePath=MipsReportwithPatientInfoHTMLFilePath(sharedPath,PDFData,FileName);
+		String s=null;	
+		File patientDir = new File(sharedPath+"/MipsReportwithPatientInfo/");
+		patientDir.setWritable(true, false);
+		patientDir.setExecutable(true, false);
+		if (!patientDir.exists()){
+			patientDir.mkdir();
+		}
+		Process p2 = Runtime.getRuntime().exec("/usr/local/bin/wkhtmltopdf "+HTMLFilePath+" "+sharedPath+"/MipsReportwithPatientInfo/"+FileName+".pdf");
+		BufferedReader stdInput2 = new BufferedReader(new  InputStreamReader(p2.getInputStream()));
+		BufferedReader stdError2 = new BufferedReader(new InputStreamReader(p2.getErrorStream()));
+		while ((s = stdInput2.readLine()) != null) {
+			//System.out.println(s);
+		}
+		while ((s = stdError2.readLine()) != null) {
+
+		}
+		return FileName;
+	}
+	
+	public String MipsReportwithPatientInfoHTMLFilePath(String sharePath,String DatatoSave,String fileName)
+	{
+	File saveDir = new File(sharePath+"/MipsReportwithPatientInfo/");
+	saveDir.setWritable(true, false);
+	saveDir.setExecutable(true, false);
+	String filename="";
+	try{
+		if (!saveDir.exists()){
+		        saveDir.mkdir();
+		}
+		filename =sharePath+"/MipsReportwithPatientInfo/"+fileName+".html";
+		File obj=new File(sharePath+"/MipsReportwithPatientInfo/"+fileName+".html");
+		if(!obj.canExecute())
+		{
+		obj.setExecutable(true);
+		}
+		else
+		if(!obj.canWrite())
+		{
+			obj.setWritable(true);
+		}
+		else
+		if(!obj.canRead())
+		{
+		obj.setReadable(true, false);
+		}
+		FileWriter fstream = new FileWriter(obj);
+		BufferedWriter out = new BufferedWriter(fstream);
+		out.write(DatatoSave);
+		out.close();
+	}catch (Exception e){ //Catch exception if any
+		e.printStackTrace();
+	}
+	return filename;
+	}
+	
 	private int getPointsByReporting(double reportingRate){
 		
 		double rate = reportingRate / 10;
@@ -2722,6 +3566,64 @@ System.out.println("patient llist query>>>>>>>>>>>>>.");
 			return 10;
 		}
 		
+	}
+	
+	private double getMeasurePoints(double performancRate,String submissionMethod,EMeasure eMeasureObj){
+
+		HashMap<String, List<Benchmark>> benchMark=eMeasureObj.getBenchmark();
+		List<Benchmark> benchMarkObjs=benchMark.get("2017");
+		
+		int index = 0; 
+		double measurePoints = 0; double decileStart = 0;
+		double benchMarkStart = 0,benchMarkEnd = 0;
+		DecimalFormat newFormat = new DecimalFormat("#0.00");
+
+		
+		for(int i=0;i<benchMarkObjs.size();i++)
+		{
+			if(benchMarkObjs.get(i).getSubmissionMethod().equals(submissionMethod))
+			{
+				ArrayList<Decile> decileList=benchMarkObjs.get(i).getDecileList();
+				for(int j=0;j<decileList.size();j++)
+				{
+					benchMarkStart = decileList.get(0).getIndex();
+					benchMarkEnd = decileList.get(decileList.size()-1).getIndex();
+					if(!(decileList.get(j).getStart()==null && decileList.get(j).getEnd()==null))
+					{
+						if(decileList.get(j).getStart()!=null && decileList.get(j).getEnd()!=null)
+						{
+							if(performancRate>=decileList.get(j).getStart() && performancRate<=decileList.get(j).getEnd())
+							{
+								index= decileList.get(j).getIndex();
+								decileStart = decileList.get(j).getStart();
+							}
+						}
+						else if(decileList.get(j).getStart()!=null)
+						{
+							if(performancRate>=decileList.get(j).getStart())
+							{	
+								index= decileList.get(j).getIndex();
+								decileStart = decileList.get(j).getStart();
+							}
+						}
+						else if(decileList.get(j).getEnd()!=null)
+						{
+							if(performancRate<=decileList.get(j).getEnd())
+							{	
+								index= decileList.get(j).getIndex();
+								decileStart = decileList.get(j).getStart();
+							}
+						}
+
+					}
+
+				}
+			}
+		}
+		measurePoints = (performancRate - decileStart)/(benchMarkEnd - benchMarkStart);
+		measurePoints = Double.valueOf(index) + Double.valueOf(newFormat.format(measurePoints));
+
+		return measurePoints;
 	}
 	
 	private int getPointsByBenchMark(double performancRate,EMeasure eMeasureObj){

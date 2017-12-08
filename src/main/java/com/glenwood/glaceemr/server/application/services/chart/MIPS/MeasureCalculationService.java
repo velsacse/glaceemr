@@ -196,5 +196,15 @@ public interface MeasureCalculationService {
 	String mipsPDFfile(GeneratePDFDetails generatePDFDetails, int provId,
 			String configuredMeasures, String accountId,String tinId, boolean isACIReport,
 			boolean isOrderBy) throws Exception;
+	
+	String mipsReportPDF(GeneratePDFDetails generatePDFDetails, int provId,
+			String configuredMeasures, String accountId, String tinId,
+			boolean isACIReport, boolean isOrderBy, String practiceName,Integer year) throws Exception;
+
+	String mipsReportwithPatientInfo(GeneratePDFDetails generatePDFDetails,
+			int provId, String configuredMeasures, String accountId,
+			String tinId, boolean isACIReport, boolean isOrderBy,
+			String practiceName,Integer year) throws Exception;
+
 
 }
