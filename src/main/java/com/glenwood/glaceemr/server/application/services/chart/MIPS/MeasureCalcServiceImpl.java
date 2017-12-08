@@ -3461,17 +3461,17 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 						status = totalPatientList.get(j).getStatus();
 						PDFData+= "<td>";
 						if(status.equals("Num"))
-							PDFData+=" <img src='"+sharedPath+"/Images/met.png' alt='no IMG' height='18px' width='18px' />";
+							PDFData+=" <img src='"+sharedPath+"/MipsImages/met.png' alt='no IMG' height='18px' width='18px' />";
 						else if(status.equals("ParMet"))
-							PDFData+=" <img src='"+sharedPath+"/Images/partiallymet.png' alt='no IMG' height='18px' width='18px' />";
+							PDFData+=" <img src='"+sharedPath+"/MipsImages/partiallymet.png' alt='no IMG' height='18px' width='18px' />";
 						else if(status.equals("DenExcl"))
-							PDFData+=" <img src='"+sharedPath+"/Images/denexc.png' alt='no IMG' height='18px' width='18px' />";
+							PDFData+=" <img src='"+sharedPath+"/MipsImages/denexc.png' alt='no IMG' height='18px' width='18px' />";
 						else if(status.equals("DenExcep"))
-							PDFData+=" <img src='"+sharedPath+"/Images/exception.png' alt='no IMG' height='18px' width='18px' />";
+							PDFData+=" <img src='"+sharedPath+"/MipsImages/exception.png' alt='no IMG' height='18px' width='18px' />";
 						else if(status.equals("NumExcl"))
-							PDFData+=" <img src='"+sharedPath+"/Images/numexc.png' alt='no IMG' height='18px' width='18px' />";
+							PDFData+=" <img src='"+sharedPath+"/MipsImages/numexc.png' alt='no IMG' height='18px' width='18px' />";
 						else if(status.equals("Den"))
-							PDFData+=" <img src='"+sharedPath+"/Images/notmet.png' alt='no IMG' height='18px' width='18px' />";
+							PDFData+=" <img src='"+sharedPath+"/MipsImages/notmet.png' alt='no IMG' height='18px' width='18px' />";
 						//else if(status.equals("Ipp"))
 						PDFData+="</td>";
 						PDFData+=" <td align=left >"+accountNo+"</td>  <td align=left>"+lastName+"</td>  <td align=left>"+firstName+"</td>   <td align=left>"+dob+"</td>    <td align=left>"+gender+"</td> <td align=left>"+phoneNo+"</td> </tr>";
