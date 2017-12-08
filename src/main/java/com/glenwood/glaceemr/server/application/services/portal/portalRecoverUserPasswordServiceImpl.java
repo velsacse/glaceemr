@@ -88,7 +88,7 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 		bean.setLogin(false);
 
 		boolean isDOBCorrect=false;
-		boolean isAccountIDCorrect=false;
+		//boolean isAccountIDCorrect=false;
 		boolean isAnswer1Correct=false;
 		boolean isAnswer2Correct=false;
 		boolean isAnswer3Correct=false;
@@ -98,8 +98,8 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 
 		if(dateFormat.format(DOB).equalsIgnoreCase(recoverBean.getDob()))
 			isDOBCorrect=true;
-		if(portalUser.getChartpatient_portal_userTable().getPatientRegistrationTable().getPatientRegistrationAccountno().equalsIgnoreCase(recoverBean.getAccountID()))
-			isAccountIDCorrect=true;
+		/*if(portalUser.getChartpatient_portal_userTable().getPatientRegistrationTable().getPatientRegistrationAccountno().equalsIgnoreCase(recoverBean.getAccountID()))
+			isAccountIDCorrect=true;*/
 		if(portalUser.getSecurityAnswer1().equalsIgnoreCase(recoverBean.getSecurityAnswer1()))
 			isAnswer1Correct=true;
 		if(portalUser.getSecurityAnswer2().equalsIgnoreCase(recoverBean.getSecurityAnswer2()))
@@ -110,12 +110,12 @@ public class portalRecoverUserPasswordServiceImpl implements portalRecoverUserPa
 
 		StringBuffer sb=new StringBuffer();
 
-		if(!isDOBCorrect||!isAccountIDCorrect||!isAnswer1Correct||!isAnswer2Correct||!isAnswer3Correct)
+		if(!isDOBCorrect||!isAnswer1Correct||!isAnswer2Correct||!isAnswer3Correct)
 		{
 			if(!isDOBCorrect)
 				sb.append("DOB, ");
-			if(!isAccountIDCorrect)
-				sb.append("Account ID, ");
+			/*if(!isAccountIDCorrect)
+				sb.append("Account ID, ");*/
 			if(!isAnswer1Correct)
 				sb.append("Answer1, ");
 			if(!isAnswer2Correct)

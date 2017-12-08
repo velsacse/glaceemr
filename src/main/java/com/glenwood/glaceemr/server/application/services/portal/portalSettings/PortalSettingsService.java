@@ -52,4 +52,6 @@ public interface PortalSettingsService {
 	
 	SecQuesUpdateBean getUserSecurityQuestions(long patientId);
 	
+	List<String> getInsuranceNames(String searchKey);
+	
 }
