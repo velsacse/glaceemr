@@ -8,9 +8,36 @@ public class MUAttestationBean {
 
 	int reportingYear;
 	String lastModifiedDate;
-	
 	HashMap<Integer, HashMap<String, List<MUPerformanceBean>>> reportingStatus;
+
+	String objectiveMeasureId;
+	boolean objectiveStauts;
 	
+	public MUAttestationBean(String objectiveMeasureId, boolean objectiveStauts) {
+		super();
+		this.objectiveMeasureId = objectiveMeasureId;
+		this.objectiveStauts = objectiveStauts;
+	}
+
+	public MUAttestationBean(){
+	}
+
+	public String getObjectiveMeasureId() {
+		return objectiveMeasureId;
+	}
+	
+	public void setObjectiveMeasureId(String objectiveMeasureId) {
+		this.objectiveMeasureId = objectiveMeasureId;
+	}
+
+	public boolean isObjectiveStauts() {
+		return objectiveStauts;
+	}
+
+	public void setObjectiveStauts(boolean objectiveStauts) {
+		this.objectiveStauts = objectiveStauts;
+	}
+
 	public int getReportingYear() {
 		return reportingYear;
 	}

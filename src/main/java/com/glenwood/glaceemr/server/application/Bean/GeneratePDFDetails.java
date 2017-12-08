@@ -13,7 +13,33 @@ public class GeneratePDFDetails {
 	String submissionMethod;
 	String reportStart;
 	String reportEnd;
+	
 	List<MIPSPatientInformation> patientInfo;
+	
+	List<MIPSPerformanceBean> aciTransMeasureInfo;
+	List<MIPSPerformanceBean> aciMeasureInfo;
+	
+	public List<MIPSPerformanceBean> getAciTransMeasureInfo() {
+		return aciTransMeasureInfo;
+	}
+	public void setAciTransMeasureInfo(List<MIPSPerformanceBean> aciTransMeasureInfo) {
+		this.aciTransMeasureInfo = aciTransMeasureInfo;
+	}
+	public List<MIPSPerformanceBean> getAciMeasureInfo() {
+		return aciMeasureInfo;
+	}
+	public void setAciMeasureInfo(List<MIPSPerformanceBean> aciMeasureInfo) {
+		this.aciMeasureInfo = aciMeasureInfo;
+	}
+
+	MUDashboardBean  dashboardInfo;
+	public MUDashboardBean getDashboardInfo() {
+		return dashboardInfo;
+	}
+	public void setDashboardInfo(MUDashboardBean dashboardInfo) {
+		this.dashboardInfo = dashboardInfo;
+	}
+	
 	
 	public String getMeasureName() {
 		return measureName;

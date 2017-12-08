@@ -17,12 +17,44 @@ public class MIPSPatientInformation {
 	String state;
 	String zip;
 	String phoneNo;
+	String status;
 	int ipp;
 	int denominator;
 	int denominatorExclusion;
 	int numerator;
 	int numeratorExclusion;
 	int denominatorException;
+	
+	public MIPSPatientInformation(int patientId, String accountNo,
+			String lastName, String firstName, String dob, String gender,
+			String race, String ethnicity, String address1, String address2,
+			String city, String state, String zip, String phoneNo,
+			String status, int ipp, int denominator, int denominatorExclusion,
+			int numerator, int numeratorExclusion, int denominatorException) {
+		super();
+		this.patientId = patientId;
+		this.accountNo = accountNo;
+		this.lastName = lastName;
+		this.firstName = firstName;
+		this.dob = dob;
+		this.gender = gender;
+		this.race = race;
+		this.ethnicity = ethnicity;
+		this.address1 = address1;
+		this.address2 = address2;
+		this.city = city;
+		this.state = state;
+		this.zip = zip;
+		this.phoneNo = phoneNo;
+		this.status = status;
+		this.ipp = ipp;
+		this.denominator = denominator;
+		this.denominatorExclusion = denominatorExclusion;
+		this.numerator = numerator;
+		this.numeratorExclusion = numeratorExclusion;
+		this.denominatorException = denominatorException;
+	}
+
 
 	public MIPSPatientInformation(int patientId, String accountNo,String lastName, String firstName, String dob, String gender,String race, String ethnicity, String address1, String address2,String city, String state, String zip,String phoneNo,int ipp,int denominator,int denominatorExclusion,int numerator,int numeratorExclusion,int denominatorException){
 		super();
@@ -68,6 +100,12 @@ public class MIPSPatientInformation {
 		this.phoneNo = phoneNo;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	public int getPatientId() {
 		return patientId;
 	}
