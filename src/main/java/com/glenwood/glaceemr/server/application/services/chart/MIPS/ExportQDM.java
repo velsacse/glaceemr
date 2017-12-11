@@ -3,6 +3,8 @@ package com.glenwood.glaceemr.server.application.services.chart.MIPS;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -401,9 +403,8 @@ Root<Encounter> root = cq.from(Encounter.class);
         for(int i=0;i<codes.length;i++){
             codeList.add(codes[i]);
         }
-        
         CriteriaBuilder builder = em.getCriteriaBuilder();
-        CriteriaQuery<Object> cq = builder.createQuery();
+        CriteriaQuery<MedicationQDM> cq = builder.createQuery(MedicationQDM.class);
         
         Root<Prescription> root = cq.from(Prescription.class);
         Join<Prescription, MedStatus> prescStatusJoin=root.join(Prescription_.medstatus,JoinType.INNER);
@@ -412,7 +413,8 @@ Root<Encounter> root = cq.from(Encounter.class);
         Predicate status=builder.notEqual(root.get(Prescription_.docPrescStatus),13);
         Predicate byRXNorm=builder.or(root.get(Prescription_.docPrescRxnormCode).in(codeList),root.get(Prescription_.docPrescRxnormCD).in(codeList));
         Expression<String> rxNormcode = builder.<String>selectCase().when(root.get(Prescription_.docPrescRxnormCode).in(codeList),root.get(Prescription_.docPrescRxnormCode)).otherwise(root.get(Prescription_.docPrescRxnormCD));
-        cq.select(builder.construct(MedicationQDM.class, root.get(Prescription_.rxname),
+        cq.select(builder.construct(MedicationQDM.class, root.get(Prescription_.docPrescId),
+        		root.get(Prescription_.rxname),
                 root.get(Prescription_.rxstrength),
                 root.get(Prescription_.rxform),
                 root.get(Prescription_.docPrescRoute),
@@ -439,50 +441,23 @@ Root<Encounter> root = cq.from(Encounter.class);
         
         cq.distinct(true);
         
-        List<Object> result=em.createQuery(cq).getResultList();
+        List<MedicationQDM> result=em.createQuery(cq).getResultList();
         
-        List<MedicationOrder> medicationObj = new ArrayList<MedicationOrder>();
-        
-        for(int i=0;i<result.size();i++){
-        	
-        	MedicationOrder eachMedObj = new MedicationOrder();
-        	MedicationQDM eachData=(MedicationQDM) result.get(i);
-            
-        	int cmd=(Integer.parseInt(eachData.getDays().trim()) * (Integer.parseInt(eachData.getRefills().trim())+1));
-            eachData.setCMD(cmd);
-            
-            eachMedObj.setCode(eachData.getCode());
-            eachMedObj.setCodeSystem("RXNORM");
-            eachMedObj.setCodeSystemOID("2.16.840.1.113883.6.88");
-            eachMedObj.setDescription(eachData.getDescription());
-            eachMedObj.setStartDate(eachData.getStartDate());
-            
-            eachMedObj.setCMD(cmd);
-            eachMedObj.setDose(eachData.getDose());
-            eachMedObj.setFrequency(eachData.getFrequency());
-            eachMedObj.setRefills(Integer.parseInt(eachData.getRefills()));
-            eachMedObj.setRoute(eachData.getRoute());
-            eachMedObj.setOrderDate(eachData.getOrderDate());
-            if(eachMedObj.getStartDate()!=null)
-            medicationObj.add(eachMedObj);
-            
-        }
-        
-        return medicationObj;
+        return arrangeOrderedMedicationQDM(result);
         
     }
 	
 	public List<ActiveMedication> getActiveMedications(EntityManager em,Boolean considerProvider,int providerId,String rxNormCodes,int patientId, int range) {
 
 		String [] codes=rxNormCodes.split(",");
-
+		List<ActiveMedication> activeMedsList=new ArrayList<ActiveMedication>();
 		List<String> codeList=new ArrayList<String>();
 		for(int i=0;i<codes.length;i++){
 			codeList.add(codes[i]);
 		}
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq = builder.createQuery();
+		CriteriaQuery<MedicationQDM> cq = builder.createQuery(MedicationQDM.class);
 
 		Root<Prescription> root = cq.from(Prescription.class);
         Join<Prescription, MedStatus> prescStatusJoin=root.join(Prescription_.medstatus,JoinType.INNER);
@@ -492,7 +467,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Predicate byRXNorm=builder.or(root.get(Prescription_.docPrescRxnormCode).in(codeList),root.get(Prescription_.docPrescRxnormCD).in(codeList));
         Expression<String> rxNormcode = builder.<String>selectCase().when(root.get(Prescription_.docPrescRxnormCode).in(codeList),root.get(Prescription_.docPrescRxnormCode)).otherwise(root.get(Prescription_.docPrescRxnormCD));
         
-		cq.select(builder.construct(MedicationQDM.class, root.get(Prescription_.rxname),
+		cq.select(builder.construct(MedicationQDM.class,root.get(Prescription_.docPrescId), root.get(Prescription_.rxname),
 				root.get(Prescription_.rxstrength),
 				root.get(Prescription_.rxform),
 				root.get(Prescription_.docPrescRoute),
@@ -519,11 +494,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 
 		cq.distinct(true);
 
-		List<Object> result=em.createQuery(cq).getResultList();
-
+		List<MedicationQDM> result=em.createQuery(cq).getResultList();
+		activeMedsList=arrangeActiveMedicationQDM(result);
 		/*****************Data from current med **************************/
 		CriteriaBuilder builder1 = em.getCriteriaBuilder();
-		CriteriaQuery<Object> cq1 = builder1.createQuery();
+		CriteriaQuery<MedicationQDM> cq1 = builder1.createQuery(MedicationQDM.class);
 
 		Root<CurrentMedication> root1 = cq1.from(CurrentMedication.class);
         Join<CurrentMedication, MedStatus> prescStatusJoin1=root1.join(CurrentMedication_.medstatus,JoinType.INNER);
@@ -533,7 +508,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		Predicate byRXNorm1=builder1.or(root1.get(CurrentMedication_.currentMedicationRxnormCode).in(codeList),root1.get(CurrentMedication_.currentMedicationRXNormCD).in(codeList));
         Expression<String> rxNormcode1 = builder1.<String>selectCase().when(root1.get(CurrentMedication_.currentMedicationRxnormCode).in(codeList),root1.get(CurrentMedication_.currentMedicationRxnormCode)).otherwise(root1.get(CurrentMedication_.currentMedicationRXNormCD));
         
-		cq1.select(builder1.construct(MedicationQDM.class, root1.get(CurrentMedication_.currentMedicationRxName),
+		cq1.select(builder1.construct(MedicationQDM.class, root1.get(CurrentMedication_.currentMedicationId),root1.get(CurrentMedication_.currentMedicationRxName),
 				root1.get(CurrentMedication_.currentMedicationDosageWithUnit),
 				root1.get(CurrentMedication_.currentMedicationForm),
 				root1.get(CurrentMedication_.currentMedicationRoute),
@@ -560,37 +535,9 @@ Root<Encounter> root = cq.from(Encounter.class);
 
 		cq1.distinct(true);
 
-		List<Object> result1=em.createQuery(cq1).getResultList();
-
-		result.addAll(result1);
-		List<ActiveMedication> medicationObj = new ArrayList<ActiveMedication>();
-
-		for(int i=0;i<result.size();i++){
-
-			ActiveMedication eachMedObj = new ActiveMedication();
-			MedicationQDM eachData=(MedicationQDM) result.get(i);
-
-			int cmd=(Integer.parseInt(eachData.getDays().trim()) * (Integer.parseInt(eachData.getRefills().trim())+1));
-			eachData.setCMD(cmd);
-
-			eachMedObj.setCode(eachData.getCode());
-			eachMedObj.setCodeSystem("RXNORM");
-			eachMedObj.setCodeSystemOID("2.16.840.1.113883.6.88");
-			eachMedObj.setDescription(eachData.getDescription());
-			eachMedObj.setStartDate(eachData.getStartDate());
-
-			eachMedObj.setCMD(cmd);
-			eachMedObj.setDose(eachData.getDose());
-			eachMedObj.setFrequency(eachData.getFrequency());
-			eachMedObj.setRefills(Integer.parseInt(eachData.getRefills()));
-			eachMedObj.setRoute(eachData.getRoute());
-
-			if(eachMedObj.getStartDate()!=null)
-			medicationObj.add(eachMedObj);
-
-		}
-
-		return medicationObj;
+		List<MedicationQDM> result1=em.createQuery(cq1).getResultList();
+		activeMedsList.addAll(arrangeActiveMedicationQDM(result1));
+		return activeMedsList;
 
 	}
 	
@@ -2209,4 +2156,189 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 	}
 	
+	//This method will calculate CMD and End date for a medication and arrange it in MedicationOrder bean
+	public List<MedicationOrder> arrangeOrderedMedicationQDM(List<MedicationQDM> result){
+		List<MedicationOrder> medicationObj = new ArrayList<MedicationOrder>();
+        List<String> completeRoutIds=new ArrayList<String>();
+        List<String> replicatedRouteIds=new ArrayList<String>();
+        //For medications having more than one entries with same routeIds
+        for(MedicationQDM eachData:result){
+        	if(!completeRoutIds.contains(eachData.getRoute()))
+            {
+        		completeRoutIds.add(eachData.getRoute());
+        		
+            }else if(!replicatedRouteIds.contains(eachData.getRoute())){
+            	replicatedRouteIds.add(eachData.getRoute());
+            }
+            
+        }
+        for(int i=0;i<result.size();i++){
+        	
+        	MedicationOrder eachMedObj = new MedicationOrder();
+        	MedicationQDM eachData=(MedicationQDM) result.get(i);
+            	if(!replicatedRouteIds.contains(eachData.getRoute()))
+            	{	
+            		int cmd=(Integer.parseInt(eachData.getDays().trim()) * (Integer.parseInt(eachData.getRefills().trim())+1));
+		            eachData.setCMD(cmd);
+		            
+		            Calendar cal = new GregorianCalendar();
+					cal.setTime(eachData.getStartDate());
+					System.out.println("start day::::::::::"+cal.getTime());
+					cal.add(Calendar.DATE, cmd);
+					System.out.println("end day:::::::::::"+cal.getTime());
+		            eachMedObj.setCode(eachData.getCode());
+		            eachMedObj.setCodeSystem("RXNORM");
+		            eachMedObj.setCodeSystemOID("2.16.840.1.113883.6.88");
+		            eachMedObj.setDescription(eachData.getDescription());
+		            eachMedObj.setStartDate(eachData.getStartDate());
+		            
+		            eachMedObj.setCMD(cmd);
+		            eachMedObj.setDose(eachData.getDose());
+		            eachMedObj.setFrequency(eachData.getFrequency());
+		            eachMedObj.setRefills(Integer.parseInt(eachData.getRefills()));
+		            eachMedObj.setRoute(eachData.getRoute());
+		            eachMedObj.setOrderDate(eachData.getOrderDate());
+		            if(eachMedObj.getStartDate()!=null)
+		            medicationObj.add(eachMedObj);
+            	}
+            
+            
+        }
+        for(String route:replicatedRouteIds)
+        {
+        	List<MedicationQDM> eachGroup=new ArrayList<MedicationQDM>();
+        	for(MedicationQDM eachData:result){
+        		if(eachData.getRoute().equals(route)){
+        			eachGroup.add(eachData);
+        		}
+        	}
+        	Collections.sort(eachGroup, new Comparator<MedicationQDM>() {
+                @Override
+                public int compare(MedicationQDM o1, MedicationQDM o2) {
+                    return Integer.compare(o1.getId(),o2.getId());
+                }
+            });
+        	int cmd=0;
+        	Date startDate=null;
+        	for(int i=0;i<eachGroup.size();i++){
+        		startDate=eachGroup.get(0).getStartDate();
+        		if(i==0)
+        			cmd=Integer.parseInt(eachGroup.get(i).getDays().trim())*(Integer.parseInt(eachGroup.get(i).getRefills().trim())+1);
+        		else
+        			cmd+=Integer.parseInt(eachGroup.get(i).getDays().trim())*(Integer.parseInt(eachGroup.get(i).getRefills().trim()));
+        	}
+        	MedicationOrder eachMedObj = new MedicationOrder();
+        	System.out.println("cmd>>>>>>>>>>"+cmd);
+        	eachMedObj.setCMD(cmd);
+        	eachMedObj.setCode(eachGroup.get(0).getCode());
+            eachMedObj.setCodeSystem("RXNORM");
+            eachMedObj.setCodeSystemOID("2.16.840.1.113883.6.88");
+            eachMedObj.setDescription(eachGroup.get(0).getDescription());
+            eachMedObj.setStartDate(startDate);
+            Calendar cal = new GregorianCalendar();
+			cal.setTime(eachGroup.get(0).getStartDate());
+			System.out.println("start day::::::::::"+cal.getTime());
+			cal.add(Calendar.DATE, cmd);
+			System.out.println("end day:::::::::::"+cal.getTime());
+			eachMedObj.setEndDate(cal.getTime());
+            eachMedObj.setDose(eachGroup.get(0).getDose());
+            eachMedObj.setFrequency(eachGroup.get(0).getFrequency());
+            eachMedObj.setOrderDate(eachGroup.get(0).getOrderDate());
+            if(eachMedObj.getStartDate()!=null)
+            medicationObj.add(eachMedObj);
+        }
+    return medicationObj;
+	}
+	
+	//This method will calculate CMD and End date for a medication and arrange it in MedicationOrder bean
+		public List<ActiveMedication> arrangeActiveMedicationQDM(List<MedicationQDM> result){
+			List<ActiveMedication> medicationObj = new ArrayList<ActiveMedication>();
+	        List<String> completeRoutIds=new ArrayList<String>();
+	        List<String> replicatedRouteIds=new ArrayList<String>();
+	        //For medications having more than one entries with same routeIds
+	        for(MedicationQDM eachData:result){
+	        	if(!completeRoutIds.contains(eachData.getRoute()))
+	            {
+	        		completeRoutIds.add(eachData.getRoute());
+	        		
+	            }else if(!replicatedRouteIds.contains(eachData.getRoute())){
+	            	replicatedRouteIds.add(eachData.getRoute());
+	            }
+	            
+	        }
+	        for(int i=0;i<result.size();i++){
+	        	
+	        	ActiveMedication eachMedObj = new ActiveMedication();
+	        	MedicationQDM eachData=(MedicationQDM) result.get(i);
+	            	if(!replicatedRouteIds.contains(eachData.getRoute()))
+	            	{	
+	            		int cmd=(Integer.parseInt(eachData.getDays().trim()) * (Integer.parseInt(eachData.getRefills().trim())+1));
+			            eachData.setCMD(cmd);
+			            
+			            Calendar cal = new GregorianCalendar();
+						cal.setTime(eachData.getStartDate());
+						System.out.println("start day::::::::::"+cal.getTime());
+						cal.add(Calendar.DATE, cmd);
+						System.out.println("end day:::::::::::"+cal.getTime());
+			            eachMedObj.setCode(eachData.getCode());
+			            eachMedObj.setCodeSystem("RXNORM");
+			            eachMedObj.setCodeSystemOID("2.16.840.1.113883.6.88");
+			            eachMedObj.setDescription(eachData.getDescription());
+			            eachMedObj.setStartDate(eachData.getStartDate());
+			            
+			            eachMedObj.setCMD(cmd);
+			            eachMedObj.setDose(eachData.getDose());
+			            eachMedObj.setFrequency(eachData.getFrequency());
+			            eachMedObj.setRefills(Integer.parseInt(eachData.getRefills()));
+			            eachMedObj.setRoute(eachData.getRoute());
+			            if(eachMedObj.getStartDate()!=null)
+			            medicationObj.add(eachMedObj);
+	            	}
+	            
+	            
+	        }
+	        for(String route:replicatedRouteIds)
+	        {
+	        	List<MedicationQDM> eachGroup=new ArrayList<MedicationQDM>();
+	        	for(MedicationQDM eachData:result){
+	        		if(eachData.getRoute().equals(route)){
+	        			eachGroup.add(eachData);
+	        		}
+	        	}
+	        	Collections.sort(eachGroup, new Comparator<MedicationQDM>() {
+	                @Override
+	                public int compare(MedicationQDM o1, MedicationQDM o2) {
+	                    return Integer.compare(o1.getId(),o2.getId());
+	                }
+	            });
+	        	int cmd=0;
+	        	Date startDate=null;
+	        	for(int i=0;i<eachGroup.size();i++){
+	        		startDate=eachGroup.get(0).getStartDate();
+	        		if(i==0)
+	        			cmd=Integer.parseInt(eachGroup.get(i).getDays().trim())*(Integer.parseInt(eachGroup.get(i).getRefills().trim())+1);
+	        		else
+	        			cmd+=Integer.parseInt(eachGroup.get(i).getDays().trim())*(Integer.parseInt(eachGroup.get(i).getRefills().trim()));
+	        	}
+	        	ActiveMedication eachMedObj = new ActiveMedication();
+	        	System.out.println("cmd>>>>>>>>>>"+cmd);
+	        	eachMedObj.setCMD(cmd);
+	        	eachMedObj.setCode(eachGroup.get(0).getCode());
+	            eachMedObj.setCodeSystem("RXNORM");
+	            eachMedObj.setCodeSystemOID("2.16.840.1.113883.6.88");
+	            eachMedObj.setDescription(eachGroup.get(0).getDescription());
+	            eachMedObj.setStartDate(startDate);
+	            Calendar cal = new GregorianCalendar();
+				cal.setTime(eachGroup.get(0).getStartDate());
+				System.out.println("start day::::::::::"+cal.getTime());
+				cal.add(Calendar.DATE, cmd);
+				System.out.println("end day:::::::::::"+cal.getTime());
+				eachMedObj.setEndDate(cal.getTime());
+	            eachMedObj.setDose(eachGroup.get(0).getDose());
+	            eachMedObj.setFrequency(eachGroup.get(0).getFrequency());
+	            if(eachMedObj.getStartDate()!=null)
+	            medicationObj.add(eachMedObj);
+	        }
+	    return medicationObj;
+		}
 }

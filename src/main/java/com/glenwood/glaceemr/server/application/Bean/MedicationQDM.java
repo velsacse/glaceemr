@@ -132,8 +132,8 @@ public class MedicationQDM {
 		CMD = cMD;
 	}
 
-	public MedicationQDM(String description,String dose,String form,String route,String status,String frequency,String code,String refills,String days,Date orderDate,Date startDate){
-//		this.id=id;
+	public MedicationQDM(Integer id,String description,String dose,String form,String route,String status,String frequency,String code,String refills,String days,Date orderDate,Date startDate){
+		this.id=id;
 		this.description=description;
 		this.dose=dose;
 		this.form=form;
