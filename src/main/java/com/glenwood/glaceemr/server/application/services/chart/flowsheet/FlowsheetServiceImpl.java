@@ -1572,7 +1572,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						isElementGenderRuleSatisfied = true;
 						if(( DateUtil.dateDiffVal(today, flowSheetRuleObj.getStartdate().toString()) == 1 && DateUtil.dateDiffVal(today, flowSheetRuleObj.getEnddate().toString()) == -1 ) || DateUtil.dateDiffVal(today, flowSheetRuleObj.getStartdate().toString()) == 0){
 							if((MoreObjects.firstNonNull(flowSheetRuleObj.getSchType(),"").toString().equals("") || MoreObjects.firstNonNull(flowSheetRuleObj.getSchedule(),"").toString().equals(""))){
-								if(!flowSheetDataObj.getPerformedOn().equals("Never Performed")){
+								if(!flowSheetDataObj.getPerformedOn().equalsIgnoreCase(null) && !flowSheetDataObj.getPerformedOn().equals("Never Performed")){
 									if(DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), flowSheetRuleObj.getStartdate().toString()) == 1 && DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), flowSheetRuleObj.getEnddate().toString()) == -1){
 										flowSheetDataObj.setDue("Completed");
 										flowSheetDataObj.setDueCriteria(Optional.fromNullable(flowSheetRuleObj.getDesc()).or("").toString());
@@ -1592,7 +1592,7 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 									} else {
 										//Due Checking for schedule Range
 										if(( DateUtil.dateDiffVal(today, freqStartDate ) == 1 && DateUtil.dateDiffVal(today, freqEndDate) == -1 ) || DateUtil.dateDiffVal(today, flowSheetRuleObj.getStartdate().toString()) == 0){
-											if(!flowSheetDataObj.getPerformedOn().equals("Never Performed")){
+											if(!flowSheetDataObj.getPerformedOn().equalsIgnoreCase(null) && !flowSheetDataObj.getPerformedOn().equals("Never Performed")){
 												//here change the code for last performed append last performed + due period 
 
 												if(flowSheetRuleObj.getRuledate().equals("3")){
@@ -1615,14 +1615,14 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 											break;
 										} else if(DateUtil.dateDiffVal(today, freqStartDate ) == 1 && DateUtil.dateDiffVal(today, freqEndDate ) == 1){
 											flowSheetDataObj.setDue("Over Due");
-											if(!flowSheetDataObj.getPerformedOn().equals("Never Performed")){
+											if(flowSheetDataObj.getPerformedOn()!=null && !flowSheetDataObj.getPerformedOn().equalsIgnoreCase("") && !flowSheetDataObj.getPerformedOn().equalsIgnoreCase(" ") &&  flowSheetRuleObj.getStartdate()!=null && flowSheetRuleObj.getEnddate()!=null && !flowSheetDataObj.getPerformedOn().equals("Never Performed")){
 												if(DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), freqStartDate ) == 1 && DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), freqEndDate) == -1){
 													flowSheetDataObj.setDue("Completed");
 													flowSheetDataObj.setDueCriteria(Optional.fromNullable(flowSheetRuleObj.getDesc()).or(""));
 												}
 											}		
 
-											if(!flowSheetDataObj.getPerformedOn().equals("Never Performed")){
+											if(flowSheetDataObj.getPerformedOn()!=null && !flowSheetDataObj.getPerformedOn().equalsIgnoreCase("") && !flowSheetDataObj.getPerformedOn().equalsIgnoreCase(" ") &&  flowSheetRuleObj.getStartdate()!=null && flowSheetRuleObj.getEnddate()!=null && !flowSheetDataObj.getPerformedOn().equals("Never Performed")){
 												if(DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), freqStartDate) == 1 && DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), freqEndDate ) == 1){
 													flowSheetDataObj.setDue("");
 													flowSheetDataObj.setDueCriteria("");
@@ -1636,13 +1636,13 @@ public class FlowsheetServiceImpl implements FlowsheetService{
 						} else if(DateUtil.dateDiffVal(today, flowSheetRuleObj.getStartdate().toString()) == 1 && DateUtil.dateDiffVal(today, flowSheetRuleObj.getEnddate().toString()) == 1){
 							flowSheetDataObj.setDue("Over Due");
 							flowSheetDataObj.setDueCriteria(Optional.fromNullable(flowSheetRuleObj.getDesc()).or(""));
-							if(!flowSheetDataObj.getPerformedOn().equals("Never Performed")){
+							if(flowSheetDataObj.getPerformedOn()!=null && !flowSheetDataObj.getPerformedOn().equalsIgnoreCase("") && flowSheetRuleObj.getStartdate()!=null && flowSheetRuleObj.getEnddate()!=null && !flowSheetDataObj.getPerformedOn().equals("Never Performed")){
 								if(DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), flowSheetRuleObj.getStartdate().toString()) == 1 && DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), flowSheetRuleObj.getEnddate().toString()) == -1){
 									flowSheetDataObj.setDue("Completed");
 									flowSheetDataObj.setDueCriteria(Optional.fromNullable(flowSheetRuleObj.getDesc()).or(""));
 								}
 							}		
-							if(!flowSheetDataObj.getPerformedOn().equals("Never Performed")){
+							if(flowSheetDataObj.getPerformedOn()!=null && !flowSheetDataObj.getPerformedOn().equalsIgnoreCase("") && flowSheetRuleObj.getStartdate()!=null && flowSheetRuleObj.getEnddate()!=null && !flowSheetDataObj.getPerformedOn().equals("Never Performed")){
 								if(  ( DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), flowSheetRuleObj.getStartdate().toString()) == -1 && DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), flowSheetRuleObj.getEnddate().toString()) == -1) ||  ( DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), flowSheetRuleObj.getStartdate().toString()) == 1 && DateUtil.dateDiffVal(flowSheetDataObj.getPerformedOn().toString().replace("-", "/"), flowSheetRuleObj.getEnddate().toString()) == 1)){
 									flowSheetDataObj.setDue("");
 									flowSheetDataObj.setDueCriteria("");
