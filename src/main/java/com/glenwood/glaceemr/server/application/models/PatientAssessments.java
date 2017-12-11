@@ -147,7 +147,7 @@ public class PatientAssessments implements Serializable{
 	
 	@ManyToOne
 	@JsonManagedReference
-	@JoinColumn(name="patient_assessments_id", referencedColumnName="encounter_id" , insertable=false, updatable=false)
+	@JoinColumn(name="patient_assessments_encounterid", referencedColumnName="encounter_id" , insertable=false, updatable=false)
 	Encounter encounter;
 	
 	public String getPlanNotes() {
