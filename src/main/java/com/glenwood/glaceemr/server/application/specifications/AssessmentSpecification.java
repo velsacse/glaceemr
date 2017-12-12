@@ -169,7 +169,7 @@ public class AssessmentSpecification {
 					CriteriaQuery<?> query, CriteriaBuilder cb) {	
 				
 				Predicate predicate=cb.equal(root.get(PatientAssessments_.patient_assessments_patientId), patientid);
-				Predicate predicate1=cb.equal(root.get(PatientAssessments_.patient_assessments_id), encounterid);
+				Predicate predicate1=cb.equal(root.get(PatientAssessments_.patient_assessments_encounterid), encounterid);
 				Predicate predicate2=cb.equal(root.get(PatientAssessments_.patient_assessments_id), problemid);
 				Predicate predicate3=cb.like(root.get(PatientAssessments_.patient_assessments_dxcode), dxCode);
 				Predicate result;
