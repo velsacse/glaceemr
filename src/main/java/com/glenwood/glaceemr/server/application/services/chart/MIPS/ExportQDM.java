@@ -417,7 +417,7 @@ Root<Encounter> root = cq.from(Encounter.class);
         		root.get(Prescription_.rxname),
                 root.get(Prescription_.rxstrength),
                 root.get(Prescription_.rxform),
-                root.get(Prescription_.docPrescRoute),
+                root.get(Prescription_.rxroute),
                 prescStatusJoin.get(MedStatus_.medStatusName),
                 root.get(Prescription_.rxfreq),
                 rxNormcode,
@@ -470,7 +470,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		cq.select(builder.construct(MedicationQDM.class,root.get(Prescription_.docPrescId), root.get(Prescription_.rxname),
 				root.get(Prescription_.rxstrength),
 				root.get(Prescription_.rxform),
-				root.get(Prescription_.docPrescRoute),
+				root.get(Prescription_.rxroute),
 				prescStatusJoin.get(MedStatus_.medStatusName),
 				root.get(Prescription_.rxfreq),
 				rxNormcode,
@@ -511,7 +511,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		cq1.select(builder1.construct(MedicationQDM.class, root1.get(CurrentMedication_.currentMedicationId),root1.get(CurrentMedication_.currentMedicationRxName),
 				root1.get(CurrentMedication_.currentMedicationDosageWithUnit),
 				root1.get(CurrentMedication_.currentMedicationForm),
-				root1.get(CurrentMedication_.currentMedicationRoute),
+				root1.get(CurrentMedication_.currentMedicationRouteId),
 				prescStatusJoin1.get(MedStatus_.medStatusName),
 				root1.get(CurrentMedication_.currentMedicationFrequency1),
 				rxNormcode1,
@@ -2159,8 +2159,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 	//This method will calculate CMD and End date for a medication and arrange it in MedicationOrder bean
 	public List<MedicationOrder> arrangeOrderedMedicationQDM(List<MedicationQDM> result){
 		List<MedicationOrder> medicationObj = new ArrayList<MedicationOrder>();
-        List<String> completeRoutIds=new ArrayList<String>();
-        List<String> replicatedRouteIds=new ArrayList<String>();
+        List<Integer> completeRoutIds=new ArrayList<Integer>();
+        List<Integer> replicatedRouteIds=new ArrayList<Integer>();
         //For medications having more than one entries with same routeIds
         for(MedicationQDM eachData:result){
         	if(!completeRoutIds.contains(eachData.getRoute()))
@@ -2196,7 +2196,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 		            eachMedObj.setDose(eachData.getDose());
 		            eachMedObj.setFrequency(eachData.getFrequency());
 		            eachMedObj.setRefills(Integer.parseInt(eachData.getRefills()));
-		            eachMedObj.setRoute(eachData.getRoute());
 		            eachMedObj.setOrderDate(eachData.getOrderDate());
 		            if(eachMedObj.getStartDate()!=null)
 		            medicationObj.add(eachMedObj);
@@ -2204,7 +2203,7 @@ Root<Encounter> root = cq.from(Encounter.class);
             
             
         }
-        for(String route:replicatedRouteIds)
+        for(Integer route:replicatedRouteIds)
         {
         	List<MedicationQDM> eachGroup=new ArrayList<MedicationQDM>();
         	for(MedicationQDM eachData:result){
@@ -2253,8 +2252,8 @@ Root<Encounter> root = cq.from(Encounter.class);
 	//This method will calculate CMD and End date for a medication and arrange it in MedicationOrder bean
 		public List<ActiveMedication> arrangeActiveMedicationQDM(List<MedicationQDM> result){
 			List<ActiveMedication> medicationObj = new ArrayList<ActiveMedication>();
-	        List<String> completeRoutIds=new ArrayList<String>();
-	        List<String> replicatedRouteIds=new ArrayList<String>();
+	        List<Integer> completeRoutIds=new ArrayList<Integer>();
+	        List<Integer> replicatedRouteIds=new ArrayList<Integer>();
 	        //For medications having more than one entries with same routeIds
 	        for(MedicationQDM eachData:result){
 	        	if(!completeRoutIds.contains(eachData.getRoute()))
@@ -2290,14 +2289,13 @@ Root<Encounter> root = cq.from(Encounter.class);
 			            eachMedObj.setDose(eachData.getDose());
 			            eachMedObj.setFrequency(eachData.getFrequency());
 			            eachMedObj.setRefills(Integer.parseInt(eachData.getRefills()));
-			            eachMedObj.setRoute(eachData.getRoute());
 			            if(eachMedObj.getStartDate()!=null)
 			            medicationObj.add(eachMedObj);
 	            	}
 	            
 	            
 	        }
-	        for(String route:replicatedRouteIds)
+	        for(Integer route:replicatedRouteIds)
 	        {
 	        	List<MedicationQDM> eachGroup=new ArrayList<MedicationQDM>();
 	        	for(MedicationQDM eachData:result){

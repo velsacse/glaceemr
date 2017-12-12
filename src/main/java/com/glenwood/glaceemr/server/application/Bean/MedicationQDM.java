@@ -7,7 +7,7 @@ public class MedicationQDM {
 	String description;
 	String dose;
 	String form;
-	String route;
+	Integer route;
 	String status;
 	String refills;
 	String days;
@@ -76,11 +76,11 @@ public class MedicationQDM {
 		this.form = form;
 	}
 
-	public String getRoute() {
+	public Integer getRoute() {
 		return route;
 	}
 
-	public void setRoute(String route) {
+	public void setRoute(Integer route) {
 		this.route = route;
 	}
 
@@ -132,7 +132,7 @@ public class MedicationQDM {
 		CMD = cMD;
 	}
 
-	public MedicationQDM(Integer id,String description,String dose,String form,String route,String status,String frequency,String code,String refills,String days,Date orderDate,Date startDate){
+	public MedicationQDM(Integer id,String description,String dose,String form,Integer route,String status,String frequency,String code,String refills,String days,Date orderDate,Date startDate){
 		this.id=id;
 		this.description=description;
 		this.dose=dose;
