@@ -2206,8 +2206,10 @@ Root<Encounter> root = cq.from(Encounter.class);
         for(Integer route:replicatedRouteIds)
         {
         	List<MedicationQDM> eachGroup=new ArrayList<MedicationQDM>();
+        	System.out.println("inside replicatedRouteIds>>>>>>>>");
         	for(MedicationQDM eachData:result){
-        		if(eachData.getRoute().equals(route)){
+        		if(eachData.getRoute()==route){
+        			System.out.println("eachdata>>>>>>>>>"+eachData);
         			eachGroup.add(eachData);
         		}
         	}
@@ -2299,7 +2301,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	        {
 	        	List<MedicationQDM> eachGroup=new ArrayList<MedicationQDM>();
 	        	for(MedicationQDM eachData:result){
-	        		if(eachData.getRoute().equals(route)){
+	        		if(eachData.getRoute()==route){
 	        			eachGroup.add(eachData);
 	        		}
 	        	}
