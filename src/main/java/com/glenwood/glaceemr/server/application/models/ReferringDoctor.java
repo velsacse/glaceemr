@@ -26,6 +26,11 @@ public class ReferringDoctor {
 		this.referring_doctor_firstname= referring_doctor_firstname;
 		this.referring_doctor_credential= referring_doctor_credential;
 	}
+	public ReferringDoctor(Integer referring_doctor_uniqueid, String referring_doctor_lastname, String referring_doctor_firstname){
+		this.referring_doctor_uniqueid= referring_doctor_uniqueid;
+		this.referring_doctor_lastname= referring_doctor_lastname;
+		this.referring_doctor_firstname= referring_doctor_firstname;
+	}
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "referring_doctor_referring_doctor_uniqueid_seq")
