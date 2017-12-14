@@ -330,9 +330,16 @@ public class QPPPerformanceController {
 			if(performanceObj.size()==0)
 			{
 				MIPSPerformanceBean emptyObj=new MIPSPerformanceBean();
-				emptyObj.setMessage("No Measure's credit recorded for the reporting year "+reportingYear);
+				emptyObj.setMessage("No Measure credits recorded for the reporting year "+reportingYear);
 				performanceObj.add(emptyObj);
 			}
+			else if(isACIReport==true && isTrans==true)
+			{
+				performanceObj=measureService.getAttObjsAndOrderIt(providerId,reportingYear,performanceObj);
+				
+			}
+			
+			
 			response.setData(performanceObj);
 			
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in generating MIPS Performance Report" , -1, request.getRemoteAddr(),-1,"isACIReport="+isACIReport+"&providerId="+providerId,LogUserType.USER_LOGIN, "", "");

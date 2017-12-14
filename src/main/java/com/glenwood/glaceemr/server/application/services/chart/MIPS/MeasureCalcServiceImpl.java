@@ -2370,7 +2370,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 		List<MIPSPerformanceBean> temp=new ArrayList<MIPSPerformanceBean>();
 		if(ecqmPerformance.size()==0)
-			providerDashboard.setMessage("No Measure's credit recorded for the reporting year "+providerDashboard.getReportingYear());
+			providerDashboard.setMessage("No Measure credits recorded for the reporting year "+providerDashboard.getReportingYear());
 		List<EMeasure> eMeasures=new ArrayList<EMeasure>();
 		for(int i=0;i<ecqmPerformance.size();i++){
 			EMeasure eMeasureObj=null;
@@ -3668,6 +3668,35 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	public String getMIPSMeasureDetails(String measureId,String accountId) throws Exception {
 		String getMIPSData = getCMSIdAndTitle(measureId,accountId); 
 		return getMIPSData;
+	}
+
+	@Override
+	public List<MIPSPerformanceBean> getAttObjsAndOrderIt(int providerId,int reportingYear,List<MIPSPerformanceBean> performanceObjs) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<MIPSPerformanceBean> cq = builder.createQuery(MIPSPerformanceBean.class);;
+		Root<MuAttestationObjectives> rootMuAttestationObjectives = cq.from(MuAttestationObjectives.class);
+		Selection[] objectives= new Selection[] {
+				rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveMeasureid),
+				rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveStatus),
+		};
+		cq.orderBy(builder.asc(rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveId)));		
+		cq.select(builder.construct(MIPSPerformanceBean.class,objectives));
+		List<MIPSPerformanceBean> objectivesList = em.createQuery(cq).getResultList();
+		MIPSPerformanceBean obj=null;
+		if(objectivesList.size()==0)
+		{
+			obj=new MIPSPerformanceBean("ACI_TRANS_PHCDRR_1", false);
+			objectivesList.add(obj);
+			obj=new MIPSPerformanceBean("ACI_TRANS_PHCDRR_2", false);
+			objectivesList.add(obj);
+			obj=new MIPSPerformanceBean("ACI_TRANS_PHCDRR_3", false);
+			objectivesList.add(obj);
+			obj=new MIPSPerformanceBean("ACI_TRANS_PPHI_1", false);
+			objectivesList.add(obj);
+		}
+		objectivesList.addAll(performanceObjs);
+		
+		return objectivesList;
 	}
 	
 }

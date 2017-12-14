@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.services.chart.MIPS;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -205,6 +206,8 @@ public interface MeasureCalculationService {
 			int provId, String configuredMeasures, String accountId,
 			String tinId, boolean isACIReport, boolean isOrderBy,
 			String practiceName,Integer year) throws Exception;
+
+	List<MIPSPerformanceBean> getAttObjsAndOrderIt(int providerId, int reportingYear,List<MIPSPerformanceBean> performanceObjs);
 
 
 }

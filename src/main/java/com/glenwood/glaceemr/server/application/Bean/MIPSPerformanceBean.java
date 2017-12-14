@@ -10,6 +10,7 @@ public class MIPSPerformanceBean {
 	String message;
 	long ippCount;
 	String ippPatientsList;
+	Boolean attestationStatus;
 	
 	long denominatorCount;
 	String denominatorPatientsList;
@@ -29,6 +30,14 @@ public class MIPSPerformanceBean {
 	double performanceRate;
 	double reportingRate;
 	
+	public Boolean getAttestationStatus() {
+		return attestationStatus;
+	}
+
+	public void setAttestationStatus(Boolean attestationStatus) {
+		this.attestationStatus = attestationStatus;
+	}
+
 	double points;
 	
 	String npi;
@@ -53,6 +62,11 @@ public class MIPSPerformanceBean {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	public MIPSPerformanceBean(String measureId, boolean attestationStatus) {
+		super();
+		this.measureId = measureId;
+		this.attestationStatus = attestationStatus;
 	}
 
 	public MIPSPerformanceBean(String measureId, int criteria,int reportingYear,
