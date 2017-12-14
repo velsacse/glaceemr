@@ -16,6 +16,7 @@
 		<intercept-url pattern="/api/emr/api-docs/**" access="permitAll" />
 		<intercept-url pattern="/api/emr/glacemonitor/**" access="permitAll" />
 		<intercept-url pattern="/api/emr/login/**" access="permitAll" />
+		<intercept-url pattern="/api/emr/oauth/**" access="permitAll" />
 		<intercept-url pattern="/api/emr/user/**" access="isAuthenticated()" />
 		<sec:form-login authentication-success-handler-ref="mySuccessHandler" />
 		<sec:access-denied-handler ref="accessDeniedHandler" />

@@ -163,4 +163,37 @@ public class RestDispatcherTemplate {
 		responseBean.setCanUserAccess(false);
 		return responseBean;
 	}}
+	
+	public TokenValidationResponse validateToken(HttpServletRequest request, String connectionPath,Object requestObj) throws JsonParseException, JsonMappingException, IOException{
+
+
+		TokenValidationResponse tokenValidationResponse=new TokenValidationResponse(); 
+		
+		try {
+
+			RestTemplate restTemplate = new RestTemplate();
+
+			HttpHeaders headers = new HttpHeaders();
+
+			setAndCheckJSESSIONIDCookie(request, headers);
+
+			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			
+			System.out.println("***********************************"+objectMapper.writeValueAsString(requestObj));
+
+			HttpEntity<String> entity = new HttpEntity<String>(objectMapper.writeValueAsString(requestObj), headers);
+
+			tokenValidationResponse = restTemplate.postForObject(connectionPath, entity, TokenValidationResponse.class);
+
+			return tokenValidationResponse;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			tokenValidationResponse.setMessage("Error in validating the token.");
+			tokenValidationResponse.setValid(false);
+			return tokenValidationResponse;
+		}
+
+	}
 }

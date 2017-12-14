@@ -16,6 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
+
+import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistrationSearchBean;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
@@ -129,6 +132,19 @@ public class ChartcenterServiceImpl implements ChartcenterService {
 		cq.select(builder.count(root.get(PatientRegistration_.patientRegistrationId)));
 		cq.where(predicateList.toArray(new Predicate[] {}));
 		return (long) em.createQuery(cq).getSingleResult();
+	}
+	@Override
+	public int getChartIdByPatientId(Integer patientId) throws Exception {
+		// TODO Auto-generated method stub
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> cq = builder.createQuery(Object.class);
+		Root<Chart> root = cq.from(Chart.class);
+		
+		cq.select(root.get(Chart_.chartId));
+		cq.where(builder.equal(root.get(Chart_.chartPatientid), patientId));
+		
+		
+		return (int) em.createQuery(cq).getSingleResult();
 	}
 
 }

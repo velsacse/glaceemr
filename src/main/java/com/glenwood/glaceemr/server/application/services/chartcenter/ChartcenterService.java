@@ -17,4 +17,5 @@ public interface ChartcenterService {
 
 	public List<PatientRegistrationSearchBean> getPatientNameBySearch(String toSearchData) throws Exception;
 	
+	public int getChartIdByPatientId(Integer patientId) throws Exception;
 }
