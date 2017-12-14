@@ -107,7 +107,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 	public void saveConfDetails(Integer programYear, Integer type,
 			Integer providerId, java.util.Date startDate, java.util.Date endDate,
 			Integer submissionMtd,short reportType) throws Exception {
-		deletePerformanceEntries(programYear,providerId);
+//		deletePerformanceEntries(programYear,providerId);
 		java.sql.Date sqlStartDate = new java.sql.Date(startDate.getTime());
 		java.sql.Date sqlEndDate = new java.sql.Date(endDate.getTime());
 		MacraConfiguration yearThereOrNot=macraConfigurationRepository.findOne(Specifications.where(QPPConfigurationSpecification.getConfObj(programYear)));
