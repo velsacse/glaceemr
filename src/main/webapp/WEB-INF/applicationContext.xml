@@ -44,6 +44,9 @@
 	<!-- <bean id="jdbcEmployeeDAO" class="com.glenwood.glaceemr.server.application.model.dao.JDBCEmployeeDAOImpl"> 
 		</bean> -->
 
+	<bean id="patientRegistrationServiceImpl"
+		class="com.glenwood.glaceemr.server.application.services.patient.PatientRegistrationServiceImpl"></bean>
+	
 
 	<bean id="jdbcProperty"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
