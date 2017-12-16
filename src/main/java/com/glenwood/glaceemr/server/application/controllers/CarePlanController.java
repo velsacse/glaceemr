@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -106,10 +107,10 @@ public class CarePlanController {
 	 */
 	@RequestMapping(value ="/GetCarePlanConcerns", method = RequestMethod.GET) 
 	@ResponseBody
-	public List<CarePlanConcern> getCarePlanConcerns(@RequestParam(value="episodeId",required=false,defaultValue="-1")Integer episodeId,@RequestParam(value="concernId",required=false,defaultValue="-1")Integer concernId,@RequestParam(value="patientId",required=false,defaultValue="-1")Integer patientId,@RequestParam(value="encounterId",required=false,defaultValue="-1")Integer encounterId,@RequestParam(value="categoryId",required=false,defaultValue="-1")Integer categoryId,
+	public List<CarePlanConcernBean> getCarePlanConcerns(@RequestParam(value="episodeId",required=false,defaultValue="-1")Integer episodeId,@RequestParam(value="concernId",required=false,defaultValue="-1")Integer concernId,@RequestParam(value="patientId",required=false,defaultValue="-1")Integer patientId,@RequestParam(value="encounterId",required=false,defaultValue="-1")Integer encounterId,@RequestParam(value="categoryId",required=false,defaultValue="-1")Integer categoryId,
 			@RequestParam(value="frmDate", required=false,defaultValue="-1") String frmDate,
 			@RequestParam(value="toDate", required=false,defaultValue="-1") String toDate)throws Exception{
-		List<CarePlanConcern> listOfConcerns=carePlanService.fetchCarePlanConcerns(concernId, patientId, categoryId, episodeId, encounterId,frmDate,toDate);
+		List<CarePlanConcernBean> listOfConcerns=carePlanService.fetchCarePlanConcerns(concernId, patientId, categoryId, episodeId, encounterId,frmDate,toDate);
 	//	auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CAREPLAN, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved list of goals which belongs to the given PatientId", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return listOfConcerns;
 	}
@@ -141,7 +142,7 @@ public class CarePlanController {
 	@RequestMapping(value="/SaveCarePlanConcern", method = RequestMethod.POST)
 	@ResponseBody
 	public EMRResponseBean saveCarePlanConcern(@RequestBody CarePlanConcernBean carePlanConcernBean){
-		List<CarePlanConcern> carePlanConcerns = carePlanService.saveCarePlanConcern(carePlanConcernBean);
+		List<CarePlanConcernBean> carePlanConcerns = carePlanService.saveCarePlanConcern(carePlanConcernBean);
 		EMRResponseBean bean= new EMRResponseBean();
 		bean.setData(carePlanConcerns);
 		return bean;		
@@ -503,13 +504,14 @@ public class CarePlanController {
 	 * @param episodeTypeId
 	 * @param encounterId
 	 * @return
+	 * @throws ParseException 
 	 */
 	@RequestMapping(value="/GetCarePlanSummary",method= RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getCarePlanSummary(@RequestParam(value="patientId", required=true) Integer patientId,
 			@RequestParam(value="episodeId",required=false,defaultValue="-1")Integer episodeId,
 			@RequestParam(value="episodeTypeId",required=false,defaultValue="-1")Integer episodeTypeId,
-			@RequestParam(value="encounterId",required=false,defaultValue="-1")Integer encounterId){
+			@RequestParam(value="encounterId",required=false,defaultValue="-1")Integer encounterId) throws ParseException{
 			Map<String, Object> lists=carePlanService.getCarePlanSummaryData(patientId,episodeId,encounterId,episodeTypeId);
 			EMRResponseBean emrResponseBean = new EMRResponseBean();
 			emrResponseBean.setData(lists);
@@ -531,8 +533,9 @@ public class CarePlanController {
 	public void saveCarePlanSummary(@RequestParam(value="patientId", required=true) Integer patientId,
 			@RequestParam(value="episodeId",required=false,defaultValue="-1")Integer episodeId,
 			@RequestParam(value="userId",required=false,defaultValue="-1")Integer userId,
+			@RequestParam(value="encounterId",required=false,defaultValue="-1")Integer encounterId,
 			@RequestParam(value="completeJSON", required=true) String completeJSON) throws Exception{
-		carePlanService.saveCarePlanSummaryData(completeJSON,userId);
+		carePlanService.saveCarePlanSummaryData(patientId,encounterId,episodeId,completeJSON,userId);
 	}
 	
 	/**
@@ -558,7 +561,7 @@ public class CarePlanController {
 	@RequestMapping(value ="/SaveCarePlanRecommendedIntervention", method = RequestMethod.POST)
 	@ResponseBody
 	public  EMRResponseBean saveRecommendedInterventionData(@RequestBody CarePlanRecommendedInterventionBean CarePlanRecommendedInterventionBean){
-		List<CarePlanRecommendedIntervention> carePlanRecommInterventions = carePlanService.saveCarePlanRecommendedIntervention(CarePlanRecommendedInterventionBean);
+		List<CarePlanRecommendedInterventionBean> carePlanRecommInterventions = carePlanService.saveCarePlanRecommendedIntervention(CarePlanRecommendedInterventionBean);
 	EMRResponseBean bean= new EMRResponseBean();
 		bean.setData(carePlanRecommInterventions);
 		return bean;	
@@ -574,7 +577,7 @@ public class CarePlanController {
 			@RequestParam(value="episodeId",required=false,defaultValue="-1")Integer episodeId,
 			@RequestParam(value="frmDate", required=false,defaultValue="-1") String frmDate,
 			@RequestParam(value="toDate", required=false,defaultValue="-1") String toDate){
-		List<CarePlanRecommendedIntervention> carePlanRecommInterventions = carePlanService.fetchRecommIntervention(patientId,encounterId,episodeId,frmDate,toDate);
+		List<CarePlanRecommendedInterventionBean> carePlanRecommInterventions = carePlanService.fetchRecommIntervention(patientId,encounterId,episodeId,frmDate,toDate);
 		EMRResponseBean bean= new EMRResponseBean();
 		bean.setData(carePlanRecommInterventions);
 		return bean;	
@@ -595,7 +598,7 @@ public class CarePlanController {
 			@RequestParam(value="frmDate", required=false,defaultValue="-1") String frmDate,
 			@RequestParam(value="toDate", required=false,defaultValue="-1") String toDate){
 			carePlanService.deleteCarePlanRecommIntervention(patientId,encounterId,delVal);
-			List<CarePlanRecommendedIntervention> getData = carePlanService.fetchRecommIntervention(patientId, encounterId, episodeId,frmDate,toDate);
+			List<CarePlanRecommendedInterventionBean> getData = carePlanService.fetchRecommIntervention(patientId, encounterId, episodeId,frmDate,toDate);
 			//auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CAREPLAN, LogActionType.DELETE, 0, Log_Outcome.SUCCESS, "Intervention Deleted for patient with Intervention id:"+delVal, -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 			EMRResponseBean bean= new EMRResponseBean();
 			bean.setData(getData);

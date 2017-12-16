@@ -10,7 +10,7 @@ import com.glenwood.glaceemr.server.application.models.CarePlanRecommendedInterv
 
 public interface CarePlanService{
 	
-	List<CarePlanConcern> fetchCarePlanConcerns(Integer concernId,Integer patientId,Integer categoryId,Integer episodeId,Integer encounterId,String frmDate,String toDate);
+	List<CarePlanConcernBean> fetchCarePlanConcerns(Integer concernId,Integer patientId,Integer categoryId,Integer episodeId,Integer encounterId,String frmDate,String toDate);
 	
 	List<CarePlanGoalBean> fetchCarePlanGoals(Integer goalId,Integer concernId,Integer patientId,Integer encoutnerId,Integer episodeId,String frmDate,String toDate);
 	
@@ -19,7 +19,7 @@ public interface CarePlanService{
 	List<CarePlanGoalBean> fetchCarePlanOutcomesForCDA(Integer outcomeId,Integer goalId,Integer patientId,Integer encoutnerId,Integer episodeId,String frmDate,String toDate);
 
 	Map<String,Object> getCarePlanInitialData(Integer patientId,Integer encounterId,Integer episodeId,Integer episodeTypeId,Integer previousEpisodeId);	
-	List<CarePlanConcern> saveCarePlanConcern(CarePlanConcernBean carePlanConcerns);
+	List<CarePlanConcernBean> saveCarePlanConcern(CarePlanConcernBean carePlanConcerns);
 	
 	List<CarePlanGoalBean>  saveCarePlanGoal(CarePlanGoalBean carePlanGoal);
 	
@@ -29,7 +29,7 @@ public interface CarePlanService{
 		
 	List<Object> fetchCarePlanShortcuts(Integer categoryId);
 
-	Map<String,Object> importCarePlanShortcuts(Integer patientId,Integer encounterId,String shortcutIDs,Integer providerId,Integer episodeId,Integer shortcutTerm,Integer categoryId,Integer previousEpisodeId,Integer summaryMode);
+	Map<String,Object> importCarePlanShortcuts(Integer patientId,Integer encounterId,String shortcutIDs,Integer providerId,Integer episodeId,Integer shortcutTerm,Integer categoryId,Integer previousEpisodeId,Integer summaryMode) throws ParseException;
 	
 	void saveProgressPlanNotes(Integer encounterId,String planText);
 	
@@ -57,18 +57,18 @@ public interface CarePlanService{
 
 	//List<CarePlanInterventionBean> saveInterventionData(CarePlanInterventionBean carePlanInterventionBean);
 	
-	Map<String, Object> getCarePlanSummaryData(Integer patientId, Integer episodeId, Integer encounterId, Integer episodeTypeId);
+	Map<String, Object> getCarePlanSummaryData(Integer patientId, Integer episodeId, Integer encounterId, Integer episodeTypeId) throws ParseException;
 	
-	void saveCarePlanSummaryData(String completeJSON,Integer userId) throws Exception;
+	void saveCarePlanSummaryData(Integer patientId,Integer encounterId,Integer episodeId,String completeJSON,Integer userId) throws Exception;
 
 	Map<String, Object> saveConcernAndGoal(
 			CarePlanConcernBean carePlanConcernJSON, int previousEpisodeId);
 
 	Map<String, Object> showInactiveConcerns(int patientId,int encounterId,int episodeId);
 
-	List<CarePlanRecommendedIntervention> saveCarePlanRecommendedIntervention(CarePlanRecommendedInterventionBean carePlanRecommendedInterventionBean);
+	List<CarePlanRecommendedInterventionBean> saveCarePlanRecommendedIntervention(CarePlanRecommendedInterventionBean carePlanRecommendedInterventionBean);
 
-	List<CarePlanRecommendedIntervention> fetchRecommIntervention(Integer patientId,Integer encounterId,Integer episodeId,String frmDate,String toDate);
+	List<CarePlanRecommendedInterventionBean> fetchRecommIntervention(Integer patientId,Integer encounterId,Integer episodeId,String frmDate,String toDate);
 	
 	void deleteCarePlanRecommIntervention(Integer patientId, Integer encounterId, Integer delVal);
 	

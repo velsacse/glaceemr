@@ -22,6 +22,8 @@ public class CarePlanSummaryBean {
 	Integer carePlanSummaryGoalId;
 	Integer carePlanSummaryGoalProgress;
 	Integer carePlanSummaryGoalStatus;
+	Integer carePlanSummaryGoalOrder;
+	Integer carePlanSummaryOutcomeId;
 	
 	public CarePlanSummaryBean(Integer carePlanSummaryId,
 			Integer carePlanSummaryPatientId,
@@ -30,7 +32,8 @@ public class CarePlanSummaryBean {
 			String carePlanSummaryConcernDesc, String carePlanSummaryGoalDesc,
 			Integer carePlanSummaryGoalTerm,
 			Date carePlanSummaryMasteredDate, String carePlanSummaryComments,
-			Integer carePlanSummaryAggregate, Integer carePlanSummaryEpisodeId, Integer carePlanSummaryGoalId, Integer carePlanSummaryGoalProgress,Integer carePlanSummaryGoalStatus) {
+			Integer carePlanSummaryAggregate, Integer carePlanSummaryEpisodeId, Integer carePlanSummaryGoalId, Integer carePlanSummaryGoalProgress,Integer carePlanSummaryGoalStatus,Integer carePlanSummaryGoalOrder,
+			Integer outcomeId) {
 		super();
 		DateFormat timeFormat = new SimpleDateFormat("MM/dd/yyyy");
 
@@ -51,6 +54,8 @@ public class CarePlanSummaryBean {
 		this.carePlanSummaryGoalId = carePlanSummaryGoalId; 
 		this.carePlanSummaryGoalProgress = carePlanSummaryGoalProgress;
 		this.carePlanSummaryGoalStatus = carePlanSummaryGoalStatus;
+		this.carePlanSummaryGoalOrder = carePlanSummaryGoalOrder;
+		this.carePlanSummaryOutcomeId = outcomeId;
 	}
 
 	public CarePlanSummaryBean() {
@@ -169,5 +174,20 @@ public class CarePlanSummaryBean {
 	public void setCarePlanSummaryGoalStatus(Integer carePlanSummaryGoalStatus) {
 		this.carePlanSummaryGoalStatus = carePlanSummaryGoalStatus;
 	}
-		
+
+	public Integer getCarePlanSummaryGoalOrder() {
+		return carePlanSummaryGoalOrder;
+	}
+
+	public void setCarePlanSummaryGoalOrder(Integer carePlanSummaryGoalOrder) {
+		this.carePlanSummaryGoalOrder = carePlanSummaryGoalOrder;
+	}
+
+	public Integer getCarePlanSummaryOutcomeId() {
+		return carePlanSummaryOutcomeId;
+	}
+
+	public void setCarePlanSummaryOutcomeId(Integer carePlanSummaryOutcomeId) {
+		this.carePlanSummaryOutcomeId = carePlanSummaryOutcomeId;
+	}
 }

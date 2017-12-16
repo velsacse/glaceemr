@@ -1,5 +1,9 @@
 package com.glenwood.glaceemr.server.application.services.chart.careplan;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class CarePlanConcernBean {
 	
 	Integer concernId;
@@ -25,7 +29,61 @@ public class CarePlanConcernBean {
 	Integer episodeId;
 	Integer concernFrom;
 	Integer encounterId;
+	String concernCreatedName;
+	String concernModifiedName;
 	
+	public CarePlanConcernBean(){	
+	}
+
+	
+	public CarePlanConcernBean(Integer concernId, Integer concernPatientId,
+			Integer concernCategoryId, Integer concernProviderId,
+			Integer concernType, String concernCode, String concernCodeSystem,
+			String concernCodeSystemName, String concernCodeDesc,
+			Integer concernPriority, String concernValue, String concernUnit,
+			String concernDesc, String concernNotes, Integer concernStatus,
+			Date concernStatusUpdatedDate, Integer concernCreatedBy,
+			Date concernCreatedOn, Integer concernModifiedBy,
+			Date concernModifiedOn, Integer episodeId, Integer concernFrom,
+			Integer encounterId, String concernCreatedName,
+			String concernModifiedName) {
+		super();
+		DateFormat timeFormat = new SimpleDateFormat("MM/dd/yyyy");
+		this.concernId = concernId;
+		this.concernPatientId = concernPatientId;
+		this.concernCategoryId = concernCategoryId;
+		this.concernProviderId = concernProviderId;
+		this.concernType = concernType;
+		this.concernCode = concernCode;
+		this.concernCodeSystem = concernCodeSystem;
+		this.concernCodeSystemName = concernCodeSystemName;
+		this.concernCodeDesc = concernCodeDesc;
+		this.concernPriority = concernPriority;
+		this.concernValue = concernValue;
+		this.concernUnit = concernUnit;
+		this.concernDesc = concernDesc;
+		this.concernNotes = concernNotes;
+		this.concernStatus = concernStatus;
+		if(concernStatusUpdatedDate==null)
+			this.concernStatusUpdatedDate = "";
+		else
+			this.concernStatusUpdatedDate = timeFormat.format(concernStatusUpdatedDate);
+		this.concernCreatedBy = concernCreatedBy;
+		if(concernCreatedOn==null)
+			this.concernCreatedOn = "";
+		else
+			this.concernCreatedOn = timeFormat.format(concernCreatedOn);
+		this.concernModifiedBy = concernModifiedBy;
+		if(concernModifiedOn==null)
+			this.concernModifiedOn = "";
+		else
+			this.concernModifiedOn = timeFormat.format(concernModifiedOn);
+		this.episodeId = episodeId;
+		this.concernFrom = concernFrom;
+		this.encounterId = encounterId;
+		this.concernCreatedName = concernCreatedName;
+		this.concernModifiedName = concernModifiedName;
+	}
 	public Integer getConcernId() {
 		return concernId;
 	}
@@ -164,5 +222,16 @@ public class CarePlanConcernBean {
 	public void setEncounterId(Integer encounterId) {
 		this.encounterId = encounterId;
 	}
-	
+	public String getConcernCreatedName() {
+		return concernCreatedName;
+	}
+	public void setConcernCreatedName(String concernCreatedName) {
+		this.concernCreatedName = concernCreatedName;
+	}
+	public String getConcernModifiedName() {
+		return concernModifiedName;
+	}
+	public void setConcernModifiedName(String concernModifiedName) {
+		this.concernModifiedName = concernModifiedName;
+	}
 }

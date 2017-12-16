@@ -39,6 +39,10 @@ public class CarePlanRecommendedInterventionBean {
 	Integer recommInterventionModifiedBy;
 	String recommInterventionModifiedOn;
 	Integer recommResponsibleParty;
+	String recommCreatedName;
+	String recommModifiedName;
+	String concernDesc;
+	String goalDesc;
 	
 	DateFormat timeFormat = new SimpleDateFormat("MM/dd/yyyy");
 	
@@ -50,13 +54,15 @@ public class CarePlanRecommendedInterventionBean {
 			Integer recommInterventionEncounterId,Integer recommInterventionEpisodeId,
 			Integer recommInterventionConcernId,Integer recommInterventionGoalId,
 			Integer recommInterventionCategoryId,String recommInterventionDescription,
-			Integer recommInterventionRecommendedBy,String recommInterventionRecommendedOn,
+			Integer recommInterventionRecommendedBy,Date recommInterventionRecommendedOn,
 			String recommInterventionCode,String recommInterventionCodeSystem, String recommInterventionCodeSystemname, 
-			Integer recommInterventionPerformedBy,String recommInterventionPerformedOn,String recommInterventionNotes,
-			Integer recommInterventionCreatedBy,String recommInterventionCreatedOn,Integer recommInterventionModifiedBy,String recommInterventionModifiedOn) {
+			Integer recommInterventionPerformedBy,Date recommInterventionPerformedOn,String recommInterventionNotes,
+			Integer recommInterventionCreatedBy,Date recommInterventionCreatedOn,Integer recommInterventionModifiedBy,Date recommInterventionModifiedOn,
+			Integer recommInterventionStatus,Date recommInterventionOrderedOn,
+			String recommCreatedName,String recommModifiedName,String concernDesc,String goalDesc) {
 				
 				super();
-		
+				DateFormat timeFormat = new SimpleDateFormat("MM/dd/yyyy");
 				this.recommInterventionId=recommInterventionId;
 				this.recommInterventionPatientId=recommInterventionPatientId;
 				this.recommInterventionEncounterId=recommInterventionEncounterId;
@@ -66,18 +72,38 @@ public class CarePlanRecommendedInterventionBean {
 				this.recommInterventionCategoryId=recommInterventionCategoryId;
 				this.recommInterventionDescription=recommInterventionDescription;
 				this.recommInterventionRecommendedBy=recommInterventionRecommendedBy;
-				this.recommInterventionRecommendedOn=recommInterventionRecommendedOn;
+				if(recommInterventionRecommendedOn==null)
+					this.recommInterventionRecommendedOn="";
+				else
+					this.recommInterventionRecommendedOn=timeFormat.format(recommInterventionRecommendedOn);
 				this.recommInterventionCode=recommInterventionCode;
 				this.recommInterventionCodeSystem=recommInterventionCodeSystem;
 				this.recommInterventionCodeSystemname= recommInterventionCodeSystemname;        
 				this.recommInterventionPerformedBy=recommInterventionPerformedBy;
-				this.recommInterventionPerformedOn=recommInterventionPerformedOn;
+				if(recommInterventionPerformedOn==null)
+					this.recommInterventionPerformedOn="";
+				else
+					this.recommInterventionPerformedOn=timeFormat.format(recommInterventionPerformedOn);
 				this.recommInterventionNotes=recommInterventionNotes;
 				this.recommInterventionCreatedBy=recommInterventionCreatedBy;
-				this.recommInterventionCreatedOn=recommInterventionCreatedOn;
+				if(recommInterventionCreatedOn==null)
+					this.recommInterventionCreatedOn="";
+				else
+					this.recommInterventionCreatedOn=timeFormat.format(recommInterventionCreatedOn);
 				this.recommInterventionModifiedBy=recommInterventionModifiedBy;
-				this.recommInterventionModifiedOn=recommInterventionCreatedOn;
-
+				if(recommInterventionModifiedOn==null)
+					this.recommInterventionModifiedOn="";
+				else
+					this.recommInterventionModifiedOn=timeFormat.format(recommInterventionCreatedOn);
+				this.recommCreatedName=recommCreatedName;
+				this.recommModifiedName=recommModifiedName;
+				this.recommInterventionStatus=recommInterventionStatus;
+				if(recommInterventionOrderedOn==null)
+					this.recommInterventionOrderedOn="";
+				else
+					this.recommInterventionOrderedOn = timeFormat.format(recommInterventionOrderedOn);
+				this.concernDesc = concernDesc;
+				this.goalDesc = goalDesc;
 	}
 
 	public Integer getRecommInterventionId() {
@@ -366,6 +392,36 @@ public class CarePlanRecommendedInterventionBean {
 	public void setRecommResponsibleParty(Integer recommResponsibleParty) {
 		this.recommResponsibleParty = recommResponsibleParty;
 	}
-	
-	
+
+	public String getRecommCreatedName() {
+		return recommCreatedName;
+	}
+
+	public void setRecommCreatedName(String recommCreatedName) {
+		this.recommCreatedName = recommCreatedName;
+	}
+
+	public String getRecommModifiedName() {
+		return recommModifiedName;
+	}
+
+	public void setRecommModifiedName(String recommModifiedName) {
+		this.recommModifiedName = recommModifiedName;
+	}
+
+	public String getConcernDesc() {
+		return concernDesc;
+	}
+
+	public void setConcernDesc(String concernDesc) {
+		this.concernDesc = concernDesc;
+	}
+
+	public String getGoalDesc() {
+		return goalDesc;
+	}
+
+	public void setGoalDesc(String goalDesc) {
+		this.goalDesc = goalDesc;
+	}
 }
