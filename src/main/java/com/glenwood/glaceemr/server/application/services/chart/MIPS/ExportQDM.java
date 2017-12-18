@@ -61,6 +61,8 @@ import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping;
 import com.glenwood.glaceemr.server.application.models.CvxVaccineGroupMapping_;
 import com.glenwood.glaceemr.server.application.models.DirectEmailLog;
 import com.glenwood.glaceemr.server.application.models.DirectEmailLog_;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
+import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.Hl7ExternalTest;
@@ -1650,8 +1652,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 		Root<Prescription> root = cq.from(Prescription.class);
-		Join<Prescription, Encounter> joinEncounter=root.join(Prescription_.encounter,JoinType.INNER);
-		Predicate byProviderId  = builder.equal(joinEncounter.get(Encounter_.encounter_service_doctor), providerId);
+		Predicate byProviderId  = builder.equal(root.get(Prescription_.docPrescProviderId), providerId);
 		Predicate byOrderedDate = builder.between(root.get(Prescription_.docPrescOrderedDate), startDate, endDate);
 		Predicate byPatientId	= builder.equal(root.get(Prescription_.docPrescPatientId), patientId);
 		Predicate byStatus = root.get(Prescription_.docPrescStatus).in(1,2);
@@ -1945,6 +1946,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 			Root<ReferralDetails> root = cq.from(ReferralDetails.class);
+			Join<ReferralDetails, EmployeeProfile> joinEmpProfile = root.join(ReferralDetails_.empProfile, JoinType.INNER);
 			
 			Selection[] selections= new Selection[] {
 				
@@ -1956,7 +1958,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			cq.multiselect(selections);
 			
 			if(isGroup)
-				cq.where(builder.equal(root.get(ReferralDetails_.referralById), providerId),builder.between(builder.function("DATE", Date.class, root.get(ReferralDetails_.referralOrderOn)), startDate, endDate), builder.equal(root.get(ReferralDetails_.referral_details_myalert), patientId));
+				cq.where(builder.equal(joinEmpProfile.get(EmployeeProfile_.empProfileEmpid), providerId),builder.between(builder.function("DATE", Date.class, root.get(ReferralDetails_.referralOrderOn)), startDate, endDate), builder.equal(root.get(ReferralDetails_.referral_details_myalert), patientId));
 			else
 				cq.where(builder.between(builder.function("DATE", Date.class, root.get(ReferralDetails_.referralOrderOn)), startDate, endDate), builder.equal(root.get(ReferralDetails_.referral_details_myalert), patientId));
 			
@@ -2206,10 +2208,8 @@ Root<Encounter> root = cq.from(Encounter.class);
         for(Integer route:replicatedRouteIds)
         {
         	List<MedicationQDM> eachGroup=new ArrayList<MedicationQDM>();
-        	System.out.println("inside replicatedRouteIds>>>>>>>>");
         	for(MedicationQDM eachData:result){
-        		if(eachData.getRoute()==route){
-        			System.out.println("eachdata>>>>>>>>>"+eachData);
+        		if(eachData.getRoute()==route && eachData!=null){
         			eachGroup.add(eachData);
         		}
         	}

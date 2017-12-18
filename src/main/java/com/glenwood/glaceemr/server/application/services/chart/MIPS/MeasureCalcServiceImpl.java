@@ -3679,24 +3679,20 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveMeasureid),
 				rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveStatus),
 		};
+		cq.where(builder.equal(rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveStatus), true));
 		cq.orderBy(builder.asc(rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveId)));		
 		cq.select(builder.construct(MIPSPerformanceBean.class,objectives));
 		List<MIPSPerformanceBean> objectivesList = em.createQuery(cq).getResultList();
-		MIPSPerformanceBean obj=null;
-		if(objectivesList.size()==0)
-		{
-			obj=new MIPSPerformanceBean("ACI_TRANS_PHCDRR_1", false);
-			objectivesList.add(obj);
-			obj=new MIPSPerformanceBean("ACI_TRANS_PHCDRR_2", false);
-			objectivesList.add(obj);
-			obj=new MIPSPerformanceBean("ACI_TRANS_PHCDRR_3", false);
-			objectivesList.add(obj);
-			obj=new MIPSPerformanceBean("ACI_TRANS_PPHI_1", false);
-			objectivesList.add(obj);
+		Boolean isThere=false;
+		for(MIPSPerformanceBean obj:objectivesList){
+			if(obj.getMeasureId().equals("ACI_TRANS_PPHI_1"))
+				isThere=true;	
 		}
-		objectivesList.addAll(performanceObjs);
-		
-		return objectivesList;
+		if(objectivesList.size()>0)
+			performanceObjs.addAll(objectivesList);
+		if(!isThere)
+			performanceObjs.add(new MIPSPerformanceBean("ACI_TRANS_PPHI_1", false));
+		return performanceObjs;
 	}
 	
 }
