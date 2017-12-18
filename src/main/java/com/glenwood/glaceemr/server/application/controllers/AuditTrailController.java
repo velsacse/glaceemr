@@ -47,7 +47,8 @@ public class AuditTrailController {
 		JSONObject dataObj = new JSONObject(data);
 		int userId = Integer.parseInt((String) HUtil.nz(dataObj.get("userId"), "-1"));
 		int patientid = (int) HUtil.nz(dataObj.get("patientid"), -1);
-		String module = (String) HUtil.nz(dataObj.get("module"), "-1");
+		String parentModule = (String) HUtil.nz(dataObj.get("parentModule"), "-1");
+		String subModule = (String) HUtil.nz(dataObj.get("subModule"), "-1");
 		String outcome = (String) HUtil.nz(dataObj.get("outcome"), "-1");
 		String desc = (String) HUtil.nz(dataObj.get("desc"), "-1");
 		String startDate = (String) HUtil.nz(dataObj.get("startDate"), "-1");
@@ -71,7 +72,7 @@ public class AuditTrailController {
 			SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			endDate = newFormat.format(eDate);
 		}
-		Iterable<AuditTrail> auditLogList = auditTrailFetchService.getSearchResult(userId, module, outcome, desc,
+		Iterable<AuditTrail> auditLogList = auditTrailFetchService.getSearchResult(userId, parentModule, subModule, outcome, desc,
 				startDate, endDate, action, parentEvent, patientid, sessionId, clientIp, logId, sortProperty, order, currentPage, pageSize);
 		auditResponseBean.setData(auditLogList);
 		auditResponseBean.setSuccess(true);
@@ -84,7 +85,8 @@ public class AuditTrailController {
 		JSONObject dataObj = new JSONObject(data);
 		int userId = Integer.parseInt((String) HUtil.nz(dataObj.get("userId"), "-1"));
 		int patientid = (int) HUtil.nz(dataObj.get("patientid"), -1);
-		String module = (String) HUtil.nz(dataObj.get("module"), "-1");
+		String parentModule = (String) HUtil.nz(dataObj.get("parentModule"), "-1");
+		String subModule = (String) HUtil.nz(dataObj.get("subModule"), "-1");
 		String outcome = (String) HUtil.nz(dataObj.get("outcome"), "-1");
 		String desc = (String) HUtil.nz(dataObj.get("desc"), "-1");
 		String startDate = (String) HUtil.nz(dataObj.get("startDate"), "-1");
@@ -108,7 +110,7 @@ public class AuditTrailController {
 			endDate = newFormat.format(eDate);
 		}
 
-		String auditLogCount = auditTrailFetchService.generateCsvCount(userId, module, outcome, desc, startDate,
+		String auditLogCount = auditTrailFetchService.generateCsvCount(userId, parentModule, subModule, outcome, desc, startDate,
 				endDate, action, parentEvent, patientid, sessionId, clientIp, logId, newResponse);
 		return auditLogCount;
 	}
@@ -119,7 +121,8 @@ public class AuditTrailController {
 		JSONObject dataObj = new JSONObject(data);
 		int userId = Integer.parseInt((String) HUtil.nz(dataObj.get("userId"), "-1"));
 		int patientid = (int) HUtil.nz(dataObj.get("patientid"), -1);
-		String module = (String) HUtil.nz(dataObj.get("module"), "-1");
+		String parentModule = (String) HUtil.nz(dataObj.get("parentModule"), "-1");
+		String subModule = (String) HUtil.nz(dataObj.get("subModule"), "-1");
 		String outcome = (String) HUtil.nz(dataObj.get("outcome"), "-1");
 		String desc = (String) HUtil.nz(dataObj.get("desc"), "-1");
 		String startDate = (String) HUtil.nz(dataObj.get("startDate"), "-1");
@@ -146,7 +149,7 @@ public class AuditTrailController {
 			endDate = newFormat.format(eDate);
 		}
 
-		Iterable<AuditTrail> auditLogList = auditTrailFetchService.generateCsv(userId, module, outcome, desc, startDate,
+		Iterable<AuditTrail> auditLogList = auditTrailFetchService.generateCsv(userId, parentModule, subModule, outcome, desc, startDate,
 				endDate, action, parentEvent, patientid, sessionId, clientIp, logId, sortProperty, order, newResponse);
 
 		SimpleDateFormat monthDayYearformatter = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");

@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.specifications;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -9,11 +10,16 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.stereotype.Component;
 
 import com.glenwood.glaceemr.server.application.models.AuditTrail;
 import com.glenwood.glaceemr.server.application.models.AuditTrail_;
+import com.glenwood.glaceemr.server.application.repositories.AuditLogSubModuleRepository;
 
+@Component
 public class AuditTrailSpecifications {
+	
+	
 	public static Specification<AuditTrail> checkUserId(final Integer userId) {
 		Specification<AuditTrail> checkUserIdSpec = new Specification<AuditTrail>() {
 			@Override
@@ -45,6 +51,19 @@ public class AuditTrailSpecifications {
 			}
 		};
 		return checkLogModuleSpec;
+	}
+	
+	public static Specification<AuditTrail> checkParentLogModule(final List<Integer> subModuleIds) {
+		Specification<AuditTrail> checkParentLogModuleSpec = new Specification<AuditTrail>() {
+			@Override
+			public Predicate toPredicate(Root<AuditTrail> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+				if(subModuleIds.size()==0)
+					subModuleIds.add(0);
+				Predicate checkParentLogModulePredicate = root.get(AuditTrail_.module).in(subModuleIds.toArray());
+				return checkParentLogModulePredicate;
+			}
+		};
+		return checkParentLogModuleSpec;
 	}
 	
 	public static Specification<AuditTrail> checkAction(final String action) {
@@ -135,12 +154,11 @@ public class AuditTrailSpecifications {
 		return checkClientIpSpec;
 	}
 	
-	public static Specification<AuditTrail> getSearchResult(final int userId, final String module, final String outcome, final String desc, final String action, final int parentEvent, final int patientId, final String sessionId, final String clientIp, final int logId, final String sortProperty, final String order, final Timestamp startTimeStamp, final Timestamp endTimeStamp) {
+	public static Specification<AuditTrail> getSearchResult(final int userId, final String parentModule, final String subModule, final String outcome, final String desc, final String action, final int parentEvent, final int patientId, final String sessionId, final String clientIp, final int logId, final String sortProperty, final String order, final Timestamp startTimeStamp, final Timestamp endTimeStamp, final AuditLogSubModuleRepository repository) {
 		Specification<AuditTrail> specification = new Specification<AuditTrail>() {
 			@Override
 			public Predicate toPredicate(Root<AuditTrail> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
 					Predicate checklogOnPredicate = cb.lessThanOrEqualTo(root.get(AuditTrail_.logOn), endTimeStamp);
-
 					return checklogOnPredicate;
 			}
 		};
@@ -149,8 +167,15 @@ public class AuditTrailSpecifications {
 			specification = Specifications.where(specification).and(checkUserId(userId));
 		if (patientId != -1)
 			specification = Specifications.where(specification).and(checkPatientId(patientId));
-		if (!module.equals("-1"))
-			specification = Specifications.where(specification).and(checkLogModule(module));
+		if (!parentModule.equals("-1")){
+			if(subModule.equals("-1")){
+				specification = Specifications.where(specification).and(checkParentLogModule(repository.getSubModuleIds(Integer.parseInt(parentModule))));
+			}
+			else{
+				specification = Specifications.where(specification).and(checkLogModule(subModule));
+			}
+		}else if (!subModule.equals("-1"))
+			specification = Specifications.where(specification).and(checkLogModule(subModule));
 		if (!outcome.equals("-1"))
 			specification = Specifications.where(specification).and(checkOutcome(outcome));
 		if (!desc.trim().equals("-1"))
