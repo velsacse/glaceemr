@@ -2752,24 +2752,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	return filename;
 	}
 	
-	public List<MUAttestationBean> getAttestationObjectives()
-	{
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<MUAttestationBean> cq = builder.createQuery(MUAttestationBean.class);;
-		Root<MuAttestationObjectives> rootMuAttestationObjectives = cq.from(MuAttestationObjectives.class);
-		Selection[] objectives= new Selection[] {
-				rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveMeasureid),
-				rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveStatus),
-		};
-		cq.orderBy(builder.asc(rootMuAttestationObjectives.get(MuAttestationObjectives_.objectiveId)));		
-		cq.select(builder.construct(MUAttestationBean.class,objectives));
-		List<MUAttestationBean> objectivesList = em.createQuery(cq).getResultList();
-		return objectivesList;
-	}
-	
 	@Override
 	public String mipsReportPDF(GeneratePDFDetails generatePDFDetails,int provId,String configuredMeasures,String accountId,String tinId,boolean isACIReport, boolean isOrderBy,String practiceName,Integer year) throws Exception
 	{
+
 		String providerName,submissionMethod,reportingStart,reportingEnd;
 		String PDFData="";String FileName = null;String provName=null;
 		try{
@@ -2779,7 +2765,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			MUDashboardBean providerDashboard = new MUDashboardBean();
 			List<MIPSPerformanceBean> aciMeasures = new ArrayList<MIPSPerformanceBean>();
 			List<MIPSPerformanceBean> aciTransMeasures = new ArrayList<MIPSPerformanceBean>();
-			List<MUAttestationBean> objectiveMeasureList= getAttestationObjectives();
 			double ecqmRate =0,aciRate=0;
 			providerDashboard=generatePDFDetails.getDashboardInfo();
 			ecqmMeasureList = providerDashboard.getEcqmMeasures();
@@ -2884,43 +2869,29 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			
 			// <---- ACI Transition Measures------>
 			PDFData+="<h3 class='break'><center><br><br>ACI Transition Measures</center></h3><br>";
-			String objMeasureId; boolean objMeasureStatus;
 			int aciTrans_baseScoreCount = 0,aciTrans_performancePoints = 0,aciTrans_bonusPoints = 0,aciTrans_basePoints=0,aciTrans_TotalPoints = 0;
 			int aciTransMeasurePoints;String aciTransCmsID=null;
-			for(int i=0;i<objectiveMeasureList.size();i++){
-				objMeasureId=objectiveMeasureList.get(i).getObjectiveMeasureId();
-				objMeasureStatus=objectiveMeasureList.get(i).isObjectiveStauts();
-
-				if(objMeasureId.equals("ACI_TRANS_PPHI_1"))
-				{
-					if(objMeasureStatus==true)
-						aciTrans_baseScoreCount++;
-				}
-				if(objMeasureId.equals("ACI_TRANS_PHCDRR_1"))
-				{
-					if(objMeasureStatus==true)
-						aciTrans_performancePoints+=10;
-				}
-				if(objMeasureId.equals("ACI_TRANS_PHCDRR_2"))
-				{
-					if(objMeasureStatus==true)
-						aciTrans_bonusPoints+=5;
-				}
-				if(objMeasureId.equals("ACI_IMPRO_1"))
-				{
-					if(objMeasureStatus==true)
-						aciTrans_bonusPoints+=10;
-				}
-			}
-			
+			long aciTransDenom,aciTransNumer,aciTransNotMet;
 			for(int i=0;i<aciTransMeasures.size();i++)
 			{
 				aciTransMeasurePoints =(int) aciTransMeasures.get(i).getPoints();
-				aciTransCmsID=aciTransMeasures.get(i).getCmsId();
-				if(!aciTransCmsID.equals("ACI_TRANS_EP_1"))
+				aciTransNumer=aciTransMeasures.get(i).getNumeratorCount();
+				if (aciTransMeasures.get(i).getMeasureId().equals("ACI_TRANS_EP_1")|| aciTransMeasures.get(i).getMeasureId().equals("ACI_TRANS_HIE_1")|| aciTransMeasures.get(i).getMeasureId().equals("ACI_TRANS_PEA_1"))
+				{
+					if(aciTransNumer>=1)
+					{
+						aciTrans_baseScoreCount++;
+					}
+				}
+				else if(aciTransMeasures.get(i).getMeasureId().equals("ACI_TRANS_PPHI_1"))
+					aciTrans_baseScoreCount++;
+				
+				if(!aciTransMeasures.get(i).getMeasureId().equals("ACI_TRANS_EP_1"))
 					aciTrans_performancePoints+=aciTransMeasurePoints;
+				
 			}
-				if (aciTrans_baseScoreCount == 4) {
+				
+			if (aciTrans_baseScoreCount == 4) {
 					aciTrans_basePoints = 50;
 				} else {
 					aciTrans_basePoints = 0;
@@ -2931,15 +2902,14 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				} else {
 					aciTrans_TotalPoints = aciTrans_basePoints + aciTrans_performancePoints + aciTrans_bonusPoints;
 				}
-			
 			PDFData+="<center><table class=totalscore><tr><th align=center>Total Score</th></tr><tr><td align=center>"+aciTrans_TotalPoints+"/155</td></tr></table></center>&nbsp";
 			PDFData+="<center><table class=measureScore><tr><th align=center>Base Score</th><th align=center> Performance Score</th><th align=center>Bonus Score</th></tr><tr><td align=center>"+aciTrans_basePoints+"/50</td><td align=center>"+aciTrans_performancePoints+"/90</td><td align=center>"+aciTrans_bonusPoints+"/15</td></tr></table></center>&nbsp";
 			PDFData+="</table>";
 			PDFData+= "&nbsp<table class=acimeasure width=100% cellpadding=5 cellspacing=5><tr><th>Measure Name </th>   <th>DENOM</th>   <th> NUMER</th>  <th>NOT MET</th>   <th>RATE</th> <th>BASE SCORE</th>  <th>POINTS</th></tr>";
 			String aciTransMeasureName=null;
 
-			long aciTransDenom,aciTransNumer,aciTransNotMet;
-			String ACIMeasures = "ACI_TRANS_EP_1,ACI_TRANS_PEA_1,ACI_TRANS_HIE_1,ACI_TRANS_PEA_2,ACI_TRANS_PSE_1,ACI_TRANS_SM_1,ACI_TRANS_MR_1";
+			
+			String ACIMeasures = "ACI_TRANS_EP_1,ACI_TRANS_HIE_1,ACI_TRANS_PHCDRR_1,ACI_TRANS_MR_1,ACI_TRANS_PSE_1,ACI_TRANS_PEA_1,ACI_TRANS_SM_1,ACI_TRANS_PPHI_1,ACI_TRANS_PHCDRR_3,ACI_TRANS_PHCDRR_2,ACI_TRANS_PEA_2";
 			String aciTransitionMeasures[]=ACIMeasures.split(",");
 			double aciTransMeasureRate;
 			for(int i=0;i<aciTransitionMeasures.length;i++){
@@ -2949,33 +2919,89 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					if (!(aciTransitionMeasures[i].equals(aciTransMeasures.get(j).getMeasureId()))) {
 						continue;
 					}
-					aciTransMeasureName=aciTransMeasures.get(j).getTitle();
-					aciTransCmsID=aciTransMeasures.get(j).getCmsId();
-					aciTransDenom=aciTransMeasures.get(j).getDenominatorCount();
-					aciTransNumer=aciTransMeasures.get(j).getNumeratorCount();
-					aciTransNotMet=aciTransMeasures.get(j).getNotMetPatients();
-					aciTransMeasureRate=aciTransMeasures.get(j).getPerformanceRate();
-					PDFData+="<tr><td align=left>"+aciTransMeasureName+"("+aciTransCmsID+")</td><td align=center><font color=blue>"+aciTransDenom+"</font></td><td align=center><font color=blue>"+aciTransNumer+"</font></td><td align=center><font color=blue>"+aciTransNotMet+"</font></td><td align=center><font color=green>"+aciTransMeasureRate+"%</font></td>";
-					if (aciTransCmsID.equals("ACI_TRANS_EP_1")|| aciTransCmsID.equals("ACI_TRANS_HIE_1")|| aciTransCmsID.equals("ACI_TRANS_PEA_1"))
+					if(!(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PPHI_1")) && !(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_1")) && !(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_2")) && !(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_3")))
 					{
-						if(aciTransNumer>=1)
+						aciTransMeasureName=aciTransMeasures.get(j).getTitle();
+						aciTransCmsID=aciTransMeasures.get(j).getCmsId();
+						aciTransDenom=aciTransMeasures.get(j).getDenominatorCount();
+						aciTransNumer=aciTransMeasures.get(j).getNumeratorCount();
+						aciTransNotMet=aciTransMeasures.get(j).getNotMetPatients();
+						aciTransMeasureRate=aciTransMeasures.get(j).getPerformanceRate();
+						PDFData+="<tr><td align=left>"+aciTransMeasureName+"("+aciTransCmsID+")</td><td align=center><font color=blue>"+aciTransDenom+"</font></td><td align=center><font color=blue>"+aciTransNumer+"</font></td><td align=center><font color=blue>"+aciTransNotMet+"</font></td><td align=center><font color=green>"+aciTransMeasureRate+"%</font></td>";
+						if (aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_EP_1")|| aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_HIE_1")|| aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PEA_1"))
 						{
-							PDFData+="<td align=center><font color=green>ACHIEVED</font></td>";
+							if(aciTransNumer>=1)
+							{
+								PDFData+="<td align=center><font color=green>ACHIEVED</font></td>";
+							}
+							else
+								PDFData+="<td align=center><font color=red>NOT ACHIEVED</font></td>";
 						}
 						else
-							PDFData+="<td align=center><font color=red>NOT ACHIEVED</font></td>";
-					}
-					else
-						PDFData+="<td align=center>N/A</td>";
+							PDFData+="<td align=center>N/A</td>";
 
-					if(aciTransCmsID.equals("ACI_TRANS_EP_1")){
-						PDFData+="<td align=center>N/A</td></tr>";
+						if(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_EP_1")){
+							PDFData+="<td align=center>N/A</td></tr>";
+						}
+						else{
+							aciTransMeasurePoints =(int) aciTransMeasures.get(j).getPoints();
+							PDFData+="<td align=center>"+aciTransMeasurePoints+"</td></tr>";
+						}
 					}
 					else{
-						aciTransMeasurePoints =(int) aciTransMeasures.get(j).getPoints();
-						PDFData+="<td align=center>"+aciTransMeasurePoints+"</td></tr>";
+						if(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PPHI_1"))
+						{
+							PDFData+="<tr><td align=left>Security Risk Analysis (SRA)("+aciTransMeasures.get(j).getMeasureId()+")</td>";
+							if(aciTransMeasures.get(j).getAttestationStatus() == true){
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Completed )</p></td>";
+								PDFData += "<td><p style='color: green' align=center>ACHIEVED</p></td>";
+							}else{
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Not Completed )</p></td>";
+								PDFData += "<td><p style='color: red' align=center>NOT ACHIEVED</p></td>";
+							}	
+							PDFData += "<td align=center><p>N/A</p></td></tr>";
+						}
+						else if(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_1"))
+						{
+							PDFData+="<tr><td align=left>Immunization Registry Reporting("+aciTransMeasures.get(j).getMeasureId()+")</td>";
+							if(aciTransMeasures.get(j).getAttestationStatus() == true){
+								
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Completed )</p></td>";
+								PDFData += "<td><p style='color: green' align=center>ACHIEVED</p></td>";
+							}else{
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Not Completed )</p></td>";
+								PDFData += "<td><p style='color: red' align=center>NOT ACHIEVED</p></td>";
+							}	
+							PDFData += "<td align=center><p>N/A</p></td></tr>";
+						}
+						else if(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_2"))
+						{
+							PDFData+="<tr><td align=left>Syndromic Surveillance Reporting("+aciTransMeasures.get(j).getMeasureId()+")</td>";
+							if(aciTransMeasures.get(j).getAttestationStatus() == true){
+								
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Completed )</p></td>";
+								PDFData += "<td><p style='color: green' align=center>ACHIEVED</p></td>";
+							}else{
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Not Completed )</p></td>";
+								PDFData += "<td><p style='color: red' align=center>NOT ACHIEVED</p></td>";
+							}	
+							PDFData += "<td align=center><p>N/A</p></td></tr>";
+						}
+						
+						else if(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_3"))
+						{
+							PDFData+="<tr><td align=left>Specialized Registry Reporting("+aciTransMeasures.get(j).getMeasureId()+")</td>";
+							if(aciTransMeasures.get(j).getAttestationStatus() == true){
+								
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Completed )</p></td>";
+								PDFData += "<td><p style='color: green' align=center>ACHIEVED</p></td>";
+							}else{
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Not Completed )</p></td>";
+								PDFData += "<td><p style='color: red' align=center>NOT ACHIEVED</p></td>";
+							}	
+							PDFData += "<td align=center><p>N/A</p></td></tr>";
+						}
 					}
-
 				}
 			}
 			PDFData+="</table>";
@@ -3158,7 +3184,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			MUDashboardBean providerDashboard = new MUDashboardBean();
 			List<MIPSPerformanceBean> aciMeasures = new ArrayList<MIPSPerformanceBean>();
 			List<MIPSPerformanceBean> aciTransMeasures = new ArrayList<MIPSPerformanceBean>();
-			List<MUAttestationBean> objectiveMeasureList= getAttestationObjectives();
 			String sharedPath = sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
 			double ecqmRate,aciRate;
 			providerDashboard=generatePDFDetails.getDashboardInfo();
@@ -3261,42 +3286,28 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			PDFData+="</table>";
 			// <---- ACI Transition Measures------>
 			PDFData+="<h3 class='break'><center><br><br>ACI Transition Measures</center></h3><br>";
-			String objMeasureId; boolean objMeasureStatus;
 			int aciTrans_baseScoreCount = 0,aciTrans_performancePoints = 0,aciTrans_bonusPoints = 0,aciTrans_basePoints=0,aciTrans_TotalPoints = 0;
 			int aciTransMeasurePoints;String aciTransCmsID=null;
-			for(int i=0;i<objectiveMeasureList.size();i++){
-				objMeasureId=objectiveMeasureList.get(i).getObjectiveMeasureId();
-				objMeasureStatus=objectiveMeasureList.get(i).isObjectiveStauts();
-
-				if(objMeasureId.equals("ACI_TRANS_PPHI_1"))
-				{
-					if(objMeasureStatus==true)
-						aciTrans_baseScoreCount++;
-				}
-				if(objMeasureId.equals("ACI_TRANS_PHCDRR_1"))
-				{
-					if(objMeasureStatus==true)
-						aciTrans_performancePoints+=10;
-				}
-				if(objMeasureId.equals("ACI_TRANS_PHCDRR_2"))
-				{
-					if(objMeasureStatus==true)
-						aciTrans_bonusPoints+=5;
-				}
-				if(objMeasureId.equals("ACI_IMPRO_1"))
-				{
-					if(objMeasureStatus==true)
-						aciTrans_bonusPoints+=10;
-				}
-			}
-
+			long aciTransDenom,aciTransNumer,aciTransNotMet;
 			for(int i=0;i<aciTransMeasures.size();i++)
 			{
 				aciTransMeasurePoints =(int) aciTransMeasures.get(i).getPoints();
-				aciTransCmsID=aciTransMeasures.get(i).getCmsId();
-				if(!aciTransCmsID.equals("ACI_TRANS_EP_1"))
+				aciTransNumer=aciTransMeasures.get(i).getNumeratorCount();
+				if (aciTransMeasures.get(i).getMeasureId().equals("ACI_TRANS_EP_1")|| aciTransMeasures.get(i).getMeasureId().equals("ACI_TRANS_HIE_1")|| aciTransMeasures.get(i).getMeasureId().equals("ACI_TRANS_PEA_1"))
+				{
+					if(aciTransNumer>=1)
+					{
+						aciTrans_baseScoreCount++;
+					}
+				}
+				else if(aciTransMeasures.get(i).getMeasureId().equals("ACI_TRANS_PPHI_1"))
+					aciTrans_baseScoreCount++;
+
+				if(!aciTransMeasures.get(i).getMeasureId().equals("ACI_TRANS_EP_1"))
 					aciTrans_performancePoints+=aciTransMeasurePoints;
+
 			}
+
 			if (aciTrans_baseScoreCount == 4) {
 				aciTrans_basePoints = 50;
 			} else {
@@ -3308,15 +3319,14 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			} else {
 				aciTrans_TotalPoints = aciTrans_basePoints + aciTrans_performancePoints + aciTrans_bonusPoints;
 			}
-
 			PDFData+="<center><table class=totalscore><tr><th align=center>Total Score</th></tr><tr><td align=center>"+aciTrans_TotalPoints+"/155</td></tr></table></center>&nbsp";
 			PDFData+="<center><table class=measureScore><tr><th align=center>Base Score</th><th align=center> Performance Score</th><th align=center>Bonus Score</th></tr><tr><td align=center>"+aciTrans_basePoints+"/50</td><td align=center>"+aciTrans_performancePoints+"/90</td><td align=center>"+aciTrans_bonusPoints+"/15</td></tr></table></center>&nbsp";
 			PDFData+="</table>";
 			PDFData+= "&nbsp<table class=acimeasure width=100% cellpadding=5 cellspacing=5><tr><th>Measure Name </th>   <th>DENOM</th>   <th> NUMER</th>  <th>NOT MET</th>   <th>RATE</th> <th>BASE SCORE</th>  <th>POINTS</th></tr>";
 			String aciTransMeasureName=null;
 
-			long aciTransDenom,aciTransNumer,aciTransNotMet;
-			String ACIMeasures = "ACI_TRANS_EP_1,ACI_TRANS_PEA_1,ACI_TRANS_HIE_1,ACI_TRANS_PEA_2,ACI_TRANS_PSE_1,ACI_TRANS_SM_1,ACI_TRANS_MR_1";
+
+			String ACIMeasures = "ACI_TRANS_EP_1,ACI_TRANS_HIE_1,ACI_TRANS_PHCDRR_1,ACI_TRANS_MR_1,ACI_TRANS_PSE_1,ACI_TRANS_PEA_1,ACI_TRANS_SM_1,ACI_TRANS_PPHI_1,ACI_TRANS_PHCDRR_3,ACI_TRANS_PHCDRR_2,ACI_TRANS_PEA_2";
 			String aciTransitionMeasures[]=ACIMeasures.split(",");
 			double aciTransMeasureRate;
 			for(int i=0;i<aciTransitionMeasures.length;i++){
@@ -3326,33 +3336,89 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					if (!(aciTransitionMeasures[i].equals(aciTransMeasures.get(j).getMeasureId()))) {
 						continue;
 					}
-					aciTransMeasureName=aciTransMeasures.get(j).getTitle();
-					aciTransCmsID=aciTransMeasures.get(j).getCmsId();
-					aciTransDenom=aciTransMeasures.get(j).getDenominatorCount();
-					aciTransNumer=aciTransMeasures.get(j).getNumeratorCount();
-					aciTransNotMet=aciTransMeasures.get(j).getNotMetPatients();
-					aciTransMeasureRate=aciTransMeasures.get(j).getPerformanceRate();
-					PDFData+="<tr><td align=left>"+aciTransMeasureName+"("+aciTransCmsID+")</td><td align=center><font color=blue>"+aciTransDenom+"</font></td><td align=center><font color=blue>"+aciTransNumer+"</font></td><td align=center><font color=blue>"+aciTransNotMet+"</font></td><td align=center><font color=green>"+aciTransMeasureRate+"%</font></td>";
-					if (aciTransCmsID.equals("ACI_TRANS_EP_1")|| aciTransCmsID.equals("ACI_TRANS_HIE_1")|| aciTransCmsID.equals("ACI_TRANS_PEA_1"))
+					if(!(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PPHI_1")) && !(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_1")) && !(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_2")) && !(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_3")))
 					{
-						if(aciTransNumer>=1)
+						aciTransMeasureName=aciTransMeasures.get(j).getTitle();
+						aciTransCmsID=aciTransMeasures.get(j).getCmsId();
+						aciTransDenom=aciTransMeasures.get(j).getDenominatorCount();
+						aciTransNumer=aciTransMeasures.get(j).getNumeratorCount();
+						aciTransNotMet=aciTransMeasures.get(j).getNotMetPatients();
+						aciTransMeasureRate=aciTransMeasures.get(j).getPerformanceRate();
+						PDFData+="<tr><td align=left>"+aciTransMeasureName+"("+aciTransCmsID+")</td><td align=center><font color=blue>"+aciTransDenom+"</font></td><td align=center><font color=blue>"+aciTransNumer+"</font></td><td align=center><font color=blue>"+aciTransNotMet+"</font></td><td align=center><font color=green>"+aciTransMeasureRate+"%</font></td>";
+						if (aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_EP_1")|| aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_HIE_1")|| aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PEA_1"))
 						{
-							PDFData+="<td align=center><font color=green>ACHIEVED</font></td>";
+							if(aciTransNumer>=1)
+							{
+								PDFData+="<td align=center><font color=green>ACHIEVED</font></td>";
+							}
+							else
+								PDFData+="<td align=center><font color=red>NOT ACHIEVED</font></td>";
 						}
 						else
-							PDFData+="<td align=center><font color=red>NOT ACHIEVED</font></td>";
-					}
-					else
-						PDFData+="<td align=center>N/A</td>";
+							PDFData+="<td align=center>N/A</td>";
 
-					if(aciTransCmsID.equals("ACI_TRANS_EP_1")){
-						PDFData+="<td align=center>N/A</td></tr>";
+						if(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_EP_1")){
+							PDFData+="<td align=center>N/A</td></tr>";
+						}
+						else{
+							aciTransMeasurePoints =(int) aciTransMeasures.get(j).getPoints();
+							PDFData+="<td align=center>"+aciTransMeasurePoints+"</td></tr>";
+						}
 					}
 					else{
-						aciTransMeasurePoints =(int) aciTransMeasures.get(j).getPoints();
-						PDFData+="<td align=center>"+aciTransMeasurePoints+"</td></tr>";
-					}
+						if(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PPHI_1"))
+						{
+							PDFData+="<tr><td align=left>Security Risk Analysis (SRA)("+aciTransMeasures.get(j).getMeasureId()+")</td>";
+							if(aciTransMeasures.get(j).getAttestationStatus() == true){
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Completed )</p></td>";
+								PDFData += "<td><p style='color: green' align=center>ACHIEVED</p></td>";
+							}else{
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Not Completed )</p></td>";
+								PDFData += "<td><p style='color: red' align=center>NOT ACHIEVED</p></td>";
+							}	
+							PDFData += "<td align=center><p>N/A</p></td></tr>";
+						}
+						else if(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_1"))
+						{
+							PDFData+="<tr><td align=left>Immunization Registry Reporting("+aciTransMeasures.get(j).getMeasureId()+")</td>";
+							if(aciTransMeasures.get(j).getAttestationStatus() == true){
 
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Completed )</p></td>";
+								PDFData += "<td><p style='color: green' align=center>ACHIEVED</p></td>";
+							}else{
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Not Completed )</p></td>";
+								PDFData += "<td><p style='color: red' align=center>NOT ACHIEVED</p></td>";
+							}	
+							PDFData += "<td align=center><p>N/A</p></td></tr>";
+						}
+						else if(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_2"))
+						{
+							PDFData+="<tr><td align=left>Syndromic Surveillance Reporting("+aciTransMeasures.get(j).getMeasureId()+")</td>";
+							if(aciTransMeasures.get(j).getAttestationStatus() == true){
+
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Completed )</p></td>";
+								PDFData += "<td><p style='color: green' align=center>ACHIEVED</p></td>";
+							}else{
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Not Completed )</p></td>";
+								PDFData += "<td><p style='color: red' align=center>NOT ACHIEVED</p></td>";
+							}	
+							PDFData += "<td align=center><p>N/A</p></td></tr>";
+						}
+
+						else if(aciTransMeasures.get(j).getMeasureId().equals("ACI_TRANS_PHCDRR_3"))
+						{
+							PDFData+="<tr><td align=left>Specialized Registry Reporting("+aciTransMeasures.get(j).getMeasureId()+")</td>";
+							if(aciTransMeasures.get(j).getAttestationStatus() == true){
+
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Completed )</p></td>";
+								PDFData += "<td><p style='color: green' align=center>ACHIEVED</p></td>";
+							}else{
+								PDFData += "<td colspan='4' align=center><p>Attestation Objective( Not Completed )</p></td>";
+								PDFData += "<td><p style='color: red' align=center>NOT ACHIEVED</p></td>";
+							}	
+							PDFData += "<td align=center><p>N/A</p></td></tr>";
+						}
+					}
 				}
 			}
 			PDFData+="</table>";
@@ -3460,43 +3526,45 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				{
 					measureCriteria=CriteriaList.get(l);
 					totalPatientList= getPatienttoPrint(criteriaId,provId,measureId,tinId,measureCriteria);
-					measureName = getCMSIdAndTitle(measureId,accountId).split("&&&")[1];
-					PDFData+="<br><br><table class='break'><th><br>"+measureName+"</th></table>";
-					String accountNo = null, lastName = null, firstName = null,dob = null,gender = null,phoneNo = null,status=null;
-					PDFData+="<table class=patientlist width=100% cellpadding=5 cellspacing=5> <tr>  ";
-					PDFData+= "<td></td><th>Account No.</th>   <th>Last Name</th>   <th>First Name</th>  <th>DOB</th>   <th>Gender</th> <th>Phone Number</th>   </tr><br><tr>";
-					for(int j=0;j<totalPatientList.size();j++)
-					{
-						accountNo = totalPatientList.get(j).getAccountNo();
-						lastName = totalPatientList.get(j).getLastName();
-						firstName = totalPatientList.get(j).getFirstName();
-						dob = totalPatientList.get(j).getDob();
-						gender = totalPatientList.get(j).getGender();
-						phoneNo = totalPatientList.get(j).getPhoneNo();
-						status = totalPatientList.get(j).getStatus();
-						PDFData+= "<td>";
-						if(status.equals("Num"))
-							PDFData+=" <img src='"+sharedPath+"/MipsImages/met.png' alt='no IMG' height='18px' width='18px' />";
-						else if(status.equals("ParMet"))
-							PDFData+=" <img src='"+sharedPath+"/MipsImages/partiallymet.png' alt='no IMG' height='18px' width='18px' />";
-						else if(status.equals("DenExcl"))
-							PDFData+=" <img src='"+sharedPath+"/MipsImages/denexc.png' alt='no IMG' height='18px' width='18px' />";
-						else if(status.equals("DenExcep"))
-							PDFData+=" <img src='"+sharedPath+"/MipsImages/exception.png' alt='no IMG' height='18px' width='18px' />";
-						else if(status.equals("NumExcl"))
-							PDFData+=" <img src='"+sharedPath+"/MipsImages/numexc.png' alt='no IMG' height='18px' width='18px' />";
-						else if(status.equals("Den"))
-							PDFData+=" <img src='"+sharedPath+"/MipsImages/notmet.png' alt='no IMG' height='18px' width='18px' />";
-						//else if(status.equals("Ipp"))
-						PDFData+="</td>";
-						PDFData+=" <td align=left >"+accountNo+"</td>  <td align=left>"+lastName+"</td>  <td align=left>"+firstName+"</td>   <td align=left>"+dob+"</td>    <td align=left>"+gender+"</td> <td align=left>"+phoneNo+"</td> </tr>";
+					if(totalPatientList.size()!=0){
+						measureName = getCMSIdAndTitle(measureId,accountId).split("&&&")[1];
+						PDFData+="<br><br><table class='break'><th><br>"+measureName+"</th></table>";
+						String accountNo = null, lastName = null, firstName = null,dob = null,gender = null,phoneNo = null,status=null;
+						PDFData+="<table class=patientlist width=100% cellpadding=5 cellspacing=5> <tr>  ";
+						PDFData+= "<td></td><th>Account No.</th>   <th>Last Name</th>   <th>First Name</th>  <th>DOB</th>   <th>Gender</th> <th>Phone Number</th>   </tr><br><tr>";
+						for(int j=0;j<totalPatientList.size();j++)
+						{
+							accountNo = totalPatientList.get(j).getAccountNo();
+							lastName = totalPatientList.get(j).getLastName();
+							firstName = totalPatientList.get(j).getFirstName();
+							dob = totalPatientList.get(j).getDob();
+							gender = totalPatientList.get(j).getGender();
+							phoneNo = totalPatientList.get(j).getPhoneNo();
+							status = totalPatientList.get(j).getStatus();
+							PDFData+= "<td>";
+							if(status.equals("Num"))
+								PDFData+=" <img src='"+sharedPath+"/MipsImages/met.png' alt='no IMG' height='18px' width='18px' />";
+							else if(status.equals("ParMet"))
+								PDFData+=" <img src='"+sharedPath+"/MipsImages/partiallymet.png' alt='no IMG' height='18px' width='18px' />";
+							else if(status.equals("DenExcl"))
+								PDFData+=" <img src='"+sharedPath+"/MipsImages/denexc.png' alt='no IMG' height='18px' width='18px' />";
+							else if(status.equals("DenExcep"))
+								PDFData+=" <img src='"+sharedPath+"/MipsImages/exception.png' alt='no IMG' height='18px' width='18px' />";
+							else if(status.equals("NumExcl"))
+								PDFData+=" <img src='"+sharedPath+"/MipsImages/numexc.png' alt='no IMG' height='18px' width='18px' />";
+							else if(status.equals("Den"))
+								PDFData+=" <img src='"+sharedPath+"/MipsImages/notmet.png' alt='no IMG' height='18px' width='18px' />";
+							//else if(status.equals("Ipp"))
+							PDFData+="</td>";
+							PDFData+=" <td align=left >"+accountNo+"</td>  <td align=left>"+lastName+"</td>  <td align=left>"+firstName+"</td>   <td align=left>"+dob+"</td>    <td align=left>"+gender+"</td> <td align=left>"+phoneNo+"</td> </tr>";
+						}
+						PDFData+="</table>";
 					}
-					PDFData+="</table>";
 				}
 			}
 			PDFData+="</body></html>";
 		}
-		
+
 		catch(Exception e){
 			PDFData="";
 		}
