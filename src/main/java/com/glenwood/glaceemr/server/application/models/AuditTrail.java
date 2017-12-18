@@ -102,7 +102,7 @@ public class AuditTrail {
 
 	@Column(name = "audittrail_log_checksum")
 	private String checkSum;
-
+	
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
 	@JoinColumn(name = "audittrail_log_user_id", referencedColumnName = "login_users_id", insertable = false, updatable = false)
@@ -123,6 +123,8 @@ public class AuditTrail {
 	private String patientName;
 	@Transient
 	private Date dob;
+	@Transient
+	private Integer logParentModule;
 
 	public Integer getLogId() {
 		return logId;
@@ -299,6 +301,7 @@ public class AuditTrail {
 	public void setCheckSum(String checkSum) {
 		this.checkSum = checkSum;
 	}
+	
 
 	@JsonProperty
 	public Boolean getVerifyCheckSum() {
@@ -339,12 +342,29 @@ public class AuditTrail {
 	public void setDob(Date dob) {
 		this.dob = dob;
 	}
+	
+	@JsonProperty
+	public Integer getLogParentModule() {
+		return logParentModule;
+	}
+
+	@JsonProperty
+	public void setLogParentModule(Integer logParentModule) {
+		this.logParentModule = logParentModule;
+	}
 
 	@Override
 	public String toString() {
-		return "AuditTrail [logId=" + logId + ",parentID=" + parentID + ",logType=" + logType + ",userId=" + userId + ",patientId=" + patientId + ",logOn=" + logOn + ", module=" + module + ", action=" + action + ", outcome=" + outcome + ",clientIp="
-				+ clientIp + ", serverIp=" + serverIp + ",serverHostname=" + serverHostname + " sessionId=" + sessionId + ",relevantIds=" + relevantIds + ", desc=" + desc + ",loginType=" + loginType + ", requestedUrl=" + requestedUrl
-				+ ", referenceUrl=" + referenceUrl + ",phiDescription=" + phiDescription + ", relevantIds=" + relevantIds + ", verifyCheckSum=" + verifyCheckSum + ", accountNo="+ accountNo +", patientName="+patientName+", dob="+dob+"]";
-
+		return "AuditTrail [logId=" + logId + ", parentID=" + parentID + ", logType=" + logType + ", userId=" + userId
+				+ ", patientId=" + patientId + ", logOn=" + logOn + ", module=" + module + ", action=" + action
+				+ ", outcome=" + outcome + ", clientIp=" + clientIp + ", serverIp=" + serverIp + ", serverHostname="
+				+ serverHostname + ", sessionId=" + sessionId + ", relevantIds=" + relevantIds + ", desc=" + desc
+				+ ", loginType=" + loginType + ", requestedUrl=" + requestedUrl + ", referenceUrl=" + referenceUrl
+				+ ", phiDescription=" + phiDescription + ", backUpData=" + backUpData + ", rawData=" + rawData
+				+ ", checkSum=" + checkSum + ", verifyCheckSum=" + verifyCheckSum + ", accountNo=" + accountNo
+				+ ", patientName=" + patientName + ", dob=" + dob + ", logParentModule=" + logParentModule + "]";
 	}
+	
+	
+
 }

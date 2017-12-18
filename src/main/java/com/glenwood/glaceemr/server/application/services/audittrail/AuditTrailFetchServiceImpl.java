@@ -18,6 +18,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -25,9 +26,11 @@ import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.AuditTrail;
 import com.glenwood.glaceemr.server.application.models.AuditTrail_;
+import com.glenwood.glaceemr.server.application.repositories.AuditLogSubModuleRepository;
 import com.glenwood.glaceemr.server.application.repositories.AuditTrailRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
 import com.glenwood.glaceemr.server.application.specifications.AuditTrailSpecifications;
+import com.glenwood.glaceemr.server.utils.HUtil;
 
 @Service
 public class AuditTrailFetchServiceImpl implements AuditTrailFetchService {
@@ -36,12 +39,15 @@ public class AuditTrailFetchServiceImpl implements AuditTrailFetchService {
 	@Resource
 	PatientRegistrationRepository patientRegistrationRepository;
 	
+	@Autowired
+	AuditLogSubModuleRepository auditLogSubModuleRepository;
+	
 	@PersistenceContext
 	private EntityManager entityManager;
 	long timeDiff = 0;
 
 	@Override
-	public Iterable<AuditTrail> getSearchResult(int userId, String module, String outcome, String desc,
+	public Iterable<AuditTrail> getSearchResult(int userId, String parentModule, String subModule, String outcome, String desc,
 			String startDate, String endDate, String action, int parentEvent, int patientId, String sessionId, String clientIp, int logId, String sortProperty, String order, int currentPage, int pageSize) {
 		Iterable<AuditTrail> searchedList = null;
 
@@ -95,26 +101,26 @@ public class AuditTrailFetchServiceImpl implements AuditTrailFetchService {
 
 		if (startDate.equals("-1") && !endDate.equals("-1")) {
 
-			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, module,
-					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  null, Timestamp.valueOf(endDate)), new PageRequest(currentPage, pageSize, sort));
+			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, parentModule, subModule,
+					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  null, Timestamp.valueOf(endDate), auditLogSubModuleRepository), new PageRequest(currentPage, pageSize, sort));
 
 		} else if (!startDate.equals("-1") && endDate.equals("-1")) {
 
 			searchedList = auditTrailRepository.findAll(
-					AuditTrailSpecifications.getSearchResult(userId, module, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order, 
-							(Timestamp) Timestamp.valueOf(startDate), (Timestamp) findCurrentTimeStamp),
+					AuditTrailSpecifications.getSearchResult(userId, parentModule, subModule, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order, 
+							(Timestamp) Timestamp.valueOf(startDate), (Timestamp) findCurrentTimeStamp, auditLogSubModuleRepository), 
 					new PageRequest(currentPage, pageSize, sort));
 		} else if (!startDate.equals("-1") && !endDate.equals("-1")) {
 
 			searchedList = auditTrailRepository.findAll(
-					AuditTrailSpecifications.getSearchResult(userId, module, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order, 
-							Timestamp.valueOf(startDate), Timestamp.valueOf(endDate)),
+					AuditTrailSpecifications.getSearchResult(userId, parentModule, subModule, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order, 
+							Timestamp.valueOf(startDate), Timestamp.valueOf(endDate), auditLogSubModuleRepository),
 					new PageRequest(currentPage, pageSize, sort));
 		} else if (startDate.equals("-1") && endDate.equals("-1")) {
 
 			searchedList = auditTrailRepository.findAll(
-					AuditTrailSpecifications.getSearchResult(userId, module, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order, null, findCurrentTimeStamp),
-					new PageRequest(currentPage, pageSize, sort));
+					AuditTrailSpecifications.getSearchResult(userId, parentModule, subModule, outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order, null, findCurrentTimeStamp, auditLogSubModuleRepository),
+					new PageRequest(currentPage, pageSize, sort) );
 		} else {
 
 			searchedList = auditTrailRepository.findAll(new PageRequest(currentPage, pageSize, sort));
@@ -138,7 +144,7 @@ public class AuditTrailFetchServiceImpl implements AuditTrailFetchService {
 					System.out.println(e.getLocalizedMessage());
 				}
 				try{
-				eventLog.setPatientName(patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationFirstName()+patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationMidInitial()+patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationLastName());
+				eventLog.setPatientName(patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationFirstName()+" "+HUtil.Nz(patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationMidInitial(),"")+" "+patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationLastName());
 				}catch(Exception e){
 					System.out.println(e.getLocalizedMessage());
 				}
@@ -214,24 +220,24 @@ public class AuditTrailFetchServiceImpl implements AuditTrailFetchService {
 
 
 	@Override
-	public Iterable<AuditTrail> generateCsv(int userId, String module, String outcome, String desc, String startDate,
+	public Iterable<AuditTrail> generateCsv(int userId, String parentModule, String subModule, String outcome, String desc, String startDate,
 			String endDate, String action, int parentEvent, int patientId, String sessionId, String clientIp, int logId, String sortProperty, String order, HttpServletResponse response)
 			throws IOException {
 
 		Iterable<AuditTrail> searchedList = null;
 		Timestamp findCurrentTimeStamp = findCurrentTimeStamp();
 		if (startDate.equals("-1") && !endDate.equals("-1")) {
-			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, module,
-					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  null, Timestamp.valueOf(endDate)));
+			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, parentModule, subModule,
+					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  null, Timestamp.valueOf(endDate), auditLogSubModuleRepository));
 		} else if (!startDate.equals("-1") && endDate.equals("-1")) {
-			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, module,
-					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  Timestamp.valueOf(startDate), findCurrentTimeStamp));
+			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, parentModule, subModule,
+					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  Timestamp.valueOf(startDate), findCurrentTimeStamp, auditLogSubModuleRepository));
 		} else if (!startDate.equals("-1") && !endDate.equals("-1")) {
-			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, module,
-					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  Timestamp.valueOf(startDate), Timestamp.valueOf(endDate)));
+			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, parentModule, subModule,
+					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  Timestamp.valueOf(startDate), Timestamp.valueOf(endDate), auditLogSubModuleRepository));
 		} else if (startDate.equals("-1") && endDate.equals("-1")) {
-			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, module,
-					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  null, findCurrentTimeStamp));
+			searchedList = auditTrailRepository.findAll(AuditTrailSpecifications.getSearchResult(userId, parentModule, subModule,
+					outcome, desc, action, parentEvent, patientId, sessionId, clientIp, logId, sortProperty, order,  null, findCurrentTimeStamp, auditLogSubModuleRepository));
 		} else {
 			searchedList = auditTrailRepository.findAll();
 		}
@@ -254,6 +260,8 @@ public class AuditTrailFetchServiceImpl implements AuditTrailFetchService {
 					System.out.println(e.getLocalizedMessage());
 				}
 				try{
+					System.out.println("firstname >> "+patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationFirstName());
+					System.out.println("lastname >> "+patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationLastName());
 				eventLog.setPatientName(patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationFirstName()+patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationMidInitial()+patientRegistrationRepository.findOne(eventLog.getPatientId()).getPatientRegistrationLastName());
 				}catch(Exception e){
 					System.out.println(e.getLocalizedMessage());
@@ -271,7 +279,7 @@ public class AuditTrailFetchServiceImpl implements AuditTrailFetchService {
 	}
 
 	@Override
-	public String generateCsvCount(int userId, String module, String outcome, String desc,
+	public String generateCsvCount(int userId, String parentModule, String subModule, String outcome, String desc,
 			String startDate, String endDate, String action, int parentEvent, int patientId, String sessionId,
 			String clientIp, int logId, HttpServletResponse response) throws IOException {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -288,8 +296,17 @@ public class AuditTrailFetchServiceImpl implements AuditTrailFetchService {
 			Predicate patientIdPredict = cb.equal( rootCount.get(AuditTrail_.patientId),patientId);
 			predList.add(patientIdPredict);
 		}
-		if (!module.equals("-1")){
-			Predicate modulePredict = cb.equal( rootCount.get(AuditTrail_.module),module);
+		if (!parentModule.equals("-1")){
+			if(subModule.equals("-1")){
+				Predicate parentModulePredicate = cb.equal(rootCount.get(AuditTrail_.module), auditLogSubModuleRepository.getSubModuleIds(Integer.parseInt(parentModule)));
+				predList.add(parentModulePredicate);
+			}
+			else{
+				Predicate modulePredict = cb.equal( rootCount.get(AuditTrail_.module),subModule);
+				predList.add(modulePredict);
+			}
+		}else if (!subModule.equals("-1")){
+			Predicate modulePredict = cb.equal( rootCount.get(AuditTrail_.module),subModule);
 			predList.add(modulePredict);
 		}
 		if (!outcome.equals("-1")){
