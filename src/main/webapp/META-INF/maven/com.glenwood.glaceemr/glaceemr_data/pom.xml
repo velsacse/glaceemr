@@ -12,7 +12,7 @@
 		<jackson.version>2.5.0</jackson.version>
 		<version.org.json>20080701</version.org.json>
 		<junit.version>4.11</junit.version>
-		<postgresqljdbc.version>9.1-901.jdbc4</postgresqljdbc.version>
+		<postgresqljdbc.version>42.1.4</postgresqljdbc.version>
 		<servlet.version>3.0.1</servlet.version>
 		<dbcp.version>1.4</dbcp.version>
 
@@ -178,7 +178,7 @@
 		<!-- Postgresql jdbc -->
 
 		<dependency>
-			<groupId>postgresql</groupId>
+			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>${postgresqljdbc.version}</version>
 		</dependency>
