@@ -604,4 +604,23 @@ public class EmployeeProfile implements Serializable {
 	@OneToMany(mappedBy="empProfile")
 	private List<CarePlanLog> carePlanLog;
 	
+	@OneToMany(mappedBy="empProfileConcernCreatedBy")
+	private List<CarePlanConcern> carePlanConcernCreatedBy;
+	
+	@OneToMany(mappedBy="empProfileConcernModifiedBy")
+	private List<CarePlanConcern> carePlanConcernModifiedBy;
+	
+	@OneToMany(mappedBy="empProfileGoalCreatedBy")
+	private List<CarePlanGoal> carePlanGoalCreatedBy;
+	
+	@OneToMany(mappedBy="empProfileGoalModifiedBy")
+	private List<CarePlanGoal> carePlanGoalModifiedBy;
+	
+	
+	@OneToMany(mappedBy="empProfileRecommInterCreatedBy")
+	private List<CarePlanRecommendedIntervention> carePlanRecommInterCreatedBy;
+	
+	@OneToMany(mappedBy="empProfileRecommInterModifiedBy")
+	private List<CarePlanRecommendedIntervention> carePlanRecommInterModifiedBy;
+	
 }

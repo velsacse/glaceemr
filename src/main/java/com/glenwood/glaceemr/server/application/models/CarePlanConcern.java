@@ -5,9 +5,12 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -288,4 +291,29 @@ public class CarePlanConcern {
 		this.carePlanConcernFrom = carePlanConcernFrom;
 	}
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "careplan_concern_created_by", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
+	private EmployeeProfile empProfileConcernCreatedBy;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "careplan_concern_modified_by", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
+	private EmployeeProfile empProfileConcernModifiedBy;
+
+	public EmployeeProfile getEmpProfileConcernCreatedBy() {
+		return empProfileConcernCreatedBy;
+	}
+
+	public void setEmpProfileConcernCreatedBy(
+			EmployeeProfile empProfileConcernCreatedBy) {
+		this.empProfileConcernCreatedBy = empProfileConcernCreatedBy;
+	}
+
+	public EmployeeProfile getEmpProfileConcernModifiedBy() {
+		return empProfileConcernModifiedBy;
+	}
+
+	public void setEmpProfileConcernModifiedBy(
+			EmployeeProfile empProfileConcernModifiedBy) {
+		this.empProfileConcernModifiedBy = empProfileConcernModifiedBy;
+	}
 }

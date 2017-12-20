@@ -56,6 +56,10 @@ public class CarePlanSummary{
 	@Column(name="careplan_summary_goal_progress")
 	private Integer carePlanSummaryGoalProgress;
 
+	@Column(name="careplan_summary_outcome_id")
+	private Integer carePlanSummaryOutcomeId;
+	
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "careplan_summary_concern_id", referencedColumnName = "careplan_concern_id", insertable = false, updatable = false)
 	private CarePlanConcern carePlanConcern;
@@ -159,6 +163,12 @@ public class CarePlanSummary{
 	public void setCarePlanSummaryGoalProgress(Integer carePlanSummaryGoalProgress) {
 		this.carePlanSummaryGoalProgress = carePlanSummaryGoalProgress;
 	}
-	
-	
+
+	public Integer getCarePlanSummaryOutcomeId() {
+		return carePlanSummaryOutcomeId;
+	}
+
+	public void setCarePlanSummaryOutcomeId(Integer carePlanSummaryOutcomeId) {
+		this.carePlanSummaryOutcomeId = carePlanSummaryOutcomeId;
+	}
 }

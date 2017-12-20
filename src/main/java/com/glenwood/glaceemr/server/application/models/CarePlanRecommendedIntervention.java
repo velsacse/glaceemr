@@ -425,4 +425,45 @@ public class CarePlanRecommendedIntervention{
 		this.careplanRecommendedInterventionResponsibleParty = careplanRecommendedInterventionResponsibleParty;
 	}
 	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "careplan_recommended_intervention_created_by", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
+	private EmployeeProfile empProfileRecommInterCreatedBy;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "careplan_recommended_intervention_modified_by", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
+	private EmployeeProfile empProfileRecommInterModifiedBy;
+
+	public CarePlanConcern getCarePlanRecommConcern() {
+		return carePlanRecommConcern;
+	}
+
+	public void setCarePlanRecommConcern(CarePlanConcern carePlanRecommConcern) {
+		this.carePlanRecommConcern = carePlanRecommConcern;
+	}
+
+	public CarePlanGoal getCarePlanRecommGoal() {
+		return carePlanRecommGoal;
+	}
+
+	public void setCarePlanRecommGoal(CarePlanGoal carePlanRecommGoal) {
+		this.carePlanRecommGoal = carePlanRecommGoal;
+	}
+
+	public EmployeeProfile getEmpProfileRecommInterCreatedBy() {
+		return empProfileRecommInterCreatedBy;
+	}
+
+	public void setEmpProfileRecommInterCreatedBy(
+			EmployeeProfile empProfileRecommInterCreatedBy) {
+		this.empProfileRecommInterCreatedBy = empProfileRecommInterCreatedBy;
+	}
+
+	public EmployeeProfile getEmpProfileRecommInterModifiedBy() {
+		return empProfileRecommInterModifiedBy;
+	}
+
+	public void setEmpProfileRecommInterModifiedBy(
+			EmployeeProfile empProfileRecommInterModifiedBy) {
+		this.empProfileRecommInterModifiedBy = empProfileRecommInterModifiedBy;
+	}
 }

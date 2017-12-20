@@ -41,6 +41,9 @@ public class CarePlanGoalBean {
 	String outcomeCreatedOn;
 	Integer assistanceStatus;
 	Integer levelStatus;
+	Integer outcomeId;
+	String carePlanGoalCreatedName;
+	String carePlanGoalModifiedName;
 	
 	public CarePlanGoalBean(){	
 	}
@@ -150,8 +153,120 @@ public class CarePlanGoalBean {
 			this.outcomeCreatedOn = "";
 	}
 
+	public CarePlanGoalBean(Integer carePlanGoalId,
+			Integer carePlanGoalPatientId, Integer carePlanGoalEncounterId,
+			Integer carePlanGoalConcernId, String carePlanGoalConcernDesc,
+			Integer carePlanGoalPriority, Integer carePlanGoalType,
+			Integer carePlanGoalTerm, Integer carePlanGoalProviderId,
+			String carePlanGoalDesc,
+			String carePlanGoalCode, String carePlanGoalCodeDescription,
+			String carePlanGoalCodeOperator, String carePlanGoalValue,
+			String carePlanGoalUnit, Integer carePlanGoalStatus,
+			Date carePlanGoalTargetDate, Date carePlanGoalNextReviewDate,
+			String carePlanGoalNotes,Integer carePlanGoalFrom,Integer carePlanGoalProgress,Integer carePlanGoalResultStatus,Integer episodeId,Integer carePlanGoalOrder,String carePlanGoalValueOne,
+			Integer carePlanAssistanceStatus,Integer carePlanLevelStatus,Integer carePlanOutcomeId) {
+		
+		super();
+		
+		DateFormat timeFormat = new SimpleDateFormat("MM/dd/yyyy");
+		this.carePlanGoalId = carePlanGoalId;
+		this.carePlanGoalPatientId = carePlanGoalPatientId;
+		this.carePlanGoalEncounterId = carePlanGoalEncounterId;
+		this.carePlanGoalConcernId = carePlanGoalConcernId;
+		this.carePlanGoalConcernDesc = carePlanGoalConcernDesc;
+		this.carePlanGoalPriority = carePlanGoalPriority;
+		this.carePlanGoalType = carePlanGoalType;
+		this.carePlanGoalTerm = carePlanGoalTerm;
+		this.carePlanGoalProviderId = carePlanGoalProviderId;
+		this.carePlanGoalDesc=carePlanGoalDesc;
+		this.carePlanGoalCode = carePlanGoalCode;
+		this.carePlanGoalCodeDescription = carePlanGoalCodeDescription;
+		this.carePlanGoalCodeOperator = carePlanGoalCodeOperator;
+		this.carePlanGoalValue = carePlanGoalValue;
+		this.carePlanGoalUnit = carePlanGoalUnit;
+		this.carePlanGoalStatus = carePlanGoalStatus;
+		if(carePlanGoalTargetDate!=null)
+		this.carePlanGoalTargetDate = timeFormat.format(carePlanGoalTargetDate);
+		else
+			this.carePlanGoalTargetDate = "";
+		if(carePlanGoalNextReviewDate!=null)
+		this.carePlanGoalNextReviewDate = timeFormat.format(carePlanGoalNextReviewDate);
+		else
+			this.carePlanGoalNextReviewDate = "";	
+		this.carePlanGoalNotes = carePlanGoalNotes;
+		this.carePlanGoalFrom = carePlanGoalFrom;
+		this.carePlanGoalProgress=carePlanGoalProgress;
+		this.carePlanGoalResultStatus=carePlanGoalResultStatus;
+		this.episodeId=episodeId;
+		this.carePlanGoalOrder=carePlanGoalOrder;
+		this.carePlanGoalValueOne=carePlanGoalValueOne;
+		this.assistanceStatus=carePlanAssistanceStatus;
+		this.levelStatus=carePlanLevelStatus;
+		this.outcomeId=carePlanOutcomeId;
+	}
 
+	public CarePlanGoalBean(Integer carePlanGoalId,
+			Integer carePlanGoalPatientId, Integer carePlanGoalEncounterId,
+			Integer carePlanGoalConcernId, String carePlanGoalConcernDesc,
+			Integer carePlanGoalPriority, Integer carePlanGoalType,
+			Integer carePlanGoalTerm, Integer carePlanGoalProviderId,
+			String carePlanGoalDesc,
+			String carePlanGoalCode, String carePlanGoalCodeDescription,
+			String carePlanGoalCodeOperator, String carePlanGoalValue,
+			String carePlanGoalUnit, Integer carePlanGoalStatus,
+			Date carePlanGoalTargetDate, Date carePlanGoalNextReviewDate,
+			String carePlanGoalNotes,Integer carePlanGoalFrom,Integer carePlanGoalProgress,Integer carePlanGoalResultStatus,Integer episodeId,Integer carePlanGoalOrder,String carePlanGoalValueOne,
+			Integer carePlanAssistanceStatus,Integer carePlanLevelStatus,String goalCreatedBy,String goalModifiedBy,
+			Date goalCreatedOn,Date goalModifiedOn) {
+		
+		super();
+		
+		DateFormat timeFormat = new SimpleDateFormat("MM/dd/yyyy");
+		this.carePlanGoalId = carePlanGoalId;
+		this.carePlanGoalPatientId = carePlanGoalPatientId;
+		this.carePlanGoalEncounterId = carePlanGoalEncounterId;
+		this.carePlanGoalConcernId = carePlanGoalConcernId;
+		this.carePlanGoalConcernDesc = carePlanGoalConcernDesc;
+		this.carePlanGoalPriority = carePlanGoalPriority;
+		this.carePlanGoalType = carePlanGoalType;
+		this.carePlanGoalTerm = carePlanGoalTerm;
+		this.carePlanGoalProviderId = carePlanGoalProviderId;
+		this.carePlanGoalDesc=carePlanGoalDesc;
+		this.carePlanGoalCode = carePlanGoalCode;
+		this.carePlanGoalCodeDescription = carePlanGoalCodeDescription;
+		this.carePlanGoalCodeOperator = carePlanGoalCodeOperator;
+		this.carePlanGoalValue = carePlanGoalValue;
+		this.carePlanGoalUnit = carePlanGoalUnit;
+		this.carePlanGoalStatus = carePlanGoalStatus;
+		if(carePlanGoalTargetDate!=null)
+		this.carePlanGoalTargetDate = timeFormat.format(carePlanGoalTargetDate);
+		else
+			this.carePlanGoalTargetDate = "";
+		if(carePlanGoalNextReviewDate!=null)
+		this.carePlanGoalNextReviewDate = timeFormat.format(carePlanGoalNextReviewDate);
+		else
+			this.carePlanGoalNextReviewDate = "";	
+		this.carePlanGoalNotes = carePlanGoalNotes;
+		this.carePlanGoalFrom = carePlanGoalFrom;
+		this.carePlanGoalProgress=carePlanGoalProgress;
+		this.carePlanGoalResultStatus=carePlanGoalResultStatus;
+		this.episodeId=episodeId;
+		this.carePlanGoalOrder=carePlanGoalOrder;
+		this.carePlanGoalValueOne=carePlanGoalValueOne;
+		this.assistanceStatus=carePlanAssistanceStatus;
+		this.levelStatus=carePlanLevelStatus;
+		this.carePlanGoalCreatedName = goalCreatedBy;
+		this.carePlanGoalModifiedName= goalModifiedBy;
 
+		if(goalCreatedOn!=null)
+			this.carePlanGoalCreatedOn = timeFormat.format(goalCreatedOn);
+		else
+			this.carePlanGoalCreatedOn = "";
+		if(goalModifiedOn!=null)
+			this.carePlanGoalModifiedOn = timeFormat.format(goalModifiedOn);
+		else
+			this.carePlanGoalModifiedOn = "";
+	}
 	public Integer getCarePlanGoalId() {
 		return carePlanGoalId;
 	}
@@ -438,7 +553,28 @@ public class CarePlanGoalBean {
 	public void setLevelStatus(Integer levelStatus) {
 		this.levelStatus = levelStatus;
 	}
-	
-	
-	
+
+	public Integer getOutcomeId() {
+		return outcomeId;
+	}
+
+	public void setOutcomeId(Integer outcomeId) {
+		this.outcomeId = outcomeId;
+	}
+
+	public String getCarePlanGoalCreatedName() {
+		return carePlanGoalCreatedName;
+	}
+
+	public void setCarePlanGoalCreatedName(String carePlanGoalCreatedName) {
+		this.carePlanGoalCreatedName = carePlanGoalCreatedName;
+	}
+
+	public String getCarePlanGoalModifiedName() {
+		return carePlanGoalModifiedName;
+	}
+
+	public void setCarePlanGoalModifiedName(String carePlanGoalModifiedName) {
+		this.carePlanGoalModifiedName = carePlanGoalModifiedName;
+	}
 }

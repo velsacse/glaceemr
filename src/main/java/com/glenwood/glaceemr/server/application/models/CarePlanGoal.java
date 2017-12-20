@@ -404,6 +404,12 @@ public class CarePlanGoal {
 	public void setCarePlanGoalLevelStatus(Integer carePlanGoalLevelStatus) {
 		this.carePlanGoalLevelStatus = carePlanGoalLevelStatus;
 	}
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "careplan_goal_created_by", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
+	private EmployeeProfile empProfileGoalCreatedBy;
 	
-	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "careplan_goal_modified_by", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
+	private EmployeeProfile empProfileGoalModifiedBy;
 }
