@@ -1837,7 +1837,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			resultObject.setHighPriority(eMeasure.isHighPriority());
 			resultObject.setOutcome(eMeasure.getType());
 			resultObject.setPoints(getPointsByBenchMark(resultObject.getPerformanceRate(), eMeasure));
-			resultObject.setEcqmPoints(getMeasurePoints(resultObject.getPerformanceRate(),resultObject.getSubmissionMethod(), eMeasure));
+			resultObject.setEcqmPoints(getMeasurePoints(resultObject.getPerformanceRate(),resultObject.getSubmissionMethod(), eMeasure,reportingYear));
 		} 
 		catch (Exception e) 
 		{
@@ -3651,17 +3651,14 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 	}
 	
-	private double getMeasurePoints(double performancRate,String submissionMethod,EMeasure eMeasureObj){
-
+	private double getMeasurePoints(double performancRate,String submissionMethod,EMeasure eMeasureObj,Integer reportingYear){
 		HashMap<String, List<Benchmark>> benchMark=eMeasureObj.getBenchmark();
-		List<Benchmark> benchMarkObjs=benchMark.get("2017");
-		
+		List<Benchmark> benchMarkObjs=benchMark.get(reportingYear.toString());
+
 		int index = 0; 
-		double measurePoints = 0; double decileStart = 0;
-		double benchMarkStart = 0,benchMarkEnd = 0;
+		double measurePoints = 0, decileStart = 0, decileEnd = 0;
 		DecimalFormat newFormat = new DecimalFormat("#0.00");
 
-		
 		for(int i=0;i<benchMarkObjs.size();i++)
 		{
 			if(benchMarkObjs.get(i).getSubmissionMethod().equals(submissionMethod))
@@ -3669,8 +3666,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				ArrayList<Decile> decileList=benchMarkObjs.get(i).getDecileList();
 				for(int j=0;j<decileList.size();j++)
 				{
-					benchMarkStart = decileList.get(0).getIndex();
-					benchMarkEnd = decileList.get(decileList.size()-1).getIndex();
 					if(!(decileList.get(j).getStart()==null && decileList.get(j).getEnd()==null))
 					{
 						if(decileList.get(j).getStart()!=null && decileList.get(j).getEnd()!=null)
@@ -3679,6 +3674,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 							{
 								index= decileList.get(j).getIndex();
 								decileStart = decileList.get(j).getStart();
+								decileEnd = decileList.get(j).getEnd();
 							}
 						}
 						else if(decileList.get(j).getStart()!=null)
@@ -3687,6 +3683,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 							{	
 								index= decileList.get(j).getIndex();
 								decileStart = decileList.get(j).getStart();
+								decileEnd = decileList.get(j).getEnd();
 							}
 						}
 						else if(decileList.get(j).getEnd()!=null)
@@ -3695,6 +3692,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 							{	
 								index= decileList.get(j).getIndex();
 								decileStart = decileList.get(j).getStart();
+								decileEnd = decileList.get(j).getEnd();
 							}
 						}
 
@@ -3703,11 +3701,20 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				}
 			}
 		}
-		measurePoints = (performancRate - decileStart)/(benchMarkEnd - benchMarkStart);
-		measurePoints = Double.valueOf(index) + Double.valueOf(newFormat.format(measurePoints));
+		if(index == 0)
+			measurePoints = 3.00;
 
+		if(index==10)
+			return 10.00;
+
+		else{
+			measurePoints = (performancRate - decileStart)/(decileEnd - decileStart);
+			measurePoints = Double.valueOf(index) + Double.valueOf(measurePoints);
+			measurePoints = Double.valueOf(newFormat.format(measurePoints));
+		}
 		return measurePoints;
 	}
+	
 	
 	private int getPointsByBenchMark(double performancRate,EMeasure eMeasureObj){
 		performancRate=performancRate*100;
