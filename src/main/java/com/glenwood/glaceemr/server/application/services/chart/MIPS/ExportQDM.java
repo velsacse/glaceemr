@@ -813,18 +813,20 @@ Root<Encounter> root = cq.from(Encounter.class);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<ReferralQDM> cq = builder.createQuery(ReferralQDM.class);
 		Root<ReferralDetails> rooth413 = cq.from(ReferralDetails.class);
+		Join<ReferralDetails, EmployeeProfile> joinEmpProfile = rooth413.join(ReferralDetails_.empProfile, JoinType.INNER);
+		
 		Selection[] selections= new Selection[] {
 				rooth413.get(ReferralDetails_.referral_details_refid).alias("Referral id"),
 				rooth413.get(ReferralDetails_.referral_details_ord_on).alias("Referred Date"),
 				rooth413.get(ReferralDetails_.referralOrderOn).alias("Ordered Date"),
 				rooth413.get(ReferralDetails_.referralReviewedOn).alias("Reviewed On"),
-				rooth413.get(ReferralDetails_.referralCriticalStatus).alias("Status")
+				rooth413.get(ReferralDetails_.referral_details_patientid).alias("Status")
 		};
 		
 		cq.select(builder.construct(ReferralQDM.class,selections));
 		
 		Predicate predicateByPatientId=builder.equal(rooth413.get(ReferralDetails_.referral_details_myalert),patientId);
-		Predicate byProvider=builder.equal(rooth413.get(ReferralDetails_.referralOrderBy), providerId);
+		Predicate byProvider=builder.equal(joinEmpProfile.get(EmployeeProfile_.empProfileEmpid), providerId);
 		Predicate byDateRange = builder.between(rooth413.get(ReferralDetails_.referralOrderOn), startDate, endDate);
 		
 		if(considerProvider)
@@ -1201,6 +1203,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 			String []  codeListString=snomedCodes.split(",");
 			String [] loincCodeListString=loincCodes.split(",");
+			System.out.println("loincCodes>>>>>>>"+loincCodes);
 			List<String> snomedCodeList= Arrays.asList(codeListString);
 			List<String> loincCodeList=Arrays.asList(loincCodeListString);
 			List<ClinicalDataQDM> clinicalDataSNOMED = new ArrayList<ClinicalDataQDM>();
@@ -1338,6 +1341,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					cqForLoinc.where(restrictions);
 				cqForLoinc.distinct(true);   
 				clinicalDataLOINC = em.createQuery(cqForLoinc).getResultList();
+				System.out.println("clinicalDataLOINC size>>>>>"+clinicalDataLOINC.size());
 				for(ClinicalDataQDM clinicalDataQDM: clinicalDataLOINC){
 					clinicalDataQDM.setEndDate(endDate);
 					clinicalDataQDM.setStartDate(startDate);
@@ -1365,7 +1369,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				}
 				requestObj.setTobaccoStatusList(tobaccoDetails);
 			}  
-			
+			System.out.println("clinicaldataFinal size>>>>>>>>>>>>"+clinicaldataFinal.size());
 			/***********************Intervention Query*********************/
 			CriteriaBuilder interventionCriteria = em.getCriteriaBuilder();
 			CriteriaQuery<ClinicalDataQDM> cq = interventionCriteria.createQuery(ClinicalDataQDM.class);
