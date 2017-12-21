@@ -1024,6 +1024,7 @@ public class EMeasureUtils {
 				diagnosticObj.setResultCode(eachObj.getResultCode());
 				diagnosticObj.setResultCodeSystemOID(eachObj.getResultCodeSystem());
 				diagnosticObj.setStartDate(eachObj.getRecordedDate());
+				diagnosticObj.setResultValue(eachObj.getResultValue());
 				diagnosticList.add(diagnosticObj);
 			}
 		}
