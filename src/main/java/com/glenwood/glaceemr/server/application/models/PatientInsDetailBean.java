@@ -97,16 +97,6 @@ public class PatientInsDetailBean {
 	private String patientInsDetailProgramStartdate;
 	
 	private String patientInsDetailProgramEnddate;
-	
-	private String patientInsDetailInsName;
-
-	public String getPatientInsDetailInsName() {
-		return patientInsDetailInsName;
-	}
-
-	public void setPatientInsDetailInsName(String patientInsDetailInsName) {
-		this.patientInsDetailInsName = patientInsDetailInsName;
-	}
 
 	public Long getPatientInsDetailId() {
 		return patientInsDetailId;

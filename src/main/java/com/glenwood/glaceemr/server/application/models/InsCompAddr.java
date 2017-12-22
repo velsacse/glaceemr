@@ -13,7 +13,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -178,7 +177,7 @@ public class InsCompAddr {
 	private Boolean insCompAddrIsindividual;
 
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JsonBackReference
+	@JsonManagedReference
 	@JoinColumn(name="ins_comp_addr_inscompany_id", referencedColumnName="ins_company_id" , insertable=false, updatable=false)
 	private InsCompany insCompany;
 	
