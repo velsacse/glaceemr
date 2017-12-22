@@ -63,7 +63,7 @@ public class PortalLabResultsSpecification {
 					root.fetch(LabEntries_.encounter, JoinType.LEFT);
 				}
                 Join<LabEntries, LabDescription> joinLab = root.join(LabEntries_.labDescriptionTable,JoinType.INNER);
-				Predicate statusPredicate=cb.not(root.get(LabEntries_.labEntriesTestStatus).in(1,2,3,4,6,7,8));
+				Predicate statusPredicate=cb.not(root.get(LabEntries_.labEntriesTestStatus).in(1,2,5,7,8));
 				Predicate typePredicate=cb.notEqual(joinLab.get(LabDescription_.labDescriptionTestcategoryType),3);
 				Predicate chartPredicate=cb.equal(root.get(LabEntries_.labEntriesChartid), chartId);
 
