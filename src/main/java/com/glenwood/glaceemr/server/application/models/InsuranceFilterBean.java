@@ -22,7 +22,7 @@ public class InsuranceFilterBean {
 	
 	long totalInsurancesCount;
 	
-	//List<InsCompAddr> insuranceList;
+	List<InsCompAddr> insuranceList;
 
 	public String getInsShortId() {
 		return insShortId;
@@ -96,13 +96,12 @@ public class InsuranceFilterBean {
 		this.totalInsurancesCount = totalInsurancesCount;
 	}
 
-	/*
 	public List<InsCompAddr> getInsuranceList() {
 		return insuranceList;
 	}
 
 	public void setInsuranceList(List<InsCompAddr> insuranceList) {
 		this.insuranceList = insuranceList;
-	}*/
+	}
 	
 }

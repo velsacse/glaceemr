@@ -33,6 +33,8 @@ import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr;
 import com.glenwood.glaceemr.server.application.models.InsCompAddr_;
 import com.glenwood.glaceemr.server.application.models.InsuranceFilterBean;
+import com.glenwood.glaceemr.server.application.models.PatientInsDetail;
+import com.glenwood.glaceemr.server.application.models.PatientInsDetailBean;
 import com.glenwood.glaceemr.server.application.models.PatientPortalFeatureConfig;
 import com.glenwood.glaceemr.server.application.models.PatientPortalMenuConfig;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
@@ -56,6 +58,7 @@ import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepo
 import com.glenwood.glaceemr.server.application.repositories.InsCompAddrRepository;
 import com.glenwood.glaceemr.server.application.repositories.InsCompanyRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientClinicalElementsQuestionsRepository;
+import com.glenwood.glaceemr.server.application.repositories.PatientInsDetailRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientPortalFeatureConfigRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientPortalMenuConfigRepository;
 import com.glenwood.glaceemr.server.application.repositories.PatientRegistrationRepository;
@@ -68,6 +71,7 @@ import com.glenwood.glaceemr.server.application.services.portal.portalForms.Port
 import com.glenwood.glaceemr.server.application.services.portal.portalMedicalSummary.PortalMedicalSummaryService;
 import com.glenwood.glaceemr.server.application.services.portal.portalPayments.PortalPaymentsService;
 import com.glenwood.glaceemr.server.application.services.portalLogin.PortalLoginService;
+import com.glenwood.glaceemr.server.application.specifications.ChargesSpecification;
 import com.glenwood.glaceemr.server.application.specifications.InsuranceSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalLoginSpecification;
 import com.glenwood.glaceemr.server.application.specifications.PortalSettingsSpecification;
@@ -156,6 +160,9 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 	@PersistenceContext
 	EntityManager em;
 	
+	@Autowired
+	PatientInsDetailRepository patientInsDetailRepository;
+	
 
 	@Override
 	public List<PatientPortalMenuConfig> getPortalMenuConfig(boolean isActiveMenuItemList) {
@@ -233,6 +240,10 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 		PatientRegistrationBean regSaveDetailsBean=savePatientDemographicsBean.getSavePatientRegistrationBean();
 		PatientRegistration registrationDetails=portalMedicalSummaryService.getPatientPersonalDetails(regSaveDetailsBean.getPatientRegistrationId());
 
+		List<PatientInsDetailBean> patientInsDetailList = savePatientDemographicsBean.getPatientInsList();
+		
+		List<PatientInsDetail> insDetails=patientInsDetailRepository.findAll(ChargesSpecification.getInsDetails(regSaveDetailsBean.getPatientRegistrationId()));
+		
 		PatientPortalDemographicRequest demographicChanges=new PatientPortalDemographicRequest();
 		if(regSaveDetailsBean.getPatientRegistrationFirstName()!=null&&!regSaveDetailsBean.getPatientRegistrationFirstName().equals(registrationDetails.getPatientRegistrationFirstName()))
 			demographicChanges.setdemographic_request_first_name(WordUtils.capitalize(regSaveDetailsBean.getPatientRegistrationFirstName()));
@@ -310,7 +321,65 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 			demographicChanges.setdemographic_request_email(regSaveDetailsBean.getPatientRegistrationMailId());
 		else
 			demographicChanges.setdemographic_request_email("");
+		
+		//////==================================================================================================//////
+		
+		for(int i=0; i<insDetails.size();i++){
 
+			if(insDetails.get(i).getPatientInsDetailInsno() == 1 && insDetails.get(i).getPatientInsDetailInstype() == 1){
+				
+				if(insDetails.get(i).getInsCompAddr().getInsCompAddrInsName()!=null){
+					
+					if(!insDetails.get(i).getInsCompAddr().getInsCompAddrInsName().equals(patientInsDetailList.get(0).getPatientInsDetailInsName()))
+						demographicChanges.setdemographic_request_primary_ins_company(patientInsDetailList.get(0).getPatientInsDetailInsName());
+					else
+						demographicChanges.setdemographic_request_primary_ins_company("");
+				}else{
+					demographicChanges.setdemographic_request_primary_ins_company(patientInsDetailList.get(0).getPatientInsDetailInsName());
+				}
+
+				
+
+				if(insDetails.get(i).getPatientInsDetailPatientinsuranceid()!=null && !insDetails.get(i).getPatientInsDetailPatientinsuranceid().equals(patientInsDetailList.get(0).getPatientInsDetailPatientinsuranceid().toString()))
+					demographicChanges.setdemographic_request_primary_ins_patient_id(patientInsDetailList.get(0).getPatientInsDetailPatientinsuranceid().toString());
+				else
+					demographicChanges.setdemographic_request_primary_ins_patient_id("");
+
+				if(insDetails.get(i).getPatientInsDetailValidfrom()==null){
+					if(patientInsDetailList.get(0).getPatientInsDetailValidfrom()!=null || !patientInsDetailList.get(0).getPatientInsDetailValidfrom().equals(""))
+						demographicChanges.setdemographic_request_primary_ins_valid_from(patientInsDetailList.get(0).getPatientInsDetailValidfrom());
+					else
+						demographicChanges.setdemographic_request_primary_ins_valid_from("");
+				}else if(!insDetails.get(i).getPatientInsDetailValidfrom().equals(patientInsDetailList.get(0).getPatientInsDetailValidfrom()))
+					demographicChanges.setdemographic_request_primary_ins_valid_from(patientInsDetailList.get(0).getPatientInsDetailValidfrom());
+				else
+					demographicChanges.setdemographic_request_primary_ins_valid_from("");
+
+				if(insDetails.get(i).getPatientInsDetailValidto()==null){		
+					if(patientInsDetailList.get(0).getPatientInsDetailValidto()!=null || !patientInsDetailList.get(0).getPatientInsDetailValidto().equals(""))
+						demographicChanges.setdemographic_request_primary_ins_valid_to(patientInsDetailList.get(0).getPatientInsDetailValidto());
+					else
+						demographicChanges.setdemographic_request_primary_ins_valid_to("");
+				}else if(!insDetails.get(i).getPatientInsDetailValidto().equals(patientInsDetailList.get(0).getPatientInsDetailValidto()))
+					demographicChanges.setdemographic_request_primary_ins_valid_to(patientInsDetailList.get(0).getPatientInsDetailValidto());
+				else
+					demographicChanges.setdemographic_request_primary_ins_valid_to("");
+
+
+				if(insDetails.get(i).getPatientInsDetailSubscribername()!=null && !insDetails.get(i).getPatientInsDetailSubscribername().equals(patientInsDetailList.get(0).getPatientInsDetailSubscribername()))
+					demographicChanges.setdemographic_request_primary_ins_subscriber_name(patientInsDetailList.get(0).getPatientInsDetailSubscribername());
+				else
+					demographicChanges.setdemographic_request_primary_ins_subscriber_name("");
+
+				if(insDetails.get(i).getPatientInsDetailRelationtosubs()!= patientInsDetailList.get(0).getPatientInsDetailRelationtosubs()){
+					int reationShip = patientInsDetailList.get(0).getPatientInsDetailRelationtosubs();
+					demographicChanges.setdemographic_request_primary_ins_relation(reationShip);
+				}
+				else
+					demographicChanges.setdemographic_request_primary_ins_relation(-1);
+
+			}
+		}
 
 		demographicChanges.setdemographic_request_employer("");
 		demographicChanges.setdemographic_request_cell_no("");
@@ -323,15 +392,9 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 		demographicChanges.setdemographic_request_contact_person_city("");
 		demographicChanges.setdemographic_request_contact_person_state("-1");
 		demographicChanges.setdemographic_request_contact_person_zip("");
-		demographicChanges.setdemographic_request_primary_ins_company("");
 		demographicChanges.setdemographic_request_primary_ins_company_id("");
-		demographicChanges.setdemographic_request_primary_ins_patient_id("");
-		demographicChanges.setdemographic_request_primary_ins_valid_from("");
-		demographicChanges.setdemographic_request_primary_ins_valid_to("");
 		demographicChanges.setdemographic_request_primary_ins_group_number("");
 		demographicChanges.setdemographic_request_primary_ins_group_name("");
-		demographicChanges.setdemographic_request_primary_ins_relation(-1);
-		demographicChanges.setdemographic_request_primary_ins_subscriber_name("");
 		demographicChanges.setdemographic_request_secondary_ins_company("");
 		demographicChanges.setdemographic_request_secondary_ins_company_id("");
 		demographicChanges.setdemographic_request_secondary_ins_patient_id("");
@@ -561,7 +624,7 @@ public class PortalSettingsServiceImpl implements PortalSettingsService{
 	public InsuranceFilterBean getInsuranceListList(InsuranceFilterBean insFilterBean) {
 		
 		List<InsCompAddr> insList=insCompAddrRepository.findAll(InsuranceSpecification.getInsurancesBy(insFilterBean));
-		//insFilterBean.setInsuranceList(insList);
+		insFilterBean.setInsuranceList(insList);
 		
 		insFilterBean.setTotalInsurancesCount(insCompAddrRepository.count(InsuranceSpecification.getInsurancesBy(insFilterBean)));
 				

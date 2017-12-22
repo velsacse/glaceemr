@@ -38,12 +38,16 @@ public class InsuranceSpecification {
 					/*Final Predicate Build*/
 					
 					Predicate insShortIdPredicate=null;
-					if(filterBean.getInsShortId()!=null)
-						insShortIdPredicate=cb.and(cb.equal(root.get(InsCompAddr_.insCompAddrInscompanyId), Integer.parseInt(filterBean.getInsShortId())));
+					if(filterBean.getInsShortId()!=null){
+						if(!filterBean.getInsShortId().equals("")){
+							if(!filterBean.getInsShortId().isEmpty())
+								insShortIdPredicate=cb.and(cb.equal(root.get(InsCompAddr_.insCompAddrInscompanyId), Integer.parseInt(filterBean.getInsShortId())));
+						}
+					}
 					
 					Predicate insNamePredicate=null;
 					if(filterBean.getInsName()!=null&&!filterBean.getInsName().equalsIgnoreCase("-1")&&filterBean.getInsName().length()>0)
-						insNamePredicate=cb.and(cb.equal(cb.upper(insComJoin.get(InsCompany_.insCompanyName)), filterBean.getInsName()));
+						insNamePredicate=cb.and(cb.like(cb.upper(insComJoin.get(InsCompany_.insCompanyName)), "%"+filterBean.getInsName()+"%"));
 					
 					Predicate insAddressPredicate=null;
 					if(filterBean.getInsAddress()!=null&&!filterBean.getInsAddress().equalsIgnoreCase("-1")&&filterBean.getInsAddress().length()>0)
