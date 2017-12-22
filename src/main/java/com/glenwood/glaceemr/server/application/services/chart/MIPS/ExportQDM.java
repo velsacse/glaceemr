@@ -2189,9 +2189,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		            
 		            Calendar cal = new GregorianCalendar();
 					cal.setTime(eachData.getStartDate());
-					System.out.println("start day::::::::::"+cal.getTime());
 					cal.add(Calendar.DATE, cmd);
-					System.out.println("end day:::::::::::"+cal.getTime());
 		            eachMedObj.setCode(eachData.getCode());
 		            eachMedObj.setCodeSystem("RXNORM");
 		            eachMedObj.setCodeSystemOID("2.16.840.1.113883.6.88");
@@ -2213,7 +2211,7 @@ Root<Encounter> root = cq.from(Encounter.class);
         {
         	List<MedicationQDM> eachGroup=new ArrayList<MedicationQDM>();
         	for(MedicationQDM eachData:result){
-        		if(eachData.getRoute()==route && eachData!=null){
+        		if(eachData.getRoute().intValue()==route.intValue()){
         			eachGroup.add(eachData);
         		}
         	}
@@ -2233,7 +2231,6 @@ Root<Encounter> root = cq.from(Encounter.class);
         			cmd+=Integer.parseInt(eachGroup.get(i).getDays().trim())*(Integer.parseInt(eachGroup.get(i).getRefills().trim()));
         	}
         	MedicationOrder eachMedObj = new MedicationOrder();
-        	System.out.println("cmd>>>>>>>>>>"+cmd);
         	eachMedObj.setCMD(cmd);
         	eachMedObj.setCode(eachGroup.get(0).getCode());
             eachMedObj.setCodeSystem("RXNORM");
@@ -2242,9 +2239,7 @@ Root<Encounter> root = cq.from(Encounter.class);
             eachMedObj.setStartDate(startDate);
             Calendar cal = new GregorianCalendar();
 			cal.setTime(eachGroup.get(0).getStartDate());
-			System.out.println("start day::::::::::"+cal.getTime());
 			cal.add(Calendar.DATE, cmd);
-			System.out.println("end day:::::::::::"+cal.getTime());
 			eachMedObj.setEndDate(cal.getTime());
             eachMedObj.setDose(eachGroup.get(0).getDose());
             eachMedObj.setFrequency(eachGroup.get(0).getFrequency());
@@ -2282,9 +2277,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			            
 			            Calendar cal = new GregorianCalendar();
 						cal.setTime(eachData.getStartDate());
-						System.out.println("start day::::::::::"+cal.getTime());
 						cal.add(Calendar.DATE, cmd);
-						System.out.println("end day:::::::::::"+cal.getTime());
 			            eachMedObj.setCode(eachData.getCode());
 			            eachMedObj.setCodeSystem("RXNORM");
 			            eachMedObj.setCodeSystemOID("2.16.840.1.113883.6.88");
@@ -2305,7 +2298,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	        {
 	        	List<MedicationQDM> eachGroup=new ArrayList<MedicationQDM>();
 	        	for(MedicationQDM eachData:result){
-	        		if(eachData.getRoute()==route){
+	        		if(eachData.getRoute().intValue()==route.intValue()){
 	        			eachGroup.add(eachData);
 	        		}
 	        	}
@@ -2325,7 +2318,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 	        			cmd+=Integer.parseInt(eachGroup.get(i).getDays().trim())*(Integer.parseInt(eachGroup.get(i).getRefills().trim()));
 	        	}
 	        	ActiveMedication eachMedObj = new ActiveMedication();
-	        	System.out.println("cmd>>>>>>>>>>"+cmd);
 	        	eachMedObj.setCMD(cmd);
 	        	eachMedObj.setCode(eachGroup.get(0).getCode());
 	            eachMedObj.setCodeSystem("RXNORM");
@@ -2334,9 +2326,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 	            eachMedObj.setStartDate(startDate);
 	            Calendar cal = new GregorianCalendar();
 				cal.setTime(eachGroup.get(0).getStartDate());
-				System.out.println("start day::::::::::"+cal.getTime());
 				cal.add(Calendar.DATE, cmd);
-				System.out.println("end day:::::::::::"+cal.getTime());
 				eachMedObj.setEndDate(cal.getTime());
 	            eachMedObj.setDose(eachGroup.get(0).getDose());
 	            eachMedObj.setFrequency(eachGroup.get(0).getFrequency());

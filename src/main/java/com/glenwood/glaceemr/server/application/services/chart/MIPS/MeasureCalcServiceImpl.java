@@ -1837,7 +1837,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			resultObject.setHighPriority(eMeasure.isHighPriority());
 			resultObject.setOutcome(eMeasure.getType());
 			resultObject.setPoints(getPointsByBenchMark(resultObject.getPerformanceRate(), eMeasure));
-			resultObject.setEcqmPoints(getMeasurePoints(resultObject.getPerformanceRate(),resultObject.getSubmissionMethod(), eMeasure,reportingYear));
+			resultObject.setEcqmPoints(getMeasurePoints(resultObject.getPerformanceRate(),resultObject.getNumeratorCount(),resultObject.getSubmissionMethod(), eMeasure,reportingYear));
 		} 
 		catch (Exception e) 
 		{
@@ -3651,7 +3651,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 	}
 	
-	private double getMeasurePoints(double performancRate,String submissionMethod,EMeasure eMeasureObj,Integer reportingYear){
+	private double getMeasurePoints(double performancRate,Long numeratorCount,String submissionMethod,EMeasure eMeasureObj,Integer reportingYear){
 		HashMap<String, List<Benchmark>> benchMark=eMeasureObj.getBenchmark();
 		List<Benchmark> benchMarkObjs=benchMark.get(reportingYear.toString());
 		int index = 0; 
@@ -3700,8 +3700,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				}
 			}
 		}
-		if(index == 0)
-			measurePoints = 3.00;
+		if(index == 0 && numeratorCount.intValue()>=1)
+			return measurePoints = 3.00;
 
 		if(index==10)
 			return 10.00;
