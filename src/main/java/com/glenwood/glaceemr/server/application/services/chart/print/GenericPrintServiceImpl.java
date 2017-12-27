@@ -1304,7 +1304,7 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			// Content of PDF
 			String contentHTML=URLDecoder.decode(databean.getHtmlData(),"UTF-8");
 			contentHTML = contentHTML.replaceAll("[^\\x00-\\x7F^\\xB0]", "");
-
+			contentHTML = contentHTML.replaceAll("&amp;apos;", "'");
 			//Filepath of PDF file
 			String fileName=sharedFolderPath+"/"+databean.getFileName();
 
