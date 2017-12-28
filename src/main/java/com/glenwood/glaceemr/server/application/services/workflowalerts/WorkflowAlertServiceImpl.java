@@ -693,7 +693,14 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 	public Workflow insertAlert(int patientId, int encounterId, int chartId,
 			int roomId, int fromId, int toId, String msg, int status,
 			boolean isHighPriority) {
-		List<Workflow> alertList=workFlowAlertRepository.findAll();
+		//List<Workflow> alertList=workFlowAlertRepository.findAll();
+		CriteriaBuilder alertListBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<WorkflowBean> alertListcq = alertListBuilder.createQuery(WorkflowBean.class);
+		Root<Workflow> workflowRoot = alertListcq.from(Workflow.class);
+		alertListcq.multiselect(workflowRoot.get(Workflow_.workflowPatientid),
+				workflowRoot.get(Workflow_.workflowEncounterid));
+		List<WorkflowBean> alertList = em.createQuery(alertListcq).getResultList();
+		
 		int patientIdFlag=0,encounterIdFlag=0;
 		Workflow alert=null;
 		for(int i=0;i<alertList.size();i++)

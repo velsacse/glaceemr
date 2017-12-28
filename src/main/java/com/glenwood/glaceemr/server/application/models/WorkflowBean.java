@@ -57,7 +57,12 @@ public class WorkflowBean {
 		this.patientName = patientName;
 		this.categoryUrl=categoryUrl;
 	}
-
+	
+	public WorkflowBean(Integer workflowPatientid,Integer workflowEncounterid){
+		this.workflowPatientid = workflowPatientid;
+		this.workflowEncounterid = workflowEncounterid;
+	}
+	
 	public Integer getWorkflowId() {
 		return workflowId;
 	}
