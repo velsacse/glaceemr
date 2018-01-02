@@ -101,8 +101,8 @@ public class WorkflowAlertController {
 	public Workflow insertAlert(
 			 @RequestParam(value="patientid", required=true) int patientId,
 			 @RequestParam(value="encounterid", required=true) int encounterId,
-			 @RequestParam(value="chartid", required=true) int chartId,
-			 @RequestParam(value="roomid", required=true) int roomId,
+			 @RequestParam(value="chartid", required=false,defaultValue="-1") int chartId,
+			 @RequestParam(value="roomid", required=false, defaultValue="-1") int roomId,
 			 @RequestParam(value="fromid", required=true) int fromId,
 			@RequestParam(value="toid", required=true) int toId,
 			 @RequestParam(value="msg", required=true) String msg,
@@ -110,7 +110,7 @@ public class WorkflowAlertController {
 			@RequestParam(value="ishighpriority", required=true) boolean isHighPriority)
 	{
 		Workflow grpDetails=workFlowAlertService.insertAlert(patientId,encounterId,chartId,roomId,fromId,toId,msg,status,isHighPriority);
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Create workflow alert", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "encounterId="+encounterId+"&chartid="+chartId+"&roomId="+roomId, LogUserType.USER_LOGIN, "", "");
+		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ALERTS, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Create workflow alert", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "encounterId="+encounterId, LogUserType.USER_LOGIN, "", "");
 		return grpDetails;
 	}
 	

@@ -31,9 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.glenwood.glaceemr.server.application.models.AlertCategory;
 import com.glenwood.glaceemr.server.application.models.AlertCategory_;
+import com.glenwood.glaceemr.server.application.models.Chart;
+import com.glenwood.glaceemr.server.application.models.Chart_;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
+import com.glenwood.glaceemr.server.application.models.Encounter_;
 import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration;
 import com.glenwood.glaceemr.server.application.models.PatientRegistration_;
@@ -690,8 +693,8 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 	 * @return newly inserted alert
 	 */
 	@Override
-	public Workflow insertAlert(int patientId, int encounterId, int chartId,
-			int roomId, int fromId, int toId, String msg, int status,
+	public Workflow insertAlert(int patientId, int encounterId, int chartIdFromreq,
+			int roomIdFromreq, int fromId, int toId, String msg, int status,
 			boolean isHighPriority) {
 		//List<Workflow> alertList=workFlowAlertRepository.findAll();
 		CriteriaBuilder alertListBuilder = em.getCriteriaBuilder();
@@ -701,6 +704,37 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 				workflowRoot.get(Workflow_.workflowEncounterid));
 		List<WorkflowBean> alertList = em.createQuery(alertListcq).getResultList();
 		
+		
+		CriteriaBuilder chartIdBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Object> chartIdcq = chartIdBuilder.createQuery();
+		Root<Chart> chartIdroot = chartIdcq.from(Chart.class);
+		chartIdcq.select(chartIdroot.get(Chart_.chartId)).where(chartIdBuilder.equal(chartIdroot.get(Chart_.chartPatientid), patientId));
+		List<Object> chartIdList = em.createQuery(chartIdcq).getResultList();
+		
+		Short roomId = null;
+		Integer chartId = null;
+		
+		if(roomIdFromreq == -1){
+			CriteriaBuilder roomIdBuilder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> roomIdcq = roomIdBuilder.createQuery();
+			Root<Encounter> roomIdroot = roomIdcq.from(Encounter.class);
+			roomIdcq.select(roomIdroot.get(Encounter_.encounterRoom)).where(roomIdBuilder.equal(roomIdroot.get(Encounter_.encounterId), encounterId));
+			List<Object> roomIdList = em.createQuery(roomIdcq).getResultList();
+			
+				if(roomIdList.size()>0){
+					roomId = roomIdList.get(0) != null? (Short) roomIdList.get(0):-1;
+				}
+				else
+				roomId  =-1;
+		}
+		else{
+				roomId = (short) roomIdFromreq;
+		}
+		
+		if(chartIdList.size()>0)
+			chartId = (Integer) chartIdList.get(0);
+		
+
 		int patientIdFlag=0,encounterIdFlag=0;
 		Workflow alert=null;
 		for(int i=0;i<alertList.size();i++)
@@ -729,7 +763,7 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 				{
 					activeAlert.setWorkflowToid(toId);
 					activeAlert.setWorkflowFromid(fromId);
-					activeAlert.setWorkflowRoomid(roomId);
+					activeAlert.setWorkflowRoomid(Integer.parseInt(roomId.toString()));
 					activeAlert.setWorkflowIshighpriority(isHighPriority);
 					activeAlert.setWorkflowMessage(msg);
 					workFlowAlertRepository.saveAndFlush(activeAlert);
@@ -758,7 +792,7 @@ public class WorkflowAlertServiceImpl implements WorkflowAlertService{
 				{
 					activeAlert.setWorkflowToid(toId);
 					activeAlert.setWorkflowFromid(fromId);
-					activeAlert.setWorkflowRoomid(roomId);
+					activeAlert.setWorkflowRoomid(Integer.parseInt(roomId.toString()));
 					activeAlert.setWorkflowIshighpriority(isHighPriority);
 					activeAlert.setWorkflowMessage(msg);
 					workFlowAlertRepository.saveAndFlush(activeAlert);
