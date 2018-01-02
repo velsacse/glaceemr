@@ -114,7 +114,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<MIPSPerformanceBean> getPerformanceCount(int providerId, String measureId, String configuredMeasures, String accountId);
+	List<MIPSPerformanceBean> getPerformanceCount(int year,int providerId, String measureId, String configuredMeasures, String accountId);
 	
 	/**
 	 * Function to get MIPS Performance of group of providers falling under same TIN/SSN

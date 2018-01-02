@@ -1232,7 +1232,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<MIPSPerformanceBean> getMeasureRateReportByNPI(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy,Integer reportingYear){
-
 		String npiId = getNPIForProvider(providerId);
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -1653,7 +1652,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MIPSPerformanceBean> getPerformanceCount(int providerId, String measureId, String configuredMeasures, String accountId){
+	public List<MIPSPerformanceBean> getPerformanceCount(int year,int providerId, String measureId, String configuredMeasures, String accountId){
 
 		List<MIPSPerformanceBean> results = new ArrayList<MIPSPerformanceBean>();
 
@@ -1662,15 +1661,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		try{
 
-			Calendar now = Calendar.getInstance();
-			int reportingYear = now.get(Calendar.YEAR);
-
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<MIPSPerformanceBean> cq = builder.createQuery(MIPSPerformanceBean.class);
 			Root<QualityMeasuresPatientEntries> root = cq.from(QualityMeasuresPatientEntries.class);
 
 			Predicate byProviderId = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesProviderId), providerId);
-			Predicate byReportingYear = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear), reportingYear);		
+			Predicate byReportingYear = builder.equal(root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear), year);		
 			Predicate byConfiguredMeasures = root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesMeasureId).in(Arrays.asList(configuredMeasures.split(",")));
 
 			if(!measureId.equals("")){
@@ -3669,7 +3665,16 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					{
 						if(decileList.get(j).getStart()!=null && decileList.get(j).getEnd()!=null)
 						{
-							if(performancRate>=decileList.get(j).getStart() && performancRate<=decileList.get(j).getEnd())
+							if(eMeasureObj.isInverseMeasure())
+							{
+								if(performancRate<=decileList.get(j).getStart() && performancRate>=decileList.get(j).getEnd())
+								{
+									index= decileList.get(j).getIndex();
+									decileStart = decileList.get(j).getStart();
+									decileEnd = decileList.get(j).getEnd();
+								}
+							}
+							else if(performancRate>=decileList.get(j).getStart() && performancRate<=decileList.get(j).getEnd())
 							{
 								index= decileList.get(j).getIndex();
 								decileStart = decileList.get(j).getStart();

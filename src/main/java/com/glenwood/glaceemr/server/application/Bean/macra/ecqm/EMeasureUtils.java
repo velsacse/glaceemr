@@ -910,7 +910,8 @@ public class EMeasureUtils {
 		ClinicalDataQDM eachObj= null;
 		PhysicalExam phyExamObj;
 		List<PhysicalExam> PhysicalExamList=new ArrayList<PhysicalExam>();
-
+		codeList=","+codeList+",";
+		
 		for(int i=0;i<clinicalData.size();i++){
 			eachObj=clinicalData.get(i);
 			phyExamObj=new PhysicalExam();

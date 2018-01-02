@@ -367,15 +367,15 @@ public class MUPerformanceRateController {
 				
 				providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
 				
-				providerPerformance = measureService.getPerformanceCount(providerId, "", providerInfo.get(0).getMeasures(), accountID);
+				providerPerformance = measureService.getPerformanceCount(reportingYear,providerId, "", providerInfo.get(0).getMeasures(), accountID);
 
 				performanceService.addToMacraMeasuresRate(providerId,  providerPerformance, reportingYear, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), false);
 				
-				providerPerformance = measureService.getPerformanceCount(providerId, "", "ACI_TRANS_EP_1,ACI_TRANS_SM_1,ACI_TRANS_PEA_1,ACI_TRANS_PEA_2,ACI_TRANS_HIE_1,ACI_TRANS_PSE_1,ACI_TRANS_MR_1", accountID);
+				providerPerformance = measureService.getPerformanceCount(reportingYear,providerId, "", "ACI_TRANS_EP_1,ACI_TRANS_SM_1,ACI_TRANS_PEA_1,ACI_TRANS_PEA_2,ACI_TRANS_HIE_1,ACI_TRANS_PSE_1,ACI_TRANS_MR_1", accountID);
 				
 				performanceService.addToMacraMeasuresRate(providerId,  providerPerformance, reportingYear, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), true);
 				
-				providerPerformance = measureService.getPerformanceCount(providerId, "", "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3", accountID);
+				providerPerformance = measureService.getPerformanceCount(reportingYear,providerId, "", "ACI_EP_1,ACI_CCTPE_2,ACI_PEA_1,ACI_CCTPE_1,ACI_HIE_1,ACI_PEA_2,ACI_HIE_3", accountID);
 				
 				performanceService.addToMacraMeasuresRate(providerId,  providerPerformance, reportingYear, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(), true);
 				
