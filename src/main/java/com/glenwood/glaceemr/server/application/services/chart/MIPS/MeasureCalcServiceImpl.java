@@ -1832,7 +1832,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			EMeasure eMeasure=emeasureObj.get(0);
 			resultObject.setHighPriority(eMeasure.isHighPriority());
 			resultObject.setOutcome(eMeasure.getType());
-			resultObject.setPoints(getPointsByBenchMark(resultObject.getPerformanceRate(), eMeasure));
+			resultObject.setPoints(getPointsByBenchMark(reportingYear,resultObject.getPerformanceRate(), eMeasure));
 			resultObject.setEcqmPoints(getMeasurePoints(resultObject.getPerformanceRate(),resultObject.getNumeratorCount(),resultObject.getSubmissionMethod(), eMeasure,reportingYear));
 		} 
 		catch (Exception e) 
@@ -2313,7 +2313,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				eMeasures= eMeasureUtils.getMeasureBeanDetails(reportingYear,measureId, sharedPath,accountId);
 				eMeasureObj=eMeasures.get(0);
 				
-				resultObject.setPoints(getPointsByBenchMark(resultObject.getReportingRate()/100, eMeasureObj));
+				resultObject.setPoints(getPointsByBenchMark(reportingYear,resultObject.getReportingRate()/100, eMeasureObj));
 			}
 			
 			if(submissionMethod==2)
@@ -2380,7 +2380,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			if(i<5 && temp.size()<7)
 			{
 				temp.add(ecqmPerformance.get(i));
-				measurePoint=getPointsByBenchMark(ecqmPerformance.get(i).getPerformanceRate(),eMeasureObj);
+				measurePoint=getPointsByBenchMark(providerDashboard.getReportingYear(),ecqmPerformance.get(i).getPerformanceRate(),eMeasureObj);
 				ecqmPerformance.get(i).setPoints(measurePoint);
 				ecqmPoints+=measurePoint;
 			}
@@ -2389,7 +2389,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				if(eMeasureObj.getType().equalsIgnoreCase("Outcome") || eMeasureObj.isHighPriority())
 				{
 					temp.add(ecqmPerformance.get(i));
-					ecqmPoints+=getPointsByBenchMark(ecqmPerformance.get(i).getPerformanceRate(),eMeasureObj);
+					ecqmPoints+=getPointsByBenchMark(providerDashboard.getReportingYear(),ecqmPerformance.get(i).getPerformanceRate(),eMeasureObj);
 				}
 			}
 			//aciPoints += aciPerformance.get(i).getPoints();
@@ -3720,10 +3720,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	}
 	
 	
-	private int getPointsByBenchMark(double performancRate,EMeasure eMeasureObj){
+	private int getPointsByBenchMark(Integer reportingYear,double performancRate,EMeasure eMeasureObj){
 		performancRate=performancRate*100;
 		HashMap<String, List<Benchmark>> benchMark=eMeasureObj.getBenchmark();
-		List<Benchmark> benchMarkObjs=benchMark.get("2017");
+		List<Benchmark> benchMarkObjs=benchMark.get(reportingYear.toString());
 		int index=0;
 		for(int i=0;i<benchMarkObjs.size();i++)
 		{
