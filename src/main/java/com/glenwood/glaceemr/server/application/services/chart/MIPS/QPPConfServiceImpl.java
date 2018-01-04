@@ -296,17 +296,18 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
         Root<QualityMeasuresProviderMapping> root1 = cq1.from(QualityMeasuresProviderMapping.class);
         Join< QualityMeasuresProviderMapping,IAMeasures> joinIAMeasures = root1.join(QualityMeasuresProviderMapping_.iaMeasures,JoinType.LEFT);
         Predicate byProvider=builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),providerId);
-        Predicate byYear=builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),year);
+        Predicate byYear = builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear), year);
+        Predicate byIaYear=builder1.equal(joinIAMeasures.get(IAMeasures_.IaMeasuresReportingYear),year);
         Predicate byMeasureId=builder1.like(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%");
         Selection[] selections= new Selection[] {
         root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),
         root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingTitle),
         root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingPriority),
         builder1.coalesce(joinIAMeasures.get(IAMeasures_.IaMeasuresStatus),false),
-        builder1.coalesce(joinIAMeasures.get(IAMeasures_.IaMeasuresPoints),0)
+        builder1.coalesce(joinIAMeasures.get(IAMeasures_.IaMeasuresPoints),0),
         };
         cq1.select(builder1.construct(ConfigurationDetails.class,selections));
-		cq1.where(byProvider,byYear,byMeasureId);
+		cq1.where(byProvider,byYear,byIaYear,byMeasureId);
 		List<ConfigurationDetails> result=em.createQuery(cq1).getResultList();
 		
 		return result;
