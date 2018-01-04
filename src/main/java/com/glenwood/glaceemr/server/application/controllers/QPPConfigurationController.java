@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.glenwood.glaceemr.server.application.Bean.DiagnosisList;
+import com.glenwood.glaceemr.server.application.Bean.IAMeasureBean;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
+import com.glenwood.glaceemr.server.application.Bean.getMeasureBean;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants;
@@ -109,6 +112,43 @@ public class QPPConfigurationController {
 		
 //		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.CREATEORUPDATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in saving measure configuration for provider" , -1, request.getRemoteAddr(),-1,"measures="+measureIds,LogUserType.USER_LOGIN, "", "");
 		
+	}
+	
+	@RequestMapping(value = "/getImprovementActMeasureIds", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getImprovementActMeasureIds(
+			@RequestParam(value = "providerId", required = true) Integer providerId,
+			@RequestParam(value = "year", required = true)Integer year)throws Exception {
+		EMRResponseBean result=new EMRResponseBean();
+		List<ConfigurationDetails> iaMeasureDetails=QppConfigurationService.getImprovementActivityMeasureIds(providerId,year);
+		result.setData(iaMeasureDetails);
+		return result;
+	}
+	
+	@RequestMapping(value = "/addImpMeasuresToProvider", method = RequestMethod.POST)
+	@ResponseBody 
+	public void addImpMeasuresToProvider(@RequestBody List<getMeasureBean> requestBean ) throws Exception{
+		
+		QppConfigurationService.addImpMeasuresToProvider(requestBean);
+		
+	}
+	
+	@RequestMapping(value = "/addIAmeasures", method = RequestMethod.POST)
+	@ResponseBody
+	public void addIAmeasures(
+			@RequestBody List<IAMeasureBean> requestBean ) throws Exception {
+		QppConfigurationService.addIAmeasures(requestBean);
+	}
+	
+	@RequestMapping(value = "/getconfigIAmeasures", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getconfigIAmeasures(
+			@RequestParam(value = "providerId", required = true) Integer providerId,
+			@RequestParam(value = "year", required = true)Integer year)throws Exception {
+		EMRResponseBean result=new EMRResponseBean();
+		List<ConfigurationDetails> iaMeasures = QppConfigurationService.getConfiguredIameasures(providerId,year);
+		result.setData(iaMeasures);
+		return result;
 	}
 	
 	@RequestMapping(value = "/getFilterDetails", method = RequestMethod.GET)

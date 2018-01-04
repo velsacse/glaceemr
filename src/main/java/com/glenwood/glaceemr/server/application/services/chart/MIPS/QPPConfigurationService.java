@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.glenwood.glaceemr.server.application.Bean.DiagnosisList;
+import com.glenwood.glaceemr.server.application.Bean.IAMeasureBean;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
 import com.glenwood.glaceemr.server.application.Bean.MacraProviderQDM;
+import com.glenwood.glaceemr.server.application.Bean.getMeasureBean;
 import com.glenwood.glaceemr.server.application.models.Chart;
 import com.glenwood.glaceemr.server.application.models.MacraProviderConfiguration;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping;
@@ -151,4 +153,13 @@ public interface QPPConfigurationService {
 	
 	List<MIPSPatientInformation> getPatientBasedOnDX(String patientId,String dxCodes)throws Exception;
 	
+	List<ConfigurationDetails> getImprovementActivityMeasureIds(
+			Integer providerId, Integer year) throws Exception;
+
+
+	void addImpMeasuresToProvider(List<getMeasureBean> requestBean) throws Exception;
+
+	void addIAmeasures(List<IAMeasureBean> requestBean) throws Exception;
+
+	List<ConfigurationDetails> getConfiguredIameasures(Integer providerId, Integer year);
 }

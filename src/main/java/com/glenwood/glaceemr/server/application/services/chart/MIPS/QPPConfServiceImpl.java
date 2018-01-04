@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.services.chart.MIPS;
 
 import java.io.File;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -13,6 +14,7 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
@@ -29,9 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.glenwood.glaceemr.server.application.Bean.DiagnosisList;
+import com.glenwood.glaceemr.server.application.Bean.IAMeasureBean;
 import com.glenwood.glaceemr.server.application.Bean.MIPSPatientInformation;
 import com.glenwood.glaceemr.server.application.Bean.MacraProviderQDM;
 import com.glenwood.glaceemr.server.application.Bean.SharedFolderBean;
+import com.glenwood.glaceemr.server.application.Bean.getMeasureBean;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.CQMSpecification;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.Category;
 import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.Code;
@@ -49,6 +53,10 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
+import com.glenwood.glaceemr.server.application.models.HpiSymptom;
+import com.glenwood.glaceemr.server.application.models.HpiSymptom_;
+import com.glenwood.glaceemr.server.application.models.IAMeasures;
+import com.glenwood.glaceemr.server.application.models.IAMeasures_;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter_;
 import com.glenwood.glaceemr.server.application.models.LabParameterCode;
@@ -78,6 +86,7 @@ import com.glenwood.glaceemr.server.application.models.QualityMeasuresPatientEnt
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping;
 import com.glenwood.glaceemr.server.application.models.QualityMeasuresProviderMapping_;
 import com.glenwood.glaceemr.server.application.repositories.EmployeeProfileRepository;
+import com.glenwood.glaceemr.server.application.repositories.IAMeasuresRepository;
 import com.glenwood.glaceemr.server.application.repositories.MacraConfigurationRepository;
 import com.glenwood.glaceemr.server.application.repositories.MacraProviderConfigurationRepository;
 import com.glenwood.glaceemr.server.application.repositories.QualityMeasuresProviderMappingRepository;
@@ -96,6 +105,8 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 	EmployeeProfileRepository employeeProfileRepository;
 	@Autowired
 	QualityMeasuresProviderMappingRepository qualityMeasuresProviderMappingRepository;
+	@Autowired
+	IAMeasuresRepository iaMeasuresRepository;
 	@PersistenceContext
 	EntityManager em;
 	@Autowired
@@ -184,7 +195,8 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
         		joinMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingStart),
         		joinMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingEnd),
         		joinMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingYear),
-        		joinMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingMethod)
+        		joinMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportingMethod),
+        		joinMacraProviderConfiguration.get(MacraProviderConfiguration_.macraProviderConfigurationReportType)
 		};
 		cq1.select(builder1.construct(ConfigurationDetails.class,selections));
 		cq1.where(byProvider,byYear);
@@ -206,11 +218,12 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
         Root<QualityMeasuresProviderMapping> root1 = cq1.from(QualityMeasuresProviderMapping.class);
         Predicate byProvider=builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),providerId);
         Predicate byYear=builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),year);
+        Predicate byMeasureId=builder1.notLike(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%");
         Selection[] selections= new Selection[] {
         root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId)
         };
         cq1.select(builder1.construct(ConfigurationDetails.class,selections));
-		cq1.where(byProvider,byYear);
+		cq1.where(byProvider,byYear,byMeasureId);
 		List<ConfigurationDetails> result=em.createQuery(cq1).getResultList();
 		return result;
 	}
@@ -219,7 +232,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		CriteriaBuilder cb1 = em.getCriteriaBuilder();
 		CriteriaDelete<QualityMeasuresProviderMapping> delete1 = cb1.createCriteriaDelete(QualityMeasuresProviderMapping.class);
 		Root<QualityMeasuresProviderMapping> rootCriteria1 = delete1.from(QualityMeasuresProviderMapping.class);
-		delete1.where(cb1.equal(rootCriteria1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),providerId),cb1.equal(rootCriteria1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),reportingYear));
+		delete1.where(cb1.equal(rootCriteria1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),providerId),cb1.equal(rootCriteria1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),reportingYear),cb1.notLike(rootCriteria1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId), "IA_%"));
 		this.em.createQuery(delete1).executeUpdate();
 		
 		String[] measureid;
@@ -232,6 +245,130 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		qmpmObj.setQualityMeasuresProviderMappingReportingYear(reportingYear);
 		qualityMeasuresProviderMappingRepository.saveAndFlush(qmpmObj);
 		}
+	}
+	
+	@Override
+	public List<ConfigurationDetails> getImprovementActivityMeasureIds(Integer providerId,Integer year)
+			throws Exception {
+		CriteriaBuilder builder1 = em.getCriteriaBuilder();
+        CriteriaQuery<ConfigurationDetails> cq1 = builder1.createQuery(ConfigurationDetails.class);
+        Root<QualityMeasuresProviderMapping> root1 = cq1.from(QualityMeasuresProviderMapping.class);
+        Predicate byProvider=builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),providerId);
+        Predicate byYear=builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),year);
+        Predicate byMeasureId=builder1.like(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%");
+        Selection[] selections= new Selection[] {
+        root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),
+        root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingTitle),
+        root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingPriority)
+        };
+        cq1.select(builder1.construct(ConfigurationDetails.class,selections));
+		cq1.where(byProvider,byYear,byMeasureId);
+		List<ConfigurationDetails> result=em.createQuery(cq1).getResultList();
+		return result;
+	}
+	
+	@Override
+	public void addImpMeasuresToProvider(List<getMeasureBean> requestBean)
+			throws Exception {
+		
+		CriteriaBuilder cb1 = em.getCriteriaBuilder();
+		CriteriaDelete<QualityMeasuresProviderMapping> delete1 = cb1.createCriteriaDelete(QualityMeasuresProviderMapping.class);
+		Root<QualityMeasuresProviderMapping> rootCriteria1 = delete1.from(QualityMeasuresProviderMapping.class);
+		delete1.where(cb1.equal(rootCriteria1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),requestBean.get(0).getProviderId()),cb1.equal(rootCriteria1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),requestBean.get(0).getYear()),cb1.like(rootCriteria1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId), "IA_%"));
+		this.em.createQuery(delete1).executeUpdate();
+		for(int i=0;i<requestBean.size();i++){
+		QualityMeasuresProviderMapping qmpmObj=new QualityMeasuresProviderMapping();
+		qmpmObj.setQualityMeasuresProviderMappingProviderId(requestBean.get(i).getProviderId());
+		qmpmObj.setQualityMeasuresProviderMappingMeasureId(requestBean.get(i).getMeasureIds());
+		qmpmObj.setQualityMeasuresProviderMappingTitle(requestBean.get(i).getMeasureNames());
+		qmpmObj.setQualityMeasuresProviderMappingPriority(requestBean.get(i).getPriority());
+		qmpmObj.setQualityMeasuresProviderMappingReportingYear(requestBean.get(i).getYear());
+		qualityMeasuresProviderMappingRepository.saveAndFlush(qmpmObj);
+		}
+	
+	}
+	
+	@Override
+	public List<ConfigurationDetails> getConfiguredIameasures(Integer providerId, Integer year)
+	{
+		CriteriaBuilder builder1 = em.getCriteriaBuilder();
+        CriteriaQuery<ConfigurationDetails> cq1 = builder1.createQuery(ConfigurationDetails.class);
+        Root<QualityMeasuresProviderMapping> root1 = cq1.from(QualityMeasuresProviderMapping.class);
+        Join< QualityMeasuresProviderMapping,IAMeasures> joinIAMeasures = root1.join(QualityMeasuresProviderMapping_.iaMeasures,JoinType.LEFT);
+        Predicate byProvider=builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),providerId);
+        Predicate byYear=builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),year);
+        Predicate byMeasureId=builder1.like(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%");
+        Selection[] selections= new Selection[] {
+        root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),
+        root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingTitle),
+        root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingPriority),
+        builder1.coalesce(joinIAMeasures.get(IAMeasures_.IaMeasuresStatus),false),
+        builder1.coalesce(joinIAMeasures.get(IAMeasures_.IaMeasuresPoints),0)
+        };
+        cq1.select(builder1.construct(ConfigurationDetails.class,selections));
+		cq1.where(byProvider,byYear,byMeasureId);
+		List<ConfigurationDetails> result=em.createQuery(cq1).getResultList();
+		
+		return result;
+	}
+	
+	@Override
+	public void addIAmeasures(List<IAMeasureBean> requestBean){
+		Date date = new Date();
+		Timestamp curr_time = new Timestamp(date.getTime());
+		for(int i=0;i<requestBean.size();i++){
+			String iaMeasure =	IAMeasureExist(requestBean.get(i).getMeasureIds(), requestBean.get(i).getProviderId(), requestBean.get(i).getYear());
+			if(iaMeasure.equals("No Measure")){
+				IAMeasures iameasuresObj = new IAMeasures();
+				iameasuresObj.setIaMeasuresStatus(requestBean.get(i).getMeasureStatus());
+				iameasuresObj.setIaMeasuresMeasureId(requestBean.get(i).getMeasureIds());
+				iameasuresObj.setIaMeasuresLastModified(curr_time);
+				iameasuresObj.setIaMeasuresReportingYear(requestBean.get(i).getYear());
+				if(requestBean.get(i).getMeasureStatus()==true )
+					iameasuresObj.setIaMeasuresPoints(10);
+				else
+					iameasuresObj.setIaMeasuresPoints(0);
+				iameasuresObj.setIaMeasuresProviderId(requestBean.get(i).getProviderId());
+				iaMeasuresRepository.saveAndFlush(iameasuresObj);
+
+			}else{
+				CriteriaBuilder cb = em.getCriteriaBuilder();
+				CriteriaUpdate<IAMeasures> update = cb.createCriteriaUpdate(IAMeasures.class);
+				Root<IAMeasures> rootCriteria = update.from(IAMeasures.class);
+				Predicate ByProviderId=cb.equal(rootCriteria.get(IAMeasures_.IaMeasuresProviderId),requestBean.get(i).getProviderId());
+				Predicate ByYear= cb.equal(rootCriteria.get(IAMeasures_.IaMeasuresReportingYear),requestBean.get(i).getYear());
+				Predicate byMeasureId=cb.equal(rootCriteria.get(IAMeasures_.IaMeasuresMeasureId),requestBean.get(i).getMeasureIds());
+				update.set(rootCriteria.get(IAMeasures_.IaMeasuresStatus), requestBean.get(i).getMeasureStatus());
+				update.set(rootCriteria.get(IAMeasures_.IaMeasuresMeasureId), requestBean.get(i).getMeasureIds());
+				update.set(rootCriteria.get(IAMeasures_.IaMeasuresLastModified),curr_time);
+				if(requestBean.get(i).getMeasureStatus()==true )
+					update.set(rootCriteria.get(IAMeasures_.IaMeasuresPoints), 10);
+				else 
+					update.set(rootCriteria.get(IAMeasures_.IaMeasuresPoints), 0);
+				update.where(ByProviderId,ByYear,byMeasureId);
+				this.em.createQuery(update).executeUpdate();
+			}
+		}
+		
+		
+	}
+	
+	private String IAMeasureExist(String measureId,Integer providerId,Integer reportingYear)
+	{
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<String> cq =builder.createQuery(String.class);
+		Root<IAMeasures> rootIAMeasures = cq.from(IAMeasures.class);
+		cq.select(rootIAMeasures.get(IAMeasures_.IaMeasuresMeasureId));
+		Predicate ByProviderId=builder.equal(rootIAMeasures.get(IAMeasures_.IaMeasuresProviderId),providerId);
+		Predicate ByYear= builder.equal(rootIAMeasures.get(IAMeasures_.IaMeasuresReportingYear),reportingYear);
+		Predicate byMeasureId=builder.equal(rootIAMeasures.get(IAMeasures_.IaMeasuresMeasureId),measureId);
+		cq.where(ByProviderId,ByYear,byMeasureId);
+		List<String> iaMeasureName=em.createQuery(cq).getResultList();
+		if(iaMeasureName.size()!=0)
+			return iaMeasureName.get(0);
+		else
+			return "No Measure";
+		
 	}
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
@@ -792,5 +929,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		return result;
 
 	}
+
+	
 
 }

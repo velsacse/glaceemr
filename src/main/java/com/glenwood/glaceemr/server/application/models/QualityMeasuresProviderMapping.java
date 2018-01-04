@@ -40,7 +40,13 @@ public class QualityMeasuresProviderMapping {
 	@Column(name="quality_measures_provider_mapping_cmsId")
 	private String qualityMeasuresProviderMappingCMSId;
 
-	
+	@Column(name="quality_measures_provider_mapping_title")
+	private String qualityMeasuresProviderMappingTitle;
+
+	@Column(name="quality_measures_provider_mapping_priority")
+	private String qualityMeasuresProviderMappingPriority;
+
+
 	public Integer getQualityMeasuresProviderMappingId() {
 		return qualityMeasuresProviderMappingId;
 	}
@@ -85,11 +91,39 @@ public class QualityMeasuresProviderMapping {
 			String qualityMeasuresProviderMappingCMSId) {
 		this.qualityMeasuresProviderMappingCMSId = qualityMeasuresProviderMappingCMSId;
 	}
+	
+	public String getQualityMeasuresProviderMappingTitle() {
+		return qualityMeasuresProviderMappingTitle;
+	}
+
+	public void setQualityMeasuresProviderMappingTitle(
+			String qualityMeasuresProviderMappingTitle) {
+		this.qualityMeasuresProviderMappingTitle = qualityMeasuresProviderMappingTitle;
+	}
+
+	public String getQualityMeasuresProviderMappingPriority() {
+		return qualityMeasuresProviderMappingPriority;
+	}
+
+	public void setQualityMeasuresProviderMappingPriority(
+			String qualityMeasuresProviderMappingPriority) {
+		this.qualityMeasuresProviderMappingPriority = qualityMeasuresProviderMappingPriority;
+	}
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonBackReference
 	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="quality_measures_provider_mapping_provider_id", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
 	private EmployeeProfile empProfile;
+	
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonBackReference
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JoinColumn(name="quality_measures_provider_mapping_measure_id", referencedColumnName="ia_measures_measure_id" , insertable=false, updatable=false)
+	private IAMeasures iaMeasures;
+	
+	
+	
 	
 }

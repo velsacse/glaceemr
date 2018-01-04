@@ -214,7 +214,7 @@ public class EMeasureUtils {
 		
 		String result="";
 		try {
-			String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/eCQMServices/getECQMInfoById?ids="+measureId;
+			String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/eCQMServices/getECQMInfoById?ids="+measureId+"&reportingYear="+year;
 			
 			result = restTemplate.getForObject(apiUrl, String.class);
 		} catch (Exception e) {
