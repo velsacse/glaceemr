@@ -1,6 +1,7 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,8 +73,8 @@ public class GlaceRulesController {
     @ResponseBody
     public	EMRResponseBean getPQRSMeasure(@RequestParam(value="providerId", required=true, defaultValue="-1") Integer providerId,
 			@RequestParam(value="patientId", required=true) Integer patientId,
-			@RequestParam(value="accountId", required=true) String accountId) throws Exception{
-		String measure=glaceRulesService.getMeasures(providerId,patientId,accountId);
+			@RequestParam(value="encYear", required=true) Integer encYear) throws Exception{
+		String measure=glaceRulesService.getMeasures(providerId,patientId,encYear);
 		EMRResponseBean result=new EMRResponseBean();
 		result.setData(measure);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PQRS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "Collected Configured Measures", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
@@ -106,9 +107,10 @@ public class GlaceRulesController {
 		PqrsResponseBean finalResponse = new PqrsResponseBean();
 		EMRResponseBean response = new EMRResponseBean();
 		
+	try{
 		String hub_url = measureService.getMeasureValidationServer()+"/glacecds/ECQMServices/validateRegistryReport";
 
-		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,2017);
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,Calendar.getInstance().get(Calendar.YEAR));
 
 		if(providerInfo!=null){
 
@@ -153,6 +155,10 @@ public class GlaceRulesController {
 		}
 		response.setData(finalResponse);
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PQRS, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "data to draw qty measures in MIPS flowsheet",sessionMap.getUserID(), request.getRemoteAddr(),patientID, "", LogUserType.USER_LOGIN, "", "");
+	}
+	catch (Exception e) {
+		e.printStackTrace();
+	}
 		return response;
 	}
 	

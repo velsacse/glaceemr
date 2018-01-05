@@ -131,9 +131,11 @@ public class MacraProviderConfiguration implements Serializable{
 	@Column(name="macra_provider_configuration_report_type")
 	private short macraProviderConfigurationReportType;
 	
-	@OneToMany(cascade=CascadeType.ALL,mappedBy="macraProviderConfiguration")
-	@JsonManagedReference
-	private List<EmployeeProfile> employeeProfileTable;
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonBackReference
+	@NotFound(action=NotFoundAction.IGNORE)
+	 @JoinColumn(name = "macra_provider_configuration_provider_id", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
+	private EmployeeProfile employeeProfileTable;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonBackReference

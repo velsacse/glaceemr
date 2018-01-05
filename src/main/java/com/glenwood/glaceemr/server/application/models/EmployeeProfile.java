@@ -593,9 +593,8 @@ public class EmployeeProfile implements Serializable {
 	@OneToMany(mappedBy="employeetableByEnteredName")
 	private List<WarfarinLog> warfarinlogenteredby;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "emp_profile_empid", referencedColumnName = "macra_provider_configuration_provider_id", insertable = false, updatable = false)
-    private MacraProviderConfiguration macraProviderConfiguration;
+	@OneToMany(mappedBy ="employeeProfileTable")
+    private List<MacraProviderConfiguration> macraProviderConfiguration;
 	
 	@OneToMany(mappedBy="empProfileTable")
 	@JsonManagedReference
