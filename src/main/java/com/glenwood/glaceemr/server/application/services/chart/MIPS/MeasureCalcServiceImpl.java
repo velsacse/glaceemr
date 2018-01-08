@@ -258,7 +258,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			Patient requestObj = new Patient();
 
 			String startDate="12/31/2007";
-			String endDate="12/31/2017";
+			String endDate="12/31/2019";
 
 			SimpleDateFormat format=new SimpleDateFormat("MM/dd/yyyy");
 			Date date1=format.parse(startDate);
@@ -3788,5 +3788,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			performanceObjs.add(new MIPSPerformanceBean("ACI_TRANS_PPHI_1", false));
 		return performanceObjs;
 	}
+
+	
 	
 }
