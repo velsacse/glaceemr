@@ -299,6 +299,9 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
         Predicate byYear = builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear), year);
         Predicate byIaYear=builder1.equal(joinIAMeasures.get(IAMeasures_.IaMeasuresReportingYear),year);
         Predicate byMeasureId=builder1.like(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%");
+       
+        joinIAMeasures.on(byIaYear);
+        
         Selection[] selections= new Selection[] {
         root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),
         root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingTitle),
@@ -307,7 +310,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
         builder1.coalesce(joinIAMeasures.get(IAMeasures_.IaMeasuresPoints),0),
         };
         cq1.select(builder1.construct(ConfigurationDetails.class,selections));
-		cq1.where(byProvider,byYear,byIaYear,byMeasureId);
+		cq1.where(byProvider,byYear,byMeasureId);
 		List<ConfigurationDetails> result=em.createQuery(cq1).getResultList();
 		
 		return result;
