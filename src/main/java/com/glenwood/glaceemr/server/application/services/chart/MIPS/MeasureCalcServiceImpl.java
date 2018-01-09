@@ -1784,12 +1784,12 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				resultObject.setReportingRate(reportingRate);
 				resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
 				resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
-				resultObject.setIppPatientsList(getPatientListByCriteria(1, providerId, measureId,resultObject.getCriteria()));
-				resultObject.setDenominatorPatientsList(getPatientListByCriteria(2, providerId, measureId,resultObject.getCriteria()));
-				resultObject.setDenominatorExclusionPatientsList(getPatientListByCriteria(3, providerId, measureId,resultObject.getCriteria()));
-				resultObject.setDenominatorExceptionPatientsList(getPatientListByCriteria(4, providerId, measureId,resultObject.getCriteria()));
-				resultObject.setNumeratorPatientsList(getPatientListByCriteria(5, providerId, measureId,resultObject.getCriteria()));
-				resultObject.setNumeratorExclusionPatientsList(getPatientListByCriteria(6, providerId, measureId,resultObject.getCriteria()));
+				resultObject.setIppPatientsList(getPatientListByCriteria(1, providerId, measureId,resultObject.getCriteria(),year));
+				resultObject.setDenominatorPatientsList(getPatientListByCriteria(2, providerId, measureId,resultObject.getCriteria(),year));
+				resultObject.setDenominatorExclusionPatientsList(getPatientListByCriteria(3, providerId, measureId,resultObject.getCriteria(),year));
+				resultObject.setDenominatorExceptionPatientsList(getPatientListByCriteria(4, providerId, measureId,resultObject.getCriteria(),year));
+				resultObject.setNumeratorPatientsList(getPatientListByCriteria(5, providerId, measureId,resultObject.getCriteria(),year));
+				resultObject.setNumeratorExclusionPatientsList(getPatientListByCriteria(6, providerId, measureId,resultObject.getCriteria(),year));
 
 			}
 
@@ -1907,12 +1907,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	}
 
-	private String getPatientListByCriteria(int criteriaId, int providerId, String measureId,int criteria){
+	private String getPatientListByCriteria(int criteriaId, int providerId, String measureId,int criteria,int reportingYear){
 
 		String patientsList = "";
-
-		Calendar now = Calendar.getInstance();
-		int reportingYear = now.get(Calendar.YEAR);
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<String> cq = builder.createQuery(String.class);
