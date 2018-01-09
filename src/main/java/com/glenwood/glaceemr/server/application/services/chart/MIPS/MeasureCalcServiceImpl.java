@@ -2083,7 +2083,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			CriteriaQuery<QualityMeasuresProviderMapping> cquery = builder.createQuery(QualityMeasuresProviderMapping.class);
 			Root<QualityMeasuresProviderMapping> root1 = cquery.from(QualityMeasuresProviderMapping.class);
 			cquery.where(builder.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),userId));
-			cquery.orderBy(builder.asc(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId).as(Integer.class)));
+			cquery.orderBy(builder.asc(builder.notLike(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%").as(Integer.class)));
 			qualitymeasurebean = em.createQuery(cquery).getResultList();
 			Integer userid = -1;
 			String measureid = "";

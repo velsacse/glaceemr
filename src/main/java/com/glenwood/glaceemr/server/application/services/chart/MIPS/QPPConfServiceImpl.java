@@ -312,7 +312,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
         cq1.select(builder1.construct(ConfigurationDetails.class,selections));
 		cq1.where(byProvider,byYear,byMeasureId);
 		List<ConfigurationDetails> result=em.createQuery(cq1).getResultList();
-		
+
 		return result;
 	}
 	
@@ -437,7 +437,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		Root<QualityMeasuresProviderMapping> rootQualityMeasuresProviderMapping = cq1.from(QualityMeasuresProviderMapping.class);
 		Predicate predicateByYear1 =builder1.equal(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),year);
 		Predicate predicateByProviderId1 =builder1.equal(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),providerId);
-		cq1.select(builder1.function("string_agg", String.class, rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),builder1.literal(",")));
+		cq1.select(builder1.function("string_agg", String.class, builder1.notLike(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%"),builder1.literal(",")));
 		cq1.where(predicateByYear1,predicateByProviderId1);
 		List<String> measures=em.createQuery(cq1).getResultList();
 		if(measures.size()>0 && providerInfo.size()>0)
@@ -463,7 +463,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		
 		cq.groupBy(joinProviderEmployee.get(EmployeeProfile_.empProfileSsn));
 		
-		cq.multiselect(builder.function("string_agg",String.class,root.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId) ,builder.literal(","))).distinct(true);
+		cq.multiselect(builder.function("string_agg",String.class, builder.notLike(root.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%"),builder.literal(","))).distinct(true);
 	
 		List<String> providerInfo=em.createQuery(cq).getResultList();
 		
@@ -508,7 +508,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		Root<QualityMeasuresProviderMapping> rootQualityMeasuresProviderMapping = cq1.from(QualityMeasuresProviderMapping.class);
 		Predicate predicateByYear1 =builder1.equal(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),reportingYear);
 		Predicate predicateByProviderId1 =builder1.notEqual(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),-1);
-		cq1.multiselect(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),builder1.function("string_agg", String.class, rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),builder1.literal(",")));
+		cq1.multiselect(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),builder1.function("string_agg", String.class, builder1.notLike(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%"),builder1.literal(",")));
 		cq1.where(predicateByYear1,predicateByProviderId1);
 		cq1.groupBy(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId)
 			);
