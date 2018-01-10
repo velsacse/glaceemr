@@ -28,13 +28,13 @@ public class PatientEncounterType {
 	private Boolean isactive;
 
 	@Column(name="plantype")
-	private Boolean planType;
+	private short planType;
 	
-	public Boolean getPlanType() {
+	public short getPlanType() {
 		return planType;
 	}
 
-	public void setPlanType(Boolean planType) {
+	public void setPlanType(short planType) {
 		this.planType = planType;
 	}
 
