@@ -53,8 +53,6 @@ import com.glenwood.glaceemr.server.application.models.EmployeeProfile;
 import com.glenwood.glaceemr.server.application.models.EmployeeProfile_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.Encounter_;
-import com.glenwood.glaceemr.server.application.models.HpiSymptom;
-import com.glenwood.glaceemr.server.application.models.HpiSymptom_;
 import com.glenwood.glaceemr.server.application.models.IAMeasures;
 import com.glenwood.glaceemr.server.application.models.IAMeasures_;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
@@ -299,8 +297,8 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
         Predicate byYear = builder1.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear), year);
         Predicate byIaYear=builder1.equal(joinIAMeasures.get(IAMeasures_.IaMeasuresReportingYear),year);
         Predicate byMeasureId=builder1.like(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%");
-       
-        joinIAMeasures.on(byIaYear);
+        Predicate byIaProviderId=builder1.equal(joinIAMeasures.get(IAMeasures_.IaMeasuresProviderId),providerId);
+        joinIAMeasures.on(byIaYear,byIaProviderId);
         
         Selection[] selections= new Selection[] {
         root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),
@@ -437,8 +435,9 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		Root<QualityMeasuresProviderMapping> rootQualityMeasuresProviderMapping = cq1.from(QualityMeasuresProviderMapping.class);
 		Predicate predicateByYear1 =builder1.equal(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),year);
 		Predicate predicateByProviderId1 =builder1.equal(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),providerId);
-		cq1.select(builder1.function("string_agg", String.class, builder1.notLike(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%"),builder1.literal(",")));
-		cq1.where(predicateByYear1,predicateByProviderId1);
+		Predicate excludeIaMeasures =  builder1.notLike(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%");
+		cq1.select(builder1.function("string_agg", String.class,rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),builder1.literal(",")));
+		cq1.where(predicateByYear1,predicateByProviderId1,excludeIaMeasures);
 		List<String> measures=em.createQuery(cq1).getResultList();
 		if(measures.size()>0 && providerInfo.size()>0)
 		providerInfo.get(0).setMeasures(measures.get(0));
@@ -458,12 +457,13 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 
 		Predicate bySSN = builder.equal(joinProviderEmployee.get(EmployeeProfile_.empProfileSsn), empTin);
 		Predicate byReportingYear = builder.equal(root.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear), reportingYear);
+		Predicate excludeIaMeasures =  builder.notLike(root.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%");
 
-		cq.where(builder.and(bySSN, byReportingYear));
+		cq.where(builder.and(bySSN, byReportingYear),excludeIaMeasures);
 		
 		cq.groupBy(joinProviderEmployee.get(EmployeeProfile_.empProfileSsn));
 		
-		cq.multiselect(builder.function("string_agg",String.class, builder.notLike(root.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%"),builder.literal(","))).distinct(true);
+		cq.multiselect(builder.function("string_agg",String.class,root.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),builder.literal(","))).distinct(true);
 	
 		List<String> providerInfo=em.createQuery(cq).getResultList();
 		
@@ -508,8 +508,10 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		Root<QualityMeasuresProviderMapping> rootQualityMeasuresProviderMapping = cq1.from(QualityMeasuresProviderMapping.class);
 		Predicate predicateByYear1 =builder1.equal(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),reportingYear);
 		Predicate predicateByProviderId1 =builder1.notEqual(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),-1);
-		cq1.multiselect(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),builder1.function("string_agg", String.class, builder1.notLike(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%"),builder1.literal(",")));
-		cq1.where(predicateByYear1,predicateByProviderId1);
+		Predicate excludeIaMeasures =  builder1.notLike(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%");
+
+		cq1.multiselect(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),builder1.function("string_agg", String.class,rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),builder1.literal(",")));
+		cq1.where(predicateByYear1,predicateByProviderId1,excludeIaMeasures);
 		cq1.groupBy(rootQualityMeasuresProviderMapping.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId)
 			);
 

@@ -2004,7 +2004,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode, boolean isNotMet) {
+	public List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode, boolean isNotMet,Integer year) {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MIPSPatientInformation> cq = builder.createQuery(MIPSPatientInformation.class);
 		Root<PatientRegistration> root = cq.from(PatientRegistration.class);
@@ -2025,7 +2025,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		Predicate isNotDenomExcep = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominatorException), 0);
 		Predicate isNotNumerExc = builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumeratorExclusion), 0);
 		Predicate isPartialMet = builder.notEqual(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesDenominator),joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesNumerator));
-		
+		Predicate byYear=builder.equal(joinQualityMeasuresPatientEntries.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesReportingYear), year);
 		if(mode == 0){
 			joinQualityMeasuresPatientEntries.on(byMeasureId, byCriteria,byNpi);
 		}else if(mode == 1){
@@ -2059,9 +2059,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		};
 
 		if(isNotMet){
-			cq.where(isDenom,isNotDenomExc,isNotDenomExcep,isNotNumerExc,byPatientId,isPartialMet);
+			cq.where(isDenom,isNotDenomExc,isNotDenomExcep,isNotNumerExc,byPatientId,isPartialMet,byYear);
 		}else{
-			cq.where(byPatientId);
+			cq.where(byPatientId,byYear);
 		}
 
 		cq.distinct(true);

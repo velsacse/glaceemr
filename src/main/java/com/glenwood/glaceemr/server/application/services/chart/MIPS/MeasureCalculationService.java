@@ -149,7 +149,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode, boolean isNotMet);
+	List<MIPSPatientInformation> getPatient(String patientId, String measureId, int criteria,Integer provider, String empTin, int mode, boolean isNotMet,Integer year);
 
 	/**
 	 * Function to get resultant PQRSResponse bean for given patient and provider after getting validated 
@@ -208,6 +208,7 @@ public interface MeasureCalculationService {
 			String practiceName,Integer year) throws Exception;
 
 	List<MIPSPerformanceBean> getAttObjsAndOrderIt(int providerId, int reportingYear,List<MIPSPerformanceBean> performanceObjs);
+
 
 
 }

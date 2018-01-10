@@ -1682,7 +1682,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 			}else{
 				
 				result.get(i)[1]="No";
-				ePrescStatus = 0;
+//				ePrescStatus = 0;
 				
 			}
 		}

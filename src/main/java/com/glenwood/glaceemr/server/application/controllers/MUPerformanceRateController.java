@@ -30,6 +30,7 @@ import com.glenwood.glaceemr.server.application.Bean.MUAttestationBean;
 import com.glenwood.glaceemr.server.application.Bean.MUPerformanceBean;
 import com.glenwood.glaceemr.server.application.Bean.MacraProviderQDM;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
+import com.glenwood.glaceemr.server.application.Bean.QPPDetails;
 import com.glenwood.glaceemr.server.application.Bean.SharedFolderBean;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.HttpConnectionUtils;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
@@ -501,5 +502,43 @@ public class MUPerformanceRateController {
 		return response;
 		
 	}
-
+	@RequestMapping(value = "/getCompleteQPPJSON", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getQPPJSON(@RequestParam(value="reportingYear", required=true) int reportingYear,
+			@RequestParam(value="accountID", required=true) String accountID,
+			@RequestParam(value="providerId", required=true) int providerId) throws Exception{
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		String sharedPath=sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
+		String file=performanceService.getCompleteQPPJSON(reportingYear,providerId,providerInfo,sharedPath);
+		
+		emrResponseBean.setData(file.toString());
+		return emrResponseBean;
+	}
+	@RequestMapping(value = "/getQualityJSON", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getQualityJSON(@RequestParam(value="reportingYear", required=true) int reportingYear,
+			@RequestParam(value="accountID", required=true) String accountID,
+			@RequestParam(value="providerId", required=true) int providerId) throws Exception{
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		String sharedPath=sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
+		String file=performanceService.getQualityJSON(reportingYear,providerId,providerInfo,sharedPath);
+		
+		emrResponseBean.setData(file.toString());
+		return emrResponseBean;
+	}
+	@RequestMapping(value = "/getACIJSON", method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getACIJSON(@RequestParam(value="reportingYear", required=true) int reportingYear,
+			@RequestParam(value="accountID", required=true) String accountID,
+			@RequestParam(value="providerId", required=true) int providerId) throws Exception{
+		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		String sharedPath=sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
+		String file=performanceService.getACIJSON(reportingYear,providerId,providerInfo,sharedPath);
+		
+		emrResponseBean.setData(file.toString());
+		return emrResponseBean;
+	}
 }

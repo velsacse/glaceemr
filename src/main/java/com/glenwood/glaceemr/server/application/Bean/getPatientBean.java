@@ -10,6 +10,14 @@ public class getPatientBean {
 	String accountId;
 	Boolean isNotMet=false;
 	Integer provider;
+	Integer year;
+	
+	public Integer getYear() {
+		return year;
+	}
+	public void setYear(Integer year) {
+		this.year = year;
+	}
 	public String getPatientId() {
 		return patientId;
 	}

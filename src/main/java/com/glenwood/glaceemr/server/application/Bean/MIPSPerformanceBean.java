@@ -68,7 +68,20 @@ public class MIPSPerformanceBean {
 		this.measureId = measureId;
 		this.attestationStatus = attestationStatus;
 	}
-
+	public MIPSPerformanceBean(String measureId,int denominatorCount,int numeratorCount,int denominatorExceptionCount,int denominatorExclusionCount,double performanceRate){
+		this.measureId=measureId;
+		this.denominatorCount=denominatorCount;
+		this.numeratorCount=numeratorCount;
+		this.denominatorExceptionCount=denominatorExceptionCount;
+		this.denominatorExclusionCount=denominatorExclusionCount;
+		this.performanceRate=performanceRate;
+	}
+	public MIPSPerformanceBean(String measureId,int denominatorCount,int numeratorCount){
+		this.measureId=measureId;
+		this.denominatorCount=denominatorCount;
+		this.numeratorCount=numeratorCount;
+		
+	}
 	public MIPSPerformanceBean(String measureId, int criteria,int reportingYear,
 			int ippCount, int denominatorCount,
 			int denominatorExclusionCount, int numeratorCount,

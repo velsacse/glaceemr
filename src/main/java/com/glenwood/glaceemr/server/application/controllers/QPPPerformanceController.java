@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -32,6 +33,8 @@ import com.glenwood.glaceemr.server.application.Bean.MIPSResponse;
 import com.glenwood.glaceemr.server.application.Bean.MUDashboardBean;
 import com.glenwood.glaceemr.server.application.Bean.MacraProviderQDM;
 import com.glenwood.glaceemr.server.application.Bean.MeasureStatus;
+import com.glenwood.glaceemr.server.application.Bean.QPPDetails;
+import com.glenwood.glaceemr.server.application.Bean.SharedFolderBean;
 import com.glenwood.glaceemr.server.application.Bean.getPatientBean;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.HttpConnectionUtils;
 import com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Request;
@@ -49,6 +52,7 @@ import com.glenwood.glaceemr.server.application.services.chart.MIPS.Configuratio
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.MeasureCalculationService;
 import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
 import com.glenwood.glaceemr.server.application.services.chart.admission.AdmissionBean;
+import com.glenwood.glaceemr.server.datasource.TennantContextHolder;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 
 @RestController
@@ -67,6 +71,9 @@ public class QPPPerformanceController {
 
 	@Autowired
 	HttpServletRequest request;
+	
+	@Autowired
+	SharedFolderBean sharedFolderBean;
 	
 	@RequestMapping(value = "/insertPatientEntries", method = RequestMethod.GET)
 	@ResponseBody
@@ -104,7 +111,8 @@ public class QPPPerformanceController {
 			@RequestParam(value="patientID", required=true) int patientID,
 			@RequestParam(value="userId", required=true) int userId,
 			@RequestParam(value="sharedFolder", required=true) String sharedPath,
-			@RequestParam(value="providerId", required=true) int providerId) throws Exception
+			@RequestParam(value="providerId", required=true) int providerId,
+			@RequestParam(value="year", required=true) int year) throws Exception
 	{
 	
 		EMeasureUtils utils = new EMeasureUtils();
@@ -121,14 +129,14 @@ public class QPPPerformanceController {
 		PrintWriter printWriter = new PrintWriter(writer);
 		
 			
-			Boolean isIndividual=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
+			Boolean isIndividual=measureService.checkGroupOrIndividual(year);
 
 			if(!isIndividual){
 				providerId=-1;
 				userId=-1;
 			}
 			
-			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,Calendar.getInstance().get(Calendar.YEAR));
+			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,year);
 			if(providerInfo.size()>0){
 
 				String[] measureIds = providerInfo.get(0).getMeasures().split(",");
@@ -137,7 +145,7 @@ public class QPPPerformanceController {
 					cqmMeasures.add(Integer.parseInt(measureIds[i]));
 				}
 
-				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(Calendar.getInstance().get(Calendar.YEAR),providerInfo.get(0).getMeasures(), sharedPath,accountId));
+				HashMap<String, HashMap<String, String>> codeListForQDM = utils.getCodelist(utils.getMeasureBeanDetails(year,providerInfo.get(0).getMeasures(), sharedPath,accountId));
 				finalResponse.setMeasureInfo(utils.getMeasureInfo());
 				requestObj = measureService.getQDMRequestObject(accountId,isIndividual,patientID, userId, codeListForQDM, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
 
@@ -206,7 +214,8 @@ public class QPPPerformanceController {
 			@RequestParam(value="patientID", required=true) int patientID,
 			@RequestParam(value="userId", required=true) int userId,
 			@RequestParam(value="providerId", required=true) int providerId,
-			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans) throws Exception
+			@RequestParam(value="isTrans", required=false, defaultValue="false") boolean isTrans,
+			@RequestParam(value="year", required=true) int year) throws Exception
 	{
 	
 		EMRResponseBean response = new EMRResponseBean();
@@ -218,14 +227,14 @@ public class QPPPerformanceController {
 		
 		try{
 			
-			Boolean isGroup=measureService.checkGroupOrIndividual(Calendar.getInstance().get(Calendar.YEAR));
+			Boolean isGroup=measureService.checkGroupOrIndividual(year);
 
 			if(!isGroup){
 				providerId=-1;
 				userId=-1;
 			}
 
-			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,Calendar.getInstance().get(Calendar.YEAR));
+			List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,year);
 
 			if(providerInfo.size()>0){
 
@@ -387,7 +396,7 @@ public class QPPPerformanceController {
 
 		try{
 		
-			List<MIPSPatientInformation> filtersInfo = measureService.getPatient(requestBean.getPatientId(),requestBean.getMeasureId(),requestBean.getCriteria(),requestBean.getProvider(),requestBean.getEmpTIN(), requestBean.getMode(),requestBean.getIsNotMet());
+			List<MIPSPatientInformation> filtersInfo = measureService.getPatient(requestBean.getPatientId(),requestBean.getMeasureId(),requestBean.getCriteria(),requestBean.getProvider(),requestBean.getEmpTIN(), requestBean.getMode(),requestBean.getIsNotMet(),requestBean.getYear());
 			response.setData(filtersInfo);
 		
 		auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.MU,LogActionType.GENERATE, -1,AuditTrailEnumConstants.Log_Outcome.SUCCESS ,"Success in getting filtered patients list based on measure" , -1, request.getRemoteAddr(),-1,"patientId="+requestBean.getPatientId()+"&measureId="+requestBean.getMeasureId()+"&providerId="+requestBean.getEmpTIN(),LogUserType.USER_LOGIN, "patientId="+requestBean.getPatientId(), "");
@@ -808,4 +817,5 @@ public class QPPPerformanceController {
 
 		return result;
 	}
+	
 }
