@@ -172,7 +172,7 @@ public interface MeasureCalculationService {
 	 * @return
 	 */
 	
-	List<QualityMeasureBean> getQualityMeasureResponseObject(int userId, HashMap<String, String> codeListForQDM);
+	List<QualityMeasureBean> getQualityMeasureResponseObject(int userId, HashMap<String, String> codeListForQDM,int reportingyear);
 
 	/**
 	 * Function to get selected provider's MU Dashboard details

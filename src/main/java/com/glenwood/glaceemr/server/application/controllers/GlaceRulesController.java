@@ -86,7 +86,7 @@ public class GlaceRulesController {
 	 * Method for Integrating PQRS with Macra tab
 	 * @param accountId
 	 * @param patientID
-	 * @param providerId
+	 * @param providerIdSaveAssessmentWithSNOMED
 	 * @param userId
 	 * @return
 	 * @throws Exception
@@ -98,7 +98,8 @@ public class GlaceRulesController {
 			@RequestParam(value="accountId", required=true) String accountId,
 			@RequestParam(value="patientID", required=true) int patientID,
 			@RequestParam(value="providerId", required=true) int providerId,
-			@RequestParam(value="userId", required=true) int userId) throws Exception
+			@RequestParam(value="userId", required=true) int userId,
+			@RequestParam(value="reportingyear", required=true)int reportingyear) throws Exception
 	{
 		EMeasureUtils utils = new EMeasureUtils();
 		List<Integer> cqmMeasures = new ArrayList<Integer>();		
@@ -109,8 +110,7 @@ public class GlaceRulesController {
 		
 	try{
 		String hub_url = measureService.getMeasureValidationServer()+"/glacecds/ECQMServices/validateRegistryReport";
-
-		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,Calendar.getInstance().get(Calendar.YEAR));
+		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingyear);
 
 		if(providerInfo!=null){
 
@@ -121,7 +121,6 @@ public class GlaceRulesController {
 			}
 			String data = "";
 			HashMap<String, String> codeListForQDM = utils.getPqrsCodeList(utils.getPpqrsHubReponse(providerInfo.get(0).getMeasures()));
-
 
 			finalResponse.setMeasureInfo(utils.getMeasureInfo());
 
@@ -143,12 +142,14 @@ public class GlaceRulesController {
 			Map<String,MeasureStatus> measureStatus = responseFromCentralServer.getMeasureStatus();
 
 			responseFromCentralServer.setMeasureStatus(measureStatus);
+			
+			responseFromCentralServer.setPatientId(patientID);
 
 			finalResponse.setDataFromResponse(responseFromCentralServer);
 
 			finalResponse.setPqrsresponse(measureService.getPqrsResponseObject(patientID, providerId, providerInfo.get(0).getMacraProviderConfigurationReportingStart(), providerInfo.get(0).getMacraProviderConfigurationReportingEnd(),codeListForQDM));
 
-			finalResponse.setQualityMeasures(measureService.getQualityMeasureResponseObject(providerId,codeListForQDM));
+			finalResponse.setQualityMeasures(measureService.getQualityMeasureResponseObject(providerId,codeListForQDM,reportingyear));
 
 		}else{
 

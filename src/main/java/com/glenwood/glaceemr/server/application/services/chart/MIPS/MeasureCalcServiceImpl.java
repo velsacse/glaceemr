@@ -2073,7 +2073,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	}
 
 	@Override
-	public List<QualityMeasureBean> getQualityMeasureResponseObject(int userId, HashMap<String, String> codeListForQDM){
+	public List<QualityMeasureBean> getQualityMeasureResponseObject(int userId, HashMap<String, String> codeListForQDM, int reportingyear){
 
 		List<QualityMeasureBean> pqrsResponsearray = new ArrayList<QualityMeasureBean>();
 		try {
@@ -2082,8 +2082,9 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<QualityMeasuresProviderMapping> cquery = builder.createQuery(QualityMeasuresProviderMapping.class);
 			Root<QualityMeasuresProviderMapping> root1 = cquery.from(QualityMeasuresProviderMapping.class);
-			cquery.where(builder.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),userId));
-			cquery.orderBy(builder.asc(builder.notLike(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%").as(Integer.class)));
+			cquery.where(builder.and(builder.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),userId),builder.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),reportingyear)));
+			
+			cquery.orderBy(builder.asc(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId).as(Integer.class)));
 			qualitymeasurebean = em.createQuery(cquery).getResultList();
 			Integer userid = -1;
 			String measureid = "";
@@ -2134,8 +2135,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			cq.where(builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesPatientId), patientID),
 					//builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesProviderId), providerId),
 					builder.equal(root.get(PqrsPatientEntries_.pqrsPatientEntriesIsActive), true),
-					builder.greaterThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), startDate),
-					builder.lessThan(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), endDate));
+					builder.greaterThanOrEqualTo(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), startDate),
+					builder.lessThanOrEqualTo(root.get(PqrsPatientEntries_.pqrsPatientEntriesDos), endDate));
 
 			cq.orderBy(builder.asc(root.get(PqrsPatientEntries_.pqrsPatientEntriesMeasureId).as(Integer.class)));
 			pqrsResponseBean = em.createQuery(cq).getResultList();
