@@ -2082,11 +2082,13 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<QualityMeasuresProviderMapping> cquery = builder.createQuery(QualityMeasuresProviderMapping.class);
 			Root<QualityMeasuresProviderMapping> root1 = cquery.from(QualityMeasuresProviderMapping.class);
-			cquery.where(builder.and(builder.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),userId),builder.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),reportingyear)));
-			
+			cquery.where(builder.and(builder.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingProviderId),userId),
+					builder.equal(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingReportingYear),reportingyear),
+					builder.notLike(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA%")));
+			//cquery.orderBy(builder.asc(builder.notLike(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%").as(Integer.class)));
 			cquery.orderBy(builder.asc(root1.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId).as(Integer.class)));
 			qualitymeasurebean = em.createQuery(cquery).getResultList();
-			Integer userid = -1;
+			int userid = -1;
 			String measureid = "";
 			String cmsId = "";
 			for(int i=0;i<qualitymeasurebean.size();i++){
@@ -2115,6 +2117,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			}
 		}
 		catch(Exception e){
+			e.printStackTrace();
 		}
 
 		return pqrsResponsearray;
@@ -2125,7 +2128,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		List<PqrsMeasureBean> pqrsResponsearray = new ArrayList<PqrsMeasureBean>();
 		try {
-
 			PqrsMeasureBean responseBean = null;
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			List<PqrsPatientEntries> pqrsResponseBean =  new ArrayList<PqrsPatientEntries>();
@@ -2146,7 +2148,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			String performanceind = "";
 			String measureTitle = "";
 			HashMap<String, Integer> measureMap = new HashMap<String, Integer>();
-
 			for(int i=0;i<pqrsResponseBean.size();i++){
 
 				String json = new ObjectMapper().writeValueAsString(codeListForQDM);
@@ -2190,7 +2191,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			}
 		} 
 		catch(Exception e){
-
+			e.printStackTrace();
 		}
 		return pqrsResponsearray;
 	}

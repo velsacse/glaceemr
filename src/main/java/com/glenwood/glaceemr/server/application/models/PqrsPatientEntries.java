@@ -66,7 +66,7 @@ public class PqrsPatientEntries {
 	@Column(name="pqrs_patient_entries_is_active")
 	private Boolean pqrsPatientEntriesIsActive;
 	
-	@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.LAZY)
+	/*@ManyToOne(cascade=CascadeType.ALL ,fetch=FetchType.LAZY)
 	@JoinColumn(name="pqrs_patient_entries_provider_id", referencedColumnName="macra_provider_configuration_provider_id", insertable=false, updatable=false)
 	@JsonManagedReference
 	private MacraProviderConfiguration macraproviderid;
@@ -77,7 +77,7 @@ public class PqrsPatientEntries {
 
 	public void setMacraproviderid(MacraProviderConfiguration macraproviderid) {
 		this.macraproviderid = macraproviderid;
-	}
+	}*/
 
 	
 	public Integer getPqrsPatientEntriesId() {

@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -20,7 +21,7 @@ import com.glenwood.glaceemr.server.application.services.chart.MIPS.Configuratio
 @Entity
 @Table(name = "ia_measures")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IAMeasures {
+public class IAMeasures implements Serializable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="ia_measures_ia_measures_id_seq")
@@ -103,10 +104,13 @@ public class IAMeasures {
 	}
 
 
-
+/*
 	@OneToMany(mappedBy="iaMeasures")
 	@JsonManagedReference
-	private List<IAMeasures> iaMeasures;
+	private List<IAMeasures> iaMeasures;*/
+	
+	@OneToMany(mappedBy="iaMeasures")
+	private List<QualityMeasuresProviderMapping> qtyprovidermapping;
 	
 
 }
