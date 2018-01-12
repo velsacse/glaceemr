@@ -186,6 +186,12 @@ Root<Encounter> root = cq.from(Encounter.class);
 	@SuppressWarnings("rawtypes")
 	public List<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter> getEncounterQDM(Date startDate, Date endDate, EntityManager em, boolean considerProvider,int patientID, int providerId, HashMap<String, String> encounterCodeList, ArrayList<Integer> officeVisitEncounters){
 		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(endDate);
+		calendar.add(Calendar.YEAR, -2);
+        startDate = calendar.getTime();
+        
+        
 		List<String> cptCodes = new ArrayList<String>();
 		
 		String cptCodeListString = "", hcpcsCodeListString = ""; 
