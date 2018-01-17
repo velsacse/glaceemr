@@ -434,23 +434,49 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 		cq.select(builder.construct(MIPSPerformanceBean.class,selections));
 		cq.where(builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear), reportingYear),builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateProviderId), providerId),root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId).in(Arrays.asList(aciTransMeasures.split(","))));
 		List<MIPSPerformanceBean> result=em.createQuery(cq).getResultList();
+		//Add few default JSON details
+		if(result.size()>0)
+		{
+			
+			measurementList.add(getDefaultACIParts("ACI_TRANS_PPHI_1"));
+			measurementList.add(getDefaultACIParts("ACI_INFBLO_1"));
+			measurementList.add(getDefaultACIParts("ACI_ONCDIR_1"));
+			
+		}
 		for(MIPSPerformanceBean eachObject:result)
 		{
 			
 			HashMap<String, Object> measurement=new HashMap<String, Object>();
-			measurement.put("measureId", eachObject.getMeasureId());
 			
-			HashMap<String, Object> value=new HashMap<String, Object>();
-			value.put("denominator", eachObject.getDenominatorCount());
-			value.put("numerator", eachObject.getNumeratorCount());
-			
-			measurement.put("value", value);
+			if(eachObject.getMeasureId().trim().equals("ACI_TRANS_HIE_1") && eachObject.getDenominatorCount()<100)
+			{
+				measurement.put("measureId","ACI_TRANS_LVOTC_1");
+				measurement.put("value", true);
+			}
+			else if(eachObject.getMeasureId().trim().equals("ACI_TRANS_EP_1") && eachObject.getDenominatorCount()<100)
+			{
+				measurement.put("measureId","ACI_TRANS_LVPP_1");
+				measurement.put("value", true);
+			}
+			else
+			{	
+				measurement.put("measureId", eachObject.getMeasureId());
+				HashMap<String, Object> value=new HashMap<String, Object>();
+				value.put("denominator", eachObject.getDenominatorCount());
+				value.put("numerator", eachObject.getNumeratorCount());
+				measurement.put("value", value);
+			}
 			measurementList.add(measurement);
 		}
 		return measurementList;
 		
 	}
-
+	private HashMap<String, Object> getDefaultACIParts(String measureId){
+		HashMap<String, Object> measurement=new HashMap<String, Object>();
+		measurement.put("measureId",measureId);
+		measurement.put("value", true);
+		return measurement;
+	}
 	private MeasureDetails getQualityMeasuresStatus(int reportingYear,int providerId,List<MacraProviderQDM> providerInfo) {
 		MeasureDetails measureDetails = new MeasureDetails();
 		measureDetails.setCategory("quality");
@@ -509,6 +535,12 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 		for(MIPSPerformanceBean eachObject:result)
 		{
 			HashMap<String, Object> measurement=new HashMap<String, Object>();
+			int length = eachObject.getMeasureId().trim().length();
+			if(length==1)
+				eachObject.setMeasureId("00"+eachObject.getMeasureId());
+			else if(length==2)
+				eachObject.setMeasureId("0"+eachObject.getMeasureId());
+				
 			measurement.put("measureId", eachObject.getMeasureId());
 			
 			HashMap<String, Object> value=new HashMap<String, Object>();
