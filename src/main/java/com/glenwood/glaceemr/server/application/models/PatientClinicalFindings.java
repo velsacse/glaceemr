@@ -1,16 +1,22 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.sql.Timestamp;
+import java.sql.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,41 +27,42 @@ public class PatientClinicalFindings {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="patient_clinical_findings_patient_clinical_findings_id_seq")
 	@SequenceGenerator(name ="patient_clinical_findings_patient_clinical_findings_id_seq", sequenceName="patient_clinical_findings_patient_clinical_findings_id_seq", allocationSize=1)
 	@Column(name="patient_clinical_findings_id")
-	private Long patientClinicalFindingsId;
-	
+	private Integer patientClinicalFindingsId;
+
 	@Column(name="patient_clinical_findings_patient_id")
 	private Integer patientClinicalFindingsPatientId;
-	
+
 	@Column(name="patient_clinical_findings_encounter_id")
 	private Integer patientClinicalFindingsEncounterId;
-	
+
 	@Column(name="patient_clinical_findings_episode_id")
 	private Integer patientClinicalFindingsEpisodeId;
-	
+
+	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="patient_clinical_findings_date")
 	private Timestamp patientClinicalFindingsDate;
-	
+
 	@Column(name="patient_clinical_findings_description")
 	private String patientClinicalFindingsDescription;
-	
+
 	@Column(name="patient_clinical_findings_code")
 	private String patientClinicalFindingsCode;
-	
+
 	@Column(name="patient_clinical_findings_code_system")
 	private String patientClinicalFindingsCodeSystem;
-	
+
 	@Column(name="patient_clinical_findings_status")
 	private Integer patientClinicalFindingsStatus;
-	
+
 	@Column(name="patient_clinical_findings_not_done_reason")
 	private String patientClinicalFindingsNotDoneReason;
-	
+
 	@Column(name="patient_clinical_findings_not_done_reason_code")
 	private String patientClinicalFindingsNotDoneReasonCode;
-	
+
 	@Column(name="patient_clinical_findings_not_done_reason_code_system")
 	private String patientClinicalFindingsNotDoneReasonCodeSystem;
-	
+
 	@Column(name="patient_clinical_findings_result_value")
 	private String patientClinicalFindingsResultValue;
 
@@ -64,41 +71,70 @@ public class PatientClinicalFindings {
 
 	@Column(name="patient_clinical_findings_result_description")
 	private String patientClinicalFindingsResultDescription;
-	
+
 	@Column(name="patient_clinical_findings_result_code")
 	private String patientClinicalFindingsResultCode;
-	
+
 	@Column(name="patient_clinical_findings_result_code_system")
 	private String patientClinicalFindingsResultCodeSystem;
-	
+
 	@Column(name="patient_clinical_findings_isactive")
-	private boolean patientClinicalFindingsIsactive;
-	
+	private Boolean patientClinicalFindingsIsactive;
+
 	@Column(name="patient_clinical_findings_created_source")
 	private String patientClinicalFindingsCreatedSource;
-	
-	
+
 	@Column(name="patient_clinical_findings_created_by")
 	private Integer patientClinicalFindingsCreatedBy;
-	
 
+	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="patient_clinical_findings_created_on")
 	private Timestamp patientClinicalFindingsCreatedOn;
-	
 
 	@Column(name="patient_clinical_findings_modified_by")
 	private Integer patientClinicalFindingsModifiedBy;
-	
+
+	@JsonSerialize(using = JsonTimestampSerializer.class)
 	@Column(name="patient_clinical_findings_modified_on")
 	private Timestamp patientClinicalFindingsModifiedOn;
+	
+	@Column(name="patient_clinical_findings_answerlistid")
+	private String patientClinicalFindingsAnswerListId;
+
+	@Column(name="patient_clinical_findings_answerlist_name")
+	private String patientClinicalFindingsAnswerListName;
+
+	@Column(name="patient_clinical_findings_answerlist_oid")
+	private String patientClinicalFindingsAnswerListOid;
+
+	@Column(name="patient_clinical_findings_answerid")
+	private String patientClinicalFindingsAnswerId;
+	
+	@Column(name="patient_clinical_findings_risk_assessment_id")
+	private Integer patientClinicalFindingsRiskAssessmentId;
+
+	@Column(name="patient_clinical_findings_notes")
+	private String patientClinicalFindingsNotes;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "patient_clinical_findings_risk_assessment_id", referencedColumnName = "risk_assessment_id", insertable = false, updatable = false)
+	private RiskAssessment riskAssessment;
+	
+	public Integer getPatientClinicalFindingsId() {
+		return patientClinicalFindingsId;
+	}
+
+	public void setPatientClinicalFindingsId(Integer patientClinicalFindingsId) {
+		this.patientClinicalFindingsId = patientClinicalFindingsId;
+	}
 
 	public Integer getPatientClinicalFindingsPatientId() {
 		return patientClinicalFindingsPatientId;
 	}
 
 	public void setPatientClinicalFindingsPatientId(
-			Integer patientClinicalFindingsPatientid) {
-		this.patientClinicalFindingsPatientId = patientClinicalFindingsPatientid;
+			Integer patientClinicalFindingsPatientId) {
+		this.patientClinicalFindingsPatientId = patientClinicalFindingsPatientId;
 	}
 
 	public Integer getPatientClinicalFindingsEncounterId() {
@@ -234,12 +270,12 @@ public class PatientClinicalFindings {
 		this.patientClinicalFindingsResultCodeSystem = patientClinicalFindingsResultCodeSystem;
 	}
 
-	public boolean isPatientClinicalFindingsIsactive() {
+	public Boolean getPatientClinicalFindingsIsactive() {
 		return patientClinicalFindingsIsactive;
 	}
 
 	public void setPatientClinicalFindingsIsactive(
-			boolean patientClinicalFindingsIsactive) {
+			Boolean patientClinicalFindingsIsactive) {
 		this.patientClinicalFindingsIsactive = patientClinicalFindingsIsactive;
 	}
 
@@ -287,5 +323,59 @@ public class PatientClinicalFindings {
 			Timestamp patientClinicalFindingsModifiedOn) {
 		this.patientClinicalFindingsModifiedOn = patientClinicalFindingsModifiedOn;
 	}
+
+	public String getPatientClinicalFindingsAnswerListId() {
+		return patientClinicalFindingsAnswerListId;
+	}
+
+	public void setPatientClinicalFindingsAnswerListId(
+			String patientClinicalFindingsAnswerListId) {
+		this.patientClinicalFindingsAnswerListId = patientClinicalFindingsAnswerListId;
+	}
+
+	public String getPatientClinicalFindingsAnswerListName() {
+		return patientClinicalFindingsAnswerListName;
+	}
+
+	public void setPatientClinicalFindingsAnswerListName(
+			String patientClinicalFindingsAnswerListName) {
+		this.patientClinicalFindingsAnswerListName = patientClinicalFindingsAnswerListName;
+	}
+
+	public String getPatientClinicalFindingsAnswerListOid() {
+		return patientClinicalFindingsAnswerListOid;
+	}
+
+	public void setPatientClinicalFindingsAnswerListOid(
+			String patientClinicalFindingsAnswerListOid) {
+		this.patientClinicalFindingsAnswerListOid = patientClinicalFindingsAnswerListOid;
+	}
+
+	public String getPatientClinicalFindingsAnswerId() {
+		return patientClinicalFindingsAnswerId;
+	}
+
+	public void setPatientClinicalFindingsAnswerId(
+			String patientClinicalFindingsAnswerId) {
+		this.patientClinicalFindingsAnswerId = patientClinicalFindingsAnswerId;
+	}
+
+	public Integer getpatientClinicalFindingsRiskAssessmentId() {
+		return patientClinicalFindingsRiskAssessmentId;
+	}
+
+	public void setpatientClinicalFindingsRiskAssessmentId(
+			Integer patientClinicalFindingsRiskAssessmentId) {
+		this.patientClinicalFindingsRiskAssessmentId = patientClinicalFindingsRiskAssessmentId;
+	}
+
+	public String getPatientClinicalFindingsNotes() {
+		return patientClinicalFindingsNotes;
+	}
+
+	public void setPatientClinicalFindingsNotes(String patientClinicalFindingsNotes) {
+		this.patientClinicalFindingsNotes = patientClinicalFindingsNotes;
+	}
+	
 	
 }
