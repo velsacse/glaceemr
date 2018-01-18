@@ -33,8 +33,8 @@ public class GeneralShortcut {
 	@Column(name="general_shortcut_isactive")
 	private Boolean generalShortcutIsactive;
 
-	@Column(name="general_shortcut_parent_id")
-	private Integer generalShortcutParentId;
+	/*@Column(name="general_shortcut_parent_id")
+	private Integer generalShortcutParentId;*/
 
 	public Integer getGeneralShortcutId() {
 		return generalShortcutId;
@@ -76,13 +76,13 @@ public class GeneralShortcut {
 		this.generalShortcutIsactive = generalShortcutIsactive;
 	}
 
-	public Integer getGeneralShortcutParentId() {
+/*	public Integer getGeneralShortcutParentId() {
 		return generalShortcutParentId;
 	}
 
 	public void setGeneralShortcutParentId(Integer generalShortcutParentId) {
 		this.generalShortcutParentId = generalShortcutParentId;
 	}
-	
+	*/
 	
 }

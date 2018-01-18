@@ -90,6 +90,10 @@ public class CarePlanOutcome {
 	@JoinColumn(name="careplan_outcome_created_by", referencedColumnName="emp_profile_empid" , insertable=false, updatable=false)
 	private EmployeeProfile empProfile;
 	
+	@Column(name="careplan_outcome_targeted_goal")
+	private Boolean carePlanOutcomeTargetedGoal;
+	
+	
 	public Integer getCarePlanOutcomeId() {
 		return carePlanOutcomeId;
 	}
@@ -218,5 +222,12 @@ public class CarePlanOutcome {
 	public void setCarePlanOutcomeReviewDate(Timestamp carePlanOutcomeReviewDate) {
 		this.carePlanOutcomeReviewDate = carePlanOutcomeReviewDate;
 	}
-	
+
+	public Boolean getCarePlanOutcomeTargetedGoal() {
+		return carePlanOutcomeTargetedGoal;
+	}
+
+	public void setCarePlanOutcomeTargetedGoal(Boolean carePlanOutcomeTargetedGoal) {
+		this.carePlanOutcomeTargetedGoal = carePlanOutcomeTargetedGoal;
+	}
 }

@@ -44,6 +44,7 @@ public class CarePlanGoalBean {
 	Integer outcomeId;
 	String carePlanGoalCreatedName;
 	String carePlanGoalModifiedName;
+	Boolean carePlanOutcomeTargetedGoal;
 	
 	public CarePlanGoalBean(){	
 	}
@@ -216,7 +217,8 @@ public class CarePlanGoalBean {
 			String carePlanGoalUnit, Integer carePlanGoalStatus,
 			Date carePlanGoalTargetDate, Date carePlanGoalNextReviewDate,
 			String carePlanGoalNotes,Integer carePlanGoalFrom,Integer carePlanGoalProgress,Integer carePlanGoalResultStatus,Integer episodeId,Integer carePlanGoalOrder,String carePlanGoalValueOne,
-			Integer carePlanAssistanceStatus,Integer carePlanLevelStatus,String goalCreatedBy,String goalModifiedBy,
+			Integer carePlanAssistanceStatus,Integer carePlanLevelStatus,Boolean carePlanOutcomeTargetedGoal,Integer goalOutcomeId,
+			String goalCreatedBy,String goalModifiedBy,
 			Date goalCreatedOn,Date goalModifiedOn) {
 		
 		super();
@@ -255,6 +257,8 @@ public class CarePlanGoalBean {
 		this.carePlanGoalValueOne=carePlanGoalValueOne;
 		this.assistanceStatus=carePlanAssistanceStatus;
 		this.levelStatus=carePlanLevelStatus;
+		this.carePlanOutcomeTargetedGoal = carePlanOutcomeTargetedGoal;
+		this.outcomeId=goalOutcomeId;
 		this.carePlanGoalCreatedName = goalCreatedBy;
 		this.carePlanGoalModifiedName= goalModifiedBy;
 
@@ -577,4 +581,13 @@ public class CarePlanGoalBean {
 	public void setCarePlanGoalModifiedName(String carePlanGoalModifiedName) {
 		this.carePlanGoalModifiedName = carePlanGoalModifiedName;
 	}
+
+	public Boolean getCarePlanOutcomeTargetedGoal() {
+		return carePlanOutcomeTargetedGoal;
+	}
+
+	public void setCarePlanOutcomeTargetedGoal(Boolean carePlanOutcomeTargetedGoal) {
+		this.carePlanOutcomeTargetedGoal = carePlanOutcomeTargetedGoal;
+	}
+	
 }
