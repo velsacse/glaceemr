@@ -23,11 +23,11 @@ public interface CarePlanService{
 	
 	List<CarePlanGoalBean>  saveCarePlanGoal(CarePlanGoalBean carePlanGoal);
 	
-	List<CarePlanGoalBean>  saveCarePlanOutcomes(Integer goalId,Integer providerId,Integer patientId,Integer encounterId,Integer progress,String reviewDate,String targetDate,String notes,Integer outcomeStatus,Integer episodeId,Integer goalAssisStatus,Integer goalLevelStatus);
+	List<CarePlanGoalBean>  saveCarePlanOutcomes(Integer goalId,Integer providerId,Integer patientId,Integer encounterId,Integer progress,String reviewDate,String targetDate,String notes,Integer outcomeStatus,Integer episodeId,Integer goalAssisStatus,Integer goalLevelStatus,Boolean targetedGoal);
 
 	String getVitals(Integer patientId,Integer encounterId);
 		
-	List<Object> fetchCarePlanShortcuts(Integer categoryId);
+	List<Object> fetchCarePlanShortcuts(Integer categoryId,String searchType,String searchStr);
 
 	Map<String,Object> importCarePlanShortcuts(Integer patientId,Integer encounterId,String shortcutIDs,Integer providerId,Integer episodeId,Integer shortcutTerm,Integer categoryId,Integer previousEpisodeId,Integer summaryMode) throws ParseException;
 	
@@ -76,11 +76,11 @@ public interface CarePlanService{
 	
 	Map<String, Object> getCarePlanPrint(Integer patientId,Integer encounterId,Integer episodeId);
 	
-	void addFrequentIntervention(String elementName,String snomed,Integer userId, Integer providerId, Integer isfrmconfig) throws Exception;
+	void addFrequentIntervention(String elementName,String snomed,Integer userId, Integer providerId, Integer isfrmconfig, String categoryType, String codeOid) throws Exception;
 
-	List<Object> fetchFrequentInterventions(Integer userId);
+	List<Object> fetchFrequentInterventions(Integer userId, String categoryType);
 
-	void deleteFrequentIntervention(int delid);
+	void deleteFrequentIntervention(String delid);
 
 	void UpdateFrequentInterventionGroup(Integer groupVal, String groupName);
 
