@@ -163,7 +163,6 @@ public class EMeasureUtils {
 			}
 			
 		}
-		
 		setMeasureInfo(measureInfo);
 		
 		return finalCodeList;
@@ -535,7 +534,10 @@ public class EMeasureUtils {
 			loincCodeList = getCodeList(measureObj,"Risk Category/Assessment","LOINC",loincCodeList);
 			
 		}
-		
+		if(measureObj.containsKey("Assessment")){
+			snomedCodeList = getCodeList(measureObj,"Assessment","SNOMEDCT",snomedCodeList);
+			loincCodeList = getCodeList(measureObj,"Assessment","LOINC",loincCodeList);
+		}
 		if(measureObj.containsKey("Functional Status")){
 			
 			snomedCodeList = getCodeList(measureObj,"Functional Status","SNOMEDCT",snomedCodeList);
@@ -546,7 +548,6 @@ public class EMeasureUtils {
 		codeListForCNM.put("SNOMED", snomedCodeList);
 		
 		codeListForCNM.put("LOINC", loincCodeList);
-		
 		return codeListForCNM;
 		
 	}

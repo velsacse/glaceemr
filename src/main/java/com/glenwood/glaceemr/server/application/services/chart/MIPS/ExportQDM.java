@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.services.chart.MIPS;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -222,23 +223,21 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		if(cptCodes.size()==0)
 			cptCodes.add("000000");
+		
+		List<EncounterQDM> serviceObjs=getServiceDetails(em,patientID,providerId,cptCodes,startDate,endDate);
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<EncounterQDM> cq = builder.createQuery(EncounterQDM.class);
 		Root<Chart> root = cq.from(Chart.class);
 		Join<Chart, ServiceDetail> chartServiceJoin = root.join(Chart_.serviceDetail,JoinType.INNER);
-		Join<Chart, Encounter> encounterChartJoin = root.join(Chart_.encounterTable,JoinType.LEFT);
+		Join<Chart, Encounter> encounterChartJoin = root.join(Chart_.encounterTable,JoinType.INNER);
 		Join<ServiceDetail, Cpt> serviceCptJoin = chartServiceJoin.join(ServiceDetail_.cpt,JoinType.INNER);
-		
-		Expression<Integer> indicator = builder.<Integer>selectCase().when(encounterChartJoin.get(Encounter_.encounterDate).isNull(),0).otherwise(1);
-		
+				
 		Selection[] selections= new Selection[] {
 				serviceCptJoin.get(Cpt_.cptCptcode),
 				builder.coalesce(encounterChartJoin.get(Encounter_.encounterId),-1),
 				encounterChartJoin.get(Encounter_.encounterDate),
 				encounterChartJoin.get(Encounter_.encounterClosedDate),
-				chartServiceJoin.get(ServiceDetail_.serviceDetailDos),
-				chartServiceJoin.get(ServiceDetail_.serviceDetailDx1),
-				indicator
+				chartServiceJoin.get(ServiceDetail_.serviceDetailDx1)
 		};
 		
 		cq.select(builder.construct(EncounterQDM.class,selections));
@@ -248,55 +247,46 @@ Root<Encounter> root = cq.from(Encounter.class);
 		restrictions = new Predicate[] {
 					builder.equal(root.get(Chart_.chartPatientid), patientID),
 					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
-					builder.equal(chartServiceJoin.get(ServiceDetail_.sdoctors), providerId),
-					builder.or(builder.between(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)), startDate, endDate),builder.between(chartServiceJoin.get(ServiceDetail_.serviceDetailDos), startDate, endDate)),
-					builder.or(builder.equal(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)),encounterChartJoin.get(Encounter_.encounterDate).isNull()),
+					builder.or(builder.equal(chartServiceJoin.get(ServiceDetail_.sdoctors), providerId),builder.equal(encounterChartJoin.get(Encounter_.encounter_service_doctor),providerId)),
+					builder.between(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)), startDate, endDate),
+					builder.equal(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)),chartServiceJoin.get(ServiceDetail_.serviceDetailDos))
 			};
 		
 		
 		cq.where(restrictions);
 		
-		List<EncounterQDM> encounterObj = new ArrayList<EncounterQDM>();
+		List<EncounterQDM> encounterObjs = new ArrayList<EncounterQDM>();
 		
 		List<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter> encounterQDM = new ArrayList<com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter>();
 		
 		try{
 			
-			encounterObj = em.createQuery(cq).getResultList();
+			encounterObjs = em.createQuery(cq).getResultList();
 			
 			com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter encObject;
-			
-			for(int i=0;i<encounterObj.size();i++){
-				
-				officeVisitEncounters.add(encounterObj.get(i).getEncounterId());
-				
+			Boolean encounterThere=false;
+			for(EncounterQDM eachService:serviceObjs)
+			{
+				System.out.println("inside service...........");
 				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
-							
-					encObject.setCode(encounterObj.get(i).getCode());
-					if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(encounterObj.get(i).getCode()))
-					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
-					else if(cptCodeListString.length() > 0 && cptCodeListString.contains( encounterObj.get(i).getCode() ))
-					encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
-					
-					if(encounterObj.get(i).getIndicator()==0)
+				for(EncounterQDM eachEncounter:encounterObjs)
+				{
+					System.out.println("inside encounter...........");
+					if(compareWithoutTime(eachService.getStartDate(),eachEncounter.getStartDate()))
 					{
-						Calendar cal = new GregorianCalendar();
-						cal.setTime(encounterObj.get(i).getServiceDate());
-						cal.set(Calendar.HOUR_OF_DAY, 04);  
-						cal.set(Calendar.MINUTE, 0);  
-						cal.set(Calendar.SECOND, 0);  
-						cal.set(Calendar.MILLISECOND, 0); 
-						encObject.setStartDate(cal.getTime());
-						cal.set(Calendar.HOUR_OF_DAY, 23);  
-						encObject.setEndDate(cal.getTime());
-						
-					}
-					else{
-						encObject.setStartDate(encounterObj.get(i).getStartDate());
-						if(encounterObj.get(i).getEndDate()==null)
+						encounterThere=true;
+						System.out.println("encounter and service dates are same");
+						officeVisitEncounters.add(eachEncounter.getEncounterId());
+						encObject.setCode(eachEncounter.getCode());
+						if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(eachEncounter.getCode()))
+						encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
+						else if(cptCodeListString.length() > 0 && cptCodeListString.contains(eachEncounter.getCode() ))
+						encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
+						encObject.setStartDate(eachEncounter.getStartDate());
+						if(eachEncounter.getEndDate()==null)
 						{
 							Calendar cal = new GregorianCalendar();
-							cal.setTime(encounterObj.get(i).getStartDate());
+							cal.setTime(eachEncounter.getStartDate());
 							cal.set(Calendar.HOUR_OF_DAY, 23);  
 							cal.set(Calendar.MINUTE, 0);  
 							cal.set(Calendar.SECOND, 0);  
@@ -304,16 +294,41 @@ Root<Encounter> root = cq.from(Encounter.class);
 							encObject.setEndDate(cal.getTime());
 						}
 						else
-						encObject.setEndDate(encounterObj.get(i).getEndDate());
+						encObject.setEndDate(eachEncounter.getEndDate());
+						if(eachEncounter.getDxCode()!=null && !eachEncounter.getDxCode().equals(null) && !eachEncounter.getDxCode().equals(""))
+						{
+							encObject.setPrincipalDiagnosisCode(eachEncounter.getDxCode());
+							encObject.setPrincipalDiagnosisCodeSystemOID("2.16.840.1.113883.6.90");
+						}
+							
 					}
-					if(encounterObj.get(i).getDxCode()!=null && !encounterObj.get(i).getDxCode().equals(null) && !encounterObj.get(i).getDxCode().equals(""))
-					{
-						encObject.setPrincipalDiagnosisCode(encounterObj.get(i).getDxCode());
-						encObject.setPrincipalDiagnosisCodeSystemOID("2.16.840.1.113883.6.90");
-					}
-						
-						encounterQDM.add(i, encObject);
-			
+				}
+				if(!encounterThere)
+				{
+					System.out.println("encounter and service dates are different");
+					encObject.setCode(eachService.getCode());
+					if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(eachService.getCode()))
+					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
+					else if(cptCodeListString.length() > 0 && cptCodeListString.contains(eachService.getCode() ))
+					encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
+					Calendar cal = new GregorianCalendar();
+					cal.setTime(eachService.getStartDate());
+					cal.set(Calendar.HOUR_OF_DAY, 04);  
+					cal.set(Calendar.MINUTE, 0);  
+					cal.set(Calendar.SECOND, 0);  
+					cal.set(Calendar.MILLISECOND, 0); 
+					encObject.setStartDate(cal.getTime());
+					cal.set(Calendar.HOUR_OF_DAY, 23);  
+					encObject.setEndDate(cal.getTime());
+				}
+				if(eachService.getDxCode()!=null && !eachService.getDxCode().equals(null) && !eachService.getDxCode().equals(""))
+				{
+					encObject.setPrincipalDiagnosisCode(eachService.getDxCode());
+					encObject.setPrincipalDiagnosisCodeSystemOID("2.16.840.1.113883.6.90");
+				}
+				
+				
+				encounterQDM.add(encObject);
 			}
 			
 			
@@ -324,7 +339,35 @@ Root<Encounter> root = cq.from(Encounter.class);
 		return encounterQDM;
 		
 	}
-	
+	private boolean compareWithoutTime(Date date1, Date date2){
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+		return formatter.format(date1).equals(formatter.format(date2));
+	}
+	private List<EncounterQDM> getServiceDetails(EntityManager em,int patientID, int providerId, List<String> cptCodes,
+			Date startDate, Date endDate) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<EncounterQDM> cq = builder.createQuery(EncounterQDM.class);
+		Root<ServiceDetail> root = cq.from(ServiceDetail.class);
+		Join<ServiceDetail, Cpt> serviceCptJoin = root.join(ServiceDetail_.cpt,JoinType.INNER);
+		Selection[] selections= new Selection[] {
+				serviceCptJoin.get(Cpt_.cptCptcode),
+				builder.coalesce(serviceCptJoin.get(Cpt_.cptId),-1),
+				root.get(ServiceDetail_.serviceDetailDos),
+				root.get(ServiceDetail_.serviceDetailDos),
+				root.get(ServiceDetail_.serviceDetailDx1)
+		};
+		cq.select(builder.construct(EncounterQDM.class,selections));
+				
+		Predicate[] restrictions = new Predicate[] {
+					builder.equal(root.get(ServiceDetail_.serviceDetailPatientid), patientID),
+					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
+					builder.equal(root.get(ServiceDetail_.sdoctors), providerId),
+					builder.between(root.get(ServiceDetail_.serviceDetailDos), startDate, endDate)
+					};
+		cq.where(restrictions);
+		return em.createQuery(cq).getResultList();
+	}
+
 	/**
 	 * Function to get total no of encounters for the patient for the given provider in reporting year
 	 * 
@@ -1209,7 +1252,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 			String []  codeListString=snomedCodes.split(",");
 			String [] loincCodeListString=loincCodes.split(",");
-			System.out.println("loincCodes>>>>>>>"+loincCodes);
 			List<String> snomedCodeList= Arrays.asList(codeListString);
 			List<String> loincCodeList=Arrays.asList(loincCodeListString);
 			List<ClinicalDataQDM> clinicalDataSNOMED = new ArrayList<ClinicalDataQDM>();
@@ -1347,7 +1389,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 					cqForLoinc.where(restrictions);
 				cqForLoinc.distinct(true);   
 				clinicalDataLOINC = em.createQuery(cqForLoinc).getResultList();
-				System.out.println("clinicalDataLOINC size>>>>>"+clinicalDataLOINC.size());
 				for(ClinicalDataQDM clinicalDataQDM: clinicalDataLOINC){
 					clinicalDataQDM.setEndDate(endDate);
 					clinicalDataQDM.setStartDate(startDate);
@@ -1375,7 +1416,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 				}
 				requestObj.setTobaccoStatusList(tobaccoDetails);
 			}  
-			System.out.println("clinicaldataFinal size>>>>>>>>>>>>"+clinicaldataFinal.size());
 			/***********************Intervention Query*********************/
 			CriteriaBuilder interventionCriteria = em.getCriteriaBuilder();
 			CriteriaQuery<ClinicalDataQDM> cq = interventionCriteria.createQuery(ClinicalDataQDM.class);
@@ -2102,7 +2142,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 		String resultString = "";
 
 		try{
-			
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Integer> cq = builder.createQuery(Integer.class);
 			Root<Chart> root = cq.from(Chart.class);
