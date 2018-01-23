@@ -2349,7 +2349,7 @@ public List<Object> fetchFrequentInterventions(Integer userId, String categoryTy
 	for(Object[]  freqList:result){
 		Map<String, String> parsedObject=new HashMap<String, String>();
 		try {
-			//parsedObject.put("id", freqList[0].toString());
+			parsedObject.put("freqId", freqList[0].toString());
 			parsedObject.put("id", freqList[1].toString());	
 			parsedObject.put("name", freqList[2].toString());	
 			parsedObject.put("freqInterventionGroup", freqList[3].toString());
