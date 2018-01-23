@@ -329,7 +329,7 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 	}
 
 	@Override
-	public String getCompleteQPPJSON(int reportingYear, int providerId, List<MacraProviderQDM> providerInfo,String sharedPath) {
+	public String getCompleteQPPJSON(int reportingYear, int providerId, List<MacraProviderQDM> providerInfo,List<MIPSPerformanceBean> attestationMeasures,String sharedPath) {
 		QPPDetails completeQPPDetails=new QPPDetails();
 		MeasureDetails qualityMeasures,aciMeasures,iaMeasures=null;
 		completeQPPDetails.setEntityType(getEntityType(reportingYear));
@@ -341,7 +341,7 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 		if(qualityMeasures!=null)
 		completeQPPDetails.setMeasurementSets(qualityMeasures);
 		
-		aciMeasures=getACIMeasuresStatus(reportingYear,providerId,providerInfo);
+		aciMeasures=getACIMeasuresStatus(reportingYear,providerId,providerInfo,attestationMeasures);
 		if(aciMeasures!=null)
 		completeQPPDetails.getMeasurementSets().add(aciMeasures);
 		
@@ -365,13 +365,13 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 	}
 
 	@Override
-	public String getACIJSON(int reportingYear, int providerId,List<MacraProviderQDM> providerInfo, String sharedPath) {
+	public String getACIJSON(int reportingYear, int providerId,List<MacraProviderQDM> providerInfo,List<MIPSPerformanceBean> attestationMeasures, String sharedPath) {
 		QPPDetails completeQPPDetails=new QPPDetails();
 		completeQPPDetails.setEntityType(getEntityType(reportingYear));
 		completeQPPDetails.setTaxpayerIdentificationNumber(getTINForProvider(providerId));
 		completeQPPDetails.setNationalProviderIdentifier(getNPIForProvider(providerId));
 		completeQPPDetails.setPerformanceYear(reportingYear);
-		completeQPPDetails.getMeasurementSets().add(getACIMeasuresStatus(reportingYear,providerId,providerInfo));
+		completeQPPDetails.getMeasurementSets().add(getACIMeasuresStatus(reportingYear,providerId,providerInfo,attestationMeasures));
 		
 		return generateJSONFile(completeQPPDetails,sharedPath,providerId); 
 	}
@@ -396,7 +396,7 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 		return fileName;
 	}
 
-	private MeasureDetails getACIMeasuresStatus(int reportingYear, int providerId,List<MacraProviderQDM> providerInfo) {
+	private MeasureDetails getACIMeasuresStatus(int reportingYear, int providerId,List<MacraProviderQDM> providerInfo,List<MIPSPerformanceBean> attestationMeasures) {
 		MeasureDetails measureDetails = new MeasureDetails();
 		measureDetails.setCategory("aci");
 		if(providerInfo.get(0).getMacraProviderConfigurationReportingMethod()==2)
@@ -407,9 +407,8 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 			measureDetails.setSubmissionMethod("claims");
 		measureDetails.setPerformanceStart(providerInfo.get(0).getMacraProviderConfigurationReportingStart());
 		measureDetails.setPerformanceEnd(providerInfo.get(0).getMacraProviderConfigurationReportingEnd());
-		measureDetails.setMeasurements(getACIPerformanceCount(reportingYear,providerId));
 		
-		List<HashMap<String, Object>> status=getACIPerformanceCount(reportingYear,providerId);
+		List<HashMap<String, Object>> status=getACIPerformanceCount(attestationMeasures,reportingYear,providerId);
 		measureDetails.setMeasurements(status);
 		if(status.size()>0)
 			return measureDetails;
@@ -417,7 +416,7 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 				return null;
 	}
 
-	private List<HashMap<String, Object>> getACIPerformanceCount(int reportingYear,int providerId) {
+	private List<HashMap<String, Object>> getACIPerformanceCount(List<MIPSPerformanceBean> attestationMeasures,int reportingYear,int providerId) {
 		
 		String aciTransMeasures = "ACI_TRANS_EP_1,ACI_TRANS_SM_1,ACI_TRANS_PEA_1,ACI_TRANS_PEA_2,ACI_TRANS_HIE_1,ACI_TRANS_PSE_1,ACI_TRANS_MR_1";
 		
@@ -437,10 +436,11 @@ public class MUPerformanceRateServiceImpl implements MUPerformanceRateService{
 		//Add few default JSON details
 		if(result.size()>0)
 		{
-			
-			measurementList.add(getDefaultACIParts("ACI_TRANS_PPHI_1"));
 			measurementList.add(getDefaultACIParts("ACI_INFBLO_1"));
 			measurementList.add(getDefaultACIParts("ACI_ONCDIR_1"));
+			for(MIPSPerformanceBean eachAttestationMeasure:attestationMeasures){
+				measurementList.add(getDefaultACIParts(eachAttestationMeasure.getMeasureId()));
+			}
 			
 		}
 		for(MIPSPerformanceBean eachObject:result)

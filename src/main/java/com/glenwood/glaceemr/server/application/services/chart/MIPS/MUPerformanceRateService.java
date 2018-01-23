@@ -15,10 +15,10 @@ public interface MUPerformanceRateService{
 
 	String getLastUpdatedDate();
 	
-	String getCompleteQPPJSON(int reportingYear, int providerId, List<MacraProviderQDM> providerInfo, String sharedPath);
+	String getCompleteQPPJSON(int reportingYear, int providerId, List<MacraProviderQDM> providerInfo,List<MIPSPerformanceBean> attestationMeasures,String sharedPath);
 
 	String getQualityJSON(int reportingYear, int providerId,List<MacraProviderQDM> providerInfo, String sharedPath);
 
-	String getACIJSON(int reportingYear, int providerId,List<MacraProviderQDM> providerInfo, String sharedPath);
+	String getACIJSON(int reportingYear, int providerId,List<MacraProviderQDM> providerInfo,List<MIPSPerformanceBean> attestationMeasures, String sharedPath);
 	
 }

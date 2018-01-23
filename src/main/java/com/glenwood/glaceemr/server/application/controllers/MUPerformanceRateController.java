@@ -508,9 +508,11 @@ public class MUPerformanceRateController {
 			@RequestParam(value="accountID", required=true) String accountID,
 			@RequestParam(value="providerId", required=true) int providerId) throws Exception{
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		List<MIPSPerformanceBean> performanceBean=new ArrayList<MIPSPerformanceBean>();
 		String sharedPath=sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
 		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
-		String file=performanceService.getCompleteQPPJSON(reportingYear,providerId,providerInfo,sharedPath);
+		performanceBean=measureService.getAttObjsAndOrderIt(providerId, reportingYear,performanceBean);
+		String file=performanceService.getCompleteQPPJSON(reportingYear,providerId,providerInfo,performanceBean,sharedPath);
 		
 		emrResponseBean.setData(file.toString());
 		return emrResponseBean;
@@ -534,9 +536,11 @@ public class MUPerformanceRateController {
 			@RequestParam(value="accountID", required=true) String accountID,
 			@RequestParam(value="providerId", required=true) int providerId) throws Exception{
 		EMRResponseBean emrResponseBean=new EMRResponseBean();
+		List<MIPSPerformanceBean> performanceBean=new ArrayList<MIPSPerformanceBean>();
+		performanceBean=measureService.getAttObjsAndOrderIt(providerId, reportingYear,performanceBean);
 		String sharedPath=sharedFolderBean.getSharedFolderPath().get(TennantContextHolder.getTennantId()).toString();
 		List<MacraProviderQDM> providerInfo = providerConfService.getCompleteProviderInfo(providerId,reportingYear);
-		String file=performanceService.getACIJSON(reportingYear,providerId,providerInfo,sharedPath);
+		String file=performanceService.getACIJSON(reportingYear,providerId,providerInfo,performanceBean,sharedPath);
 		
 		emrResponseBean.setData(file.toString());
 		return emrResponseBean;
