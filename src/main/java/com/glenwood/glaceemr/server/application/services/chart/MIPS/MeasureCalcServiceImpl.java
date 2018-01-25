@@ -1151,11 +1151,11 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				}else if(measureId.equals("ACI_TRANS_MR_1") || measureId.equals("ACI_HIE_3")){
 					cmsIdNTitle = measureId.concat("&&&Medication Reconcilation");						
 				}else{
-					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId,reportingYear);
 				}
 				
 			}else{
-				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId,reportingYear);
 				String submissionMethod = bringSubmissionMethod(reportingYear);
 				resultObject.setSubmissionMethod(submissionMethod);
 				addPointsAndPriorityStatus(reportingYear,measureId, accountId, resultObject);
@@ -1233,7 +1233,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	@Override
 	public List<MIPSPerformanceBean> getMeasureRateReportByNPI(int providerId, String accountId, String configuredMeasures,boolean isACIReport, boolean isOrderBy,Integer reportingYear){
 		String npiId = getNPIForProvider(providerId);
-
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<MIPSPerformanceBean> cq = builder.createQuery(MIPSPerformanceBean.class);
 		Root<MacraMeasuresRate> root = cq.from(MacraMeasuresRate.class);
@@ -1312,7 +1311,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				}
 				
 			}else{
-				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId,reportingYear);
 				String submissionMethod = bringSubmissionMethod(reportingYear);
 				resultObject.setSubmissionMethod(submissionMethod);
 				addPointsAndPriorityStatus(reportingYear,measureId, accountId, resultObject);
@@ -1543,7 +1542,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					}
 					
 				}else{
-					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId,reportingYear);
 					String submissionMethod = bringSubmissionMethod(reportingYear);
 					resultObject.setSubmissionMethod(submissionMethod);
 					addPointsAndPriorityStatus(reportingYear,measureId, accountId, resultObject);
@@ -1724,7 +1723,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					}
 					
 				}else{
-					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId,year);
 				}
 
 				DecimalFormat newFormat = new DecimalFormat("#0.00");
@@ -1870,7 +1869,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 	}
 	
 	
-	private String getCMSIdAndTitle(String measureId, String accountId){
+	private String getCMSIdAndTitle(String measureId, String accountId,Integer year){
 
 		String result = "";
 
@@ -1878,11 +1877,11 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 			String sharedFolderPath = sharedFolderBean.getSharedFolderPath().get(accountId).toString();
 
-			String jsonFolder = sharedFolderPath+File.separator+"ECQM"+File.separator;
+			String jsonFolder = sharedFolderPath+File.separator+"ECQM"+File.separator+year+File.separator;
 
 			File file = new File(jsonFolder+measureId+".json");
 
-			String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/eCQMServices/getECQMInfoById?ids="+measureId;
+			String apiUrl = "http://hub-icd10.glaceemr.com/DataGateway/eCQMServices/getECQMInfoById?ids="+measureId+"&reportingYear="+year;
 
 			if(file.exists()){
 
@@ -2304,11 +2303,11 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				}else if(measureId.equals("ACI_TRANS_MR_1") || measureId.equals("ACI_HIE_3")){
 					cmsIdNTitle = measureId.concat("&&&Medication Reconcilation");						
 				}else{
-					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+					cmsIdNTitle = getCMSIdAndTitle(measureId, accountId,reportingYear);
 				}
 				
 			}else if(!measureId.equals("0")){
-				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId);
+				cmsIdNTitle = getCMSIdAndTitle(measureId, accountId,reportingYear);
 				resultObject.setCmsId(cmsIdNTitle.split("&&&")[0]);
 				resultObject.setTitle(cmsIdNTitle.split("&&&")[1]);
 			}
@@ -2531,7 +2530,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			}else if(measureid.equals("ACI_TRANS_MR_1") || measureid.equals("ACI_HIE_3")){
 				CMSIdAndTitle = measureid.concat("&&&Medication Reconcilation");						
 			}else{
-				CMSIdAndTitle = getCMSIdAndTitle(measureid, accountId);
+				CMSIdAndTitle = getCMSIdAndTitle(measureid, accountId,2018);
 			}
 
 			cmsID=CMSIdAndTitle.split("&&&")[0];
@@ -3529,7 +3528,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					measureCriteria=CriteriaList.get(l);
 					totalPatientList= getPatienttoPrint(criteriaId,provId,measureId,tinId,measureCriteria);
 					if(totalPatientList.size()!=0){
-						measureName = getCMSIdAndTitle(measureId,accountId).split("&&&")[1];
+						measureName = getCMSIdAndTitle(measureId,accountId,year).split("&&&")[1];
 						PDFData+="<br><br><table class='break'><th><br>"+measureName+"</th></table>";
 						String accountNo = null, lastName = null, firstName = null,dob = null,gender = null,phoneNo = null,status=null;
 						PDFData+="<table class=patientlist width=100% cellpadding=5 cellspacing=5> <tr>  ";
@@ -3765,8 +3764,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		
 	}
 	@Override
-	public String getMIPSMeasureDetails(String measureId,String accountId) throws Exception {
-		String getMIPSData = getCMSIdAndTitle(measureId,accountId); 
+	public String getMIPSMeasureDetails(String measureId,String accountId,Integer year) throws Exception {
+		String getMIPSData = getCMSIdAndTitle(measureId,accountId,year); 
 		return getMIPSData;
 	}
 

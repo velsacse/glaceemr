@@ -219,7 +219,6 @@ public class QPPPerformanceController {
 	{
 	
 		EMRResponseBean response = new EMRResponseBean();
-		
 		List<EPMeasureBean> epMeasureStatus = new ArrayList<EPMeasureBean>();
 		
 		Writer writer = new StringWriter();
@@ -554,8 +553,9 @@ public class QPPPerformanceController {
 			//@RequestParam(value="encounterId", required=false) int encounterId,
 			//@RequestParam(value="providerId", required=false) int providerId,
 			@RequestParam(value="accountId", required=false) String accountId,
-			@RequestParam(value="measureId", required=true) String measureId) throws Exception{
-		String resData = measureService.getMIPSMeasureDetails(measureId,accountId);
+			@RequestParam(value="measureId", required=true) String measureId,
+			@RequestParam(value="year", required=true) Integer year) throws Exception{
+		String resData = measureService.getMIPSMeasureDetails(measureId,accountId,year);
 		EMRResponseBean response = new EMRResponseBean();
 		response.setData(resData);
 		return response;

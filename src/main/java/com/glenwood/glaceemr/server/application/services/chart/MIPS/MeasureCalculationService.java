@@ -190,7 +190,7 @@ public interface MeasureCalculationService {
 	
 	String getMeasureValidationServer();
 
-	String getMIPSMeasureDetails(String measureId, String accountId) throws Exception;
+	String getMIPSMeasureDetails(String measureId, String accountId,Integer year) throws Exception;
 	
 	String generatePDFFile(GeneratePDFDetails generatePDFDetails,int provId, String measureid,String accountId, int criteriaId,String tinId,int criterias,boolean isNotMet) throws Exception;
 
