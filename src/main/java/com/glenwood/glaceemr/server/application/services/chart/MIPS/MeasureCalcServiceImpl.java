@@ -1349,12 +1349,21 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 					performanceRate =  Double.valueOf(newFormat.format(performanceRate));
 				}
 
+				if(measureId.equals("ACI_TRANS_PEA_1") || measureId.equals("ACI_TRANS_HIE_1"))
+				{
+					if(reportingRate > 0 && reportingRate%5 != 0)
+						score = (int) ((reportingRate / 5)+1);
+					else if(reportingRate > 0 && reportingRate%5 == 0)
+						score = (int) (reportingRate / 5);
+				}
+				else{
 				if(reportingRate > 0 && reportingRate%10 != 0){
-					score = (int) ((reportingRate / 10)+1);
+						score = (int) ((reportingRate / 10)+1);
 				}else if(reportingRate > 0 && reportingRate%10 == 0){
-					score = (int) (reportingRate / 10);
+						score = (int) (reportingRate / 10);
 				}else{
 					score = 0;
+				}
 				}
 
 				if((measureId.equals("ACI_HIE_1")) || (measureId.equals("ACI_PEA_1"))){
@@ -1582,12 +1591,21 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 					}
 
+					if(measureId.equals("ACI_TRANS_PEA_1") || measureId.equals("ACI_TRANS_HIE_1"))
+					{
+						if(reportingRate > 0 && reportingRate%5 != 0)
+							score = (int) ((reportingRate / 5)+1);
+						else if(reportingRate > 0 && reportingRate%5 == 0)
+							score = (int) (reportingRate / 5);
+					}
+					else{
 					if(reportingRate > 0 && reportingRate%10 != 0){
-						score = (int) ((reportingRate / 10)+1);
+							score = (int) ((reportingRate / 10)+1);
 					}else if(reportingRate > 0 && reportingRate%10 == 0){
-						score = (int) (reportingRate / 10);
+							score = (int) (reportingRate / 10);
 					}else{
 						score = 0;
+					}
 					}
 
 					if((measureId.equals("ACI_HIE_1")) || (measureId.equals("ACI_PEA_1"))){
