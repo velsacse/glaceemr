@@ -88,6 +88,8 @@ public class ScreeningsServiceImpl implements ScreeningsService{
 				root.get(RiskAssessment_.riskAssessmentResultValue),
 				root.get(RiskAssessment_.riskAssessmentResultDescription),
 				root.get(RiskAssessment_.riskAssessmentResultCode),
+				root.get(RiskAssessment_.riskAssessmentOrderedBy),
+				root.get(RiskAssessment_.riskAssessmentOrderedOn),
 				root.get(RiskAssessment_.riskAssessmentDate),
 				root.get(RiskAssessment_.riskAssessmentScreeningName),
 				root.get(RiskAssessment_.riskAssessmentScreeningCode),
@@ -191,6 +193,8 @@ public class ScreeningsServiceImpl implements ScreeningsService{
 			riskAssessment.setRiskAssessmentResultValue(riskAssessmentBean.getRiskAssessmentResultValue());
 			riskAssessment.setRiskAssessmentResultDescription(riskAssessmentBean.getRiskAssessmentResultDescription());
 			riskAssessment.setRiskAssessmentResultCode(riskAssessmentBean.getRiskAssessmentResultCode());
+			riskAssessment.setRiskAssessmentOrderedBy(riskAssessmentBean.getRiskAssessmentOrderedBy());
+			riskAssessment.setRiskAssessmentOrderedOn(riskAssessmentRepository.findCurrentTimeStamp());
 			riskAssessment.setRiskAssessmentDate(riskAssessmentRepository.findCurrentTimeStamp());
 			riskAssessment.setRiskAssessmentScreeningName(riskAssessmentBean.getRiskAssessmentScreeningName());
 			riskAssessment.setRiskAssessmentScreeningCode(riskAssessmentBean.getRiskAssessmentScreeningCode());

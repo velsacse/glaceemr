@@ -128,8 +128,23 @@ public class RiskAssessment {
 
 	@Column(name="risk_assessment_result_value_units")
 	private String riskAssessmentResultValueUnits;
+	
+	@Column(name="risk_assessment_screening_id")
+	private Integer riskAssessmentScreeningId;
+	
+	@Column(name="risk_assessment_screening_name")
+	private String riskAssessmentScreeningName;
 
-	@Column(name="risk_assessment_result_screening_name")
+	@Column(name="risk_assessment_screening_code")
+	private String riskAssessmentScreeningCode;
+
+	@Column(name="risk_assessment_screening_code_system")
+	private String riskAssessmentScreeningCodeSystem;
+	
+	@Column(name="risk_assessment_screening_code_system_oid")
+	private String riskAssessmentScreeningCodeSystemOid;
+	
+/*	@Column(name="risk_assessment_result_screening_name")
 	private String riskAssessmentScreeningName;
 
 	@Column(name="risk_assessment_result_screening_code")
@@ -142,7 +157,7 @@ public class RiskAssessment {
 	private String riskAssessmentScreeningCodeSystemOid;
 	
 	@Column(name="risk_assessment_result_screening_id")
-	private Integer riskAssessmentScreeningId;
+	private Integer riskAssessmentScreeningId;*/
 	
 	public Integer getRiskAssessmentId() {
 		return riskAssessmentId;

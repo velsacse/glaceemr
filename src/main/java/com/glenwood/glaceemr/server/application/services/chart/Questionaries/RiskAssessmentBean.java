@@ -50,6 +50,7 @@ public class RiskAssessmentBean{
 			Integer riskAssessmentStatus,String riskAssessmentNotes,
 			Integer riskAssessmentCreatedBy,Date riskAssessmentCreatedOn,
 			Integer riskAssessmentResultValue,String riskAssessmentResultDescription,String riskAssessmentResultCode,
+			Integer riskAssessmentOrderedBy,Date  riskAssessmentOrderedOn,
 			Date riskAssessmentDate,String riskAssessmentScreeningName,
 			String riskAssessmentScreeningCode,	String riskAssessmentScreeningCodeSystem,
 			String riskAssessmentScreeningCodeSystemOid,Integer riskAssessmentScreeningId) {
@@ -68,6 +69,8 @@ public class RiskAssessmentBean{
 		this.riskAssessmentResultValue = riskAssessmentResultValue;
 		this.riskAssessmentResultDescription = riskAssessmentResultDescription;
 		this.riskAssessmentResultCode = riskAssessmentResultCode;
+		this.riskAssessmentOrderedBy = riskAssessmentOrderedBy;
+		this.riskAssessmentOrderedOn = riskAssessmentOrderedOn==null?null:timeFormat.format(riskAssessmentOrderedOn);
 		this.riskAssessmentDate = riskAssessmentDate==null?null:timeFormat.format(riskAssessmentDate);
 		this.riskAssessmentScreeningName = riskAssessmentScreeningName;
 		this.riskAssessmentScreeningCode = riskAssessmentScreeningCode;
