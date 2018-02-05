@@ -1,5 +1,6 @@
 package com.glenwood.glaceemr.server.application.services.chart.admission;
 
+import java.sql.Date;
 import java.util.List;
 
 import org.json.JSONException;
@@ -15,6 +16,8 @@ public interface AdmissionService  {
 	Admission getAdmission(Integer patientId);
 
 	String dischargePatient(Integer patientId,Integer loginId,Integer userId);
+	
+	String dischargePatientDetails(Integer patientId,Integer loginId,Integer userId, String DischargeDate, String dispositionvalue);
 	
 	Admission getPastAdmission(Integer admissionId);
 

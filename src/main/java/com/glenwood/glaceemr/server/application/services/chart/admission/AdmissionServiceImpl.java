@@ -563,9 +563,51 @@ public class AdmissionServiceImpl implements AdmissionService {
 				}
 			}
 		}
-		dischargePatient(dataJson.getPatientId(),dataJson.getLoginId(),dataJson.getUserId());
-		
+		dischargePatientDetails(dataJson.getPatientId(),dataJson.getLoginId(),dataJson.getUserId(), dataJson.getDischargeDate(),dataJson.getDispositionvalue());
 	}
+	
+	@Override
+	public String dischargePatientDetails(Integer patientId, Integer loginId,Integer userId, String date, String dispositionvalue) {
+		
+		try {
+			
+			SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+			Date disdate=null;
+
+			try {
+				disdate = format.parse(date);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+
+			java.sql.Date dischargeDate = new java.sql.Date(disdate.getTime());
+			Admission admiss=getAdmission(patientId);
+			if(admiss != null){
+				admiss.setAdmissionDischargedDate(dischargeDate);
+				admiss.setAdmissionDischargeDocId(userId);
+				admiss.setAdmissionStatus(2);
+				admiss.setadmissionDischargeDisposition(dispositionvalue);
+				admissionRepository.saveAndFlush(admiss);
+				
+				
+				//update admission episode status to 1 on discharge
+				PatientEpisode patEpisode=null;
+				if((patEpisode = getPatientEpisodebyEpisodeId(admiss.getAdmissionEpisode()))!=null){
+					patEpisode.setPatientEpisodeStatus(1);
+					patEpisode.setPatientEpisodeModifiedBy(loginId);
+					patEpisode.setPatientEpisodeModifiedDate(new Timestamp(disdate.getTime()));
+					patientEpisodeRepository.saveAndFlush(patEpisode);
+				}
+			}
+
+			return "success";
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "failure";
+		}
+	}
+	
 	
 	private List<PatientAdmission> getPatientAdmission(Integer admissionId){
 		return patientAdmissionRepository.findAll(AdmissionSpecification.byPatientAdmissionId(admissionId));

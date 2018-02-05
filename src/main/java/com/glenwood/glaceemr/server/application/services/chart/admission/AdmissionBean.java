@@ -17,6 +17,8 @@ public class AdmissionBean {
 	Integer roomNo;
 	Integer blockNo;
 	String notes;
+	String dischargeDate;
+	String dispositionvalue; 
 	
 	public Integer getAdmissionId() {
 		return admissionId;
@@ -107,6 +109,20 @@ public class AdmissionBean {
 	}
 	public void setAdmissionTime(String admissionTime) {
 		this.admissionTime = admissionTime;
+	}
+	public String getDischargeDate() {
+		return dischargeDate;
+	}
+	public void setDischargeDate(String dischargeDate) {
+		this.dischargeDate = dischargeDate;
+	}
+	public String getDispositionvalue() {
+		return dispositionvalue;
+		
+	}
+	public void setDispositionvalue(String dispositionvalue) {
+		this.dispositionvalue = dispositionvalue;
+		
 	}
 	
 }

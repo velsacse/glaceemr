@@ -198,6 +198,9 @@ public class Admission implements Serializable{
 	@Column(name="admission_time")
 	private String admissionTime;
 	
+	@Column(name="admission_discharge_disposition")
+	private String admissionDischargeDisposition;
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "admission_doctor_id", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
 	private EmployeeProfile empProfile;
@@ -743,5 +746,12 @@ public class Admission implements Serializable{
 	public void setAdmissionTime(String admissionTime) {
 		this.admissionTime = admissionTime;
 	}	
+	public void setadmissionDischargeDisposition(String admissionDischargeDisposition) {
+		this.admissionDischargeDisposition = admissionDischargeDisposition;
+	}	
+	public String getadmissionDischargeDisposition() {
+		return admissionDischargeDisposition;
+	}
+	
 
 }
