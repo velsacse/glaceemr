@@ -439,6 +439,7 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 				root.get(CurrentMedication_.currentMedicationStartDate),
 				root.get(CurrentMedication_.currentMedicationIsOverridden),
 				root.get(CurrentMedication_.currentMedicationMedInternalRootSource),
+				root.get(CurrentMedication_.currentMedicationPrescribedBy),
 				root.get(CurrentMedication_.currentMedicationNdcCode),
 				currentMedStatusJoin.get(MedStatus_.medStatusName),
 				encChartJoin.get(Chart_.chartId),
@@ -454,7 +455,6 @@ public class CurrentMedicationServiceImp implements CurrentMedicationService{
 			eachObj.setUnits("");
 			eachObj.setToprint(false);
 			eachObj.setMedfrom(1);
-			eachObj.setProvider_name("");
 			eachObj.setDxforrx("");
 			eachObj.setAddi("");
 			eachObj.setTrans_mode(0);

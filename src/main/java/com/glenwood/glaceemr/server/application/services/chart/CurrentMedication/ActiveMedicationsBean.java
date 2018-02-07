@@ -596,7 +596,7 @@ public  ActiveMedicationsBean(Integer prescid,Integer Encounterid,Integer status
 	 this.iseprescription=iseprescription;
 }
 	
-public  ActiveMedicationsBean(Integer prescid,Integer Encounterid,Integer statusid ,Boolean ischronic,String orderBy ,String orderdate,String modifiedby ,String modifieddate ,String number ,String qty ,String drugname ,String dosagename,String unitname,String refills ,String route ,String duration ,String lotno,String expdate,String days,String sch1 ,String sch2 ,String form ,String comments,Integer rootid,Boolean allowsubstitution ,Date startdate,Boolean overriddenflag,String interal_source,String ndc_code,String status,Integer chartid,Short typeid,Boolean uncodedmed,String external_source_info,String rxnormcode){
+public  ActiveMedicationsBean(Integer prescid,Integer Encounterid,Integer statusid ,Boolean ischronic,String orderBy ,String orderdate,String modifiedby ,String modifieddate ,String number ,String qty ,String drugname ,String dosagename,String unitname,String refills ,String route ,String duration ,String lotno,String expdate,String days,String sch1 ,String sch2 ,String form ,String comments,Integer rootid,Boolean allowsubstitution ,Date startdate,Boolean overriddenflag,String interal_source,String provider_name,String ndc_code,String status,Integer chartid,Short typeid,Boolean uncodedmed,String external_source_info,String rxnormcode){
 	
 	 this.prescid=prescid;
 	 this.Encounterid=Encounterid;
@@ -626,6 +626,7 @@ public  ActiveMedicationsBean(Integer prescid,Integer Encounterid,Integer status
 	 this.startdate=startdate; 
 	 this.overriddenflag=overriddenflag;
 	 this.interal_source=interal_source;
+	 this.provider_name=provider_name;
 	 this.ndc_code=ndc_code;
 	 this.status=status;
 	 this.chartid=chartid;
@@ -634,5 +635,6 @@ public  ActiveMedicationsBean(Integer prescid,Integer Encounterid,Integer status
 	 this.external_source_info=external_source_info;
 	 this.rxnormcode=rxnormcode;
 }
+
 
 }

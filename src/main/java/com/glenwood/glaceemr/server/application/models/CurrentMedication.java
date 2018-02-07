@@ -189,6 +189,9 @@ public class CurrentMedication {
 	@Column(name="current_medication_med_internal_root_source")
 	private String currentMedicationMedInternalRootSource;
 
+	@Column(name="current_medication_prescribed_by")
+	private  String currentMedicationPrescribedBy;
+	
 	@Column(name="current_medication_inactivated_by")
 	private Integer currentMedicationInactivatedBy;
 
@@ -591,6 +594,14 @@ public class CurrentMedication {
 
 	public void setCurrentMedicationRxnormCode(String currentMedicationRxnormCode) {
 		this.currentMedicationRxnormCode = currentMedicationRxnormCode;
+	}
+
+	public String getCurrentMedicationPrescribedBy() {
+		return currentMedicationPrescribedBy;
+	}
+
+	public void setCurrentMedicationPrescribedBy(String currentMedicationPrescribedBy) {
+		this.currentMedicationPrescribedBy = currentMedicationPrescribedBy;
 	}
 
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
