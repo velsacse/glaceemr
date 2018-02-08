@@ -142,4 +142,10 @@ public class MacraProviderConfiguration implements Serializable{
 	@NotFound(action=NotFoundAction.IGNORE)
 	@JoinColumn(name="macra_provider_configuration_reporting_year", referencedColumnName="macra_configuration_year" , insertable=false, updatable=false)
 	private MacraConfiguration macraConf;
+	
+	@ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+	@JsonManagedReference
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JoinColumn(name="macra_provider_configuration_provider_id", referencedColumnName="staff_pin_number_details_profileid" , insertable=false, updatable=false)
+	private StaffPinNumberDetails staffPinNumberDetails;
 }

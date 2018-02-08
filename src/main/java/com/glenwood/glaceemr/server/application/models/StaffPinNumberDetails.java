@@ -1,12 +1,21 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "staff_pin_number_details")
@@ -111,7 +120,9 @@ public class StaffPinNumberDetails {
 	@Column(name="staff_pin_number_details_smedino")
 	private String staff_pin_number_details_smedino;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "staff_pin_number_details_profileid", referencedColumnName = "macra_provider_configuration_provider_id", insertable = false, updatable = false)
-    private MacraProviderConfiguration macraProviderConfiguration;
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="staffPinNumberDetails")
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@JsonManagedReference
+	List<MacraProviderConfiguration> macraProviderConfiguration;
+	
 }

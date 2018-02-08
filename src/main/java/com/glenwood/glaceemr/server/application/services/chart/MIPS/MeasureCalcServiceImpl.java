@@ -245,7 +245,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	@Override
 	public Request getQDMRequestObject(String accountId,Boolean considerProvider,int patientID, int providerId, HashMap<String, HashMap<String, String>> codeListForQDM, Date repStartDate, Date repEndDate) {
-
 		Request finalReqObject = new Request();
 
 		Writer writer = new StringWriter();
@@ -310,6 +309,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 			if(codeListForQDM.containsKey("Risk Category/Assessment")){
 				List<Assessment> riskAssessment =measureUtils.getAssessmentFromCNM(clinicalDataQDM,measureUtils.getCodeListByCategory(codeListForQDM, "Risk Category/Assessment"));
+				requestObj.setRiskAssessmentList(riskAssessment);
+			}
+			else if(codeListForQDM.containsKey("Assessment")){
+				List<Assessment> riskAssessment =measureUtils.getAssessmentFromCNM(clinicalDataQDM,measureUtils.getCodeListByCategory(codeListForQDM, "Assessment"));
 				requestObj.setRiskAssessmentList(riskAssessment);
 			}
 
