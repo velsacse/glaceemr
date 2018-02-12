@@ -3,6 +3,7 @@ package com.glenwood.glaceemr.server.application.specifications;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -346,6 +347,26 @@ public class PortalSettingsSpecification {
 				Predicate predicate=cq.where(cb.and(cb.isNotNull(root.get(EmployeeProfile_.empProfileEmpid)),cb.equal(root.get(EmployeeProfile_.empProfileIsActive), true),cb.not(cb.like(cb.lower(empName), "%demo%")), cb.not(cb.like(cb.lower(empName), "%test%")),exprToId.in(-1))).orderBy(cb.asc(root.get(EmployeeProfile_.empProfileFullname))).getRestriction();
 					
 				return predicate;
+			}
+			   
+		};
+	   }
+	
+	/**
+	 * @return portal lab results configuration
+	 */	
+	public static Specification<InitialSettings> getPortalLabResultsConfig()
+	   {
+		   return new Specification<InitialSettings>() {
+
+			@Override
+			public Predicate toPredicate(Root<InitialSettings> root,
+					CriteriaQuery<?> cq, CriteriaBuilder cb) {
+				
+				Predicate practicePredicate=cq.where(cb.equal(root.get(InitialSettings_.initialSettingsOptionType), 2)).getRestriction();
+				Predicate sharedFolderPredicate = cq.where(cb.equal(root.get(InitialSettings_.initialSettingsOptionName),"Lab result status to show in Patient Portal")).getRestriction();
+				
+				return cb.and(practicePredicate,sharedFolderPredicate);
 			}
 			   
 		};

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.glenwood.glaceemr.server.application.models.FileDetails;
 import com.glenwood.glaceemr.server.application.models.ChartStatus;
+import com.glenwood.glaceemr.server.application.models.InitialSettings;
 import com.glenwood.glaceemr.server.application.models.LabEntries;
 import com.glenwood.glaceemr.server.application.models.LabEntriesParameter;
 import com.glenwood.glaceemr.server.application.models.LabParameterCode;
@@ -28,6 +29,7 @@ import com.glenwood.glaceemr.server.application.repositories.FileNameRepository;
 import com.glenwood.glaceemr.server.application.repositories.ChartStatusRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7ResultInboxRepository;
 import com.glenwood.glaceemr.server.application.repositories.Hl7UnmappedResultsRepository;
+import com.glenwood.glaceemr.server.application.repositories.InitialSettingsRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabEntriesParameterRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabEntriesRepository;
 import com.glenwood.glaceemr.server.application.repositories.LabParameterCodeRepository;
@@ -37,6 +39,7 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEn
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.portal.portalDocuments.SharedFolderUtil;
 import com.glenwood.glaceemr.server.application.specifications.PortalLabResultsSpecification;
+import com.glenwood.glaceemr.server.application.specifications.PortalSettingsSpecification;
 
 @Service
 public class PortalLabResultsServiceImpl implements PortalLabResultsService{
@@ -87,10 +90,20 @@ public class PortalLabResultsServiceImpl implements PortalLabResultsService{
 	@Autowired
 	HttpServletRequest request;
 	
+	@Autowired
+	InitialSettingsRepository initialSettingsRepository;
+	
 	@Override
 	public List<LabEntries> getPatientLabResultsList(int patientId, int chartId, int pageOffset, int pageIndex) {
 		
-		List<LabEntries> labResultsList=labEntriesRepository.findAll(PortalLabResultsSpecification.getPatientLabResults(patientId, chartId), PortalLabResultsSpecification.createPortalLabResultListRequestByDescDate(pageIndex, pageOffset)).getContent();
+		InitialSettings settings = initialSettingsRepository.findOne(PortalSettingsSpecification.getPortalLabResultsConfig());
+		
+		int statusToShow = 2;
+		
+		if(settings!=null)
+			statusToShow = Integer.parseInt(settings.getInitialSettingsOptionValue());
+		
+		List<LabEntries> labResultsList=labEntriesRepository.findAll(PortalLabResultsSpecification.getPatientLabResults(patientId, chartId, statusToShow), PortalLabResultsSpecification.createPortalLabResultListRequestByDescDate(pageIndex, pageOffset)).getContent();
 		
 		auditTrailSaveService.LogEvent(AuditTrailEnumConstants.LogType.GLACE_LOG,AuditTrailEnumConstants.LogModuleType.PATIENTPORTAL,
 				AuditTrailEnumConstants.LogActionType.READ,1,AuditTrailEnumConstants.Log_Outcome.SUCCESS,"Patient with:"+patientId+"requested patient lab results list",-1,

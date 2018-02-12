@@ -51,7 +51,7 @@ public class PortalLabResultsSpecification {
 	 */
 
 
-	public static Specification<LabEntries> getPatientLabResults(final int patientId, final int chartId) {
+	public static Specification<LabEntries> getPatientLabResults(final int patientId, final int chartId, final int statusToShow) {
 		return new Specification<LabEntries>() {
 
 			@Override
@@ -63,7 +63,13 @@ public class PortalLabResultsSpecification {
 					root.fetch(LabEntries_.encounter, JoinType.LEFT);
 				}
                 Join<LabEntries, LabDescription> joinLab = root.join(LabEntries_.labDescriptionTable,JoinType.INNER);
-				Predicate statusPredicate=cb.not(root.get(LabEntries_.labEntriesTestStatus).in(1,2,5,7,8));
+               
+                Predicate statusPredicate = null;
+                if(statusToShow == 1)
+                	statusPredicate=cb.not(root.get(LabEntries_.labEntriesTestStatus).in(1,2,7,8));
+                else
+                	statusPredicate=cb.not(root.get(LabEntries_.labEntriesTestStatus).in(1,2,3,7,8));
+				
 				Predicate typePredicate=cb.notEqual(joinLab.get(LabDescription_.labDescriptionTestcategoryType),3);
 				Predicate chartPredicate=cb.equal(root.get(LabEntries_.labEntriesChartid), chartId);
 
