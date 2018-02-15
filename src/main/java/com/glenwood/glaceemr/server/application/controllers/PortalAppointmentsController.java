@@ -185,7 +185,14 @@ public class PortalAppointmentsController {
 		
 		try {
 			responseBean.setSuccess(true);
-			responseBean.setData(portalAppointmentsService.getBookedSlots(resourceId, new Date(apptDate)));
+			System.out.println("apptDate= "+apptDate);
+			String s=apptDate;
+
+			String s1 = s.split("00:00:00")[0];
+			String s2 = s.split("00:00:00")[1];
+			String s3 = s2.split(" ")[2];
+			
+			responseBean.setData(portalAppointmentsService.getBookedSlots(resourceId, new Date(s1+" "+s3)));
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -214,7 +221,14 @@ public class PortalAppointmentsController {
 		
 		try {
 			responseBean.setSuccess(true);
-			responseBean.setData(portalAppointmentsService.getLockedSlots(resourceId, new Date(apptDate)));
+			System.out.println("apptDate= "+apptDate);
+			String s=apptDate;
+
+			String s1 = s.split("00:00:00")[0];
+			String s2 = s.split("00:00:00")[1];
+			String s3 = s2.split(" ")[2];
+			
+			responseBean.setData(portalAppointmentsService.getLockedSlots(resourceId, new Date(s1+" "+s3)));
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -326,7 +340,14 @@ public class PortalAppointmentsController {
 		
 		try {
 			responseBean.setSuccess(true);
-			responseBean.setData(portalAppointmentsService.getApptFreeSlotsByProviderIdAndDate(providerId, new Date(apptDate)));
+			System.out.println("apptDate= "+apptDate);
+			String s=apptDate;
+
+			String s1 = s.split("00:00:00")[0];
+			String s2 = s.split("00:00:00")[1];
+			String s3 = s2.split(" ")[2];
+
+			responseBean.setData(portalAppointmentsService.getApptFreeSlotsByProviderIdAndDate(providerId, new Date(s1+" "+s3)));
 			return responseBean;
 		} catch (Exception e) {
 			e.printStackTrace();
