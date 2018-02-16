@@ -76,7 +76,7 @@ public interface CarePlanService{
 	
 	Map<String, Object> getCarePlanPrint(Integer patientId,Integer encounterId,Integer episodeId);
 	
-	void addFrequentIntervention(String elementName,String snomed,Integer userId, Integer providerId, Integer isfrmconfig, String categoryType, String codeOid) throws Exception;
+	void addFrequentIntervention(String elementName,String snomed,Integer userId, Integer providerId, Integer isfrmconfig, String categoryType, String codeOid,String groupName) throws Exception;
 
 	List<Object> fetchFrequentInterventions(Integer userId, String categoryType);
 

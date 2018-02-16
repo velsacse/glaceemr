@@ -1,6 +1,8 @@
 package com.glenwood.glaceemr.server.application.controllers;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +18,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.CQMSpecification;
+import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.Category;
+import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.Code;
+import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.CodeSet;
+import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasure;
+import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.EMeasureUtils;
+import com.glenwood.glaceemr.server.application.Bean.macra.ecqm.Valueset;
 import com.glenwood.glaceemr.server.application.models.CarePlanConcern;
 import com.glenwood.glaceemr.server.application.models.CarePlanGoal;
 import com.glenwood.glaceemr.server.application.models.CarePlanIntervention;
@@ -27,6 +36,8 @@ import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEn
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.chart.MIPS.ConfigurationDetails;
+import com.glenwood.glaceemr.server.application.services.chart.MIPS.QPPConfigurationService;
 import com.glenwood.glaceemr.server.application.services.chart.careplan.CarePlanConcernBean;
 import com.glenwood.glaceemr.server.application.services.chart.careplan.CarePlanGoalBean;
 import com.glenwood.glaceemr.server.application.services.chart.careplan.CarePlanInterventionBean;
@@ -52,6 +63,9 @@ public class CarePlanController {
 	
 	@Autowired
 	HttpServletRequest request;
+	
+	@Autowired
+	QPPConfigurationService QppConfigurationService;
 	
 	/**
 	 * To get the list of concerns,goals,outcomes and recommendended Intervetion on initial load which belongs to the given patientId and encounterId
@@ -645,8 +659,9 @@ public class CarePlanController {
 			@RequestParam(value="providerId", required=true) Integer providerId,
 			@RequestParam(value="isfrmconfig", required=true) Integer isfrmconfig,
 			@RequestParam(value="categoryType", required=false) String categoryType,
+			@RequestParam(value="groupName", required=false) String groupName,
 			@RequestParam(value="codeOid", required=false) String codeOid) throws Exception{
-			carePlanService.addFrequentIntervention(elementName,snomed,userId,providerId,isfrmconfig,categoryType,codeOid);
+			carePlanService.addFrequentIntervention(elementName,snomed,userId,providerId,isfrmconfig,categoryType,codeOid,groupName);
 			List<Object> getFrequentList = carePlanService.fetchFrequentInterventions(userId,categoryType);
 			EMRResponseBean emrResponseBean = new EMRResponseBean();
 			emrResponseBean.setData(getFrequentList);
@@ -779,4 +794,98 @@ public class CarePlanController {
 		//	auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.CAREPLAN, LogActionType.VIEW, 0, Log_Outcome.SUCCESS, "successfully retrieved list of goals which belongs to the given PatientId", -1, request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
 		return listOfShrtImport;
 	}
+	
+	// TO Get MEASURES IDS
+		@RequestMapping(value = "/getFreqMeasureIds", method = RequestMethod.GET)
+		@ResponseBody
+		public EMRResponseBean getFrequentMeasureIds(
+				@RequestParam(value = "providerId", required = true) Integer providerId,
+				@RequestParam(value="accountId", required=true) String accountId,
+				@RequestParam(value = "year", required = true) Integer year,
+				@RequestParam(value = "sharedFolder", required = true) String  sharedFolder)throws Exception {
+			EMRResponseBean result=new EMRResponseBean();
+			EMeasureUtils utils = new EMeasureUtils();
+			List<ConfigurationDetails> indiMeasureids=QppConfigurationService.getMeasureIds(providerId,year);
+			String measureId="";
+			for(int i=0;i<indiMeasureids.size();i++){
+				measureId += indiMeasureids.get(i).getQualityMeasuresProviderMappingMeasureId()+",";
+			}
+			//String sharedPath= "/home/software/Documents/shared";
+			List<EMeasure> emeasure = utils.getMeasureBeanDetails(year,measureId, sharedFolder,accountId);
+				for(int i=0 ;i<emeasure.size();i++){
+					CQMSpecification specification = emeasure.get(i).getSpecification();
+					HashMap<String, Category> qdmCatagory = specification.getQdmCategory();
+					List<Object>  cmsIdsList=new ArrayList<Object>();
+					if(qdmCatagory.containsKey("Intervention")){
+					Map<String, Object> cmsIdsListObject=new HashMap<String, Object>();
+					try {
+						cmsIdsListObject.put("CmsId", emeasure.get(i).getCmsId().toString());
+						cmsIdsListObject.put("Id", emeasure.get(i).getId());
+						cmsIdsList.add(cmsIdsListObject);
+					}catch (Exception e) {
+					}
+				}
+				result.setData(cmsIdsList);
+			}
+			return result;
+		}
+		
+		@RequestMapping(value = "/getFreqMeasureDescription", method = RequestMethod.GET)
+		@ResponseBody
+		public EMRResponseBean getFrequentMeasureDescription(
+				@RequestParam(value = "providerId", required = true) Integer providerId,
+				@RequestParam(value="accountId", required=true) String accountId,
+				@RequestParam(value = "year", required = true) Integer year,
+				@RequestParam(value = "sharedFolder", required = true) String  sharedFolder) throws Exception {
+			EMRResponseBean result=new EMRResponseBean();
+			EMeasureUtils utils = new EMeasureUtils();
+			List<ConfigurationDetails> indiMeasureids=QppConfigurationService.getMeasureIds(providerId,year);
+			String measureid="";
+			for(int i=0;i<indiMeasureids.size();i++){
+				measureid += indiMeasureids.get(i).getQualityMeasuresProviderMappingMeasureId()+",";
+			}
+		//	String sharedPath= "/home/software/Documents/shared";
+			List<EMeasure> emeasure = utils.getMeasureBeanDetails(year,measureid, sharedFolder,accountId);
+			for(int p=0 ;p<emeasure.size();p++){
+				CQMSpecification specification = emeasure.get(p).getSpecification();
+				HashMap<String, Category> qdmCatagory = specification.getQdmCategory();
+				List<Object> code=new ArrayList<Object>();
+				List<Object> description=new ArrayList<Object>();
+				List<Object> name=new ArrayList<Object>();
+
+				HashMap<String, HashMap<String, List<Object>>> interventionList = new HashMap<String, HashMap<String,List<Object>>>();
+				HashMap<String, List<Object>> interventionCodeList;
+				if(qdmCatagory.containsKey("Intervention")){
+					
+				Category interventionCategory = qdmCatagory.get("Intervention");
+				List<Valueset> valueSet = interventionCategory.getValueSet();
+				for(int i=0;i<valueSet.size();i++)
+				{
+					interventionCodeList = new HashMap<String, List<Object>>();
+					code=new ArrayList<Object>();
+					description=new ArrayList<Object>();
+					name=new ArrayList<Object>();
+					name.add(valueSet.get(i));
+					List<CodeSet> codeSetList=valueSet.get(i).getCodeSetList();
+					for(int j=0;j<codeSetList.size();j++)
+					{
+						if(codeSetList.get(j).getCodeSystem().contains("SNOMEDCT")){
+							List<Code> codeList=codeSetList.get(j).getCodeList();
+							for(int k=0;k<codeList.size();k++){
+								code.add(codeList.get(k));
+								description.add(codeList.get(k));
+							}
+						}
+					}
+					interventionCodeList.put("Code", code);
+					interventionCodeList.put("description", description);
+					interventionCodeList.put("name", name);
+					interventionList.put(valueSet.get(i).getName(), interventionCodeList);
+				}
+				result.setData(interventionList);
+			}
+		}
+			return result;
+		}
+
 }

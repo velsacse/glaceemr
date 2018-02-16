@@ -802,7 +802,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 		listsMap.put("employeeList", fetchEmployeeList());
 		listsMap.put("lastVisitProgress",getLastVisitProgressStatus(patientId,encounterId,episodeId));
 		listsMap.put("recommIntervention", fetchRecommIntervention(patientId,encounterId,episodeId,"-1","-1"));
-		listsMap.put("reviewStatus", fetchCarePlanLog(patientId));
+		listsMap.put("reviewStatus", fetchCarePlanLog(patientId,new ArrayList<Integer>()));
 		listsMap.put("healthStatus", getCarePlanStatus(patientId, encounterId, episodeId));
 		listsMap.put("interventionShortcuts", fetchCarePlanInterventionShortcuts());
 		//listsMap.put("getCarePlanSummary",getCarePlanSummaryData(patientId,episodeId,encounterId));
@@ -945,7 +945,7 @@ public class CarePlanServiceImpl implements  CarePlanService  {
 				builder.coalesce(cnmJoin.get(CNMCodeSystem_.cnmCodeSystemCode),""),
 				builder.coalesce(cnmJoin.get(CNMCodeSystem_.cnmCodeSystemOid),""));
 		query.where(builder.equal(root.get(VitalsParameter_.vitalsParameterIsactive),true),
-				root.get(VitalsParameter_.vitalsParameterGwId).in(GwIDs));
+		root.get(VitalsParameter_.vitalsParameterGwId).in(GwIDs),builder.equal(cnmJoin.get(CNMCodeSystem_.cnmCodeSystemOid),"2.16.840.1.113883.6.1"));
 		query.orderBy(builder.asc(root.get(VitalsParameter_.vitalsParameterName)));
 		List<Object[]> vitals=entityManager.createQuery(query).getResultList();
 		List<Object>  parsedVitalParameters=new ArrayList<Object>();
@@ -2268,17 +2268,39 @@ public void deleteCarePlanRecommIntervention(Integer patientId, Integer encounte
 @Override
 public List<Object[]> saveCarePlanLog(Integer patientId,Integer userId,Boolean reviewStatus) {
 	// TODO Auto-generated method stub
-	CarePlanLog carePlanLog = new CarePlanLog();
-	carePlanLog.setCarePlanlogPatientId(patientId);
-	carePlanLog.setCarePlanlogReviewedBy(userId);
-	carePlanLog.setCarePlanlogReviewedOn(carePlanLogRepository.findCurrentTimeStamp());
-	carePlanLog.setCarePlanlogReviewed(reviewStatus);
-	carePlanLogRepository.saveAndFlush(carePlanLog);
-	List<Object[]> carePlanLogList = fetchCarePlanLog(patientId);
+	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+	CriteriaQuery<CarePlanLog> cq = builder.createQuery(CarePlanLog.class);
+	Root<CarePlanLog> root = cq.from(CarePlanLog.class);
+	cq.where(builder.and(builder.equal(root.get(CarePlanLog_.carePlanlogPatientId),patientId),
+			builder.equal(builder.function("DATE", Date.class, root.get(CarePlanLog_.carePlanlogReviewedOn)), new Date()),
+			builder.equal(root.get(CarePlanLog_.carePlanlogReviewedBy), userId)));
+	List<CarePlanLog> resultSet = entityManager.createQuery(cq).getResultList();
+	List<Integer> affectedLogId=new ArrayList<>();
+	if(resultSet.size()>0) {
+		CriteriaUpdate<CarePlanLog> update = builder.createCriteriaUpdate(CarePlanLog.class);
+		Root<CarePlanLog> rootUpdate = update.from(CarePlanLog.class);
+		update.set(rootUpdate.get(CarePlanLog_.carePlanlogReviewedBy), userId);
+		update.set(rootUpdate.get(CarePlanLog_.carePlanlogReviewedOn), carePlanLogRepository.findCurrentTimeStamp());
+		update.where(builder.and(builder.equal(rootUpdate.get(CarePlanLog_.carePlanlogPatientId),patientId),
+				builder.equal(builder.function("DATE", Date.class, rootUpdate.get(CarePlanLog_.carePlanlogReviewedOn)), new Date()),
+				builder.equal(root.get(CarePlanLog_.carePlanlogReviewedBy), userId)));	
+		this.entityManager.createQuery(update).executeUpdate();
+	}
+	
+	else {
+		CarePlanLog carePlanLog = new CarePlanLog();
+		carePlanLog.setCarePlanlogPatientId(patientId);
+		carePlanLog.setCarePlanlogReviewedBy(userId);
+		carePlanLog.setCarePlanlogReviewedOn(carePlanLogRepository.findCurrentTimeStamp());
+		carePlanLog.setCarePlanlogReviewed(reviewStatus);
+		carePlanLogRepository.saveAndFlush(carePlanLog);
+		affectedLogId.add(carePlanLog.getCarePlanLogId());
+	}
+	List<Object[]> carePlanLogList = fetchCarePlanLog(patientId,affectedLogId);
 	return carePlanLogList;
 }
 
-public List<Object[]> fetchCarePlanLog(Integer patientId) {
+public List<Object[]> fetchCarePlanLog(Integer patientId, List<Integer> alertId) {
 	CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 	CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
 	Root<CarePlanLog> root = cq.from(CarePlanLog.class);
@@ -2286,10 +2308,12 @@ public List<Object[]> fetchCarePlanLog(Integer patientId) {
 	cq.multiselect(root.get(CarePlanLog_.carePlanlogPatientId),
 			root.get(CarePlanLog_.carePlanlogReviewedBy),
 			root.get(CarePlanLog_.carePlanlogReviewedOn),
-			empJoin.get(EmployeeProfile_.empProfileFullname));
+			empJoin.get(EmployeeProfile_.empProfileFullname),
+			root.get(CarePlanLog_.carePlanLogId));
 	cq.where(builder.equal(root.get(CarePlanLog_.carePlanlogPatientId),patientId));
 	cq.orderBy(builder.desc(root.get(CarePlanLog_.carePlanLogId)));
 	List<Object[]> carePlanLogList = entityManager.createQuery(cq).getResultList();
+	carePlanLogList.add(alertId.toArray());
 	return carePlanLogList;
 }
 
@@ -2299,7 +2323,7 @@ public Map<String, Object> getCarePlanPrint(Integer patientId,
 	// TODO Auto-generated method stub
 	Map<String,Object> listsMap=new HashMap<String,Object>();
 	listsMap.put("concernsList", fetchCarePlanConcerns(-1,patientId,-1,episodeId,encounterId,"-1","-1"));
-	listsMap.put("logList", fetchCarePlanLog(patientId));
+	listsMap.put("logList", fetchCarePlanLog(patientId,new ArrayList<Integer>()));
 	listsMap.put("goalList", fetchCarePlanGoals(-1, -1, patientId, encounterId,episodeId,"-1","-1"));
 	listsMap.put("recommList",fetchRecommIntervention(patientId, encounterId, episodeId,"-1","-1"));
 	listsMap.put("healthStatus", getCarePlanStatus(patientId, encounterId, episodeId));
@@ -2307,7 +2331,7 @@ public Map<String, Object> getCarePlanPrint(Integer patientId,
 }
 @Override
 public void addFrequentIntervention(String elementName, String snomed,
-		Integer userId,Integer providerId, Integer isfrmconfig,String categoryType, String codeOid) throws Exception {
+		Integer userId,Integer providerId, Integer isfrmconfig,String categoryType, String codeOid,String groupName) throws Exception {
 	java.util.Date today =new java.util.Date();
 	FrequentInterventions freqIntervention = new FrequentInterventions();
 	freqIntervention.setFrequentinterventionsdescription(elementName);
@@ -2319,7 +2343,7 @@ public void addFrequentIntervention(String elementName, String snomed,
 		freqIntervention.setFrequentinterventionsuserid(userId);
 	freqIntervention.setFrequentinterventionsstatus(1);
 	if(isfrmconfig==1)
-		freqIntervention.setFrequentinterventionsgroup("-1");
+		freqIntervention.setFrequentinterventionsgroup(groupName);
 	else
 		freqIntervention.setFrequentinterventionsgroup("Others");
 	freqIntervention.setFrequentinterventionscreatedby(userId);
@@ -2336,11 +2360,9 @@ public List<Object> fetchFrequentInterventions(Integer userId, String categoryTy
 	List<Predicate> predicates = new ArrayList<>();
 	if(userId!=-1){
 		predicates.add(builder.equal(root.get(FrequentInterventions_.frequentinterventionsuserid), userId));
-		predicates.add(builder.equal(root.get(FrequentInterventions_.frequentinterventionscategory), categoryType));
-		cq.where(builder.and(predicates.toArray(new Predicate[predicates.size()])));
-	}/*else{
-		predicates=builder.equal(root.get(FrequentInterventions_.frequentinterventionsuserid), -1);
-	}*/
+	}
+	predicates.add(builder.equal(root.get(FrequentInterventions_.frequentinterventionscategory), categoryType));
+	cq.where(builder.and(predicates.toArray(new Predicate[predicates.size()])));
 	cq.multiselect(root.get(FrequentInterventions_.frequentinterventionsid),root.get(FrequentInterventions_.frequentinterventionscode),root.get(FrequentInterventions_.frequentinterventionsdescription),root.get(FrequentInterventions_.frequentinterventionsgroup));
 	cq.orderBy(builder.asc(root.get(FrequentInterventions_.frequentinterventionsgroup)),
 			builder.asc(root.get(FrequentInterventions_.frequentinterventionsdescription)));
