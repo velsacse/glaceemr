@@ -249,8 +249,9 @@ Root<Encounter> root = cq.from(Encounter.class);
 					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
 					builder.or(builder.equal(chartServiceJoin.get(ServiceDetail_.sdoctors), providerId),builder.equal(encounterChartJoin.get(Encounter_.encounter_service_doctor),providerId)),
 					builder.between(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)), startDate, endDate),
-					builder.equal(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)),chartServiceJoin.get(ServiceDetail_.serviceDetailDos))
-			};
+					builder.equal(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)),
+					builder.equal(encounterChartJoin.get(Encounter_.encounterType), 1)
+		};
 		
 		
 		cq.where(restrictions);
@@ -1177,7 +1178,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 	
 	public List<Procedure> getMedicationsReviewed(EntityManager em,Boolean considerProvider,int providerId,int patientId,Date date1,Date date2,ArrayList<Integer> officeVisitEncounters){
 		List<Procedure> reviewedVisits = new ArrayList<Procedure>();
-		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
         Root<Encounter> root = cq.from(Encounter.class);
@@ -1189,23 +1189,24 @@ Root<Encounter> root = cq.from(Encounter.class);
         Predicate byProvider = builder.equal(root.get(Encounter_.encounter_service_doctor), providerId);
         Predicate attest = builder.gt(builder.length(builder.trim(root.get(Encounter_.medicationAttestationStatus))), 0);
         Predicate inEncounters = root.get(Encounter_.encounterId).in(officeVisitEncounters);
+        Predicate byType =builder.equal(root.get(Encounter_.encounterType), 1);
         
         cq.multiselect(root.get(Encounter_.encounterDate),root.get(Encounter_.medicationAttestationStatus));
         
         if(considerProvider){
 
         	if(officeVisitEncounters.size() > 0){
-        		cq.where(date,attest,byProvider,inEncounters);
+        		cq.where(date,attest,byProvider,inEncounters,byType);
             }else{
-            	cq.where(date,attest,byProvider);
+            	cq.where(date,attest,byProvider,byType);
             }
         	
         }else{
 
         	if(officeVisitEncounters.size() > 0){
-            	cq.where(date,attest,inEncounters);
+            	cq.where(date,attest,inEncounters,byType);
         	}else{
-            	cq.where(date,attest);
+            	cq.where(date,attest,byType);
         	}
         	
         }
@@ -1664,7 +1665,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 		boolean result = false;
 		
 		try{
-			
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Boolean> cq = builder.createQuery(Boolean.class);
 			Root<PatientRegistration> root = cq.from(PatientRegistration.class);
@@ -1710,11 +1710,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 		cq.multiselect(root.get(Prescription_.rxname).alias("Medication"),
 				builder.coalesce(root.get(Prescription_.docPrescIsEPrescSent),0).alias("IsSentElectronically"));
 		
-		if(isGroup)
-			cq.where(byProviderId,byOrderedDate,byPatientId,byStatus);
-		else
-			cq.where(byOrderedDate,byPatientId,byStatus);
-		
+			if(isGroup)
+				cq.where(byProviderId,byOrderedDate,byPatientId,byStatus);
+			else
+				cq.where(byOrderedDate,byPatientId,byStatus);
+
 		List<Object[]> result=em.createQuery(cq).getResultList();
 		
 		for(i=0;i<result.size();i++){

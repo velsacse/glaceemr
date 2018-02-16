@@ -82,6 +82,34 @@ public class MIPSPerformanceBean {
 		this.numeratorCount=numeratorCount;
 		
 	}
+	public MIPSPerformanceBean(String tin,String measureId, int criteria, int reportingYear,
+			long ippCount, String ippPatientsList, long denominatorCount,
+			String denominatorPatientsList, long denominatorExclusionCount,
+			String denominatorExclusionPatientsList, long numeratorCount,
+			String numeratorPatientsList, long numeratorExclusionCount,
+			String numeratorExclusionPatientsList,
+			long denominatorExceptionCount,
+			String denominatorExceptionPatientsList) {
+
+		this.tin = tin;
+		this.measureId = measureId;
+		this.criteria = criteria;
+		this.reportingYear = reportingYear;
+		this.ippCount = ippCount;
+		this.ippPatientsList = ippPatientsList;
+		this.denominatorCount = denominatorCount;
+		this.denominatorPatientsList = denominatorPatientsList;
+		this.denominatorExclusionCount = denominatorExclusionCount;
+		this.denominatorExclusionPatientsList = denominatorExclusionPatientsList;
+		this.numeratorCount = numeratorCount;
+		this.numeratorPatientsList = numeratorPatientsList;
+		this.numeratorExclusionCount = numeratorExclusionCount;
+		this.numeratorExclusionPatientsList = numeratorExclusionPatientsList;
+		this.denominatorExceptionCount = denominatorExceptionCount;
+		this.denominatorExceptionPatientsList = denominatorExceptionPatientsList;
+		
+		
+	}
 	public MIPSPerformanceBean(String measureId, int criteria,int reportingYear,
 			int ippCount, int denominatorCount,
 			int denominatorExclusionCount, int numeratorCount,
@@ -271,6 +299,22 @@ public class MIPSPerformanceBean {
 		this.reportingRate = reportingRate;
 	}
 	
+	
+	public MIPSPerformanceBean(String measureId,int criteria, int reportingYear,
+			long denominatorCount, String denominatorPatientsList,
+			long numeratorCount, String numeratorPatientsList,
+			double performanceRate) {
+		super();
+		this.measureId = measureId;
+		this.criteria = criteria;
+		this.reportingYear = reportingYear;
+		this.denominatorCount = denominatorCount;
+		this.denominatorPatientsList = denominatorPatientsList;
+		this.numeratorCount = numeratorCount;
+		this.numeratorPatientsList = numeratorPatientsList;
+		this.performanceRate = performanceRate;
+	}
+
 	public double getPoints() {
 		return points;
 	}

@@ -1268,9 +1268,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 				builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusion),0)),
 				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusionlist),builder.literal(",")),
 				builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorException),0)),
-				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExceptionlist),builder.literal(",")),
-				root.get(MacraMeasuresRate_.macraMeasuresRatePerformance),
-				root.get(MacraMeasuresRate_.macraMeasuresRateReporting),
+				builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExceptionlist),builder.literal(","))
 		};
 
 		cq.multiselect(selections);
@@ -1475,55 +1473,59 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		Writer writer = new StringWriter();
 		PrintWriter printWriter = new PrintWriter(writer);
-
+		
+		
 		try{
 
-			CriteriaBuilder builder = em.getCriteriaBuilder();
-			CriteriaQuery<MIPSPerformanceBean> cq = builder.createQuery(MIPSPerformanceBean.class);
-			Root<MacraMeasuresRate> root = cq.from(MacraMeasuresRate.class);
-
-			Predicate byEmpTin = builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateTin), tinValue);
-			Predicate byReportingYear = builder.equal(root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear), reportingYear);		
-			Predicate byConfiguredMeasures = root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId).in(Arrays.asList(configuredMeasures.split(",")));
-
-			cq.where(builder.and(byEmpTin,byReportingYear, byConfiguredMeasures));
-
-			cq.groupBy(root.get(MacraMeasuresRate_.macraMeasuresRateTin),
-					root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
-					root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
-					root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
-					root.get(MacraMeasuresRate_.macraMeasuresRatePerformance),
-					root.get(MacraMeasuresRate_.macraMeasuresRateReporting));
-
-			Selection[] selections= new Selection[] {
-
-					root.get(MacraMeasuresRate_.macraMeasuresRateTin),
-					root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
-					root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
-					root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
-					builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateIpp),0)),
-					builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateIpplist),builder.literal(",")),
-					builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominator),0)),
-					builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorlist),builder.literal(",")),
-					builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExclusion),0)),
-					builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExclusionlist),builder.literal(",")),
-					builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumerator),0)),
-					builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorlist),builder.literal(",")),
-					builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusion),0)),
-					builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateNumeratorExclusionlist),builder.literal(",")),
-					builder.sum(builder.coalesce(root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorException),0)),
-					builder.function("string_agg",String.class,root.get(MacraMeasuresRate_.macraMeasuresRateDenominatorExceptionlist),builder.literal(",")),
-					root.get(MacraMeasuresRate_.macraMeasuresRatePerformance),
-					root.get(MacraMeasuresRate_.macraMeasuresRateReporting)
-			};
-
-			cq.multiselect(selections);
-
-			if(isOrderBy){
-				cq.orderBy(builder.desc(root.get(MacraMeasuresRate_.macraMeasuresRatePerformance)));
-			}
+			List<String> measuresList=Arrays.asList(configuredMeasures.split(","));
 			
-			results = em.createQuery(cq).getResultList();
+			
+			for(String measureId:measuresList)
+			{
+				int criteriaCount=getCriteriaCount(measureId, reportingYear);
+				Boolean patientSpecific=true;
+				if(measureId.equals("130") || measureId.equals("ACI_TRANS_EP_1") || measureId.equals("ACI_TRANS_HIE_1") || measureId.equals("ACI_EP_1") || measureId.equals("ACI_HIE_1") || measureId.equals("ACI_TRANS_MR_1"))
+					patientSpecific=false;
+				for(int i=1;i<=criteriaCount;i++)
+				{	
+					
+					Integer ipp=0,den=0,num=0,denexcl=0,denexcep=0;
+					String ippList="",denList="",numList="",denexclList="",denexcepList="";
+					
+					String patientList=getPatientList(1, reportingYear, measureId,i, tinValue,patientSpecific);
+					if(!patientList.equals(""))
+					{	
+						ipp=Integer.parseInt(patientList.split("&&&")[1]);
+						ippList=patientList.split("&&&")[0];
+					}
+					patientList=getPatientList(2, reportingYear, measureId,i, tinValue,patientSpecific);
+					if(!patientList.equals(""))
+					{
+						den=Integer.parseInt(patientList.split("&&&")[1]);
+						denList=patientList.split("&&&")[0];
+					}
+					patientList=getPatientList(3, reportingYear, measureId,i, tinValue,patientSpecific);
+					if(!patientList.equals(""))
+					{
+						num=Integer.parseInt(patientList.split("&&&")[1]);
+						numList=patientList.split("&&&")[0];
+					}
+					patientList=getPatientList(4, reportingYear, measureId,i, tinValue,patientSpecific);
+					if(!patientList.equals(""))
+					{
+						denexcl=Integer.parseInt(patientList.split("&&&")[1]);
+						denexclList=patientList.split("&&&")[0];
+					}
+					patientList=getPatientList(5, reportingYear, measureId,i, tinValue,patientSpecific);
+					if(!patientList.equals(""))
+					{
+						denexcep=Integer.parseInt(patientList.split("&&&")[1]);
+						denexcepList=patientList.split("&&&")[0];
+					}
+					MIPSPerformanceBean obj=new MIPSPerformanceBean(tinValue,measureId,i,reportingYear,ipp,ippList,den,denList,denexcl,denexclList,num,numList,0,"",denexcep,denexcepList);
+					results.add(obj);
+				}
+			}
 
 			int range = results.size();
 			
@@ -1895,9 +1897,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		String result = "";
 
 		try{
-
 			String sharedFolderPath = sharedFolderBean.getSharedFolderPath().get(accountId).toString();
-
 			String jsonFolder = sharedFolderPath+File.separator+"ECQM"+File.separator+year+File.separator;
 
 			File file = new File(jsonFolder+measureId+".json");
@@ -3814,7 +3814,52 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			performanceObjs.add(new MIPSPerformanceBean("ACI_TRANS_PPHI_1", false));
 		return performanceObjs;
 	}
-
+	public String getPatientList(int catagory,int reportingYear,String measureId,int criteriaCount,String tin,Boolean patientSpecific){
+		String selectString="",whereString="";
+		switch(catagory){
+		case 1:	selectString="quality_measures_patient_entries_ipp as count ";
+			whereString="quality_measures_patient_entries_ipp >=1";
+			break;
+		case 2:
+			selectString="quality_measures_patient_entries_denominator as count ";
+			whereString="quality_measures_patient_entries_denominator >=1";
+			break;
+		case 3:
+			selectString="quality_measures_patient_entries_numerator as count ";
+			whereString="quality_measures_patient_entries_numerator >=1";
+			break;
+		case 4:
+			selectString="quality_measures_patient_entries_denominator_exclusion as count ";
+			whereString="quality_measures_patient_entries_denominator_exclusion >=1";
+			break;
+		case 5:
+			selectString="quality_measures_patient_entries_denominator_exception as count ";
+			whereString="quality_measures_patient_entries_denominator_exception >=1";
+			break;
+		}
+		List<Object[]> result;
+		if(patientSpecific)
+		result= em.createNativeQuery("select  string_agg( cast(t.patid as text),','),sum(t.count) from(select distinct quality_measures_patient_entries_patient_id as patid," +selectString+"from quality_measures_patient_entries where quality_measures_patient_entries_tin='"+tin+"' and quality_measures_patient_entries_reporting_year="+reportingYear+"  and quality_measures_patient_entries_measure_id='"+measureId+"' and "+whereString+" ) t").getResultList();
+		else
+		result= em.createNativeQuery("select  string_agg( cast(t.patid as text),','),sum(t.count) from(select quality_measures_patient_entries_patient_id as patid," +selectString+"from quality_measures_patient_entries where quality_measures_patient_entries_tin='"+tin+"' and quality_measures_patient_entries_reporting_year="+reportingYear+"  and quality_measures_patient_entries_measure_id='"+measureId+"' and "+whereString+" ) t").getResultList();
+		
+		if(result!=null && result.get(0)!=null && result.get(0)[0]!=null && result.get(0)[1]!=null)
+		return result.get(0)[0].toString()+"&&&"+result.get(0)[1].toString();
+		else
+			return "";
+		
+	}
+	public int getCriteriaCount(String measureId,int reportingYear){
+		if(measureId.equals("238") || measureId.equals("9") || measureId.equals("366")){
+			return 2;
+		}
+		
+		if(measureId.equals("239") || measureId.equals("371")  || (measureId.equals("226") && reportingYear==2018)){
+			return 3;
+		}
+		return 1;
+	}
+	
 	
 	
 }
