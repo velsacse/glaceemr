@@ -1936,7 +1936,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 	private String getPatientListByCriteria(int criteriaId, int providerId, String measureId,int criteria,int reportingYear){
 
-		String patientsList = "";
+		String patientsList = null;
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<String> cq = builder.createQuery(String.class);
@@ -1968,9 +1968,10 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 			cq.where(builder.and(byProviderId, byReportingYear, condition,byCriteria));
 		}
 
-		cq.select(builder.coalesce(builder.function("string_agg", String.class, root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesPatientId).as(String.class),builder.literal(",")),""));
-
-		patientsList = em.createQuery(cq).getResultList().get(0); 
+		cq.select(builder.function("string_agg", String.class, root.get(QualityMeasuresPatientEntries_.qualityMeasuresPatientEntriesPatientId).as(String.class),builder.literal(",")));
+		List<String> result=em.createQuery(cq).getResultList();
+		if(result.get(0)!=null)
+		patientsList = result.get(0);  
 
 		return patientsList;
 
@@ -3860,6 +3861,7 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		return 1;
 	}
 	
+		
 	
 	
 }

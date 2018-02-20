@@ -448,7 +448,7 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 	
 	@Override
 	public String getCompleteTinInfo(String empTin, int reportingYear){
-		
+		String measureIds="";
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<String> cq = builder.createQuery(String.class);
 		Root<QualityMeasuresProviderMapping> root = cq.from(QualityMeasuresProviderMapping.class);
@@ -460,18 +460,21 @@ public class QPPConfServiceImpl implements QPPConfigurationService{
 		Predicate excludeIaMeasures =  builder.notLike(root.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),"IA_%");
 
 		cq.where(builder.and(bySSN, byReportingYear),excludeIaMeasures);
-		
-		cq.groupBy(joinProviderEmployee.get(EmployeeProfile_.empProfileSsn));
-		
-		cq.multiselect(builder.function("string_agg",String.class,root.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId),builder.literal(","))).distinct(true);
+				
+		cq.select(root.get(QualityMeasuresProviderMapping_.qualityMeasuresProviderMappingMeasureId));
 	
+		cq.distinct(true);
 		List<String> providerInfo=em.createQuery(cq).getResultList();
 		
-		if(providerInfo.size() > 0){
-			return providerInfo.get(0).toString();
+		for(String measureId:providerInfo){
+			if(measureIds.equals(""))
+				measureIds=measureId;
+			else
+				measureIds+=","+measureId;
 		}
 		
-		return "";
+		return measureIds;
+		
 	}
 	
 	@SuppressWarnings("rawtypes")
