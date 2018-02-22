@@ -809,54 +809,44 @@ public class CarePlanController {
 			String measureId="";
 			for(int i=0;i<indiMeasureids.size();i++){
 				measureId += indiMeasureids.get(i).getQualityMeasuresProviderMappingMeasureId()+",";
-			}
-			//String sharedPath= "/home/software/Documents/shared";
-			List<EMeasure> emeasure = utils.getMeasureBeanDetails(year,measureId, sharedFolder,accountId);
-				for(int i=0 ;i<emeasure.size();i++){
-					CQMSpecification specification = emeasure.get(i).getSpecification();
+				List<EMeasure> emeasure = utils.getMeasureBeanDetails(year,measureId, sharedFolder,accountId);
+					CQMSpecification specification = emeasure.get(0).getSpecification();
 					HashMap<String, Category> qdmCatagory = specification.getQdmCategory();
 					List<Object>  cmsIdsList=new ArrayList<Object>();
-					if(qdmCatagory.containsKey("Intervention")){
-					Map<String, Object> cmsIdsListObject=new HashMap<String, Object>();
-					try {
-						cmsIdsListObject.put("CmsId", emeasure.get(i).getCmsId().toString());
-						cmsIdsListObject.put("Id", emeasure.get(i).getId());
-						cmsIdsList.add(cmsIdsListObject);
-					}catch (Exception e) {
+						for(int j=0 ;j<emeasure.size();j++){
+							if(qdmCatagory.containsKey("Intervention")){
+								Map<String, Object> cmsIdsListObject=new HashMap<String, Object>();
+								try {
+									cmsIdsListObject.put("CmsId", emeasure.get(j).getCmsId().toString());
+									cmsIdsListObject.put("Id", emeasure.get(j).getId());
+									cmsIdsList.add(cmsIdsListObject);
+								}catch (Exception e) {
+							}
+							result.setData(cmsIdsList);
+							}
+						}
 					}
-				}
-				result.setData(cmsIdsList);
-			}
-			return result;
+				return result;
 		}
-		
 		@RequestMapping(value = "/getFreqMeasureDescription", method = RequestMethod.GET)
 		@ResponseBody
 		public EMRResponseBean getFrequentMeasureDescription(
-				@RequestParam(value = "providerId", required = true) Integer providerId,
 				@RequestParam(value="accountId", required=true) String accountId,
 				@RequestParam(value = "year", required = true) Integer year,
+				@RequestParam(value = "measureId", required = true) String measureId,
 				@RequestParam(value = "sharedFolder", required = true) String  sharedFolder) throws Exception {
 			EMRResponseBean result=new EMRResponseBean();
 			EMeasureUtils utils = new EMeasureUtils();
-			List<ConfigurationDetails> indiMeasureids=QppConfigurationService.getMeasureIds(providerId,year);
-			String measureid="";
-			for(int i=0;i<indiMeasureids.size();i++){
-				measureid += indiMeasureids.get(i).getQualityMeasuresProviderMappingMeasureId()+",";
-			}
-		//	String sharedPath= "/home/software/Documents/shared";
-			List<EMeasure> emeasure = utils.getMeasureBeanDetails(year,measureid, sharedFolder,accountId);
+			List<EMeasure> emeasure = utils.getMeasureBeanDetails(year,measureId, sharedFolder,accountId);
+			CQMSpecification specification = emeasure.get(0).getSpecification();
+			HashMap<String, Category> qdmCatagory = specification.getQdmCategory();
 			for(int p=0 ;p<emeasure.size();p++){
-				CQMSpecification specification = emeasure.get(p).getSpecification();
-				HashMap<String, Category> qdmCatagory = specification.getQdmCategory();
 				List<Object> code=new ArrayList<Object>();
 				List<Object> description=new ArrayList<Object>();
 				List<Object> name=new ArrayList<Object>();
-
 				HashMap<String, HashMap<String, List<Object>>> interventionList = new HashMap<String, HashMap<String,List<Object>>>();
 				HashMap<String, List<Object>> interventionCodeList;
 				if(qdmCatagory.containsKey("Intervention")){
-					
 				Category interventionCategory = qdmCatagory.get("Intervention");
 				List<Valueset> valueSet = interventionCategory.getValueSet();
 				for(int i=0;i<valueSet.size();i++)
