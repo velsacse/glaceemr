@@ -1271,10 +1271,6 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 		};
 
 		cq.multiselect(selections);
-
-		if(isOrderBy){
-			cq.orderBy(builder.desc(root.get(MacraMeasuresRate_.macraMeasuresRatePerformance)));
-		}
 		
 		List<MIPSPerformanceBean> results = em.createQuery(cq).getResultList();
 
