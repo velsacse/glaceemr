@@ -268,17 +268,15 @@ Root<Encounter> root = cq.from(Encounter.class);
 			Boolean encounterThere=false;
 			for(EncounterQDM eachService:serviceObjs)
 			{
-				System.out.println("inside service...........");
 				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
+				int encounterId=0;
 				for(EncounterQDM eachEncounter:encounterObjs)
 				{
-					System.out.println("inside encounter...........");
 					if(compareWithoutTime(eachService.getStartDate(),eachEncounter.getStartDate()))
 					{
 						encounterThere=true;
-						System.out.println("encounter and service dates are same");
-						officeVisitEncounters.add(eachEncounter.getEncounterId());
-						encObject.setCode(eachEncounter.getCode());
+						encounterId=eachEncounter.getEncounterId();
+						encObject.setCode(eachEncounter.getCode().substring(1,5));
 						if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(eachEncounter.getCode()))
 						encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
 						else if(cptCodeListString.length() > 0 && cptCodeListString.contains(eachEncounter.getCode() ))
@@ -303,11 +301,10 @@ Root<Encounter> root = cq.from(Encounter.class);
 						}
 							
 					}
-				}
+				}officeVisitEncounters.add(encounterId);
 				if(!encounterThere)
 				{
-					System.out.println("encounter and service dates are different");
-					encObject.setCode(eachService.getCode());
+					encObject.setCode(eachService.getCode().substring(1, 5));
 					if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(eachService.getCode()))
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
 					else if(cptCodeListString.length() > 0 && cptCodeListString.contains(eachService.getCode() ))

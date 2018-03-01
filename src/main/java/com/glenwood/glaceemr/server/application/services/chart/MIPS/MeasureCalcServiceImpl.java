@@ -1248,9 +1248,8 @@ public class MeasureCalcServiceImpl implements MeasureCalculationService{
 
 		cq.groupBy(root.get(MacraMeasuresRate_.macraMeasuresRateMeasureId),
 				root.get(MacraMeasuresRate_.macraMeasuresRateCriteria),
-				root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear),
-				root.get(MacraMeasuresRate_.macraMeasuresRatePerformance),
-				root.get(MacraMeasuresRate_.macraMeasuresRateReporting));
+				root.get(MacraMeasuresRate_.macraMeasuresRateReportingYear)
+				);
 
 		Selection[] selections= new Selection[] {
 
