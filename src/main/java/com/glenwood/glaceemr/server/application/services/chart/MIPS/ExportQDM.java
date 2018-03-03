@@ -276,7 +276,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 					{
 						encounterThere=true;
 						encounterId=eachEncounter.getEncounterId();
-						encObject.setCode(eachEncounter.getCode().substring(1,5));
+						encObject.setCode(eachEncounter.getCode().substring(0,5));
 						if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(eachEncounter.getCode()))
 						encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
 						else if(cptCodeListString.length() > 0 && cptCodeListString.contains(eachEncounter.getCode() ))
@@ -304,7 +304,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				}officeVisitEncounters.add(encounterId);
 				if(!encounterThere)
 				{
-					encObject.setCode(eachService.getCode().substring(1, 5));
+					encObject.setCode(eachService.getCode().substring(0, 5));
 					if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(eachService.getCode()))
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
 					else if(cptCodeListString.length() > 0 && cptCodeListString.contains(eachService.getCode() ))
