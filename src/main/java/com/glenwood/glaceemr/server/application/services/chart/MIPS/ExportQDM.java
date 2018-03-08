@@ -246,7 +246,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		restrictions = new Predicate[] {
 					builder.equal(root.get(Chart_.chartPatientid), patientID),
-					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
+					builder.function("substring", String.class, serviceCptJoin.get(Cpt_.cptCptcode),builder.literal("1"),builder.literal("5")).in(cptCodes),
 					builder.or(builder.equal(chartServiceJoin.get(ServiceDetail_.sdoctors), providerId),builder.equal(encounterChartJoin.get(Encounter_.encounter_service_doctor),providerId)),
 					builder.between(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)), startDate, endDate),
 					builder.equal(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)),
@@ -358,7 +358,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				
 		Predicate[] restrictions = new Predicate[] {
 					builder.equal(root.get(ServiceDetail_.serviceDetailPatientid), patientID),
-					serviceCptJoin.get(Cpt_.cptCptcode).in(cptCodes),
+					builder.function("substring", String.class, serviceCptJoin.get(Cpt_.cptCptcode),builder.literal("1"),builder.literal("5")).in(cptCodes),
 					builder.equal(root.get(ServiceDetail_.sdoctors), providerId),
 					builder.between(root.get(ServiceDetail_.serviceDetailDos), startDate, endDate)
 					};
@@ -2005,9 +2005,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 			cq.multiselect(selections);
 			
 			if(isGroup)
-				cq.where(builder.equal(joinEmpProfile.get(EmployeeProfile_.empProfileEmpid), providerId),builder.between(builder.function("DATE", Date.class, root.get(ReferralDetails_.referralOrderOn)), startDate, endDate), builder.equal(root.get(ReferralDetails_.referral_details_myalert), patientId));
+				cq.where(builder.equal(joinEmpProfile.get(EmployeeProfile_.empProfileEmpid), providerId),builder.between(builder.function("DATE", Date.class, root.get(ReferralDetails_.referralOrderOn)), startDate, endDate),
+						builder.equal(root.get(ReferralDetails_.referral_details_myalert), patientId),builder.notEqual(root.get(ReferralDetails_.referral_details_patientid), 2));
 			else
-				cq.where(builder.between(builder.function("DATE", Date.class, root.get(ReferralDetails_.referralOrderOn)), startDate, endDate), builder.equal(root.get(ReferralDetails_.referral_details_myalert), patientId));
+				cq.where(builder.between(builder.function("DATE", Date.class, root.get(ReferralDetails_.referralOrderOn)), startDate, endDate),
+						builder.equal(root.get(ReferralDetails_.referral_details_myalert), patientId),builder.notEqual(root.get(ReferralDetails_.referral_details_patientid), 2));
 			
 			cq.groupBy(root.get(ReferralDetails_.summaryCareRecordProvidedElectronic));
 			

@@ -27,5 +27,6 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
             registerFunction("date_part",new StandardSQLFunction("date_part",StandardBasicTypes.INTEGER));
             registerFunction("format_name",new StandardSQLFunction("format_name",StandardBasicTypes.STRING));
             registerFunction("testtableprimarykey_generator",  new StandardSQLFunction("testtableprimarykey_generator", StandardBasicTypes.STRING));
+            registerFunction("substring",new StandardSQLFunction("substring",StandardBasicTypes.STRING));
         }
 }
