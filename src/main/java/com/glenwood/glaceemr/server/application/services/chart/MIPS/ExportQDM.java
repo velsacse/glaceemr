@@ -246,7 +246,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 		
 		restrictions = new Predicate[] {
 					builder.equal(root.get(Chart_.chartPatientid), patientID),
-					builder.function("substring", String.class, serviceCptJoin.get(Cpt_.cptCptcode),builder.literal("1"),builder.literal("5")).in(cptCodes),
+					builder.function("substring", String.class, serviceCptJoin.get(Cpt_.cptCptcode),builder.literal(1),builder.literal(5)).in(cptCodes),
 					builder.or(builder.equal(chartServiceJoin.get(ServiceDetail_.sdoctors), providerId),builder.equal(encounterChartJoin.get(Encounter_.encounter_service_doctor),providerId)),
 					builder.between(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)), startDate, endDate),
 					builder.equal(builder.function("DATE", Date.class, encounterChartJoin.get(Encounter_.encounterDate)),chartServiceJoin.get(ServiceDetail_.serviceDetailDos)),
@@ -358,7 +358,7 @@ Root<Encounter> root = cq.from(Encounter.class);
 				
 		Predicate[] restrictions = new Predicate[] {
 					builder.equal(root.get(ServiceDetail_.serviceDetailPatientid), patientID),
-					builder.function("substring", String.class, serviceCptJoin.get(Cpt_.cptCptcode),builder.literal("1"),builder.literal("5")).in(cptCodes),
+					builder.function("substring", String.class, serviceCptJoin.get(Cpt_.cptCptcode),builder.literal(1),builder.literal(5)).in(cptCodes),
 					builder.equal(root.get(ServiceDetail_.sdoctors), providerId),
 					builder.between(root.get(ServiceDetail_.serviceDetailDos), startDate, endDate)
 					};
