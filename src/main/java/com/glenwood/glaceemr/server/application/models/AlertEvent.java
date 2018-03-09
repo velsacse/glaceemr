@@ -12,13 +12,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.JoinColumnOrFormula;
-import org.hibernate.annotations.JoinColumnsOrFormulas;
-import org.hibernate.annotations.JoinFormula;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.glenwood.glaceemr.server.utils.JsonTimestampSerializer;
 
@@ -109,6 +107,10 @@ public class AlertEvent {
 	@Column(name="alert_event_frompage")
 	private String alertEventFrompage;
 	
+	@Transient
+	@JsonSerialize
+	@JsonDeserialize
+	private String alertEventCreatedDateTime;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonManagedReference
@@ -518,4 +520,16 @@ public class AlertEvent {
 	public void setPortalMessage(PortalMessage portalMessage) {
 		this.portalMessage = portalMessage;
 	}
+
+
+	public String getAlertEventCreatedDateTime() {
+		return alertEventCreatedDateTime;
+	}
+
+
+	public void setAlertEventCreatedDateTime(String alertEventCreatedDateTime) {
+		this.alertEventCreatedDateTime = alertEventCreatedDateTime;
+	}
+	
+	
 }

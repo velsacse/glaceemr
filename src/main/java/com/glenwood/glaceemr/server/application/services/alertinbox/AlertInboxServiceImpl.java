@@ -1248,6 +1248,14 @@ public class AlertInboxServiceImpl implements AlertInboxService{
 				alerts.add(ae);
 			}
 		}
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss a");
+		if(activeAlert.getAlertEventCreatedDate() != null){
+			String a= dateFormat.format(activeAlert.getAlertEventCreatedDate());
+			activeAlert.setAlertEventCreatedDateTime(a);
+		}
+		alerts.add(activeAlert);
+		
 		alerts.add(activeAlert);
 		return alerts;
 	}
