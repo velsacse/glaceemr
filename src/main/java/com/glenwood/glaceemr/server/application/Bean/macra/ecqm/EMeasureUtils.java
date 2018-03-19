@@ -360,6 +360,11 @@ public class EMeasureUtils {
 		
 		String filePath = sharedPath+File.separator+"ECQM"+File.separator+year;
 		File sharedFile=new File(sharedPath);
+		System.out.println("absol path::::::"+sharedFile.getAbsolutePath());
+		if(sharedFile.canRead() && sharedFile.canWrite())
+			System.out.println("can read and write::");
+		if(sharedFile.canRead())
+			System.out.println("can read");
 		if(sharedFile.canRead() && sharedFile.canExecute())
 		{
 

@@ -192,7 +192,6 @@ Root<Encounter> root = cq.from(Encounter.class);
 		calendar.add(Calendar.YEAR, -2);
         startDate = calendar.getTime();
         
-        
 		List<String> cptCodes = new ArrayList<String>();
 		
 		String cptCodeListString = "", hcpcsCodeListString = ""; 
@@ -265,21 +264,23 @@ Root<Encounter> root = cq.from(Encounter.class);
 			encounterObjs = em.createQuery(cq).getResultList();
 			
 			com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter encObject;
-			Boolean encounterThere=false;
+			Boolean encounterThere=false;String code="";
 			for(EncounterQDM eachService:serviceObjs)
 			{
+				
 				encObject = new com.glenwood.glaceemr.server.application.Bean.macra.data.qdm.Encounter();
 				int encounterId=0;
 				for(EncounterQDM eachEncounter:encounterObjs)
 				{
 					if(compareWithoutTime(eachService.getStartDate(),eachEncounter.getStartDate()))
 					{
+						code=eachEncounter.getCode().substring(0,5);
 						encounterThere=true;
 						encounterId=eachEncounter.getEncounterId();
-						encObject.setCode(eachEncounter.getCode().substring(0,5));
-						if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(eachEncounter.getCode()))
+						encObject.setCode(code);
+						if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(code))
 						encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
-						else if(cptCodeListString.length() > 0 && cptCodeListString.contains(eachEncounter.getCode() ))
+						else if(cptCodeListString.length() > 0 && cptCodeListString.contains(code))
 						encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
 						encObject.setStartDate(eachEncounter.getStartDate());
 						if(eachEncounter.getEndDate()==null)
@@ -304,10 +305,11 @@ Root<Encounter> root = cq.from(Encounter.class);
 				}officeVisitEncounters.add(encounterId);
 				if(!encounterThere)
 				{
-					encObject.setCode(eachService.getCode().substring(0, 5));
-					if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(eachService.getCode()))
+					code=eachService.getCode().substring(0,5);
+					encObject.setCode(code);
+					if(hcpcsCodeListString.length() > 0 && hcpcsCodeListString.contains(code))
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.285");
-					else if(cptCodeListString.length() > 0 && cptCodeListString.contains(eachService.getCode() ))
+					else if(cptCodeListString.length() > 0 && cptCodeListString.contains(code))
 					encObject.setCodeSystemOID("2.16.840.1.113883.6.12");
 					Calendar cal = new GregorianCalendar();
 					cal.setTime(eachService.getStartDate());
