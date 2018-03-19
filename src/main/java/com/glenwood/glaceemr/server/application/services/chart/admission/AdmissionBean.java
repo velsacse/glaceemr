@@ -19,6 +19,7 @@ public class AdmissionBean {
 	String notes;
 	String dischargeDate;
 	String dispositionvalue; 
+	String dispositionText;
 	
 	public Integer getAdmissionId() {
 		return admissionId;
@@ -122,6 +123,14 @@ public class AdmissionBean {
 	}
 	public void setDispositionvalue(String dispositionvalue) {
 		this.dispositionvalue = dispositionvalue;
+		
+	}
+	public String getDispositionText() {
+		return dispositionText;
+		
+	}
+	public void setDispositionText(String dispositionText) {
+		this.dispositionText = dispositionText;
 		
 	}
 	

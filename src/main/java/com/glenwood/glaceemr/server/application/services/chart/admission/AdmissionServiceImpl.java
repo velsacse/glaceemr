@@ -6,12 +6,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.json.JSONArray;
@@ -26,8 +32,11 @@ import com.glenwood.glaceemr.server.application.models.AdmissionRoom;
 import com.glenwood.glaceemr.server.application.models.Admission_;
 import com.glenwood.glaceemr.server.application.models.Encounter;
 import com.glenwood.glaceemr.server.application.models.FaxOutbox;
+import com.glenwood.glaceemr.server.application.models.FrequentInterventions;
+import com.glenwood.glaceemr.server.application.models.FrequentInterventions_;
 import com.glenwood.glaceemr.server.application.models.LeafPatient;
 import com.glenwood.glaceemr.server.application.models.PatientAdmission;
+import com.glenwood.glaceemr.server.application.models.PatientAdmission_;
 import com.glenwood.glaceemr.server.application.models.PatientAllergies;
 import com.glenwood.glaceemr.server.application.models.PatientEpisode;
 import com.glenwood.glaceemr.server.application.repositories.AdmissionRepository;
@@ -246,6 +255,27 @@ public class AdmissionServiceImpl implements AdmissionService {
 			return null;
 		}
 	}
+	
+	@Override
+	public List<Object[]> getdischargeValues(Integer admissionId,Integer patientId) {
+
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Object[]> cq = builder.createQuery(Object[].class);
+		Root<Admission> root = cq.from(Admission.class);
+		Join<Admission, PatientAdmission> patjoin = root.join(Admission_.patientAdmission,JoinType.INNER);
+		cq.multiselect(root.get(Admission_.admissionDischargeDate),
+				root.get(Admission_.admissionDischargeDisposition),
+				root.get(Admission_.admissionDischargeDispositionOther),
+				builder.function("string_agg",String.class,patjoin.get(PatientAdmission_.patientAdmissionDxCode),builder.literal(",")),
+				builder.function("string_agg",String.class,patjoin.get(PatientAdmission_.patientAdmissionDxDescription),builder.literal("@")));
+		cq.where(builder.and(
+				builder.equal(root.get(Admission_.admissionId), admissionId),
+				builder.equal(root.get(Admission_.admissionPatientId), patientId),
+				builder.equal(patjoin.get(PatientAdmission_.patientAdmissionDxType), 2)));
+		cq.groupBy(root.get(Admission_.admissionDischargeDate),root.get(Admission_.admissionDischargeDisposition),root.get(Admission_.admissionDischargeDispositionOther));
+		List<Object[]> dischargeValuesList = entityManager.createQuery(cq).getResultList();
+		return dischargeValuesList;
+}
 	
 /*	@Override
 	public List<Admission> getPastAdmission(Integer patientId) {
@@ -563,12 +593,11 @@ public class AdmissionServiceImpl implements AdmissionService {
 				}
 			}
 		}
-		dischargePatientDetails(dataJson.getPatientId(),dataJson.getLoginId(),dataJson.getUserId(), dataJson.getDischargeDate(),dataJson.getDispositionvalue());
+		dischargePatientDetails(dataJson.getAdmissionId(),dataJson.getPatientId(),dataJson.getLoginId(),dataJson.getUserId(), dataJson.getDischargeDate(),dataJson.getDispositionvalue(),dataJson.getDispositionText());
 	}
 	
 	@Override
-	public String dischargePatientDetails(Integer patientId, Integer loginId,Integer userId, String date, String dispositionvalue) {
-		
+	public String dischargePatientDetails(Integer admissionId,Integer patientId, Integer loginId,Integer userId, String date, String dispositionvalue, String dispositionText) {		
 		try {
 			
 			SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
@@ -582,14 +611,26 @@ public class AdmissionServiceImpl implements AdmissionService {
 
 			java.sql.Date dischargeDate = new java.sql.Date(disdate.getTime());
 			Admission admiss=getAdmission(patientId);
+			
+			/*admiss.setAdmissionDischargedDate(dischargeDate);
+			admiss.setAdmissionDischargeDocId(userId);
+			admiss.setAdmissionStatus(2);
+			admiss.setadmissionDischargeDisposition(dispositionvalue);
+			admiss.setadmissionDischargeDispositionOther(dispositionText);
+			admissionRepository.saveAndFlush(admiss);*/
+			
+			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+			CriteriaUpdate<Admission> update = builder.createCriteriaUpdate(Admission.class);
+			Root<Admission> root = update.from(Admission.class);
+			update.set(root.get(Admission_.admissionDischargeDate), dischargeDate);
+			update.set(root.get(Admission_.admissionDischargeDocId), userId);
+			update.set(root.get(Admission_.admissionStatus), 2);
+			update.set(root.get(Admission_.admissionDischargeDisposition), dispositionvalue);
+			update.set(root.get(Admission_.admissionDischargeDispositionOther), dispositionText);
+			update.where(builder.equal(root.get(Admission_.admissionId), admissionId));
+			this.entityManager.createQuery(update).executeUpdate();
+			
 			if(admiss != null){
-				admiss.setAdmissionDischargedDate(dischargeDate);
-				admiss.setAdmissionDischargeDocId(userId);
-				admiss.setAdmissionStatus(2);
-				admiss.setadmissionDischargeDisposition(dispositionvalue);
-				admissionRepository.saveAndFlush(admiss);
-				
-				
 				//update admission episode status to 1 on discharge
 				PatientEpisode patEpisode=null;
 				if((patEpisode = getPatientEpisodebyEpisodeId(admiss.getAdmissionEpisode()))!=null){

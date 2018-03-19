@@ -200,6 +200,9 @@ public class Admission implements Serializable{
 	
 	@Column(name="admission_discharge_disposition")
 	private String admissionDischargeDisposition;
+
+	@Column(name="admission_discharge_disposition_other")
+	private String admissionDischargeDispositionOther;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "admission_doctor_id", referencedColumnName = "emp_profile_empid", insertable = false, updatable = false)
@@ -752,6 +755,13 @@ public class Admission implements Serializable{
 	public String getadmissionDischargeDisposition() {
 		return admissionDischargeDisposition;
 	}
-	
 
+	public void setadmissionDischargeDispositionOther(String admissionDischargeDispositionOther) {
+		this.admissionDischargeDispositionOther = admissionDischargeDispositionOther;
+	}	
+	public String getaadmissionDischargeDispositionOther() {
+		return admissionDischargeDispositionOther;
+	}
+	
+	
 }

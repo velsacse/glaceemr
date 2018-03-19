@@ -96,6 +96,28 @@ public class AdmissionController {
 	    return emrResponseBean;
 	}
 	
+	/**
+	 * To Get open discharge details from pat encounter
+	 * @param patientId
+	 * @param admissionId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/getdischargeValues",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getdischargeValues(@RequestParam(value="admissionId",required=false, defaultValue="")  Integer admissionId,
+			@RequestParam(value="patientId",required=false, defaultValue="") Integer patientId) throws Exception{
+		EMRResponseBean emrResponseBean= new EMRResponseBean();
+		try{
+			List<Object[]> admission= admissionService.getdischargeValues(admissionId,patientId);
+			emrResponseBean.setData(admission);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Past discharge details viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+		}catch(Exception e){
+			e.printStackTrace();
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.ADMISSION, LogActionType.VIEW, 1, Log_Outcome.EXCEPTION, "Past discharge details viewed", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "", LogUserType.USER_LOGIN, "", "");
+		}
+	    return emrResponseBean;
+	}
 	
 	/**
 	 * To Discharge patient (closing admission)

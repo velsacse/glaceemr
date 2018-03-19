@@ -17,7 +17,7 @@ public interface AdmissionService  {
 
 	String dischargePatient(Integer patientId,Integer loginId,Integer userId);
 	
-	String dischargePatientDetails(Integer patientId,Integer loginId,Integer userId, String DischargeDate, String dispositionvalue);
+	String dischargePatientDetails(Integer admissionId,Integer patientId,Integer loginId,Integer userId, String DischargeDate, String dispositionvalue, String dispositionText);
 	
 	Admission getPastAdmission(Integer admissionId);
 
@@ -34,6 +34,8 @@ public interface AdmissionService  {
 	Admission getAdmissionPast(Integer patientId);
 
 	List<String> getPastAdmissionDates(Integer patientId);
+	
+	List<Object[]> getdischargeValues(Integer admissionId,Integer patientId);
 
 	void saveDishcargeDetails(AdmissionBean dataJson) throws JSONException;
 	
