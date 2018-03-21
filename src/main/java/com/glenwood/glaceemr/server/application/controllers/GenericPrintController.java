@@ -171,7 +171,7 @@ public class GenericPrintController {
 		//http://localhost:7080/glaceemr_backend/api/GenericPrintStyle.Action/GetPrint?patientId=7514&encounterId=7328
 		//,objectMapper.readValue(printDetails, PrintDetailsDataBean.class)
 		 genericPrintService.generatePDFPreview(styleId,patientId);
-		auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully loaded header list for configuration", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "styleId="+styleId, LogUserType.USER_LOGIN, "", "");
+		 auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.PRINTINGANDREPORTING, LogActionType.VIEW, 1, Log_Outcome.SUCCESS, "Successfully loaded header list for configuration", sessionMap.getUserID(), request.getRemoteAddr(), patientId, "styleId="+styleId, LogUserType.USER_LOGIN, "", "");
 		logger.debug("End of request to get the list of all generic print styles.");
 		
 		
@@ -263,7 +263,7 @@ public class GenericPrintController {
 			@RequestParam(value="encounterId", defaultValue="-1") Integer encounterId,
 			@RequestParam(value="sharedFolderPath", defaultValue="", required=false) String sharedFolderPath) throws Exception{
 		logger.debug("Begin of request to get generic print header data.");
-    	CustomGenericBean bean = genericPrintService.getCustomeGenericData(styleId, patientId, encounterId, sharedFolderPath);
+		CustomGenericBean bean = genericPrintService.getCustomeGenericData(styleId, patientId, encounterId, sharedFolderPath);
 		logger.debug("End of request to get generic print header data.");
 		EMRResponseBean respBean= new EMRResponseBean();
 		respBean.setData(bean);
@@ -336,8 +336,25 @@ public class GenericPrintController {
 	public void fetchgenericPrintPDFData(@RequestBody PrintDetailsDataBean dataBean) throws Exception{
 		try{
 			logger.debug("Begin of request to Generate PDF file.");
-
 			genericPrintService.generatePDFPrint(dataBean.getStyleId(),dataBean.getPatientId(),dataBean);
+			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.CREATE,1,Log_Outcome.SUCCESS,"Successfully generated PDF file.",sessionMap.getUserID(), request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN,"","");		
+			logger.debug("End of request to Generate PDF file.");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+
+	}
+
+	/**
+	 * To convert PDF to Images 
+	 */
+	@RequestMapping(value = "/FetchGenericPrintPDFFaxData",method = RequestMethod.POST, consumes = "application/json")
+	public void fetchGrowthGraphData(@RequestBody PrintDetailsDataBean dataBean) throws Exception{
+		try{
+			logger.debug("Begin of request to Generate PDF file.");
+
+			genericPrintService.generatePDFFaxPrint(dataBean.getStyleId(),dataBean.getPatientId(),dataBean);
 
 			auditTrailSaveService.LogEvent(LogType.GLACE_LOG,LogModuleType.PRINTINGANDREPORTING,LogActionType.CREATE,1,Log_Outcome.SUCCESS,"Successfully generated PDF file.",sessionMap.getUserID(), request.getRemoteAddr(),-1,"",LogUserType.USER_LOGIN,"","");		
 			logger.debug("End of request to Generate PDF file.");
@@ -346,6 +363,18 @@ public class GenericPrintController {
 		}
 
 
+	}
+	@RequestMapping(value = "/FetchGenericPrintPDFPatientHeaderData",method = RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean FetchGenericPrintPDFPatientHeader(@RequestParam(value="styleId") Integer styleId,
+			@RequestParam(value="patientId", defaultValue="-1") Integer patientId) throws Exception{
+		logger.debug("Begin of request to get generic print patient header data.");
+    	String headerHTML = genericPrintService.getPatientHeaderHTML(styleId, patientId);
+		logger.debug("End of request to get generic print patient header data.");
+		EMRResponseBean respBean= new EMRResponseBean();
+		respBean.setData(headerHTML);
+		return respBean;
+		
 	}
 }
 

@@ -24,6 +24,7 @@ public interface GenericPrintService {
 	/*
 	 * <b> Purpose: </b> To get patient details, employee details and pos details
 	 */
+	public void generatePDFFaxPrint(Integer styleId,Integer patientId,PrintDetailsDataBean databean);
 	public GenericPrintBean getCompleteDetails(Integer patientId, Integer encounterId) throws Exception;
 	String getHeaderHTML(Integer styleId, Integer patientId, Integer encounterId, String sharedPath) throws Exception;
 	String getFooterHTML(Integer styleId);
@@ -38,6 +39,7 @@ public interface GenericPrintService {
 	
 	PatientRegistration getTesData(int patientId);
 	public String getLeftHeaderHTML(Integer styleId);
+	public String getPatientHeaderHTML(Integer styleId, Integer patientId) throws Exception;
 	CustomGenericBean getCustomeGenericData(Integer patientId, Integer encounterId, Integer styleId, String sharedFolderPath) throws Exception;
 	public void saveLeafLibrary(LeafLibrary leafLibrary);
 	public List<LeafLibrary> getTemplatesList();

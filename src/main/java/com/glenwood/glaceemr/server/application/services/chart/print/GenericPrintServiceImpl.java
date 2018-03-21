@@ -1,10 +1,20 @@
 package com.glenwood.glaceemr.server.application.services.chart.print;
 
-import java.net.URLDecoder;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfImportedPage;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfWriter;
+
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -945,7 +955,6 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 	 * @return
 	 */
 	private String getState(String state) {
-
 		CriteriaBuilder builder= em.getCriteriaBuilder();
 		CriteriaQuery<String> query= builder.createQuery(String.class);
 		Root<BillingConfigTable> root= query.from(BillingConfigTable.class);
@@ -1307,7 +1316,6 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 			contentHTML = contentHTML.replaceAll("&amp;apos;", "'");
 			//Filepath of PDF file
 			String fileName=sharedFolderPath+"/"+databean.getFileName();
-
 			//Call to generate PDF with provided details
 			generatePDFBean.generatePDF(fileName,headerHTML,patientHeaderPage1,patientHeaderHTML,footerHTML,leftHeaderHTML,contentHTML,pageVariant,getPageSize(1),0,headerRowCount);
 
@@ -1317,6 +1325,176 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 
 
 	}
+	/**
+	 * Generate PDF file using HTML data input in shared folder
+	 * @param styleId - Generic print style id
+	 * @param patientId
+	 * @param dataBean - Print details data bean
+	 */
+	@Override
+	public void generatePDFFaxPrint(Integer styleId, Integer patientId,PrintDetailsDataBean databean) {
+		//System.out.println("generatePDFFaxPrint >>>>>>>>>>>>>>>>>>>>>>");
+		//Need to replace with common function
+		getPracticeDetails();
+
+		String sharedFolderPath=sessionMap.getPracticeSharedFolderPath()+"/Attachments/"+patientId;
+
+		String headerHTML="",patientHeaderHTML="",leftHeaderHTML="",footerHTML="";
+		String patientHeaderPage1="";
+		int pageVariant=0;
+		int headerRowCount=0;
+		try{
+
+			int encounterId=databean.getEncounterId();
+			int isGrowthGraphReq=databean.getIsGrowthGraphReq();
+			//System.out.println("get encounter Id >>>>>>>>>>>>>>>>>>>>"+encounterId);
+			//System.out.println("=========================isGrowthGraphReq >>>>>>>>>>>>>>>>>>"+isGrowthGraphReq);
+			GenericPrintBean genericPrintBean = getCompleteDetails(patientId, encounterId);
+
+			GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
+			
+			if(genericPrintStyle!=null){
+			int letterHeaderId=genericPrintStyle.getGenericPrintStyleHeaderId();
+			int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
+			int footerId=genericPrintStyle.getGenericPrintStyleFooterId();
+			PatientDataBean patientDataBean=genericPrintBean.getPatientBean(); 
+			String[] patientDetailsArr=generatePatentDetailsArr(patientDataBean);
+
+			//Header row count is used to get the height of top margin for PDF
+				headerRowCount=generateHeaderBean.getPatientHeaderAttributeCount(patientHeaderId, 1);
+			//Generate Letter header HTML
+			if(letterHeaderId>0){
+				headerHTML=generateHeaderBean.generateHeader(letterHeaderId, sharedFolderPath, genericPrintBean);
+				if(!headerHTML.equalsIgnoreCase("")){
+					headerHTML=headerHTML.replaceAll("cellpadding='0'", "");
+					headerHTML="<head><style type='text/css' media='all'>td{padding-top:5px;}</style></head><body>"+headerHTML+"</body>";
+				}
+			}
+
+			//Generate Patient header HTML
+			patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
+			if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
+				patientHeaderPage1 = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
+			}else{
+				patientHeaderPage1 = patientHeaderHTML;
+			}
+			//Generate footer HTML along with page number style
+			if(footerId>0){
+				footerHTML=generateFooterBean.generateFooter(footerId);
+				pageVariant=generateFooterBean.getPageFormatForFooter(footerId);
+			}
+			//Generate Left side header HTML			
+			if(letterHeaderId>0){
+				leftHeaderHTML=generateHeaderBean.generateLeftHeader(letterHeaderId,genericPrintBean);
+				if(!leftHeaderHTML.equalsIgnoreCase("")){
+					leftHeaderHTML=leftHeaderHTML.replaceAll("cellpadding='0'", "");
+					leftHeaderHTML="<head><style type='text/css' media='all'>td{padding-top:7px;}</style></head><body>"+leftHeaderHTML+"</body>";
+				}
+			}
+			}
+			// Content of PDF
+			String contentHTML=URLDecoder.decode(databean.getHtmlData(),"UTF-8");
+			contentHTML = contentHTML.replaceAll("[^\\x00-\\x7F^\\xB0]", "");
+			contentHTML = contentHTML.replaceAll("&amp;apos;", "'");
+			//Filepath of PDF file
+			String fileName="";
+			String growthGraphFileName="";
+			
+			//if(isGrowthGraphReq==0){
+				fileName=sharedFolderPath+"/"+databean.getFileName();
+			/*}else if(isGrowthGraphReq==1){
+				fileName=sharedFolderPath+"/"+databean.getFileName()+"_1";
+				growthGraphFileName=sharedFolderPath+"/"+patientId;
+					
+			}*/
+			
+			//To avoid header colliding issue in print 
+			headerRowCount=headerRowCount+1;
+			
+			//Call to generate PDF with provided details
+			generatePDFBean.generatePDF(fileName,headerHTML,patientHeaderPage1,patientHeaderHTML,footerHTML,leftHeaderHTML,contentHTML,pageVariant,getPageSize(0),0,headerRowCount);
+			/*if(isGrowthGraphReq==1){
+				try {
+
+					//Prepare input pdf file list as list of input stream for merging the PDF's
+					List<InputStream> inputPdfList = new ArrayList<InputStream>();
+					//Adding the generated PDF with normal content
+					//System.out.println("filename >>>>>>>>>>>>>"+fileName);
+					inputPdfList.add(new FileInputStream(fileName+".pdf"));
+					//System.out.println("growthgraph file name >>>>>>>>>>>>"+growthGraphFileName);
+					//Adding Growth graph PDF 
+					inputPdfList.add(new FileInputStream(growthGraphFileName+".pdf"));
+					
+					//Creating the new PDF which will obtain after the merging of two PDF's
+					//System.out.println("filnal file name >>>>>>>>>>>>>>>>>>>"+sharedFolderPath+"/"+databean.getFileName()+".pdf");
+					OutputStream outputStream = new FileOutputStream(sharedFolderPath+"/"+databean.getFileName()+".pdf");
+
+					//call method to merge pdf files.
+					mergePdfFiles(inputPdfList, outputStream);     
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}*/
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+
+	}
+	static void mergePdfFiles(List<InputStream> inputPdfList,
+            OutputStream outputStream) throws Exception{
+		//Create document and pdfReader objects.
+		Document document = new Document();
+        List<PdfReader> readers = 
+        		new ArrayList<PdfReader>();
+        int totalPages = 0;
+        
+        //Create pdf Iterator object using inputPdfList.
+        Iterator<InputStream> pdfIterator = 
+        		inputPdfList.iterator();
+
+        // Create reader list for the input pdf files.
+        while (pdfIterator.hasNext()) {
+                InputStream pdf = pdfIterator.next();
+                PdfReader pdfReader = new PdfReader(pdf);
+                readers.add(pdfReader);
+                totalPages = totalPages + pdfReader.getNumberOfPages();
+        }
+
+        // Create writer for the outputStream
+        PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+        
+        //Open document.
+        document.open();
+       
+        //Contain the pdf data.
+        PdfContentByte pageContentByte = writer.getDirectContent();
+
+        PdfImportedPage pdfImportedPage;
+        int currentPdfReaderPage = 1;
+        Iterator<PdfReader> iteratorPDFReader = readers.iterator();
+
+        // Iterate and process the reader list.
+        while (iteratorPDFReader.hasNext()) {
+                PdfReader pdfReader = iteratorPDFReader.next();
+                //Create page and add content.
+                while (currentPdfReaderPage <= pdfReader.getNumberOfPages()) {
+                      document.newPage();
+                      pdfImportedPage = writer.getImportedPage(
+                    		  pdfReader,currentPdfReaderPage);
+                      pageContentByte.addTemplate(pdfImportedPage, 0, 0);
+                      currentPdfReaderPage++;
+                }
+                currentPdfReaderPage = 1;
+        }
+        
+        //Close document and outputStream.
+        outputStream.flush();
+        document.close();
+        outputStream.close();
+        
+	}
+
 
 	//To identify page size based on integer input given
 	public Rectangle getPageSize(int pagesize){
@@ -1334,5 +1512,24 @@ public class GenericPrintServiceImpl implements GenericPrintService{
 
 		return pageRect;
 	}
+	public String getPatientHeaderHTML(Integer styleId, Integer patientId) throws Exception {
+		String patientHeaderHTML="";
+		Integer encounterId=-1;
+		GenericPrintBean genericPrintBean = getCompleteDetails(patientId, encounterId);
+		GenericPrintStyle genericPrintStyle=genericPrintStyleRepository.findOne(styleId);
+		if(genericPrintStyle!=null){
+			int patientHeaderId=genericPrintStyle.getGenericPrintStylePatientHeaderId();
+			PatientDataBean patientDataBean=genericPrintBean.getPatientBean(); 
+			String[] patientDetailsArr=generatePatentDetailsArr(patientDataBean);
+			if(generateHeaderBean.getPatientHeaderType(patientHeaderId)==2){
+						patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 2,patientDetailsArr);
+				}else{
+						patientHeaderHTML = generateHeaderBean.generatePatientHeader(patientHeaderId, 1,patientDetailsArr);
+					}
+		}
+		//System.out.println("PatientHeader Html >>>>>>>>>>>>>>>>>>>"+patientHeaderHTML);
+		return patientHeaderHTML;
+		}
+
 
 }

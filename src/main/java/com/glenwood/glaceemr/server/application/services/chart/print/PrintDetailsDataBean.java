@@ -14,7 +14,21 @@ public class PrintDetailsDataBean {
 	int isDoctorSignReq;
 	int isPatientHeaderReq;
 	int isPracticeHeaderReq;
+	int isGrowthGraphReq;
+	String growthGraphFileName;
 
+	public String getGrowthGraphFileName() {
+		return growthGraphFileName;
+	}
+	public void setGrowthGraphFileName(String growthGraphFileName) {
+		this.growthGraphFileName = growthGraphFileName;
+	}
+	public int getIsGrowthGraphReq() {
+		return isGrowthGraphReq;
+	}
+	public void setIsGrowthGraphReq(int isGrowthGraphReq) {
+		this.isGrowthGraphReq = isGrowthGraphReq;
+	}
 	public int getPageSize() {
 		return pageSize;
 	}
