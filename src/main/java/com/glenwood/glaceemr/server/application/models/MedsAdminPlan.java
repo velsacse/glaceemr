@@ -80,6 +80,14 @@ public class MedsAdminPlan {
 	@JsonManagedReference
 	MedsAdminPlanShortcut medsAdminShortcut;
 	
+	public MedsAdminPlanShortcut getMedsAdminShortcut() {
+		return medsAdminShortcut;
+	}
+
+	public void setMedsAdminShortcut(MedsAdminPlanShortcut medsAdminShortcut) {
+		this.medsAdminShortcut = medsAdminShortcut;
+	}
+
 	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
 	@JoinColumn(name="meds_admin_plan_medication_id",referencedColumnName="doc_presc_id",insertable=false, updatable=false)
 	@JsonBackReference
