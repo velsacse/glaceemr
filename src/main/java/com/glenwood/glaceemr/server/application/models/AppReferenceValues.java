@@ -1,15 +1,25 @@
 package com.glenwood.glaceemr.server.application.models;
 
 import java.io.Serializable;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "App_Reference_Values")
 public class AppReferenceValues implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="App_Reference_Values_Id")
@@ -18,7 +28,7 @@ public class AppReferenceValues implements Serializable{
 	@Column(name="App_Reference_Values_tableId")
 	private Integer App_Reference_Values_tableId;
 
-	
+
 	@Column(name="App_Reference_Values_statusId")
 	private Integer App_Reference_Values_statusId;
 
@@ -28,6 +38,21 @@ public class AppReferenceValues implements Serializable{
 	@Column(name="App_Reference_Values_option_Color")
 	private String App_Reference_Values_option_Color;
 
+
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="appReferenceValues")
+	@JsonManagedReference
+	List<ReasonUserGroupMapping> reasonUserGroupMappings;
+
+
+	public AppReferenceValues(){
+		
+	}
+	
+	public AppReferenceValues(String App_Reference_Values_statusName,Integer App_Reference_Values_statusId){
+
+		this.App_Reference_Values_statusName=App_Reference_Values_statusName;
+		this.App_Reference_Values_statusId=App_Reference_Values_statusId;
+	}
 	public Integer getApp_Reference_Values_Id() {
 		return App_Reference_Values_Id;
 	}

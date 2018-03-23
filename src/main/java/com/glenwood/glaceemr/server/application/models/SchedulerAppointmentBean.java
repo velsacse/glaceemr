@@ -10,11 +10,12 @@ public class SchedulerAppointmentBean {
 			String patientAccNo, String patientName, String homePhone,
 			String homeExtn, String workPhone, String workExtn, Integer resourceId,
 			String apptStatus, Integer apptStatusId,String apptStatusColor, String apptType,
-			Integer apptTypeId, String apptLocation, Integer apptLocationId,
+			Integer apptTypeId,String apptLocation, Integer apptLocationId,
 			String apptReason,Integer apptReasonId, String refPhysician,
 			Integer refPhysicianId, String refPhoneNumber, String refFaxNumber, 
 			Integer workflowStatusId, String workflowStatusName,
-			Date workflowStatusDate) {
+			Date workflowStatusDate,String resourceColor,Double insDetailCopay,String insEligibility,
+			String remindedCallStatus,Integer reminderStatusId) {
 		super();
 		this.apptId = apptId;
 		this.apptStartTime = apptStartTime;
@@ -44,6 +45,11 @@ public class SchedulerAppointmentBean {
 		this.workflowStatusId=workflowStatusId;
 		this.workflowStatusName=workflowStatusName;
 		this.workflowStatusDate=workflowStatusDate;
+		this.resourceColor=resourceColor;
+		this.insDetailCopay=insDetailCopay;
+		this.insEligibility=insEligibility;
+		this.remindedCallStatus=remindedCallStatus;
+		this.reminderStatusId=reminderStatusId;
 	}
 	
 	private Integer apptId;
@@ -74,7 +80,43 @@ public class SchedulerAppointmentBean {
 	private Integer workflowStatusId;
 	private String workflowStatusName;
 	private Date workflowStatusDate;
+	private String resourceColor;
+	private Double insDetailCopay;
+	private String insEligibility;
+	private String remindedCallStatus;
+	private Integer reminderStatusId;
 	
+	public Integer getReminderStatusId() {
+		return reminderStatusId;
+	}
+	public void setReminderStatusId(Integer reminderStatusId) {
+		this.reminderStatusId = reminderStatusId;
+	}
+	public Double getInsDetailCopay() {
+		return insDetailCopay;
+	}
+	public void setInsDetailCopay(Double insDetailCopay) {
+		this.insDetailCopay = insDetailCopay;
+	}
+	public String getInsEligibility() {
+		return insEligibility;
+	}
+	public void setInsEligibility(String insEligibility) {
+		this.insEligibility = insEligibility;
+	}
+	public String getRemindedCallStatus() {
+		return remindedCallStatus;
+	}
+	public void setRemindedCallStatus(String remindedCallStatus) {
+		this.remindedCallStatus = remindedCallStatus;
+	}
+
+	public String getResourceColor() {
+		return resourceColor;
+	}
+	public void setResourceColor(String resourceColor) {
+		this.resourceColor = resourceColor;
+	}
 	public Integer getApptId() {
 		return apptId;
 	}

@@ -422,13 +422,13 @@ public class SchedulerAppointment {
 		this.App_Reference_ValuesApptType = App_Reference_ValuesApptType;
 	}
 
-	public AppReferenceValues getApp_Reference_ValuesApptReason() {
+	/*public AppReferenceValues getApp_Reference_ValuesApptReason() {
 		return App_Reference_ValuesApptReason;
 	}
 
 	public void setApp_Reference_ValuesApptReason(AppReferenceValues App_Reference_ValuesApptReason) {
 		this.App_Reference_ValuesApptReason = App_Reference_ValuesApptReason;
-	}
+	}*/
 
 	public SchedulerAppointmentParameter getSchApptParam() {
 		return schApptParam;

@@ -1,21 +1,32 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "billing_config_table")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BillingConfigTable {
+public class BillingConfigTable implements Serializable {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	 @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "billing_config_table_billing_config_table_id_seq")
 	@SequenceGenerator(name = "billing_config_table_billing_config_table_id_seq", sequenceName = "billing_config_table_billing_config_table_id_seq", allocationSize = 1)
@@ -37,6 +48,11 @@ public class BillingConfigTable {
 	@Column(name="billing_config_table_is_active")
 	private Boolean billingConfigTableIsActive;
 
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="billingConfigTable1")
+	@JsonManagedReference
+	List<ZipCodesMain> zipCodesMain;
+	
+	
 	public Integer getBillingConfigTableId() {
 		return billingConfigTableId;
 	}

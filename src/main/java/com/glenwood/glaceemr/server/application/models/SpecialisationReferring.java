@@ -1,9 +1,15 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "specialisation_referring")
@@ -22,6 +28,11 @@ public class SpecialisationReferring {
 	@Column(name="nucc_code")
 	private String nuccCode;
 
+	
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="specialisationReferring")
+	@JsonManagedReference
+	List<ReferringDoctor> referringDoctors;
+	
 	public Integer getspecialisation_referring_id() {
 		return specialisation_referring_id;
 	}

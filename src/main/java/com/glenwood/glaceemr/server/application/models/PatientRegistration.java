@@ -2219,6 +2219,16 @@ public class PatientRegistration implements Serializable {
 	@JsonManagedReference
 	List<AuthorizationMaster> authMaster;
 	
+	
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="patientRegistration2")
+	@JsonManagedReference
+	List<PatientEligibility> patientEligibility;
+	
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="patientRegistration3")
+	@JsonManagedReference
+	List<ReminderDetail> reminderDetails;
+	
+	
 	public List<AuthorizationMaster> getAuthMaster() {
 		return authMaster;
 	}

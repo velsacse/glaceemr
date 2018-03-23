@@ -25,5 +25,24 @@ public interface SchedulerService {
 	List<Object> getApptBookLocationList();
 
 	List<Object> getApptTypes();
+	
+	List<Object> getApptStatus();
 
+	List<List<SchedulerAppointmentBean>> getWeekAppointments(Date date,
+			Integer[] resourceIds, String viewType);
+
+	Object getWeekTemplates(Integer userId, Date date);
+	
+	Appointment pasteappointment(Appointment fromJson, Appointment toJson);
+
+	 List<SchedulerAppointmentBean> updateAppointment(Appointment appointment);
+
+	List<SchedulerAppointmentBean> changeAppointmentStatus(Appointment appointment);
+
+	List<SchedulerAppointmentBean> getDetailAppointments(Date date,
+			String patientId, String apptId);
+
+	String updateDefaultUsers(String zoomValue, String group, String resource, String defSize, String userId);
+	
+	List<String> getInitialReportData();
 }

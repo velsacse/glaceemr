@@ -59,7 +59,13 @@ public class Appointment {
 	private Integer schApptReferringdoctorId;
 
 	private Integer h101028;
+	
+	private String operationStatus;
 
+
+	public Appointment() {
+		// TODO Auto-generated constructor stub
+	}
 	public Integer getSchApptId() {
 		return schApptId;
 	}
@@ -290,6 +296,12 @@ public class Appointment {
 
 	public void setH101028(Integer h101028) {
 		this.h101028 = h101028;
+	}
+	public String getOperationStatus() {
+		return operationStatus;
+	}
+	public void setOperationStatus(String operationStatus) {
+		this.operationStatus = operationStatus;
 	}
 
 }

@@ -21,12 +21,12 @@ import com.glenwood.glaceemr.server.application.models.Appointment;
 import com.glenwood.glaceemr.server.application.models.SchedulerAppointmentBean;
 import com.glenwood.glaceemr.server.application.models.SchedulerResource;
 import com.glenwood.glaceemr.server.application.models.SchedulerResourceCategory;
-import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogActionType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogModuleType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.LogUserType;
 import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailEnumConstants.Log_Outcome;
+import com.glenwood.glaceemr.server.application.services.audittrail.AuditTrailSaveService;
 import com.glenwood.glaceemr.server.application.services.scheduler.SchedulerService;
 import com.glenwood.glaceemr.server.utils.EMRResponseBean;
 import com.glenwood.glaceemr.server.utils.SessionMap;
@@ -90,6 +90,7 @@ public class SchedulerController {
 	 * @param apptDate
 	 * @param resourceId
 	 */
+	@SuppressWarnings("deprecation")
 	@RequestMapping(value="/getappointments",method=RequestMethod.GET)
 	@ResponseBody
 	public EMRResponseBean getAppointments(@RequestParam(value="apptdate",required=true,defaultValue="t") String apptDate,
@@ -110,8 +111,47 @@ public class SchedulerController {
             System.out.println(" Exception while parsing date :: "+apptDate);
             e.printStackTrace();
         }
-        
+     
         List<SchedulerAppointmentBean> schedulerAppointments=schedulerService.getAppointments(date,resourceIds);
+
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        emrResponseBean.setData(schedulerAppointments);
+
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting Scheduler appointments based on resource.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "resourceId="+resourceIds.toString(), LogUserType.USER_LOGIN, "", "");
+        return emrResponseBean;
+    } 
+
+	
+	/**
+	 * To get the week appointments based on date.
+	 * @return
+	 * @param apptDate
+	 * @param resourceId
+	 */
+	@SuppressWarnings("deprecation")
+	@RequestMapping(value="/getweekappointments",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getWeekAppointments(@RequestParam(value="apptdate",required=true,defaultValue="t") String apptDate,
+            @RequestParam(value="resourceid",required=true) Integer[] resourceIds,
+            @RequestParam(value="viewType",required=true) String viewType){
+        SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy");
+        Date date=null;
+        try{
+            if(!apptDate.equals("-1")){
+                date=new Date(apptDate);
+                sdf.format(date);
+            }
+            else{    // If apptDate=-1 ===> Current date
+                date=new Date();
+                sdf.format(date);
+            }
+        }
+        catch(Exception e){
+            System.out.println(" Exception while parsing date :: "+apptDate);
+            e.printStackTrace();
+        }
+        
+        List<List<SchedulerAppointmentBean>> schedulerAppointments=schedulerService.getWeekAppointments(date,resourceIds,viewType);
 
         EMRResponseBean emrResponseBean=new EMRResponseBean();
         emrResponseBean.setData(schedulerAppointments);
@@ -144,9 +184,12 @@ public class SchedulerController {
      * @param date
      * @return
      */
-    @RequestMapping(value="/gettemplates",method=RequestMethod.GET)
+    @SuppressWarnings("deprecation")
+	@RequestMapping(value="/gettemplates",method=RequestMethod.GET)
     @ResponseBody
-    public EMRResponseBean getTemplates(@RequestParam(value="resourceId",required=true) Integer[] userIds, @RequestParam(value="date", required=true) String dateString){
+    public EMRResponseBean getTemplates(@RequestParam(value="resourceId",required=true) Integer[] userIds,
+    		                            @RequestParam(value="date", required=true) String dateString
+    		                           ){
 
         Date date=null;
         EMRResponseBean emrResponseBean=new EMRResponseBean();
@@ -166,6 +209,7 @@ public class SchedulerController {
             System.out.println(" Exception while parsing date :: "+dateString);
             e.printStackTrace();
         }
+  
         for(Integer userId: userIds){
             Object o = schedulerService.getTemplates(userId, date);
             resultObject.put(userId,o);
@@ -176,6 +220,50 @@ public class SchedulerController {
 
         return emrResponseBean;
     } 	
+    
+    
+    /**
+     * To get Week templates
+     * @param userId
+     * @param date
+     * @return
+     */
+    @SuppressWarnings("deprecation")
+	@RequestMapping(value="/getweektemplates",method=RequestMethod.GET)
+    @ResponseBody
+    public EMRResponseBean getWeekTemplates(@RequestParam(value="resourceId",required=true) Integer[] userIds,
+    		                            @RequestParam(value="date", required=true) String dateString
+    		                           ){
+
+        Date date=null;
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        
+        try{
+            SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy");
+            if(!dateString.equals("-1")){
+                date=new Date(dateString);
+                sdf.format(date);
+            }
+            else{    // If dateString=-1 ===> Current date
+                date=new Date();
+                sdf.format(date);
+            }
+        }
+        catch(Exception e){
+            System.out.println(" Exception while parsing date :: "+dateString);
+            e.printStackTrace();
+        }
+       // for(Integer userId: userIds){
+            Object weekTemplatesData = schedulerService.getWeekTemplates(userIds[0], date);
+            //resultObject.put(userId,o);
+       // }
+        emrResponseBean.setData(weekTemplatesData);
+
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting templates", sessionMap.getUserID(), request.getRemoteAddr(), -1, "resourceId="+userIds, LogUserType.USER_LOGIN, "", "");
+
+        return emrResponseBean;
+    } 	
+
     
     /**
      * To create appointment
@@ -219,7 +307,146 @@ public class SchedulerController {
         EMRResponseBean emrResponseBean=new EMRResponseBean();
         List<Object> apptTypes = schedulerService.getApptTypes();
         emrResponseBean.setData(apptTypes);
-        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting location list", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting appointment types", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
         return emrResponseBean;
     }
+    
+    
+    /**
+     * To get appointment status
+     * @return
+     */
+    @RequestMapping(value="/getapptstatus",method=RequestMethod.GET)
+    @ResponseBody
+    public EMRResponseBean getApptStatus(){
+    	
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        List<Object> apptTypes = schedulerService.getApptStatus();
+        emrResponseBean.setData(apptTypes);
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting appointment status", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+        return emrResponseBean;
+    }
+    
+    
+    /**
+     * To change status
+     * @return
+     */    
+    @RequestMapping(value="/changeappointmentstatus", method=RequestMethod.POST)
+    @ResponseBody
+    public EMRResponseBean changeAppointmentStatus(@RequestBody(required=true) Appointment appointment){
+    	List<SchedulerAppointmentBean> changestatus= schedulerService.changeAppointmentStatus(appointment);
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        emrResponseBean.setData(changestatus);
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "changed appointment status", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+    	return emrResponseBean;
+    }
+    /**
+     * paste appt
+     * @return
+     */    
+    @RequestMapping(value="/pasteappointment", method=RequestMethod.POST)
+    @ResponseBody
+    public EMRResponseBean pasteappointment(@RequestBody(required=true) Appointment fromjson,@RequestParam(value="tojson",required=false)Appointment tojson){
+  
+    	Appointment pasteappt= schedulerService.pasteappointment(fromjson,new Appointment());
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        emrResponseBean.setData(pasteappt);
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "paste appointment", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+    	return emrResponseBean;
+    }
+    
+    
+    /**
+     * To update appointment
+     * @param appointment
+     * @return
+     */
+    @RequestMapping(value="/updateappointment", method=RequestMethod.POST)
+    @ResponseBody
+    public EMRResponseBean updateappointment(@RequestBody(required=true) Appointment appointment){    
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        List<SchedulerAppointmentBean> updateappointment=schedulerService.updateAppointment(appointment);
+        emrResponseBean.setData(updateappointment);   
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Updated appointment status", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+    	return emrResponseBean;
+    } 	
+   
+    
+	/**
+	 * To get appointment based on date.
+	 * @return
+	 * @param apptDate
+	 * @param resourceId
+	 */
+	@SuppressWarnings("deprecation")
+	@RequestMapping(value="/getdetailappointment",method=RequestMethod.GET)
+	@ResponseBody
+	public EMRResponseBean getDetailAppointment(@RequestParam(value="apptdate",required=true,defaultValue="t") String apptDate,
+            @RequestParam(value="patientId",required=true) String patientId,
+            @RequestParam(value="apptId",required=true) String apptId){
+        SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy");
+        System.out.println("appt date string >"+apptDate);
+        Date date=null;
+        try{
+            if(!apptDate.equals("-1")){
+                date=new Date(apptDate);
+                sdf.format(date);
+            }
+            else{    // If apptDate=-1 ===> Current date
+                date=new Date();
+                sdf.format(date);
+            }
+        }
+        catch(Exception e){
+            System.out.println(" Exception while parsing date :: "+apptDate);
+            e.printStackTrace();
+        }
+        
+        List<SchedulerAppointmentBean> schedulerAppointments=schedulerService.getDetailAppointments(date,patientId,apptId);
+
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        emrResponseBean.setData(schedulerAppointments);
+
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting Scheduler appointments based on resource.", sessionMap.getUserID(), request.getRemoteAddr(), -1, "patientId="+patientId, LogUserType.USER_LOGIN, "", "");
+        return emrResponseBean;
+    } 
+	
+	
+	 /**
+     * To update the default users
+     * @return
+     */
+    @RequestMapping(value="/updatedefaultusers",method=RequestMethod.GET)
+    @ResponseBody
+    public EMRResponseBean updateDefaultUsers(@RequestParam(value="zoomVal",required=false) String zoomValue,
+    		                                  @RequestParam(value="group",required=true) String group,
+    		                                  @RequestParam(value="resource",required=true,defaultValue="-1") String resource,
+    		                                  @RequestParam(value="defSize",required=false) String defSize,
+    		                                  @RequestParam(value="userId",required=true) String userId){
+    	
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        String resources = schedulerService.updateDefaultUsers(zoomValue,group,resource,defSize,userId);
+        emrResponseBean.setData(resources);
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Updated default users", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+        return emrResponseBean;
+    }
+    
+    /**
+     * To get the reports data
+     * @return
+     */
+    @RequestMapping(value="/getInitialReportData",method=RequestMethod.GET)
+    @ResponseBody
+    public EMRResponseBean getInitialReportData(){
+    	
+        EMRResponseBean emrResponseBean=new EMRResponseBean();
+        List<String> resources = schedulerService.getInitialReportData();
+        emrResponseBean.setData(resources);
+        auditTrailSaveService.LogEvent(LogType.GLACE_LOG, LogModuleType.SCHEDULER, LogActionType.VIEW, -1, Log_Outcome.SUCCESS, "Getting initial report data", sessionMap.getUserID(), request.getRemoteAddr(), -1, "", LogUserType.USER_LOGIN, "", "");
+        return emrResponseBean;
+    }
+    
+    
+    
 }

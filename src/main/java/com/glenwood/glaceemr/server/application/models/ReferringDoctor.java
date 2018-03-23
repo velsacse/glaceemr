@@ -1,19 +1,34 @@
 package com.glenwood.glaceemr.server.application.models;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "referring_doctor")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ReferringDoctor {
+public class ReferringDoctor implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public ReferringDoctor(){
 		
@@ -116,6 +131,20 @@ public class ReferringDoctor {
 	@Column(name="practice_name")
 	private String practiceName;
 
+	@Column(name="ref_title")
+	private String refTitle;
+	
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="referring_doctor_speciality_id", referencedColumnName="specialisation_referring_id" , insertable=false, updatable=false)
+	SpecialisationReferring specialisationReferring;
+	
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumnsOrFormulas({ @JoinColumnOrFormula(formula= @JoinFormula(value="referring_doctor_state::integer" , referencedColumnName="billing_config_table_config_id"))})
+	@JsonManagedReference
+	BillingConfigTable billingConfigTableJoin;
+	
 	public String getPracticeName() {
 		return practiceName;
 	}
@@ -332,4 +361,12 @@ public class ReferringDoctor {
 		this.directEmailAddress = directEmailAddress;
 	}
 	
+	public String getRefTitle() {
+		return refTitle;
+	}
+
+	public void setRefTitle(String refTitle) {
+		this.refTitle = refTitle;
+	}
+
 }
